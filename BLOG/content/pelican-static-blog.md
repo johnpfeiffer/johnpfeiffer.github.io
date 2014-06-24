@@ -36,18 +36,19 @@ Pelican is an open source project that converts static text files into an html s
 
 
 `tree`
-    .
-    ├── content
-    ├── develop_server.sh
-    ├── fabfile.py
-    ├── Makefile
-    ├── output
-    ├── pelicanconf.py
-    └── publishconf.py
+```
+>    .
+>    ├── content
+>    ├── develop_server.sh
+>    ├── fabfile.py
+>    ├── Makefile
+>    ├── output
+>    ├── pelicanconf.py
+>    └── publishconf.py
 
 2 directories, 5 files
 ```
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+- - -
 mkdir -p content/images
 mkdir -p content/pages
 vi content/hello_world.md
@@ -71,7 +72,7 @@ http://localhost:8000
 
 ./develop_server.sh stop  # stop the dev server (required if reloading the .conf file)
 
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+- - -
 vi pelicanconf.py
 
 
@@ -112,3 +113,14 @@ AUTHOR_SAVE_AS = False
 AUTHORS_SAVE_AS = False
 CATEGORY_SAVE_AS = False
 CATEGORIES_SAVE_AS = False
+
+- - -
+
+## importing from drupal (work in progress) ##
+
+sudo apt-get install pandoc
+sudo pip install feedparser
+pelican-import -h
+pelican-import --feed http://blog.example.com/rss.xml -o output/ -m markdown
+
+NEED TO HACK DRUPAL DO TO MORE THAN 10 STORES IN THE RSS FEED
