@@ -35,7 +35,8 @@ Pelican is an open source project that converts static text files into an html s
 
 
 `tree`
-```
+
+    :::bash
 >    .
 >    ├── content
 >    ├── develop_server.sh
@@ -45,82 +46,84 @@ Pelican is an open source project that converts static text files into an html s
 >    ├── pelicanconf.py
 >    └── publishconf.py
 
-2 directories, 5 files
-```
+    2 directories, 5 files
+
 - - -
 mkdir -p content/images
 mkdir -p content/pages
 vi content/hello_world.md
 
-Title: My first blog post
-Date: 2014-06-21 20:20
-Tags: python
-Slug: my-first-blog-post
-Author: John Pfeiffer
-Summary: Short version for index and feeds
+    :::text
+    Title: My first blog post
+    Date: 2014-06-21 20:20
+    Tags: python
+    Slug: my-first-blog-post
+    Author: John Pfeiffer
+    Summary: Short version for index and feeds
 
-This is the content of my first blog post.
+    This is the content of my first blog post.
 
+```make devserver```   # the same as: make regenerate ; make server
 
-make devserver   # the same as: make regenerate ; make server
-...Starting up Pelican and pelican.server...
+> ...Starting up Pelican and pelican.server...
 
-http://localhost:8000
+**http://localhost:8000**
 
-# auto detects any content changes and reloads itself
+    # auto detects any content changes and reloads itself
 
-./develop_server.sh stop  # stop the dev server (required if reloading the .conf file)
-
-- - -
-vi pelicanconf.py
-
-
-
-#!/usr/bin/env python
-# -*- coding: utf-8 -*- #
-from __future__ import unicode_literals
-
-AUTHOR = u'john pfeiffer'
-SITENAME = u'johnpfeiffer'
-SITEURL = ''
-
-TIMEZONE = 'America/Los Angeles'
-
-DEFAULT_LANG = u'en'
-
-# Feed generation is usually not desired when developing
-FEED_ALL_ATOM = None
-CATEGORY_FEED_ATOM = None
-TRANSLATION_FEED_ATOM = None
-
-# Blogroll
-LINKS =  (('CV', 'https://www.linkedin.com/in/foupfeiffer'),
-          ('source code', 'https://bitbucket.org/johnpfeiffer'))
-
-# Social widget
-# SOCIAL = (('You can add links in your config file', '#'),
-#          ('Another social link', '#'),)
-
-# DEFAULT_PAGINATION = 10
-
-# Uncomment following line if you want document-relative URLs when developing
-#RELATIVE_URLS = True
-
-STATIC_PATHS = ['images', 'js']
-# Sole author and don't use categories ... disable these features
-AUTHOR_SAVE_AS = False
-AUTHORS_SAVE_AS = False
-CATEGORY_SAVE_AS = False
-CATEGORIES_SAVE_AS = False
+```./develop_server.sh stop```
+>  stop the dev server (required if reloading the .conf file)
 
 - - -
 
-## importing from drupal (work in progress) ##
+```vi pelicanconf.py```
 
-sudo apt-get install pandoc
-sudo pip install feedparser
-pelican-import -h
-pelican-import --feed http://blog.example.com/rss.xml -o output/ -m markdown
+    #!/usr/bin/env python
+    # -*- coding: utf-8 -*- #
+    from __future__ import unicode_literals
+
+    AUTHOR = u'john pfeiffer'
+    SITENAME = u'johnpfeiffer'
+    SITEURL = ''
+
+    TIMEZONE = 'America/Los Angeles'
+
+    DEFAULT_LANG = u'en'
+
+    # Feed generation is usually not desired when developing
+    FEED_ALL_ATOM = None
+    CATEGORY_FEED_ATOM = None
+    TRANSLATION_FEED_ATOM = None
+
+    # Blogroll
+    LINKS =  (('CV', 'https://www.linkedin.com/in/foupfeiffer'),
+        ('source code', 'https://bitbucket.org/johnpfeiffer'))
+
+    # Social widget
+    # SOCIAL = (('You can add links in your config file', '#'),
+    #          ('Another social link', '#'),)
+
+    # DEFAULT_PAGINATION = 10
+
+    # Uncomment following line if you want document-relative URLs when developing
+    #RELATIVE_URLS = True
+
+    STATIC_PATHS = ['images', 'js']
+    # Sole author and don not use categories ... disable these features
+    # AUTHOR_SAVE_AS = False
+    # AUTHORS_SAVE_AS = False
+    # CATEGORY_SAVE_AS = False
+    # CATEGORIES_SAVE_AS = False
+
+- - -
+
+## Importing from drupal (work in progress) ##
+
+    :::bash
+    sudo apt-get install pandoc
+    sudo pip install feedparser
+    pelican-import -h
+    pelican-import --feed http://blog.example.com/rss.xml -o output/ -m markdown
 
 NEED TO HACK DRUPAL DO TO MORE THAN 10 STORES IN THE RSS FEED
 
@@ -136,3 +139,6 @@ pelican-themes --list
 
 vi pelicanconf.py
 THEME = "/home/ubuntu/pelican-themes/foundation-default-colours"
+
+
+Tweaking default syntax highlighting: http://pygments.org/docs/lexers/
