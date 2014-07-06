@@ -5,16 +5,15 @@ Tags: python
 Pelican is an open source project that converts static text files into an html site.
 
 
-**```sudo pip install pelican Markdown ```**
-> \#  optionally use virtualenv venv; source venv/bin/activate
+**`sudo pip install pelican Markdown `**
+> - installing both the pelican and the Markdown packages
+> - optionally use virtualenv venv; source venv/bin/activate
 
-**```pelican-quickstart```**
+**`pelican-quickstart`**
 
-
+    :::text
     Welcome to pelican-quickstart v3.3.0.
-
     This script will help you create a new Pelican-based website.
-
     Please answer the following questions so this script can generate the files needed by Pelican.
 
     > Where do you want to create your new web site? [.]
@@ -33,25 +32,29 @@ Pelican is an open source project that converts static text files into an html s
     > Do you want to upload your website using Rackspace Cloud Files? (y/N)
     Done. Your new project is available at /home/ubuntu/BLOG
 
+- - - 
 
 `tree`
 
-    :::bash
->    .
->    ├── content
->    ├── develop_server.sh
->    ├── fabfile.py
->    ├── Makefile
->    ├── output
->    ├── pelicanconf.py
->    └── publishconf.py
-
+    :::text
+    .
+    ├── content
+    ├── develop_server.sh
+    ├── fabfile.py
+    ├── Makefile
+    ├── output
+    ├── pelicanconf.py
+    └── publishconf.py
+    
     2 directories, 5 files
 
 - - -
-mkdir -p content/images
-mkdir -p content/pages
-vi content/hello_world.md
+
+`mkdir -p content/images`
+
+`mkdir -p content/pages`
+
+`vi content/hello_world.md`
 
     :::text
     Title: My first blog post
@@ -63,16 +66,25 @@ vi content/hello_world.md
 
     This is the content of my first blog post.
 
-```make devserver```   # the same as: make regenerate ; make server
+- - - 
 
+`make devserver`
 > ...Starting up Pelican and pelican.server...
 
-**http://localhost:8000**
-
-    # auto detects any content changes and reloads itself
-
-```./develop_server.sh stop```
+`./develop_server.sh stop`
 >  stop the dev server (required if reloading the .conf file)
+
+**This only works with the basic first setup, after that it is better to manually use multiple screens:**
+
+`make clean`
+
+`make regenerate`
+> auto detects any content changes and reloads itself
+
+`cd output; python -m SimpleHTTPServer`
+> Serving HTTP on 0.0.0.0 port 8000 ... (Control + C to quit)
+
+**http://localhost:8000**
 
 - - -
 
@@ -86,10 +98,6 @@ vi content/hello_world.md
     SITENAME = u'johnpfeiffer'
     SITEURL = ''
 
-    TIMEZONE = 'America/Los Angeles'
-
-    DEFAULT_LANG = u'en'
-
     # Feed generation is usually not desired when developing
     FEED_ALL_ATOM = None
     CATEGORY_FEED_ATOM = None
@@ -99,25 +107,16 @@ vi content/hello_world.md
     LINKS =  (('CV', 'https://www.linkedin.com/in/foupfeiffer'),
         ('source code', 'https://bitbucket.org/johnpfeiffer'))
 
-    # Social widget
-    # SOCIAL = (('You can add links in your config file', '#'),
-    #          ('Another social link', '#'),)
-
     # DEFAULT_PAGINATION = 10
 
     # Uncomment following line if you want document-relative URLs when developing
     #RELATIVE_URLS = True
 
-    STATIC_PATHS = ['images', 'js']
-    # Sole author and don not use categories ... disable these features
-    # AUTHOR_SAVE_AS = False
-    # AUTHORS_SAVE_AS = False
-    # CATEGORY_SAVE_AS = False
-    # CATEGORIES_SAVE_AS = False
+    STATIC_PATHS = ['images'] 
 
 - - -
 
-## Importing from drupal (work in progress) ##
+### Importing from drupal (work in progress) ###
 
     :::bash
     sudo apt-get install pandoc

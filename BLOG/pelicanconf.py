@@ -20,7 +20,7 @@ DEFAULT_PAGINATION = 10
 # Uncomment following line if you want document-relative URLs when developing
 #RELATIVE_URLS = True
 
-STATIC_PATHS = ['images', 'js']
+STATIC_PATHS = ['images']
 
 THEME = "/usr/local/lib/python2.7/dist-packages/pelican/themes/foundation-default-colours"
 FOUNDATION_FRONT_PAGE_FULL_ARTICLES = False
