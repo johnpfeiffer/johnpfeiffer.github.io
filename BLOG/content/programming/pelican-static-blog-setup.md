@@ -127,17 +127,42 @@ Pelican is an open source project that converts static text files into an html s
 NEED TO HACK DRUPAL DO TO MORE THAN 10 STORES IN THE RSS FEED
 
 - - -
+**https://github.com/getpelican/pelican-themes**
+`git clone --recursive https://github.com/getpelican/pelican-themes ~/pelican-themes`
 
-https://github.com/getpelican/pelican-themes
-git clone --recursive https://github.com/getpelican/pelican-themes ~/pelican-themes
 http://pelican.readthedocs.org/en/latest/pelican-themes.html
-sudo pelican-themes --install ~/pelican-themes/foundation-default-colours
-  Installing themes...
-  Copying `/home/ubuntu/pelican-themes/foundation-default-colours' to `/usr/local/lib/python2.7/dist-packages/pelican/themes/foundation-default-colours' ...
-pelican-themes --list
+
+    sudo pelican-themes --install ~/pelican-themes/foundation-default-colours
+>    Installing themes...
+>    Copying `/home/ubuntu/pelican-themes/foundation-default-colours' to `/usr/local/lib/python2.7/dist-packages/pelican/themes/foundation-default-colours' ...
+    `pelican-themes --list`
 
 vi pelicanconf.py
 THEME = "/home/ubuntu/pelican-themes/foundation-default-colours"
 
 
 Tweaking default syntax highlighting: http://pygments.org/docs/lexers/
+
+- - - 
+**https://github.com/getpelican/pelican-plugins**
+`git clone https://github.com/getpelican/pelican-plugins`
+
+
+```
+PLUGIN_PATHS = ['/home/ubuntu/Desktop/repos/pelican-plugins']
+PLUGINS = ['sitemap']
+
+SITEMAP = {
+    'format': 'xml',
+    'priorities': {
+        'articles': 0.5,
+        'indexes': 0.5,
+        'pages': 0.5
+    },
+    'changefreqs': {
+        'articles': 'monthly',
+        'indexes': 'daily',
+        'pages': 'monthly'
+    }
+}
+```

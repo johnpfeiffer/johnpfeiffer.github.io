@@ -30,3 +30,20 @@ FOUNDATION_NEW_ANALYTICS = False
 FOUNDATION_ANALYTICS_DOMAIN = ''
 FOUNDATION_FOOTER_TEXT = ''
 FOUNDATION_PYGMENT_THEME = 'autumn'
+
+PLUGIN_PATHS = ['/home/ubuntu/Desktop/repos/pelican-plugins']
+PLUGINS = ['sitemap']
+
+SITEMAP = {
+    'format': 'xml',
+    'priorities': {
+        'articles': 0.5,
+        'indexes': 0.5,
+        'pages': 0.5
+    },
+    'changefreqs': {
+        'articles': 'monthly',
+        'indexes': 'daily',
+        'pages': 'monthly'
+    }
+}
