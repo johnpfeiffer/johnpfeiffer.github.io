@@ -13,6 +13,11 @@ SITEURL = 'https://johnpfeiffer.bitbucket.org'
 RELATIVE_URLS = True
 FEED_DOMAIN = 'https://johnpfeiffer.bitbucket.org'
 
+LINKS =  (('About John Pfeiffer', 'http://johnpfeiffer.bitbucket.org/pages/about-john-pfeiffer.html'),
+          ('CV', 'https://www.linkedin.com/in/foupfeiffer'),
+          ('source code', 'https://bitbucket.org/johnpfeiffer'))
+
+
 FEED_ALL_ATOM = 'feeds/all.atom.xml'
 CATEGORY_FEED_ATOM = 'feeds/%s.atom.xml'
 DELETE_OUTPUT_DIRECTORY = True

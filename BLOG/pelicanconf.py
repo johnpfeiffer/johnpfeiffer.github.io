@@ -3,9 +3,6 @@
 from __future__ import unicode_literals
 
 AUTHOR = u'john pfeiffer'
-PAGE_PATHS = ['pages']
-DISPLAY_PAGES_ON_MENU = True
-
 SITENAME = u'johnpfeiffer'
 OUTPUT_PATH = 'output/'
 
