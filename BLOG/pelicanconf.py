@@ -3,8 +3,10 @@
 from __future__ import unicode_literals
 
 AUTHOR = u'john pfeiffer'
+PAGE_PATHS = ['pages']
+DISPLAY_PAGES_ON_MENU = True
+
 SITENAME = u'johnpfeiffer'
-# SITEURL = 'johnpfeiffer.bitbucket.org'
 OUTPUT_PATH = 'output/'
 
 # Feed generation is usually not desired when developing
@@ -12,7 +14,8 @@ FEED_ALL_ATOM = None
 CATEGORY_FEED_ATOM = None
 TRANSLATION_FEED_ATOM = None
 
-LINKS =  (('CV', 'https://www.linkedin.com/in/foupfeiffer'),
+LINKS =  (('About John Pfeiffer', 'http://johnpfeiffer.bitbucket.org/pages/about-john-pfeiffer.html'),
+          ('CV', 'https://www.linkedin.com/in/foupfeiffer'),
           ('source code', 'https://bitbucket.org/johnpfeiffer'))
 
 DEFAULT_PAGINATION = 10
