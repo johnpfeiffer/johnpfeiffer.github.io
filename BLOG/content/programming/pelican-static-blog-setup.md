@@ -4,6 +4,7 @@ Tags: python
 
 Pelican is an open source project that converts static text files into an html site.
 
+## Install Pelican ##
 
 **`sudo pip install pelican Markdown `**
 > - installing both the pelican and the Markdown packages
@@ -50,7 +51,7 @@ Pelican is an open source project that converts static text files into an html s
 
 - - -
 
-`mkdir -p content/images`
+`mkdir -p images`
 
 `mkdir -p content/pages`
 
@@ -116,40 +117,64 @@ Pelican is an open source project that converts static text files into an html s
 
 - - -
 
-### Importing from drupal (work in progress) ###
+### Importing from drupal ###
 
-    :::bash
-    sudo apt-get install pandoc
-    sudo pip install feedparser
-    pelican-import -h
-    pelican-import --feed http://blog.example.com/rss.xml -o output/ -m markdown
+- Hack the Drupal files to allow a lot more than 10 items per feed:
+`grep -r 'items per feed' . `
+> learned from drupal-7.28/modules/system/system.module
 
-NEED TO HACK DRUPAL DO TO MORE THAN 10 STORES IN THE RSS FEED
+
+`vi modules/system/system.admin.inc`
+
+>    $form['feed_default_items']
+>    
+>    Add to the dropdown choices of 10, 15, 30 etc. the option of 999
+
+- - - 
+
+`sudo apt-get install pandoc`
+
+`sudo pip install feedparser`
+
+`pelican-import -h`
+
+`pelican-import --feed http://blog.example.com/rss.xml -o output/ -m markdown`
+
 
 - - -
-**https://github.com/getpelican/pelican-themes**
+
+[https://github.com/getpelican/pelican-themes][pelicanthemes]
+[pelicanthemes]: https://github.com/getpelican/pelican-themes
+
 `git clone --recursive https://github.com/getpelican/pelican-themes ~/pelican-themes`
 
-http://pelican.readthedocs.org/en/latest/pelican-themes.html
+[http://pelican.readthedocs.org/en/latest/pelican-themes.html][pelicanthemesdocs]
+[pelicanthemesdocs]: http://pelican.readthedocs.org/en/latest/pelican-themes.html
 
-    sudo pelican-themes --install ~/pelican-themes/foundation-default-colours
+`sudo pelican-themes --install ~/pelican-themes/foundation-default-colours`
 >    Installing themes...
->    Copying `/home/ubuntu/pelican-themes/foundation-default-colours' to `/usr/local/lib/python2.7/dist-packages/pelican/themes/foundation-default-colours' ...
-    `pelican-themes --list`
+>        
+>    Copying /home/ubuntu/pelican-themes/foundation-default-colours to /usr/local/lib/python2.7/dist-packages/pelican/themes/foundation-default-colours...
 
-vi pelicanconf.py
-THEME = "/home/ubuntu/pelican-themes/foundation-default-colours"
+`pelican-themes --list`
+
+`vi pelicanconf.py`
+> THEME = "/home/ubuntu/pelican-themes/foundation-default-colours"
 
 
 Tweaking default syntax highlighting: http://pygments.org/docs/lexers/
 
 - - - 
-**https://github.com/getpelican/pelican-plugins**
+[https://github.com/getpelican/pelican-plugins][pelicanplugins]
+[pelicanplugins]: https://github.com/getpelican/pelican-plugins
+
 `git clone https://github.com/getpelican/pelican-plugins`
 
 
 ```
+
 PLUGIN_PATHS = ['/home/ubuntu/Desktop/repos/pelican-plugins']
+
 PLUGINS = ['sitemap']
 
 SITEMAP = {

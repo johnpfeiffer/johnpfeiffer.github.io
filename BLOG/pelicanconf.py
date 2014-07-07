@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 AUTHOR = u'john pfeiffer'
 SITENAME = u'johnpfeiffer'
 OUTPUT_PATH = 'output/'
+DEFAULT_DATE_FORMAT = '%Y-%m-%d'
 
 # Feed generation is usually not desired when developing
 FEED_ALL_ATOM = None
@@ -20,19 +21,12 @@ DEFAULT_PAGINATION = 10
 # Uncomment following line if you want document-relative URLs when developing
 #RELATIVE_URLS = True
 
-STATIC_PATHS = ['images']
-
-THEME = "/usr/local/lib/python2.7/dist-packages/pelican/themes/foundation-default-colours"
-FOUNDATION_FRONT_PAGE_FULL_ARTICLES = False
-FOUNDATION_ALTERNATE_FONTS = False
-FOUNDATION_TAGS_IN_MOBILE_SIDEBAR = False
-FOUNDATION_NEW_ANALYTICS = False
-FOUNDATION_ANALYTICS_DOMAIN = ''
-FOUNDATION_FOOTER_TEXT = ''
-FOUNDATION_PYGMENT_THEME = 'autumn'
-
-PLUGIN_PATHS = ['/home/ubuntu/Desktop/repos/pelican-plugins']
-PLUGINS = ['sitemap']
+THEME = 'themes/pelican-elegant'
+PLUGIN_PATHS = 'plugins'
+PLUGINS = ['sitemap', 'extract_toc', 'tipue_search']
+MD_EXTENSIONS = ['codehilite(css_class=highlight)', 'extra', 'headerid', 'toc']
+DIRECT_TEMPLATES = (('index', 'tags', 'categories','archives', 'search', '404'))
+STATIC_PATHS = ['theme/images', 'images']
 
 SITEMAP = {
     'format': 'xml',

@@ -42,6 +42,7 @@
 &lt;li&gt;git pull&lt;/li&gt;
 &lt;li&gt;https://username.bitbucket.org&lt;/li&gt;
 &lt;/ol&gt;</summary><category term="programming"></category></entry><entry><title>How to set up a Pelican static blog site</title><link href="/how-to-set-up-a-pelican-static-blog-site.html" rel="alternate"></link><updated>2014-06-21T20:21:00Z</updated><author><name>john pfeiffer</name></author><id>tag:,2014-06-21:how-to-set-up-a-pelican-static-blog-site.html</id><summary type="html">&lt;p&gt;Pelican is an open source project that converts static text files into an html site.&lt;/p&gt;
+&lt;h2&gt;Install Pelican&lt;/h2&gt;
 &lt;p&gt;&lt;strong&gt;&lt;code&gt;sudo pip install pelican Markdown&lt;/code&gt;&lt;/strong&gt;&lt;/p&gt;
 &lt;blockquote&gt;
 &lt;ul&gt;
@@ -88,7 +89,7 @@ Done. Your new project is available at /home/ubuntu/BLOG
 
 
 &lt;hr /&gt;
-&lt;p&gt;&lt;code&gt;mkdir -p content/images&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;mkdir -p images&lt;/code&gt;&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;mkdir -p content/pages&lt;/code&gt;&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;vi content/hello_world.md&lt;/code&gt;&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;Title: My first blog post
@@ -173,35 +174,44 @@ This is the content of my first blog post.
 &lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 
 &lt;hr /&gt;
-&lt;h3&gt;Importing from drupal (work in progress)&lt;/h3&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;sudo apt-get install pandoc
-sudo pip install feedparser
-pelican-import -h
-pelican-import --feed http://blog.example.com/rss.xml -o output/ -m markdown
-&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;p&gt;NEED TO HACK DRUPAL DO TO MORE THAN 10 STORES IN THE RSS FEED&lt;/p&gt;
-&lt;hr /&gt;
-&lt;p&gt;&lt;strong&gt;https://github.com/getpelican/pelican-themes&lt;/strong&gt;
-&lt;code&gt;git clone --recursive https://github.com/getpelican/pelican-themes ~/pelican-themes&lt;/code&gt;&lt;/p&gt;
-&lt;p&gt;http://pelican.readthedocs.org/en/latest/pelican-themes.html&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="n"&gt;sudo&lt;/span&gt; &lt;span class="n"&gt;pelican&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;themes&lt;/span&gt; &lt;span class="o"&gt;--&lt;/span&gt;&lt;span class="n"&gt;install&lt;/span&gt; &lt;span class="o"&gt;~/&lt;/span&gt;&lt;span class="n"&gt;pelican&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;themes&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;foundation&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="k"&gt;default&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;colours&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;blockquote&gt;
-&lt;p&gt;Installing themes...
-   Copying &lt;code&gt;/home/ubuntu/pelican-themes/foundation-default-colours' to&lt;/code&gt;/usr/local/lib/python2.7/dist-packages/pelican/themes/foundation-default-colours' ...
-    &lt;code&gt;pelican-themes --list&lt;/code&gt;&lt;/p&gt;
+&lt;h3&gt;Importing from drupal&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;Hack the Drupal files to allow a lot more than 10 items per feed:
+&lt;code&gt;grep -r 'items per feed' .&lt;/code&gt;&lt;blockquote&gt;
+&lt;p&gt;learned from drupal-7.28/modules/system/system.module&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;p&gt;vi pelicanconf.py
-THEME = "/home/ubuntu/pelican-themes/foundation-default-colours"&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;code&gt;vi modules/system/system.admin.inc&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;$form['feed_default_items']&lt;/p&gt;
+&lt;p&gt;Add to the dropdown choices of 10, 15, 30 etc. the option of 999&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr /&gt;
+&lt;p&gt;&lt;code&gt;sudo apt-get install pandoc&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;sudo pip install feedparser&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;pelican-import -h&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;pelican-import --feed http://blog.example.com/rss.xml -o output/ -m markdown&lt;/code&gt;&lt;/p&gt;
+&lt;hr /&gt;
+&lt;p&gt;&lt;a href="https://github.com/getpelican/pelican-themes"&gt;https://github.com/getpelican/pelican-themes&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;git clone --recursive https://github.com/getpelican/pelican-themes ~/pelican-themes&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href="http://pelican.readthedocs.org/en/latest/pelican-themes.html"&gt;http://pelican.readthedocs.org/en/latest/pelican-themes.html&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;sudo pelican-themes --install ~/pelican-themes/foundation-default-colours&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Installing themes...&lt;/p&gt;
+&lt;p&gt;Copying /home/ubuntu/pelican-themes/foundation-default-colours to /usr/local/lib/python2.7/dist-packages/pelican/themes/foundation-default-colours...&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;code&gt;pelican-themes --list&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;vi pelicanconf.py&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;THEME = "/home/ubuntu/pelican-themes/foundation-default-colours"&lt;/p&gt;
+&lt;/blockquote&gt;
 &lt;p&gt;Tweaking default syntax highlighting: http://pygments.org/docs/lexers/&lt;/p&gt;
 &lt;hr /&gt;
-&lt;p&gt;&lt;strong&gt;https://github.com/getpelican/pelican-plugins&lt;/strong&gt;
-&lt;code&gt;git clone https://github.com/getpelican/pelican-plugins&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://github.com/getpelican/pelican-plugins"&gt;https://github.com/getpelican/pelican-plugins&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;git clone https://github.com/getpelican/pelican-plugins&lt;/code&gt;&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="n"&gt;PLUGIN_PATHS&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="err"&gt;&amp;#39;&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;home&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;ubuntu&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;Desktop&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;repos&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;pelican&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;plugins&lt;/span&gt;&lt;span class="err"&gt;&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+
 &lt;span class="n"&gt;PLUGINS&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="err"&gt;&amp;#39;&lt;/span&gt;&lt;span class="n"&gt;sitemap&lt;/span&gt;&lt;span class="err"&gt;&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
 
 &lt;span class="n"&gt;SITEMAP&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
