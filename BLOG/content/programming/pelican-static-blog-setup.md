@@ -91,6 +91,29 @@ Pelican is an open source project that converts static text files into an html s
 
 ```vi pelicanconf.py```
 
+
+    # clean urls for pages
+    PAGE_URL = '{slug}'
+    PAGE_SAVE_AS = '{slug}/index.html'
+    # clean urls for articles
+    ARTICLE_SAVE_AS = '{slug}/index.html'
+    ARTICLE_URL = '{slug}'
+
+
+    DEFAULT_PAGINATION = 10
+
+    # Uncomment following line if you want document-relative URLs when developing
+    #RELATIVE_URLS = True
+
+    THEME = 'themes/pelican-elegant'
+    PLUGIN_PATHS = 'plugins'
+    PLUGINS = ['sitemap', 'extract_toc', 'tipue_search']
+    MD_EXTENSIONS = ['codehilite(css_class=highlight)', 'extra', 'headerid', 'toc']
+    DIRECT_TEMPLATES = (('index', 'tags', 'categories','archives', 'search', '404'))
+    STATIC_PATHS = ['theme/images', 'images']
+
+
+
     #!/usr/bin/env python
     # -*- coding: utf-8 -*- #
     from __future__ import unicode_literals
@@ -98,22 +121,14 @@ Pelican is an open source project that converts static text files into an html s
     AUTHOR = u'john pfeiffer'
     SITENAME = u'johnpfeiffer'
     SITEURL = ''
-
+    OUTPUT_PATH = 'output/'
+    DEFAULT_DATE_FORMAT = '%Y-%m-%d'
     # Feed generation is usually not desired when developing
     FEED_ALL_ATOM = None
     CATEGORY_FEED_ATOM = None
     TRANSLATION_FEED_ATOM = None
 
-    # Blogroll
-    LINKS =  (('CV', 'https://www.linkedin.com/in/foupfeiffer'),
-        ('source code', 'https://bitbucket.org/johnpfeiffer'))
 
-    # DEFAULT_PAGINATION = 10
-
-    # Uncomment following line if you want document-relative URLs when developing
-    #RELATIVE_URLS = True
-
-    STATIC_PATHS = ['images'] 
 
 - - -
 

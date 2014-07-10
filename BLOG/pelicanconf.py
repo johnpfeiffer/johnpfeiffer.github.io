@@ -12,11 +12,14 @@ FEED_ALL_ATOM = None
 CATEGORY_FEED_ATOM = None
 TRANSLATION_FEED_ATOM = None
 
-LINKS =  (('About John Pfeiffer', 'http://johnpfeiffer.bitbucket.org/pages/about-john-pfeiffer.html'),
-          ('CV', 'https://www.linkedin.com/in/foupfeiffer'),
-          ('source code', 'https://bitbucket.org/johnpfeiffer'))
-
 DEFAULT_PAGINATION = 10
+
+# clean urls for pages
+PAGE_URL = '{slug}'
+PAGE_SAVE_AS = '{slug}/index.html'
+# clean urls for articles
+ARTICLE_SAVE_AS = '{slug}/index.html'
+ARTICLE_URL = '{slug}'
 
 # Uncomment following line if you want document-relative URLs when developing
 #RELATIVE_URLS = True

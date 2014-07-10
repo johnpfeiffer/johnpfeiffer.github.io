@@ -1,5 +1,8 @@
 Title: About John Pfeiffer
 
+- [CV/Resume](https://www.linkedin.com/in/foupfeiffer)
+- [source code](https://bitbucket.org/johnpfeiffer)
+
 John Pfeiffer began with DOS on a 486, tweaking DOS to make games work and BBS's...
 
 Then there was Internet -> University -> Linux -> Football (aka soccer)
