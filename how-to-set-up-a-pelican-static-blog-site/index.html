@@ -57,10 +57,29 @@
 </div>
 
 <div class="row-fluid">
-        <div class="span8 offset2 article-content">
+    <div class="span2 table-of-content">
+        <nav>
+        <h4>Contents</h4>
+        <div class="toc">
+<ul>
+<li><a href="#install-pelican">Install Pelican</a></li>
+<li><a href="#create-content">Create Content</a></li>
+<li><a href="#run-a-dev-server-to-see-the-results-locally">Run a dev server to see the results locally</a></li>
+<li><a href="#publish">Publish</a></li>
+<li><a href="#example-pelican-configuration-file">Example pelican configuration file</a></li>
+<li><a href="#importing-from-drupal">Importing from drupal</a></li>
+<li><a href="#pelican-themes">Pelican Themes</a></li>
+<li><a href="#pelican-plugins">Pelican Plugins</a></li>
+<li><a href="#more-info">more info</a></li>
+</ul>
+</div>
+        </nav>
+    </div>
+    <div class="span8 article-content">
 
-            <p>Pelican is an open source project that converts static text files into an html site.</p>
-<h2 id="install-pelican">Install Pelican</h2>
+            
+<p>Pelican is an open source project that converts static text files into an html site.</p>
+<h3 id="install-pelican">Install Pelican</h3>
 <p><strong><code>sudo pip install pelican Markdown</code></strong></p>
 <blockquote>
 <ul>
@@ -89,9 +108,7 @@ Please answer the following questions so this script can generate the files need
 &gt; Do you want to upload your website using Rackspace Cloud Files? (y/N)
 Done. Your new project is available at /home/ubuntu/BLOG
 </pre></div>
-
-
-<hr />
+<hr/>
 <p><code>tree</code></p>
 <div class="highlight"><pre>.
 ├── content
@@ -104,11 +121,8 @@ Done. Your new project is available at /home/ubuntu/BLOG
 
 2 directories, 5 files
 </pre></div>
-
-
-<hr />
-<p><code>mkdir -p images</code></p>
-<p><code>mkdir -p content/pages</code></p>
+<hr/>
+<h3 id="create-content">Create Content</h3>
 <p><code>vi content/hello_world.md</code></p>
 <div class="highlight"><pre>Title: My first blog post
 Date: 2014-06-21 20:20
@@ -119,9 +133,8 @@ Summary: Short version for index and feeds
 
 This is the content of my first blog post.
 </pre></div>
-
-
-<hr />
+<hr/>
+<h3 id="run-a-dev-server-to-see-the-results-locally">Run a dev server to see the results locally</h3>
 <p><code>make devserver</code></p>
 <blockquote>
 <p>...Starting up Pelican and pelican.server...</p>
@@ -141,107 +154,99 @@ This is the content of my first blog post.
 <p>Serving HTTP on 0.0.0.0 port 8000 ... (Control + C to quit)</p>
 </blockquote>
 <p><strong>http://localhost:8000</strong></p>
-<hr />
+<p><code>mkdir -p content/pages</code></p>
+<hr/>
+<h3 id="publish">Publish</h3>
+<p>I just use the pelicanconf output rather than publishconf, and I use git with a bitbucket static html site.</p>
+<hr/>
+<h3 id="example-pelican-configuration-file">Example pelican configuration file</h3>
+<p><em>Contains the elegant theme and tipue search plugin</em></p>
 <p><code>vi pelicanconf.py</code></p>
-<div class="highlight"><pre><span class="cp"># clean urls for pages</span>
-<span class="n">PAGE_URL</span> <span class="o">=</span> <span class="err">&#39;</span><span class="p">{</span><span class="n">slug</span><span class="p">}</span><span class="err">&#39;</span>
-<span class="n">PAGE_SAVE_AS</span> <span class="o">=</span> <span class="err">&#39;</span><span class="p">{</span><span class="n">slug</span><span class="p">}</span><span class="o">/</span><span class="n">index</span><span class="p">.</span><span class="n">html</span><span class="err">&#39;</span>
-<span class="cp"># clean urls for articles</span>
-<span class="n">ARTICLE_SAVE_AS</span> <span class="o">=</span> <span class="err">&#39;</span><span class="p">{</span><span class="n">slug</span><span class="p">}</span><span class="o">/</span><span class="n">index</span><span class="p">.</span><span class="n">html</span><span class="err">&#39;</span>
-<span class="n">ARTICLE_URL</span> <span class="o">=</span> <span class="err">&#39;</span><span class="p">{</span><span class="n">slug</span><span class="p">}</span><span class="err">&#39;</span>
+<div class="highlight"><pre>#!/usr/bin/env python
+# -*- coding: utf-8 -*- #
+from __future__ import unicode_literals
 
+AUTHOR = u'john pfeiffer'
+SITENAME = u'johnpfeiffer'
+SITEURL = ''
+OUTPUT_PATH = 'output/'
+DEFAULT_DATE_FORMAT = '%Y-%m-%d'
+# Feed generation is usually not desired when developing
+FEED_ALL_ATOM = None
+CATEGORY_FEED_ATOM = None
+TRANSLATION_FEED_ATOM = None
 
-<span class="n">DEFAULT_PAGINATION</span> <span class="o">=</span> <span class="mi">10</span>
+# clean urls for pages
+PAGE_URL = '{slug}'
+PAGE_SAVE_AS = '{slug}/index.html'
+# clean urls for articles
+ARTICLE_SAVE_AS = '{slug}/index.html'
+ARTICLE_URL = '{slug}'
 
-<span class="cp"># Uncomment following line if you want document-relative URLs when developing</span>
-<span class="cp">#RELATIVE_URLS = True</span>
+DEFAULT_PAGINATION = 10
 
-<span class="n">THEME</span> <span class="o">=</span> <span class="err">&#39;</span><span class="n">themes</span><span class="o">/</span><span class="n">pelican</span><span class="o">-</span><span class="n">elegant</span><span class="err">&#39;</span>
-<span class="n">PLUGIN_PATHS</span> <span class="o">=</span> <span class="err">&#39;</span><span class="n">plugins</span><span class="err">&#39;</span>
-<span class="n">PLUGINS</span> <span class="o">=</span> <span class="p">[</span><span class="err">&#39;</span><span class="n">sitemap</span><span class="err">&#39;</span><span class="p">,</span> <span class="err">&#39;</span><span class="n">extract_toc</span><span class="err">&#39;</span><span class="p">,</span> <span class="err">&#39;</span><span class="n">tipue_search</span><span class="err">&#39;</span><span class="p">]</span>
-<span class="n">MD_EXTENSIONS</span> <span class="o">=</span> <span class="p">[</span><span class="err">&#39;</span><span class="n">codehilite</span><span class="p">(</span><span class="n">css_class</span><span class="o">=</span><span class="n">highlight</span><span class="p">)</span><span class="err">&#39;</span><span class="p">,</span> <span class="err">&#39;</span><span class="n">extra</span><span class="err">&#39;</span><span class="p">,</span> <span class="err">&#39;</span><span class="n">headerid</span><span class="err">&#39;</span><span class="p">,</span> <span class="err">&#39;</span><span class="n">toc</span><span class="err">&#39;</span><span class="p">]</span>
-<span class="n">DIRECT_TEMPLATES</span> <span class="o">=</span> <span class="p">((</span><span class="err">&#39;</span><span class="n">index</span><span class="err">&#39;</span><span class="p">,</span> <span class="err">&#39;</span><span class="n">tags</span><span class="err">&#39;</span><span class="p">,</span> <span class="err">&#39;</span><span class="n">categories</span><span class="sc">&#39;,&#39;</span><span class="n">archives</span><span class="err">&#39;</span><span class="p">,</span> <span class="err">&#39;</span><span class="n">search</span><span class="err">&#39;</span><span class="p">,</span> <span class="err">&#39;</span><span class="mi">404</span><span class="err">&#39;</span><span class="p">))</span>
-<span class="n">STATIC_PATHS</span> <span class="o">=</span> <span class="p">[</span><span class="err">&#39;</span><span class="n">theme</span><span class="o">/</span><span class="n">images</span><span class="err">&#39;</span><span class="p">,</span> <span class="err">&#39;</span><span class="n">images</span><span class="err">&#39;</span><span class="p">]</span>
+THEME = 'themes/pelican-elegant'
+PLUGIN_PATHS = ['plugins']
+PLUGINS = ['sitemap', 'extract_toc', 'tipue_search']
+MD_EXTENSIONS = ['codehilite(css_class=highlight)', 'extra', 'headerid', 'toc']
+DIRECT_TEMPLATES = (('index', 'tags', 'categories','archives', 'search', '404'))
+STATIC_PATHS = ['theme/images', 'images']
 
-
-
-<span class="cp">#!/usr/bin/env python</span>
-<span class="cp"># -*- coding: utf-8 -*- #</span>
-<span class="n">from</span> <span class="n">__future__</span> <span class="n">import</span> <span class="n">unicode_literals</span>
-
-<span class="n">AUTHOR</span> <span class="o">=</span> <span class="n">u</span><span class="err">&#39;</span><span class="n">john</span> <span class="n">pfeiffer</span><span class="err">&#39;</span>
-<span class="n">SITENAME</span> <span class="o">=</span> <span class="n">u</span><span class="err">&#39;</span><span class="n">johnpfeiffer</span><span class="err">&#39;</span>
-<span class="n">SITEURL</span> <span class="o">=</span> <span class="err">&#39;&#39;</span>
-<span class="n">OUTPUT_PATH</span> <span class="o">=</span> <span class="err">&#39;</span><span class="n">output</span><span class="o">/</span><span class="err">&#39;</span>
-<span class="n">DEFAULT_DATE_FORMAT</span> <span class="o">=</span> <span class="err">&#39;</span><span class="o">%</span><span class="n">Y</span><span class="o">-%</span><span class="n">m</span><span class="o">-%</span><span class="n">d</span><span class="err">&#39;</span>
-<span class="cp"># Feed generation is usually not desired when developing</span>
-<span class="n">FEED_ALL_ATOM</span> <span class="o">=</span> <span class="n">None</span>
-<span class="n">CATEGORY_FEED_ATOM</span> <span class="o">=</span> <span class="n">None</span>
-<span class="n">TRANSLATION_FEED_ATOM</span> <span class="o">=</span> <span class="n">None</span>
+SITEMAP = {
+    'format': 'xml',
+    'priorities': {
+        'articles': 0.5,
+        'indexes': 0.5,
+        'pages': 0.5
+     },
+    'changefreqs': {
+        'articles': 'monthly',
+        'indexes': 'daily',
+        'pages': 'monthly'
+    }
+}
 </pre></div>
-
-
-<hr />
+<hr/>
 <h3 id="importing-from-drupal">Importing from drupal</h3>
-<ul>
-<li>Hack the Drupal files to allow a lot more than 10 items per feed:
-<code>grep -r 'items per feed' .</code><blockquote>
+<p><strong>Hack the Drupal files to allow a lot more than 10 items per feed</strong>
+<code>grep -r 'items per feed' .</code></p>
+<blockquote>
 <p>learned from drupal-7.28/modules/system/system.module</p>
 </blockquote>
-</li>
-</ul>
 <p><code>vi modules/system/system.admin.inc</code></p>
 <blockquote>
 <p>$form['feed_default_items']</p>
 <p>Add to the dropdown choices of 10, 15, 30 etc. the option of 999</p>
 </blockquote>
-<hr />
+<hr/>
 <p><code>sudo apt-get install pandoc</code></p>
 <p><code>sudo pip install feedparser</code></p>
 <p><code>pelican-import -h</code></p>
 <p><code>pelican-import --feed http://blog.example.com/rss.xml -o output/ -m markdown</code></p>
-<hr />
+<hr/>
+<h3 id="pelican-themes">Pelican Themes</h3>
 <p><a href="https://github.com/getpelican/pelican-themes">https://github.com/getpelican/pelican-themes</a></p>
 <p><code>git clone --recursive https://github.com/getpelican/pelican-themes ~/pelican-themes</code></p>
 <p><a href="http://pelican.readthedocs.org/en/latest/pelican-themes.html">http://pelican.readthedocs.org/en/latest/pelican-themes.html</a></p>
-<p><code>sudo pelican-themes --install ~/pelican-themes/foundation-default-colours</code></p>
-<blockquote>
-<p>Installing themes...</p>
-<p>Copying /home/ubuntu/pelican-themes/foundation-default-colours to /usr/local/lib/python2.7/dist-packages/pelican/themes/foundation-default-colours...</p>
-</blockquote>
-<p><code>pelican-themes --list</code></p>
-<p><code>vi pelicanconf.py</code></p>
-<blockquote>
-<p>THEME = "/home/ubuntu/pelican-themes/foundation-default-colours"</p>
-</blockquote>
-<p>Tweaking default syntax highlighting: http://pygments.org/docs/lexers/</p>
-<hr />
+<p><code>mkdir themes</code></p>
+<p>`cp -a pelican-themes/elegant themes/</p>
+<hr/>
+<h3 id="pelican-plugins">Pelican Plugins</h3>
 <p><a href="https://github.com/getpelican/pelican-plugins">https://github.com/getpelican/pelican-plugins</a></p>
 <p><code>git clone https://github.com/getpelican/pelican-plugins</code></p>
-<div class="highlight"><pre><span class="n">PLUGIN_PATHS</span> <span class="o">=</span> <span class="p">[</span><span class="err">&#39;</span><span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">ubuntu</span><span class="o">/</span><span class="n">Desktop</span><span class="o">/</span><span class="n">repos</span><span class="o">/</span><span class="n">pelican</span><span class="o">-</span><span class="n">plugins</span><span class="err">&#39;</span><span class="p">]</span>
-
-<span class="n">PLUGINS</span> <span class="o">=</span> <span class="p">[</span><span class="err">&#39;</span><span class="n">sitemap</span><span class="err">&#39;</span><span class="p">]</span>
-
-<span class="n">SITEMAP</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="err">&#39;</span><span class="n">format</span><span class="err">&#39;</span><span class="o">:</span> <span class="err">&#39;</span><span class="n">xml</span><span class="err">&#39;</span><span class="p">,</span>
-    <span class="err">&#39;</span><span class="n">priorities</span><span class="err">&#39;</span><span class="o">:</span> <span class="p">{</span>
-        <span class="err">&#39;</span><span class="n">articles</span><span class="err">&#39;</span><span class="o">:</span> <span class="mf">0.5</span><span class="p">,</span>
-        <span class="err">&#39;</span><span class="n">indexes</span><span class="err">&#39;</span><span class="o">:</span> <span class="mf">0.5</span><span class="p">,</span>
-        <span class="err">&#39;</span><span class="n">pages</span><span class="err">&#39;</span><span class="o">:</span> <span class="mf">0.5</span>
-    <span class="p">},</span>
-    <span class="err">&#39;</span><span class="n">changefreqs</span><span class="err">&#39;</span><span class="o">:</span> <span class="p">{</span>
-        <span class="err">&#39;</span><span class="n">articles</span><span class="err">&#39;</span><span class="o">:</span> <span class="err">&#39;</span><span class="n">monthly</span><span class="err">&#39;</span><span class="p">,</span>
-        <span class="err">&#39;</span><span class="n">indexes</span><span class="err">&#39;</span><span class="o">:</span> <span class="err">&#39;</span><span class="n">daily</span><span class="err">&#39;</span><span class="p">,</span>
-        <span class="err">&#39;</span><span class="n">pages</span><span class="err">&#39;</span><span class="o">:</span> <span class="err">&#39;</span><span class="n">monthly</span><span class="err">&#39;</span>
-    <span class="p">}</span>
-<span class="p">}</span>
-</pre></div>
+<p><code>mkdir plugins</code></p>
+<p><code>cp -a pelican-plugins/sitemap plugins/</code></p>
+<h3 id="more-info">more info</h3>
+<ul>
+<li><a href="http://pelican.readthedocs.org/en/latest/settings.html">http://pelican.readthedocs.org/en/latest/settings.html</a></li>
+<li>Tweaking default syntax highlighting: http://pygments.org/docs/lexers/</li>
+</ul>
             <aside>
             <hr/>
             <nav>
             <ul class="articles_timeline">
  
-                <li class="previous_article">« <a href="/yes-change-your-password-regularly" title="Previous: Yes, Change your Password regularly">Yes, Change your Password regularly</a></li>
+                <li class="previous_article">« <a href="/content/yes-change-your-password-regularly" title="Previous: Yes, Change your Password regularly">Yes, Change your Password regularly</a></li>
  
                 <li class="next_article"><a href="/creating-a-static-web-site-with-bitbucket" title="Next: Creating a static web site with Bitbucket">Creating a static web site with Bitbucket</a> »</li>
             </ul>

@@ -2,9 +2,11 @@ Title: How to set up a Pelican static blog site
 Date: 2014-06-21 20:21
 Tags: python
 
+[TOC]
+
 Pelican is an open source project that converts static text files into an html site.
 
-## Install Pelican ##
+### Install Pelican
 
 **`sudo pip install pelican Markdown `**
 > - installing both the pelican and the Markdown packages
@@ -50,11 +52,7 @@ Pelican is an open source project that converts static text files into an html s
     2 directories, 5 files
 
 - - -
-
-`mkdir -p images`
-
-`mkdir -p content/pages`
-
+### Create Content
 `vi content/hello_world.md`
 
     :::text
@@ -68,7 +66,7 @@ Pelican is an open source project that converts static text files into an html s
     This is the content of my first blog post.
 
 - - - 
-
+### Run a dev server to see the results locally
 `make devserver`
 > ...Starting up Pelican and pelican.server...
 
@@ -87,33 +85,19 @@ Pelican is an open source project that converts static text files into an html s
 
 **http://localhost:8000**
 
+`mkdir -p content/pages`
 - - -
+### Publish
+I just use the pelicanconf output rather than publishconf, and I use git with a bitbucket static html site.
+
+- - -
+### Example pelican configuration file
+
+*Contains the elegant theme and tipue search plugin*
 
 ```vi pelicanconf.py```
 
-
-    # clean urls for pages
-    PAGE_URL = '{slug}'
-    PAGE_SAVE_AS = '{slug}/index.html'
-    # clean urls for articles
-    ARTICLE_SAVE_AS = '{slug}/index.html'
-    ARTICLE_URL = '{slug}'
-
-
-    DEFAULT_PAGINATION = 10
-
-    # Uncomment following line if you want document-relative URLs when developing
-    #RELATIVE_URLS = True
-
-    THEME = 'themes/pelican-elegant'
-    PLUGIN_PATHS = 'plugins'
-    PLUGINS = ['sitemap', 'extract_toc', 'tipue_search']
-    MD_EXTENSIONS = ['codehilite(css_class=highlight)', 'extra', 'headerid', 'toc']
-    DIRECT_TEMPLATES = (('index', 'tags', 'categories','archives', 'search', '404'))
-    STATIC_PATHS = ['theme/images', 'images']
-
-
-
+    :::text
     #!/usr/bin/env python
     # -*- coding: utf-8 -*- #
     from __future__ import unicode_literals
@@ -128,16 +112,43 @@ Pelican is an open source project that converts static text files into an html s
     CATEGORY_FEED_ATOM = None
     TRANSLATION_FEED_ATOM = None
 
+    # clean urls for pages
+    PAGE_URL = '{slug}'
+    PAGE_SAVE_AS = '{slug}/index.html'
+    # clean urls for articles
+    ARTICLE_SAVE_AS = '{slug}/index.html'
+    ARTICLE_URL = '{slug}'
 
+    DEFAULT_PAGINATION = 10
+
+    THEME = 'themes/pelican-elegant'
+    PLUGIN_PATHS = ['plugins']
+    PLUGINS = ['sitemap', 'extract_toc', 'tipue_search']
+    MD_EXTENSIONS = ['codehilite(css_class=highlight)', 'extra', 'headerid', 'toc']
+    DIRECT_TEMPLATES = (('index', 'tags', 'categories','archives', 'search', '404'))
+    STATIC_PATHS = ['theme/images', 'images']
+
+    SITEMAP = {
+        'format': 'xml',
+        'priorities': {
+            'articles': 0.5,
+            'indexes': 0.5,
+            'pages': 0.5
+         },
+        'changefreqs': {
+            'articles': 'monthly',
+            'indexes': 'daily',
+            'pages': 'monthly'
+        }
+    }
 
 - - -
 
-### Importing from drupal ###
+### Importing from drupal
 
-- Hack the Drupal files to allow a lot more than 10 items per feed:
+**Hack the Drupal files to allow a lot more than 10 items per feed**
 `grep -r 'items per feed' . `
 > learned from drupal-7.28/modules/system/system.module
-
 
 `vi modules/system/system.admin.inc`
 
@@ -157,6 +168,7 @@ Pelican is an open source project that converts static text files into an html s
 
 
 - - -
+### Pelican Themes
 
 [https://github.com/getpelican/pelican-themes][pelicanthemes]
 [pelicanthemes]: https://github.com/getpelican/pelican-themes
@@ -166,43 +178,22 @@ Pelican is an open source project that converts static text files into an html s
 [http://pelican.readthedocs.org/en/latest/pelican-themes.html][pelicanthemesdocs]
 [pelicanthemesdocs]: http://pelican.readthedocs.org/en/latest/pelican-themes.html
 
-`sudo pelican-themes --install ~/pelican-themes/foundation-default-colours`
->    Installing themes...
->        
->    Copying /home/ubuntu/pelican-themes/foundation-default-colours to /usr/local/lib/python2.7/dist-packages/pelican/themes/foundation-default-colours...
+`mkdir themes`
 
-`pelican-themes --list`
-
-`vi pelicanconf.py`
-> THEME = "/home/ubuntu/pelican-themes/foundation-default-colours"
-
-
-Tweaking default syntax highlighting: http://pygments.org/docs/lexers/
+`cp -a pelican-themes/elegant themes/
 
 - - - 
+### Pelican Plugins
 [https://github.com/getpelican/pelican-plugins][pelicanplugins]
 [pelicanplugins]: https://github.com/getpelican/pelican-plugins
 
 `git clone https://github.com/getpelican/pelican-plugins`
 
+`mkdir plugins`
 
-```
+`cp -a pelican-plugins/sitemap plugins/`
 
-PLUGIN_PATHS = ['/home/ubuntu/Desktop/repos/pelican-plugins']
+### more info
+- [http://pelican.readthedocs.org/en/latest/settings.html](http://pelican.readthedocs.org/en/latest/settings.html)
+- Tweaking default syntax highlighting: http://pygments.org/docs/lexers/
 
-PLUGINS = ['sitemap']
-
-SITEMAP = {
-    'format': 'xml',
-    'priorities': {
-        'articles': 0.5,
-        'indexes': 0.5,
-        'pages': 0.5
-    },
-    'changefreqs': {
-        'articles': 'monthly',
-        'indexes': 'daily',
-        'pages': 'monthly'
-    }
-}
-```

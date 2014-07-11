@@ -25,7 +25,7 @@ ARTICLE_URL = '{slug}'
 #RELATIVE_URLS = True
 
 THEME = 'themes/pelican-elegant'
-PLUGIN_PATHS = 'plugins'
+PLUGIN_PATHS = ['plugins']
 PLUGINS = ['sitemap', 'extract_toc', 'tipue_search']
 MD_EXTENSIONS = ['codehilite(css_class=highlight)', 'extra', 'headerid', 'toc']
 DIRECT_TEMPLATES = (('index', 'tags', 'categories','archives', 'search', '404'))
