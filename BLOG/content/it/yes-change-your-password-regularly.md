@@ -1,7 +1,7 @@
 Title: Yes, Change your Password regularly
 Date: 2011-12-27 17:10
 Author: John Pfeiffer
-Slug: content/yes-change-your-password-regularly
+Slug: yes-change-your-password-regularly
 
 ### Security is risk management
 

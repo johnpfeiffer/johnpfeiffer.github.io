@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en-US">
+    <head>
+        <meta charset="utf-8"> 
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="author" content="John Pfeiffer" />
+        <meta name="copyright" content="John Pfeiffer" />
+
+<meta name="keywords" content=", linux, " />
+        <title>Outlook RPC over HTTP with a non standard port  · johnpfeiffer
+</title>
+        <link href="http://cdn-images.mailchimp.com/embedcode/slim-081711.css" rel="stylesheet" type="text/css">
+        <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="/theme/css/style.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="/theme/css/solarizedlight.css" media="screen">
+        <link rel="shortcut icon" href="/theme/images/favicon.ico" type="image/x-icon" />
+        <link rel="apple-touch-icon" href="/theme/images/apple-touch-icon.png" />
+        <link rel="apple-touch-icon" sizes="57x57" href="/theme/images/apple-touch-icon-57x57.png" />
+        <link rel="apple-touch-icon" sizes="72x72" href="/theme/images/apple-touch-icon-72x72.png" />
+        <link rel="apple-touch-icon" sizes="114x114" href="/theme/images/apple-touch-icon-114x114.png" />
+        <link rel="apple-touch-icon" sizes="144x144" href="/theme/images/apple-touch-icon-144x144.png" />
+        <link rel="icon" href="/theme/images/apple-touch-icon-144x144.png" />
+    </head>
+    <body>
+        <div id="content-sans-footer">
+        <div class="navbar navbar-static-top">
+            <div class="navbar-inner">
+                <div class="container">
+                    <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </a>
+                    <a class="brand" href="/"><span class=site-name>johnpfeiffer</span></a>
+                    <div class="nav-collapse collapse">
+                        <ul class="nav pull-right top-menu">
+                            <li ><a href="">Home</a></li>
+                            <li ><a href="/about-john-pfeiffer">About John Pfeiffer</a></li>
+                            <li ><a href="/categories.html">Categories</a></li>
+                            <li ><a href="/tags.html">Tags</a></li>
+                            <li ><a href="/archives.html">Archives</a></li>
+                            <li><form class="navbar-search" action="/search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container-fluid">
+            <div class="row-fluid">
+                <div class="span1"></div>
+                <div class="span10">
+<article>
+<div class="row-fluid">
+    <header class="page_header span10 offset2">
+    <h1><a href="/outlook-rpc-over-http-with-a-non-standard-port"> Outlook RPC over HTTP with a non standard port  </a></h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+        <div class="span8 offset2 article-content">
+
+            <div class="field field-name-body field-type-text-with-summary field-label-hidden">
+<div class="field-items">
+<div class="field-item even">
+"The proxy server you have specified is invalid. Correct it and try
+again."
+
+</p>
+
+Oh, the wonderful error messages from Microsoft...  
+
+So Outlook 2003 has HTTP and HTTPS hard coded to ports 80 and 443
+(wonderfully modular thinking).
+
+</p>
+
+Imagine you want to move your Outlook Web Access to a different port
+(security reasons? Or maybe just that another application is hard coded
+to port 443...)
+
+</p>
+
+Now it's easy to tell people: [https://mailserver.domain.com:4430][]
+
+</p>
+
+BUT you might have to update any Blackberry using OWA to connect to
+Exchange users with the new port...
+
+</p>
+
+and RPC over HTTP (s) is quite useful for the non VPN inclined ...
+
+</p>
+
+The following unsupported workaround works, use at your own risk,
+registry editing is required...  
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+</p>
+
+In Control Panel -\> Mail -\> Email Accounts -\> View or Change -\>
+Change (button) -\> More Settings (button) -\> Connection (tab)
+
+</p>
+
+Checkbox: Connect to my Exchange mailbox using HTTP  
+
+Then the button: Exchange Proxy Settings
+
+</p>
+
+[https://mailserver.domain.com-4430][]
+
+</p>
+
+Connect using SSL only (for the paranoid)  
+
+Mutually authenticate...  
+
+Yes, we need the following: msstd:mail.anders.co.uk  
+
+(note that you may have to download and install the certificate from
+your mail server for RPC over HTTP to work, the name we've entered
+doesn't have a port because it's the name that's on the SSL certificate)
+
+</p>
+
+Authentication (NTLM = SSL, Basic means anything)
+
+</p>
+
+Click ok a million times and we've finished the easy part...
+
+</p>
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+</p>
+
+Start -\> Run -\> regedit (and hit the OK button)
+
+</p>
+
+(HKCU = hkey\_current\_user)  
+
+HKCU\\Software\\Microsoft\\Windows NT\\CurrentVersion\\Windows Messaging
+Subsystem\\Profiles\\\  
+
+</p>
+
+Browse down to the subkey: "13dbb0c8aa05101a9bb000aa002fc45a"  
+
+(don't ask me why these settings are exactly there)
+
+</p>
+
+Locate in the name column: "001f6622" of type REG\_BINARY and double
+click on it...
+
+</p>
+
+The "Value Data" will be in hex code (with a preview of the ascii on the
+right)
+
+</p>
+
+0000 6D 00 61 00 69 00 6C 00 m.a.i.l.  
+
+0008 65 00 72 00 2E 00 65 00 ......d.  
+
+0010 78 00 61 00 6D 00 70 00 o.m.a.i.  
+
+0018 6C 00 65 00 2E 00 63 00 n......c.  
+
+0020 6F 00 6D 00 **2D** 00 34 00 o.m.-.4.  
+
+0028 34 00 33 00 30 00 30 00 4.3.0.0.  
+
+0030 00 00
+
+</p>
+
+You'll see the 2D in the middle - that's the hex code for '-', we're
+going to change it to 3A (or the hex code for ':')  
+
+(yes, we click inside, use the delete key to remove those two and type
+in 3A)
+
+</p>
+
+0020 6F 00 6D 00 3A 00 34 00 o.m.:.4.
+
+</p>
+
+Click OK... Whew, hard part's over...  
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
+
+Now check that your change has taken by going to:
+
+</p>
+
+Control Panel -\> Mail -\> Email Accounts -\> View or Change -\> Change
+(button) -\> More Settings (button) -\> Connection (tab)
+
+</p>
+
+You should now see: [https://mailserver.domain.com:4430][]
+
+</p>
+
+Note that you won't be able to click OK (because Outlook detects that
+unpermitted colon) but hit Cancel a bunch of times and open up Outlook
+to try connecting to your Exchange Server!
+
+</p>
+
+PLEASE NOTE: first ensure that you can get RPC over HTTP working with
+the default port 443 (e.g. no colons needed) BEFORE trying a non
+standard port as it is a little tricky to remember the certificate, the
+firewall port forwarding (if you need to), etc.
+
+</p>
+
+ALSO, remember that to do this you've already changed your Exchange Mail
+Server IIS SSL port to the non standard 4430 AND you've fixed any
+firewall forwarding for your server so that 4430 goes to your mail
+server...
+
+</p>
+<p>
+</div>
+
+<p></div>
+</div>
+<div class="field field-name-taxonomy-vocabulary-1 field-type-taxonomy-term-reference field-label-above clearfix"></p>
+<h3 id="tags">tags:</h3>
+<ul>
+<li><a href="http://john-pfeiffer.com/category/it">IT</a></li>
+</ul>
+<p></div>
+</p></p>
+            <aside>
+            <hr/>
+            <nav>
+            <ul class="articles_timeline">
+ 
+                <li class="previous_article">« <a href="/the-magical-million-3-helicopters-scratchcard-scam" title="Previous: The Magical Million 3 helicopters scratchcard scam">The Magical Million 3 helicopters scratchcard scam</a></li>
+ 
+                <li class="next_article"><a href="/americas-great-recession-and-wealth-without-borders" title="Next: America's Great Recession and Wealth Without Borders">America's Great Recession and Wealth Without Borders</a> »</li>
+            </ul>
+            </nav>
+            </aside>
+        </div>
+        <section>
+        <div class="span2" style="float:right;font-size:0.9em;">
+ 
+            <h4>Published</h4>
+            <time pubdate="pubdate" datetime="2010-06-14T13:03:00">Jun 14, 2010</time>
+            <h4>Category</h4>
+            <a class="category-link" href="/categories.html#linux-ref">linux</a> 
+
+        </div>
+        </section>
+</div>
+</article>
+                </div>
+                <div class="span1"></div>
+            </div>
+        </div>
+    </div>
+<footer>
+<div id="footer">
+    <ul class="footer-content">
+        <li class="elegant-power">Powered by <a href="http://getpelican.com/" title="Pelican Home Page">Pelican</a>. Theme: <a href="http://oncrashreboot.com/pelican-elegant" title="Theme Elegant Home Page">Elegant</a> by <a href="http://oncrashreboot.com" title="Talha Mansoor Home Page">Talha Mansoor</a></li>
+    </ul>
+</div>
+</footer>            <script src="http://code.jquery.com/jquery.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+    </body>
+</html>

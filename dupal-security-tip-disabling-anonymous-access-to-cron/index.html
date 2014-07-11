@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en-US">
+    <head>
+        <meta charset="utf-8"> 
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="author" content="John Pfeiffer" />
+        <meta name="copyright" content="John Pfeiffer" />
+
+<meta name="keywords" content=", linux, " />
+        <title>Dupal Security Tip: disabling anonymous access to cron  · johnpfeiffer
+</title>
+        <link href="http://cdn-images.mailchimp.com/embedcode/slim-081711.css" rel="stylesheet" type="text/css">
+        <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="/theme/css/style.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="/theme/css/solarizedlight.css" media="screen">
+        <link rel="shortcut icon" href="/theme/images/favicon.ico" type="image/x-icon" />
+        <link rel="apple-touch-icon" href="/theme/images/apple-touch-icon.png" />
+        <link rel="apple-touch-icon" sizes="57x57" href="/theme/images/apple-touch-icon-57x57.png" />
+        <link rel="apple-touch-icon" sizes="72x72" href="/theme/images/apple-touch-icon-72x72.png" />
+        <link rel="apple-touch-icon" sizes="114x114" href="/theme/images/apple-touch-icon-114x114.png" />
+        <link rel="apple-touch-icon" sizes="144x144" href="/theme/images/apple-touch-icon-144x144.png" />
+        <link rel="icon" href="/theme/images/apple-touch-icon-144x144.png" />
+    </head>
+    <body>
+        <div id="content-sans-footer">
+        <div class="navbar navbar-static-top">
+            <div class="navbar-inner">
+                <div class="container">
+                    <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </a>
+                    <a class="brand" href="/"><span class=site-name>johnpfeiffer</span></a>
+                    <div class="nav-collapse collapse">
+                        <ul class="nav pull-right top-menu">
+                            <li ><a href="">Home</a></li>
+                            <li ><a href="/about-john-pfeiffer">About John Pfeiffer</a></li>
+                            <li ><a href="/categories.html">Categories</a></li>
+                            <li ><a href="/tags.html">Tags</a></li>
+                            <li ><a href="/archives.html">Archives</a></li>
+                            <li><form class="navbar-search" action="/search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container-fluid">
+            <div class="row-fluid">
+                <div class="span1"></div>
+                <div class="span10">
+<article>
+<div class="row-fluid">
+    <header class="page_header span10 offset2">
+    <h1><a href="/dupal-security-tip-disabling-anonymous-access-to-cron"> Dupal Security Tip: disabling anonymous access to cron  </a></h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+        <div class="span8 offset2 article-content">
+
+            <div class="field field-name-body field-type-text-with-summary field-label-hidden">
+<div class="field-items">
+<div class="field-item even">
+Drupal is a wonderful way of leveraging many open source advanced web
+features into one interface that conceivably can be handed off to a "non
+developer" to maintain.
+
+</p>
+
+Along with all of the installation / implementation (often customized to
+fit the customers' needs) there are two further things that should be
+considered, Security and Useability.
+
+</p>
+
+Here's some tips on security and maintenance:
+
+</p>
+
+Drupal is a Content Management System that allows remote users to run
+scripts and access databases on your web server, this is a serious
+responsibility as Shared Hosting means your runaway/hacked scripts
+affects others, and Hackers/Spammers are always looking for new
+Zombies...
+
+</p>
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+- - - - - - - - - - - -  
+
+Restrict the PHP scripts access from ANONYMOUS USERS ON THE INTERNET
+
+</p>
+
+"index.php" should be allowed (it's your home page) but...
+
+</p>
+
+\*Cron is the method in linux to run scheduled tasks.
+
+</p>
+
+Drupal requires regular scheduled actions for maintenance (e.g. update
+content in search,  
+
+cleaning up log files, checking for updates, etc.)
+
+</p>
+
+[http://drupal.org/cron.php][] is not accessible but  
+[http://yourdomain.com/cron.php][] may be accessible to ANYONE (as
+that's the default install).
+
+</p>
+
+To secure the cron.php file in .htacess, you have to do that manually
+after installation:
+
+</p>
+
+To block remote access to cron.php, in the server's .htaccess file or
+vhost configuration file:
+
+</p>
+
+Order Deny,Allow  
+
+Deny from all  
+
+Allow from localhost  
+
+Allow from 127.0.0.1  
+
+Allow from xx.xx.xx.xx <-- your remote IP address
+
+</p>
+
+Or protect update.php too in the .htaccess file:
+
+</p>
+
+order deny,allow  
+
+deny from all  
+
+allow from 127.0.0  
+
+\# add allowed remote IP addresses  
+
+allow from a.b.c.d  
+
+allow from a.b.c.d
+
+</p>
+
+NOW ANONYMOUS ACCESS TO CRON.PHP should return either "access denied" or
+"page not found"...
+
+</p>
+
+You can still run cron manually from either of the options below:  
+
+Administer -\> Reports -\> Status
+
+</p>
+
+[http://domain.com/admin/reports/status/run-cron][]
+
+</p>
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+- - - - - - - - - - - -  
+
+Cpanel -\> Advanced -\> Cron Jobs
+
+</p>
+
+\* \* \* \* \* [http://domain.com/cron.php][]
+
+</p>
+
+(e.g. for rochen or bluehost cpanelx command should be the 8 char
+directory)
+
+</p>
+
+php -q /home/yoursite/public\_html/cron.php
+
+</p>
+
+OR if you have multiple subdomains running different drupal installs:  
+
+php -q /home/8chars/public\_html/subdomain/cron.php
+
+</p>
+
+Check using your drupal admin to ensure that the cron job has run  
+
+Administer -\> Reports -\> Status
+
+</p>
+
+This will allow you to test if your cpanel really has the correct
+permissions as  
+
+Administer -\> Reports -\> Status should now show the cron job status as
+updated frequently! =)
+
+</p>
+
+Here is a diagram of the general crontab syntax, for illustration:
+
+</p>
+
+\# +---------------- minute (0 - 59)  
+
+\# | +------------- hour (0 - 23)  
+
+\# | | +---------- day of month (1 - 31)  
+
+\# | | | +------- month (1 - 12)  
+
+\# | | | | +---- day of week (0 - 7) (Sunday=0 or 7)  
+
+\# | | | | |  
+
+\* \* \* \* \* command to be executed
+
+</p>
+
+e.g. 2 13 28 12 \* /bin/execute/this/script.sh
+
+</p>
+
+the five stars (with a space in between each!) represent wildcards:
+
+</p>
+
+\1. when minute = 2  
+
+\2. when hour = 13  
+
+\3. when day = 28  
+
+\4. when month = 12  
+
+\5. every day (could be = 5 for every friday)
+
+</p>
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+- - - - - - - - - - - -  
+
+/sites/default/settings.php should definitely have:
+
+</p>
+
+$update\_free\_access = FALSE;
+
+</p>
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+- - - - - - - - - - - -  
+
+Administer \> Site configuration \> File uploads  
+
+"Default permitted file extensions field" for each role should be
+limited, because obviously you don't want ANONYMOUS users uploading .php
+files! (Or in INPUT FORMAT, .php code entered by an anonymous or hacked
+authenticated user!)
+
+</p>
+<p>
+</div>
+
+<p></div>
+</div>
+<div class="field field-name-taxonomy-vocabulary-1 field-type-taxonomy-term-reference field-label-above clearfix"></p>
+<h3 id="tags">tags:</h3>
+<ul>
+<li><a href="http://john-pfeiffer.com/category/tags/drupal">Drupal</a></li>
+</ul>
+<p></div>
+</p></p>
+            <aside>
+            <hr/>
+            <nav>
+            <ul class="articles_timeline">
+ 
+                <li class="previous_article">« <a href="/drupal-6-wysiwyg-module-so-users-can-insert-images" title="Previous: Drupal 6 wysiwyg module so users can insert images">Drupal 6 wysiwyg module so users can insert images</a></li>
+ 
+                <li class="next_article"><a href="/eclipse-ide-c-wascana-on-windows-7" title="Next: Eclipse IDE C Wascana on Windows 7">Eclipse IDE C Wascana on Windows 7</a> »</li>
+            </ul>
+            </nav>
+            </aside>
+        </div>
+        <section>
+        <div class="span2" style="float:right;font-size:0.9em;">
+ 
+            <h4>Published</h4>
+            <time pubdate="pubdate" datetime="2010-08-30T17:33:00">Aug 30, 2010</time>
+            <h4>Category</h4>
+            <a class="category-link" href="/categories.html#linux-ref">linux</a> 
+
+        </div>
+        </section>
+</div>
+</article>
+                </div>
+                <div class="span1"></div>
+            </div>
+        </div>
+    </div>
+<footer>
+<div id="footer">
+    <ul class="footer-content">
+        <li class="elegant-power">Powered by <a href="http://getpelican.com/" title="Pelican Home Page">Pelican</a>. Theme: <a href="http://oncrashreboot.com/pelican-elegant" title="Theme Elegant Home Page">Elegant</a> by <a href="http://oncrashreboot.com" title="Talha Mansoor Home Page">Talha Mansoor</a></li>
+    </ul>
+</div>
+</footer>            <script src="http://code.jquery.com/jquery.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+    </body>
+</html>

@@ -4,6 +4,8 @@ from __future__ import unicode_literals
 
 AUTHOR = u'john pfeiffer'
 SITENAME = u'johnpfeiffer'
+# uncomment before publishing
+# SITEURL = u'http://johnpfeiffer.bitbucket.org'
 OUTPUT_PATH = 'output/'
 DEFAULT_DATE_FORMAT = '%Y-%m-%d'
 
@@ -29,7 +31,7 @@ PLUGIN_PATHS = ['plugins']
 PLUGINS = ['sitemap', 'extract_toc', 'tipue_search']
 MD_EXTENSIONS = ['codehilite(css_class=highlight)', 'extra', 'headerid', 'toc']
 DIRECT_TEMPLATES = (('index', 'tags', 'categories','archives', 'search', '404'))
-STATIC_PATHS = ['theme/images', 'images']
+STATIC_PATHS = ['themes/images', 'images']
 
 SITEMAP = {
     'format': 'xml',

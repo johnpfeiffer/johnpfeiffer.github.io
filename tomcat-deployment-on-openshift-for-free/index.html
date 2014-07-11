@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en-US">
+    <head>
+        <meta charset="utf-8"> 
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="author" content="John Pfeiffer" />
+        <meta name="copyright" content="John Pfeiffer" />
+
+<meta name="keywords" content=", linux, " />
+        <title>Tomcat deployment on Openshift for free  · johnpfeiffer
+</title>
+        <link href="http://cdn-images.mailchimp.com/embedcode/slim-081711.css" rel="stylesheet" type="text/css">
+        <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="/theme/css/style.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="/theme/css/solarizedlight.css" media="screen">
+        <link rel="shortcut icon" href="/theme/images/favicon.ico" type="image/x-icon" />
+        <link rel="apple-touch-icon" href="/theme/images/apple-touch-icon.png" />
+        <link rel="apple-touch-icon" sizes="57x57" href="/theme/images/apple-touch-icon-57x57.png" />
+        <link rel="apple-touch-icon" sizes="72x72" href="/theme/images/apple-touch-icon-72x72.png" />
+        <link rel="apple-touch-icon" sizes="114x114" href="/theme/images/apple-touch-icon-114x114.png" />
+        <link rel="apple-touch-icon" sizes="144x144" href="/theme/images/apple-touch-icon-144x144.png" />
+        <link rel="icon" href="/theme/images/apple-touch-icon-144x144.png" />
+    </head>
+    <body>
+        <div id="content-sans-footer">
+        <div class="navbar navbar-static-top">
+            <div class="navbar-inner">
+                <div class="container">
+                    <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </a>
+                    <a class="brand" href="/"><span class=site-name>johnpfeiffer</span></a>
+                    <div class="nav-collapse collapse">
+                        <ul class="nav pull-right top-menu">
+                            <li ><a href="">Home</a></li>
+                            <li ><a href="/about-john-pfeiffer">About John Pfeiffer</a></li>
+                            <li ><a href="/categories.html">Categories</a></li>
+                            <li ><a href="/tags.html">Tags</a></li>
+                            <li ><a href="/archives.html">Archives</a></li>
+                            <li><form class="navbar-search" action="/search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container-fluid">
+            <div class="row-fluid">
+                <div class="span1"></div>
+                <div class="span10">
+<article>
+<div class="row-fluid">
+    <header class="page_header span10 offset2">
+    <h1><a href="/tomcat-deployment-on-openshift-for-free"> Tomcat deployment on Openshift for free  </a></h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+        <div class="span8 offset2 article-content">
+
+            <div class="field field-name-body field-type-text-with-summary field-label-hidden">
+<div class="field-items">
+<div class="field-item even">
+sudo apt-get update
+
+sudo apt-get install ruby1.9.3 //yay for ubuntu 12.04
+
+</p>
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+- - - - - - - - - - - - - - - - - - - - - - - -  
+
+(PREREQUISITE IS INSTALLING GIT - apt-get install git-core)
+
+</p>
+
+sudo gem install rhc //red hat client
+
+</p>
+
+rhc setup  
+
+Created local config file: /home/ubuntu/.openshift/express.conf  
+
+The express.conf file contains user configuration, and can be
+transferred to different computers.  
+
+No SSH keys were found. We will generate a pair of keys for you.  
+
+2: No such file or directory  
+
+Created: /home/ubuntu/.ssh/id\_rsa.pub  
+
+Your public ssh key must be uploaded to the OpenShift server. Would you
+like us to upload it for you? (yes/no) yes
+
+</p>
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+- - - - - - - - - - - - - - - - - - - - - - - -  
+
+rhc -h  
+
+rhc domain show //prompts for password
+
+</p>
+
+rhc app create -h  
+
+Valid application types are (nodejs-0.6, ruby-1.9, jbossas-7,
+python-2.6, jenkins-1.4, ruby-1.8, jbosseap-6.0, diy-0.1, php-5.3,
+perl-5.10)
+
+</p>
+
+rhc app create -a john -t diy-0.1
+
+</p>
+
+rhc app show -a john
+
+</p>
+
+rhc app cartridge list
+
+</p>
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+- - - - - - - - - - - - - - - - - - - - - - - -  
+
+ON YOUR LOCAL MACHINE BROWSE TO WHERE YOU WANT TO STORE YOUR GIT REPO
+
+</p>
+
+git clone git clone
+[ssh://a261d0fc2932413694456e3473fdc972@APPNAME-DOMAIN.rhcloud.com/\~/git/...][]
+
+</p>
+
+git status  
+
+git pull
+
+</p>
+
+REPO LAYOUT of \~/john/repo
+
+</p>
+
+.openshift/action\_hooks/start - Script that gets run to start your
+application  
+
+.openshift/action\_hooks/stop - Script that gets run to stop your
+application  
+
+.openshift/action\_hooks/pre\_build - Script that gets run every git
+push before the build  
+
+.openshift/action\_hooks/build - Script that gets run every git push as
+part of the build process (on the CI system if available)  
+
+.openshift/action\_hooks/deploy - Script that gets run every git push
+after build but before the app is restarted  
+
+.openshift/action\_hooks/post\_deploy - Script that gets run every git
+push after the app is restarted  
+
+diy  
+
+misc  
+
+README  
+
+static/ If it exists externally exposed static content goes here
+
+</p>
+
+CHANGES ARE ONE DIRECTIONAL FROM THE GIT CLONE TO THE OPENSHIFT BOX
+
+</p>
+
+mv diy/testrubyserver.rb ../misc  
+
+mv diy/index.html ../misc
+
+</p>
+
+git add -A  
+
+git commit -m "moved initial test stuff to /misc"  
+
+git push //if the app is running then a git push automatically ...
+
+</p>
+
+Counting objects: 6, done.  
+
+Delta compression using up to 4 threads.  
+
+Compressing objects: 100% (4/4), done.  
+
+Writing objects: 100% (4/4), 607 bytes, done.  
+
+Total 4 (delta 1), reused 1 (delta 0)  
+
+remote: Stopping application...  
+
+remote: Done  
+
+remote: \~/git/john.git \~/git/john.git  
+
+remote: \~/git/john.git  
+
+remote: Running .openshift/action\_hooks/pre\_build  
+
+remote: Running .openshift/action\_hooks/build  
+
+remote: Running .openshift/action\_hooks/deploy  
+
+remote: Starting application...  
+
+remote: Done  
+
+remote: Running .openshift/action\_hooks/post\_deploy
+
+</p>
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+- - - - - - - - - - - - - - - - - - - - - - - -  
+
+ssh [51233d90ea45fd91e42096651d937e@john-pfeiffer.rhcloud.com][] //note
+that HOME is /var/lib/stickshift/12315longidentifier  
+
+cd app-root/data  
+
+wget
+[http://mirror.cc.columbia.edu/pub/software/apache/tomcat/tomcat-7/v7.0.2...][]  
+
+tar -xzvf apache-tomcat-7.0.29.tar.gz //expands to 13MB, note that JAVA
+is already installed by default  
+
+rm apache-tomcat-7.0.29.tar.gz
+
+</p>
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+- - - - - - - - - - - - - - - - - - - - - - - -  
+
+Since OpenShift has a proxy setup that passes port 80 to your local
+server on port 8080, BUT  
+
+OpenShift does not allow users to bind to any port below 15000 other
+than 8080, so...
+
+</p>
+
+ssh [521233d90ea45fd91e42096651d937e@john-pfeiffer.rhcloud.com][]
+
+</p>
+
+env //shows you all of the environment variables in the openShift
+multitenant config  
+
+env | grep INTERNAL  
+
+OPENSHIFT\_INTERNAL\_PORT=8080  
+
+OPENSHIFT\_INTERNAL\_IP=127.13.29.1
+
+</p>
+
+vi app-root/data/apache-tomcat-7.0.29/conf/server.xml
+
+</p>
+
+escape key then :x (save and quit)
+
+</p>
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+- - - - - - - - - - - - - - - - - - - - - - - -  
+
+cd app-root/data/apache-tomcat-7.0.29/bin
+
+</p>
+
+sh startup.sh && tail -f ../logs/\*
+
+</p>
+
+(this is how you can start it manually from within ssh, you'll have to
+stop it manually too!)
+
+</p>
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+- - - - - - - - - - - - - - - - - - - - - - - -  
+
+ADDING Tomcat to your default start and stop scripts (which are used
+during every git push)
+
+</p>
+
+In your local git repo there is a hidden directory ".openshift"
+
+</p>
+
+cd APPNAME/.openshift/action\_hooks
+
+</p>
+
+vi .openshift/action\_hooks/start  
+
+\#nohup $OPENSHIFT\_REPO\_DIR/diy/testrubyserver.rb
+$OPENSHIFT\_INTERNAL\_IP $OPENSHIFT\_REPO\_DIR/diy \>
+$OPENSHIFT\_LOG\_DIR/server.log 2\>&1 &
+
+</p>
+
+cd $OPENSHIFT\_DATA\_DIR/apache-tomcat-7.0.29/bin  
+
+nohup sh startup.sh  
+
+echo "completed tomcat7 startup"
+
+</p>
+
+vi .openshift/action\_hooks/stop  
+
+cd $OPENSHIFT\_DATA\_DIR/apache-tomcat-7.0.29/bin  
+
+nohup sh shutdown.sh  
+
+echo "completed tomcat7 shutdown"  
+
+exit 0
+
+</p>
+
+git add -A  
+
+git commit -m "removed testrubyserver.rb and added tomcat to start/stop
+scripts"  
+
+git push
+
+</p>
+
+[http://APPNAME-DOMAINNAME.rhcloud.com][]
+
+</p>
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+- - - - - - - - - - - - - - - - - - - - - - - -  
+
+MOVE YOUR WEBAPPS DIRECTORY TO THE GIT REPO SO THAT A GIT PUSH WILL AUTO
+DEPLOY THE NEWEST
+
+</p>
+
+mv $OPENSHIFT\_DATA\_DIR/apache-tomcat-7.0.29/webapps
+\~/john/repo/diy/webapps
+
+</p>
+
+ln -s \~/john/repo/diy/webapps webapps
+
+</p>
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+- - - - - - - - - - - - - - - - - - - - - - - -  
+
+Strongly advised to remove the manager and example apps (just deploy
+your .war's)
+
+</p>
+
+//rhc app stop â€“a APPNAME -p YOURPASSWORD //yes, it uses your RHCloud
+account username and password for app management
+
+</p>
+
+ssh [521233d90ea45fd91e42096651d937e@john-pfeiffer.rhcloud.com][]  
+
+mv \~/app-root/data/apache-tomcat-7.0.29/webapps/\* app-root/repo/misc  
+
+mv app-root/repo/misc/ROOT \~/app-root/data/apache-tomcat-7.0.29/webapps
+
+</p>
+
+//rhc app startâ€“a APPNAME -p YOURPASSWORD
+
+</p>
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+- - - - - - - - - - - - - - - - - - - - - - - -  
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+- - - - - - - - - - - - - - - - - - - - - - - -  
+
+ONCE YOU'VE SSH'D IN...  
+
+help  
+
+ps|ls|  
+
+ctl\_app start [stop|restart|status]  
+
+mysql | mongo | quota
+
+</p>
+
+NOTE: sometimes it's easier to use a UI
+[https://openshift.redhat.com/app/console/applications][]  
+
+My Account -\> Public Keys
+
+</p>
+
+My Applications -\> APPLICATION\_NAME -\>
+
+</p>
+
+rhc app add-alias -a myapp --alias myapp.net
+
+</p>
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+- - - - - - - - - - - - - - - - - - - - - - - -  
+
+FUTURE THOUGHTS
+
+</p>
+
+Eclipse + m2e (maven plugin) + jetty plugin for fast and easy dependency
+management -\> mvn install + added custom script can put your .war into
+your local openshift repo for continuous deployment.
+
+</p>
+<p>
+</div>
+
+<p></div>
+</div>
+<div class="field field-name-taxonomy-vocabulary-1 field-type-taxonomy-term-reference field-label-above clearfix"></p>
+<h3 id="tags">tags:</h3>
+<ul>
+<li><a href="http://john-pfeiffer.com/category/tags/linux">Linux</a></li>
+<li><a href="http://john-pfeiffer.com/category/tags/programming">Programming</a></li>
+</ul>
+<p></div>
+</p></p>
+<div class="highlight"><pre><span class="nl">ssh:</span><span class="c1">//a261d0fc2932413694456e3473fdc972@APPNAME-DOMAIN.rhcloud.com/~/git/APPNAME.git/</span>
+<span class="nl">http:</span><span class="c1">//mirror.cc.columbia.edu/pub/software/apache/tomcat/tomcat-7/v7.0.29/bin/apache-tomcat-7.0.29.tar.gz</span>
+</pre></div>
+            <aside>
+            <hr/>
+            <nav>
+            <ul class="articles_timeline">
+ 
+                <li class="previous_article">« <a href="/creating-economies-of-scale-in-software-development" title="Previous: Creating Economies of  Scale in Software Development">Creating Economies of  Scale in Software Development</a></li>
+ 
+                <li class="next_article"><a href="/server-operations-cloud-versus-build-your-own" title="Next: Server Operations: Cloud versus Build Your Own">Server Operations: Cloud versus Build Your Own</a> »</li>
+            </ul>
+            </nav>
+            </aside>
+        </div>
+        <section>
+        <div class="span2" style="float:right;font-size:0.9em;">
+ 
+            <h4>Published</h4>
+            <time pubdate="pubdate" datetime="2012-09-11T13:48:00">Sep 11, 2012</time>
+            <h4>Category</h4>
+            <a class="category-link" href="/categories.html#linux-ref">linux</a> 
+
+        </div>
+        </section>
+</div>
+</article>
+                </div>
+                <div class="span1"></div>
+            </div>
+        </div>
+    </div>
+<footer>
+<div id="footer">
+    <ul class="footer-content">
+        <li class="elegant-power">Powered by <a href="http://getpelican.com/" title="Pelican Home Page">Pelican</a>. Theme: <a href="http://oncrashreboot.com/pelican-elegant" title="Theme Elegant Home Page">Elegant</a> by <a href="http://oncrashreboot.com" title="Talha Mansoor Home Page">Talha Mansoor</a></li>
+    </ul>
+</div>
+</footer>            <script src="http://code.jquery.com/jquery.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+    </body>
+</html>

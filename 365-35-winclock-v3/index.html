@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en-US">
+    <head>
+        <meta charset="utf-8"> 
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="author" content="John Pfeiffer" />
+        <meta name="copyright" content="John Pfeiffer" />
+
+<meta name="keywords" content=", linux, " />
+        <title>365-35 WinClock v3  · johnpfeiffer
+</title>
+        <link href="http://cdn-images.mailchimp.com/embedcode/slim-081711.css" rel="stylesheet" type="text/css">
+        <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="/theme/css/style.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="/theme/css/solarizedlight.css" media="screen">
+        <link rel="shortcut icon" href="/theme/images/favicon.ico" type="image/x-icon" />
+        <link rel="apple-touch-icon" href="/theme/images/apple-touch-icon.png" />
+        <link rel="apple-touch-icon" sizes="57x57" href="/theme/images/apple-touch-icon-57x57.png" />
+        <link rel="apple-touch-icon" sizes="72x72" href="/theme/images/apple-touch-icon-72x72.png" />
+        <link rel="apple-touch-icon" sizes="114x114" href="/theme/images/apple-touch-icon-114x114.png" />
+        <link rel="apple-touch-icon" sizes="144x144" href="/theme/images/apple-touch-icon-144x144.png" />
+        <link rel="icon" href="/theme/images/apple-touch-icon-144x144.png" />
+    </head>
+    <body>
+        <div id="content-sans-footer">
+        <div class="navbar navbar-static-top">
+            <div class="navbar-inner">
+                <div class="container">
+                    <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </a>
+                    <a class="brand" href="/"><span class=site-name>johnpfeiffer</span></a>
+                    <div class="nav-collapse collapse">
+                        <ul class="nav pull-right top-menu">
+                            <li ><a href="">Home</a></li>
+                            <li ><a href="/about-john-pfeiffer">About John Pfeiffer</a></li>
+                            <li ><a href="/categories.html">Categories</a></li>
+                            <li ><a href="/tags.html">Tags</a></li>
+                            <li ><a href="/archives.html">Archives</a></li>
+                            <li><form class="navbar-search" action="/search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container-fluid">
+            <div class="row-fluid">
+                <div class="span1"></div>
+                <div class="span10">
+<article>
+<div class="row-fluid">
+    <header class="page_header span10 offset2">
+    <h1><a href="/365-35-winclock-v3"> 365-35 WinClock v3  </a></h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+        <div class="span8 offset2 article-content">
+
+            <div class="field field-name-body field-type-text-with-summary field-label-hidden">
+<div class="field-items">
+<div class="field-item even">
+My windows clock is slowly progressing...
+
+</p>
+
+Now I can create a window with a QUIT button and display the current
+system time (only once)...
+
+</p>
+
+If you want to know more about the project from the beginning search the
+site for winclock (or click on the time.h tag).
+
+</p>
+
+I've stripped out most of the project header stuff - perhaps in the
+future I'll just have it as an "include" so that it's in the project but
+since it doesn't change much I only have to look at it when I refer back
+to it (instead of at the top of the file ALL THE TIME!)
+
+</p>
+
+Ok, enough planning and review, here's the code:
+
+</p>
+
+gcwin.bat  
+
+gcc.exe -o %1.exe %1 -Iinclude -Llib -Wall -ansi -mwindows
+
+</p>
+
+winclock-v3.c
+
+</p>
+<p>
+    /* 2010-02-08  john pfeiffer, MS windows clock v3 (the windows)*/#include <time.h>#include <string.h>#include <windows.h>#define  IDC_MyExitButton 40001 /* case sensitive! random high number to keep windows happy */LRESULT CALLBACK WindowProcedure( HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);void get_current_time( char current_time[128] );int WINAPI WinMain( HINSTANCE hThisInstance, HINSTANCE hPrevInstance, LPSTR lpszArgument,            int ncmdshow)               {    HWND hwnd;           /* The handle for our window */    HWND ButtonPushed = NULL;    MSG messages;        /* Messages to the application  */    WNDCLASS wc;         /* Data structure for our defined windowclass */    wc.style = 0;    wc.lpfnWndProc = WindowProcedure;   /* This function is called by windows */    wc.cbClsExtra = 0;                   /* No extra bytes after the window class */    wc.cbWndExtra = 0;                   /* structure or the window instance */    wc.hInstance = hThisInstance;       /* handle to the owner */    wc.hIcon = NULL;                    /* no special application icon */    wc.hCursor = LoadCursor(NULL, IDC_ARROW); /* default cursor */    wc.hbrBackground = (HBRUSH) GetStockObject(LTGRAY_BRUSH);     wc.lpszMenuName = NULL;                /* No menu */    wc.lpszClassName = "WindowsApp";        /* the name of the windows class */            /* Register the window class, if fail quit the program with an error value */    if( RegisterClass(&wc) ==0 ){ return -1;  }    /* The class is registered, let's instantiate our window */    hwnd = CreateWindowEx( 1, "WindowsApp", "Windows Title",       WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,     NULL, NULL, hThisInstance, NULL ); /* create button and store the handle */  ButtonPushed = CreateWindow(         "button",                       /* class name */        "Push to Quit",                  /* button caption */        WS_CHILD |WS_VISIBLE | BS_PUSHBUTTON,  /* the styles */        0,0,                            /* the left and top coordinates */        150,50,                         /* width and height */        hwnd,                           /* parent window handle */        (HMENU)IDC_MyExitButton,        /* the ID of your button */        hThisInstance,                  /* the instance of your application */        NULL) ;                         /* unnecessary extra */    ShowWindow(hwnd, ncmdshow);       /* Make the window visible on the screen */  UpdateWindow(hwnd);             /* update with changes */    /* Run the message loop. It will run until GetMessage( ) returns 0 */    while( GetMessage(&messages, NULL, 0, 0) )    {                TranslateMessage(&messages);         DispatchMessage(&messages);      }    /* The program return-value is 0 - The value that PostQuitMessage( ) gave */    return messages.wParam;}/* This function is called by the Windows function DispatchMessage( ) */LRESULT CALLBACK WindowProcedure( HWND hwnd, UINT message,  WPARAM wParam, LPARAM lParam){    char current_time[128];    PAINTSTRUCT ps;       /* a structure for a paint job (see below */    RECT rect;      /* a struct to hold rectangle values (e.g. x,y coordinates) */    HDC hdc;            /* handle to a DC (buffer) for the screen */    switch (message)                  /* handle the messages */    {     case WM_COMMAND:         switch(LOWORD(wParam))    /* find out what's been clicked */        {            case IDC_MyExitButton:                    PostQuitMessage(0);                break;                                                default:                break;            }        break;  case WM_PAINT:       GetClientRect( hwnd, &rect );       /* get the size of our window */     hdc = BeginPaint( hwnd, &ps );      /* begin painting to the buffer */        get_current_time( current_time );     DrawText( hdc, TEXT(current_time), -1, &rect, DT_CENTER | DT_VCENTER | DT_SINGLELINE);              EndPaint( hwnd, &ps);        return 0; case WM_DESTROY:     PostQuitMessage(0);        /* send a WM_QUIT */        break;        default:                   /* for messages that we don't deal with */ return DefWindowProc(hwnd, message, wParam, lParam);    }    return 0;}/* Get the current time from the system and update the time string */void get_current_time( char current_time[128] ){  time_t tempTime;/* initialize the variable, otherwise only returns 1970 date */   tempTime = time(NULL);   strcpy(current_time, asctime(localtime(&tempTime)));}
+
+For the binary executable (and the source code as .c file)  
+[http://kittyandbear.net/john/blog-prog/winclock-v3.zip][]
+
+</p>
+<p>
+</div>
+
+<p></div>
+</div>
+</p></p>
+            <aside>
+            <hr/>
+            <nav>
+            <ul class="articles_timeline">
+ 
+                <li class="previous_article">« <a href="/customize-your-linux-console-bashrc" title="Previous: Customize your linux console: bashrc">Customize your linux console: bashrc</a></li>
+ 
+                <li class="next_article"><a href="/drupal-basic-site-configuration-the-search-block" title="Next: Drupal Basic Site Configuration the Search Block">Drupal Basic Site Configuration the Search Block</a> »</li>
+            </ul>
+            </nav>
+            </aside>
+        </div>
+        <section>
+        <div class="span2" style="float:right;font-size:0.9em;">
+ 
+            <h4>Published</h4>
+            <time pubdate="pubdate" datetime="2010-02-11T13:42:00">Feb 11, 2010</time>
+            <h4>Category</h4>
+            <a class="category-link" href="/categories.html#linux-ref">linux</a> 
+
+        </div>
+        </section>
+</div>
+</article>
+                </div>
+                <div class="span1"></div>
+            </div>
+        </div>
+    </div>
+<footer>
+<div id="footer">
+    <ul class="footer-content">
+        <li class="elegant-power">Powered by <a href="http://getpelican.com/" title="Pelican Home Page">Pelican</a>. Theme: <a href="http://oncrashreboot.com/pelican-elegant" title="Theme Elegant Home Page">Elegant</a> by <a href="http://oncrashreboot.com" title="Talha Mansoor Home Page">Talha Mansoor</a></li>
+    </ul>
+</div>
+</footer>            <script src="http://code.jquery.com/jquery.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+    </body>
+</html>

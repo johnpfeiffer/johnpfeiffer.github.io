@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en-US">
+    <head>
+        <meta charset="utf-8"> 
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="author" content="John Pfeiffer" />
+        <meta name="copyright" content="John Pfeiffer" />
+
+<meta name="keywords" content=", linux, " />
+        <title>365-24 Javascript on MS CRM Forms  · johnpfeiffer
+</title>
+        <link href="http://cdn-images.mailchimp.com/embedcode/slim-081711.css" rel="stylesheet" type="text/css">
+        <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="/theme/css/style.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="/theme/css/solarizedlight.css" media="screen">
+        <link rel="shortcut icon" href="/theme/images/favicon.ico" type="image/x-icon" />
+        <link rel="apple-touch-icon" href="/theme/images/apple-touch-icon.png" />
+        <link rel="apple-touch-icon" sizes="57x57" href="/theme/images/apple-touch-icon-57x57.png" />
+        <link rel="apple-touch-icon" sizes="72x72" href="/theme/images/apple-touch-icon-72x72.png" />
+        <link rel="apple-touch-icon" sizes="114x114" href="/theme/images/apple-touch-icon-114x114.png" />
+        <link rel="apple-touch-icon" sizes="144x144" href="/theme/images/apple-touch-icon-144x144.png" />
+        <link rel="icon" href="/theme/images/apple-touch-icon-144x144.png" />
+    </head>
+    <body>
+        <div id="content-sans-footer">
+        <div class="navbar navbar-static-top">
+            <div class="navbar-inner">
+                <div class="container">
+                    <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </a>
+                    <a class="brand" href="/"><span class=site-name>johnpfeiffer</span></a>
+                    <div class="nav-collapse collapse">
+                        <ul class="nav pull-right top-menu">
+                            <li ><a href="">Home</a></li>
+                            <li ><a href="/about-john-pfeiffer">About John Pfeiffer</a></li>
+                            <li ><a href="/categories.html">Categories</a></li>
+                            <li ><a href="/tags.html">Tags</a></li>
+                            <li ><a href="/archives.html">Archives</a></li>
+                            <li><form class="navbar-search" action="/search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container-fluid">
+            <div class="row-fluid">
+                <div class="span1"></div>
+                <div class="span10">
+<article>
+<div class="row-fluid">
+    <header class="page_header span10 offset2">
+    <h1><a href="/365-24-javascript-on-ms-crm-forms"> 365-24 Javascript on MS CRM Forms  </a></h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+        <div class="span8 offset2 article-content">
+
+            <div class="field field-name-body field-type-text-with-summary field-label-hidden">
+<div class="field-items">
+<div class="field-item even">
+Programming isn't always fun and games. Here's an example from me
+putting in extra time on a weekend...
+
+</p>
+
+At my work We use Microsoft Dynamics CRM 4.0 which is a customizable CRM
+web interface on top of MS SQL Server. While the built in functionality
+is pretty good a business always needs some more customization to get
+things "just right"...
+
+</p>
+
+MS CRM has "onload" and "onsave" functionality for each entity that
+allows a developer to stick in some custom javascript.
+
+</p>
+
+Below is the JS that controls the calculations on the Products section
+of a Quote for Customer Form. This improves the end user experience as
+user changes update the different fields instantly and automatically
+(though they still have to press SAVE to keep those changes).
+
+</p>
+
+Note: Javascript isn't related to Java, it's a "client side" (runs on
+your computer, not the server) piece of code frequently used to modify
+how things look on your screen.
+
+</p>
+
+--------------------------------------------------------------------------------
+
+</p>
+<p>
+    // if the Tax field is null (ie a new quote is being created) we fill in a default taxif (crmForm.all.new_taxpercentage.DataValue == null) { crmForm.all.new_taxpercentage.DataValue = 17.5;}//when Loading the Quote Form and on certain fields I have the following:crmForm.all.quantity.FireOnChange();//tells the system to pretend that the Quantity field has just changed //(and run it's jscripts)//this allows for one central place to control all of the calculations--------------------------------------------------------------------------------//this forces even "disabled" fields to update valuescrmForm.all.new_taxpercentage.ForceSubmit = true;//Calculate the BASE amount - MS CRM multicurrency required for moneycrmForm.all.baseamount_base.DataValue = crmForm.all.quantity.DataValue * crmForm.all.priceperunit_base.DataValue//Calculate the baseamount.crmForm.all.baseamount.DataValue = crmForm.all.quantity.DataValue * crmForm.all.priceperunit.DataValue;//Only calculate the discount if the user has actually filled in the discount fieldif( crmForm.all.new_manualdiscountpercentage.DataValue >= 0 ){    //Calculate the manual BASE discount amount. crmForm.all.manualdiscountamount_base.DataValue = crmForm.all.quantity.DataValue * crmForm.all.priceperunit_base.DataValue * (crmForm.all.new_manualdiscountpercentage.DataValue/100);    //Calculate the manual discount amount.  crmForm.all.manualdiscountamount.DataValue = crmForm.all.quantity.DataValue * crmForm.all.priceperunit.DataValue * (crmForm.all.new_manualdiscountpercentage.DataValue/100);}//Tricky piece of math with lots of ( and * and / ...//Calculate the new BASE Tax AmountcrmForm.all.tax_base.DataValue = ((crmForm.all.quantity.DataValue * crmForm.all.priceperunit_base.DataValue) - (crmForm.all.manualdiscountamount_base.DataValue)) * (crmForm.all.new_taxpercentage.DataValue/100);//Calculate the new Tax AmountcrmForm.all.tax.DataValue = ((crmForm.all.quantity.DataValue * crmForm.all.priceperunit.DataValue) -  (crmForm.all.manualdiscountamount.DataValue)) * (crmForm.all.new_taxpercentage.DataValue/100);//Calculate the new Extended BASE AmountcrmForm.all.extendedamount_base.DataValue = (crmForm.all.baseamount_base.DataValue -  crmForm.all.manualdiscountamount_base.DataValue) +  (crmForm.all.tax_base.DataValue);//Calculate the new Extended AmountcrmForm.all.extendedamount.DataValue = (crmForm.all.baseamount.DataValue -  crmForm.all.manualdiscountamount.DataValue) +  (crmForm.all.tax.DataValue);
+
+</div>
+
+<p></div>
+</div>
+</p></p>
+            <aside>
+            <hr/>
+            <nav>
+            <ul class="articles_timeline">
+ 
+                <li class="previous_article">« <a href="/365-22-vbscript-windows-shell-script-programming-for-loop" title="Previous: 365-22 VBScript Windows Shell Script (Programming) For Loop">365-22 VBScript Windows Shell Script (Programming) For Loop</a></li>
+ 
+                <li class="next_article"><a href="/365-25-php-user-input-html-sanitization-and-math" title="Next: 365-25 PHP User Input HTML Sanitization and Math">365-25 PHP User Input HTML Sanitization and Math</a> »</li>
+            </ul>
+            </nav>
+            </aside>
+        </div>
+        <section>
+        <div class="span2" style="float:right;font-size:0.9em;">
+ 
+            <h4>Published</h4>
+            <time pubdate="pubdate" datetime="2010-01-24T19:19:00">Jan 24, 2010</time>
+            <h4>Category</h4>
+            <a class="category-link" href="/categories.html#linux-ref">linux</a> 
+
+        </div>
+        </section>
+</div>
+</article>
+                </div>
+                <div class="span1"></div>
+            </div>
+        </div>
+    </div>
+<footer>
+<div id="footer">
+    <ul class="footer-content">
+        <li class="elegant-power">Powered by <a href="http://getpelican.com/" title="Pelican Home Page">Pelican</a>. Theme: <a href="http://oncrashreboot.com/pelican-elegant" title="Theme Elegant Home Page">Elegant</a> by <a href="http://oncrashreboot.com" title="Talha Mansoor Home Page">Talha Mansoor</a></li>
+    </ul>
+</div>
+</footer>            <script src="http://code.jquery.com/jquery.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+    </body>
+</html>

@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en-US">
+    <head>
+        <meta charset="utf-8"> 
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="author" content="John Pfeiffer" />
+        <meta name="copyright" content="John Pfeiffer" />
+
+<meta name="keywords" content=", linux, " />
+        <title>Win CE with PocketGCC a simple win32 button  · johnpfeiffer
+</title>
+        <link href="http://cdn-images.mailchimp.com/embedcode/slim-081711.css" rel="stylesheet" type="text/css">
+        <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="/theme/css/style.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="/theme/css/solarizedlight.css" media="screen">
+        <link rel="shortcut icon" href="/theme/images/favicon.ico" type="image/x-icon" />
+        <link rel="apple-touch-icon" href="/theme/images/apple-touch-icon.png" />
+        <link rel="apple-touch-icon" sizes="57x57" href="/theme/images/apple-touch-icon-57x57.png" />
+        <link rel="apple-touch-icon" sizes="72x72" href="/theme/images/apple-touch-icon-72x72.png" />
+        <link rel="apple-touch-icon" sizes="114x114" href="/theme/images/apple-touch-icon-114x114.png" />
+        <link rel="apple-touch-icon" sizes="144x144" href="/theme/images/apple-touch-icon-144x144.png" />
+        <link rel="icon" href="/theme/images/apple-touch-icon-144x144.png" />
+    </head>
+    <body>
+        <div id="content-sans-footer">
+        <div class="navbar navbar-static-top">
+            <div class="navbar-inner">
+                <div class="container">
+                    <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </a>
+                    <a class="brand" href="/"><span class=site-name>johnpfeiffer</span></a>
+                    <div class="nav-collapse collapse">
+                        <ul class="nav pull-right top-menu">
+                            <li ><a href="">Home</a></li>
+                            <li ><a href="/about-john-pfeiffer">About John Pfeiffer</a></li>
+                            <li ><a href="/categories.html">Categories</a></li>
+                            <li ><a href="/tags.html">Tags</a></li>
+                            <li ><a href="/archives.html">Archives</a></li>
+                            <li><form class="navbar-search" action="/search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container-fluid">
+            <div class="row-fluid">
+                <div class="span1"></div>
+                <div class="span10">
+<article>
+<div class="row-fluid">
+    <header class="page_header span10 offset2">
+    <h1><a href="/win-ce-with-pocketgcc-a-simple-win32-button"> Win CE with PocketGCC a simple win32 button  </a></h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+        <div class="span8 offset2 article-content">
+
+            <div class="field field-name-body field-type-text-with-summary field-label-hidden">
+<div class="field-items">
+<div class="field-item even">
+Win CE uses a subset of the win32 API which is neat because technically
+anything written for it can be compiled for a "full" windows as well.
+
+</p>
+
+Even though the Win32 API is very outdated I prefer the concept of
+building blocks and getting your hands dirty with implementation -
+that's how you really learn how things work. C\# and .Net, especially
+with a super GUI IDE, make it easy to quickly build something but also
+obscure why performance might be slow, why different parts aren't
+integrating together, and really require you to build based on the
+vision of the platform designers - for better or for worse.
+
+</p>
+
+This is probably why many programs written in C that are speed critical
+have important parts hand written in assembly. So here's a Windows API
+button for Win CE...  
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+- - - - - - - - - - - -  
+
+Don't forget the batch file:  
+
+\\pgcc\\cc1plus \\pgcc\\source-code.txt -o \\pgcc\\cwms.s -I
+\\pgcc\\include -include \\pgcc\\fixincl.h -fms-extensions \\pgcc\\as
+\\pgcc\\cwms.s -o \\pgcc\\cwmo.o \\pgcc\\ld \\pgcc\\cwmo.o -o
+\\pgcc\\cwme.exe -L \\pgcc\\lib -l cpplib -l corelibc -l coredll -l
+aygshell -l runtime -l portlib  
+[Download the pocketgcc binaries][]
+
+</p>
+
+/\* 2010-03-06 john pfeiffer wince quit button  
+
+\*/
+
+</p>
+
+\#define WIN32\_LEAN\_AND\_MEAN  
+
+\#include
+
+</p>
+
+/\* these three are included for pocketgcc compatibility \*/  
+
+\#include  
+
+\#include  
+
+\#include
+
+</p>
+
+/\* not only do we have those complex included Windows headers  
+
+but we have to define a special numeric ID for our buttons \*/
+
+</p>
+
+\#define IDC\_ExitButton 40099  
+
+\#define IDC\_clearScreen 40098
+
+</p>
+
+/\* HDC = handle to device context - a logical buffer of the screen.  
+
+You "write" things to it and then it can write to the display in a
+chunk.  
+
+A paint structure contains the info about the area being painted.
+
+</p>
+
+Direct from MSDN...  
+
+typedef struct tagPAINTSTRUCT {  
+
+HDC hdc;  
+
+BOOL fErase;  
+
+RECT rcPaint;  
+
+BOOL fRestore;  
+
+BOOL fIncUpdate;  
+
+BYTE rgbReserved[32];  
+
+} PAINTSTRUCT, \*PPAINTSTRUCT;
+
+</p>
+
+\*/
+
+</p>
+
+VOID APIENTRY initializeBackground( HWND hwnd )  
+
+{ HDC hdc;  
+
+PAINTSTRUCT ps;  
+
+hdc = BeginPaint(hwnd, &ps); /\* prepares the window for painting \*/  
+
+EndPaint(hwnd, &ps); /\* done painting \*/  
+
+}
+
+</p>
+
+/\* This is the prototype to the "do everything" window message  
+
+processing switch function \*/
+
+</p>
+
+LRESULT CALLBACK MenuWndProc(  
+
+HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
+
+</p>
+
+int APIENTRY WinMain(  
+
+HINSTANCE hInstance,  
+
+HINSTANCE hPrevInstance,  
+
+LPTSTR lpCmdLine, int ncmdshow )  
+
+{  
+
+HWND hwnd = NULL;  
+
+HWND ExitButton = NULL; /\* each button gets a window handle \*/  
+
+HWND clearScreenButton = NULL;
+
+</p>
+
+MSG msg;  
+
+WNDCLASS wc;  
+
+RECT rc;
+
+</p>
+
+wc.style = CS\_HREDRAW | CS\_VREDRAW;  
+
+wc.lpfnWndProc = (WNDPROC)MenuWndProc;  
+
+wc.cbClsExtra = 0;  
+
+wc.cbWndExtra = 0;  
+
+wc.hInstance = hInstance;  
+
+wc.hIcon = 0;  
+
+wc.hCursor = 0;  
+
+wc.hbrBackground = (HBRUSH) GetStockObject(WHITE\_BRUSH);  
+
+wc.lpszMenuName = NULL;  
+
+wc.lpszClassName = (LPTSTR) L"Menu App";
+
+</p>
+
+if(! RegisterClass (&wc))  
+
+{ MessageBox(NULL, TEXT("errors "),  
+
+L"IMPORTANT", MB\_OK);  
+
+return 0;  
+
+}
+
+</p>
+
+/\* create our main window letting windows decide the placement & size
+\*/  
+
+hwnd = CreateWindow (L"Menu App", L"quit button app", WS\_VISIBLE,  
+
+CW\_USEDEFAULT, CW\_USEDEFAULT,  
+
+CW\_USEDEFAULT, CW\_USEDEFAULT,  
+
+(HWND)NULL, NULL, hInstance, (LPSTR)NULL);
+
+</p>
+
+/\* ----------- ----------- ----------- ----------- \*/  
+
+/\* here we get the coordinate dimensions of the main window \*/  
+
+GetWindowRect(hwnd, &rc);
+
+</p>
+
+/\* this makes a quit button at the bottom of the screen \*/  
+
+ExitButton = CreateWindow(  
+
+L"BUTTON", L"Quit", WS\_CHILD |  
+
+WS\_VISIBLE | BS\_PUSHBUTTON,  
+
+0, (rc.bottom - (rc.top + (rc.right/6) )),  
+
+/\* button top left corner x,y \*/  
+
+rc.right/6 , rc.right/6 , /\* width & height \*/  
+
+hwnd, (HMENU)IDC\_ExitButton,  
+
+hInstance, NULL);
+
+</p>
+
+clearScreenButton = CreateWindow(  
+
+L"BUTTON", L"Clear", WS\_CHILD |  
+
+WS\_VISIBLE | BS\_PUSHBUTTON,  
+
+/\* button top left corner x,y \*/  
+
+50, (rc.bottom - (rc.top + (rc.right/6) )),  
+
+/\* width & height \*/  
+
+rc.right/6 , rc.right/6 ,  
+
+hwnd, (HMENU) IDC\_clearScreen,  
+
+hInstance, NULL);
+
+</p>
+
+ShowWindow(hwnd, ncmdshow);  
+
+UpdateWindow(hwnd);
+
+</p>
+
+while(GetMessage(&msg, NULL, 0, 0)) {  
+
+TranslateMessage(&msg);  
+
+DispatchMessage(&msg);  
+
+}  
+
+return msg.wParam;  
+
+} /\* end WinMain \*/
+
+</p>
+
+/\* ----------- ----------- ----------- ----------- \*/
+
+</p>
+
+LRESULT CALLBACK MenuWndProc(  
+
+HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam )  
+
+{  
+
+/\* here we test for what events happened/the user might have done \*/  
+
+switch (message)  
+
+{  
+
+case WM\_CREATE:  
+
+initializeBackground( hwnd ); /\* draw the main window \*/  
+
+break;  
+
+case WM\_DESTROY:  
+
+PostQuitMessage(0);  
+
+break;  
+
+case WM\_LBUTTONDOWN: /\* left button pressed / tap on screen \*/  
+
+break;  
+
+case WM\_MOUSEMOVE: /\* mouse pointer is moving \*/  
+
+/\* if(wParam & MK\_LBUTTON)\*/  
+
+break;  
+
+case WM\_COMMAND:  
+
+switch(LOWORD(wParam))  
+
+{  
+
+case IDC\_ExitButton: /\* quit button pressed \*/  
+
+PostQuitMessage(0);  
+
+break;  
+
+case IDC\_clearScreen: /\* clear button pressed \*/  
+
+InvalidateRect( hwnd, NULL, TRUE);  
+
+break; /\* wipe the main window \*/  
+
+default:  
+
+break;  
+
+}/\* end case command \*/  
+
+break;  
+
+case WM\_PAINT:  
+
+initializeBackground( hwnd );  
+
+break;  
+
+default:  
+
+return DefWindowProc(hwnd, message, wParam, lParam);  
+
+break;  
+
+}/\* end case message \*/  
+
+return 0;  
+
+}
+
+</p>
+
+As you can see a button is just a predefined "window" object... but
+hopefully I'll figure out how to design my own button infrastructure so
+that I better understand the challenges, have increased portability, and
+maybe even enhanced functionality! ...
+
+</p>
+
+Further research when compiling using GCC on Windows XP gave warnings
+about the "long" formatting of some text,
+
+</p>
+
+e.g. the "L" MessageBox(NULL, TEXT("errors "), L"IMPORTANT", MB\_OK);
+
+</p>
+
+If you don't remove the "L" designation then your buttons won't appear
+in your binary compiled for Windows XP...
+
+</p>
+
+clearScreenButton = CreateWindow( L"BUTTON", L"Clear", WS\_CHILD
+
+</p>
+
+Should be: clearScreenButton = CreateWindow( "BUTTON", "Clear",
+WS\_CHILD
+
+</p>
+
+If you forget to remove the L from wc.lpszClassName = (LPTSTR)
+L"AppClass"; Then your program will have "undefined behavior" =)
+
+</p>
+<p>
+</div>
+
+<p></div>
+</div>
+<div class="field field-name-taxonomy-vocabulary-1 field-type-taxonomy-term-reference field-label-above clearfix"></p>
+<h3 id="tags">tags:</h3>
+<ul>
+<li><a href="http://john-pfeiffer.com/category/tags/programming">Programming</a></li>
+</ul>
+<p></div>
+</p></p>
+            <aside>
+            <hr/>
+            <nav>
+            <ul class="articles_timeline">
+ 
+                <li class="previous_article">« <a href="/365-windows-ce-programming-a-win32-api-button" title="Previous: 365-? Windows CE programming: A win32 api button">365-? Windows CE programming: A win32 api button</a></li>
+ 
+                <li class="next_article"><a href="/drupal-in-2d-pictures-of-pixels" title="Next: Drupal in 2D - pictures of pixels">Drupal in 2D - pictures of pixels</a> »</li>
+            </ul>
+            </nav>
+            </aside>
+        </div>
+        <section>
+        <div class="span2" style="float:right;font-size:0.9em;">
+ 
+            <h4>Published</h4>
+            <time pubdate="pubdate" datetime="2010-03-17T02:27:00">Mar 17, 2010</time>
+            <h4>Category</h4>
+            <a class="category-link" href="/categories.html#linux-ref">linux</a> 
+
+        </div>
+        </section>
+</div>
+</article>
+                </div>
+                <div class="span1"></div>
+            </div>
+        </div>
+    </div>
+<footer>
+<div id="footer">
+    <ul class="footer-content">
+        <li class="elegant-power">Powered by <a href="http://getpelican.com/" title="Pelican Home Page">Pelican</a>. Theme: <a href="http://oncrashreboot.com/pelican-elegant" title="Theme Elegant Home Page">Elegant</a> by <a href="http://oncrashreboot.com" title="Talha Mansoor Home Page">Talha Mansoor</a></li>
+    </ul>
+</div>
+</footer>            <script src="http://code.jquery.com/jquery.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+    </body>
+</html>
