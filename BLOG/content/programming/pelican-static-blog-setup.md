@@ -6,6 +6,17 @@ Tags: python
 
 Pelican is an open source project that converts static text files into an html site.
 
+Why use a static site generator (pelican) instead of a hosted blog platform or a CMS (Content Management System)?
+
+**Because less is more and you should use the right tool for the right job**
+
+- A static site made of html pages is very easy to maintain
+- It is also more secure and performance is good too =)
+- Can use version control (git)
+- Developers prefer to be able to customize and add functionality (python and javascript)
+- Using widely adopted open source software reduces risk (python, pelican, javascript, elagant theme and tipue search)
+
+
 ### Install Pelican
 
 **`sudo pip install pelican Markdown `**
@@ -64,6 +75,10 @@ Pelican is an open source project that converts static text files into an html s
     Summary: Short version for index and feeds
 
     This is the content of my first blog post.
+
+
+>optional UI markdown editor: 
+`sudo apt-get install retext`
 
 - - - 
 ### Run a dev server to see the results locally
@@ -196,4 +211,5 @@ I just use the pelicanconf output rather than publishconf, and I use git with a 
 ### more info
 - [http://pelican.readthedocs.org/en/latest/settings.html](http://pelican.readthedocs.org/en/latest/settings.html)
 - Tweaking default syntax highlighting: http://pygments.org/docs/lexers/
+
 
