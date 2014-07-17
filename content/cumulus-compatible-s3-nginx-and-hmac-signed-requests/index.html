@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en-US">
+    <head>
+        <meta charset="utf-8"> 
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="author" content="John Pfeiffer" />
+        <meta name="copyright" content="John Pfeiffer" />
+
+<meta name="keywords" content=", programming, " />
+        <title>Cumulus compatible S3, nginx, and HMAC signed requests  · johnpfeiffer
+</title>
+        <link href="http://cdn-images.mailchimp.com/embedcode/slim-081711.css" rel="stylesheet" type="text/css">
+        <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="/theme/css/style.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="/theme/css/solarizedlight.css" media="screen">
+        <link rel="shortcut icon" href="/theme/images/favicon.ico" type="image/x-icon" />
+        <link rel="apple-touch-icon" href="/theme/images/apple-touch-icon.png" />
+        <link rel="apple-touch-icon" sizes="57x57" href="/theme/images/apple-touch-icon-57x57.png" />
+        <link rel="apple-touch-icon" sizes="72x72" href="/theme/images/apple-touch-icon-72x72.png" />
+        <link rel="apple-touch-icon" sizes="114x114" href="/theme/images/apple-touch-icon-114x114.png" />
+        <link rel="apple-touch-icon" sizes="144x144" href="/theme/images/apple-touch-icon-144x144.png" />
+        <link rel="icon" href="/theme/images/apple-touch-icon-144x144.png" />
+    </head>
+    <body>
+        <div id="content-sans-footer">
+        <div class="navbar navbar-static-top">
+            <div class="navbar-inner">
+                <div class="container">
+                    <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </a>
+                    <a class="brand" href="/"><span class=site-name>johnpfeiffer</span></a>
+                    <div class="nav-collapse collapse">
+                        <ul class="nav pull-right top-menu">
+                            <li ><a href="">Home</a></li>
+                            <li ><a href="/about-john-pfeiffer">About John Pfeiffer</a></li>
+                            <li ><a href="/categories.html">Categories</a></li>
+                            <li ><a href="/tags.html">Tags</a></li>
+                            <li ><a href="/archives.html">Archives</a></li>
+                            <li><form class="navbar-search" action="/search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container-fluid">
+            <div class="row-fluid">
+                <div class="span1"></div>
+                <div class="span10">
+<article>
+<div class="row-fluid">
+    <header class="page_header span10 offset2">
+    <h1><a href="/content/cumulus-compatible-s3-nginx-and-hmac-signed-requests"> Cumulus compatible S3, nginx, and HMAC signed requests  </a></h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+        <div class="span8 offset2 article-content">
+
+            <p>With the exceptionally fast, reliable and popular web server <a href="http://nginx.org/">nginx﻿</a> as a front end customers can use a browser to access their uploaded
+files via a simple URL, the same as the SaaS Amazon S3 implementation, without knowing about the <a href="http://www.nimbusproject.org/doc/nimbus/faq/#what-is-cumulus">Cumulus backend</a>.</p>
+<p>Unfortunately there were edge cases around the encodings of spaces,
+pluses, slashes, etc. where nginx + Cumulus was returning "Access
+Denied" when trying to GET a file.</p>
+</p>
+
+<p>Examining the relevant RFC's ([http://tools.ietf.org/html/rfc3986#section-2.1][])﻿, PHP﻿
+(<a href="http://php.net/manual/en/function.rawurlencode.php">http://php.net/manual/en/function.rawurlencode.php</a>) and Python﻿(<a href="http://docs.python.org/2/library/urllib.html">http://docs.python.org/2/library/urllib.html</a>) references, and
+examining the ﻿Iogs, I could see the files were PUT correctly, <a href="http://s3tools.org/s3cmd">s3cmd﻿</a> could retrieve the binary objects (files) from Cumulus fine... </p>
+<p>but the logs were showing a change in the URL's.</p>
+<p>Increasing the <a href="http://nginx.org/en/docs/debugging_log.html">debugging in nginx﻿</a>, digging into the <a href="https://github.com/nimbusproject/nimbus/tree/master/cumulus">Cumulus source
+code﻿</a> and <a href="https://github.com/anomalizer/ngx_aws_auth">nginx AWS Authentication Module﻿﻿</a> (and adding more
+logging statements in Python and C respectively), I realized there was a
+mismatch in the REST URL signature process.</p>
+</p>
+
+<p>Since Cumulus was using the open source <a href="http://docs.pythonboto.org/en/latest/">Python Boto library﻿</a> which
+is actually <a href="https://github.com/boto/boto/graphs/contributors">supported﻿</a> by <a href="http://aws.amazon.com/sdkforpython/">Amazon﻿﻿</a> (the de facto rulers of the
+S3 "standard"), I decided that their <a href="http://docs.aws.amazon.com/AmazonS3/latest/dev/RESTAuthentication.html">signing process﻿</a> was
+authoritative.</p>
+</p>
+
+<p>A lot of digging into nginx configs and source, along with learning a
+bit about nginx module development and hacking the source of the
+ngx_aws_auth module, I finally came up with a matching signature
+process, (success!)</p>
+<div class="highlight"><pre><span class="o">**</span><span class="nx">ngx</span><span class="o">\</span><span class="nx">_aws</span><span class="o">\</span><span class="nx">_auth</span><span class="p">/</span><span class="nx">ngx</span><span class="o">\</span><span class="nx">_http</span><span class="o">\</span><span class="nx">_aws</span><span class="o">\</span><span class="nx">_auth.c</span><span class="o">**</span>
+
+<span class="o">/\*</span> <span class="nx">uses</span> <span class="nx">the</span> <span class="nb">source</span> <span class="ow">and</span> <span class="nb">length</span> <span class="k">to</span> <span class="nx">copy</span> <span class="nx">the</span> <span class="nx">uri</span><span class="p">,</span> <span class="nx">does</span> <span class="ow">not</span> <span class="nx">escape</span>
+<span class="nx">characters</span>
+
+<span class="p">(</span><span class="nx">the</span> <span class="nx">argument</span> <span class="nb">signature</span> <span class="nx">is</span> <span class="nx">compatible</span> <span class="nx">wit</span> <span class="nx">ngx</span><span class="o">\</span><span class="nx">_escape</span><span class="o">\</span><span class="nx">_uri</span><span class="p">)</span>
+
+<span class="o">\*/</span>
+
+<span class="nx">uintptr</span><span class="o">\</span><span class="nx">_t</span> <span class="nx">ngx</span><span class="o">\</span><span class="nx">_uri</span><span class="o">\</span><span class="nx">_extractor</span><span class="p">(</span><span class="nx">u</span><span class="o">\</span><span class="nx">_char</span> <span class="o">\*</span><span class="nb">dst</span><span class="p">,</span> <span class="nx">u</span><span class="o">\</span><span class="nx">_char</span> <span class="o">\*</span><span class="nb">src</span><span class="p">,</span> <span class="nb">size</span><span class="o">\</span><span class="nx">_t</span>
+<span class="nb">size</span><span class="p">,</span> <span class="nx">ngx</span><span class="o">\</span><span class="nx">_uint</span><span class="o">\</span><span class="nx">_t</span> <span class="k">type</span><span class="p">)</span>
+
+<span class="p">{</span>
+
+<span class="k">while</span> <span class="p">(</span><span class="nb">size</span><span class="p">)</span> <span class="p">{</span>
+
+<span class="o">\*</span><span class="nb">dst</span><span class="o">++</span> <span class="o">=</span> <span class="o">\*</span><span class="nb">src</span><span class="o">++</span><span class="p">;</span>
+
+<span class="nb">size</span><span class="o">--</span><span class="p">;</span>
+
+<span class="p">}</span>
+
+<span class="k">return</span> <span class="p">(</span><span class="nx">uintptr</span><span class="o">\</span><span class="nx">_t</span><span class="p">)</span> <span class="nb">dst</span><span class="p">;</span>
+
+<span class="p">}</span>
+
+<span class="o">/\*</span> <span class="nx">customized</span> <span class="k">to</span> <span class="nx">calculate</span> <span class="nx">the</span> <span class="nb">signature</span> <span class="nx">using</span> <span class="nx">the</span> <span class="nx">non</span> <span class="nx">escaped</span> <span class="nx">URI</span><span class="p">,</span>
+<span class="nx">compatible</span> <span class="k">with</span> <span class="nx">cumulus</span> <span class="nx">boto</span>
+
+<span class="o">\*/</span>
+
+<span class="nx">static</span> <span class="nx">ngx</span><span class="o">\</span><span class="nx">_int</span><span class="o">\</span><span class="nx">_t</span>
+
+<span class="nx">ngx</span><span class="o">\</span><span class="nx">_http</span><span class="o">\</span><span class="nx">_aws</span><span class="o">\</span><span class="nx">_auth</span><span class="o">\</span><span class="nx">_variable</span><span class="o">\</span><span class="nx">_s3</span><span class="p">(</span><span class="nx">ngx</span><span class="o">\</span><span class="nx">_http</span><span class="o">\</span><span class="nx">_request</span><span class="o">\</span><span class="nx">_t</span> <span class="o">\*</span><span class="nb">r</span><span class="p">,</span>
+<span class="nx">ngx</span><span class="o">\</span><span class="nx">_http</span><span class="o">\</span><span class="nx">_variable</span><span class="o">\</span><span class="nx">_value</span><span class="o">\</span><span class="nx">_t</span> <span class="o">\*</span><span class="nx">v</span><span class="p">,</span>
+
+<span class="nx">uintptr</span><span class="o">\</span><span class="nx">_t</span> <span class="kd">data</span><span class="p">)</span>
+
+<span class="p">{</span>
+
+<span class="nx">ngx</span><span class="o">\</span><span class="nx">_http</span><span class="o">\</span><span class="nx">_aws</span><span class="o">\</span><span class="nx">_auth</span><span class="o">\</span><span class="nx">_conf</span><span class="o">\</span><span class="nx">_t</span> <span class="o">\*</span><span class="nx">aws</span><span class="o">\</span><span class="nx">_conf</span><span class="p">;</span>
+
+<span class="nx">unsigned</span> <span class="nx">int</span> <span class="nx">md</span><span class="o">\</span><span class="nx">_len</span><span class="p">;</span>
+
+<span class="nx">unsigned</span> <span class="nx">char</span> <span class="nx">md</span><span class="err">[</span><span class="nx">EVP</span><span class="o">\</span><span class="nx">_MAX</span><span class="o">\</span><span class="nx">_MD</span><span class="o">\</span><span class="nx">_SIZE</span><span class="cp">]</span>;
+
+aws\_conf = ngx\_http\_get\_module\_loc\_conf(r,
+ngx\_http\_aws\_auth\_module);<span class="nt">&lt;/code&gt;</span>
+
+<span class="nt">&lt;/p&gt;</span>
+
+/\*
+
+\* This Block of code added to deal with paths that are not on the root
+-
+
+\* that is, via proxy\_pass that are being redirected and the base part
+of
+
+\* the proxy url needs to be taken off the beginning of the URI in
+order
+
+\* to sign it correctly.
+
+\*/
+
+u\_char \*uri = ngx\_palloc(r-\&gt;pool, r-\&gt;uri.len + 200); // allow room
+for escaping
+
+/\*
+
+u\_char \*uri\_end = (u\_char\*) ngx\_escape\_uri(uri,r-\&gt;uri.data,
+r-\&gt;uri.len, NGX\_ESCAPE\_URI);
+
+\*/
+
+u\_char \*uri\_end = (u\_char\*)
+ngx\_uri\_extractor(uri,r-\&gt;unparsed\_uri.data, r-\&gt;unparsed\_uri.len,
+NGX\_ESCAPE\_URI);
+
+\*uri\_end = &#39;\\0&#39;; // null terminate
+
+...
+</pre></div>
+            <aside>
+            <hr/>
+            <nav>
+            <ul class="articles_timeline">
+ 
+                <li class="previous_article">« <a href="/selenium-headless-browser-automated-testing-with-phantomjs-and-python" title="Previous: Selenium headless browser automated testing with PhantomJS and Python">Selenium headless browser automated testing with PhantomJS and Python</a></li>
+ 
+                <li class="next_article"><a href="/how-to-set-up-a-pelican-static-blog-site" title="Next: How to set up a Pelican static blog site">How to set up a Pelican static blog site</a> »</li>
+            </ul>
+            </nav>
+            </aside>
+        </div>
+        <section>
+        <div class="span2" style="float:right;font-size:0.9em;">
+ 
+            <h4>Published</h4>
+            <time pubdate="pubdate" datetime="2013-11-26T17:10:00">Nov 26, 2013</time>
+            <h4>Category</h4>
+            <a class="category-link" href="/categories.html#programming-ref">programming</a> 
+
+        </div>
+        </section>
+</div>
+</article>
+                </div>
+                <div class="span1"></div>
+            </div>
+        </div>
+    </div>
+<footer>
+<div id="footer">
+    <ul class="footer-content">
+        <li class="elegant-power">Powered by <a href="http://getpelican.com/" title="Pelican Home Page">Pelican</a>. Theme: <a href="http://oncrashreboot.com/pelican-elegant" title="Theme Elegant Home Page">Elegant</a> by <a href="http://oncrashreboot.com" title="Talha Mansoor Home Page">Talha Mansoor</a></li>
+    </ul>
+</div>
+</footer>            <script src="http://code.jquery.com/jquery.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+    </body>
+</html>

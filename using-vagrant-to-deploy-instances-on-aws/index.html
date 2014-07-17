@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en-US">
+    <head>
+        <meta charset="utf-8"> 
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="author" content="john pfeiffer" />
+        <meta name="copyright" content="john pfeiffer" />
+
+<meta name="keywords" content=", virtualization, " />
+        <title>Using Vagrant to deploy instances on AWS  · johnpfeiffer
+</title>
+        <link href="http://cdn-images.mailchimp.com/embedcode/slim-081711.css" rel="stylesheet" type="text/css">
+        <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="/theme/css/style.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="/theme/css/solarizedlight.css" media="screen">
+        <link rel="shortcut icon" href="/theme/images/favicon.ico" type="image/x-icon" />
+        <link rel="apple-touch-icon" href="/theme/images/apple-touch-icon.png" />
+        <link rel="apple-touch-icon" sizes="57x57" href="/theme/images/apple-touch-icon-57x57.png" />
+        <link rel="apple-touch-icon" sizes="72x72" href="/theme/images/apple-touch-icon-72x72.png" />
+        <link rel="apple-touch-icon" sizes="114x114" href="/theme/images/apple-touch-icon-114x114.png" />
+        <link rel="apple-touch-icon" sizes="144x144" href="/theme/images/apple-touch-icon-144x144.png" />
+        <link rel="icon" href="/theme/images/apple-touch-icon-144x144.png" />
+    </head>
+    <body>
+        <div id="content-sans-footer">
+        <div class="navbar navbar-static-top">
+            <div class="navbar-inner">
+                <div class="container">
+                    <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </a>
+                    <a class="brand" href="/"><span class=site-name>johnpfeiffer</span></a>
+                    <div class="nav-collapse collapse">
+                        <ul class="nav pull-right top-menu">
+                            <li ><a href="">Home</a></li>
+                            <li ><a href="/about-john-pfeiffer">About John Pfeiffer</a></li>
+                            <li ><a href="/categories.html">Categories</a></li>
+                            <li ><a href="/tags.html">Tags</a></li>
+                            <li ><a href="/archives.html">Archives</a></li>
+                            <li><form class="navbar-search" action="/search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container-fluid">
+            <div class="row-fluid">
+                <div class="span1"></div>
+                <div class="span10">
+<article>
+<div class="row-fluid">
+    <header class="page_header span10 offset2">
+    <h1><a href="/using-vagrant-to-deploy-instances-on-aws"> Using Vagrant to deploy instances on AWS  </a></h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+    <div class="span2 table-of-content">
+        <nav>
+        <h4>Contents</h4>
+        <div class="toc">
+<ul>
+<li><a href="#install-vagrant-and-the-vagrant-aws-plugin">Install Vagrant and the Vagrant AWS plugin</a></li>
+<li><a href="#more-info">more info</a></li>
+</ul>
+</div>
+        </nav>
+    </div>
+    <div class="span8 article-content">
+
+            
+<p>Using Vagrant to deploy instances on AWS...</p>
+<h3 id="install-vagrant-and-the-vagrant-aws-plugin">Install Vagrant and the Vagrant AWS plugin</h3>
+<p><a href="https://www.vagrantup.com/downloads">https://www.vagrantup.com/downloads</a></p>
+<p><code>wget https://dl.bintray.com/mitchellh/vagrant/vagrant_1.6.3_x86_64.deb ; dpkg -i vagrant_1.6.3_x86_64.deb</code></p>
+<p><code>vagrant box add dummy https://github.com/mitchellh/vagrant-aws/raw/master/dummy.box</code></p>
+<p><code>vagrant box list</code></p>
+<p><code>vi Vagrantfile</code></p>
+<div class="highlight"><pre><span class="n">Vagrant</span><span class="p">.</span><span class="n">configure</span><span class="p">(</span><span class="s">"2"</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span>
+    <span class="n">config</span><span class="p">.</span><span class="n">vm</span><span class="p">.</span><span class="n">box</span> <span class="o">=</span> <span class="s">"dummy"</span>
+    <span class="n">config</span><span class="p">.</span><span class="n">vm</span><span class="p">.</span><span class="n">provider</span> <span class="o">:</span><span class="n">aws</span> <span class="k">do</span> <span class="o">|</span><span class="n">aws</span><span class="p">,</span> <span class="n">override</span><span class="o">|</span>
+        <span class="n">aws</span><span class="p">.</span><span class="n">access_key_id</span> <span class="o">=</span> <span class="s">"YOURACCESSKEY"</span>
+        <span class="n">aws</span><span class="p">.</span><span class="n">secret_access_key</span> <span class="o">=</span> <span class="s">"YOURSECRETKEY"</span>
+        <span class="n">aws</span><span class="p">.</span><span class="n">keypair_name</span> <span class="o">=</span> <span class="s">"YOURKEYPAIRNAME"</span>
+        <span class="n">aws</span><span class="p">.</span><span class="n">ami</span> <span class="o">=</span> <span class="s">"ami-7747d01e"</span>
+        <span class="n">aws</span><span class="p">.</span><span class="n">instance_type</span> <span class="o">=</span> <span class="s">"m3.large"</span>
+        <span class="n">aws</span><span class="p">.</span><span class="n">tags</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s">"Name"</span> <span class="o">=&gt;</span> <span class="s">"HipChatCI"</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="n">override</span><span class="p">.</span><span class="n">vm</span><span class="p">.</span><span class="n">box</span> <span class="o">=</span> <span class="s">"dummy"</span>
+        <span class="n">override</span><span class="p">.</span><span class="n">vm</span><span class="p">.</span><span class="n">box_url</span> <span class="o">=</span> <span class="s">"https://github.com/mitchellh/vagrant-aws/raw/master/dummy.box"</span>
+        <span class="n">override</span><span class="p">.</span><span class="n">ssh</span><span class="p">.</span><span class="n">username</span> <span class="o">=</span> <span class="s">"ubuntu"</span>
+        <span class="n">override</span><span class="p">.</span><span class="n">ssh</span><span class="p">.</span><span class="n">private_key_path</span> <span class="o">=</span> <span class="s">"/usr/local/bamboo/YOURKEYPAIRNAME.pem"</span>
+        <span class="n">override</span><span class="p">.</span><span class="n">vm</span><span class="p">.</span><span class="n">synced_folder</span> <span class="s">"./chef-repo"</span><span class="p">,</span> <span class="s">"/vagrant"</span><span class="p">,</span> <span class="n">type</span><span class="o">:</span> <span class="s">"rsync"</span><span class="p">,</span>
+            <span class="nl">rsync__exclude:</span> <span class="s">".git/"</span>
+    <span class="n">end</span>
+<span class="n">end</span>
+</pre></div>
+<blockquote>
+<p>ubuntu/images/ubuntu-precise-12.04-amd64-server-20130204 - ami-7747d01e</p>
+</blockquote>
+<p><code>vagrant plugin install vagrant-aws</code></p>
+<p><code>vagrant up --provider=aws</code></p>
+<blockquote>
+<p>ERROR: The provider 'aws' could not be found, but was requested to back the machine 'default'. Please use a provider that exists.</p>
+<p>RESOLUTION: try re-installing the vagrant-aws plugin again and immediately running the vagrant up command afterwards</p>
+</blockquote>
+<div class="highlight"><pre><span class="n">Bringing</span> <span class="n">machine</span> <span class="err">'</span><span class="k">default</span><span class="err">'</span> <span class="n">up</span> <span class="n">with</span> <span class="err">'</span><span class="n">aws</span><span class="err">'</span> <span class="n">provider</span><span class="p">...</span>
+<span class="o">==&gt;</span> <span class="k">default</span><span class="o">:</span> <span class="n">HandleBoxUrl</span> <span class="n">middleware</span> <span class="n">is</span> <span class="n">deprecated</span><span class="p">.</span> <span class="n">Use</span> <span class="n">HandleBox</span> <span class="n">instead</span><span class="p">.</span>
+<span class="o">==&gt;</span> <span class="k">default</span><span class="o">:</span> <span class="n">This</span> <span class="n">is</span> <span class="n">a</span> <span class="n">bug</span> <span class="n">with</span> <span class="n">the</span> <span class="n">provider</span><span class="p">.</span> <span class="n">Please</span> <span class="n">contact</span> <span class="n">the</span> <span class="n">creator</span>
+<span class="o">==&gt;</span> <span class="k">default</span><span class="o">:</span> <span class="n">of</span> <span class="n">the</span> <span class="n">provider</span> <span class="n">you</span> <span class="n">use</span> <span class="n">to</span> <span class="n">fix</span> <span class="n">this</span><span class="p">.</span>
+<span class="o">==&gt;</span> <span class="k">default</span><span class="o">:</span> <span class="n">Warning</span><span class="o">!</span> <span class="n">The</span> <span class="n">AWS</span> <span class="n">provider</span> <span class="n">doesn</span><span class="err">'</span><span class="n">t</span> <span class="n">support</span> <span class="n">any</span> <span class="n">of</span> <span class="n">the</span> <span class="n">Vagrant</span>
+<span class="o">==&gt;</span> <span class="k">default</span><span class="o">:</span> <span class="n">high</span><span class="o">-</span><span class="n">level</span> <span class="n">network</span> <span class="n">configurations</span> <span class="p">(</span><span class="err">`</span><span class="n">config</span><span class="p">.</span><span class="n">vm</span><span class="p">.</span><span class="n">network</span><span class="err">`</span><span class="p">).</span> <span class="n">They</span>
+<span class="o">==&gt;</span> <span class="k">default</span><span class="o">:</span> <span class="n">will</span> <span class="n">be</span> <span class="n">silently</span> <span class="n">ignored</span><span class="p">.</span>
+<span class="o">==&gt;</span> <span class="k">default</span><span class="o">:</span> <span class="n">Launching</span> <span class="n">an</span> <span class="n">instance</span> <span class="n">with</span> <span class="n">the</span> <span class="n">following</span> <span class="n">settings</span><span class="p">...</span>
+<span class="o">==&gt;</span> <span class="k">default</span><span class="o">:</span>  <span class="o">--</span> <span class="n">Type</span><span class="o">:</span> <span class="n">m3</span><span class="p">.</span><span class="n">large</span>
+<span class="o">==&gt;</span> <span class="k">default</span><span class="o">:</span>  <span class="o">--</span> <span class="n">AMI</span><span class="o">:</span> <span class="n">ami</span><span class="o">-</span><span class="mi">7747</span><span class="n">d01e</span>
+<span class="o">==&gt;</span> <span class="k">default</span><span class="o">:</span>  <span class="o">--</span> <span class="n">Region</span><span class="o">:</span> <span class="n">us</span><span class="o">-</span><span class="n">east</span><span class="o">-</span><span class="mi">1</span>
+<span class="o">==&gt;</span> <span class="k">default</span><span class="o">:</span>  <span class="o">--</span> <span class="n">Keypair</span><span class="o">:</span> <span class="n">YOURKEYPAIRHERE</span>
+<span class="o">==&gt;</span> <span class="k">default</span><span class="o">:</span>  <span class="o">--</span> <span class="n">Block</span> <span class="n">Device</span> <span class="n">Mapping</span><span class="o">:</span> <span class="p">[]</span>
+<span class="o">==&gt;</span> <span class="k">default</span><span class="o">:</span>  <span class="o">--</span> <span class="n">Terminate</span> <span class="n">On</span> <span class="n">Shutdown</span><span class="o">:</span> <span class="nb">false</span>
+<span class="o">==&gt;</span> <span class="k">default</span><span class="o">:</span>  <span class="o">--</span> <span class="n">Monitoring</span><span class="o">:</span> <span class="nb">false</span>
+<span class="o">==&gt;</span> <span class="k">default</span><span class="o">:</span>  <span class="o">--</span> <span class="n">EBS</span> <span class="n">optimized</span><span class="o">:</span> <span class="nb">false</span>
+<span class="o">==&gt;</span> <span class="k">default</span><span class="o">:</span>  <span class="o">--</span> <span class="n">Assigning</span> <span class="n">a</span> <span class="n">public</span> <span class="n">IP</span> <span class="n">address</span> <span class="n">in</span> <span class="n">a</span> <span class="n">VPC</span><span class="o">:</span> <span class="nb">false</span>
+<span class="o">==&gt;</span> <span class="k">default</span><span class="o">:</span> <span class="n">Waiting</span> <span class="k">for</span> <span class="n">instance</span> <span class="n">to</span> <span class="n">become</span> <span class="s">"ready"</span><span class="p">...</span>
+<span class="o">==&gt;</span> <span class="k">default</span><span class="o">:</span> <span class="n">Waiting</span> <span class="k">for</span> <span class="n">SSH</span> <span class="n">to</span> <span class="n">become</span> <span class="n">available</span><span class="p">...</span>
+<span class="o">==&gt;</span> <span class="k">default</span><span class="o">:</span> <span class="n">Machine</span> <span class="n">is</span> <span class="n">booted</span> <span class="n">and</span> <span class="n">ready</span> <span class="k">for</span> <span class="n">use</span><span class="o">!</span>
+<span class="o">==&gt;</span> <span class="k">default</span><span class="o">:</span> <span class="n">Rsyncing</span> <span class="n">folder</span><span class="o">:</span> <span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">bamboo</span><span class="o">/</span> <span class="o">=&gt;</span> <span class="o">/</span><span class="n">vagrant</span>
+</pre></div>
+<p><code>vagrant ssh</code></p>
+<blockquote>
+<p>alternatively: Use the AWS EC2 WebUI or <a href="http://aws.amazon.com/cli/">http://aws.amazon.com/cli</a> to discover the IP address</p>
+<p>ssh -i YOURKEYPAIRHERE.pem ubuntu@1.2.3.4 ls -ahl /vagrant</p>
+</blockquote>
+<p><code>exit</code></p>
+<p><code>vagrant up</code> , <code>vagrant reload</code> , and <code>vagrant provision</code> will have the AWS provider use rsync to push data to /vagrant
+<a href="https://docs.vagrantup.com/v2/synced-folders/rsync.html">https://docs.vagrantup.com/v2/synced-folders/rsync.html</a></p>
+<p><code>vagrant stop</code></p>
+<blockquote>
+<p>UnsupportedOperation =&gt; The instance 'i-1295bf39' does not have an 'ebs' root device type and cannot be stopped. (Fog::Compute::AWS::Error)</p>
+</blockquote>
+<p><code>vagrant destroy</code></p>
+<div class="highlight"><pre><span class="o">&gt;</span> <span class="k">default</span><span class="o">:</span> <span class="n">Are</span> <span class="n">you</span> <span class="n">sure</span> <span class="n">you</span> <span class="n">want</span> <span class="n">to</span> <span class="n">destroy</span> <span class="n">the</span> <span class="err">'</span><span class="k">default</span><span class="err">'</span> <span class="n">VM</span><span class="o">?</span> <span class="p">[</span><span class="n">y</span><span class="o">/</span><span class="n">N</span><span class="p">]</span> <span class="n">Y</span>
+<span class="o">&gt;</span>
+<span class="o">&gt;</span> <span class="o">==&gt;</span> <span class="k">default</span><span class="o">:</span> <span class="n">Terminating</span> <span class="n">the</span> <span class="n">instance</span><span class="p">...</span>
+</pre></div>
+<h3 id="more-info">more info</h3>
+<p><a href="https://github.com/mitchellh/vagrant-aws">https://github.com/mitchellh/vagrant-aws</a></p>
+            <aside>
+            <hr/>
+            <nav>
+            <ul class="articles_timeline">
+ 
+                <li class="previous_article">« <a href="/docker-intro-install-run-and-port-forward" title="Previous: Docker Intro install run and port forward">Docker Intro install run and port forward</a></li>
+            </ul>
+            </nav>
+            </aside>
+        </div>
+        <section>
+        <div class="span2" style="float:right;font-size:0.9em;">
+ 
+            <h4>Published</h4>
+            <time pubdate="pubdate" datetime="2014-07-16T21:12:00">Jul 16, 2014</time>
+            <h4>Category</h4>
+            <a class="category-link" href="/categories.html#virtualization-ref">virtualization</a> 
+
+        </div>
+        </section>
+</div>
+</article>
+                </div>
+                <div class="span1"></div>
+            </div>
+        </div>
+    </div>
+<footer>
+<div id="footer">
+    <ul class="footer-content">
+        <li class="elegant-power">Powered by <a href="http://getpelican.com/" title="Pelican Home Page">Pelican</a>. Theme: <a href="http://oncrashreboot.com/pelican-elegant" title="Theme Elegant Home Page">Elegant</a> by <a href="http://oncrashreboot.com" title="Talha Mansoor Home Page">Talha Mansoor</a></li>
+    </ul>
+</div>
+</footer>            <script src="http://code.jquery.com/jquery.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+    </body>
+</html>
