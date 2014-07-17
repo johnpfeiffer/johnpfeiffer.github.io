@@ -24,6 +24,7 @@ Using Vagrant to deploy instances on AWS...
             aws.secret_access_key = "YOURSECRETKEY"
             aws.keypair_name = "YOURKEYPAIRNAME"
             aws.ami = "ami-7747d01e"
+            aws.instance_ready_timeout = 300
             aws.instance_type = "m3.large"
             aws.tags = {
                 "Name" => "HipChatCI",
@@ -32,20 +33,15 @@ Using Vagrant to deploy instances on AWS...
             override.vm.box_url = "https://github.com/mitchellh/vagrant-aws/raw/master/dummy.box"
             override.ssh.username = "ubuntu"
             override.ssh.private_key_path = "/usr/local/bamboo/YOURKEYPAIRNAME.pem"
-            override.vm.synced_folder "./chef-repo", "/vagrant", type: "rsync",
-                rsync__exclude: ".git/"
+            override.vm.synced_folder "./chef-repo", "/vagrant", type: "rsync", create: true, rsync__exclude: ".git/"
         end
     end
 
-> ubuntu/images/ubuntu-precise-12.04-amd64-server-20130204 - ami-7747d01e
+> ubuntu/images/ubuntu-precise-12.04-amd64-server-20130204 - ami-7747d01e , no ebs storage - just instance storage
 
 `vagrant plugin install vagrant-aws`
 
-`vagrant up --provider=aws`
-
-> ERROR: The provider 'aws' could not be found, but was requested to back the machine 'default'. Please use a provider that exists.
-
-> RESOLUTION: try re-installing the vagrant-aws plugin again and immediately running the vagrant up command afterwards
+`vagrant up --provider=aws --debug`
 
 
     Bringing machine 'default' up with 'aws' provider...
@@ -91,6 +87,22 @@ Using Vagrant to deploy instances on AWS...
     >
     > ==> default: Terminating the instance...
 
+### Vagrant provisioning
+
+Allows for automated installation of software bundled into the `vagrant up` command
+
+`vagrant up --provider=aws --no-provision` to prevent any provisioning
+
+    config.vm.provision "shell",
+        inline: "echo Hello, World"
+
+    config.vm.provision "shell", path: "script.sh"
+
+    config.vm.provision "shell", path: "https://example.com/script.sh"
+
+[http://docs.vagrantup.com/v2/provisioning](http://docs.vagrantup.com/v2/provisioning)
+
+[http://docs.vagrantup.com/v2/provisioning/shell.html](http://docs.vagrantup.com/v2/provisioning/shell.html)
 
 
 ### more info
@@ -98,3 +110,14 @@ Using Vagrant to deploy instances on AWS...
 [https://github.com/mitchellh/vagrant-aws](https://github.com/mitchellh/vagrant-aws)
 
 
+### Troubleshooting
+
+`vagrant up --provider=aws --debug`
+
+> ERROR: The provider 'aws' could not be found, but was requested to back the machine 'default'. Please use a provider that exists.
+
+> RESOLUTION: try re-installing the vagrant-aws plugin again and immediately running the vagrant up command afterwards
+
+> ERROR: Timeout when waiting for SSH , SSH not up: ... The private key to connect to the machine via SSH must be owned
+
+> RESOLUTION: chown root:root  and chmod 400
