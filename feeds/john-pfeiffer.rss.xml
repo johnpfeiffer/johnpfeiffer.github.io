@@ -2,7 +2,7 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>johnpfeiffer</title><link>/</link><description></description><atom:link href="/feeds/john-pfeiffer.rss.xml" rel="self"></atom:link><lastBuildDate>Wed, 16 Jul 2014 21:12:00 -0000</lastBuildDate><item><title>Using Vagrant to deploy instances on AWS</title><link>/using-vagrant-to-deploy-instances-on-aws</link><description>
 &lt;p&gt;Using Vagrant to deploy instances on AWS...&lt;/p&gt;
 &lt;h3 id="install-vagrant-and-the-vagrant-aws-plugin"&gt;Install Vagrant and the Vagrant AWS plugin&lt;/h3&gt;
-&lt;p&gt;&lt;a href="https://www.vagrantup.com/downloads"&gt;https://www.vagrantup.com/downloads&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Download and install vagrant: &lt;strong&gt;&lt;a href="https://www.vagrantup.com/downloads"&gt;https://www.vagrantup.com/downloads&lt;/a&gt;&lt;/strong&gt;&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;wget https://dl.bintray.com/mitchellh/vagrant/vagrant_1.6.3_x86_64.deb ; dpkg -i vagrant_1.6.3_x86_64.deb&lt;/code&gt;&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;vagrant box add dummy https://github.com/mitchellh/vagrant-aws/raw/master/dummy.box&lt;/code&gt;&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;vagrant box list&lt;/code&gt;&lt;/p&gt;
@@ -56,10 +56,14 @@
 &lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;&lt;code&gt;vagrant ssh&lt;/code&gt;&lt;/p&gt;
 &lt;blockquote&gt;
-&lt;p&gt;alternatively: Use the AWS EC2 WebUI or &lt;a href="http://aws.amazon.com/cli/"&gt;http://aws.amazon.com/cli&lt;/a&gt; to discover the IP address&lt;/p&gt;
+&lt;p&gt;alternative interactive ssh session: Use the AWS EC2 WebUI or &lt;a href="http://aws.amazon.com/cli/"&gt;http://aws.amazon.com/cli&lt;/a&gt; to discover the IP address&lt;/p&gt;
 &lt;p&gt;ssh -i YOURKEYPAIRHERE.pem ubuntu@1.2.3.4 ls -ahl /vagrant&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;p&gt;&lt;code&gt;exit&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;vagrant ssh -c "ls -ahl"&lt;/code&gt; for a non interactive listing of the home directory&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;vagrant ssh -c "pidof ntpd | xargs sudo kill -9"&lt;/strong&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
 &lt;p&gt;&lt;code&gt;vagrant up&lt;/code&gt; , &lt;code&gt;vagrant reload&lt;/code&gt; , and &lt;code&gt;vagrant provision&lt;/code&gt; will have the AWS provider use rsync to push data to /vagrant
 &lt;a href="https://docs.vagrantup.com/v2/synced-folders/rsync.html"&gt;https://docs.vagrantup.com/v2/synced-folders/rsync.html&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;vagrant stop&lt;/code&gt;&lt;/p&gt;
@@ -71,6 +75,10 @@
 &lt;span class="o"&gt;&amp;gt;&lt;/span&gt;
 &lt;span class="o"&gt;&amp;gt;&lt;/span&gt; &lt;span class="o"&gt;==&amp;gt;&lt;/span&gt; &lt;span class="k"&gt;default&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="n"&gt;Terminating&lt;/span&gt; &lt;span class="n"&gt;the&lt;/span&gt; &lt;span class="n"&gt;instance&lt;/span&gt;&lt;span class="p"&gt;...&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;&lt;code&gt;vagrant destroy -f&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;non interactively destroy the instance and avoid the misleading error message: Vagrant is attempting to interface with the UI in a way that requires a TTY&lt;/p&gt;
+&lt;/blockquote&gt;
 &lt;h3 id="vagrant-provisioning"&gt;Vagrant provisioning&lt;/h3&gt;
 &lt;p&gt;Allows for automated installation of software bundled into the &lt;code&gt;vagrant up&lt;/code&gt; command&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;vagrant up --provider=aws --no-provision&lt;/code&gt; to prevent any provisioning&lt;/p&gt;
