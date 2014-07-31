@@ -642,222 +642,112 @@ NGX\_ESCAPE\_URI);
 \*uri\_end = &amp;#39;\\0&amp;#39;; // null terminate
 
 ...
-&lt;/pre&gt;&lt;/div&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">John Pfeiffer</dc:creator><pubDate>Tue, 26 Nov 2013 17:10:00 -0000</pubDate><guid>tag:,2013-11-26:content/cumulus-compatible-s3-nginx-and-hmac-signed-requests</guid></item><item><title>Selenium headless browser automated testing with PhantomJS and Python</title><link>/selenium-headless-browser-automated-testing-with-phantomjs-and-python</link><description>&lt;div class="field field-name-body field-type-text-with-summary field-label-hidden"&gt;
-&lt;div class="field-items"&gt;
-&lt;div class="field-item even"&gt;
-selenium: automation of browser actions
-([http://docs.seleniumhq.org/docs/02\_selenium\_ide.jsp\#introduction][])
-
-&lt;/p&gt;
-
-phantomjs: headless browser ([http://phantomjs.org/][])
-
-&lt;/p&gt;
-
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-- - - -  
-
-pip install selenium
-
-&lt;/p&gt;
-
-wget
-[https://code.google.com/p/phantomjs/downloads/detail?name=phantomjs-1.9....][]  
-
-tar -xjvf phantomjs-1.9.2-linux-x86\_64.tar.bz2
-
-&lt;/p&gt;
-
-phantomjs-1.9.2-linux-x86\_64/bin/phantomjs --webdriver=9134 \# run
-ghostdriver on a port
-
-&lt;/p&gt;
-
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-- - - -  
-
-\# mini script to just show usage
-
-&lt;/p&gt;
-
-from selenium import webdriver
-
-&lt;/p&gt;
-
-driver = webdriver.PhantomJS(
-executable\_path='/opt/phantomjs-1.9.2-linux-x86\_64/bin/phantomjs',
-port=9134 )  
-
-driver.get( "[http://127.0.0.1][]" )  
-
-print driver.current\_url  
-
-driver.quit  
-
-print "done"
-
-&lt;/p&gt;
-
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-- - - -  
-
-phantomjs-1.9.2-linux-x86\_64/bin/phantomjs --webdriver=9134
---ignore-ssl-errors=true
-
-&lt;/p&gt;
-
-\# more complete example with python unittest framework (used the
-Firefox Selenium IDE plugin -\&gt; Export)  
-
-\# logs in, asserts there is an Admin tab which when clicked shows Group
-Info
-
-&lt;/p&gt;
-
-from selenium import webdriver  
-
-from selenium.webdriver.common.by import By  
-
-from selenium.webdriver.common.keys import Keys  
-
-from selenium.webdriver.support.ui import Select  
-
-from selenium.common.exceptions import NoSuchElementException  
-
-import unittest, time, re
-
-&lt;/p&gt;
-
-class SeleniumAdminLogin( unittest.TestCase ):  
-
-def setUp( self ):  
-
-self.driver = webdriver.PhantomJS(
-'/opt/phantomjs-1.9.2-linux-x86\_64/bin/phantomjs', port=9134 )  
-
-self.driver.implicitly\_wait(30)  
-
-self.base\_url = "[https://myexample.org][]"  
-
-self.verificationErrors = []  
-
-self.accept\_next\_alert = True
-
-&lt;/p&gt;
-
-def test\_selenium\_admin\_login( self ):  
-
-driver = self.driver  
-
-driver.get( self.base\_url + "/" )  
-
-driver.find\_element\_by\_id( "email" ).clear()  
-
-driver.find\_element\_by\_id( "email" ).send\_keys(
-"[admin@example.org][]" )  
-
-driver.find\_element\_by\_id( "password" ).clear()  
-
-driver.find\_element\_by\_id( "password" ).send\_keys( "mypassword" )  
-
-driver.find\_element\_by\_id( "signin" ).click()  
-
-self.assertEqual("[https://myexample.org/home][]", driver.current\_url)  
-
-self.assertTrue(self.is\_element\_present(By.LINK\_TEXT, "Launch the web
-app"))  
-
-self.assertTrue(self.is\_element\_present(By.CSS\_SELECTOR, "a.admin \&gt;
-span"))  
-
-driver.find\_element\_by\_css\_selector("a.admin \&gt; span").click()  
-
-self.assertEqual("Group Info",
-driver.find\_element\_by\_css\_selector("h1").text)
-
-&lt;/p&gt;
-
-def is\_element\_present(self, how, what):  
-
-try: self.driver.find\_element(by=how, value=what)  
-
-except NoSuchElementException, e: return False  
-
-return True
-
-&lt;/p&gt;
-
-def is\_alert\_present(self):  
-
-try: self.driver.switch\_to\_alert()  
-
-except NoAlertPresentException, e: return False  
-
-return True
-
-&lt;/p&gt;
-
-def close\_alert\_and\_get\_its\_text(self):  
-
-try:  
-
-alert = self.driver.switch\_to\_alert()  
-
-alert\_text = alert.text  
-
-if self.accept\_next\_alert:  
-
-alert.accept()  
-
-else:  
-
-alert.dismiss()  
-
-return alert\_text  
-
-finally: self.accept\_next\_alert = True
-
-&lt;/p&gt;
-
-def tearDown(self):  
-
-self.driver.quit()  
-
-self.assertEqual([], self.verificationErrors)
-
-&lt;/p&gt;
-
-if \_\_name\_\_ == "\_\_main\_\_":  
-
-unittest.main()
-
-&lt;/p&gt;
-
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-- - - -  
-
-REFERENCES:  
-[http://phantomjs.org/release-1.8.html][]  
-[https://github.com/ariya/phantomjs/wiki/API-Reference][]  
-[http://www.realpython.com/blog/python/headless-selenium-testing-with-pyt...][]
-
-&lt;/p&gt;
-&lt;p&gt;
-&lt;/div&gt;
-
-&lt;p&gt;&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class="field field-name-taxonomy-vocabulary-1 field-type-taxonomy-term-reference field-label-above clearfix"&gt;&lt;/p&gt;
-&lt;h3 id="tags"&gt;tags:&lt;/h3&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;a href="http://john-pfeiffer.com/category/tags/programming"&gt;Programming&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;&lt;/div&gt;
-&lt;/p&gt;&lt;/p&gt;
+&lt;/pre&gt;&lt;/div&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">John Pfeiffer</dc:creator><pubDate>Tue, 26 Nov 2013 17:10:00 -0000</pubDate><guid>tag:,2013-11-26:content/cumulus-compatible-s3-nginx-and-hmac-signed-requests</guid></item><item><title>Selenium headless browser automated testing with PhantomJS and Python</title><link>/content/selenium-headless-browser-automated-testing-with-phantomjs-and-python</link><description>
+&lt;h3 id="overview"&gt;Overview&lt;/h3&gt;
+&lt;p&gt;selenium: automation of browser actions (http://docs.seleniumhq.org/docs/02_selenium_ide.jsp#introduction)[http://docs.seleniumhq.org/docs/02_selenium_ide.jsp#introduction]&lt;/p&gt;
+&lt;p&gt;phantomjs: headless browser (&lt;a href="http://phantomjs.org/"&gt;http://phantomjs.org/&lt;/a&gt;)&lt;/p&gt;
+&lt;hr/&gt;
+&lt;h3 id="install"&gt;Install&lt;/h3&gt;
+&lt;p&gt;sudo pip install selenium&lt;/p&gt;
+&lt;p&gt;wget (https://bitbucket.org/ariya/phantomjs/downloads/phantomjs-1.9.7-linux-x86_64.tar.bz2)[https://bitbucket.org/ariya/phantomjs/downloads/phantomjs-1.9.7-linux-x86_64.tar.bz2]&lt;/p&gt;
+&lt;p&gt;tar -xjvf phantomjs-1.9.7-linux-x86_64.tar.bz2&lt;/p&gt;
+&lt;hr/&gt;
+&lt;h3 id="run"&gt;Run&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;phantomjs-1.9.7-linux-x86\_64/bin/phantomjs --webdriver=9134&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;ghostdriver including and running on port 9134&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr/&gt;
+&lt;h3 id="example-python-script"&gt;Example python script&lt;/h3&gt;
+&lt;p&gt;&lt;strong&gt;mini script to just show usage&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;from selenium import webdriver&lt;/p&gt;
+&lt;p&gt;driver = webdriver.PhantomJS(
+executable_path='/opt/phantomjs-1.9.2-linux-x86_64/bin/phantomjs',
+port=9134 )  &lt;/p&gt;
+&lt;p&gt;driver.get( "&lt;a href="http://127.0.0.1"&gt;http://127.0.0.1&lt;/a&gt;" )  &lt;/p&gt;
+&lt;p&gt;print driver.current_url  &lt;/p&gt;
+&lt;p&gt;driver.quit  &lt;/p&gt;
+&lt;p&gt;print "done"&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;phantomjs-1.9.2-linux-x86\_64/bin/phantomjs --webdriver=9134 --ignore-ssl-errors=true&lt;/code&gt;&lt;/p&gt;
+&lt;hr/&gt;
+&lt;h3 id="advanced-python-example"&gt;Advanced Python example&lt;/h3&gt;
+&lt;blockquote&gt;
+&lt;p&gt;more complete example with python unittest framework (used the Firefox Selenium IDE plugin -&amp;gt; Export)  &lt;/p&gt;
+&lt;p&gt;logs in, asserts there is an Admin tab which when clicked shows Group Info&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="n"&gt;from&lt;/span&gt; &lt;span class="n"&gt;selenium&lt;/span&gt; &lt;span class="n"&gt;import&lt;/span&gt; &lt;span class="n"&gt;webdriver&lt;/span&gt;  
+&lt;span class="n"&gt;from&lt;/span&gt; &lt;span class="n"&gt;selenium&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;webdriver&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;common&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;by&lt;/span&gt; &lt;span class="n"&gt;import&lt;/span&gt; &lt;span class="n"&gt;By&lt;/span&gt;  
+&lt;span class="n"&gt;from&lt;/span&gt; &lt;span class="n"&gt;selenium&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;webdriver&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;common&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;keys&lt;/span&gt; &lt;span class="n"&gt;import&lt;/span&gt; &lt;span class="n"&gt;Keys&lt;/span&gt;  
+&lt;span class="n"&gt;from&lt;/span&gt; &lt;span class="n"&gt;selenium&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;webdriver&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;support&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;ui&lt;/span&gt; &lt;span class="n"&gt;import&lt;/span&gt; &lt;span class="n"&gt;Select&lt;/span&gt;  
+&lt;span class="n"&gt;from&lt;/span&gt; &lt;span class="n"&gt;selenium&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;common&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;exceptions&lt;/span&gt; &lt;span class="n"&gt;import&lt;/span&gt; &lt;span class="n"&gt;NoSuchElementException&lt;/span&gt;  
+&lt;span class="n"&gt;import&lt;/span&gt; &lt;span class="n"&gt;unittest&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;time&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;re&lt;/span&gt;
+
+&lt;span class="n"&gt;class&lt;/span&gt; &lt;span class="n"&gt;SeleniumAdminLogin&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="n"&gt;unittest&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;TestCase&lt;/span&gt; &lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;
+
+&lt;span class="n"&gt;def&lt;/span&gt; &lt;span class="n"&gt;setUp&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="n"&gt;self&lt;/span&gt; &lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;self.driver = webdriver.PhantomJS(
+'/opt/phantomjs-1.9.2-linux-x86_64/bin/phantomjs', port=9134 )  &lt;/p&gt;
+&lt;p&gt;self.driver.implicitly_wait(30)  &lt;/p&gt;
+&lt;p&gt;self.base_url = "&lt;a href="https://myexample.org"&gt;https://myexample.org&lt;/a&gt;"  &lt;/p&gt;
+&lt;p&gt;self.verificationErrors = []  &lt;/p&gt;
+&lt;p&gt;self.accept_next_alert = True&lt;/p&gt;
+
+&lt;p&gt;def test_selenium_admin_login( self ):  &lt;/p&gt;
+&lt;p&gt;driver = self.driver  &lt;/p&gt;
+&lt;p&gt;driver.get( self.base_url + "/" )  &lt;/p&gt;
+&lt;p&gt;driver.find_element_by_id( "email" ).clear()  &lt;/p&gt;
+&lt;p&gt;driver.find_element_by_id( "email" ).send_keys(
+"&lt;a href="mailto:admin@example.org"&gt;admin@example.org&lt;/a&gt;" )  &lt;/p&gt;
+&lt;p&gt;driver.find_element_by_id( "password" ).clear()  &lt;/p&gt;
+&lt;p&gt;driver.find_element_by_id( "password" ).send_keys( "mypassword" )  &lt;/p&gt;
+&lt;p&gt;driver.find_element_by_id( "signin" ).click()  &lt;/p&gt;
+&lt;p&gt;self.assertEqual("&lt;a href="https://myexample.org/home"&gt;https://myexample.org/home&lt;/a&gt;", driver.current_url)  &lt;/p&gt;
+&lt;p&gt;self.assertTrue(self.is_element_present(By.LINK_TEXT, "Launch the web
+app"))  &lt;/p&gt;
+&lt;p&gt;self.assertTrue(self.is_element_present(By.CSS_SELECTOR, "a.admin &amp;gt;
+span"))  &lt;/p&gt;
+&lt;p&gt;driver.find_element_by_css_selector("a.admin &amp;gt; span").click()  &lt;/p&gt;
+&lt;p&gt;self.assertEqual("Group Info",
+driver.find_element_by_css_selector("h1").text)&lt;/p&gt;
+
+&lt;p&gt;def is_element_present(self, how, what):  &lt;/p&gt;
+&lt;p&gt;try: self.driver.find_element(by=how, value=what)  &lt;/p&gt;
+&lt;p&gt;except NoSuchElementException, e: return False  &lt;/p&gt;
+&lt;p&gt;return True&lt;/p&gt;
+
+&lt;p&gt;def is_alert_present(self):  &lt;/p&gt;
+&lt;p&gt;try: self.driver.switch_to_alert()  &lt;/p&gt;
+&lt;p&gt;except NoAlertPresentException, e: return False  &lt;/p&gt;
+&lt;p&gt;return True&lt;/p&gt;
+
+&lt;p&gt;def close_alert_and_get_its_text(self):  &lt;/p&gt;
+&lt;p&gt;try:  &lt;/p&gt;
+&lt;p&gt;alert = self.driver.switch_to_alert()  &lt;/p&gt;
+&lt;p&gt;alert_text = alert.text  &lt;/p&gt;
+&lt;p&gt;if self.accept_next_alert:  &lt;/p&gt;
+&lt;p&gt;alert.accept()  &lt;/p&gt;
+&lt;p&gt;else:  &lt;/p&gt;
+&lt;p&gt;alert.dismiss()  &lt;/p&gt;
+&lt;p&gt;return alert_text  &lt;/p&gt;
+&lt;p&gt;finally: self.accept_next_alert = True&lt;/p&gt;
+
+&lt;p&gt;def tearDown(self):  &lt;/p&gt;
+&lt;p&gt;self.driver.quit()  &lt;/p&gt;
+&lt;p&gt;self.assertEqual([], self.verificationErrors)&lt;/p&gt;
+
+&lt;p&gt;if __name__ == "__main__":  &lt;/p&gt;
+&lt;p&gt;unittest.main()&lt;/p&gt;
+
+&lt;hr/&gt;
+&lt;p&gt;REFERENCES:&lt;br/&gt;
+&lt;a href="http://phantomjs.org/release-1.8.html"&gt;http://phantomjs.org/release-1.8.html&lt;/a&gt;&lt;br/&gt;
+&lt;a href="https://github.com/ariya/phantomjs/wiki/API-Reference"&gt;https://github.com/ariya/phantomjs/wiki/API-Reference&lt;/a&gt;&lt;br/&gt;
+&lt;a href=""&gt;http://www.realpython.com/blog/python/headless-selenium-testing-with-pyt...&lt;/a&gt;&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nl"&gt;http:&lt;/span&gt;&lt;span class="c1"&gt;//docs.seleniumhq.org/docs/02_selenium_ide.jsp#introduction&lt;/span&gt;
 &lt;span class="nl"&gt;https:&lt;/span&gt;&lt;span class="c1"&gt;//code.google.com/p/phantomjs/downloads/detail?name=phantomjs-1.9.2-linux-x86_64.tar.bz2&lt;/span&gt;
 &lt;span class="nl"&gt;http:&lt;/span&gt;&lt;span class="c1"&gt;//www.realpython.com/blog/python/headless-selenium-testing-with-python-and-phantomjs/&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">John Pfeiffer</dc:creator><pubDate>Tue, 17 Sep 2013 21:04:00 -0000</pubDate><guid>tag:,2013-09-17:selenium-headless-browser-automated-testing-with-phantomjs-and-python</guid></item><item><title>Attack of the Spiders, Bots, and Crawlers</title><link>/content/attack-of-the-spiders-bots-and-crawlers</link><description>&lt;p&gt;It is well known that search engines need to index what the contents of webpages are in order to return accurate results to Users.&lt;/p&gt;
+&lt;/pre&gt;&lt;/div&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">John Pfeiffer</dc:creator><pubDate>Tue, 17 Sep 2013 21:04:00 -0000</pubDate><guid>tag:,2013-09-17:content/selenium-headless-browser-automated-testing-with-phantomjs-and-python</guid></item><item><title>Attack of the Spiders, Bots, and Crawlers</title><link>/content/attack-of-the-spiders-bots-and-crawlers</link><description>&lt;p&gt;It is well known that search engines need to index what the contents of webpages are in order to return accurate results to Users.&lt;/p&gt;
 &lt;p&gt;It may not be well known how much traffic that generates!
 In this sampling from my logs (not representative of anything), 57% of the traffic in the log is from bots (I'm not turning them away, skip to the end on how to do that).&lt;/p&gt;
 &lt;div class="field field-name-body field-type-text-with-summary field-label-hidden"&gt;
