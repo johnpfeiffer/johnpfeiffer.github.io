@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en-US">
+    <head>
+        <meta charset="utf-8"> 
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="author" content="john pfeiffer" />
+        <meta name="copyright" content="john pfeiffer" />
+
+<meta name="keywords" content=", programming, " />
+        <title>publish-a-pelican-blog-using-a-bitbucket-post-webhook  · johnpfeiffer
+</title>
+        <link href="http://cdn-images.mailchimp.com/embedcode/slim-081711.css" rel="stylesheet" type="text/css">
+        <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="/theme/css/style.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="/theme/css/solarizedlight.css" media="screen">
+        <link rel="shortcut icon" href="/theme/images/favicon.ico" type="image/x-icon" />
+        <link rel="apple-touch-icon" href="/theme/images/apple-touch-icon.png" />
+        <link rel="apple-touch-icon" sizes="57x57" href="/theme/images/apple-touch-icon-57x57.png" />
+        <link rel="apple-touch-icon" sizes="72x72" href="/theme/images/apple-touch-icon-72x72.png" />
+        <link rel="apple-touch-icon" sizes="114x114" href="/theme/images/apple-touch-icon-114x114.png" />
+        <link rel="apple-touch-icon" sizes="144x144" href="/theme/images/apple-touch-icon-144x144.png" />
+        <link rel="icon" href="/theme/images/apple-touch-icon-144x144.png" />
+    </head>
+    <body>
+        <div id="content-sans-footer">
+        <div class="navbar navbar-static-top">
+            <div class="navbar-inner">
+                <div class="container">
+                    <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </a>
+                    <a class="brand" href="/"><span class=site-name>johnpfeiffer</span></a>
+                    <div class="nav-collapse collapse">
+                        <ul class="nav pull-right top-menu">
+                            <li ><a href="">Home</a></li>
+                            <li ><a href="/about-john-pfeiffer">About John Pfeiffer</a></li>
+                            <li ><a href="/categories.html">Categories</a></li>
+                            <li ><a href="/tags.html">Tags</a></li>
+                            <li ><a href="/archives.html">Archives</a></li>
+                            <li><form class="navbar-search" action="/search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container-fluid">
+            <div class="row-fluid">
+                <div class="span1"></div>
+                <div class="span10">
+<article>
+<div class="row-fluid">
+    <header class="page_header span10 offset2">
+    <h1><a href="/publish-a-pelican-blog-using-a-bitbucket-post-webhook"> publish-a-pelican-blog-using-a-bitbucket-post-webhook  </a></h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+    <div class="span2 table-of-content">
+        <nav>
+        <h4>Contents</h4>
+        <div class="toc">
+<ul>
+<li><a href="#steps-to">Steps to</a></li>
+<li><a href="#flask-and-bash-source-code-to-publish-pelican">Flask and Bash source code to publish pelican</a><ul>
+<li><a href="#vi-mypublishpy">vi mypublish.py</a></li>
+<li><a href="#vi-mypublishsh">vi mypublish.sh</a></li>
+<li><a href="#vi-clean-outputsh">vi clean-output.sh</a></li>
+</ul>
+</li>
+<li><a href="#more-info">More info</a></li>
+</ul>
+</div>
+        </nav>
+    </div>
+    <div class="span8 article-content">
+
+            
+<p>Webhooks are an incredibly useful way to tie together disparate network parts, WHEN something happens in one place, it sends a POST HTTP request to another place.</p>
+<h3 id="steps-to">Steps to</h3>
+<ol>
+<li>Log in to the Bitbucket WebUI</li>
+<li>Choose the repository</li>
+<li>Choose to administer the repository (gear symbol) -&gt; Hooks (left menu) , or simply <a href="https://bitbucket.org/username/reponame/admin/hooks">https://bitbucket.org/username/reponame/admin/hooks</a></li>
+<li>Select Hook Type (dropdown) , POST , Add Hook (Button)</li>
+<li>Enter your target URL, SAVE</li>
+<li>Setup a webserver (easiest might be Bamboo or Jenkins) somewhere</li>
+<li>Ensure there is a URL that accepts POST requests</li>
+<li>Ensure that when the POST is received it runs the pelican content generation commands to make the new output</li>
+<li>Ensure new output is visible</li>
+</ol>
+<blockquote>
+<p>You may notice any existing POST webhooks, i.e. a HipChat notification add-on, listed: https://hipchat-bitbucket.herokuapp.com/commit?client_id=f955ddb5</p>
+</blockquote>
+<h3 id="flask-and-bash-source-code-to-publish-pelican">Flask and Bash source code to publish pelican</h3>
+<blockquote>
+<p>This custom solution requires running that flask app manually, i.e. python mypublish.py
+It also requires having two repositories, one for the pelican source content, 
+the other repo (i.e. a bitbucket static web site) will only contain the output (.html files)</p>
+</blockquote>
+<h4 id="vi-mypublishpy">vi mypublish.py</h4>
+<div class="highlight"><pre><span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">Flask</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">subprocess</span> <span class="kn">import</span> <span class="n">Popen</span><span class="p">,</span> <span class="n">PIPE</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">Flask</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+
+<span class="nd">@app.route</span><span class="p">(</span><span class="s">'/someuniquekeyhere'</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s">'GET'</span><span class="p">,</span> <span class="s">'POST'</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">mypublish</span><span class="p">():</span>
+  <span class="k">try</span><span class="p">:</span>
+      <span class="n">output</span> <span class="o">=</span> <span class="n">Popen</span><span class="p">([</span><span class="s">"./mypublish.sh"</span><span class="p">],</span> <span class="n">stdout</span><span class="o">=</span><span class="n">PIPE</span><span class="p">)</span><span class="o">.</span><span class="n">communicate</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+  <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+      <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
+  <span class="k">return</span> <span class="n">output</span>
+
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">'__main__'</span><span class="p">:</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="s">'0.0.0.0'</span><span class="p">,</span> <span class="mi">8443</span><span class="p">,</span> <span class="n">use_reloader</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</pre></div>
+<h4 id="vi-mypublishsh">vi mypublish.sh</h4>
+<div class="highlight"><pre><span class="c">#!/bin/bash</span>
+git pull
+<span class="nv">GITMESSAGE</span><span class="o">=</span><span class="k">$(</span>git log -n 1<span class="k">)</span>
+<span class="nv">OUTPUT</span><span class="o">=</span><span class="s2">"../reponame.bitbucket.org"</span>
+./clean-output.sh <span class="s2">"../reponame.bitbucket.org"</span>  <span class="c"># removes all of the old content</span>
+<span class="nb">echo</span> <span class="s2">"$GITMESSAGE"</span>
+pelican content
+cp -a ./output/* ../output-johnpfeiffer.bitbucket.org
+
+rm -rf ./output
+rm -rf ./cache
+rm -f *.pyc
+
+<span class="nb">cd</span> <span class="s2">"$OUTPUT"</span>
+git add --all ./content
+git commit -m <span class="s2">"source $GITMESSAGE"</span>
+git push
+</pre></div>
+<h4 id="vi-clean-outputsh">vi clean-output.sh</h4>
+<div class="highlight"><pre><span class="c">#!/bin/bash</span>
+
+rm -rf ./output
+rm -rf ./cache
+rm -f *.pyc
+
+<span class="k">for </span>ITEM in <span class="nv">$SOURCE</span>/*
+<span class="k">do</span>
+<span class="k">  if</span> <span class="o">[</span> -d <span class="s2">"$ITEM"</span> <span class="o">]</span>; <span class="k">then</span>
+<span class="k">    </span>rm -rf <span class="s2">"$ITEM"</span>
+  <span class="k">else</span>
+<span class="k">    </span>rm -f <span class="s2">"$ITEM"</span>
+  <span class="k">fi</span>
+<span class="k">done</span>
+</pre></div>
+<h3 id="more-info">More info</h3>
+<ul>
+<li><a href="http://read-the-docs.readthedocs.org/en/latest/webhooks.html">http://read-the-docs.readthedocs.org/en/latest/webhooks.html</a></li>
+<li><a href="https://confluence.atlassian.com/display/BITBUCKET/POST+hook+management">https://confluence.atlassian.com/display/BITBUCKET/POST+hook+management</a></li>
+</ul>
+            <aside>
+            <hr/>
+            <nav>
+            <ul class="articles_timeline">
+ 
+                <li class="previous_article">« <a href="/using-vagrant-to-deploy-instances-on-aws" title="Previous: Using Vagrant to deploy instances on AWS">Using Vagrant to deploy instances on AWS</a></li>
+            </ul>
+            </nav>
+            </aside>
+        </div>
+        <section>
+        <div class="span2" style="float:right;font-size:0.9em;">
+ 
+            <h4>Published</h4>
+            <time pubdate="pubdate" datetime="2014-08-08T06:00:00">Aug 8, 2014</time>
+            <h4>Category</h4>
+            <a class="category-link" href="/categories.html#programming-ref">programming</a> 
+
+        </div>
+        </section>
+</div>
+</article>
+                </div>
+                <div class="span1"></div>
+            </div>
+        </div>
+    </div>
+<footer>
+<div id="footer">
+    <ul class="footer-content">
+        <li class="elegant-power">Powered by <a href="http://getpelican.com/" title="Pelican Home Page">Pelican</a>. Theme: <a href="http://oncrashreboot.com/pelican-elegant" title="Theme Elegant Home Page">Elegant</a> by <a href="http://oncrashreboot.com" title="Talha Mansoor Home Page">Talha Mansoor</a></li>
+    </ul>
+</div>
+</footer>            <script src="http://code.jquery.com/jquery.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+    </body>
+</html>

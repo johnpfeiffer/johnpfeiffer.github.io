@@ -1,5 +1,86 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>johnpfeiffer</title><link href="/" rel="alternate"></link><link href="/feeds/john-pfeiffer.atom.xml" rel="self"></link><id>/</id><updated>2014-07-16T21:12:00Z</updated><entry><title>Using Vagrant to deploy instances on AWS</title><link href="/using-vagrant-to-deploy-instances-on-aws" rel="alternate"></link><updated>2014-07-16T21:12:00Z</updated><author><name>john pfeiffer</name></author><id>tag:,2014-07-16:using-vagrant-to-deploy-instances-on-aws</id><summary type="html">
+<feed xmlns="http://www.w3.org/2005/Atom"><title>johnpfeiffer</title><link href="/" rel="alternate"></link><link href="/feeds/john-pfeiffer.atom.xml" rel="self"></link><id>/</id><updated>2014-08-08T06:00:00Z</updated><entry><title>publish-a-pelican-blog-using-a-bitbucket-post-webhook</title><link href="/publish-a-pelican-blog-using-a-bitbucket-post-webhook" rel="alternate"></link><updated>2014-08-08T06:00:00Z</updated><author><name>john pfeiffer</name></author><id>tag:,2014-08-08:publish-a-pelican-blog-using-a-bitbucket-post-webhook</id><summary type="html">
+&lt;p&gt;Webhooks are an incredibly useful way to tie together disparate network parts, WHEN something happens in one place, it sends a POST HTTP request to another place.&lt;/p&gt;
+&lt;h3 id="steps-to"&gt;Steps to&lt;/h3&gt;
+&lt;ol&gt;
+&lt;li&gt;Log in to the Bitbucket WebUI&lt;/li&gt;
+&lt;li&gt;Choose the repository&lt;/li&gt;
+&lt;li&gt;Choose to administer the repository (gear symbol) -&amp;gt; Hooks (left menu) , or simply &lt;a href="https://bitbucket.org/username/reponame/admin/hooks"&gt;https://bitbucket.org/username/reponame/admin/hooks&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Select Hook Type (dropdown) , POST , Add Hook (Button)&lt;/li&gt;
+&lt;li&gt;Enter your target URL, SAVE&lt;/li&gt;
+&lt;li&gt;Setup a webserver (easiest might be Bamboo or Jenkins) somewhere&lt;/li&gt;
+&lt;li&gt;Ensure there is a URL that accepts POST requests&lt;/li&gt;
+&lt;li&gt;Ensure that when the POST is received it runs the pelican content generation commands to make the new output&lt;/li&gt;
+&lt;li&gt;Ensure new output is visible&lt;/li&gt;
+&lt;/ol&gt;
+&lt;blockquote&gt;
+&lt;p&gt;You may notice any existing POST webhooks, i.e. a HipChat notification add-on, listed: https://hipchat-bitbucket.herokuapp.com/commit?client_id=f955ddb5&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id="flask-and-bash-source-code-to-publish-pelican"&gt;Flask and Bash source code to publish pelican&lt;/h3&gt;
+&lt;blockquote&gt;
+&lt;p&gt;This custom solution requires running that flask app manually, i.e. python mypublish.py
+It also requires having two repositories, one for the pelican source content, 
+the other repo (i.e. a bitbucket static web site) will only contain the output (.html files)&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h4 id="vi-mypublishpy"&gt;vi mypublish.py&lt;/h4&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;flask&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;Flask&lt;/span&gt;
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;os&lt;/span&gt;
+&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;subprocess&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;Popen&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;PIPE&lt;/span&gt;
+
+&lt;span class="n"&gt;app&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;Flask&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;__name__&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="nd"&gt;@app.route&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;'/someuniquekeyhere'&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;methods&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="s"&gt;'GET'&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s"&gt;'POST'&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt;
+&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;mypublish&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
+  &lt;span class="k"&gt;try&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+      &lt;span class="n"&gt;output&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;Popen&lt;/span&gt;&lt;span class="p"&gt;([&lt;/span&gt;&lt;span class="s"&gt;"./mypublish.sh"&lt;/span&gt;&lt;span class="p"&gt;],&lt;/span&gt; &lt;span class="n"&gt;stdout&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;PIPE&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;communicate&lt;/span&gt;&lt;span class="p"&gt;()[&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+  &lt;span class="k"&gt;except&lt;/span&gt; &lt;span class="ne"&gt;Exception&lt;/span&gt; &lt;span class="k"&gt;as&lt;/span&gt; &lt;span class="n"&gt;error&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+      &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="nb"&gt;str&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;error&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+  &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;output&lt;/span&gt;
+
+
+&lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="n"&gt;__name__&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="s"&gt;'__main__'&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="n"&gt;app&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;run&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;'0.0.0.0'&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;8443&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;use_reloader&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="bp"&gt;True&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;h4 id="vi-mypublishsh"&gt;vi mypublish.sh&lt;/h4&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="c"&gt;#!/bin/bash&lt;/span&gt;
+git pull
+&lt;span class="nv"&gt;GITMESSAGE&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="k"&gt;$(&lt;/span&gt;git log -n 1&lt;span class="k"&gt;)&lt;/span&gt;
+&lt;span class="nv"&gt;OUTPUT&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;"../reponame.bitbucket.org"&lt;/span&gt;
+./clean-output.sh &lt;span class="s2"&gt;"../reponame.bitbucket.org"&lt;/span&gt;  &lt;span class="c"&gt;# removes all of the old content&lt;/span&gt;
+&lt;span class="nb"&gt;echo&lt;/span&gt; &lt;span class="s2"&gt;"$GITMESSAGE"&lt;/span&gt;
+pelican content
+cp -a ./output/* ../output-johnpfeiffer.bitbucket.org
+
+rm -rf ./output
+rm -rf ./cache
+rm -f *.pyc
+
+&lt;span class="nb"&gt;cd&lt;/span&gt; &lt;span class="s2"&gt;"$OUTPUT"&lt;/span&gt;
+git add --all ./content
+git commit -m &lt;span class="s2"&gt;"source $GITMESSAGE"&lt;/span&gt;
+git push
+&lt;/pre&gt;&lt;/div&gt;
+&lt;h4 id="vi-clean-outputsh"&gt;vi clean-output.sh&lt;/h4&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="c"&gt;#!/bin/bash&lt;/span&gt;
+
+rm -rf ./output
+rm -rf ./cache
+rm -f *.pyc
+
+&lt;span class="k"&gt;for &lt;/span&gt;ITEM in &lt;span class="nv"&gt;$SOURCE&lt;/span&gt;/*
+&lt;span class="k"&gt;do&lt;/span&gt;
+&lt;span class="k"&gt;  if&lt;/span&gt; &lt;span class="o"&gt;[&lt;/span&gt; -d &lt;span class="s2"&gt;"$ITEM"&lt;/span&gt; &lt;span class="o"&gt;]&lt;/span&gt;; &lt;span class="k"&gt;then&lt;/span&gt;
+&lt;span class="k"&gt;    &lt;/span&gt;rm -rf &lt;span class="s2"&gt;"$ITEM"&lt;/span&gt;
+  &lt;span class="k"&gt;else&lt;/span&gt;
+&lt;span class="k"&gt;    &lt;/span&gt;rm -f &lt;span class="s2"&gt;"$ITEM"&lt;/span&gt;
+  &lt;span class="k"&gt;fi&lt;/span&gt;
+&lt;span class="k"&gt;done&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;h3 id="more-info"&gt;More info&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="http://read-the-docs.readthedocs.org/en/latest/webhooks.html"&gt;http://read-the-docs.readthedocs.org/en/latest/webhooks.html&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://confluence.atlassian.com/display/BITBUCKET/POST+hook+management"&gt;https://confluence.atlassian.com/display/BITBUCKET/POST+hook+management&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</summary></entry><entry><title>Using Vagrant to deploy instances on AWS</title><link href="/using-vagrant-to-deploy-instances-on-aws" rel="alternate"></link><updated>2014-07-16T21:12:00Z</updated><author><name>john pfeiffer</name></author><id>tag:,2014-07-16:using-vagrant-to-deploy-instances-on-aws</id><summary type="html">
 &lt;p&gt;Vagrant is an infrastructure tool that simplifies deployment, such as virtual machines or in this case Amazon EC2 instances.&lt;/p&gt;
 &lt;h3 id="install-vagrant-and-the-vagrant-aws-plugin"&gt;Install Vagrant and the Vagrant AWS plugin&lt;/h3&gt;
 &lt;p&gt;Download and install vagrant: &lt;strong&gt;&lt;a href="https://www.vagrantup.com/downloads"&gt;https://www.vagrantup.com/downloads&lt;/a&gt;&lt;/strong&gt;&lt;/p&gt;
