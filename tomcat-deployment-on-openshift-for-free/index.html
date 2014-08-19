@@ -3,8 +3,8 @@
     <head>
         <meta charset="utf-8"> 
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta name="author" content="John Pfeiffer" />
-        <meta name="copyright" content="John Pfeiffer" />
+        <meta name="author" content="john pfeiffer" />
+        <meta name="copyright" content="john pfeiffer" />
 
 <meta name="keywords" content=", linux, " />
         <title>Tomcat deployment on Openshift for free  · johnpfeiffer
@@ -59,398 +59,215 @@
 <div class="row-fluid">
         <div class="span8 offset2 article-content">
 
-            <div class="field field-name-body field-type-text-with-summary field-label-hidden">
-<div class="field-items">
-<div class="field-item even">
-sudo apt-get update
+            <p>[TOC]
+openshift is the cloud PaaS offering from RedHat</p>
+<h3 id="prerequisites">Prerequisites</h3>
+<div class="highlight"><pre><span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">update</span>
+<span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">install</span> <span class="n">ruby1</span><span class="mf">.9.3</span> <span class="n">git</span><span class="o">-</span><span class="n">core</span>
+<span class="c1">//yay for ubuntu 12.04</span>
 
-sudo apt-get install ruby1.9.3 //yay for ubuntu 12.04
+<span class="n">sudo</span> <span class="n">gem</span> <span class="n">install</span> <span class="n">rhc</span>
+</pre></div>
 
-</p>
 
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-- - - - - - - - - - - - - - - - - - - - - - - -  
+<p>//red hat client</p>
+<hr />
+<p>rhc setup  </p>
+<div class="highlight"><pre><span class="n">Created</span> <span class="n">local</span> <span class="n">config</span> <span class="n">file</span><span class="o">:</span> <span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">ubuntu</span><span class="o">/</span><span class="p">.</span><span class="n">openshift</span><span class="o">/</span><span class="n">express</span><span class="p">.</span><span class="n">conf</span>
+<span class="n">The</span> <span class="n">express</span><span class="p">.</span><span class="n">conf</span> <span class="n">file</span> <span class="n">contains</span> <span class="n">user</span> <span class="n">configuration</span><span class="p">,</span> <span class="n">and</span> <span class="n">can</span> <span class="n">be</span> <span class="n">transferred</span> <span class="n">to</span> <span class="n">different</span> <span class="n">computers</span><span class="p">.</span>
+<span class="n">No</span> <span class="n">SSH</span> <span class="n">keys</span> <span class="n">were</span> <span class="n">found</span><span class="p">.</span> <span class="n">We</span> <span class="n">will</span> <span class="n">generate</span> <span class="n">a</span> <span class="n">pair</span> <span class="n">of</span> <span class="n">keys</span> <span class="k">for</span> <span class="n">you</span><span class="p">.</span>
 
-(PREREQUISITE IS INSTALLING GIT - apt-get install git-core)
+<span class="mi">2</span><span class="o">:</span> <span class="n">No</span> <span class="n">such</span> <span class="n">file</span> <span class="n">or</span> <span class="n">directory</span>
+<span class="nl">Created:</span> <span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">ubuntu</span><span class="o">/</span><span class="p">.</span><span class="n">ssh</span><span class="o">/</span><span class="n">id_rsa</span><span class="p">.</span><span class="n">pub</span>
 
-</p>
+<span class="n">Your</span> <span class="n">public</span> <span class="n">ssh</span> <span class="n">key</span> <span class="n">must</span> <span class="n">be</span> <span class="n">uploaded</span> <span class="n">to</span> <span class="n">the</span> <span class="n">OpenShift</span> <span class="n">server</span><span class="p">.</span> <span class="n">Would</span> <span class="n">you</span> <span class="n">like</span> <span class="n">us</span> <span class="n">to</span> <span class="n">upload</span> <span class="n">it</span> <span class="k">for</span> <span class="n">you</span><span class="o">?</span> <span class="p">(</span><span class="n">yes</span><span class="o">/</span><span class="n">no</span><span class="p">)</span> <span class="n">yes</span>
+</pre></div>
 
-sudo gem install rhc //red hat client
 
-</p>
-
-rhc setup  
-
-Created local config file: /home/ubuntu/.openshift/express.conf  
-
-The express.conf file contains user configuration, and can be
-transferred to different computers.  
-
-No SSH keys were found. We will generate a pair of keys for you.  
-
-2: No such file or directory  
-
-Created: /home/ubuntu/.ssh/id\_rsa.pub  
-
-Your public ssh key must be uploaded to the OpenShift server. Would you
-like us to upload it for you? (yes/no) yes
-
-</p>
-
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-- - - - - - - - - - - - - - - - - - - - - - - -  
-
-rhc -h  
-
-rhc domain show //prompts for password
-
-</p>
-
-rhc app create -h  
-
-Valid application types are (nodejs-0.6, ruby-1.9, jbossas-7,
+<h3 id="rhc-commands">rhc commands</h3>
+<p>rhc -h</p>
+<p>rhc domain show //prompts for password</p>
+<p>rhc app create -h  </p>
+<p>Valid application types are (nodejs-0.6, ruby-1.9, jbossas-7,
 python-2.6, jenkins-1.4, ruby-1.8, jbosseap-6.0, diy-0.1, php-5.3,
-perl-5.10)
-
+perl-5.10)</p>
+<p>rhc app create -a john -t diy-0.1</p>
+<p>rhc app show -a john</p>
+<p>rhc app cartridge list</p>
+<p>ON YOUR LOCAL MACHINE BROWSE TO WHERE YOU WANT TO STORE YOUR GIT REPO</p>
+<p>git clone git clone
+ssh://a261d0fc2932413694456e3473fdc972@APPNAME-DOMAIN.rhcloud.com/\~/git/...</p>
+<p>git status
+git pull</p>
+<p>REPO LAYOUT of \~/john/repo</p>
 </p>
 
-rhc app create -a john -t diy-0.1
-
+<p>.openshift/action_hooks/start - Script that gets run to start your
+application  </p>
+<p>.openshift/action_hooks/stop - Script that gets run to stop your
+application  </p>
+<p>.openshift/action_hooks/pre_build - Script that gets run every git
+push before the build  </p>
+<p>.openshift/action_hooks/build - Script that gets run every git push as
+part of the build process (on the CI system if available)  </p>
+<p>.openshift/action_hooks/deploy - Script that gets run every git push
+after build but before the app is restarted  </p>
+<p>.openshift/action_hooks/post_deploy - Script that gets run every git
+push after the app is restarted  </p>
+<p>diy  </p>
+<p>misc  </p>
+<p>README  </p>
+<p>static/ If it exists externally exposed static content goes here</p>
 </p>
 
-rhc app show -a john
-
+<p>CHANGES ARE ONE DIRECTIONAL FROM THE GIT CLONE TO THE OPENSHIFT BOX</p>
 </p>
 
-rhc app cartridge list
-
+<p>mv diy/testrubyserver.rb ../misc  </p>
+<p>mv diy/index.html ../misc</p>
 </p>
 
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-- - - - - - - - - - - - - - - - - - - - - - - -  
-
-ON YOUR LOCAL MACHINE BROWSE TO WHERE YOU WANT TO STORE YOUR GIT REPO
-
+<p>git add -A  </p>
+<p>git commit -m "moved initial test stuff to /misc"  </p>
+<p>git push //if the app is running then a git push automatically ...</p>
 </p>
 
-git clone git clone
-[ssh://a261d0fc2932413694456e3473fdc972@APPNAME-DOMAIN.rhcloud.com/\~/git/...][]
-
+<p>Counting objects: 6, done.  </p>
+<p>Delta compression using up to 4 threads.  </p>
+<p>Compressing objects: 100% (4/4), done.  </p>
+<p>Writing objects: 100% (4/4), 607 bytes, done.  </p>
+<p>Total 4 (delta 1), reused 1 (delta 0)  </p>
+<p>remote: Stopping application...  </p>
+<p>remote: Done  </p>
+<p>remote: \~/git/john.git \~/git/john.git  </p>
+<p>remote: \~/git/john.git  </p>
+<p>remote: Running .openshift/action_hooks/pre_build  </p>
+<p>remote: Running .openshift/action_hooks/build  </p>
+<p>remote: Running .openshift/action_hooks/deploy  </p>
+<p>remote: Starting application...  </p>
+<p>remote: Done  </p>
+<p>remote: Running .openshift/action_hooks/post_deploy</p>
 </p>
 
-git status  
-
-git pull
-
+<hr />
+<hr />
+<p>ssh <a href="mailto:51233d90ea45fd91e42096651d937e@john-pfeiffer.rhcloud.com">51233d90ea45fd91e42096651d937e@john-pfeiffer.rhcloud.com</a> //note
+that HOME is /var/lib/stickshift/12315longidentifier  </p>
+<p>cd app-root/data  </p>
+<p>wget
+<a href="">http://mirror.cc.columbia.edu/pub/software/apache/tomcat/tomcat-7/v7.0.2...</a>  </p>
+<p>tar -xzvf apache-tomcat-7.0.29.tar.gz //expands to 13MB, note that JAVA
+is already installed by default  </p>
+<p>rm apache-tomcat-7.0.29.tar.gz</p>
 </p>
 
-REPO LAYOUT of \~/john/repo
-
+<hr />
+<hr />
+<p>Since OpenShift has a proxy setup that passes port 80 to your local
+server on port 8080, BUT  </p>
+<p>OpenShift does not allow users to bind to any port below 15000 other
+than 8080, so...</p>
 </p>
 
-.openshift/action\_hooks/start - Script that gets run to start your
-application  
-
-.openshift/action\_hooks/stop - Script that gets run to stop your
-application  
-
-.openshift/action\_hooks/pre\_build - Script that gets run every git
-push before the build  
-
-.openshift/action\_hooks/build - Script that gets run every git push as
-part of the build process (on the CI system if available)  
-
-.openshift/action\_hooks/deploy - Script that gets run every git push
-after build but before the app is restarted  
-
-.openshift/action\_hooks/post\_deploy - Script that gets run every git
-push after the app is restarted  
-
-diy  
-
-misc  
-
-README  
-
-static/ If it exists externally exposed static content goes here
-
+<p>ssh <a href="mailto:521233d90ea45fd91e42096651d937e@john-pfeiffer.rhcloud.com">521233d90ea45fd91e42096651d937e@john-pfeiffer.rhcloud.com</a></p>
 </p>
 
-CHANGES ARE ONE DIRECTIONAL FROM THE GIT CLONE TO THE OPENSHIFT BOX
-
+<p>env //shows you all of the environment variables in the openShift
+multitenant config  </p>
+<p>env | grep INTERNAL  </p>
+<p>OPENSHIFT_INTERNAL_PORT=8080  </p>
+<p>OPENSHIFT_INTERNAL_IP=127.13.29.1</p>
 </p>
 
-mv diy/testrubyserver.rb ../misc  
-
-mv diy/index.html ../misc
-
+<p>vi app-root/data/apache-tomcat-7.0.29/conf/server.xml</p>
 </p>
 
-git add -A  
-
-git commit -m "moved initial test stuff to /misc"  
-
-git push //if the app is running then a git push automatically ...
-
+<p>escape key then :x (save and quit)</p>
 </p>
 
-Counting objects: 6, done.  
-
-Delta compression using up to 4 threads.  
-
-Compressing objects: 100% (4/4), done.  
-
-Writing objects: 100% (4/4), 607 bytes, done.  
-
-Total 4 (delta 1), reused 1 (delta 0)  
-
-remote: Stopping application...  
-
-remote: Done  
-
-remote: \~/git/john.git \~/git/john.git  
-
-remote: \~/git/john.git  
-
-remote: Running .openshift/action\_hooks/pre\_build  
-
-remote: Running .openshift/action\_hooks/build  
-
-remote: Running .openshift/action\_hooks/deploy  
-
-remote: Starting application...  
-
-remote: Done  
-
-remote: Running .openshift/action\_hooks/post\_deploy
-
+<hr />
+<hr />
+<p>cd app-root/data/apache-tomcat-7.0.29/bin</p>
 </p>
 
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-- - - - - - - - - - - - - - - - - - - - - - - -  
-
-ssh [51233d90ea45fd91e42096651d937e@john-pfeiffer.rhcloud.com][] //note
-that HOME is /var/lib/stickshift/12315longidentifier  
-
-cd app-root/data  
-
-wget
-[http://mirror.cc.columbia.edu/pub/software/apache/tomcat/tomcat-7/v7.0.2...][]  
-
-tar -xzvf apache-tomcat-7.0.29.tar.gz //expands to 13MB, note that JAVA
-is already installed by default  
-
-rm apache-tomcat-7.0.29.tar.gz
-
+<p>sh startup.sh &amp;&amp; tail -f ../logs/*</p>
 </p>
 
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-- - - - - - - - - - - - - - - - - - - - - - - -  
-
-Since OpenShift has a proxy setup that passes port 80 to your local
-server on port 8080, BUT  
-
-OpenShift does not allow users to bind to any port below 15000 other
-than 8080, so...
-
+<p>(this is how you can start it manually from within ssh, you'll have to
+stop it manually too!)</p>
 </p>
 
-ssh [521233d90ea45fd91e42096651d937e@john-pfeiffer.rhcloud.com][]
-
+<hr />
+<hr />
+<p>ADDING Tomcat to your default start and stop scripts (which are used
+during every git push)</p>
 </p>
 
-env //shows you all of the environment variables in the openShift
-multitenant config  
-
-env | grep INTERNAL  
-
-OPENSHIFT\_INTERNAL\_PORT=8080  
-
-OPENSHIFT\_INTERNAL\_IP=127.13.29.1
-
+<p>In your local git repo there is a hidden directory ".openshift"</p>
 </p>
 
-vi app-root/data/apache-tomcat-7.0.29/conf/server.xml
-
+<p>cd APPNAME/.openshift/action_hooks</p>
 </p>
 
-escape key then :x (save and quit)
-
+<p>vi .openshift/action_hooks/start  </p>
+<p>#nohup $OPENSHIFT_REPO_DIR/diy/testrubyserver.rb
+$OPENSHIFT_INTERNAL_IP $OPENSHIFT_REPO_DIR/diy >
+$OPENSHIFT_LOG_DIR/server.log 2>&amp;1 &amp;</p>
 </p>
 
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-- - - - - - - - - - - - - - - - - - - - - - - -  
-
-cd app-root/data/apache-tomcat-7.0.29/bin
-
+<p>cd $OPENSHIFT_DATA_DIR/apache-tomcat-7.0.29/bin  </p>
+<p>nohup sh startup.sh  </p>
+<p>echo "completed tomcat7 startup"</p>
 </p>
 
-sh startup.sh && tail -f ../logs/\*
-
+<p>vi .openshift/action_hooks/stop  </p>
+<p>cd $OPENSHIFT_DATA_DIR/apache-tomcat-7.0.29/bin  </p>
+<p>nohup sh shutdown.sh  </p>
+<p>echo "completed tomcat7 shutdown"  </p>
+<p>exit 0</p>
 </p>
 
-(this is how you can start it manually from within ssh, you'll have to
-stop it manually too!)
-
+<p>git add -A  </p>
+<p>git commit -m "removed testrubyserver.rb and added tomcat to start/stop
+scripts"  </p>
+<p>git push</p>
 </p>
 
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-- - - - - - - - - - - - - - - - - - - - - - - -  
-
-ADDING Tomcat to your default start and stop scripts (which are used
-during every git push)
-
+<p><a href="http://APPNAME-DOMAINNAME.rhcloud.com">http://APPNAME-DOMAINNAME.rhcloud.com</a></p>
 </p>
 
-In your local git repo there is a hidden directory ".openshift"
-
+<hr />
+<hr />
+<p>MOVE YOUR WEBAPPS DIRECTORY TO THE GIT REPO SO THAT A GIT PUSH WILL AUTO
+DEPLOY THE NEWEST</p>
 </p>
 
-cd APPNAME/.openshift/action\_hooks
-
+<p>mv $OPENSHIFT_DATA_DIR/apache-tomcat-7.0.29/webapps
+\~/john/repo/diy/webapps</p>
 </p>
 
-vi .openshift/action\_hooks/start  
-
-\#nohup $OPENSHIFT\_REPO\_DIR/diy/testrubyserver.rb
-$OPENSHIFT\_INTERNAL\_IP $OPENSHIFT\_REPO\_DIR/diy \>
-$OPENSHIFT\_LOG\_DIR/server.log 2\>&1 &
-
+<p>ln -s \~/john/repo/diy/webapps webapps</p>
 </p>
 
-cd $OPENSHIFT\_DATA\_DIR/apache-tomcat-7.0.29/bin  
-
-nohup sh startup.sh  
-
-echo "completed tomcat7 startup"
-
-</p>
-
-vi .openshift/action\_hooks/stop  
-
-cd $OPENSHIFT\_DATA\_DIR/apache-tomcat-7.0.29/bin  
-
-nohup sh shutdown.sh  
-
-echo "completed tomcat7 shutdown"  
-
-exit 0
-
-</p>
-
-git add -A  
-
-git commit -m "removed testrubyserver.rb and added tomcat to start/stop
-scripts"  
-
-git push
-
-</p>
-
-[http://APPNAME-DOMAINNAME.rhcloud.com][]
-
-</p>
-
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-- - - - - - - - - - - - - - - - - - - - - - - -  
-
-MOVE YOUR WEBAPPS DIRECTORY TO THE GIT REPO SO THAT A GIT PUSH WILL AUTO
-DEPLOY THE NEWEST
-
-</p>
-
-mv $OPENSHIFT\_DATA\_DIR/apache-tomcat-7.0.29/webapps
-\~/john/repo/diy/webapps
-
-</p>
-
-ln -s \~/john/repo/diy/webapps webapps
-
-</p>
-
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-- - - - - - - - - - - - - - - - - - - - - - - -  
-
-Strongly advised to remove the manager and example apps (just deploy
-your .war's)
-
-</p>
-
-//rhc app stop â€“a APPNAME -p YOURPASSWORD //yes, it uses your RHCloud
-account username and password for app management
-
-</p>
-
-ssh [521233d90ea45fd91e42096651d937e@john-pfeiffer.rhcloud.com][]  
-
-mv \~/app-root/data/apache-tomcat-7.0.29/webapps/\* app-root/repo/misc  
-
-mv app-root/repo/misc/ROOT \~/app-root/data/apache-tomcat-7.0.29/webapps
-
-</p>
-
-//rhc app startâ€“a APPNAME -p YOURPASSWORD
-
-</p>
-
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-- - - - - - - - - - - - - - - - - - - - - - - -  
-
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-- - - - - - - - - - - - - - - - - - - - - - - -  
-
-ONCE YOU'VE SSH'D IN...  
-
-help  
-
-ps|ls|  
-
-ctl\_app start [stop|restart|status]  
-
-mysql | mongo | quota
-
-</p>
-
-NOTE: sometimes it's easier to use a UI
-[https://openshift.redhat.com/app/console/applications][]  
-
-My Account -\> Public Keys
-
-</p>
-
-My Applications -\> APPLICATION\_NAME -\>
-
-</p>
-
-rhc app add-alias -a myapp --alias myapp.net
-
-</p>
-
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-- - - - - - - - - - - - - - - - - - - - - - - -  
-
-FUTURE THOUGHTS
-
-</p>
-
-Eclipse + m2e (maven plugin) + jetty plugin for fast and easy dependency
-management -\> mvn install + added custom script can put your .war into
-your local openshift repo for continuous deployment.
-
-</p>
-<p>
-</div>
-
-<p></div>
-</div>
-<div class="field field-name-taxonomy-vocabulary-1 field-type-taxonomy-term-reference field-label-above clearfix"></p>
-<h3 id="tags">tags:</h3>
-<ul>
-<li><a href="http://john-pfeiffer.com/category/tags/linux">Linux</a></li>
-<li><a href="http://john-pfeiffer.com/category/tags/programming">Programming</a></li>
-</ul>
-<p></div>
-</p></p>
+<p>Strongly advised to remove the manager and example apps (just deploy your .war's)</p>
+<p>//rhc app stop -a APPNAME -p YOURPASSWORD //yes, it uses your RHCloud
+account username and password for app management</p>
+<p>ssh <a href="mailto:521233d90ea45fd91e42096651d937e@john-pfeiffer.rhcloud.com">521233d90ea45fd91e42096651d937e@john-pfeiffer.rhcloud.com</a>  </p>
+<p>mv \~/app-root/data/apache-tomcat-7.0.29/webapps/* app-root/repo/misc  </p>
+<p>mv app-root/repo/misc/ROOT \~/app-root/data/apache-tomcat-7.0.29/webapps</p>
+<p>//rhc app start -a APPNAME -p YOURPASSWORD</p>
+<h3 id="once-youve-sshd-in">ONCE YOU'VE SSH'D IN...</h3>
+<p>help  </p>
+<p>ps|ls|  </p>
+<p>ctl_app start [stop|restart|status]  </p>
+<p>mysql | mongo | quota</p>
+<p>NOTE: sometimes it's easier to use a UI
+<a href="https://openshift.redhat.com/app/console/applications">https://openshift.redhat.com/app/console/applications</a>  </p>
+<p>My Account -> Public Keys</p>
+<p>My Applications -> APPLICATION_NAME -></p>
+<p>rhc app add-alias -a myapp --alias myapp.net</p>
+<h3 id="future-thoughts">FUTURE THOUGHTS</h3>
+<p>Eclipse + m2e (maven plugin) + jetty plugin for fast and easy dependency management -> mvn install + added custom script can put your .war into your local openshift repo for continuous deployment.</p>
 <div class="highlight"><pre><span class="nl">ssh:</span><span class="c1">//a261d0fc2932413694456e3473fdc972@APPNAME-DOMAIN.rhcloud.com/~/git/APPNAME.git/</span>
 <span class="nl">http:</span><span class="c1">//mirror.cc.columbia.edu/pub/software/apache/tomcat/tomcat-7/v7.0.29/bin/apache-tomcat-7.0.29.tar.gz</span>
 </pre></div>
