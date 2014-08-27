@@ -9234,188 +9234,107 @@ One down, many more to go!
 
 &lt;p&gt;&lt;/div&gt;
 &lt;/div&gt;
-&lt;/p&gt;&lt;/p&gt;</summary></entry><entry><title>linux install virtualbox 3 on debian 5 gui</title><link href="/linux-install-virtualbox-3-on-debian-5-gui" rel="alternate"></link><updated>2010-01-09T07:00:00Z</updated><author><name>John Pfeiffer</name></author><id>tag:,2010-01-09:linux-install-virtualbox-3-on-debian-5-gui</id><summary type="html">&lt;div class="field field-name-body field-type-text-with-summary field-label-hidden"&gt;
-&lt;div class="field-items"&gt;
-&lt;div class="field-item even"&gt;
-linux-install-virtualbox-3-on-debian-5-gui
-
-&lt;/p&gt;
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-- - - - - - - -
-
-NOTE: this is a command line installation of VirtualBox 3 proprietary
-driver edition...
-
-The "open source edition" does not include RDP into VM's nor USB drivers
-for VM's to access host USB's
-
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-- - - - - - - -
-
-PREPARATION STEPS
-
-uname -r //find your kernel version
-
-apt-cache search linux-headers //in the long list see if your version is
-there
-
-sudo apt-get install linux-headers-$(uname -r) //failed because I have
-"squeeze" 2.6.32-rc8-686
-
-//unfortunately the rc8 headers were missing from debian website
-
-apt-get install linux-headers-2.6.32-trunk-686 //manual way (instead of
-the fancy function returns a result)
-
-ls -ahl /usr/src //ensure the folders are there, sometimes no kernel
-folder
-
-export KERN\_DIR=/usr/src/kernels/2.6.32-trunk-686 //sometimes instead
-/usr/src/2.6.32-trunk-686
-
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-- - - - - - - -
-
-ACTUAL INSTALLATION
-
-http://www.virtualbox.org/wiki/Linux\_Downloads
-
-nano /etc/apt/sources.list //add line
-
-deb http://download.virtualbox.org/virtualbox/debian lenny non-free
-
-apt-get update
-
-apt-cache search virtualbox
-
-apt-get install virtualbox-3.0 //install without verification...
-
-sudo addusers username vboxusers
-
-OR usermod -a -G vboxusers USERNAME
-
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-- - - - - - - -
-
-GUI MANAGEMENT
-
-Setting up virtualbox-3.0 (3.0.12-54655\_Debian\_lenny) ...
-
-addgroup: The group \`vboxusers' already exists as a system group.
-Exiting.
-
-Messages emitted during module compilation will be logged to
-/var/log/vbox-install.log.
-
-Success!
-
-Starting VirtualBox kernel module:done..
-
-Setting up libsdl-ttf2.0-0 (2.0.9-1) ...
-
-type "VBoxManage -v" to see if everything is working (shows your
-VirtualBox version)
-
-VirtualBox //this command starts the GUI interface where you can easily
-create/manage
-
-//you can test it - from the command line create and start a VM, you'll
-see it appear in the GUI!
-
-VBoxManage createvm --name VM1 --register
-
-VBoxManage startvm VM1
-
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-- - - - - - - -
-
-VirtualBox GUI is pretty straightforward but I highly recommend that you
-skim the manual and
-
-especially that you learn to play with the command line VBoxManage
-
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-- - - - - - - -
-
-TROUBLESHOOTING
-
-/etc/init.d/vbox\_drv setup
-
-The above command often fails, and when it fails, check the install log
-
-nano /var/log/vbox-install.log
-
-\1. no kernel headers installed/downloaded or export (so the OS knows
-where!)
-
-\2. the user running VirtualBox needs to be in the /etc/group/vboxusers
-
-if you have not installed the right headers (e.g. Virtualbox is
-compiling a driver specific to your kernel)
-
-So you need gcc, make... also you need the kernel-headers source
-
-uname -a //will show you exactly what kernel you have installed
-
-ls -ahl /usr/src //will show you exactly what directories are there...
-see some varations:
-
-export KERN\_DIR=/usr/src/2.6.32-trunk-686
-
-export KERN\_DIR=/usr/src/kernels/2.6.32-trunk-686
-
-export KERN\_DIR=/usr/src/kernels/2.6.18-128.4.1.el5-x86\_64/
-
-sudo apt-get remove virtualbox-3.0 //the easiest method
-
-do all of the fixes (e.g. in my case I had to downgrade my kernel from
-2.6.32-rc8 to 2.6.32-trunk)
-
-sudo apt-get install linux-image-686
-
-sudo apt-get install linux-headers-$(uname -r)
-
-export KERN\_DIR=/usr/src/2.6.32-trunk-686
-
-sudo apt-get install virtualbox-3.0
-
-usermod -a -G vboxusers USERNAME
-
-after the reinstall hopefully you'll see:
-
-...
-
-Setting up libcurl3 (7.19.7-1) ...
-
-Setting up virtualbox-3.0 (3.0.12-54655\_Debian\_lenny) ...
-
-addgroup: The group \`vboxusers' already exists as a system group.
-Exiting.
-
-Messages emitted during module compilation will be logged to
-/var/log/vbox-install.log.
-
-Success!
-
-Starting VirtualBox kernel module:done..
-
-Setting up libsdl-ttf2.0-0 (2.0.9-1) ...
-
-type "VBoxManage -v" to see if everything is working (shows your
-VirtualBox version)
-
-&lt;p&gt;
-&lt;/div&gt;
-
-&lt;p&gt;&lt;/div&gt;
-&lt;/div&gt;
-&lt;/p&gt;&lt;/p&gt;</summary></entry><entry><title>How to use Drupal Blocks and a custom php hit counter block</title><link href="/how-to-use-drupal-blocks-and-a-custom-php-hit-counter-block" rel="alternate"></link><updated>2010-01-06T14:15:00Z</updated><author><name>john pfeiffer</name></author><id>tag:,2010-01-06:how-to-use-drupal-blocks-and-a-custom-php-hit-counter-block</id><summary type="html">&lt;p&gt;Blocks control the layout of the pages, i.e. a "footer" block appears at the bottom of each page.&lt;/p&gt;
+&lt;/p&gt;&lt;/p&gt;</summary></entry><entry><title>Install Virtualbox 3 on Debian 5 gui</title><link href="/install-virtualbox-3-on-debian-5-gui" rel="alternate"></link><updated>2010-01-09T07:00:00Z</updated><author><name>john pfeiffer</name></author><id>tag:,2010-01-09:install-virtualbox-3-on-debian-5-gui</id><summary type="html">
+&lt;p&gt;NOTE: this is a command line installation of VirtualBox 3 proprietary driver edition...&lt;/p&gt;
+&lt;p&gt;The "open source edition" does not include RDP into VM's nor USB drivers for VM's to access host USB's&lt;/p&gt;
+&lt;h3 id="preparation-steps"&gt;Preparation Steps&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;uname -r //find your kernel version&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;apt-cache search linux-headers //in the long list see if your version is there&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;sudo apt-get install linux-headers-$(uname -r) //failed because I have "squeeze" 2.6.32-rc8-686&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;unfortunately the rc8 headers were missing from debian website&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;code&gt;apt-get install linux-headers-2.6.32-trunk-686 //manual way (instead of the fancy function returns a result)&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;ls -ahl /usr/src //ensure the folders are there, sometimes no kernel folder&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;export KERN_DIR=/usr/src/kernels/2.6.32-trunk-686 //sometimes instead /usr/src/2.6.32-trunk-686&lt;/code&gt;&lt;/p&gt;
+&lt;h3 id="actual-installation"&gt;Actual Installation&lt;/h3&gt;
+&lt;p&gt;&lt;a href="http://www.virtualbox.org/wiki/Linux_Downloads"&gt;http://www.virtualbox.org/wiki/Linux_Downloads&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;nano /etc/apt/sources.list //add line&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="k"&gt;deb&lt;/span&gt; &lt;span class="s"&gt;http://download.virtualbox.org/virtualbox/debian&lt;/span&gt; &lt;span class="kp"&gt;lenny&lt;/span&gt; &lt;span class="kp"&gt;non-free&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;&lt;code&gt;apt-get update&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;apt-cache search virtualbox&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;apt-get install virtualbox-3.0 //install without verification...&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;sudo addusers username vboxusers&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;OR &lt;code&gt;usermod -a -G vboxusers USERNAME&lt;/code&gt;&lt;/p&gt;
+&lt;h3 id="gui-management"&gt;GUI Management&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="n"&gt;Setting&lt;/span&gt; &lt;span class="n"&gt;up&lt;/span&gt; &lt;span class="n"&gt;virtualbox&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mf"&gt;3.0&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mf"&gt;3.0.12&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;54655&lt;/span&gt;&lt;span class="n"&gt;_Debian_lenny&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;...&lt;/span&gt;
+&lt;span class="nl"&gt;addgroup:&lt;/span&gt; &lt;span class="n"&gt;The&lt;/span&gt; &lt;span class="n"&gt;group&lt;/span&gt; &lt;span class="err"&gt;\`&lt;/span&gt;&lt;span class="n"&gt;vboxusers&lt;/span&gt;&lt;span class="err"&gt;'&lt;/span&gt; &lt;span class="n"&gt;already&lt;/span&gt; &lt;span class="n"&gt;exists&lt;/span&gt; &lt;span class="n"&gt;as&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="n"&gt;system&lt;/span&gt; &lt;span class="n"&gt;group&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;
+&lt;span class="n"&gt;Exiting&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;
+
+&lt;span class="n"&gt;Messages&lt;/span&gt; &lt;span class="n"&gt;emitted&lt;/span&gt; &lt;span class="n"&gt;during&lt;/span&gt; &lt;span class="n"&gt;module&lt;/span&gt; &lt;span class="n"&gt;compilation&lt;/span&gt; &lt;span class="n"&gt;will&lt;/span&gt; &lt;span class="n"&gt;be&lt;/span&gt; &lt;span class="n"&gt;logged&lt;/span&gt; &lt;span class="n"&gt;to&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;var&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;log&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;vbox&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;install&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;log&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;
+&lt;span class="n"&gt;Success&lt;/span&gt;&lt;span class="o"&gt;!&lt;/span&gt;
+
+&lt;span class="n"&gt;Starting&lt;/span&gt; &lt;span class="n"&gt;VirtualBox&lt;/span&gt; &lt;span class="n"&gt;kernel&lt;/span&gt; &lt;span class="n"&gt;module&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="n"&gt;done&lt;/span&gt;&lt;span class="p"&gt;..&lt;/span&gt;
+
+&lt;span class="n"&gt;Setting&lt;/span&gt; &lt;span class="n"&gt;up&lt;/span&gt; &lt;span class="n"&gt;libsdl&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;ttf2&lt;/span&gt;&lt;span class="mf"&gt;.0&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mf"&gt;2.0.9&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;...&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;type &lt;code&gt;VBoxManage -v&lt;/code&gt; to see if everything is working (shows your VirtualBox version)&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;VirtualBox&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;this command starts the GUI interface where you can easily create/manage&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;you can test it - from the command line create and start a VM, you'll see it appear in the GUI!&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;VBoxManage createvm --name VM1 --register&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;VBoxManage startvm VM1&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;VirtualBox GUI is pretty straightforward but I highly recommend that you
+skim the manual and especially that you learn to play with the command line VBoxManage&lt;/p&gt;
+&lt;h3 id="troubleshooting"&gt;Troubleshooting&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;/etc/init.d/vbox_drv setup&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;The above command often fails, and when it fails, check the install log&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;code&gt;nano /var/log/vbox-install.log&lt;/code&gt;&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;no kernel headers installed/downloaded or export (so the OS knows where!)&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;the user running VirtualBox needs to be in the /etc/group/vboxusers&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;if you have not installed the right headers (e.g. Virtualbox is compiling a driver specific to your kernel)&lt;/p&gt;
+&lt;p&gt;So you need gcc, make... also you need the kernel-headers source&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;uname -a&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;will show you exactly what kernel you have installed&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;code&gt;ls -ahl /usr/src&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;will show you exactly what directories are there... &lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;see some varations:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="n"&gt;export&lt;/span&gt; &lt;span class="n"&gt;KERN_DIR&lt;/span&gt;&lt;span class="o"&gt;=/&lt;/span&gt;&lt;span class="n"&gt;usr&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;src&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="mf"&gt;2.6.32&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;trunk&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;686&lt;/span&gt;
+&lt;span class="n"&gt;export&lt;/span&gt; &lt;span class="n"&gt;KERN_DIR&lt;/span&gt;&lt;span class="o"&gt;=/&lt;/span&gt;&lt;span class="n"&gt;usr&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;src&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;kernels&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="mf"&gt;2.6.32&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;trunk&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;686&lt;/span&gt;
+&lt;span class="n"&gt;export&lt;/span&gt; &lt;span class="n"&gt;KERN_DIR&lt;/span&gt;&lt;span class="o"&gt;=/&lt;/span&gt;&lt;span class="n"&gt;usr&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;src&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;kernels&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="mf"&gt;2.6.18&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mf"&gt;128.4.1&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;el5&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;x86_64&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;&lt;code&gt;sudo apt-get remove virtualbox-3.0&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;the easiest method to uninstall&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;do all of the fixes (e.g. in my case I had to downgrade my kernel from 2.6.32-rc8 to 2.6.32-trunk)&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="n"&gt;sudo&lt;/span&gt; &lt;span class="n"&gt;apt&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;get&lt;/span&gt; &lt;span class="n"&gt;install&lt;/span&gt; &lt;span class="n"&gt;linux&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;image&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;686&lt;/span&gt;
+&lt;span class="n"&gt;sudo&lt;/span&gt; &lt;span class="n"&gt;apt&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;get&lt;/span&gt; &lt;span class="n"&gt;install&lt;/span&gt; &lt;span class="n"&gt;linux&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;headers&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="err"&gt;$&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;uname&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;r&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="n"&gt;export&lt;/span&gt; &lt;span class="n"&gt;KERN_DIR&lt;/span&gt;&lt;span class="o"&gt;=/&lt;/span&gt;&lt;span class="n"&gt;usr&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;src&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="mf"&gt;2.6.32&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;trunk&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;686&lt;/span&gt;
+&lt;span class="n"&gt;sudo&lt;/span&gt; &lt;span class="n"&gt;apt&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;get&lt;/span&gt; &lt;span class="n"&gt;install&lt;/span&gt; &lt;span class="n"&gt;virtualbox&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mf"&gt;3.0&lt;/span&gt;
+&lt;span class="n"&gt;usermod&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;G&lt;/span&gt; &lt;span class="n"&gt;vboxusers&lt;/span&gt; &lt;span class="n"&gt;USERNAME&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;after the reinstall hopefully you'll see:&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="n"&gt;Setting&lt;/span&gt; &lt;span class="n"&gt;up&lt;/span&gt; &lt;span class="n"&gt;libcurl3&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mf"&gt;7.19.7&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;...&lt;/span&gt;
+&lt;span class="n"&gt;Setting&lt;/span&gt; &lt;span class="n"&gt;up&lt;/span&gt; &lt;span class="n"&gt;virtualbox&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mf"&gt;3.0&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mf"&gt;3.0.12&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;54655&lt;/span&gt;&lt;span class="err"&gt;\&lt;/span&gt;&lt;span class="n"&gt;_Debian&lt;/span&gt;&lt;span class="err"&gt;\&lt;/span&gt;&lt;span class="n"&gt;_lenny&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;...&lt;/span&gt;
+&lt;span class="nl"&gt;addgroup:&lt;/span&gt; &lt;span class="n"&gt;The&lt;/span&gt; &lt;span class="n"&gt;group&lt;/span&gt; &lt;span class="err"&gt;\`&lt;/span&gt;&lt;span class="n"&gt;vboxusers&lt;/span&gt;&lt;span class="err"&gt;'&lt;/span&gt; &lt;span class="n"&gt;already&lt;/span&gt; &lt;span class="n"&gt;exists&lt;/span&gt; &lt;span class="n"&gt;as&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="n"&gt;system&lt;/span&gt; &lt;span class="n"&gt;group&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;
+&lt;span class="n"&gt;Exiting&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;
+
+&lt;span class="n"&gt;Messages&lt;/span&gt; &lt;span class="n"&gt;emitted&lt;/span&gt; &lt;span class="n"&gt;during&lt;/span&gt; &lt;span class="n"&gt;module&lt;/span&gt; &lt;span class="n"&gt;compilation&lt;/span&gt; &lt;span class="n"&gt;will&lt;/span&gt; &lt;span class="n"&gt;be&lt;/span&gt; &lt;span class="n"&gt;logged&lt;/span&gt; &lt;span class="n"&gt;to&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;var&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;log&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;vbox&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;install&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;log&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;
+&lt;span class="n"&gt;Success&lt;/span&gt;&lt;span class="o"&gt;!&lt;/span&gt;
+
+&lt;span class="n"&gt;Starting&lt;/span&gt; &lt;span class="n"&gt;VirtualBox&lt;/span&gt; &lt;span class="n"&gt;kernel&lt;/span&gt; &lt;span class="n"&gt;module&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="n"&gt;done&lt;/span&gt;&lt;span class="p"&gt;..&lt;/span&gt;
+
+&lt;span class="n"&gt;Setting&lt;/span&gt; &lt;span class="n"&gt;up&lt;/span&gt; &lt;span class="n"&gt;libsdl&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;ttf2&lt;/span&gt;&lt;span class="mf"&gt;.0&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mf"&gt;2.0.9&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;...&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;type &lt;code&gt;VBoxManage -v&lt;/code&gt; to see if everything is working (shows your VirtualBox version)&lt;/p&gt;</summary><category term="virtualbox"></category><category term="debian"></category></entry><entry><title>How to use Drupal Blocks and a custom php hit counter block</title><link href="/how-to-use-drupal-blocks-and-a-custom-php-hit-counter-block" rel="alternate"></link><updated>2010-01-06T14:15:00Z</updated><author><name>john pfeiffer</name></author><id>tag:,2010-01-06:how-to-use-drupal-blocks-and-a-custom-php-hit-counter-block</id><summary type="html">&lt;p&gt;Blocks control the layout of the pages, i.e. a "footer" block appears at the bottom of each page.&lt;/p&gt;
 &lt;p&gt;Each theme might have a different layout (and blocks available), and of course you can add your own custom blocks.&lt;/p&gt;
 &lt;p&gt;Using the WebUI you can modify the look of the site's layout pretty quickly:&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;Administer -&amp;gt; Blocks&lt;/code&gt;&lt;/p&gt;
@@ -9508,4 +9427,4 @@ VirtualBox version)
 &lt;h2 id="download-locations"&gt;download locations&lt;/h2&gt;
 &lt;p&gt;&lt;a href="http://www.centos.org"&gt;http://www.centos.org&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;&lt;a href="http://download.virtualbox.org/virtualbox/rpm/rhel/"&gt;http://download.virtualbox.org/virtualbox/rpm/rhel/&lt;/a&gt; &lt;/p&gt;
-&lt;p&gt;&lt;a href="http://download.virtualbox.org/virtualbox/debian/sun_vbox.asc"&gt;http://download.virtualbox.org/virtualbox/debian/sun_vbox.asc&lt;/a&gt;&lt;/p&gt;</summary></entry></feed>
+&lt;p&gt;&lt;a href="http://download.virtualbox.org/virtualbox/debian/sun_vbox.asc"&gt;http://download.virtualbox.org/virtualbox/debian/sun_vbox.asc&lt;/a&gt;&lt;/p&gt;</summary><category term="virtualbox"></category><category term="centos"></category></entry></feed>
