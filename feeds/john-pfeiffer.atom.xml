@@ -8619,50 +8619,122 @@ For a live working test of the above code:
 
 &lt;p&gt;&lt;/div&gt;
 &lt;/div&gt;
-&lt;/p&gt;&lt;/p&gt;</summary></entry><entry><title>365-4 First Real Windows Program</title><link href="/365-4-first-real-windows-program" rel="alternate"></link><updated>2010-01-18T15:05:00Z</updated><author><name>John Pfeiffer</name></author><id>tag:,2010-01-18:365-4-first-real-windows-program</id><summary type="html">&lt;div class="field field-name-body field-type-text-with-summary field-label-hidden"&gt;
-&lt;div class="field-items"&gt;
-&lt;div class="field-item even"&gt;
-Windows Programming has a steep curve in the beginning as there are many
-things to memorize (oops I mean learn and understand) as theoretically
-they've created the data structures and functions to get stuff on the
-screen.
+&lt;/p&gt;&lt;/p&gt;</summary></entry><entry><title>First real Windows program: 365 programming project day four</title><link href="/first-real-windows-program-365-programming-project-day-four" rel="alternate"></link><updated>2010-01-18T15:05:00Z</updated><author><name>john pfeiffer</name></author><id>tag:,2010-01-18:first-real-windows-program-365-programming-project-day-four</id><summary type="html">&lt;p&gt;Windows Programming has a steep curve in the beginning as there are many things to memorize (oops I mean learn and understand) as theoretically they've created the data structures and functions to get stuff on the screen.&lt;/p&gt;
+&lt;p&gt;Again I've used gcc 2.95 windows port with the special command on my wndclass-hello.c source code.&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;gcc.exe -o %1.exe %1 -Iinclude -Llib -Wall -ansi -mwindows&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;The code is extra commented as this is the foundation (of understanding) for future programs.&lt;/p&gt;
+&lt;p&gt;Basically the windows program loops waiting for some input (e.g. clicking an OK button or the X to close the window)... in the mean time I've written a simple text in the middle.&lt;/p&gt;
+&lt;p&gt;Most of the code is actually just trying to setup the data structure of a window (there are many options and variations that we might use later to extend our window's functionality).&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="cm"&gt;/* john pfeiffer basic MS windows program with comments 2009-01-18 */&lt;/span&gt;
 
-&lt;/p&gt;
+&lt;span class="p"&gt;#&lt;/span&gt;&lt;span class="k"&gt;include&lt;/span&gt;            &lt;span class="cm"&gt;/* this includes the whole Windows API */&lt;/span&gt;
 
-Again I've used gcc 2.95 windows port with the special command on my
-wndclass-hello.c source code.
+&lt;span class="cm"&gt;/* Declare the Windows procedure */&lt;/span&gt;
+&lt;span class="no"&gt;LRESULT&lt;/span&gt; &lt;span class="no"&gt;CALLBACK&lt;/span&gt; &lt;span class="n"&gt;WindowProcedure&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="no"&gt;HWND&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="no"&gt;UINT&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="no"&gt;WPARAM&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="no"&gt;LPARAM&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
 
-&lt;/p&gt;
+&lt;span class="k"&gt;int&lt;/span&gt; &lt;span class="no"&gt;WINAPI&lt;/span&gt; &lt;span class="n"&gt;WinMain&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="no"&gt;HINSTANCE&lt;/span&gt; &lt;span class="n"&gt;hThisInstance&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;    &lt;span class="cm"&gt;/* Handle to the current instance */&lt;/span&gt;
+                    &lt;span class="no"&gt;HINSTANCE&lt;/span&gt; &lt;span class="n"&gt;hPrevInstance&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;    &lt;span class="cm"&gt;/* Handle to the previous instance */&lt;/span&gt;
+                    &lt;span class="no"&gt;LPSTR&lt;/span&gt; &lt;span class="n"&gt;lpszArgument&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;         &lt;span class="cm"&gt;/* pointer to command line arguments */&lt;/span&gt;
+                    &lt;span class="k"&gt;int&lt;/span&gt; &lt;span class="n"&gt;ncmdshow&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;               &lt;span class="cm"&gt;/* show state of the window */&lt;/span&gt;
 
-gcc.exe -o %1.exe %1 -Iinclude -Llib -Wall -ansi -mwindows
+&lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="no"&gt;HWND&lt;/span&gt; &lt;span class="n"&gt;hwnd&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;               &lt;span class="cm"&gt;/* The handle for our window */&lt;/span&gt;
+    &lt;span class="no"&gt;MSG&lt;/span&gt; &lt;span class="n"&gt;messages&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;            &lt;span class="cm"&gt;/* Messages to the application  */&lt;/span&gt;
+    &lt;span class="no"&gt;WNDCLASS&lt;/span&gt; &lt;span class="n"&gt;wc&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;            &lt;span class="cm"&gt;/* Data structure for our defined windowclass */&lt;/span&gt;
 
-&lt;/p&gt;
 
-The code is extra commented as this is the foundation (of understanding)
-for future programs.
+    &lt;span class="n"&gt;wc&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;style&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mh"&gt;0&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="n"&gt;wc&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;lpfnWndProc&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;WindowProcedure&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;         &lt;span class="cm"&gt;/* This function is called by windows */&lt;/span&gt;
+    &lt;span class="n"&gt;wc&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;cbClsExtra&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mh"&gt;0&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;                        &lt;span class="cm"&gt;/* No extra bytes after the window class */&lt;/span&gt;
+    &lt;span class="n"&gt;wc&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;cbWndExtra&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mh"&gt;0&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;                        &lt;span class="cm"&gt;/* structure or the window instance */&lt;/span&gt;
+    &lt;span class="n"&gt;wc&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;hInstance&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;hThisInstance&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;             &lt;span class="cm"&gt;/* handle to the owner */&lt;/span&gt;
+    &lt;span class="n"&gt;wc&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;hIcon&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="no"&gt;NULL&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;                          &lt;span class="cm"&gt;/* no special application icon */&lt;/span&gt;
+    &lt;span class="n"&gt;wc&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;hCursor&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;LoadCursor&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="no"&gt;NULL&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="no"&gt;IDC_ARROW&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt; &lt;span class="cm"&gt;/* default cursor */&lt;/span&gt;
+    &lt;span class="n"&gt;wc&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;hbrBackground&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="no"&gt;HBRUSH&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="n"&gt;GetStockObject&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="no"&gt;LTGRAY_BRUSH&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;   &lt;span class="cm"&gt;/* the window background color */&lt;/span&gt;
+    &lt;span class="n"&gt;wc&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;lpszMenuName&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="no"&gt;NULL&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;                   &lt;span class="cm"&gt;/* No menu */&lt;/span&gt;
+    &lt;span class="n"&gt;wc&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;lpszClassName&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;WindowsApp&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;          &lt;span class="cm"&gt;/* the name of the windows class */&lt;/span&gt;
 
-&lt;/p&gt;
 
-Basically the windows program loops waiting for some input (e.g.
-clicking an OK button or the X to close the window)... in the mean time
-I've written a simple text in the middle. Most of the code is actually
-just trying to setup the data structure of a window (there are many
-options and variations that we might use later to extend our window's
-functionality).
 
-&lt;/p&gt;
-&lt;p&gt;
-    /* john pfeiffer basic MS windows program with comments 2009-01-18 */#include           /* this includes the whole Windows API *//* Declare the Windows procedure */LRESULT CALLBACK WindowProcedure(HWND, UINT, WPARAM, LPARAM);int WINAPI WinMain( HINSTANCE hThisInstance,    /* Handle to the current instance */                    HINSTANCE hPrevInstance,    /* Handle to the previous instance */                    LPSTR lpszArgument,         /* pointer to command line arguments */                    int ncmdshow)               /* show state of the window */{    HWND hwnd;               /* The handle for our window */    MSG messages;            /* Messages to the application  */    WNDCLASS wc;          /* Data structure for our defined windowclass */   wc.style = 0;    wc.lpfnWndProc = WindowProcedure;         /* This function is called by windows */   wc.cbClsExtra = 0;                        /* No extra bytes after the window class */    wc.cbWndExtra = 0;                        /* structure or the window instance */ wc.hInstance = hThisInstance;             /* handle to the owner */  wc.hIcon = NULL;                          /* no special application icon */  wc.hCursor = LoadCursor(NULL, IDC_ARROW); /* default cursor */    wc.hbrBackground = (HBRUSH) GetStockObject(LTGRAY_BRUSH);  /* the window background color */    wc.lpszMenuName = NULL;                   /* No menu */    wc.lpszClassName = "WindowsApp";        /* the name of the windows class */            /* Register the window class, if fail quit the program with an error value */    if( RegisterClass(&amp;wc) ==0 ){ return -1;   }    /* The class is registered, let's instantiate our window */    hwnd = CreateWindowEx(           1,                   /* Extended possibilites for variation */           "WindowsApp",         /* Classname */           "Windows App",       /* Application Title Text */           WS_OVERLAPPEDWINDOW, /* default window */           CW_USEDEFAULT,       /* default x position on the screen */           CW_USEDEFAULT,       /* default y position on the screen */           CW_USEDEFAULT,       /* initial window width */           CW_USEDEFAULT,       /* initial window height */           NULL,                /* no Parent window */           NULL,                /* No menu */           hThisInstance,       /* Program Instance handler */           NULL                 /* No pointer for passing parameters */           );    ShowWindow(hwnd, ncmdshow);      /* Make the window visible on the screen */  UpdateWindow(hwnd);             /* update with changes */    /* Run the message loop. It will run until GetMessage( ) returns 0 */    while( GetMessage(&amp;messages, NULL, 0, 0) )    {                TranslateMessage(&amp;messages); /* Translate virtual-key messages into character messages */        DispatchMessage(&amp;messages);  /* Send messages to WindowProcedure */    }    /* The program return-value is 0 - The value that PostQuitMessage( ) gave */    return messages.wParam;}/* This function is called by the Windows function DispatchMessage( ) */LRESULT CALLBACK WindowProcedure(                                    HWND hwnd,   /* Handle of window that received the msg */                                    UINT message,   /* The message */                                    WPARAM wParam,  /* Extra parameter (e.g. mouse x) */                                    LPARAM lParam)  /* Extra parameter (e.g. mouse y) */{   PAINTSTRUCT ps;             /* a structure for a paint job (see below */ RECT rect;                  /* a structure to hold rectangle values (e.g. x,y coordinates) */    HDC hdc;                /*handle to a DC (buffer) for the screen */    switch (message)                  /* handle the messages */    {     case WM_PAINT:           GetClientRect( hwnd, &amp;rect );       /* get the size of our window */         hdc = BeginPaint( hwnd, &amp;ps );      /* begin painting to the buffer */           DrawText( hdc, TEXT("Hello"), -1, &amp;rect, DT_CENTER | DT_VCENTER | DT_SINGLELINE);            /* the above actually draws the text, h &amp; v centered on a single line, to the buffer */          EndPaint( hwnd, &amp;ps);            return 0;     case WM_DESTROY:         PostQuitMessage(0);        /* send a WM_QUIT to the message queue */        break;        default:                   /* for messages that we don't deal with */            return DefWindowProc(hwnd, message, wParam, lParam);    }    return 0;}/* typedef struct tagPAINTSTRUCT {  HDC  hdc;       // A handle to the display DC to be used for painting.   BOOL fErase;            //Indicates whether the background must be erased.  RECT rcPaint;            //specifies upperleft and lowerright corners where to be painted                     //in device units relative to the upper-left corner of the client area.    BOOL fRestore;  BOOL fIncUpdate;  BYTE rgbReserved[32];}PAINTSTRUCT, *PPAINTSTRUCT;*/
+    &lt;span class="cm"&gt;/* Register the window class, if fail quit the program with an error value */&lt;/span&gt;
+    &lt;span class="k"&gt;if&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="n"&gt;RegisterClass&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;wc&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt;&lt;span class="mh"&gt;0&lt;/span&gt; &lt;span class="p"&gt;){&lt;/span&gt; &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mh"&gt;1&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;    &lt;span class="p"&gt;}&lt;/span&gt;
 
-Whew, another day done.
+    &lt;span class="cm"&gt;/* The class is registered, let&amp;#39;s instantiate our window */&lt;/span&gt;
+    &lt;span class="n"&gt;hwnd&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;CreateWindowEx&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;
+           &lt;span class="mh"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;                   &lt;span class="cm"&gt;/* Extended possibilites for variation */&lt;/span&gt;
+           &lt;span class="s"&gt;&amp;quot;WindowsApp&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;         &lt;span class="cm"&gt;/* Classname */&lt;/span&gt;
+           &lt;span class="s"&gt;&amp;quot;Windows App&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;       &lt;span class="cm"&gt;/* Application Title Text */&lt;/span&gt;
+           &lt;span class="no"&gt;WS_OVERLAPPEDWINDOW&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="cm"&gt;/* default window */&lt;/span&gt;
+           &lt;span class="no"&gt;CW_USEDEFAULT&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;       &lt;span class="cm"&gt;/* default x position on the screen */&lt;/span&gt;
+           &lt;span class="no"&gt;CW_USEDEFAULT&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;       &lt;span class="cm"&gt;/* default y position on the screen */&lt;/span&gt;
+           &lt;span class="no"&gt;CW_USEDEFAULT&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;       &lt;span class="cm"&gt;/* initial window width */&lt;/span&gt;
+           &lt;span class="no"&gt;CW_USEDEFAULT&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;       &lt;span class="cm"&gt;/* initial window height */&lt;/span&gt;
+           &lt;span class="no"&gt;NULL&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;                &lt;span class="cm"&gt;/* no Parent window */&lt;/span&gt;
+           &lt;span class="no"&gt;NULL&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;                &lt;span class="cm"&gt;/* No menu */&lt;/span&gt;
+           &lt;span class="n"&gt;hThisInstance&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;       &lt;span class="cm"&gt;/* Program Instance handler */&lt;/span&gt;
+           &lt;span class="no"&gt;NULL&lt;/span&gt;                 &lt;span class="cm"&gt;/* No pointer for passing parameters */&lt;/span&gt;
+           &lt;span class="p"&gt;);&lt;/span&gt;
 
-&lt;/p&gt;
-&lt;p&gt;
-&lt;/div&gt;
+    &lt;span class="n"&gt;ShowWindow&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;hwnd&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;ncmdshow&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;     &lt;span class="cm"&gt;/* Make the window visible on the screen */&lt;/span&gt;
+    &lt;span class="n"&gt;UpdateWindow&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;hwnd&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;             &lt;span class="cm"&gt;/* update with changes */&lt;/span&gt;
 
-&lt;p&gt;&lt;/div&gt;
-&lt;/div&gt;
-&lt;/p&gt;&lt;/p&gt;</summary></entry><entry><title>PHP is mad cool with CSS: 365 programming project day three</title><link href="/php-is-mad-cool-with-css-365-programming-project-day-three" rel="alternate"></link><updated>2010-01-17T22:02:00Z</updated><author><name>john pfeiffer</name></author><id>tag:,2010-01-17:php-is-mad-cool-with-css-365-programming-project-day-three</id><summary type="html">&lt;p&gt;PHP is similar to C which makes it easy for me to do interesting things.&lt;/p&gt;
+    &lt;span class="cm"&gt;/* Run the message loop. It will run until GetMessage( ) returns 0 */&lt;/span&gt;
+    &lt;span class="k"&gt;while&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="n"&gt;GetMessage&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;messages&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="no"&gt;NULL&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mh"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mh"&gt;0&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="p"&gt;{&lt;/span&gt;           
+        &lt;span class="n"&gt;TranslateMessage&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;messages&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt; &lt;span class="cm"&gt;/* Translate virtual-key messages into character messages */&lt;/span&gt;
+        &lt;span class="n"&gt;DispatchMessage&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;messages&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;  &lt;span class="cm"&gt;/* Send messages to WindowProcedure */&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt;
+
+    &lt;span class="cm"&gt;/* The program return-value is 0 - The value that PostQuitMessage( ) gave */&lt;/span&gt;
+    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;messages&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;wParam&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+
+&lt;span class="cm"&gt;/* This function is called by the Windows function DispatchMessage( ) */&lt;/span&gt;
+&lt;span class="no"&gt;LRESULT&lt;/span&gt; &lt;span class="no"&gt;CALLBACK&lt;/span&gt; &lt;span class="n"&gt;WindowProcedure&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;
+                                    &lt;span class="no"&gt;HWND&lt;/span&gt; &lt;span class="n"&gt;hwnd&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;   &lt;span class="cm"&gt;/* Handle of window that received the msg */&lt;/span&gt;
+                                    &lt;span class="no"&gt;UINT&lt;/span&gt; &lt;span class="n"&gt;message&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;   &lt;span class="cm"&gt;/* The message */&lt;/span&gt;
+                                    &lt;span class="no"&gt;WPARAM&lt;/span&gt; &lt;span class="n"&gt;wParam&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;  &lt;span class="cm"&gt;/* Extra parameter (e.g. mouse x) */&lt;/span&gt;
+                                    &lt;span class="no"&gt;LPARAM&lt;/span&gt; &lt;span class="n"&gt;lParam&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;  &lt;span class="cm"&gt;/* Extra parameter (e.g. mouse y) */&lt;/span&gt;
+&lt;span class="p"&gt;{&lt;/span&gt;
+
+    &lt;span class="no"&gt;PAINTSTRUCT&lt;/span&gt; &lt;span class="n"&gt;ps&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;             &lt;span class="cm"&gt;/* a structure for a paint job (see below */&lt;/span&gt;
+    &lt;span class="no"&gt;RECT&lt;/span&gt; &lt;span class="n"&gt;rect&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;                  &lt;span class="cm"&gt;/* a structure to hold rectangle values (e.g. x,y coordinates) */&lt;/span&gt;
+    &lt;span class="no"&gt;HDC&lt;/span&gt; &lt;span class="n"&gt;hdc&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;                &lt;span class="cm"&gt;/*handle to a DC (buffer) for the screen */&lt;/span&gt;
+
+    &lt;span class="n"&gt;switch&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;message&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;                  &lt;span class="cm"&gt;/* handle the messages */&lt;/span&gt;
+    &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="k"&gt;case&lt;/span&gt; &lt;span class="nl"&gt;WM_PAINT:&lt;/span&gt;
+            &lt;span class="n"&gt;GetClientRect&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="n"&gt;hwnd&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;rect&lt;/span&gt; &lt;span class="p"&gt;);&lt;/span&gt;       &lt;span class="cm"&gt;/* get the size of our window */&lt;/span&gt;
+            &lt;span class="n"&gt;hdc&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;BeginPaint&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="n"&gt;hwnd&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;ps&lt;/span&gt; &lt;span class="p"&gt;);&lt;/span&gt;      &lt;span class="cm"&gt;/* begin painting to the buffer */&lt;/span&gt;
+            &lt;span class="n"&gt;DrawText&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="n"&gt;hdc&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="no"&gt;TEXT&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;Hello&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mh"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;rect&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="no"&gt;DT_CENTER&lt;/span&gt; &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="no"&gt;DT_VCENTER&lt;/span&gt; &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="no"&gt;DT_SINGLELINE&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+            &lt;span class="cm"&gt;/* the above actually draws the text, h &amp;amp; v centered on a single line, to the buffer */&lt;/span&gt;
+            &lt;span class="n"&gt;EndPaint&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="n"&gt;hwnd&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;ps&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+            &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="mh"&gt;0&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+
+        &lt;span class="k"&gt;case&lt;/span&gt; &lt;span class="nl"&gt;WM_DESTROY:&lt;/span&gt;
+            &lt;span class="n"&gt;PostQuitMessage&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mh"&gt;0&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;        &lt;span class="cm"&gt;/* send a WM_QUIT to the message queue */&lt;/span&gt;
+        &lt;span class="k"&gt;break&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+        &lt;span class="k"&gt;default&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;                   &lt;span class="cm"&gt;/* for messages that we don&amp;#39;t deal with */&lt;/span&gt;
+            &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;DefWindowProc&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;hwnd&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;message&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;wParam&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;lParam&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt;
+    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="mh"&gt;0&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+
+&lt;span class="cm"&gt;/* &lt;/span&gt;
+&lt;span class="cm"&gt;typedef struct tagPAINTSTRUCT {&lt;/span&gt;
+&lt;span class="cm"&gt;  HDC  hdc;     // A handle to the display DC to be used for painting. &lt;/span&gt;
+&lt;span class="cm"&gt;  BOOL fErase;          //Indicates whether the background must be erased.&lt;/span&gt;
+&lt;span class="cm"&gt;  RECT rcPaint;         //specifies upperleft and lowerright corners where to be painted&lt;/span&gt;
+&lt;span class="cm"&gt;                        //in device units relative to the upper-left corner of the client area.  &lt;/span&gt;
+&lt;span class="cm"&gt;  BOOL fRestore;&lt;/span&gt;
+&lt;span class="cm"&gt;  BOOL fIncUpdate;&lt;/span&gt;
+&lt;span class="cm"&gt;  BYTE rgbReserved[32];&lt;/span&gt;
+&lt;span class="cm"&gt;}PAINTSTRUCT, *PPAINTSTRUCT;&lt;/span&gt;
+&lt;span class="cm"&gt;*/&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Whew, another day done.&lt;/p&gt;</summary><category term="win32"></category><category term="gcc"></category></entry><entry><title>PHP is mad cool with CSS: 365 programming project day three</title><link href="/php-is-mad-cool-with-css-365-programming-project-day-three" rel="alternate"></link><updated>2010-01-17T22:02:00Z</updated><author><name>john pfeiffer</name></author><id>tag:,2010-01-17:php-is-mad-cool-with-css-365-programming-project-day-three</id><summary type="html">&lt;p&gt;PHP is similar to C which makes it easy for me to do interesting things.&lt;/p&gt;
 &lt;p&gt;The php manual webpage (&lt;a href="http://php.net/manual/en"&gt;http://php.net/manual/en&lt;/a&gt;) is brilliant! Don't you wish everybody had a full public API, easy menus, working examples, searchable and with the best user comments that really flesh out the bugs?&lt;/p&gt;
 &lt;p&gt;CSS is so much better than HTML tables - it really revolutionizes the simplicity, maintainability, and power of displaying things on the web.&lt;/p&gt;
 &lt;p&gt;Put them together and you have miracles like Drupal.&lt;/p&gt;
@@ -8724,7 +8796,7 @@ Whew, another day done.
 
 &lt;span class="x"&gt;&amp;lt;/body&amp;gt;   &lt;/span&gt;
 &lt;span class="x"&gt;&amp;lt;/html&amp;gt;&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;</summary></entry><entry><title>Windows MessageBox: 365 programming project day two</title><link href="/windows-messagebox-365-programming-project-day-two" rel="alternate"></link><updated>2010-01-16T13:07:00Z</updated><author><name>john pfeiffer</name></author><id>tag:,2010-01-16:windows-messagebox-365-programming-project-day-two</id><summary type="html">
+&lt;/pre&gt;&lt;/div&gt;</summary><category term="php"></category><category term="css"></category></entry><entry><title>Windows MessageBox: 365 programming project day two</title><link href="/windows-messagebox-365-programming-project-day-two" rel="alternate"></link><updated>2010-01-16T13:07:00Z</updated><author><name>john pfeiffer</name></author><id>tag:,2010-01-16:windows-messagebox-365-programming-project-day-two</id><summary type="html">
 &lt;h2 id="overview"&gt;Overview&lt;/h2&gt;
 &lt;p&gt;Programming in Windows is like building with legos. 
 It can be easy and fun but at the same time very few of us have houses or cars made of legos. 
@@ -8759,7 +8831,7 @@ While not very useful it very often inspires new programmers with the power that
 &lt;p&gt;I compiled the above with a windows port of GCC that I like because I can zip and move it around and it still always works.&lt;/p&gt;
 &lt;h2 id="gcc-compile-windows-app"&gt;gcc compile windows app&lt;/h2&gt;
 &lt;p&gt;I DID have to come up with the funny batch file to actually make the GCC compile it on windows:&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;gcc.exe -o %1.exe %1 -Iinclude -Llib -Wall -ansi -mwindows&lt;/code&gt;&lt;/p&gt;</summary></entry><entry><title>Translate This!</title><link href="/translate-this" rel="alternate"></link><updated>2010-01-16T12:32:00Z</updated><author><name>john pfeiffer</name></author><id>tag:,2010-01-16:translate-this</id><summary type="html">&lt;p&gt;As I can speak bulgarian, french, and english (and almost speak italian and spanish) I realized that having my site entirely in english is limiting it's popularity.&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;gcc.exe -o %1.exe %1 -Iinclude -Llib -Wall -ansi -mwindows&lt;/code&gt;&lt;/p&gt;</summary><category term="Win32"></category><category term="gcc"></category></entry><entry><title>Translate This!</title><link href="/translate-this" rel="alternate"></link><updated>2010-01-16T12:32:00Z</updated><author><name>john pfeiffer</name></author><id>tag:,2010-01-16:translate-this</id><summary type="html">&lt;p&gt;As I can speak bulgarian, french, and english (and almost speak italian and spanish) I realized that having my site entirely in english is limiting it's popularity.&lt;/p&gt;
 &lt;p&gt;Therefore I recommend the following options to ensure that you can understand life, the universe, and the meaning of happiness:&lt;/p&gt;
 &lt;p&gt;&lt;a href="http://translate.google.com"&gt;http://translate.google.com&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;&lt;a href="http://www.babelfish.com"&gt;http://www.babelfish.com&lt;/a&gt;&lt;/p&gt;
