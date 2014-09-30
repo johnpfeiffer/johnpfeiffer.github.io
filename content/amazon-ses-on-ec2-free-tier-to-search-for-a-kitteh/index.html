@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en-US">
+    <head>
+        <meta charset="utf-8"> 
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="author" content="john pfeiffer" />
+        <meta name="copyright" content="john pfeiffer" />
+
+<meta name="keywords" content="AWS, EC2, SES, cron, linux, " />
+        <title>Amazon SES on EC2 free tier to search for a kitteh!  · johnpfeiffer
+</title>
+        <link href="http://cdn-images.mailchimp.com/embedcode/slim-081711.css" rel="stylesheet" type="text/css">
+        <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="http://johnpfeiffer.bitbucket.org/theme/css/style.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="http://johnpfeiffer.bitbucket.org/theme/css/solarizedlight.css" media="screen">
+        <link rel="shortcut icon" href="http://johnpfeiffer.bitbucket.org/theme/images/favicon.ico" type="image/x-icon" />
+        <link rel="apple-touch-icon" href="http://johnpfeiffer.bitbucket.org/theme/images/apple-touch-icon.png" />
+        <link rel="apple-touch-icon" sizes="57x57" href="http://johnpfeiffer.bitbucket.org/theme/images/apple-touch-icon-57x57.png" />
+        <link rel="apple-touch-icon" sizes="72x72" href="http://johnpfeiffer.bitbucket.org/theme/images/apple-touch-icon-72x72.png" />
+        <link rel="apple-touch-icon" sizes="114x114" href="http://johnpfeiffer.bitbucket.org/theme/images/apple-touch-icon-114x114.png" />
+        <link rel="apple-touch-icon" sizes="144x144" href="http://johnpfeiffer.bitbucket.org/theme/images/apple-touch-icon-144x144.png" />
+        <link rel="icon" href="http://johnpfeiffer.bitbucket.org/theme/images/apple-touch-icon-144x144.png" />
+    </head>
+    <body>
+        <div id="content-sans-footer">
+        <div class="navbar navbar-static-top">
+            <div class="navbar-inner">
+                <div class="container">
+                    <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </a>
+                    <a class="brand" href="http://johnpfeiffer.bitbucket.org/"><span class=site-name>johnpfeiffer</span></a>
+                    <div class="nav-collapse collapse">
+                        <ul class="nav pull-right top-menu">
+                            <li ><a href="http://johnpfeiffer.bitbucket.org">Home</a></li>
+                            <li ><a href="http://johnpfeiffer.bitbucket.org/john-likes">John Likes</a></li>
+                            <li ><a href="http://johnpfeiffer.bitbucket.org/categories.html">Categories</a></li>
+                            <li ><a href="http://johnpfeiffer.bitbucket.org/tags.html">Tags</a></li>
+                            <li ><a href="http://johnpfeiffer.bitbucket.org/archives.html">Archives</a></li>
+                            <li><form class="navbar-search" action="http://johnpfeiffer.bitbucket.org/search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container-fluid">
+            <div class="row-fluid">
+                <div class="span1"></div>
+                <div class="span10">
+<article>
+<div class="row-fluid">
+    <header class="page_header span10 offset2">
+    <h1><a href="http://johnpfeiffer.bitbucket.org/content/amazon-ses-on-ec2-free-tier-to-search-for-a-kitteh"> Amazon SES on EC2 free tier to search for a kitteh!  </a></h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+    <div class="span2 table-of-content">
+        <nav>
+        <h4>Contents</h4>
+        <div class="toc">
+<ul>
+<li><a href="#mission-hourly-poll-of-a-website">Mission: hourly poll of a website</a></li>
+<li><a href="#amazon-free-services-tier">Amazon Free services tier</a></li>
+<li><a href="#amazon-ec2-missing-some-perl">Amazon EC2 Missing some perl</a></li>
+<li><a href="#searchsh">Search.sh</a></li>
+<li><a href="#must-move-to-the-directory-to-use-the-sespm">must move to the directory to use the SES.pm</a></li>
+<li><a href="#httpdocsamazonwebservicescomseslatestdeveloperguide-for-full-details-about-emailpl">http://docs.amazonwebservices.com/ses/latest/DeveloperGuide/ for full details about email.pl</a><ul>
+<li><a href="#more-info">more info</a></li>
+</ul>
+</li>
+</ul>
+</div>
+        </nav>
+    </div>
+    <div class="span8 article-content">
+
+            
+<h3 id="mission-hourly-poll-of-a-website">Mission: hourly poll of a website</h3>
+<p>...to find out if the Kitteh is available for adoption and immediate email notification if Kitteh is found.</p>
+<p>Estimated time to complete: between 15 minutes and hours (depending on
+setting up your EC2 instance, SES service, etc.)</p>
+<p>Skills: Amazon EC2 setup, SSH, centos yum, bash, wget, cronjob</p>
+<h3 id="amazon-free-services-tier">Amazon Free services tier</h3>
+<p>If you have an Amazon EC2 instance running (e.g. EC2 Linux Micro
+Instance in Free Tier = centos!)  </p>
+<p>(And you're not running over the GET/POST upload/download free tier
+bandwidths)</p>
+<p>(If you don't know how to setup a quick Amazon Linux Micro Instance in
+the free tier search this blog for more info)</p>
+<p>Sign up for SES (then receive a verification email for your Amazon AWS Account)  </p>
+<p>Account Security Credentials (for AWS access identifiers)  </p>
+<p>Use nano or vi to create a file "aws-credentials" (Amazon's sample
+below)</p>
+<div class="highlight"><pre>    <span class="n">AWSAccessKeyId</span><span class="o">=</span><span class="mo">022</span><span class="n">QF06E7MXBSH9DHM</span>  
+        <span class="n">AWSSecretKey</span><span class="o">=</span><span class="n">kWcrlUX5JEDGM</span><span class="o">/</span><span class="n">LtmEENI</span><span class="o">/</span><span class="n">aVmYvHNif5zB</span><span class="o">+</span><span class="n">d9</span><span class="o">+</span>
+</pre></div>
+<p>Download the example perl scripts via:
+<a href="http://aws.amazon.com/code/Amazon-SES">http://aws.amazon.com/code/Amazon-SES</a></p>
+<p><code>wget
+&lt;http://aws-catalog-download-files.s3.amazonaws.com/AmazonSES-2011-02-02.zip&gt;</code></p>
+<p><code>unzip AmazonSES-2011-02-02.zip</code></p>
+<p><code>chmod +x /home/ec2-user/*.pl</code></p>
+<p><code>/home/ec2-user/bin/ses-verify-email-address.pl -k aws-credentials -v
+[youreemail@domain.com]</code></p>
+<hr/>
+<h3 id="amazon-ec2-missing-some-perl">Amazon EC2 Missing some perl</h3>
+<div class="highlight"><pre><span class="s">"Can't locate XML/LibXML.pm in @INC (@INC contains:</span>
+
+<span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">lib64</span><span class="o">/</span><span class="n">perl5</span>
+<span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">share</span><span class="o">/</span><span class="n">perl5</span>       
+<span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">share</span><span class="o">/</span><span class="n">perl5</span> 
+<span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">lib64</span><span class="o">/</span><span class="n">perl5</span>   
+<span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">share</span><span class="o">/</span><span class="n">perl5</span>
+<span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">share</span><span class="o">/</span><span class="n">perl5</span>
+<span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">lib64</span><span class="o">/</span><span class="n">perl5</span>
+<span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">share</span><span class="o">/</span><span class="n">perl5</span>
+<span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">lib64</span><span class="o">/</span><span class="n">perl5</span><span class="o">/</span><span class="n">site_perl</span><span class="o">/</span><span class="mf">5.10.0</span><span class="o">/</span><span class="n">x86_64</span><span class="o">-</span><span class="n">linux</span><span class="o">-</span><span class="kr">thread</span><span class="o">-</span><span class="n">multi</span>
+
+<span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">perl5</span><span class="o">/</span><span class="n">site_perl</span><span class="o">/</span><span class="mf">5.10.0</span>
+<span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">lib64</span><span class="o">/</span><span class="n">perl5</span><span class="o">/</span><span class="n">vendor_perl</span><span class="o">/</span><span class="mf">5.10.0</span><span class="o">/</span><span class="n">x86_64</span><span class="o">-</span><span class="n">linux</span><span class="o">-</span><span class="kr">thread</span><span class="o">-</span><span class="n">multi</span>     
+<span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">perl5</span><span class="o">/</span><span class="n">vendor_perl</span>
+<span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">perl5</span><span class="o">/</span><span class="n">site_perl</span> <span class="p">.)</span> <span class="n">at</span> <span class="p">.</span><span class="o">/</span><span class="n">ses</span><span class="o">-</span><span class="n">verify</span><span class="o">-</span><span class="n">email</span><span class="o">-</span><span class="n">address</span><span class="p">.</span><span class="n">pl</span> <span class="n">line</span> <span class="mf">26.</span>
+
+<span class="n">BEGIN</span> <span class="n">failed</span><span class="o">--</span><span class="n">compilation</span> <span class="n">aborted</span> <span class="n">at</span> <span class="p">.</span><span class="o">/</span><span class="n">ses</span><span class="o">-</span><span class="n">verify</span><span class="o">-</span><span class="n">email</span><span class="o">-</span><span class="n">address</span><span class="p">.</span><span class="n">pl</span> <span class="n">line</span> <span class="mf">26.</span><span class="s">"</span>
+</pre></div>
+<p>THANKS AMAZON! Using their preconfigured Instance means they don't have all of the Perl packages installed...</p>
+<p><code>sudo yum install perl-XML-LibXML perl-digest-SHA</code></p>
+<p><code>sudo yum provides */SHA.pm</code></p>
+<blockquote>
+<p>tells me what other packages I might have missed...</p>
+</blockquote>
+<p><code>sudo yum search perl-Digest</code></p>
+<p><code>sudo yum install perl-Digest-SHA</code></p>
+<blockquote>
+<p>What a difference a D versus d makes!</p>
+</blockquote>
+<p><em>sudo yum perl-libxml-perl libxml2-devel perl-IO-Socket-SSL libxslt-devel ?</em></p>
+<p>Debian: <code>sudo apt-get install libio-socket-ssl-perl libxml-libxml-perl</code></p>
+<p><code>tail /var/log/maillog</code> for troubleshooting sendmail...</p>
+<hr/>
+<p><code>/home/ec2-user/bin/ses-verify-email-address.pl -k aws-credentials -v
+youreemail@domain.com</code></p>
+<p>use the email account you gave above for verification and click on the
+link...  </p>
+<p>You have successfully verified an email address with Amazon Simple Email Service.</p>
+<hr/>
+<p>\~/amazonses/bin/ses-send-email.pl -k \~/amazonses/bin/aws-credentials
+-s "Test AWS" -f <a href="mailto:youremail@domain.com">youremail@domain.com</a>
+<a href="mailto:youremail@domain.com">youremail@domain.com</a>,<a href="mailto:secondemail@domain.com">secondemail@domain.com</a> &lt;
+\~/kittysearch/result.txt</p>
+
+<hr/>
+<hr/>
+<p>#/bin/bash</p>
+
+<p>wget -O \~/kittysearch/page1.htm
+'[http://adopt.hssv.org/search/searchResults.asp?task=search&amp;searchid=&amp;adv...][]'</p>
+
+<p>wget -O \~/kittysearch/page2.htm
+'[http://adopt.hssv.org/search/searchResults.asp?tpage=2&amp;task=search&amp;searc...][]'</p>
+
+<p>wget -O \~/kittysearch/page3.htm
+'[http://adopt.hssv.org/search/searchResults.asp?tpage=3&amp;task=search&amp;searc...][]'</p>
+
+<p>grep -i "bandit" \~/kittysearch/page1.htm \~/kittysearch/page2.htm
+\~/kittysearch/page3.htm &gt; \~/kittysearch/result.txt</p>
+
+<p>if [ -s \~/kittysearch/result.txt ] then</p>
+
+<p># must move to the directory to use the SES.pm  </p>
+<p>cd \~/amazonses/bin</p>
+
+<p>./ses-send-email.pl -k \~/amazonses/bin/aws-credentials -s "Test AWS" -f
+[myemail@domain.com][]
+[myemail@domain.com][],[secondrecipient@domain.com][] &lt;
+\~/kittysearch/result.txt</p>
+
+<p>fi</p>
+
+<p># [http://docs.amazonwebservices.com/ses/latest/DeveloperGuide/][] for
+full details about email.pl</p>
+
+<hr/>
+<hr/>
+<p>~/amazonses/bin/ses-send-email.pl -k ~/amazonses/bin/aws-credentials -s "Test AWS" -f youremail@domain.com youremail@domain.com,secondemail@domain.com &lt; ~/kittysearch/result.txt</p>
+<h3 id="searchsh">Search.sh</h3>
+<div class="highlight"><pre><span class="cp">#/bin/bash</span>
+
+<span class="n">wget</span> <span class="o">-</span><span class="n">O</span> <span class="o">~/</span><span class="n">kittysearch</span><span class="o">/</span><span class="n">page1</span><span class="p">.</span><span class="n">htm</span> <span class="err">'</span><span class="n">http</span><span class="o">:</span><span class="c1">//adopt.hssv.org/search/searchResults.asp?task=search&amp;searchid=&amp;adv...'</span>
+
+<span class="n">wget</span> <span class="o">-</span><span class="n">O</span> <span class="o">~/</span><span class="n">kittysearch</span><span class="o">/</span><span class="n">page2</span><span class="p">.</span><span class="n">htm</span> <span class="err">'</span><span class="n">http</span><span class="o">:</span><span class="c1">//adopt.hssv.org/search/searchResults.asp?tpage=2&amp;task=search&amp;searc...'</span>
+
+<span class="n">wget</span> <span class="o">-</span><span class="n">O</span> <span class="o">~/</span><span class="n">kittysearch</span><span class="o">/</span><span class="n">page3</span><span class="p">.</span><span class="n">htm</span> <span class="err">'</span><span class="n">http</span><span class="o">:</span><span class="c1">//adopt.hssv.org/search/searchResults.asp?tpage=3&amp;task=search&amp;searc...'</span>
+
+<span class="n">grep</span> <span class="o">-</span><span class="n">i</span> <span class="s">"bandit"</span> <span class="o">~/</span><span class="n">kittysearch</span><span class="o">/</span><span class="n">page1</span><span class="p">.</span><span class="n">htm</span> <span class="o">~/</span><span class="n">kittysearch</span><span class="o">/</span><span class="n">page2</span><span class="p">.</span><span class="n">htm</span> <span class="o">~/</span><span class="n">kittysearch</span><span class="o">/</span><span class="n">page3</span><span class="p">.</span><span class="n">htm</span> <span class="o">&gt;</span> <span class="o">~/</span><span class="n">kittysearch</span><span class="o">/</span><span class="n">result</span><span class="p">.</span><span class="n">txt</span>
+
+<span class="k">if</span> <span class="p">[</span> <span class="o">-</span><span class="n">s</span> <span class="o">~/</span><span class="n">kittysearch</span><span class="o">/</span><span class="n">result</span><span class="p">.</span><span class="n">txt</span> <span class="p">];</span> <span class="n">then</span>
+</pre></div>
+<h1 id="must-move-to-the-directory-to-use-the-sespm">must move to the directory to use the SES.pm</h1>
+<p>cd ~/amazonses/bin</p>
+<p>./ses-send-email.pl -k ~/amazonses/bin/aws-credentials -s "Test AWS" -f myemail@domain.com myemail@domain.com,secondrecipient@domain.com &lt; ~/kittysearch/result.txt</p>
+<p>fi</p>
+<h1 id="httpdocsamazonwebservicescomseslatestdeveloperguide-for-full-details-about-emailpl">http://docs.amazonwebservices.com/ses/latest/DeveloperGuide/ for full details about email.pl</h1>
+<hr/>
+<p>crontab -e
+(i key to enter input in vi)
+55 * <em> * </em> /home/ec2-user/kittysearch/kittysearch.sh
+(escape key gets : then x to save and quit)</p>
+<hr/>
+<p>Running the script from a different directory or CRON gets the error: "Can't locate SES.pm in @INC"</p>
+<p>cp /home/ec2-user/amazonses/bin/SES.pm /home/ec2-user/kittysearch</p>
+<p>FIXED! # must move to the directory in the script using cd first to have access to SES.pm</p>
+<hr/>
+<p>&lt; you can send 2,000 messages for free each day when you call Amazon SES from an Amazon EC2
+instance directly or through AWS Elastic Beanstalk. (Note bandwidth charges may still apply)</p>
+<div class="highlight"><pre><span class="o">&lt;</span><span class="n">http</span><span class="o">:</span><span class="c1">//kittyandbear.net/john/virtualization/amazon-aws-free-tier-linux-web-server.txt&gt;</span>
+</pre></div>
+<p><a href="http://aws.amazon.com/code/Amazon-SES">http://aws.amazon.com/code/Amazon-SES</a></p>
+<p><a href="http://aws-catalog-download-files.s3.amazonaws.com/AmazonSES-2011-02-02.zip">http://aws-catalog-download-files.s3.amazonaws.com/AmazonSES-2011-02-02.zip</a></p>
+<div class="highlight"><pre><span class="o">&lt;</span><span class="n">http</span><span class="o">:</span><span class="c1">//adopt.hssv.org/search/searchResults.asp?task=search&amp;searchid=&amp;advanced=&amp;s=adoption&amp;animalType=2%2C15&amp;statusID=3&amp;state=&amp;regionID=&amp;submitbtn=Find+Animals&gt;</span>
+<span class="o">&lt;</span><span class="n">http</span><span class="o">:</span><span class="c1">//adopt.hssv.org/search/searchResults.asp?tpage=2&amp;task=search&amp;searchid=&amp;advanced=&amp;s=&amp;animalType=2,15&amp;statusID=3&amp;state=&amp;regionID=&amp;submitbtn=Find+Animals&gt;</span>
+
+<span class="o">&lt;</span><span class="n">http</span><span class="o">:</span><span class="c1">//adopt.hssv.org/search/searchResults.asp?tpage=3&amp;task=search&amp;searchid=&amp;advanced=&amp;s=&amp;animalType=2,15&amp;statusID=3&amp;state=&amp;regionID=&amp;submitbtn=Find+Animals&gt;</span>
+</pre></div>
+<h3 id="more-info">more info</h3>
+<p>Apparently since 2011 there has come along infrastructure like page2rss and ifttt that makes these kind of custom solutions less helpful (unless you need customization!)</p>
+            <aside>
+            <hr/>
+            <nav>
+            <ul class="articles_timeline">
+ 
+                <li class="previous_article">« <a href="http://johnpfeiffer.bitbucket.org/content/command-line-dos-networking" title="Previous: Command Line DOS Networking">Command Line DOS Networking</a></li>
+ 
+                <li class="next_article"><a href="http://johnpfeiffer.bitbucket.org/time-for-programmers" title="Next: Time for Programmers">Time for Programmers</a> »</li>
+            </ul>
+            </nav>
+            </aside>
+        </div>
+        <section>
+        <div class="span2" style="float:right;font-size:0.9em;">
+ 
+            <h4>Published</h4>
+            <time pubdate="pubdate" datetime="2011-02-28T00:07:00">Feb 28, 2011</time>
+            <h4>Category</h4>
+            <a class="category-link" href="/categories.html#linux-ref">linux</a> 
+            <h4>Tags</h4>
+            <ul class="list-of-tags tags-in-article"> 
+                <li><a href="/tags.html#AWS-ref">AWS
+                    <span>1</span>
+</a></li>
+                <li><a href="/tags.html#cron-ref">cron
+                    <span>1</span>
+</a></li>
+                <li><a href="/tags.html#EC2-ref">EC2
+                    <span>1</span>
+</a></li>
+                <li><a href="/tags.html#SES-ref">SES
+                    <span>1</span>
+</a></li>
+            </ul>
+
+        </div>
+        </section>
+</div>
+</article>
+                </div>
+                <div class="span1"></div>
+            </div>
+        </div>
+    </div>
+<footer>
+<div id="footer">
+    <ul class="footer-content">
+    </ul>
+</div>
+</footer>            <script src="http://code.jquery.com/jquery.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+    </body>
+</html>
