@@ -114,6 +114,7 @@
 <blockquote>
 <p>ubuntu/images/ubuntu-precise-12.04-amd64-server-20130204 - ami-7747d01e , no ebs storage - just instance storage</p>
 <p>vagrant will by default upload all folders and files in your "project" folder where the Vagrantfile is located</p>
+<p>vagrant will start with the current working directory and look for a Vagrantfile, then go up one directory until it finds one: <a href="https://docs.vagrantup.com/v2/vagrantfile/">https://docs.vagrantup.com/v2/vagrantfile/</a></p>
 </blockquote>
 <p><code>vagrant plugin install vagrant-aws</code></p>
 <p><code>vagrant up --provider=aws --debug</code></p>
@@ -201,6 +202,12 @@
         <span class="n">aws</span><span class="p">.</span><span class="n">tags</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s">"Name"</span> <span class="o">=&gt;</span> <span class="s">"MyCloudInstance"</span><span class="p">,</span>
         <span class="p">}</span>
+        <span class="k">if</span> <span class="n">ENV</span><span class="p">[</span><span class="err">'</span><span class="n">bamboo_aws_use_iops</span><span class="err">'</span><span class="p">]</span>
+          <span class="n">aws</span><span class="p">.</span><span class="n">block_device_mapping</span> <span class="o">=</span> <span class="p">[{</span> <span class="err">'</span><span class="n">DeviceName</span><span class="err">'</span> <span class="o">=&gt;</span> <span class="err">'</span><span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda1</span><span class="err">'</span><span class="p">,</span> <span class="err">'</span><span class="n">Ebs</span><span class="p">.</span><span class="n">VolumeSize</span><span class="err">'</span> <span class="o">=&gt;</span> <span class="mi">100</span><span class="p">,</span> <span class="err">'</span><span class="n">Ebs</span><span class="p">.</span><span class="n">VolumeType</span><span class="err">'</span> <span class="o">=&gt;</span> <span class="err">'</span><span class="n">io1</span><span class="err">'</span><span class="p">,</span> <span class="err">'</span><span class="n">Ebs</span><span class="p">.</span><span class="n">Iops</span><span class="err">'</span> <span class="o">=&gt;</span> <span class="mi">3000</span> <span class="p">}]</span>
+        <span class="k">else</span>
+          <span class="n">aws</span><span class="p">.</span><span class="n">block_device_mapping</span> <span class="o">=</span> <span class="p">[{</span> <span class="err">'</span><span class="n">DeviceName</span><span class="err">'</span> <span class="o">=&gt;</span> <span class="err">'</span><span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sda1</span><span class="err">'</span><span class="p">,</span> <span class="err">'</span><span class="n">Ebs</span><span class="p">.</span><span class="n">VolumeSize</span><span class="err">'</span> <span class="o">=&gt;</span> <span class="mi">16</span><span class="p">,</span> <span class="err">'</span><span class="n">Ebs</span><span class="p">.</span><span class="n">VolumeType</span><span class="err">'</span> <span class="o">=&gt;</span> <span class="err">'</span><span class="n">gp2</span><span class="err">'</span> <span class="p">}]</span>
+        <span class="n">end</span>
+
         <span class="n">override</span><span class="p">.</span><span class="n">vm</span><span class="p">.</span><span class="n">box</span> <span class="o">=</span> <span class="s">"dummy"</span>
         <span class="n">override</span><span class="p">.</span><span class="n">vm</span><span class="p">.</span><span class="n">box_url</span> <span class="o">=</span> <span class="s">"https://github.com/mitchellh/vagrant-aws/raw/master/dummy.box"</span>
         <span class="n">override</span><span class="p">.</span><span class="n">ssh</span><span class="p">.</span><span class="n">username</span> <span class="o">=</span> <span class="s">"ubuntu"</span>
@@ -221,12 +228,17 @@
 <p>synced_folder is to sync other folders in your filesystem besides the folder with the Vagrantfile</p>
 <p>config.vm.hostname does not appear to work on AWS EC2 so the workaround above (|| statements to prevent extra reconfiguration)</p>
 </blockquote>
+<ul>
+<li><a href="https://github.com/mitchellh/vagrant-aws">https://github.com/mitchellh/vagrant-aws</a></li>
+<li><a href="http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/block-device-mapping-concepts.html">http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/block-device-mapping-concepts.html</a></li>
+</ul>
 <h3 id="vagrant-and-ec2-vpc-ami-that-does-not-haveallow-sudo">Vagrant and EC2 VPC (AMI that does not have/allow sudo)</h3>
 <div class="highlight"><pre><span class="cp"># -*- mode: ruby -*-</span>
 <span class="cp"># vi: set ft=ruby :</span>
 
 <span class="n">Vagrant</span><span class="p">.</span><span class="n">configure</span><span class="p">(</span><span class="s">"2"</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span>
     <span class="n">config</span><span class="p">.</span><span class="n">vm</span><span class="p">.</span><span class="n">box</span> <span class="o">=</span> <span class="s">"dummy"</span>
+
     <span class="n">config</span><span class="p">.</span><span class="n">ssh</span><span class="p">.</span><span class="n">pty</span> <span class="o">=</span> <span class="nb">true</span>
     <span class="n">config</span><span class="p">.</span><span class="n">vm</span><span class="p">.</span><span class="n">synced_folder</span> <span class="s">"."</span><span class="p">,</span> <span class="s">"/vagrant"</span><span class="p">,</span> <span class="n">disabled</span><span class="o">:</span> <span class="nb">true</span>
 
@@ -245,33 +257,83 @@
         <span class="n">aws</span><span class="p">.</span><span class="n">subnet_id</span> <span class="o">=</span> <span class="s">"my_aws_subnet_id"</span>
         <span class="n">aws</span><span class="p">.</span><span class="n">associate_public_ip</span> <span class="o">=</span> <span class="nb">true</span>
 
+        <span class="n">aws</span><span class="p">.</span><span class="n">user_data</span> <span class="o">=</span> <span class="s">"#cloud-boothook</span><span class="se">\n</span><span class="s">#!/bin/bash</span><span class="se">\n</span><span class="s">touch /opt/.license/.eula</span><span class="se">\n</span><span class="s">"</span>
+
         <span class="n">override</span><span class="p">.</span><span class="n">vm</span><span class="p">.</span><span class="n">box</span> <span class="o">=</span> <span class="s">"dummy"</span>
         <span class="n">override</span><span class="p">.</span><span class="n">vm</span><span class="p">.</span><span class="n">box_url</span> <span class="o">=</span> <span class="s">"https://github.com/mitchellh/vagrant-aws/raw/master/dummy.box"</span>
+
         <span class="n">override</span><span class="p">.</span><span class="n">ssh</span><span class="p">.</span><span class="n">username</span> <span class="o">=</span> <span class="s">"ubuntu"</span>
         <span class="n">override</span><span class="p">.</span><span class="n">ssh</span><span class="p">.</span><span class="n">private_key_path</span> <span class="o">=</span> <span class="s">"/home/ubuntu/my_aws.pem"</span>
     <span class="n">end</span>
 <span class="n">end</span>
 </pre></div>
-<p><code>vagrant up --provider=aws --no-provision --debug</code></p>
+<hr/>
+<p><strong><code>vagrant up --provider=aws --no-provision --debug</code></strong></p>
+<hr/>
 <div class="highlight"><pre><span class="n">INFO</span> <span class="n">vagrant</span><span class="o">:</span> <span class="err">`</span><span class="n">vagrant</span><span class="err">`</span> <span class="n">invoked</span><span class="o">:</span> <span class="p">[</span><span class="s">"up"</span><span class="p">,</span> <span class="s">"--provider=aws"</span><span class="p">,</span> <span class="s">"--no-provision"</span><span class="p">,</span> <span class="s">"--debug"</span><span class="p">]</span>
 
 <span class="n">Bringing</span> <span class="n">machine</span> <span class="err">'</span><span class="k">default</span><span class="err">'</span> <span class="n">up</span> <span class="n">with</span> <span class="err">'</span><span class="n">aws</span><span class="err">'</span> <span class="n">provider</span><span class="p">...</span>
 <span class="o">==&gt;</span> <span class="k">default</span><span class="o">:</span> <span class="n">Launching</span> <span class="n">an</span> <span class="n">instance</span> <span class="n">with</span> <span class="n">the</span> <span class="n">following</span> <span class="n">settings</span><span class="p">...</span>
 <span class="n">INFO</span> <span class="n">interface</span><span class="o">:</span> <span class="n">info</span><span class="o">:</span>  <span class="o">--</span> <span class="n">Type</span><span class="o">:</span> <span class="n">m3</span><span class="p">.</span><span class="n">large</span>
-
+<span class="n">INFO</span> <span class="n">interface</span><span class="o">:</span> <span class="n">info</span><span class="o">:</span> <span class="o">==&gt;</span> <span class="k">default</span><span class="o">:</span>  <span class="o">--</span> <span class="n">User</span> <span class="n">Data</span><span class="o">:</span> <span class="err">#</span><span class="n">cloud</span><span class="o">-</span><span class="n">boothook</span>
+<span class="n">INFO</span> <span class="n">interface</span><span class="o">:</span> <span class="n">info</span><span class="o">:</span> <span class="o">==&gt;</span> <span class="k">default</span><span class="o">:</span>  <span class="o">--</span> <span class="n">Assigning</span> <span class="n">a</span> <span class="n">public</span> <span class="n">IP</span> <span class="n">address</span> <span class="n">in</span> <span class="n">a</span> <span class="n">VPC</span><span class="o">:</span> <span class="nb">true</span>
 <span class="o">==&gt;</span> <span class="k">default</span><span class="o">:</span> <span class="n">Waiting</span> <span class="k">for</span> <span class="n">instance</span> <span class="n">to</span> <span class="n">become</span> <span class="s">"ready"</span><span class="p">...</span>
 <span class="o">==&gt;</span> <span class="k">default</span><span class="o">:</span> <span class="n">Waiting</span> <span class="k">for</span> <span class="n">SSH</span> <span class="n">to</span> <span class="n">become</span> <span class="n">available</span><span class="p">...</span>
 
 <span class="n">DEBUG</span> <span class="n">ssh</span><span class="o">:</span> <span class="o">==</span> <span class="n">Net</span><span class="o">-</span><span class="n">SSH</span> <span class="n">connection</span> <span class="n">debug</span><span class="o">-</span><span class="n">level</span> <span class="n">log</span> <span class="n">END</span> <span class="o">==</span>
- <span class="n">INFO</span> <span class="n">ssh</span><span class="o">:</span> <span class="n">SSH</span> <span class="n">is</span> <span class="n">ready</span><span class="o">!</span>
+<span class="n">INFO</span> <span class="n">ssh</span><span class="o">:</span> <span class="n">SSH</span> <span class="n">is</span> <span class="n">ready</span><span class="o">!</span>
 <span class="n">DEBUG</span> <span class="n">ssh</span><span class="o">:</span> <span class="n">Re</span><span class="o">-</span><span class="n">using</span> <span class="n">SSH</span> <span class="n">connection</span><span class="p">.</span>
- <span class="n">INFO</span> <span class="n">ssh</span><span class="o">:</span> <span class="n">Execute</span><span class="o">:</span>  <span class="p">(</span><span class="n">sudo</span><span class="o">=</span><span class="nb">false</span><span class="p">)</span>
+<span class="n">INFO</span> <span class="n">ssh</span><span class="o">:</span> <span class="n">Execute</span><span class="o">:</span>  <span class="p">(</span><span class="n">sudo</span><span class="o">=</span><span class="nb">false</span><span class="p">)</span>
 <span class="n">DEBUG</span> <span class="n">ssh</span><span class="o">:</span> <span class="n">pty</span> <span class="n">obtained</span> <span class="k">for</span> <span class="n">connection</span>
 <span class="n">DEBUG</span> <span class="n">ssh</span><span class="o">:</span> <span class="n">stdout</span><span class="o">:</span> <span class="n">export</span> <span class="n">TERM</span><span class="o">=</span><span class="n">vt100</span>
+
+<span class="o">**</span><span class="n">JOHN</span><span class="o">:</span> <span class="n">cloud</span><span class="o">-</span><span class="n">boothook</span> <span class="n">script</span> <span class="n">should</span> <span class="n">have</span> <span class="n">run</span> <span class="n">by</span> <span class="n">now</span> <span class="n">in</span> <span class="n">here</span><span class="o">**</span>
+
+<span class="n">DEBUG</span> <span class="n">ssh</span><span class="o">:</span> <span class="n">stdout</span><span class="o">:</span> <span class="n">logout</span>
+<span class="n">DEBUG</span> <span class="n">ssh</span><span class="o">:</span> <span class="n">Exit</span> <span class="n">status</span><span class="o">:</span> <span class="mi">0</span>
+<span class="n">INFO</span> <span class="n">run_instance</span><span class="o">:</span> <span class="n">Time</span> <span class="k">for</span> <span class="n">SSH</span> <span class="n">ready</span><span class="o">:</span> <span class="mf">48.444087982177734</span>
+<span class="n">INFO</span> <span class="n">interface</span><span class="o">:</span> <span class="n">info</span><span class="o">:</span> <span class="n">Machine</span> <span class="n">is</span> <span class="n">booted</span> <span class="n">and</span> <span class="n">ready</span> <span class="k">for</span> <span class="n">use</span><span class="o">!</span>
+
+<span class="n">which</span> <span class="n">rsync</span>    
+<span class="n">DEBUG</span> <span class="n">ssh</span><span class="o">:</span> <span class="n">stdout</span><span class="o">:</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">bin</span><span class="o">/</span><span class="n">rsync</span>
+
+<span class="n">INFO</span> <span class="n">interface</span><span class="o">:</span> <span class="n">info</span><span class="o">:</span> <span class="n">Machine</span> <span class="n">not</span> <span class="n">provisioning</span> <span class="n">because</span> <span class="err">`</span><span class="o">--</span><span class="n">no</span><span class="o">-</span><span class="n">provision</span><span class="err">`</span> <span class="n">is</span> <span class="n">specified</span><span class="p">.</span>
 </pre></div>
+<blockquote>
+<p>After all of that it is safe to either have <code>vagrant provision</code> or <code>vagrant ssh -c "ls -ahl"</code></p>
+</blockquote>
+<ul>
+<li><strong>Using a pseudo tty</strong> is a required workaround if using an AMI that does not support tty / sudo (i.e. Amazon's default Linux AMI)</li>
+<li>
 <ul>
 <li><a href="https://docs.vagrantup.com/v2/vagrantfile/ssh_settings.html">https://docs.vagrantup.com/v2/vagrantfile/ssh_settings.html</a></li>
+</ul>
+</li>
+<li>
+<ul>
 <li><a href="https://github.com/mitchellh/vagrant/issues/1482">https://github.com/mitchellh/vagrant/issues/1482</a></li>
+</ul>
+</li>
+<li><strong>Disabling the /vagrant synced project folder</strong> is nice if you don't automatically want the Vagrantfile and everything in there rsynced to your EC2 instance (and avoids the ugly <code>mkdir -p /vagrant</code> which requires sudo)</li>
+<li><strong>AWS User Data</strong> can be pushed in via Vagrant which allows for custom scripts / commands / package installation during the EC2 instance boot</li>
+<li>
+<ul>
+<li><a href="https://help.ubuntu.com/community/CloudInit">https://help.ubuntu.com/community/CloudInit</a></li>
+</ul>
+</li>
+<li>
+<ul>
+<li><a href="https://cloudinit.readthedocs.org/en/latest/topics/format.html#cloud-boothook">https://cloudinit.readthedocs.org/en/latest/topics/format.html#cloud-boothook</a></li>
+</ul>
+</li>
+<li>
+<ul>
+<li><a href="http://stackoverflow.com/questions/17413598/vagrant-rsync-error-before-provisioning">http://stackoverflow.com/questions/17413598/vagrant-rsync-error-before-provisioning</a><blockquote>
+<p>One of the use cases for an aws.user_data #cloud-boothook script has been to add to /etc/sudoers.d/ (thus avoiding later sudo issues with rsync)</p>
+</blockquote>
+</li>
+</ul>
+</li>
 </ul>
 <h3 id="more-info">more info</h3>
 <p><a href="https://github.com/mitchellh/vagrant-aws">https://github.com/mitchellh/vagrant-aws</a></p>
