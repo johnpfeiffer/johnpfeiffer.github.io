@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en-US">
+    <head>
+        <meta charset="utf-8"> 
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="author" content="john pfeiffer" />
+        <meta name="copyright" content="john pfeiffer" />
+
+<meta name="keywords" content="python, subunit, subunit2junitxml, unittest, testing, programming, " />
+        <title>Subunit and Subunit2JunitXML to get JUnitXML test result output from UnitTest  · johnpfeiffer
+</title>
+        <link href="http://cdn-images.mailchimp.com/embedcode/slim-081711.css" rel="stylesheet" type="text/css">
+        <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="http://blog.john-pfeiffer.com/theme/css/style.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="http://blog.john-pfeiffer.com/theme/css/solarizedlight.css" media="screen">
+        <link rel="shortcut icon" href="http://blog.john-pfeiffer.com/theme/images/favicon.ico" type="image/x-icon" />
+        <link rel="apple-touch-icon" href="http://blog.john-pfeiffer.com/theme/images/apple-touch-icon.png" />
+        <link rel="apple-touch-icon" sizes="57x57" href="http://blog.john-pfeiffer.com/theme/images/apple-touch-icon-57x57.png" />
+        <link rel="apple-touch-icon" sizes="72x72" href="http://blog.john-pfeiffer.com/theme/images/apple-touch-icon-72x72.png" />
+        <link rel="apple-touch-icon" sizes="114x114" href="http://blog.john-pfeiffer.com/theme/images/apple-touch-icon-114x114.png" />
+        <link rel="apple-touch-icon" sizes="144x144" href="http://blog.john-pfeiffer.com/theme/images/apple-touch-icon-144x144.png" />
+        <link rel="icon" href="http://blog.john-pfeiffer.com/theme/images/apple-touch-icon-144x144.png" />
+    <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-3758734-9']);
+    _gaq.push(['_trackPageview']);
+    (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+    </script>
+    </head>
+    <body>
+        <div id="content-sans-footer">
+        <div class="navbar navbar-static-top">
+            <div class="navbar-inner">
+                <div class="container">
+                    <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </a>
+                    <a class="brand" href="http://blog.john-pfeiffer.com/"><span class=site-name>johnpfeiffer</span></a>
+                    <div class="nav-collapse collapse">
+                        <ul class="nav pull-right top-menu">
+                            <li ><a href="http://blog.john-pfeiffer.com">Home</a></li>
+                            <li ><a href="http://blog.john-pfeiffer.com/john-likes">John Likes</a></li>
+                            <li ><a href="http://blog.john-pfeiffer.com/categories.html">Categories</a></li>
+                            <li ><a href="http://blog.john-pfeiffer.com/tags.html">Tags</a></li>
+                            <li ><a href="http://blog.john-pfeiffer.com/archives.html">Archives</a></li>
+                            <li><form class="navbar-search" action="http://blog.john-pfeiffer.com/search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container-fluid">
+            <div class="row-fluid">
+                <div class="span1"></div>
+                <div class="span10">
+<article>
+<div class="row-fluid">
+    <header class="page_header span10 offset2">
+    <h1><a href="http://blog.john-pfeiffer.com/subunit-and-subunit2junitxml-to-get-junitxml-test-result-output-from-unittest"> Subunit and Subunit2JunitXML to get JUnitXML test result output from UnitTest  </a></h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+    <div class="span2 table-of-content">
+        <nav>
+        <h4>Contents</h4>
+        <div class="toc">
+<ul>
+<li><a href="#setup">Setup</a><ul>
+<li><a href="#example-unittest-class">Example UnitTest Class</a></li>
+</ul>
+</li>
+<li><a href="#example-usage">Example Usage</a><ul>
+<li><a href="#one-liner">One Liner</a></li>
+<li><a href="#intermediate-subunit-results-file">Intermediate Subunit Results File</a></li>
+<li><a href="#twisted-unittesting">Twisted UnitTesting</a></li>
+</ul>
+</li>
+<li><a href="#troubleshooting">Troubleshooting</a></li>
+<li><a href="#more-info">More Info</a></li>
+</ul>
+</div>
+        </nav>
+    </div>
+    <div class="span8 article-content">
+
+            
+<p>Test results from differing systems or multiple test runs need a common format.</p>
+<p>JUnit XML is almost a de facto standard for test results given almost all major Continuous Integration products support it.</p>
+<ul>
+<li><a href="https://confluence.atlassian.com/display/BAMBOO/JUnit+parsing+in+Bamboo">https://confluence.atlassian.com/display/BAMBOO/JUnit+parsing+in+Bamboo</a></li>
+<li><a href="http://www.fossology.org/projects/fossology/wiki/Junit_xml_format">http://www.fossology.org/projects/fossology/wiki/Junit_xml_format</a></li>
+<li><a href="http://pytest.org/latest/usage.html">http://pytest.org/latest/usage.html</a></li>
+</ul>
+<h2 id="setup">Setup</h2>
+<p><code>pip install python-subunit junitxml</code></p>
+<blockquote>
+<p>assuming virtuelnv and myenv/bin/activate , junitxml is a hidden dependency :(</p>
+</blockquote>
+<p><strong>Do not use <code>apt-get install subunit</code> as even with 14.04 Ubuntu it has an older version does not contain timings and subunit2junitxml creates "skip" instead of "skipped"</strong></p>
+<h3 id="example-unittest-class">Example UnitTest Class</h3>
+<div class="highlight"><pre><span class="kn">import</span> <span class="nn">unittest</span>
+
+<span class="k">class</span> <span class="nc">john</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">test_success</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_fail</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+
+    <span class="nd">@unittest.skipIf</span><span class="p">(</span><span class="bp">True</span><span class="p">,</span> <span class="s">'always skip'</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">test_skip</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+</pre></div>
+<h2 id="example-usage">Example Usage</h2>
+<h3 id="one-liner">One Liner</h3>
+<p><code>python -m subunit.run foo | subunit2junitxml --no-passthrough --output-to test-results</code></p>
+<blockquote>
+<p>forward = non-subunit output will be encapsulated in subunit </p>
+</blockquote>
+<h3 id="intermediate-subunit-results-file">Intermediate Subunit Results File</h3>
+<p><code>python -m subunit.run test_some_filename_with_py_truncated &gt; test-results.subunit</code></p>
+<blockquote>
+<p>Do not use python -m subunit.run test_some_filename_with_py_truncated to stdout as it expects to have binary delimiters which screw up the console command line</p>
+</blockquote>
+<div class="highlight"><pre><span class="n">subunit</span><span class="o">-</span><span class="n">ls</span> <span class="o">&lt;</span> <span class="n">test</span><span class="o">-</span><span class="n">results</span><span class="p">.</span><span class="n">subunit</span>
+<span class="n">subunit</span><span class="o">-</span><span class="n">stats</span> <span class="o">&lt;</span> <span class="n">test</span><span class="o">-</span><span class="n">results</span><span class="p">.</span><span class="n">subunit</span>
+</pre></div>
+<p><code>python -m subunit.run foo &gt;&gt; test-results.subunit</code></p>
+<blockquote>
+<p>append some more test results
+<code>subunit-stats &lt; test-results.subunit</code></p>
+</blockquote>
+<p><code>subunit2junitxml --no-passthrough --output-to test-results.xml &lt; test-results.subunit</code></p>
+<blockquote>
+<p>no passthrough does not pass/convert any extraneous non subunit data/lines to the junit xml</p>
+</blockquote>
+<div class="highlight"><pre><span class="nt">&lt;testsuite</span> <span class="na">errors=</span><span class="s">"0"</span> <span class="na">failures=</span><span class="s">"1"</span> <span class="na">name=</span><span class="s">""</span> <span class="na">tests=</span><span class="s">"3"</span> <span class="na">time=</span><span class="s">"0.001"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;testcase</span> <span class="na">classname=</span><span class="s">"john.john"</span> <span class="na">name=</span><span class="s">"test_fail"</span> <span class="na">time=</span><span class="s">"0.000"</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;failure</span> <span class="na">type=</span><span class="s">"testtools.testresult.real._StringException"</span><span class="nt">&gt;</span>_StringException: Traceback (most recent call last):
+  File "john.py", line 9, in test_fail
+    self.assertTrue(False)
+  File "/usr/lib/python2.7/unittest/case.py", line 424, in assertTrue
+    raise self.failureException(msg)
+AssertionError: False is not true
+
+        <span class="nt">&lt;/failure&gt;</span>
+    <span class="nt">&lt;/testcase&gt;</span>
+    <span class="nt">&lt;testcase</span> <span class="na">classname=</span><span class="s">"john.john"</span> <span class="na">name=</span><span class="s">"test_skip"</span> <span class="na">time=</span><span class="s">"0.000"</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;skipped&gt;</span>always skip<span class="nt">&lt;/skipped&gt;</span>
+    <span class="nt">&lt;/testcase&gt;</span>
+    <span class="nt">&lt;testcase</span> <span class="na">classname=</span><span class="s">"john.john"</span> <span class="na">name=</span><span class="s">"test_success"</span> <span class="na">time=</span><span class="s">"0.000"</span><span class="nt">/&gt;</span>
+<span class="nt">&lt;/testsuite&gt;</span>
+</pre></div>
+<h3 id="twisted-unittesting">Twisted UnitTesting</h3>
+<p>`trial --reporter=subunit foo | subunit2junitxml --forward --output-to=junitxml-result.xml</p>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<ul>
+<li>
+<p>ImportError: No module named 'junitxml'</p>
+</li>
+<li>
+<ul>
+<li>You may not have installed the junitxml module which subunit apparently sometimes depends on: <code>pip install junitxml</code> <em>use sudo only if not using virtualenv</em></li>
+</ul>
+</li>
+<li>
+<p>AttributeError: 'AutoTimingTestResultDecorator' object has no attribute 'errors'</p>
+</li>
+<li>
+<ul>
+<li>This occured becaused TestSomeClass(unittest.TestCase) definition had an errors property/attribute which resulted in a namespace collision =(</li>
+</ul>
+</li>
+</ul>
+<h2 id="more-info">More Info</h2>
+<ul>
+<li><a href="http://www.tech-foo.net/making-the-most-of-subunit.html">http://www.tech-foo.net/making-the-most-of-subunit.html</a></li>
+<li><a href="https://pypi.python.org/pypi/python-subunit">https://pypi.python.org/pypi/python-subunit</a></li>
+<li><a href="https://launchpad.net/subunit">https://launchpad.net/subunit</a></li>
+</ul>
+            <aside>
+            <hr/>
+            <nav>
+            <ul class="articles_timeline">
+ 
+                <li class="previous_article">« <a href="http://blog.john-pfeiffer.com/virtualenv-python-interpreter-from-source" title="Previous: Virtualenv Python Interpreter from source">Virtualenv Python Interpreter from source</a></li>
+            </ul>
+            </nav>
+            </aside>
+        </div>
+        <section>
+        <div class="span2" style="float:right;font-size:0.9em;">
+ 
+            <h4>Published</h4>
+            <time pubdate="pubdate" datetime="2014-11-01T00:00:00">Nov 1, 2014</time>
+            <h4>Category</h4>
+            <a class="category-link" href="/categories.html#programming-ref">programming</a> 
+            <h4>Tags</h4>
+            <ul class="list-of-tags tags-in-article"> 
+                <li><a href="/tags.html#python-ref">python
+                    <span>4</span>
+</a></li>
+                <li><a href="/tags.html#subunit-ref">subunit
+                    <span>1</span>
+</a></li>
+                <li><a href="/tags.html#subunit2junitxml-ref">subunit2junitxml
+                    <span>1</span>
+</a></li>
+                <li><a href="/tags.html#testing-ref">testing
+                    <span>1</span>
+</a></li>
+                <li><a href="/tags.html#unittest-ref">unittest
+                    <span>1</span>
+</a></li>
+            </ul>
+
+        </div>
+        </section>
+</div>
+</article>
+                </div>
+                <div class="span1"></div>
+            </div>
+        </div>
+    </div>
+<footer>
+<div id="footer">
+    <ul class="footer-content">
+    </ul>
+</div>
+</footer>            <script src="http://code.jquery.com/jquery.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+    </body>
+</html>

@@ -1,5 +1,100 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>johnpfeiffer</title><link href="http://blog.john-pfeiffer.com/" rel="alternate"></link><link href="http://blog.john-pfeiffer.com/feeds/john-pfeiffer.atom.xml" rel="self"></link><id>http://blog.john-pfeiffer.com/</id><updated>2014-10-31T00:00:00Z</updated><entry><title>Virtualenv Python Interpreter from source</title><link href="http://blog.john-pfeiffer.com/virtualenv-python-interpreter-from-source" rel="alternate"></link><updated>2014-10-31T00:00:00Z</updated><author><name>john pfeiffer</name></author><id>tag:blog.john-pfeiffer.com,2014-10-31:virtualenv-python-interpreter-from-source</id><summary type="html">
+<feed xmlns="http://www.w3.org/2005/Atom"><title>johnpfeiffer</title><link href="http://blog.john-pfeiffer.com/" rel="alternate"></link><link href="http://blog.john-pfeiffer.com/feeds/john-pfeiffer.atom.xml" rel="self"></link><id>http://blog.john-pfeiffer.com/</id><updated>2014-11-01T00:00:00Z</updated><entry><title>Subunit and Subunit2JunitXML to get JUnitXML test result output from UnitTest</title><link href="http://blog.john-pfeiffer.com/subunit-and-subunit2junitxml-to-get-junitxml-test-result-output-from-unittest" rel="alternate"></link><updated>2014-11-01T00:00:00Z</updated><author><name>john pfeiffer</name></author><id>tag:blog.john-pfeiffer.com,2014-11-01:subunit-and-subunit2junitxml-to-get-junitxml-test-result-output-from-unittest</id><summary type="html">
+&lt;p&gt;Test results from differing systems or multiple test runs need a common format.&lt;/p&gt;
+&lt;p&gt;JUnit XML is almost a de facto standard for test results given almost all major Continuous Integration products support it.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://confluence.atlassian.com/display/BAMBOO/JUnit+parsing+in+Bamboo"&gt;https://confluence.atlassian.com/display/BAMBOO/JUnit+parsing+in+Bamboo&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="http://www.fossology.org/projects/fossology/wiki/Junit_xml_format"&gt;http://www.fossology.org/projects/fossology/wiki/Junit_xml_format&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="http://pytest.org/latest/usage.html"&gt;http://pytest.org/latest/usage.html&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="setup"&gt;Setup&lt;/h2&gt;
+&lt;p&gt;&lt;code&gt;pip install python-subunit junitxml&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;assuming virtuelnv and myenv/bin/activate , junitxml is a hidden dependency :(&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;strong&gt;Do not use &lt;code&gt;apt-get install subunit&lt;/code&gt; as even with 14.04 Ubuntu it has an older version does not contain timings and subunit2junitxml creates "skip" instead of "skipped"&lt;/strong&gt;&lt;/p&gt;
+&lt;h3 id="example-unittest-class"&gt;Example UnitTest Class&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;unittest&lt;/span&gt;
+
+&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;john&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;unittest&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;TestCase&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;test_success&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;assertTrue&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;True&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;test_fail&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;assertTrue&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;False&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="nd"&gt;@unittest.skipIf&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;True&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s"&gt;'always skip'&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;test_skip&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;assertTrue&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;False&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;h2 id="example-usage"&gt;Example Usage&lt;/h2&gt;
+&lt;h3 id="one-liner"&gt;One Liner&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;python -m subunit.run foo | subunit2junitxml --no-passthrough --output-to test-results&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;forward = non-subunit output will be encapsulated in subunit &lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id="intermediate-subunit-results-file"&gt;Intermediate Subunit Results File&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;python -m subunit.run test_some_filename_with_py_truncated &amp;gt; test-results.subunit&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Do not use python -m subunit.run test_some_filename_with_py_truncated to stdout as it expects to have binary delimiters which screw up the console command line&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="n"&gt;subunit&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;ls&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;&lt;/span&gt; &lt;span class="n"&gt;test&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;results&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;subunit&lt;/span&gt;
+&lt;span class="n"&gt;subunit&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;stats&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;&lt;/span&gt; &lt;span class="n"&gt;test&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;results&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;subunit&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;&lt;code&gt;python -m subunit.run foo &amp;gt;&amp;gt; test-results.subunit&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;append some more test results
+&lt;code&gt;subunit-stats &amp;lt; test-results.subunit&lt;/code&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;code&gt;subunit2junitxml --no-passthrough --output-to test-results.xml &amp;lt; test-results.subunit&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;no passthrough does not pass/convert any extraneous non subunit data/lines to the junit xml&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nt"&gt;&amp;lt;testsuite&lt;/span&gt; &lt;span class="na"&gt;errors=&lt;/span&gt;&lt;span class="s"&gt;"0"&lt;/span&gt; &lt;span class="na"&gt;failures=&lt;/span&gt;&lt;span class="s"&gt;"1"&lt;/span&gt; &lt;span class="na"&gt;name=&lt;/span&gt;&lt;span class="s"&gt;""&lt;/span&gt; &lt;span class="na"&gt;tests=&lt;/span&gt;&lt;span class="s"&gt;"3"&lt;/span&gt; &lt;span class="na"&gt;time=&lt;/span&gt;&lt;span class="s"&gt;"0.001"&lt;/span&gt;&lt;span class="nt"&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;lt;testcase&lt;/span&gt; &lt;span class="na"&gt;classname=&lt;/span&gt;&lt;span class="s"&gt;"john.john"&lt;/span&gt; &lt;span class="na"&gt;name=&lt;/span&gt;&lt;span class="s"&gt;"test_fail"&lt;/span&gt; &lt;span class="na"&gt;time=&lt;/span&gt;&lt;span class="s"&gt;"0.000"&lt;/span&gt;&lt;span class="nt"&gt;&amp;gt;&lt;/span&gt;
+        &lt;span class="nt"&gt;&amp;lt;failure&lt;/span&gt; &lt;span class="na"&gt;type=&lt;/span&gt;&lt;span class="s"&gt;"testtools.testresult.real._StringException"&lt;/span&gt;&lt;span class="nt"&gt;&amp;gt;&lt;/span&gt;_StringException: Traceback (most recent call last):
+  File "john.py", line 9, in test_fail
+    self.assertTrue(False)
+  File "/usr/lib/python2.7/unittest/case.py", line 424, in assertTrue
+    raise self.failureException(msg)
+AssertionError: False is not true
+
+        &lt;span class="nt"&gt;&amp;lt;/failure&amp;gt;&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;lt;/testcase&amp;gt;&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;lt;testcase&lt;/span&gt; &lt;span class="na"&gt;classname=&lt;/span&gt;&lt;span class="s"&gt;"john.john"&lt;/span&gt; &lt;span class="na"&gt;name=&lt;/span&gt;&lt;span class="s"&gt;"test_skip"&lt;/span&gt; &lt;span class="na"&gt;time=&lt;/span&gt;&lt;span class="s"&gt;"0.000"&lt;/span&gt;&lt;span class="nt"&gt;&amp;gt;&lt;/span&gt;
+        &lt;span class="nt"&gt;&amp;lt;skipped&amp;gt;&lt;/span&gt;always skip&lt;span class="nt"&gt;&amp;lt;/skipped&amp;gt;&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;lt;/testcase&amp;gt;&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;lt;testcase&lt;/span&gt; &lt;span class="na"&gt;classname=&lt;/span&gt;&lt;span class="s"&gt;"john.john"&lt;/span&gt; &lt;span class="na"&gt;name=&lt;/span&gt;&lt;span class="s"&gt;"test_success"&lt;/span&gt; &lt;span class="na"&gt;time=&lt;/span&gt;&lt;span class="s"&gt;"0.000"&lt;/span&gt;&lt;span class="nt"&gt;/&amp;gt;&lt;/span&gt;
+&lt;span class="nt"&gt;&amp;lt;/testsuite&amp;gt;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;h3 id="twisted-unittesting"&gt;Twisted UnitTesting&lt;/h3&gt;
+&lt;p&gt;`trial --reporter=subunit foo | subunit2junitxml --forward --output-to=junitxml-result.xml&lt;/p&gt;
+&lt;h2 id="troubleshooting"&gt;Troubleshooting&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;ImportError: No module named 'junitxml'&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;ul&gt;
+&lt;li&gt;You may not have installed the junitxml module which subunit apparently sometimes depends on: &lt;code&gt;pip install junitxml&lt;/code&gt; &lt;em&gt;use sudo only if not using virtualenv&lt;/em&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;AttributeError: 'AutoTimingTestResultDecorator' object has no attribute 'errors'&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;ul&gt;
+&lt;li&gt;This occured becaused TestSomeClass(unittest.TestCase) definition had an errors property/attribute which resulted in a namespace collision =(&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="more-info"&gt;More Info&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="http://www.tech-foo.net/making-the-most-of-subunit.html"&gt;http://www.tech-foo.net/making-the-most-of-subunit.html&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://pypi.python.org/pypi/python-subunit"&gt;https://pypi.python.org/pypi/python-subunit&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://launchpad.net/subunit"&gt;https://launchpad.net/subunit&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</summary><category term="python"></category><category term="subunit"></category><category term="subunit2junitxml"></category><category term="unittest"></category><category term="testing"></category></entry><entry><title>Virtualenv Python Interpreter from source</title><link href="http://blog.john-pfeiffer.com/virtualenv-python-interpreter-from-source" rel="alternate"></link><updated>2014-10-31T00:00:00Z</updated><author><name>john pfeiffer</name></author><id>tag:blog.john-pfeiffer.com,2014-10-31:virtualenv-python-interpreter-from-source</id><summary type="html">
 &lt;p&gt;When building an application (including an external facing webapp or an internal test suite) it is critical to manage your dependencies.&lt;/p&gt;
 &lt;p&gt;Virtualenv is a tool that keeps all the dependencies in a file system based container (and overcomes permissions based issues as well).&lt;/p&gt;
 &lt;p&gt;To really isolate your application from the environment not only do you need a specific version of libraries (i.e. you know your application works fine with requests 2.4.3 and selenium 2.44) but additionally a specific version of the Python Interpreter.&lt;/p&gt;
