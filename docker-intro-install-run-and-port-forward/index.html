@@ -109,19 +109,19 @@
 <p><strong>From now on it is assumed you use sudo before any docker command!</strong></p>
 <p><code>docker run --help</code></p>
 <p><code>docker run --rm -i -t ubuntu:14.04 /bin/bash</code></p>
-<div class="highlight"><pre><span class="n">create</span> <span class="n">a</span> <span class="n">container</span>
-<span class="o">--</span><span class="n">rm</span><span class="o">:</span> <span class="n">automatically</span> <span class="n">remove</span> <span class="n">the</span> <span class="n">container</span> <span class="n">when</span> <span class="n">it</span> <span class="n">exits</span>
-<span class="o">-</span><span class="n">i</span><span class="o">:</span> <span class="n">keep</span> <span class="n">stdin</span> <span class="n">open</span> <span class="n">even</span> <span class="k">if</span> <span class="n">not</span> <span class="n">attached</span>
-<span class="o">-</span><span class="n">t</span><span class="o">:</span> <span class="n">allocate</span> <span class="n">a</span> <span class="n">tty</span><span class="p">,</span> <span class="n">attach</span> <span class="n">stdin</span> <span class="n">and</span> <span class="n">stdout</span>
-<span class="n">use</span> <span class="n">the</span> <span class="n">ubuntu</span> <span class="mf">14.04</span> <span class="n">minimal</span> <span class="n">image</span>
-<span class="n">Runs</span> <span class="n">an</span> <span class="n">interactive</span> <span class="n">bash</span> <span class="n">shell</span>
+<div class="highlight"><pre>create a container
+--rm: automatically remove the container when it exits
+-i: keep stdin open even if not attached
+-t: allocate a tty, attach stdin and stdout
+use the ubuntu 14.04 minimal image
+Runs an interactive bash shell
 </pre></div>
 <blockquote>
 <p>This will continue to exist in a stopped state once exited (see "docker ps -a")</p>
 </blockquote>
-<div class="highlight"><pre><span class="n">root</span><span class="err">@</span><span class="n">f5878ed6016e</span><span class="o">:/</span><span class="err">#</span> <span class="n">cat</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">issue</span>
-<span class="n">root</span><span class="err">@</span><span class="n">f5878ed6016e</span><span class="o">:/</span><span class="err">#</span> <span class="n">uname</span> <span class="o">-</span><span class="n">a</span>
-<span class="n">root</span><span class="err">@</span><span class="n">f5878ed6016e</span><span class="o">:/</span><span class="err">#</span> <span class="n">df</span> <span class="o">-</span><span class="n">h</span>
+<div class="highlight"><pre>root@f5878ed6016e:/# cat /etc/issue
+root@f5878ed6016e:/# uname -a
+root@f5878ed6016e:/# df -h
 </pre></div>
 <p>Control-p then Control-q to detach the tty without exiting the shell</p>
 <p><code>docker ps</code></p>
@@ -129,9 +129,9 @@
 <p><code>docker attach f5878ed6016e</code></p>
 <p><code>Control + C</code> <em>(now we have exited the container and it will clean itself up)</em></p>
 <p><code>docker ps -a</code></p>
-<div class="highlight"><pre><span class="n">spun</span> <span class="n">up</span> <span class="n">another</span> <span class="n">container</span> <span class="n">but</span> <span class="n">only</span> <span class="kt">long</span> <span class="n">enough</span> <span class="n">to</span> <span class="n">run</span> <span class="n">the</span> <span class="n">command</span>
-<span class="n">CONTAINER</span> <span class="n">ID</span> <span class="n">IMAGE</span>        <span class="n">COMMAND</span>      <span class="n">CREATED</span>      <span class="n">STATUS</span>    <span class="n">PORTS</span>         <span class="n">NAMES</span>
-<span class="n">e4b436320442</span> <span class="n">ubuntu</span><span class="o">:</span><span class="mf">14.04</span> <span class="o">-</span><span class="n">uname</span> <span class="o">-</span><span class="n">a</span>  <span class="mi">3</span> <span class="n">minutes</span> <span class="n">ago</span>              <span class="n">elegant_engelbart</span>
+<div class="highlight"><pre>spun up another container but only long enough to run the command
+CONTAINER ID IMAGE        COMMAND      CREATED      STATUS    PORTS         NAMES
+e4b436320442 ubuntu:14.04 -uname -a  3 minutes ago              elegant_engelbart
 </pre></div>
 <p><code>docker rm e4b436320442</code></p>
 <blockquote>
@@ -190,16 +190,16 @@
 <hr/>
 <h3 id="dockerfile-to-automate-building-a-container">DockerFile to automate building a container</h3>
 <p>vi mydockerfile</p>
-<div class="highlight"><pre><span class="n">FROM</span> <span class="n">ubuntu</span><span class="o">:</span><span class="mf">14.04</span>
-<span class="n">MAINTAINER</span> <span class="n">John</span> <span class="n">Pfeiffer</span>
+<div class="highlight"><pre>FROM ubuntu:14.04
+MAINTAINER John Pfeiffer
 
-<span class="n">RUN</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">update</span> <span class="o">-</span><span class="n">y</span>
-<span class="n">RUN</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">upgrade</span> <span class="o">-</span><span class="n">y</span>
-<span class="n">RUN</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">install</span> <span class="o">-</span><span class="n">y</span> <span class="n">openssh</span><span class="o">-</span><span class="n">server</span>
-<span class="n">RUN</span> <span class="n">mkdir</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">run</span><span class="o">/</span><span class="n">sshd</span>
-<span class="n">CMD</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">sbin</span><span class="o">/</span><span class="n">sshd</span> <span class="o">-</span><span class="n">D</span>
+RUN apt-get update -y
+RUN apt-get upgrade -y
+RUN apt-get install -y openssh-server
+RUN mkdir /var/run/sshd
+CMD /usr/sbin/sshd -D
 
-<span class="o">&gt;</span> <span class="n">Each</span> <span class="n">RUN</span> <span class="n">command</span> <span class="n">creates</span> <span class="n">an</span> <span class="n">intermediate</span> <span class="n">container</span><span class="p">,</span> <span class="n">so</span> <span class="n">make</span> <span class="n">sure</span> <span class="n">you</span> <span class="n">use</span> <span class="n">the</span> <span class="o">-</span><span class="n">rm</span> <span class="n">option</span>
+&gt; Each RUN command creates an intermediate container, so make sure you use the -rm option
 </pre></div>
 <p>docker build -t=newimagetag -rm=true .</p>
 <hr/>
@@ -255,7 +255,7 @@
         <div class="span2" style="float:right;font-size:0.9em;">
  
             <h4>Published</h4>
-            <time pubdate="pubdate" datetime="2014-07-10T17:00:00">Jul 10, 2014</time>
+            <time pubdate="pubdate" datetime="2014-07-10T17:00:00+00:00">Jul 10, 2014</time>
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#virtualization-ref">virtualization</a> 
 
