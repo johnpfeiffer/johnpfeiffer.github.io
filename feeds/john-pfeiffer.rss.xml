@@ -990,10 +990,12 @@ INFO interface: info: Machine not provisioning because `--no-provision` is speci
 &lt;/blockquote&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">john pfeiffer</dc:creator><pubDate>Wed, 16 Jul 2014 21:12:00 +0000</pubDate><guid>tag:blog.john-pfeiffer.com,2014-07-16:using-vagrant-to-deploy-instances-on-aws</guid></item><item><title>Docker Intro install run and port forward</title><link>http://blog.john-pfeiffer.com/docker-intro-install-run-and-port-forward</link><description>&lt;p&gt;Docker is a union file system based layer system leveraging linux lxc containers for ultra lightweight virtualization/compartmentalization.&lt;/p&gt;
 
 &lt;ul&gt;
-&lt;li&gt;Images are the initial templates, each image has a unique ID&lt;/li&gt;
-&lt;li&gt;Containers are the running virtual machines, each container has a unique ID&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Images&lt;/strong&gt; are the initial templates, each image has a unique ID&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Containers&lt;/strong&gt; are the running virtual machines, each container has a unique ID  &lt;a href="http://docs.docker.com/terms/container"&gt;http://docs.docker.com/terms/container&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;em&gt;From now on it is assumed you use &lt;strong&gt;sudo&lt;/strong&gt; before any docker command!&lt;/em&gt;&lt;/li&gt;
 &lt;/ul&gt;
-&lt;h3 id="install-docker"&gt;Install Docker&lt;/h3&gt;
+&lt;hr/&gt;
+&lt;h2 id="install-docker"&gt;Install Docker&lt;/h2&gt;
 &lt;p&gt;&lt;strong&gt;&lt;a href="http://docs.docker.com/installation/ubuntulinux/#ubuntu-trusty-1404-lts-64-bit"&gt;Docker on Ubuntu 14.04&lt;/a&gt;&lt;/strong&gt;&lt;/p&gt;
 &lt;ol&gt;
 &lt;li&gt;&lt;code&gt;sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 36A1D7869245C8950F966E92D8576A8BA88D21E9&lt;/code&gt;&lt;/li&gt;
@@ -1002,11 +1004,66 @@ INFO interface: info: Machine not provisioning because `--no-provision` is speci
 &lt;li&gt;&lt;code&gt;sudo apt-get install lxc-docker&lt;/code&gt;&lt;/li&gt;
 &lt;/ol&gt;
 &lt;hr/&gt;
-&lt;h3 id="start-a-docker-image"&gt;Start a docker image&lt;/h3&gt;
-&lt;p&gt;&lt;code&gt;sudo docker pull ubuntu:14.04&lt;/code&gt; or... &lt;code&gt;sudo docker pull ubuntu:trusty&lt;/code&gt; (&lt;strong&gt;grabs the latest, i.e. 14.04.1&lt;/strong&gt;)&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;From now on it is assumed you use sudo before any docker command!&lt;/strong&gt;&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;docker --version&lt;/code&gt;
-&lt;code&gt;docker run --help&lt;/code&gt;&lt;/p&gt;
+&lt;h2 id="download-a-docker-image"&gt;Download a docker image&lt;/h2&gt;
+&lt;p&gt;&lt;code&gt;sudo docker pull ubuntu:trusty&lt;/code&gt; (&lt;strong&gt;grabs the latest, i.e. 14.04.1&lt;/strong&gt;) or &lt;code&gt;sudo docker pull ubuntu:12.04.3&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;critical! use the colon and a specific version! downloading all of the ubuntu images by accident sucks&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;code&gt;sudo docker pull redis:latest&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;choose the latest or a specific version to avoid downloading a lot of old crap&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id="remove-a-docker-image"&gt;Remove a docker image&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;docker rmi 3db9c44f4520&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;docker rmi -f $(docker images --all --quiet | grep -v 5506de2b643b)&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;remove ALL images except one by taking the output (quiet means only image ids), excluding a specific one, and then force removing the images (by id)&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;code&gt;docker rmi -f $(docker images --all --quiet)&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;remove ALL images&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;code&gt;du -sh /var/lib/docker/aufs&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;72K    /var/lib/docker/aufs/&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Sometimes a docker image is &lt;strong&gt;still connected to a container&lt;/strong&gt; (already exited or forgotten)&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;docker ps -a
+docker rm name_or_id
+docker rmi image_id
+&lt;/pre&gt;&lt;/div&gt;
+&lt;h3 id="docker-info"&gt;Docker info&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;docker&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;get a helpful list of all the commands&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;code&gt;docker --version&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;docker info&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;Containers: 1
+Images: 23
+Storage Driver: aufs
+ Root Dir: /var/lib/docker/aufs
+ Dirs: 25
+Execution Driver: native-0.2
+Kernel Version: 3.13.0-35-generic
+Operating System: Ubuntu 14.04.1 LTS
+WARNING: No swap limit support
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;&lt;code&gt;du -sh /var/lib/docker/aufs&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;469M    /var/lib/docker/aufs/&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;code&gt;docker ps --all&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;no containers are running yet&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;code&gt;docker ps --help&lt;/code&gt;&lt;/p&gt;
+&lt;hr/&gt;
+&lt;h2 id="controlling-containers-run-and-stop"&gt;Controlling Containers: run and stop&lt;/h2&gt;
+&lt;p&gt;&lt;code&gt;docker run&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;get a helpful list of how to run container&lt;/p&gt;
+&lt;/blockquote&gt;
 &lt;p&gt;&lt;code&gt;docker run --rm -i -t ubuntu:14.04 /bin/bash&lt;/code&gt;&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;creates a container
 --rm: automatically remove the container when it exits
@@ -1024,7 +1081,17 @@ root@f5878ed6016e:/# df -h
 &lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;Control-p then Control-q to detach the tty without exiting the shell&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;docker ps&lt;/code&gt;&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;docker run ubuntu:14.04 uname -a&lt;/code&gt;&lt;/p&gt;
+&lt;h3 id="stopping-a-container"&gt;Stopping a container&lt;/h3&gt;
+&lt;p&gt;Part of the efficiency in docker is that containers can &lt;strong&gt;run in the background automatically&lt;/strong&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;docker run --name myredis -d redis
+docker ps
+docker stop myredis
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Another efficiency is that a docker container will only &lt;strong&gt;run as long as it takes to execute&lt;/strong&gt; a command (and any &lt;strong&gt;changes are not forgotten&lt;/strong&gt;)&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;docker run ubuntu:trusty uname -a&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;this runs the container only as long as it takes to execute the command&lt;/p&gt;
+&lt;/blockquote&gt;
 &lt;p&gt;&lt;code&gt;docker attach f5878ed6016e&lt;/code&gt;&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;Control + C&lt;/code&gt; &lt;em&gt;(now we have exited the container and it will clean itself up)&lt;/em&gt;&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;docker ps -a&lt;/code&gt;&lt;/p&gt;
@@ -1037,6 +1104,8 @@ e4b436320442 ubuntu:14.04 -uname -a  3 minutes ago              elegant_engelbar
 &lt;p&gt;Alternatively: &lt;code&gt;docker rm elegant_engelbart&lt;/code&gt;&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;hr/&gt;
+&lt;h2 id="saving-an-instance-docker-commit"&gt;Saving an instance (docker commit)&lt;/h2&gt;
+&lt;p&gt;&lt;code&gt;docker commit --help&lt;/code&gt;&lt;/p&gt;
 &lt;h3 id="git-on-docker-ubuntu1404"&gt;Git on docker ubuntu:14.04&lt;/h3&gt;
 &lt;ol&gt;
 &lt;li&gt;&lt;code&gt;docker run -i -t ubuntu:14.04 /bin/bash&lt;/code&gt;&lt;/li&gt;
@@ -1086,58 +1155,73 @@ e4b436320442 ubuntu:14.04 -uname -a  3 minutes ago              elegant_engelbar
 &lt;li&gt;&lt;code&gt;pip install pelican Markdown beautifulsoup4&lt;/code&gt;&lt;/li&gt;
 &lt;/ol&gt;
 &lt;hr/&gt;
-&lt;hr/&gt;
-&lt;h3 id="dockerfile-to-automate-building-a-container"&gt;DockerFile to automate building a container&lt;/h3&gt;
-&lt;p&gt;vi mydockerfile&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;FROM ubuntu:14.04
+&lt;h2 id="dockerfile-to-automate-building-a-container"&gt;Dockerfile to automate building a container&lt;/h2&gt;
+&lt;p&gt;&lt;code&gt;mkdir -p dockerfiles/trustyssh&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;vi dockerfiles/trustyssh/Dockerfile&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;FROM ubuntu:trusty
 MAINTAINER John Pfeiffer
 
 RUN apt-get update -y
 RUN apt-get upgrade -y
 RUN apt-get install -y openssh-server
 RUN mkdir /var/run/sshd
+EXPOSE 22
 CMD /usr/sbin/sshd -D
 &lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;&lt;code&gt;docker build --tag=newimagetag --rm ./dockerfiles/trustyssh&lt;/code&gt;&lt;/p&gt;
 &lt;blockquote&gt;
 &lt;p&gt;Each RUN command creates an intermediate container, so make sure you use the -rm option&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;p&gt;&lt;code&gt;docker build -t=newimagetag -rm=true .&lt;/code&gt;&lt;/p&gt;
 &lt;hr/&gt;
 &lt;p&gt;&lt;code&gt;docker run -v $HOSTDIR:$DOCKERDIR&lt;/code&gt;&lt;/p&gt;
-&lt;h3 id="useful-commands"&gt;Useful Commands&lt;/h3&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;sudo docker info
-docker images
-docker images --help
-docker ps -a
-&lt;/pre&gt;&lt;/div&gt;
-&lt;h3 id="download-all-ubuntu-docker-images"&gt;Download all ubuntu docker images&lt;/h3&gt;
-&lt;p&gt;&lt;code&gt;sudo docker pull ubuntu&lt;/code&gt;&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;Pulling repository ubuntu
-58faa899733f: Download complete 
-195eb90b5349: Download complete 
-hundreds of megabytes downloaded (donotwant)!
-&lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;&lt;code&gt;docker images&lt;/code&gt;&lt;/p&gt;
-&lt;h3 id="remove-an-image"&gt;Remove an image&lt;/h3&gt;
-&lt;p&gt;&lt;code&gt;docker rmi 3db9c44f4520&lt;/code&gt;&lt;/p&gt;
+&lt;h3 id="halt-all-docker-containers"&gt;Halt all docker containers&lt;/h3&gt;
+&lt;p&gt;docker rm -f $(docker ps -a -q)&lt;/p&gt;
+&lt;h2 id="misc"&gt;Misc&lt;/h2&gt;
 &lt;p&gt;&lt;code&gt;docker search stackbrew/ubuntu&lt;/code&gt;&lt;/p&gt;
 &lt;blockquote&gt;
 &lt;p&gt;FYI stackbrew/ubuntu is the same as ubuntu , &lt;a href="https://registry.hub.docker.com/u/stackbrew/ubuntu"&gt;stackbrew is the curated Docker registry&lt;/a&gt;&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;p&gt;&lt;code&gt;docker start -i -a IDORNAME&lt;/code&gt;&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;docker images --tree&lt;/code&gt;&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;docker commit --help&lt;/code&gt;&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;docker run -d -p 127.0.0.1:5000:5000 training/webapp python app.py&lt;/code&gt;&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;docker port IDORNAME&lt;/code&gt;&lt;/p&gt;
 &lt;hr/&gt;
 &lt;h3 id="advanced-docker-pre-built-images"&gt;Advanced Docker pre built images&lt;/h3&gt;
 &lt;p&gt;&lt;a href="https://registry.hub.docker.com"&gt;https://registry.hub.docker.com&lt;/a&gt;&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;docker run --name some-redis -d redis&lt;/code&gt;
-&lt;code&gt;docker run --name some-app --link some-redis:redis -d application-that-uses-redis&lt;/code&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://registry.hub.docker.com/_/redis/"&gt;https://registry.hub.docker.com/_/redis/&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;docker run --name some-redis -d redis&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;blockquote&gt;
+&lt;p&gt;the image already includes by default the expose port command: EXPOSE 6379&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;docker run --name some-app --link some-redis:redis -d application-that-uses-redis&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
 &lt;hr/&gt;
 &lt;h3 id="more-info"&gt;More Info&lt;/h3&gt;
-&lt;p&gt;&lt;a href="https://github.com/wsargent/docker-cheat-sheet"&gt;https://github.com/wsargent/docker-cheat-sheet&lt;/a&gt;
-&lt;a href="https://docs.docker.com/reference/commandline/cli/#run"&gt;https://docs.docker.com/reference/commandline/cli/#run&lt;/a&gt;&lt;/p&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">john pfeiffer</dc:creator><pubDate>Thu, 10 Jul 2014 17:00:00 +0000</pubDate><guid>tag:blog.john-pfeiffer.com,2014-07-10:docker-intro-install-run-and-port-forward</guid></item><item><title>Markdown syntax cheatsheet</title><link>http://blog.john-pfeiffer.com/markdown-syntax-cheatsheet</link><description>
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://docs.docker.com/articles/basics"&gt;https://docs.docker.com/articles/basics&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://github.com/wsargent/docker-cheat-sheet"&gt;https://github.com/wsargent/docker-cheat-sheet&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href="https://docs.docker.com/reference/commandline/cli/#run"&gt;https://docs.docker.com/reference/commandline/cli/#run&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href="http://jpetazzo.github.io/2014/06/23/docker-ssh-considered-evil"&gt;http://jpetazzo.github.io/2014/06/23/docker-ssh-considered-evil&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">john pfeiffer</dc:creator><pubDate>Thu, 10 Jul 2014 17:00:00 +0000</pubDate><guid>tag:blog.john-pfeiffer.com,2014-07-10:docker-intro-install-run-and-port-forward</guid></item><item><title>Markdown syntax cheatsheet</title><link>http://blog.john-pfeiffer.com/markdown-syntax-cheatsheet</link><description>
 &lt;h3 id="markdown-syntax"&gt;Markdown Syntax&lt;/h3&gt;
 &lt;ul&gt;
 &lt;li&gt;html &lt;em&gt; is markdown &lt;code&gt;*emphasis* or _italics_&lt;/code&gt; = &lt;em&gt;emphasis&lt;/em&gt; or &lt;em&gt;italics&lt;/em&gt; &lt;/em&gt;&lt;/li&gt;
