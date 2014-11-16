@@ -988,6 +988,8 @@ INFO interface: info: Machine not provisioning because `--no-provision` is speci
 &lt;p&gt;ERROR: sudo: no tty present and no askpass program specified&lt;/p&gt;
 &lt;p&gt;RESOLUTION: your VM (or more likely, AMI) does not have tty or allow sudo so try using the config.ssh.pty = true (and make sure no provisioning commands require sudo)&lt;/p&gt;
 &lt;/blockquote&gt;</summary></entry><entry><title>Docker Intro install run and port forward</title><link href="http://blog.john-pfeiffer.com/docker-intro-install-run-and-port-forward" rel="alternate"></link><updated>2014-07-10T17:00:00+00:00</updated><author><name>john pfeiffer</name></author><id>tag:blog.john-pfeiffer.com,2014-07-10:docker-intro-install-run-and-port-forward</id><summary type="html">&lt;p&gt;Docker is a union file system based layer system leveraging linux lxc containers for ultra lightweight virtualization/compartmentalization.&lt;/p&gt;
+&lt;p&gt;Much like AWS cloud servers (api based dynamic deployment that should be tolerant of node failure) and automated deployment/configuration infrastructure (chef or puppet such that cloud servers are created idempotent, remotely and automatically managed at scale), Docker requires a change of mindset.&lt;/p&gt;
+&lt;p&gt;Docker encourages design of modular, deterministic and defined, single purpose components that are easy to compose into larger services.&lt;/p&gt;
 
 &lt;ul&gt;
 &lt;li&gt;&lt;strong&gt;Images&lt;/strong&gt; are the initial templates, each image has a unique ID&lt;/li&gt;
@@ -1014,10 +1016,14 @@ INFO interface: info: Machine not provisioning because `--no-provision` is speci
 &lt;p&gt;choose the latest or a specific version to avoid downloading a lot of old crap&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;h3 id="remove-a-docker-image"&gt;Remove a docker image&lt;/h3&gt;
-&lt;p&gt;&lt;code&gt;docker rmi 3db9c44f4520&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;docker rmi trustyssh&lt;/code&gt;&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;docker rmi -f $(docker images --all --quiet | grep -v 5506de2b643b)&lt;/code&gt;&lt;/p&gt;
 &lt;blockquote&gt;
 &lt;p&gt;remove ALL images except one by taking the output (quiet means only image ids), excluding a specific one, and then force removing the images (by id)&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;docker images --quiet --filter "dangling=true" | xargs docker rmi&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;remove all images that do not have a tag and are not a parent of a tagged image&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;p&gt;&lt;code&gt;docker rmi -f $(docker images --all --quiet)&lt;/code&gt;&lt;/p&gt;
 &lt;blockquote&gt;
@@ -1058,11 +1064,18 @@ WARNING: No swap limit support
 &lt;p&gt;no containers are running yet&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;p&gt;&lt;code&gt;docker ps --help&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;docker images --tree&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;view the hashes and sizes of all of the parent images&lt;/p&gt;
+&lt;/blockquote&gt;
 &lt;hr/&gt;
-&lt;h2 id="controlling-containers-run-and-stop"&gt;Controlling Containers: run and stop&lt;/h2&gt;
+&lt;h2 id="controlling-containers"&gt;Controlling Containers&lt;/h2&gt;
+&lt;h3 id="starting-a-container-from-an-image"&gt;Starting a container (from an image)&lt;/h3&gt;
+&lt;h4 id="create-a-container"&gt;Create a container&lt;/h4&gt;
+&lt;p&gt;First you must create a container from an image:&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;docker run&lt;/code&gt;&lt;/p&gt;
 &lt;blockquote&gt;
-&lt;p&gt;get a helpful list of how to run container&lt;/p&gt;
+&lt;p&gt;get a helpful list of how to run a container&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;p&gt;&lt;code&gt;docker run --rm -i -t ubuntu:14.04 /bin/bash&lt;/code&gt;&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;creates a container
@@ -1070,6 +1083,7 @@ WARNING: No swap limit support
 -i: keep stdin open even if not attached
 -t: allocate a tty, attach stdin and stdout
 use the ubuntu 14.04 minimal image
+Docker automatically gives the container a random name
 Runs an interactive bash shell
 &lt;/pre&gt;&lt;/div&gt;
 &lt;blockquote&gt;
@@ -1081,6 +1095,13 @@ root@f5878ed6016e:/# df -h
 &lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;Control-p then Control-q to detach the tty without exiting the shell&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;docker ps&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;docker run -d -p 127.0.0.1:5000:5000 training/webapp python app.py&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;detached with port 5000 available and executing&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h4 id="start-a-container"&gt;Start a container&lt;/h4&gt;
+&lt;p&gt;After a container has already been created (which starts it so ironically this is actually a "restart")&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;docker start --interactive --attach container_id_or_name&lt;/code&gt;&lt;/p&gt;
 &lt;h3 id="stopping-a-container"&gt;Stopping a container&lt;/h3&gt;
 &lt;p&gt;Part of the efficiency in docker is that containers can &lt;strong&gt;run in the background automatically&lt;/strong&gt;&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;docker run --name myredis -d redis
@@ -1099,16 +1120,80 @@ docker stop myredis
 CONTAINER ID IMAGE        COMMAND      CREATED      STATUS    PORTS         NAMES
 e4b436320442 ubuntu:14.04 -uname -a  3 minutes ago              elegant_engelbart
 &lt;/pre&gt;&lt;/div&gt;
+&lt;h3 id="deleting-aka-removing-a-container"&gt;Deleting aka removing a container&lt;/h3&gt;
 &lt;p&gt;&lt;code&gt;docker rm e4b436320442&lt;/code&gt;&lt;/p&gt;
 &lt;blockquote&gt;
-&lt;p&gt;Alternatively: &lt;code&gt;docker rm elegant_engelbart&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;Alternatively: &lt;code&gt;docker rm --force elegant_engelbart&lt;/code&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;code&gt;docker rm -f $(docker ps -a -q)&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Deletes forcibly all containers (be careful!)&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;hr/&gt;
-&lt;h2 id="saving-an-instance-docker-commit"&gt;Saving an instance (docker commit)&lt;/h2&gt;
+&lt;h2 id="dockerfile-to-automate-building-a-container"&gt;Dockerfile to automate building a container&lt;/h2&gt;
+&lt;p&gt;While the use of SSH for a docker image and container makes it more like a messy Virtual Machine than an automated reproducible component&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;mkdir -p dockerfiles/trustyssh&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;vi dockerfiles/trustyssh/Dockerfile&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;FROM ubuntu:trusty
+MAINTAINER John Pfeiffer "https://bitbucket.org/johnpfeiffer"
+
+RUN apt-get update -y
+RUN apt-get install -y openssh-server byobu
+RUN mkdir /var/run/sshd
+RUN echo 'root:root' | chpasswd
+RUN echo 'ubuntu:ubuntu' | chpasswd
+RUN sed -ri 's/^PermitRootLogin\s+.*/PermitRootLogin yes/' /etc/ssh/sshd_config
+RUN sed -ri 's/UsePAM yes/#UsePAM yes/g' /etc/ssh/sshd_config
+EXPOSE 22
+CMD    ["/usr/sbin/sshd", "-D"]
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;&lt;code&gt;docker build --tag=newimagename --rm ./dockerfiles/ubuntu-trusty-ssh&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Each RUN command creates an intermediate container, so make sure you use the -rm option&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;Sending build context to Docker daemon  2.56 kB
+Sending build context to Docker daemon
+Step 0 : FROM ubuntu:trusty
+ ---&amp;gt; 5506de2b643b
+...
+Removing intermediate container 135b686d82a6
+Step 2 : RUN apt-get update -y
+ ---&amp;gt; Running in 7fe06a9ef41b
+Ign http://archive.ubuntu.com trusty InRelease
+...
+&lt;/pre&gt;&lt;/div&gt;
+&lt;hr/&gt;
+&lt;h2 id="add-a-port-to-a-container"&gt;Add a port to a container&lt;/h2&gt;
+&lt;p&gt;&lt;code&gt;docker run --detach --publish 127.0.0.1:2222:22 --name johnssh trustyssh&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;run a detached container based on the trustyssh image that binds the private container port 22 to the host port 2222 (in this case the trustyssh image from above is running sshd on port 22)&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;code&gt;docker port johnssh 22&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;127.0.0.1:2222&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;code&gt;netstat -antp | grep 2222&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;tcp        0      0 127.0.0.1:2222          0.0.0.0:*               LISTEN      24393/docker-proxy&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;code&gt;ssh -o StrictHostKeychecking=no -p 2222 root@127.0.0.1&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;root@19ad0614b237:~#&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr/&gt;
+&lt;h2 id="host-data-with-a-docker-container"&gt;Host data with a Docker Container&lt;/h2&gt;
+&lt;p&gt;Volumes are where Docker Containers can access storage (either from the Host or other Containers)&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://docs.docker.com/userguide/dockervolumes"&gt;https://docs.docker.com/userguide/dockervolumes&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;docker run --interactive --tty --name mydata --volume /tmp/mydata:/opt/mydata trustyssh /bin/bash&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;create an interactive container named "mydata" that maps /tmp/mydata from the host onto /opt/mydata (warning: overriding any existing!)&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr/&gt;
+&lt;h2 id="saving-a-docker-container-as-a-new-image"&gt;Saving a docker container as a new image&lt;/h2&gt;
 &lt;p&gt;&lt;code&gt;docker commit --help&lt;/code&gt;&lt;/p&gt;
-&lt;h3 id="git-on-docker-ubuntu1404"&gt;Git on docker ubuntu:14.04&lt;/h3&gt;
+&lt;h3 id="docker-commit-for-a-container-ubuntutrusty-with-git"&gt;docker commit for a container: ubuntu:trusty with git&lt;/h3&gt;
 &lt;ol&gt;
-&lt;li&gt;&lt;code&gt;docker run -i -t ubuntu:14.04 /bin/bash&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;docker run -i -t ubuntu:trusty /bin/bash&lt;/code&gt;&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;Control + p then Control + q&lt;/code&gt; &lt;em&gt;(to detach the tty without exiting the shell)&lt;/em&gt;&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;docker ps -a&lt;/code&gt; &lt;em&gt;(make a note of the ID or NAME)&lt;/em&gt;&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;docker attach ID_OR_NAME&lt;/code&gt;&lt;/li&gt;
@@ -1128,14 +1213,19 @@ e4b436320442 ubuntu:14.04 -uname -a  3 minutes ago              elegant_engelbar
 &lt;li&gt;docker images&lt;/li&gt;
 &lt;/ol&gt;
 &lt;blockquote&gt;
-&lt;p&gt;output
-    REPOSITORY               TAG                 IMAGE ID            CREATED             VIRTUAL SIZE
-    johnpfeiffer_git_repo    latest              4a74440186d9        54 seconds ago      402 MB
-    ubuntu                   14.04               e54ca5efa2e9        3 weeks ago         276.5 MB&lt;/p&gt;
+&lt;p&gt;output&lt;/p&gt;
 &lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;REPOSITORY               TAG                 IMAGE ID            CREATED             VIRTUAL SIZE
+johnpfeiffer_git_repo    latest              4a74440186d9        54 seconds ago      402 MB
+ubuntu                   14.04               e54ca5efa2e9        3 weeks ago         276.5 MB
+&lt;/pre&gt;&lt;/div&gt;
 &lt;hr/&gt;
-&lt;h3 id="add-a-port-to-an-image"&gt;Add a port to an image&lt;/h3&gt;
+&lt;h2 id="misc"&gt;Misc&lt;/h2&gt;
+&lt;h3 id="python-and-pelican-static-site-generator-on-docker-ubuntu1404"&gt;Python and Pelican static site generator on docker ubuntu:14.04&lt;/h3&gt;
 &lt;ol&gt;
+&lt;li&gt;&lt;code&gt;apt-get update; apt-get install python python-setuptools openssl wget -y&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;wget -qO- https://raw.github.com/pypa/pip/master/contrib/get-pip.py | sudo python&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;pip install pelican Markdown beautifulsoup4&lt;/code&gt;&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;docker run -i -t -p 127.0.0.1:8000:8000 --name john johnpfeiffer_git_repo:latest /bin/bash&lt;/code&gt;&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;control+p then control+q&lt;/code&gt;&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;docker attach john&lt;/code&gt;&lt;/li&gt;
@@ -1148,45 +1238,11 @@ e4b436320442 ubuntu:14.04 -uname -a  3 minutes ago              elegant_engelbar
 &lt;li&gt;&lt;code&gt;http://127.0.0.1:8000&lt;/code&gt;&lt;/li&gt;
 &lt;/ol&gt;
 &lt;hr/&gt;
-&lt;h3 id="python-and-pelican-static-site-generator-on-docker-ubuntu1404"&gt;Python and Pelican static site generator on docker ubuntu:14.04&lt;/h3&gt;
-&lt;ol&gt;
-&lt;li&gt;&lt;code&gt;apt-get update; apt-get install python python-setuptools openssl wget -y&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;wget -qO- https://raw.github.com/pypa/pip/master/contrib/get-pip.py | sudo python&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;pip install pelican Markdown beautifulsoup4&lt;/code&gt;&lt;/li&gt;
-&lt;/ol&gt;
-&lt;hr/&gt;
-&lt;h2 id="dockerfile-to-automate-building-a-container"&gt;Dockerfile to automate building a container&lt;/h2&gt;
-&lt;p&gt;&lt;code&gt;mkdir -p dockerfiles/trustyssh&lt;/code&gt;&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;vi dockerfiles/trustyssh/Dockerfile&lt;/code&gt;&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;FROM ubuntu:trusty
-MAINTAINER John Pfeiffer
-
-RUN apt-get update -y
-RUN apt-get upgrade -y
-RUN apt-get install -y openssh-server
-RUN mkdir /var/run/sshd
-EXPOSE 22
-CMD /usr/sbin/sshd -D
-&lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;&lt;code&gt;docker build --tag=newimagetag --rm ./dockerfiles/trustyssh&lt;/code&gt;&lt;/p&gt;
-&lt;blockquote&gt;
-&lt;p&gt;Each RUN command creates an intermediate container, so make sure you use the -rm option&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;hr/&gt;
-&lt;p&gt;&lt;code&gt;docker run -v $HOSTDIR:$DOCKERDIR&lt;/code&gt;&lt;/p&gt;
-&lt;h3 id="halt-all-docker-containers"&gt;Halt all docker containers&lt;/h3&gt;
-&lt;p&gt;docker rm -f $(docker ps -a -q)&lt;/p&gt;
-&lt;h2 id="misc"&gt;Misc&lt;/h2&gt;
+&lt;h2 id="advanced-docker-pre-built-images"&gt;Advanced Docker pre built images&lt;/h2&gt;
 &lt;p&gt;&lt;code&gt;docker search stackbrew/ubuntu&lt;/code&gt;&lt;/p&gt;
 &lt;blockquote&gt;
 &lt;p&gt;FYI stackbrew/ubuntu is the same as ubuntu , &lt;a href="https://registry.hub.docker.com/u/stackbrew/ubuntu"&gt;stackbrew is the curated Docker registry&lt;/a&gt;&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;p&gt;&lt;code&gt;docker start -i -a IDORNAME&lt;/code&gt;&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;docker images --tree&lt;/code&gt;&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;docker run -d -p 127.0.0.1:5000:5000 training/webapp python app.py&lt;/code&gt;&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;docker port IDORNAME&lt;/code&gt;&lt;/p&gt;
-&lt;hr/&gt;
-&lt;h3 id="advanced-docker-pre-built-images"&gt;Advanced Docker pre built images&lt;/h3&gt;
 &lt;p&gt;&lt;a href="https://registry.hub.docker.com"&gt;https://registry.hub.docker.com&lt;/a&gt;&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;a href="https://registry.hub.docker.com/_/redis/"&gt;https://registry.hub.docker.com/_/redis/&lt;/a&gt;&lt;/li&gt;
@@ -1211,7 +1267,7 @@ CMD /usr/sbin/sshd -D
 &lt;/li&gt;
 &lt;/ul&gt;
 &lt;hr/&gt;
-&lt;h3 id="more-info"&gt;More Info&lt;/h3&gt;
+&lt;h2 id="more-info"&gt;More Info&lt;/h2&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;a href="https://docs.docker.com/articles/basics"&gt;https://docs.docker.com/articles/basics&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href="https://github.com/wsargent/docker-cheat-sheet"&gt;https://github.com/wsargent/docker-cheat-sheet&lt;/a&gt;&lt;/li&gt;
@@ -1219,8 +1275,9 @@ CMD /usr/sbin/sshd -D
 &lt;p&gt;&lt;a href="https://docs.docker.com/reference/commandline/cli/#run"&gt;https://docs.docker.com/reference/commandline/cli/#run&lt;/a&gt;&lt;/p&gt;
 &lt;/li&gt;
 &lt;li&gt;
-&lt;p&gt;&lt;a href="http://jpetazzo.github.io/2014/06/23/docker-ssh-considered-evil"&gt;http://jpetazzo.github.io/2014/06/23/docker-ssh-considered-evil&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href="http://blog.oddbit.com/2014/08/11/four-ways-to-connect-a-docker"&gt;http://blog.oddbit.com/2014/08/11/four-ways-to-connect-a-docker&lt;/a&gt;&lt;/p&gt;
 &lt;/li&gt;
+&lt;li&gt;&lt;a href="http://jpetazzo.github.io/2014/06/23/docker-ssh-considered-evil"&gt;http://jpetazzo.github.io/2014/06/23/docker-ssh-considered-evil&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;</summary></entry><entry><title>Markdown syntax cheatsheet</title><link href="http://blog.john-pfeiffer.com/markdown-syntax-cheatsheet" rel="alternate"></link><updated>2014-07-02T20:21:00+00:00</updated><author><name>john pfeiffer</name></author><id>tag:blog.john-pfeiffer.com,2014-07-02:markdown-syntax-cheatsheet</id><summary type="html">
 &lt;h3 id="markdown-syntax"&gt;Markdown Syntax&lt;/h3&gt;
 &lt;ul&gt;

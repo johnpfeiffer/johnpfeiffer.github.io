@@ -78,25 +78,29 @@
 <li><a href="#docker-info">Docker info</a></li>
 </ul>
 </li>
-<li><a href="#controlling-containers-run-and-stop">Controlling Containers: run and stop</a><ul>
+<li><a href="#controlling-containers">Controlling Containers</a><ul>
+<li><a href="#starting-a-container-from-an-image">Starting a container (from an image)</a><ul>
+<li><a href="#create-a-container">Create a container</a></li>
+<li><a href="#start-a-container">Start a container</a></li>
+</ul>
+</li>
 <li><a href="#stopping-a-container">Stopping a container</a></li>
+<li><a href="#deleting-aka-removing-a-container">Deleting aka removing a container</a></li>
 </ul>
 </li>
-<li><a href="#saving-an-instance-docker-commit">Saving an instance (docker commit)</a><ul>
-<li><a href="#git-on-docker-ubuntu1404">Git on docker ubuntu:14.04</a></li>
-<li><a href="#add-a-port-to-an-image">Add a port to an image</a></li>
-<li><a href="#python-and-pelican-static-site-generator-on-docker-ubuntu1404">Python and Pelican static site generator on docker ubuntu:14.04</a></li>
-</ul>
-</li>
-<li><a href="#dockerfile-to-automate-building-a-container">Dockerfile to automate building a container</a><ul>
-<li><a href="#halt-all-docker-containers">Halt all docker containers</a></li>
+<li><a href="#dockerfile-to-automate-building-a-container">Dockerfile to automate building a container</a></li>
+<li><a href="#add-a-port-to-a-container">Add a port to a container</a></li>
+<li><a href="#host-data-with-a-docker-container">Host data with a Docker Container</a></li>
+<li><a href="#saving-a-docker-container-as-a-new-image">Saving a docker container as a new image</a><ul>
+<li><a href="#docker-commit-for-a-container-ubuntutrusty-with-git">docker commit for a container: ubuntu:trusty with git</a></li>
 </ul>
 </li>
 <li><a href="#misc">Misc</a><ul>
-<li><a href="#advanced-docker-pre-built-images">Advanced Docker pre built images</a></li>
-<li><a href="#more-info">More Info</a></li>
+<li><a href="#python-and-pelican-static-site-generator-on-docker-ubuntu1404">Python and Pelican static site generator on docker ubuntu:14.04</a></li>
 </ul>
 </li>
+<li><a href="#advanced-docker-pre-built-images">Advanced Docker pre built images</a></li>
+<li><a href="#more-info">More Info</a></li>
 </ul>
 </div>
         </nav>
@@ -104,6 +108,8 @@
     <div class="span8 article-content">
 
             <p>Docker is a union file system based layer system leveraging linux lxc containers for ultra lightweight virtualization/compartmentalization.</p>
+<p>Much like AWS cloud servers (api based dynamic deployment that should be tolerant of node failure) and automated deployment/configuration infrastructure (chef or puppet such that cloud servers are created idempotent, remotely and automatically managed at scale), Docker requires a change of mindset.</p>
+<p>Docker encourages design of modular, deterministic and defined, single purpose components that are easy to compose into larger services.</p>
 
 <ul>
 <li><strong>Images</strong> are the initial templates, each image has a unique ID</li>
@@ -130,10 +136,14 @@
 <p>choose the latest or a specific version to avoid downloading a lot of old crap</p>
 </blockquote>
 <h3 id="remove-a-docker-image">Remove a docker image</h3>
-<p><code>docker rmi 3db9c44f4520</code></p>
+<p><code>docker rmi trustyssh</code></p>
 <p><code>docker rmi -f $(docker images --all --quiet | grep -v 5506de2b643b)</code></p>
 <blockquote>
 <p>remove ALL images except one by taking the output (quiet means only image ids), excluding a specific one, and then force removing the images (by id)</p>
+</blockquote>
+<p>docker images --quiet --filter "dangling=true" | xargs docker rmi</p>
+<blockquote>
+<p>remove all images that do not have a tag and are not a parent of a tagged image</p>
 </blockquote>
 <p><code>docker rmi -f $(docker images --all --quiet)</code></p>
 <blockquote>
@@ -174,11 +184,18 @@ WARNING: No swap limit support
 <p>no containers are running yet</p>
 </blockquote>
 <p><code>docker ps --help</code></p>
+<p><code>docker images --tree</code></p>
+<blockquote>
+<p>view the hashes and sizes of all of the parent images</p>
+</blockquote>
 <hr/>
-<h2 id="controlling-containers-run-and-stop">Controlling Containers: run and stop</h2>
+<h2 id="controlling-containers">Controlling Containers</h2>
+<h3 id="starting-a-container-from-an-image">Starting a container (from an image)</h3>
+<h4 id="create-a-container">Create a container</h4>
+<p>First you must create a container from an image:</p>
 <p><code>docker run</code></p>
 <blockquote>
-<p>get a helpful list of how to run container</p>
+<p>get a helpful list of how to run a container</p>
 </blockquote>
 <p><code>docker run --rm -i -t ubuntu:14.04 /bin/bash</code></p>
 <div class="highlight"><pre>creates a container
@@ -186,6 +203,7 @@ WARNING: No swap limit support
 -i: keep stdin open even if not attached
 -t: allocate a tty, attach stdin and stdout
 use the ubuntu 14.04 minimal image
+Docker automatically gives the container a random name
 Runs an interactive bash shell
 </pre></div>
 <blockquote>
@@ -197,6 +215,13 @@ root@f5878ed6016e:/# df -h
 </pre></div>
 <p>Control-p then Control-q to detach the tty without exiting the shell</p>
 <p><code>docker ps</code></p>
+<p><code>docker run -d -p 127.0.0.1:5000:5000 training/webapp python app.py</code></p>
+<blockquote>
+<p>detached with port 5000 available and executing</p>
+</blockquote>
+<h4 id="start-a-container">Start a container</h4>
+<p>After a container has already been created (which starts it so ironically this is actually a "restart")</p>
+<p><code>docker start --interactive --attach container_id_or_name</code></p>
 <h3 id="stopping-a-container">Stopping a container</h3>
 <p>Part of the efficiency in docker is that containers can <strong>run in the background automatically</strong></p>
 <div class="highlight"><pre>docker run --name myredis -d redis
@@ -215,16 +240,80 @@ docker stop myredis
 CONTAINER ID IMAGE        COMMAND      CREATED      STATUS    PORTS         NAMES
 e4b436320442 ubuntu:14.04 -uname -a  3 minutes ago              elegant_engelbart
 </pre></div>
+<h3 id="deleting-aka-removing-a-container">Deleting aka removing a container</h3>
 <p><code>docker rm e4b436320442</code></p>
 <blockquote>
-<p>Alternatively: <code>docker rm elegant_engelbart</code></p>
+<p>Alternatively: <code>docker rm --force elegant_engelbart</code></p>
+</blockquote>
+<p><code>docker rm -f $(docker ps -a -q)</code></p>
+<blockquote>
+<p>Deletes forcibly all containers (be careful!)</p>
 </blockquote>
 <hr/>
-<h2 id="saving-an-instance-docker-commit">Saving an instance (docker commit)</h2>
+<h2 id="dockerfile-to-automate-building-a-container">Dockerfile to automate building a container</h2>
+<p>While the use of SSH for a docker image and container makes it more like a messy Virtual Machine than an automated reproducible component</p>
+<p><code>mkdir -p dockerfiles/trustyssh</code></p>
+<p><code>vi dockerfiles/trustyssh/Dockerfile</code></p>
+<div class="highlight"><pre>FROM ubuntu:trusty
+MAINTAINER John Pfeiffer "https://bitbucket.org/johnpfeiffer"
+
+RUN apt-get update -y
+RUN apt-get install -y openssh-server byobu
+RUN mkdir /var/run/sshd
+RUN echo 'root:root' | chpasswd
+RUN echo 'ubuntu:ubuntu' | chpasswd
+RUN sed -ri 's/^PermitRootLogin\s+.*/PermitRootLogin yes/' /etc/ssh/sshd_config
+RUN sed -ri 's/UsePAM yes/#UsePAM yes/g' /etc/ssh/sshd_config
+EXPOSE 22
+CMD    ["/usr/sbin/sshd", "-D"]
+</pre></div>
+<p><code>docker build --tag=newimagename --rm ./dockerfiles/ubuntu-trusty-ssh</code></p>
+<blockquote>
+<p>Each RUN command creates an intermediate container, so make sure you use the -rm option</p>
+</blockquote>
+<div class="highlight"><pre>Sending build context to Docker daemon  2.56 kB
+Sending build context to Docker daemon
+Step 0 : FROM ubuntu:trusty
+ ---&gt; 5506de2b643b
+...
+Removing intermediate container 135b686d82a6
+Step 2 : RUN apt-get update -y
+ ---&gt; Running in 7fe06a9ef41b
+Ign http://archive.ubuntu.com trusty InRelease
+...
+</pre></div>
+<hr/>
+<h2 id="add-a-port-to-a-container">Add a port to a container</h2>
+<p><code>docker run --detach --publish 127.0.0.1:2222:22 --name johnssh trustyssh</code></p>
+<blockquote>
+<p>run a detached container based on the trustyssh image that binds the private container port 22 to the host port 2222 (in this case the trustyssh image from above is running sshd on port 22)</p>
+</blockquote>
+<p><code>docker port johnssh 22</code></p>
+<blockquote>
+<p>127.0.0.1:2222</p>
+</blockquote>
+<p><code>netstat -antp | grep 2222</code></p>
+<blockquote>
+<p>tcp        0      0 127.0.0.1:2222          0.0.0.0:*               LISTEN      24393/docker-proxy</p>
+</blockquote>
+<p><code>ssh -o StrictHostKeychecking=no -p 2222 root@127.0.0.1</code></p>
+<blockquote>
+<p>root@19ad0614b237:~#</p>
+</blockquote>
+<hr/>
+<h2 id="host-data-with-a-docker-container">Host data with a Docker Container</h2>
+<p>Volumes are where Docker Containers can access storage (either from the Host or other Containers)</p>
+<p><a href="https://docs.docker.com/userguide/dockervolumes">https://docs.docker.com/userguide/dockervolumes</a></p>
+<p><code>docker run --interactive --tty --name mydata --volume /tmp/mydata:/opt/mydata trustyssh /bin/bash</code></p>
+<blockquote>
+<p>create an interactive container named "mydata" that maps /tmp/mydata from the host onto /opt/mydata (warning: overriding any existing!)</p>
+</blockquote>
+<hr/>
+<h2 id="saving-a-docker-container-as-a-new-image">Saving a docker container as a new image</h2>
 <p><code>docker commit --help</code></p>
-<h3 id="git-on-docker-ubuntu1404">Git on docker ubuntu:14.04</h3>
+<h3 id="docker-commit-for-a-container-ubuntutrusty-with-git">docker commit for a container: ubuntu:trusty with git</h3>
 <ol>
-<li><code>docker run -i -t ubuntu:14.04 /bin/bash</code></li>
+<li><code>docker run -i -t ubuntu:trusty /bin/bash</code></li>
 <li><code>Control + p then Control + q</code> <em>(to detach the tty without exiting the shell)</em></li>
 <li><code>docker ps -a</code> <em>(make a note of the ID or NAME)</em></li>
 <li><code>docker attach ID_OR_NAME</code></li>
@@ -244,14 +333,19 @@ e4b436320442 ubuntu:14.04 -uname -a  3 minutes ago              elegant_engelbar
 <li>docker images</li>
 </ol>
 <blockquote>
-<p>output
-    REPOSITORY               TAG                 IMAGE ID            CREATED             VIRTUAL SIZE
-    johnpfeiffer_git_repo    latest              4a74440186d9        54 seconds ago      402 MB
-    ubuntu                   14.04               e54ca5efa2e9        3 weeks ago         276.5 MB</p>
+<p>output</p>
 </blockquote>
+<div class="highlight"><pre>REPOSITORY               TAG                 IMAGE ID            CREATED             VIRTUAL SIZE
+johnpfeiffer_git_repo    latest              4a74440186d9        54 seconds ago      402 MB
+ubuntu                   14.04               e54ca5efa2e9        3 weeks ago         276.5 MB
+</pre></div>
 <hr/>
-<h3 id="add-a-port-to-an-image">Add a port to an image</h3>
+<h2 id="misc">Misc</h2>
+<h3 id="python-and-pelican-static-site-generator-on-docker-ubuntu1404">Python and Pelican static site generator on docker ubuntu:14.04</h3>
 <ol>
+<li><code>apt-get update; apt-get install python python-setuptools openssl wget -y</code></li>
+<li><code>wget -qO- https://raw.github.com/pypa/pip/master/contrib/get-pip.py | sudo python</code></li>
+<li><code>pip install pelican Markdown beautifulsoup4</code></li>
 <li><code>docker run -i -t -p 127.0.0.1:8000:8000 --name john johnpfeiffer_git_repo:latest /bin/bash</code></li>
 <li><code>control+p then control+q</code></li>
 <li><code>docker attach john</code></li>
@@ -264,45 +358,11 @@ e4b436320442 ubuntu:14.04 -uname -a  3 minutes ago              elegant_engelbar
 <li><code>http://127.0.0.1:8000</code></li>
 </ol>
 <hr/>
-<h3 id="python-and-pelican-static-site-generator-on-docker-ubuntu1404">Python and Pelican static site generator on docker ubuntu:14.04</h3>
-<ol>
-<li><code>apt-get update; apt-get install python python-setuptools openssl wget -y</code></li>
-<li><code>wget -qO- https://raw.github.com/pypa/pip/master/contrib/get-pip.py | sudo python</code></li>
-<li><code>pip install pelican Markdown beautifulsoup4</code></li>
-</ol>
-<hr/>
-<h2 id="dockerfile-to-automate-building-a-container">Dockerfile to automate building a container</h2>
-<p><code>mkdir -p dockerfiles/trustyssh</code></p>
-<p><code>vi dockerfiles/trustyssh/Dockerfile</code></p>
-<div class="highlight"><pre>FROM ubuntu:trusty
-MAINTAINER John Pfeiffer
-
-RUN apt-get update -y
-RUN apt-get upgrade -y
-RUN apt-get install -y openssh-server
-RUN mkdir /var/run/sshd
-EXPOSE 22
-CMD /usr/sbin/sshd -D
-</pre></div>
-<p><code>docker build --tag=newimagetag --rm ./dockerfiles/trustyssh</code></p>
-<blockquote>
-<p>Each RUN command creates an intermediate container, so make sure you use the -rm option</p>
-</blockquote>
-<hr/>
-<p><code>docker run -v $HOSTDIR:$DOCKERDIR</code></p>
-<h3 id="halt-all-docker-containers">Halt all docker containers</h3>
-<p>docker rm -f $(docker ps -a -q)</p>
-<h2 id="misc">Misc</h2>
+<h2 id="advanced-docker-pre-built-images">Advanced Docker pre built images</h2>
 <p><code>docker search stackbrew/ubuntu</code></p>
 <blockquote>
 <p>FYI stackbrew/ubuntu is the same as ubuntu , <a href="https://registry.hub.docker.com/u/stackbrew/ubuntu">stackbrew is the curated Docker registry</a></p>
 </blockquote>
-<p><code>docker start -i -a IDORNAME</code></p>
-<p><code>docker images --tree</code></p>
-<p><code>docker run -d -p 127.0.0.1:5000:5000 training/webapp python app.py</code></p>
-<p><code>docker port IDORNAME</code></p>
-<hr/>
-<h3 id="advanced-docker-pre-built-images">Advanced Docker pre built images</h3>
 <p><a href="https://registry.hub.docker.com">https://registry.hub.docker.com</a></p>
 <ul>
 <li><a href="https://registry.hub.docker.com/_/redis/">https://registry.hub.docker.com/_/redis/</a></li>
@@ -327,7 +387,7 @@ CMD /usr/sbin/sshd -D
 </li>
 </ul>
 <hr/>
-<h3 id="more-info">More Info</h3>
+<h2 id="more-info">More Info</h2>
 <ul>
 <li><a href="https://docs.docker.com/articles/basics">https://docs.docker.com/articles/basics</a></li>
 <li><a href="https://github.com/wsargent/docker-cheat-sheet">https://github.com/wsargent/docker-cheat-sheet</a></li>
@@ -335,8 +395,9 @@ CMD /usr/sbin/sshd -D
 <p><a href="https://docs.docker.com/reference/commandline/cli/#run">https://docs.docker.com/reference/commandline/cli/#run</a></p>
 </li>
 <li>
-<p><a href="http://jpetazzo.github.io/2014/06/23/docker-ssh-considered-evil">http://jpetazzo.github.io/2014/06/23/docker-ssh-considered-evil</a></p>
+<p><a href="http://blog.oddbit.com/2014/08/11/four-ways-to-connect-a-docker">http://blog.oddbit.com/2014/08/11/four-ways-to-connect-a-docker</a></p>
 </li>
+<li><a href="http://jpetazzo.github.io/2014/06/23/docker-ssh-considered-evil">http://jpetazzo.github.io/2014/06/23/docker-ssh-considered-evil</a></li>
 </ul>
             <aside>
             <hr/>
