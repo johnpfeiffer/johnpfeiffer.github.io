@@ -99,7 +99,14 @@
 <li><a href="#python-and-pelican-static-site-generator-on-docker-ubuntu1404">Python and Pelican static site generator on docker ubuntu:14.04</a></li>
 </ul>
 </li>
-<li><a href="#advanced-docker-pre-built-images">Advanced Docker pre built images</a></li>
+<li><a href="#advanced-docker-pre-built-images">Advanced Docker pre built images</a><ul>
+<li><a href="#redis">Redis</a></li>
+</ul>
+</li>
+<li><a href="#troubleshooting">Troubleshooting</a><ul>
+<li><a href="#building-images-with-dockerfile">Building images with Dockerfile</a></li>
+</ul>
+</li>
 <li><a href="#more-info">More Info</a></li>
 </ul>
 </div>
@@ -215,7 +222,7 @@ root@f5878ed6016e:/# df -h
 </pre></div>
 <p>Control-p then Control-q to detach the tty without exiting the shell</p>
 <p><code>docker ps</code></p>
-<p><code>docker run -d -p 127.0.0.1:5000:5000 training/webapp python app.py</code></p>
+<p><code>docker run --detach -p 127.0.0.1:5000:5000 training/webapp python app.py</code></p>
 <blockquote>
 <p>detached with port 5000 available and executing</p>
 </blockquote>
@@ -224,7 +231,7 @@ root@f5878ed6016e:/# df -h
 <p><code>docker start --interactive --attach container_id_or_name</code></p>
 <h3 id="stopping-a-container">Stopping a container</h3>
 <p>Part of the efficiency in docker is that containers can <strong>run in the background automatically</strong></p>
-<div class="highlight"><pre>docker run --name myredis -d redis
+<div class="highlight"><pre>docker run --detach --name myredis redis
 docker ps
 docker stop myredis
 </pre></div>
@@ -252,6 +259,8 @@ e4b436320442 ubuntu:14.04 -uname -a  3 minutes ago              elegant_engelbar
 <hr/>
 <h2 id="dockerfile-to-automate-building-an-image">Dockerfile to automate building an image</h2>
 <p>Dockerfiles allow automating the creation docker images.</p>
+<p>One advantage to Dockerfile is that each command creates a separate layer so if a specific layer fails all of the previous intermediate images can be re-used.</p>
+<p>Also the version style of imagename:tag allows for chaining of upgrades of child images</p>
 <p>Containers as fast, reliable, and deterministic prod/qa/dev environments can also be extended to be just an improved experimentation sandbox (for those used to SSH and using Linux as a common base OS).</p>
 <p><code>mkdir -p dockerfiles/trustyssh</code></p>
 <p><code>vi dockerfiles/trustyssh/Dockerfile</code></p>
@@ -364,29 +373,58 @@ ubuntu                   14.04               e54ca5efa2e9        3 weeks ago    
 <blockquote>
 <p>FYI stackbrew/ubuntu is the same as ubuntu , <a href="https://registry.hub.docker.com/u/stackbrew/ubuntu">stackbrew is the curated Docker registry</a></p>
 </blockquote>
-<p><a href="https://registry.hub.docker.com">https://registry.hub.docker.com</a></p>
-<ul>
-<li><a href="https://registry.hub.docker.com/_/redis/">https://registry.hub.docker.com/_/redis/</a></li>
-<li>
-<ul>
-<li><code>docker run --name some-redis -d redis</code></li>
-</ul>
-</li>
-<li>
-<ul>
-<li>
+<p><strong><a href="https://registry.hub.docker.com">https://registry.hub.docker.com</a></strong></p>
+<h3 id="redis">Redis</h3>
+<p><strong><a href="https://registry.hub.docker.com/_/redis/">https://registry.hub.docker.com/_/redis/</a></strong></p>
+<p><code>docker run --detach --publish 127.0.0.1:6379:6379 --name redis redis</code></p>
 <blockquote>
-<p>the image already includes by default the expose port command: EXPOSE 6379</p>
+<p>detached container based on the redis latest bound to the host on port 6379
+the image already includes by default the expose port command: EXPOSE 6379...
+<code>apt-get install redis-tools; redis-cli</code>
+connect from the host to the redis container to the redis interactive cli</p>
 </blockquote>
-</li>
-</ul>
-</li>
-<li>
-<ul>
-<li><code>docker run --name some-app --link some-redis:redis -d application-that-uses-redis</code></li>
-</ul>
-</li>
-</ul>
+<p><code>docker run -i -t --link redis:db  johnssh /bin/bash</code></p>
+<div class="highlight"><pre><span class="x">root@d95a758eaa6b:/</span><span class="err">#</span><span class="x"></span>
+<span class="x">apt-get install redis-tools</span>
+<span class="x">env</span>
+<span class="x">redis-cli -h </span><span class="p">$</span><span class="nv">DB_PORT_6379_TCP_ADDR</span><span class="x"></span>
+<span class="x">ping</span>
+</pre></div>
+<blockquote>
+<p>PONG</p>
+</blockquote>
+<p><code>get mykey</code></p>
+<blockquote>
+<p>"somevalue"</p>
+</blockquote>
+<p><code>docker stop johnssh</code></p>
+<p><code>docker start --interactive --attach johnssh</code></p>
+<div class="highlight"><pre>root@d95a758eaa6b:/#
+</pre></div>
+<p><strong>Environment variables are tricky</strong></p>
+<p><code>sudo docker run --detach --publish 127.0.0.1:2222:22 --name johnssh trustyssh</code></p>
+<blockquote>
+<p>if you SSH into your container or use byobu "env" will not show you the info</p>
+</blockquote>
+<p><strong>From the host: </strong> <code>sudo docker inspect --format '{{ .NetworkSettings.IPAddress }}' redis</code></p>
+<blockquote>
+<p>172.17.0.72</p>
+</blockquote>
+<div class="highlight"><pre>ssh -p 2222 root@localhost
+apt-get install redis-tools
+redis-cli -h 172.17.0.72 keys *
+1) mykey
+</pre></div>
+<hr/>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<h3 id="building-images-with-dockerfile">Building images with Dockerfile</h3>
+<p><strong>Building images often depends on the network and DNS</strong></p>
+<p>If you are using Wifi be careful as intermittent network connectivity may cause frustrating issues.</p>
+<p>For DNS with docker installed onto ubuntu via apt-get, try changing to Google DNS by uncommenting in:</p>
+<p><code>vi /etc/default/docker</code></p>
+<p><code>sudo service docker restart</code></p>
+<p><strong>Building images often depends on dependencies</strong>
+look closely at error messages, i.e. make: not found and ensure that an early RUN statement has apt-get update &amp;&amp; apt-get install -y build-essential</p>
 <hr/>
 <h2 id="more-info">More Info</h2>
 <ul>
