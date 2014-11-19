@@ -74,6 +74,7 @@
 <ul>
 <li><a href="#build-python-from-source">Build python from source</a><ul>
 <li><a href="#python3-from-source">python3 from source</a></li>
+<li><a href="#if-you-mess-up-your-os-level-python">If you mess up your OS level python</a></li>
 </ul>
 </li>
 <li><a href="#installing-virtualenv">Installing virtualenv</a><ul>
@@ -113,11 +114,26 @@ make &amp;&amp; make altinstall
 <div class="highlight"><pre>wget https://www.python.org/ftp/python/3.4.2/Python-3.4.2.tgz
 tar -xf Python-3.4.2.tar.gz
 cd Python-3.4.2
-./configure &amp;&amp; make -j$(nproc) &amp;&amp; make altinstall
+./configure --prefix=/opt/python3.4.2 &amp;&amp; make -j$(nproc) &amp;&amp; make altinstall
 ls -ahl /usr/local/bin | grep 3.4
 
 /usr/local/bin/pip3.4 install --upgrade virtualenv
 </pre></div>
+<h3 id="if-you-mess-up-your-os-level-python">If you mess up your OS level python</h3>
+<p><code>apt-get install python3</code></p>
+<div class="highlight"><pre>python3 depends on dh-python; however:
+Package dh-python is not configured yet.
+</pre></div>
+<p>Look at the stack trace, reinstalling may not have put all of the helper directory and .py files in place</p>
+<div class="highlight"><pre>File "/usr/lib/python3.4/site.py", line 586, in &lt;module&gt;
+ImportError: No module named '_sysconfigdata_m'
+
+mv /usr/lib/python3.4 /usr/lib/python3.4-OLD
+wget http://mirrors.kernel.org/ubuntu/pool/main/d/dh-python/dh-python_1.20140128-1ubuntu8_all.deb
+dpkg -i --force-depends dh-python_1.20140128-1ubuntu8_all.deb
+apt-get install python3
+</pre></div>
+<p>And in my case I needed to reinstall loads of python3 stuff: <code>apt-get install xubuntu-destkop</code></p>
 <h2 id="installing-virtualenv">Installing virtualenv</h2>
 <p><strong><code>sudo pip install --upgrade virtualenv</code></strong></p>
 <blockquote>
