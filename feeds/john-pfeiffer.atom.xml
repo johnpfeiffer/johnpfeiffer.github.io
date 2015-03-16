@@ -7962,13 +7962,10 @@ link to the binary)  &lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="cm"&gt;/* john pfeiffer basic MS windows program with button 2009-01-20 */&lt;/span&gt;&lt;span class="cp"&gt;#include &amp;lt;windows.h&amp;gt;#define  IDC_MyExitButton 40001 &lt;/span&gt;&lt;span class="cm"&gt;/* case sensitive! random high number to keep windows happy *//* This function is called by the Windows function DispatchMessage( ) */&lt;/span&gt;&lt;span class="cp"&gt;LRESULT CALLBACK WindowProcedure(    HWND hwnd,      &lt;/span&gt;&lt;span class="cm"&gt;/* Handle of window that received the msg */&lt;/span&gt;&lt;span class="cp"&gt; UINT message,   &lt;/span&gt;&lt;span class="cm"&gt;/* The message */&lt;/span&gt;&lt;span class="cp"&gt;    WPARAM wParam,  &lt;/span&gt;&lt;span class="cm"&gt;/* Extra parameter (e.g. mouse x) */&lt;/span&gt;&lt;span class="cp"&gt; LPARAM lParam)  &lt;/span&gt;&lt;span class="cm"&gt;/* Extra parameter (e.g. mouse y) */&lt;/span&gt;&lt;span class="cp"&gt;{    PAINTSTRUCT ps;       &lt;/span&gt;&lt;span class="cm"&gt;/* a structure for a paint job (see below */&lt;/span&gt;&lt;span class="cp"&gt;    RECT rect;           &lt;/span&gt;&lt;span class="cm"&gt;/* a structure to hold rectangle values (e.g. x,y coordinates) */&lt;/span&gt;&lt;span class="cp"&gt;    HDC hdc;            &lt;/span&gt;&lt;span class="cm"&gt;/* handle to a DC (buffer) for the screen */&lt;/span&gt;&lt;span class="cp"&gt;    switch (message)                  &lt;/span&gt;&lt;span class="cm"&gt;/* handle the messages */&lt;/span&gt;&lt;span class="cp"&gt;    {     case WM_COMMAND:         switch(LOWORD(wParam))    &lt;/span&gt;&lt;span class="cm"&gt;/* find out what&amp;#39;s been clicked */&lt;/span&gt;&lt;span class="cp"&gt;        {            case IDC_MyExitButton:                    PostQuitMessage(0);                break;                                                default:                break;            }        break;  case WM_PAINT:       GetClientRect( hwnd, &amp;amp;rect );       &lt;/span&gt;&lt;span class="cm"&gt;/* get the size of our window */&lt;/span&gt;&lt;span class="cp"&gt;     hdc = BeginPaint( hwnd, &amp;amp;ps );      &lt;/span&gt;&lt;span class="cm"&gt;/* begin painting to the buffer */&lt;/span&gt;&lt;span class="cp"&gt;       DrawText( hdc, TEXT(&amp;quot;Press button to quit&amp;quot;), -1, &amp;amp;rect, DT_CENTER | DT_VCENTER | DT_SINGLELINE);     EndPaint( hwnd, &amp;amp;ps);        return 0; case WM_DESTROY:     PostQuitMessage(0);        &lt;/span&gt;&lt;span class="cm"&gt;/* send a WM_QUIT */&lt;/span&gt;&lt;span class="cp"&gt;        break;        default:                   &lt;/span&gt;&lt;span class="cm"&gt;/* for messages that we don&amp;#39;t deal with */&lt;/span&gt;&lt;span class="cp"&gt; return DefWindowProc(hwnd, message, wParam, lParam);    }    return 0;}int WINAPI WinMain(  HINSTANCE hThisInstance,    &lt;/span&gt;&lt;span class="cm"&gt;/* Handle to the current instance */&lt;/span&gt;&lt;span class="cp"&gt; HINSTANCE hPrevInstance,    &lt;/span&gt;&lt;span class="cm"&gt;/* Handle to the previous instance */&lt;/span&gt;&lt;span class="cp"&gt;    LPSTR lpszArgument,         &lt;/span&gt;&lt;span class="cm"&gt;/* pointer to command line arguments */&lt;/span&gt;&lt;span class="cp"&gt;  int ncmdshow)               &lt;/span&gt;&lt;span class="cm"&gt;/* show state of the window */&lt;/span&gt;&lt;span class="cp"&gt;{    HWND hwnd;           &lt;/span&gt;&lt;span class="cm"&gt;/* The handle for our window */&lt;/span&gt;&lt;span class="cp"&gt;    HWND ButtonPushed = NULL;    MSG messages;        &lt;/span&gt;&lt;span class="cm"&gt;/* Messages to the application  */&lt;/span&gt;&lt;span class="cp"&gt;    WNDCLASS wc;         &lt;/span&gt;&lt;span class="cm"&gt;/* Data structure for our defined windowclass */&lt;/span&gt;&lt;span class="cp"&gt;    wc.style = 0;    wc.lpfnWndProc = WindowProcedure;         &lt;/span&gt;&lt;span class="cm"&gt;/* This function is called by windows */&lt;/span&gt;&lt;span class="cp"&gt;    wc.cbClsExtra = 0;                        &lt;/span&gt;&lt;span class="cm"&gt;/* No extra bytes after the window class */&lt;/span&gt;&lt;span class="cp"&gt;    wc.cbWndExtra = 0;                        &lt;/span&gt;&lt;span class="cm"&gt;/* structure or the window instance */&lt;/span&gt;&lt;span class="cp"&gt;    wc.hInstance = hThisInstance;             &lt;/span&gt;&lt;span class="cm"&gt;/* handle to the owner */&lt;/span&gt;&lt;span class="cp"&gt;    wc.hIcon = NULL;                        &lt;/span&gt;&lt;span class="cm"&gt;/* no special application icon */&lt;/span&gt;&lt;span class="cp"&gt;    wc.hCursor = LoadCursor(NULL, IDC_ARROW); &lt;/span&gt;&lt;span class="cm"&gt;/* default cursor */&lt;/span&gt;&lt;span class="cp"&gt;    wc.hbrBackground = (HBRUSH) GetStockObject(LTGRAY_BRUSH);        wc.lpszMenuName = NULL;                &lt;/span&gt;&lt;span class="cm"&gt;/* No menu */&lt;/span&gt;&lt;span class="cp"&gt;    wc.lpszClassName = &amp;quot;WindowsApp&amp;quot;;        &lt;/span&gt;&lt;span class="cm"&gt;/* the name of the windows class */&lt;/span&gt;&lt;span class="cp"&gt;            &lt;/span&gt;&lt;span class="cm"&gt;/* Register the window class, if fail quit the program with an error value */&lt;/span&gt;&lt;span class="cp"&gt;    if( RegisterClass(&amp;amp;wc) ==0 ){ return -1;  }    &lt;/span&gt;&lt;span class="cm"&gt;/* The class is registered, let&amp;#39;s instantiate our window */&lt;/span&gt;&lt;span class="cp"&gt;    hwnd = CreateWindowEx( 1, &amp;quot;WindowsApp&amp;quot;, &amp;quot;Windows Title&amp;quot;,       WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,     NULL, NULL, hThisInstance, NULL ); &lt;/span&gt;&lt;span class="cm"&gt;/* create button and store the handle */&lt;/span&gt;&lt;span class="cp"&gt;  ButtonPushed = CreateWindow(         &amp;quot;button&amp;quot;,                       &lt;/span&gt;&lt;span class="cm"&gt;/* class name */&lt;/span&gt;&lt;span class="cp"&gt;        &amp;quot;Push Button&amp;quot;,               &lt;/span&gt;&lt;span class="cm"&gt;/* button caption */&lt;/span&gt;&lt;span class="cp"&gt;        WS_CHILD |WS_VISIBLE | BS_PUSHBUTTON,  &lt;/span&gt;&lt;span class="cm"&gt;/* the styles */&lt;/span&gt;&lt;span class="cp"&gt;        0,0,                            &lt;/span&gt;&lt;span class="cm"&gt;/* the left and top coordinates */&lt;/span&gt;&lt;span class="cp"&gt;        150,50,                         &lt;/span&gt;&lt;span class="cm"&gt;/* width and height */&lt;/span&gt;&lt;span class="cp"&gt;        hwnd,                           &lt;/span&gt;&lt;span class="cm"&gt;/* parent window handle */&lt;/span&gt;&lt;span class="cp"&gt;        (HMENU)IDC_MyExitButton,        &lt;/span&gt;&lt;span class="cm"&gt;/* the ID of your button */&lt;/span&gt;&lt;span class="cp"&gt;        hThisInstance,                  &lt;/span&gt;&lt;span class="cm"&gt;/* the instance of your application */&lt;/span&gt;&lt;span class="cp"&gt;        NULL) ;                         &lt;/span&gt;&lt;span class="cm"&gt;/* unnecessary extra */&lt;/span&gt;&lt;span class="cp"&gt;    ShowWindow(hwnd, ncmdshow);       &lt;/span&gt;&lt;span class="cm"&gt;/* Make the window visible on the screen */&lt;/span&gt;&lt;span class="cp"&gt;  UpdateWindow(hwnd);             &lt;/span&gt;&lt;span class="cm"&gt;/* update with changes */&lt;/span&gt;&lt;span class="cp"&gt;    &lt;/span&gt;&lt;span class="cm"&gt;/* Run the message loop. It will run until GetMessage( ) returns 0 */&lt;/span&gt;&lt;span class="cp"&gt;    while( GetMessage(&amp;amp;messages, NULL, 0, 0) )    {            TranslateMessage(&amp;amp;messages); &lt;/span&gt;&lt;span class="cm"&gt;/* Translate virtual-key messages into character messages */&lt;/span&gt;&lt;span class="cp"&gt;        DispatchMessage(&amp;amp;messages);  &lt;/span&gt;&lt;span class="cm"&gt;/* Send messages to WindowProcedure */&lt;/span&gt;&lt;span class="cp"&gt;    }    &lt;/span&gt;&lt;span class="cm"&gt;/* The program return-value is 0 - The value that PostQuitMessage( ) gave */&lt;/span&gt;&lt;span class="cp"&gt;    return messages.wParam;}&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;</summary><category term="win32"></category><category term="gcc"></category></entry><entry><title>PHP and CSS on a radio button board: 365 programming project day five</title><link href="http://blog.john-pfeiffer.com/php-and-css-on-a-radio-button-board-365-programming-project-day-five" rel="alternate"></link><updated>2010-01-19T22:28:00-08:00</updated><author><name>john pfeiffer</name></author><id>tag:blog.john-pfeiffer.com,2010-01-19:php-and-css-on-a-radio-button-board-365-programming-project-day-five</id><summary type="html">
 &lt;h3 id="overview"&gt;Overview&lt;/h3&gt;
-&lt;p&gt;I'm a little sick so this one took longer than it should have. Futher
-exploration of the theme of PHP + CSS + HTML as a very simple way to get user input and then do something fun with it.&lt;/p&gt;
+&lt;p&gt;I'm a little sick so this one took longer than it should have. Futher exploration of the theme of PHP + CSS + HTML as a very simple way to get user input and then do something fun with it.&lt;/p&gt;
 &lt;p&gt;The beginnings of trying to "modularize" code into functions earlier in the process (in later, more complex programs it is a necessity).&lt;/p&gt;
-&lt;p&gt;You may be asking, "How is this useful?" but I think it's a popular
-misconception that Programs should be useful...&lt;/p&gt;
-&lt;p&gt;I will try to break the code into chunks (that you will have to
-re-assemble) but with better piece by piece explanation:&lt;/p&gt;
+&lt;p&gt;You may be asking, "How is this useful?" but I think it's a popular misconception that Programs should be useful...&lt;/p&gt;
+&lt;p&gt;I will try to break the code into chunks (that you will have to re-assemble) but with better piece by piece explanation:&lt;/p&gt;
 &lt;h3 id="defining-css-style-in-the-head"&gt;Defining CSS Style in the Head&lt;/h3&gt;
 &lt;p&gt;Best practice is to have many php or html pages linked to a single CSS
 definition file so that a single update is more efficient. Efficiency in this case means all of the code in one easily visible file.&lt;/p&gt;
@@ -7992,98 +7989,61 @@ definition file so that a single update is more efficient. Efficiency in this ca
 &lt;span class="nt"&gt;&amp;lt;/style&amp;gt;&amp;lt;/head&amp;gt;&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 &lt;h3 id="body-of-php-functions"&gt;Body of PHP functions&lt;/h3&gt;
-&lt;p&gt;If you have an HTML head then you should have a body. The majority of
-the body is the definition of a custom function called "display_board".&lt;/p&gt;
-&lt;p&gt;Again I'm using the trick that if the user has entered data (and
-therefore something's in the $_POST) then we get to show the user that
-we've done something fun with what they gave us.&lt;/p&gt;
-&lt;p&gt;PHP functions are easy to define and have the usual parameters and
-return value responsibilities (though parameters don't need any typing which allows the programmer to focus on the concepts, not the
-implementation - hopefully not confusing the variables up in the
-process).&lt;/p&gt;
-&lt;p&gt;Much like a CSS you can have a file with the definitions of your php
-functions and include it somewhere with &lt;strong&gt;include("footer.php");&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;If you have an HTML head then you should have a body. The majority of the body is the definition of a custom function called "display_board".&lt;/p&gt;
+&lt;p&gt;Again I'm using the trick that if the user has entered data (and therefore something's in the $_POST) then we get to show the user that we've done something fun with what they gave us.&lt;/p&gt;
+&lt;p&gt;PHP functions are easy to define and have the usual parameters and return value responsibilities (though parameters don't need any typing which allows the programmer to focus on the concepts, not the implementation - hopefully not confusing the variables up in the process).&lt;/p&gt;
+&lt;p&gt;Much like a CSS you can have a file with the definitions of your php functions and include it somewhere with &lt;strong&gt;include("footer.php");&lt;/strong&gt;&lt;/p&gt;
 &lt;p&gt;On one hand you remove the implementation details which can make prototyping and modularization faster and easier, on the other hand you have to search through/open a number of different files (or even include definitions to functions you don't use) and of course, it's great to ignore the implentation details right until something goes wrong.&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nt"&gt;&amp;lt;body&amp;gt;&lt;/span&gt;Click on one square, then submit, then hover your choice!&lt;span class="nt"&gt;&amp;lt;br&lt;/span&gt;
+&lt;h3 id="function-display_board"&gt;function display_board&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="x"&gt;&amp;lt;body&amp;gt;Click on one square, then submit, then hover your choice!&amp;lt;br /&amp;gt; &amp;lt;br /&amp;gt;&lt;/span&gt;
+
+&lt;span class="cp"&gt;&amp;lt;?php&lt;/span&gt;
+    &lt;span class="k"&gt;function&lt;/span&gt; &lt;span class="nf"&gt;display_board&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;$chosen_square&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="k"&gt;print&lt;/span&gt; &lt;span class="s1"&gt;'&amp;lt;form action="'&lt;/span&gt; &lt;span class="o"&gt;.&lt;/span&gt; &lt;span class="nv"&gt;$_SERVER&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="s1"&gt;'PHP_SELF'&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;.&lt;/span&gt; &lt;span class="s1"&gt;'" method="post"&amp;gt;'&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="k"&gt;print&lt;/span&gt; &lt;span class="s2"&gt;"&lt;/span&gt;&lt;span class="se"&gt;\n&lt;/span&gt;&lt;span class="s2"&gt;"&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;  &lt;span class="c1"&gt;//newline character in the HTML code for readability&lt;/span&gt;
+    &lt;span class="k"&gt;print&lt;/span&gt; &lt;span class="s1"&gt;'&amp;lt;div id="chosen" align="center"\&amp;gt;'&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;  
+    &lt;span class="k"&gt;print&lt;/span&gt; &lt;span class="s2"&gt;"&lt;/span&gt;&lt;span class="se"&gt;\n&lt;/span&gt;&lt;span class="s2"&gt;"&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;/&amp;gt; &lt;br/&gt;
-    &amp;lt;?php
-        function display_board( $chosen_square ) {  &lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;    print '&amp;lt; form action="' . $\_SERVER['PHP\_SELF'] . '" method="post"\&amp;gt;';
+&lt;p&gt;I don't think the indentations show up well in the blog but the nested loops and formula are just a fancy way of counting from 1 to 64 with 8 items per line.  &lt;/p&gt;
+&lt;p&gt;The magic "redefined css anchor" is buried in there if the user has chosen a square.  &lt;/p&gt;
+&lt;h3 id="nested-for-loops"&gt;nested for loops&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="x"&gt;for($x=0; $x&amp;lt;8; $x++)&lt;/span&gt;
+&lt;span class="x"&gt;{&lt;/span&gt;
+&lt;span class="x"&gt;    for($y=0; $y&amp;lt;8; $y++)  &lt;/span&gt;
+&lt;span class="x"&gt;    {  &lt;/span&gt;
+&lt;span class="x"&gt;        if( ((8*$x) + $y+1) == $chosen_square )&lt;/span&gt;
+&lt;span class="x"&gt;        {  &lt;/span&gt;
+&lt;span class="x"&gt;            print '&amp;lt;input type="radio" name="board_square" value="';&lt;/span&gt;
+&lt;span class="x"&gt;            print ((8*$x) + $y+1) . '"&amp;gt;';&lt;/span&gt;
+&lt;span class="x"&gt;            print '&amp;lt;a href="#"&amp;gt; ';&lt;/span&gt;
+&lt;span class="x"&gt;            print ((8*$x) + $y+1);&lt;/span&gt;
+&lt;span class="x"&gt;            print "&amp;lt;/a&amp;gt;\n";&lt;/span&gt;
+&lt;span class="x"&gt;            //the nested for loops formula creates 64 consecutive values  &lt;/span&gt;
+&lt;span class="x"&gt;        } else {&lt;/span&gt;
+&lt;span class="x"&gt;            print '&amp;lt;input type="radio" name="board_square" value="';&lt;/span&gt;
+&lt;span class="x"&gt;            print ((8*$x) + $y+1) . '"&amp;gt; ' . ((8*$x) + $y+1) . "\n";&lt;/span&gt;
+&lt;span class="x"&gt;        }&lt;/span&gt;
+&lt;span class="x"&gt;    }&lt;/span&gt;
+&lt;span class="x"&gt;    print "&amp;lt;br \&amp;gt;\n";&lt;/span&gt;
+&lt;span class="x"&gt;}&lt;/span&gt;
+&lt;span class="x"&gt;print '&amp;lt;/div&amp;gt;&amp;lt;input type="submit" value="Press Me" /&amp;gt;&amp;lt;/form&amp;gt;';&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;print "\n"; //newline character in the HTML code for readability  &lt;/p&gt;
-&lt;p&gt;print '&amp;lt; div id="chosen" align="center"&amp;gt;';  &lt;/p&gt;
-&lt;p&gt;print "\n";&lt;/p&gt;
+&lt;h3 id="user-input"&gt;user input&lt;/h3&gt;
+&lt;p&gt;stripslashes is best practice when dealing with user data though I'm not sure how a $_POST of a radio button value could end up as a root command; better safe than sorry.&lt;/p&gt;
+&lt;p&gt;The ever present "if the $_POST variable is set AND the $chosen_square variable is NOT EMPTY" allows to only print something that exists (instead of foolishly printing non-existent stuff).&lt;/p&gt;
+&lt;p&gt;Finally we call our function (with a parameter). So if the CSS and PHP function definition were other files this "program" would be very compact and very easy to read (but then again you wouldn't know what the program did unless you had those other files).  &lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="x"&gt;$chosen_square = stripslashes( $_POST['board_square'] );&lt;/span&gt;
+&lt;span class="x"&gt;if( !empty( $chosen_square ) &amp;amp;&amp;amp; isset( $chosen_square ) )&lt;/span&gt;
+&lt;span class="x"&gt;{&lt;/span&gt;
+&lt;span class="x"&gt;    print $chosen_square;&lt;/span&gt;
+&lt;span class="x"&gt;}&lt;/span&gt;
 
-&lt;hr/&gt;
-&lt;p&gt;I don't think the indentations show up well in the blog but the nested
-loops and formula are just a fancy way of counting from 1 to 64 with 8
-items per line.  &lt;/p&gt;
-&lt;p&gt;The magic "redefined css anchor" is buried in there if the user has
-chosen a square.  &lt;/p&gt;
-&lt;hr/&gt;
+&lt;span class="x"&gt;display_board( $chosen_square );  &lt;/span&gt;
+&lt;span class="x"&gt;?&amp;gt;&lt;/span&gt;
 
-&lt;p&gt;for($x=0; $x&amp;lt; 8; $x++)  &lt;/p&gt;
-&lt;p&gt;{  &lt;/p&gt;
-&lt;p&gt;for($y=0; $y&amp;lt; 8; $y++)  &lt;/p&gt;
-&lt;p&gt;{  &lt;/p&gt;
-&lt;p&gt;if( ((8*$x) + $y+1) == $chosen_square )  &lt;/p&gt;
-&lt;p&gt;{  &lt;/p&gt;
-&lt;p&gt;print '&amp;lt; input type="radio" name="board_square" value="';  &lt;/p&gt;
-&lt;p&gt;print ((8*$x) + $y+1) . '"&amp;gt;';  &lt;/p&gt;
-&lt;p&gt;print '&amp;lt; a href="#"&amp;gt; ';  &lt;/p&gt;
-&lt;p&gt;print ((8*$x) + $y+1);  &lt;/p&gt;
-&lt;p&gt;print "&amp;lt; /a&amp;gt;\n";&lt;/p&gt;
-
-&lt;p&gt;//the nested for loops formula creates 64 consecutive values  &lt;/p&gt;
-&lt;p&gt;}  &lt;/p&gt;
-&lt;p&gt;else  &lt;/p&gt;
-&lt;p&gt;{  &lt;/p&gt;
-&lt;p&gt;print '&amp;lt; input type="radio" name="board_square" value="';  &lt;/p&gt;
-&lt;p&gt;print ((8*$x) + $y+1) . '"&amp;gt; ' . ((8*$x) + $y+1) . "\n";  &lt;/p&gt;
-&lt;p&gt;}&lt;/p&gt;
-
-&lt;p&gt;}  &lt;/p&gt;
-&lt;p&gt;print "&amp;lt; br /&amp;gt;\n";  &lt;/p&gt;
-&lt;p&gt;}  &lt;/p&gt;
-&lt;p&gt;print '&amp;lt; /div&amp;gt;&amp;lt; input type="submit" value="Press Me" /&amp;gt;&amp;lt; /form&amp;gt;';&lt;/p&gt;
-
-&lt;p&gt;}&lt;/p&gt;
-
-&lt;hr/&gt;
-&lt;p&gt;stripslashes is best practice when dealing with user data though I'm not
-sure how a $_POST of a radio button value could end up as a root
-command; better safe than sorry.&lt;/p&gt;
-
-&lt;p&gt;The ever present "if the $_POST variable is set AND the $chosen_square
-variable is NOT EMPTY" allows to only print something that exists
-(instead of foolishly printing non-existent stuff).&lt;/p&gt;
-
-&lt;p&gt;Finally we call our function (with a parameter). So if the CSS and PHP
-function definition were other files this "program" would be very
-compact and very easy to read (but then again you wouldn't know what the
-program did unless you had those other files).  &lt;/p&gt;
-&lt;hr/&gt;
-
-&lt;p&gt;$chosen_square = stripslashes( $_POST['board_square'] );  &lt;/p&gt;
-&lt;p&gt;if( !empty( $chosen_square ) &amp;amp;&amp;amp; isset( $chosen_square ) )  &lt;/p&gt;
-&lt;p&gt;{  &lt;/p&gt;
-&lt;p&gt;print $chosen_square;  &lt;/p&gt;
-&lt;p&gt;}&lt;/p&gt;
-
-&lt;p&gt;display_board( $chosen_square );  &lt;/p&gt;
-&lt;p&gt;?&amp;gt;&lt;/p&gt;
-
-&lt;p&gt;&amp;lt; /body&amp;gt;  &lt;/p&gt;
-&lt;p&gt;&amp;lt; /html&amp;gt;&lt;/p&gt;
-
-&lt;p&gt;For a live working test of the above code:&lt;br/&gt;
-&lt;a href="http://kittyandbear.net/john/web-tutorials/php-radio-buttons.php"&gt;http://kittyandbear.net/john/web-tutorials/php-radio-buttons.php&lt;/a&gt;&lt;/p&gt;
-&lt;p&gt;&lt;/p&gt;
-&lt;p&gt;
-&lt;/p&gt;
-
-
+&lt;span class="x"&gt;&amp;lt;/body&amp;gt;&lt;/span&gt;
+&lt;span class="x"&gt;&amp;lt;/html&amp;gt;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
 </summary></entry><entry><title>First real Windows program: 365 programming project day four</title><link href="http://blog.john-pfeiffer.com/first-real-windows-program-365-programming-project-day-four" rel="alternate"></link><updated>2010-01-18T15:05:00-08:00</updated><author><name>john pfeiffer</name></author><id>tag:blog.john-pfeiffer.com,2010-01-18:first-real-windows-program-365-programming-project-day-four</id><summary type="html">&lt;p&gt;Windows Programming has a steep curve in the beginning as there are many things to memorize (oops I mean learn and understand) as theoretically they've created the data structures and functions to get stuff on the screen.&lt;/p&gt;
 &lt;p&gt;Again I've used gcc 2.95 windows port with the special command on my wndclass-hello.c source code.&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;gcc.exe -o %1.exe %1 -Iinclude -Llib -Wall -ansi -mwindows&lt;/code&gt;&lt;/p&gt;
