@@ -6,7 +6,7 @@
         <meta name="author" content="john pfeiffer" />
         <meta name="copyright" content="john pfeiffer" />
 
-<meta name="keywords" content=", programming, " />
+<meta name="keywords" content="javascript, CRM, programming, " />
         <title>Javascript on MS CRM Forms: 365 programming project day twenty-four  · johnpfeiffer
 </title>
         <link href="http://cdn-images.mailchimp.com/embedcode/slim-081711.css" rel="stylesheet" type="text/css">
@@ -72,39 +72,81 @@
 <div class="row-fluid">
         <div class="span8 offset2 article-content">
 
-            <p>Programming isn't always fun and games. Here's an example from me
-putting in extra time on a weekend...</p>
-</p>
-
-<p>At my work We use Microsoft Dynamics CRM 4.0 which is a customizable CRM
-web interface on top of MS SQL Server. While the built in functionality
-is pretty good a business always needs some more customization to get
-things "just right"...</p>
-</p>
-
-<p>MS CRM has "onload" and "onsave" functionality for each entity that
-allows a developer to stick in some custom javascript.</p>
-</p>
-
-<p>Below is the JS that controls the calculations on the Products section
-of a Quote for Customer Form. This improves the end user experience as
-user changes update the different fields instantly and automatically
-(though they still have to press SAVE to keep those changes).</p>
-</p>
-
-<p>Note: Javascript isn't related to Java, it's a "client side" (runs on
-your computer, not the server) piece of code frequently used to modify
-how things look on your screen.</p>
-</p>
-
+            <p>Programming isn't always fun and games. Here's an example from me putting in extra time on a weekend...</p>
+<p>At my work We use Microsoft Dynamics CRM 4.0 which is a customizable CRM web interface on top of MS SQL Server. While the built in functionality is pretty good a business always needs some more customization to get things "just right"...</p>
+<p>MS CRM has "onload" and "onsave" functionality for each entity that allows a developer to stick in some custom javascript.</p>
+<p>Below is the JS that controls the calculations on the Products section of a Quote for Customer Form. This improves the end user experience as user changes update the different fields instantly and automatically (though they still have to press SAVE to keep those changes).</p>
+<p>Note: Javascript isn't related to Java, it's a "client side" (runs on your computer, not the server) piece of code frequently used to modify how things look on your screen.</p>
 <hr />
-<p></p>
-<p>
-    // if the Tax field is null (ie a new quote is being created) we fill in a default taxif (crmForm.all.new_taxpercentage.DataValue == null) { crmForm.all.new_taxpercentage.DataValue = 17.5;}//when Loading the Quote Form and on certain fields I have the following:crmForm.all.quantity.FireOnChange();//tells the system to pretend that the Quantity field has just changed //(and run it's jscripts)//this allows for one central place to control all of the calculations--------------------------------------------------------------------------------//this forces even "disabled" fields to update valuescrmForm.all.new_taxpercentage.ForceSubmit = true;//Calculate the BASE amount - MS CRM multicurrency required for moneycrmForm.all.baseamount_base.DataValue = crmForm.all.quantity.DataValue * crmForm.all.priceperunit_base.DataValue//Calculate the baseamount.crmForm.all.baseamount.DataValue = crmForm.all.quantity.DataValue * crmForm.all.priceperunit.DataValue;//Only calculate the discount if the user has actually filled in the discount fieldif( crmForm.all.new_manualdiscountpercentage.DataValue &gt;= 0 ){    //Calculate the manual BASE discount amount. crmForm.all.manualdiscountamount_base.DataValue = crmForm.all.quantity.DataValue * crmForm.all.priceperunit_base.DataValue * (crmForm.all.new_manualdiscountpercentage.DataValue/100);    //Calculate the manual discount amount.  crmForm.all.manualdiscountamount.DataValue = crmForm.all.quantity.DataValue * crmForm.all.priceperunit.DataValue * (crmForm.all.new_manualdiscountpercentage.DataValue/100);}//Tricky piece of math with lots of ( and * and / ...//Calculate the new BASE Tax AmountcrmForm.all.tax_base.DataValue = ((crmForm.all.quantity.DataValue * crmForm.all.priceperunit_base.DataValue) - (crmForm.all.manualdiscountamount_base.DataValue)) * (crmForm.all.new_taxpercentage.DataValue/100);//Calculate the new Tax AmountcrmForm.all.tax.DataValue = ((crmForm.all.quantity.DataValue * crmForm.all.priceperunit.DataValue) -  (crmForm.all.manualdiscountamount.DataValue)) * (crmForm.all.new_taxpercentage.DataValue/100);//Calculate the new Extended BASE AmountcrmForm.all.extendedamount_base.DataValue = (crmForm.all.baseamount_base.DataValue -  crmForm.all.manualdiscountamount_base.DataValue) +  (crmForm.all.tax_base.DataValue);//Calculate the new Extended AmountcrmForm.all.extendedamount.DataValue = (crmForm.all.baseamount.DataValue -  crmForm.all.manualdiscountamount.DataValue) +  (crmForm.all.tax.DataValue);</p>
-<p></div>
-</div>
-</div>
-</p></p>
+<div class="highlight"><pre><span class="c1">// if the Tax field is null (ie a new quote is being created) we fill in a default tax</span>
+<span class="k">if</span> <span class="p">(</span><span class="nx">crmForm</span><span class="p">.</span><span class="nx">all</span><span class="p">.</span><span class="nx">new_taxpercentage</span><span class="p">.</span><span class="nx">DataValue</span> <span class="o">==</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">crmForm</span><span class="p">.</span><span class="nx">all</span><span class="p">.</span><span class="nx">new_taxpercentage</span><span class="p">.</span><span class="nx">DataValue</span> <span class="o">=</span> <span class="mf">17.5</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="c1">//when Loading the Quote Form and on certain fields I have the following:</span>
+
+<span class="nx">crmForm</span><span class="p">.</span><span class="nx">all</span><span class="p">.</span><span class="nx">quantity</span><span class="p">.</span><span class="nx">FireOnChange</span><span class="p">();</span>
+
+<span class="c1">//tells the system to pretend that the Quantity field has just changed</span>
+<span class="c1">//(and run it&#39;s jscripts)</span>
+<span class="c1">//this allows for one central place to control all of the calculations</span>
+
+<span class="o">--------------------------------------------------------------------------------</span>
+
+<span class="c1">//this forces even &quot;disabled&quot; fields to update values</span>
+<span class="nx">crmForm</span><span class="p">.</span><span class="nx">all</span><span class="p">.</span><span class="nx">new_taxpercentage</span><span class="p">.</span><span class="nx">ForceSubmit</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+
+<span class="c1">//Calculate the BASE amount - MS CRM multicurrency required for money</span>
+<span class="nx">crmForm</span><span class="p">.</span><span class="nx">all</span><span class="p">.</span><span class="nx">baseamount_base</span><span class="p">.</span><span class="nx">DataValue</span> <span class="o">=</span>
+    <span class="nx">crmForm</span><span class="p">.</span><span class="nx">all</span><span class="p">.</span><span class="nx">quantity</span><span class="p">.</span><span class="nx">DataValue</span> <span class="o">*</span> <span class="nx">crmForm</span><span class="p">.</span><span class="nx">all</span><span class="p">.</span><span class="nx">priceperunit_base</span><span class="p">.</span><span class="nx">DataValue</span>
+
+<span class="c1">//Calculate the baseamount.</span>
+<span class="nx">crmForm</span><span class="p">.</span><span class="nx">all</span><span class="p">.</span><span class="nx">baseamount</span><span class="p">.</span><span class="nx">DataValue</span> <span class="o">=</span> 
+    <span class="nx">crmForm</span><span class="p">.</span><span class="nx">all</span><span class="p">.</span><span class="nx">quantity</span><span class="p">.</span><span class="nx">DataValue</span> <span class="o">*</span> <span class="nx">crmForm</span><span class="p">.</span><span class="nx">all</span><span class="p">.</span><span class="nx">priceperunit</span><span class="p">.</span><span class="nx">DataValue</span><span class="p">;</span>
+
+
+<span class="c1">//Only calculate the discount if the user has actually filled in the discount field</span>
+<span class="k">if</span><span class="p">(</span> <span class="nx">crmForm</span><span class="p">.</span><span class="nx">all</span><span class="p">.</span><span class="nx">new_manualdiscountpercentage</span><span class="p">.</span><span class="nx">DataValue</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="p">)</span>
+<span class="p">{</span>
+        <span class="c1">//Calculate the manual BASE discount amount.</span>
+        <span class="nx">crmForm</span><span class="p">.</span><span class="nx">all</span><span class="p">.</span><span class="nx">manualdiscountamount_base</span><span class="p">.</span><span class="nx">DataValue</span> <span class="o">=</span>
+    <span class="nx">crmForm</span><span class="p">.</span><span class="nx">all</span><span class="p">.</span><span class="nx">quantity</span><span class="p">.</span><span class="nx">DataValue</span> <span class="o">*</span> 
+    <span class="nx">crmForm</span><span class="p">.</span><span class="nx">all</span><span class="p">.</span><span class="nx">priceperunit_base</span><span class="p">.</span><span class="nx">DataValue</span> <span class="o">*</span>
+    <span class="p">(</span><span class="nx">crmForm</span><span class="p">.</span><span class="nx">all</span><span class="p">.</span><span class="nx">new_manualdiscountpercentage</span><span class="p">.</span><span class="nx">DataValue</span><span class="o">/</span><span class="mi">100</span><span class="p">);</span>
+
+        <span class="c1">//Calculate the manual discount amount.</span>
+        <span class="nx">crmForm</span><span class="p">.</span><span class="nx">all</span><span class="p">.</span><span class="nx">manualdiscountamount</span><span class="p">.</span><span class="nx">DataValue</span> <span class="o">=</span>
+        <span class="nx">crmForm</span><span class="p">.</span><span class="nx">all</span><span class="p">.</span><span class="nx">quantity</span><span class="p">.</span><span class="nx">DataValue</span> <span class="o">*</span> <span class="nx">crmForm</span><span class="p">.</span><span class="nx">all</span><span class="p">.</span><span class="nx">priceperunit</span><span class="p">.</span><span class="nx">DataValue</span> <span class="o">*</span>
+        <span class="p">(</span><span class="nx">crmForm</span><span class="p">.</span><span class="nx">all</span><span class="p">.</span><span class="nx">new_manualdiscountpercentage</span><span class="p">.</span><span class="nx">DataValue</span><span class="o">/</span><span class="mi">100</span><span class="p">);</span>
+
+<span class="p">}</span>
+
+<span class="c1">//Tricky piece of math with lots of ( and * and / ...</span>
+<span class="c1">//Calculate the new BASE Tax Amount</span>
+<span class="nx">crmForm</span><span class="p">.</span><span class="nx">all</span><span class="p">.</span><span class="nx">tax_base</span><span class="p">.</span><span class="nx">DataValue</span> <span class="o">=</span>
+    <span class="p">((</span><span class="nx">crmForm</span><span class="p">.</span><span class="nx">all</span><span class="p">.</span><span class="nx">quantity</span><span class="p">.</span><span class="nx">DataValue</span> <span class="o">*</span>
+     <span class="nx">crmForm</span><span class="p">.</span><span class="nx">all</span><span class="p">.</span><span class="nx">priceperunit_base</span><span class="p">.</span><span class="nx">DataValue</span><span class="p">)</span> <span class="o">-</span>
+    <span class="p">(</span><span class="nx">crmForm</span><span class="p">.</span><span class="nx">all</span><span class="p">.</span><span class="nx">manualdiscountamount_base</span><span class="p">.</span><span class="nx">DataValue</span><span class="p">))</span> <span class="o">*</span>
+    <span class="p">(</span><span class="nx">crmForm</span><span class="p">.</span><span class="nx">all</span><span class="p">.</span><span class="nx">new_taxpercentage</span><span class="p">.</span><span class="nx">DataValue</span><span class="o">/</span><span class="mi">100</span><span class="p">);</span>
+
+<span class="c1">//Calculate the new Tax Amount</span>
+<span class="nx">crmForm</span><span class="p">.</span><span class="nx">all</span><span class="p">.</span><span class="nx">tax</span><span class="p">.</span><span class="nx">DataValue</span> <span class="o">=</span>
+    <span class="p">((</span><span class="nx">crmForm</span><span class="p">.</span><span class="nx">all</span><span class="p">.</span><span class="nx">quantity</span><span class="p">.</span><span class="nx">DataValue</span> <span class="o">*</span> <span class="nx">crmForm</span><span class="p">.</span><span class="nx">all</span><span class="p">.</span><span class="nx">priceperunit</span><span class="p">.</span><span class="nx">DataValue</span><span class="p">)</span> <span class="o">-</span>
+    <span class="p">(</span><span class="nx">crmForm</span><span class="p">.</span><span class="nx">all</span><span class="p">.</span><span class="nx">manualdiscountamount</span><span class="p">.</span><span class="nx">DataValue</span><span class="p">))</span> <span class="o">*</span>
+    <span class="p">(</span><span class="nx">crmForm</span><span class="p">.</span><span class="nx">all</span><span class="p">.</span><span class="nx">new_taxpercentage</span><span class="p">.</span><span class="nx">DataValue</span><span class="o">/</span><span class="mi">100</span><span class="p">);</span>
+
+<span class="c1">//Calculate the new Extended BASE Amount</span>
+<span class="nx">crmForm</span><span class="p">.</span><span class="nx">all</span><span class="p">.</span><span class="nx">extendedamount_base</span><span class="p">.</span><span class="nx">DataValue</span> <span class="o">=</span>
+    <span class="p">(</span><span class="nx">crmForm</span><span class="p">.</span><span class="nx">all</span><span class="p">.</span><span class="nx">baseamount_base</span><span class="p">.</span><span class="nx">DataValue</span> <span class="o">-</span>
+    <span class="nx">crmForm</span><span class="p">.</span><span class="nx">all</span><span class="p">.</span><span class="nx">manualdiscountamount_base</span><span class="p">.</span><span class="nx">DataValue</span><span class="p">)</span> <span class="o">+</span>
+    <span class="p">(</span><span class="nx">crmForm</span><span class="p">.</span><span class="nx">all</span><span class="p">.</span><span class="nx">tax_base</span><span class="p">.</span><span class="nx">DataValue</span><span class="p">);</span>
+
+<span class="c1">//Calculate the new Extended Amount</span>
+<span class="nx">crmForm</span><span class="p">.</span><span class="nx">all</span><span class="p">.</span><span class="nx">extendedamount</span><span class="p">.</span><span class="nx">DataValue</span> <span class="o">=</span>
+    <span class="p">(</span><span class="nx">crmForm</span><span class="p">.</span><span class="nx">all</span><span class="p">.</span><span class="nx">baseamount</span><span class="p">.</span><span class="nx">DataValue</span> <span class="o">-</span>
+    <span class="nx">crmForm</span><span class="p">.</span><span class="nx">all</span><span class="p">.</span><span class="nx">manualdiscountamount</span><span class="p">.</span><span class="nx">DataValue</span><span class="p">)</span> <span class="o">+</span>
+    <span class="p">(</span><span class="nx">crmForm</span><span class="p">.</span><span class="nx">all</span><span class="p">.</span><span class="nx">tax</span><span class="p">.</span><span class="nx">DataValue</span><span class="p">);</span>
+</pre></div>
             <aside>
             <hr/>
             <nav>
@@ -124,6 +166,15 @@ how things look on your screen.</p>
             <time pubdate="pubdate" datetime="2010-01-24T19:19:00-08:00">Jan 24, 2010</time>
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#programming-ref">programming</a> 
+            <h4>Tags</h4>
+            <ul class="list-of-tags tags-in-article"> 
+                <li><a href="/tags.html#CRM-ref">CRM
+                    <span>1</span>
+</a></li>
+                <li><a href="/tags.html#javascript-ref">javascript
+                    <span>2</span>
+</a></li>
+            </ul>
 
         </div>
         </section>
