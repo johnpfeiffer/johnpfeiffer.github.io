@@ -1348,6 +1348,36 @@ Step 2 : RUN apt-get update -y
 Ign http://archive.ubuntu.com trusty InRelease
 ...
 &lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Since each run command creates a new layer it is best practice to consolidate commands for a single logical action when possible:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;RUN echo "#!/bin/bash" &amp;gt; /root/build-and-run.sh &amp;amp;&amp;amp; \
+  echo "cd /opt/mydata/pelican-project" &amp;gt;&amp;gt; /root/build-and-run.sh &amp;amp;&amp;amp; \
+  echo "pelican content -r &amp;amp;" &amp;gt;&amp;gt; /root/build-and-run.sh &amp;amp;&amp;amp; \
+  echo "cd /opt/mydata/pelican-project/output" &amp;gt;&amp;gt; /root/build-and-run.sh &amp;amp;&amp;amp; \
+  echo "python -m SimpleHTTPServer" &amp;gt;&amp;gt; /root/build-and-run.sh &amp;amp;&amp;amp; \
+  chmod +x /root/build-and-run.sh
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;&lt;code&gt;docker history ubuntu-utopic-pelican:latest&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;view the history of hashes (which can be run by themselves) and timestamps and sizes&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;IMAGE               CREATED             CREATED BY                                      SIZE
+39ac388d3c0d        37 seconds ago      /bin/sh -c #(nop) CMD [/bin/bash /root/build-   0 B
+218edf407f18        37 seconds ago      /bin/sh -c echo "#!/bin/bash" &amp;gt; /root/build-a   129 B
+d9d774d344bd        2 weeks ago         /bin/sh -c #(nop) EXPOSE 8000/tcp               0 B
+ae1733e0e1b9        2 weeks ago         /bin/sh -c pip install pelican Markdown beaut   20.64 MB
+24561ed8052f        2 weeks ago         /bin/sh -c curl https://bootstrap.pypa.io/get   9.826 MB
+1878a9a052eb        2 weeks ago         /bin/sh -c apt-get update &amp;amp;&amp;amp; apt-get install    60.85 MB
+5e5e0e9171da        2 weeks ago         /bin/sh -c #(nop) MAINTAINER John Pfeiffer "h   0 B
+78949b1e1cfd        7 weeks ago         /bin/sh -c #(nop) CMD [/bin/bash]               0 B
+21abcc4ef877        7 weeks ago         /bin/sh -c sed -i 's/^#\s*\(deb.*universe\)$/   1.895 kB
+f552c527d701        7 weeks ago         /bin/sh -c echo '#!/bin/sh' &amp;gt; /usr/sbin/polic   215 kB
+c4c77a6165f9        7 weeks ago         /bin/sh -c #(nop) ADD file:24ed1895f2e500dcec   194.2 MB
+511136ea3c5a        22 months ago                                                       0 B
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;experimental:
+docker save 49b5a7a88d5 | sudo docker-squash -t ubuntu-utopic-pelican:squash | docker load&lt;/p&gt;
+&lt;/blockquote&gt;
 &lt;hr/&gt;
 &lt;h2 id="add-a-port-to-a-container"&gt;Add a port to a container&lt;/h2&gt;
 &lt;p&gt;&lt;code&gt;docker run --detach --publish 127.0.0.1:2222:22 --name johnssh trustyssh&lt;/code&gt;&lt;/p&gt;
@@ -7748,59 +7778,57 @@ Wow, another day and another program (useful even!)
 
 &lt;p&gt;&lt;/div&gt;
 &lt;/div&gt;
-&lt;/p&gt;&lt;/p&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">John Pfeiffer</dc:creator><pubDate>Wed, 27 Jan 2010 20:58:00 -0800</pubDate><guid>tag:blog.john-pfeiffer.com,2010-01-27:365-27-dos-batch-file-using-a-for-loop-to-test-a-vpn-with-ping</guid></item><item><title>365-26 Javascript Validation of an HTML Form</title><link>http://blog.john-pfeiffer.com/365-26-javascript-validation-of-an-html-form</link><description>&lt;div class="field field-name-body field-type-text-with-summary field-label-hidden"&gt;
-&lt;div class="field-items"&gt;
-&lt;div class="field-item even"&gt;
-On the 26th I missed my 365 entry because I was being Mr. Corporate IT
-Hero at our annual Company Meeting but I actually have a number of
-things from the past that I can comment on and insert...
+&lt;/p&gt;&lt;/p&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">John Pfeiffer</dc:creator><pubDate>Wed, 27 Jan 2010 20:58:00 -0800</pubDate><guid>tag:blog.john-pfeiffer.com,2010-01-27:365-27-dos-batch-file-using-a-for-loop-to-test-a-vpn-with-ping</guid></item><item><title>Javascript validation of an html form: 365 programming project day twenty six</title><link>http://blog.john-pfeiffer.com/javascript-validation-of-an-html-form-365-programming-project-day-twenty-six</link><description>&lt;p&gt;On the 26th I missed my 365 entry because I was being Mr. Corporate IT Hero at our annual Company Meeting but I actually have a number of things from the past that I can comment on and insert...&lt;/p&gt;
+&lt;p&gt;Everybody who has an HTML form would like some software "intelligence" to guide the User to fill in the "required" fields, or help direct the User if they've not entered a valid email address, etc...&lt;/p&gt;
+&lt;p&gt;I'm not a fan of Javascript if only because it runs on the client and can be a big security hole. If it's merely written poorly it can crash the browser or confuse the heck out of the user (rendering your HTML Form useless).&lt;/p&gt;
+&lt;p&gt;But here's the source code on how to do the most basic user input validation:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="nx"&gt;html&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&amp;lt;&lt;/span&gt;&lt;span class="nx"&gt;head&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&amp;lt;&lt;/span&gt;&lt;span class="nx"&gt;title&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&lt;/span&gt;&lt;span class="nx"&gt;javascript&lt;/span&gt; &lt;span class="nx"&gt;form&lt;/span&gt; &lt;span class="nx"&gt;validation&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="err"&gt;/title&amp;gt;&amp;lt;/head&amp;gt;&lt;/span&gt;
+&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="nx"&gt;body&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&lt;/span&gt;
 
-&lt;/p&gt;
+&lt;span class="c"&gt;&amp;lt;!--&lt;/span&gt; &lt;span class="nx"&gt;onSubmit&lt;/span&gt; &lt;span class="nx"&gt;tells&lt;/span&gt; &lt;span class="nx"&gt;the&lt;/span&gt; &lt;span class="nx"&gt;browser&lt;/span&gt; &lt;span class="nx"&gt;that&lt;/span&gt; &lt;span class="nx"&gt;there&lt;/span&gt; &lt;span class="nx"&gt;is&lt;/span&gt; &lt;span class="nx"&gt;a&lt;/span&gt; &lt;span class="nx"&gt;javascript&lt;/span&gt; &lt;span class="kd"&gt;function&lt;/span&gt; &lt;span class="nx"&gt;to&lt;/span&gt; &lt;span class="nx"&gt;run&lt;/span&gt; &lt;span class="nx"&gt;when&lt;/span&gt; &lt;span class="nx"&gt;the&lt;/span&gt; &lt;span class="nx"&gt;user&lt;/span&gt; &lt;span class="nx"&gt;hits&lt;/span&gt; &lt;span class="nx"&gt;the&lt;/span&gt; &lt;span class="nx"&gt;submit&lt;/span&gt; &lt;span class="nx"&gt;button&lt;/span&gt; &lt;span class="o"&gt;--&amp;gt;&lt;/span&gt;
 
-Everybody who has an HTML form would like some software "intelligence"
-to guide the User to fill in the "required" fields, or help direct the
-User if they've not entered a valid email address, etc...
+&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="nx"&gt;FORM&lt;/span&gt; &lt;span class="nx"&gt;ACTION&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;javascript-form-validation.htm&amp;quot;&lt;/span&gt; &lt;span class="nx"&gt;NAME&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;testform&amp;quot;&lt;/span&gt; &lt;span class="nx"&gt;onSubmit&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;return validateMyForm()&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class="nx"&gt;Starting&lt;/span&gt; &lt;span class="nx"&gt;X&lt;/span&gt; &lt;span class="nx"&gt;Point&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="nx"&gt;input&lt;/span&gt; &lt;span class="nx"&gt;name&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;startx&amp;quot;&lt;/span&gt; &lt;span class="nx"&gt;type&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;text&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&amp;lt;&lt;/span&gt;&lt;span class="nx"&gt;br&lt;/span&gt; &lt;span class="o"&gt;/&amp;gt;&lt;/span&gt;
+    &lt;span class="nx"&gt;Starting&lt;/span&gt; &lt;span class="nx"&gt;Y&lt;/span&gt; &lt;span class="nx"&gt;Point&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="nx"&gt;input&lt;/span&gt; &lt;span class="nx"&gt;name&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;starty&amp;quot;&lt;/span&gt; &lt;span class="nx"&gt;type&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;text&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&amp;lt;&lt;/span&gt;&lt;span class="nx"&gt;br&lt;/span&gt; &lt;span class="o"&gt;/&amp;gt;&lt;/span&gt;
+    &lt;span class="nx"&gt;Email&lt;/span&gt; &lt;span class="nx"&gt;Address&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="nx"&gt;input&lt;/span&gt; &lt;span class="nx"&gt;id&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;email&amp;quot;&lt;/span&gt; &lt;span class="nx"&gt;maxlength&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;80&amp;quot;&lt;/span&gt; &lt;span class="nx"&gt;name&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;email&amp;quot;&lt;/span&gt; &lt;span class="nx"&gt;size&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;20&amp;quot;&lt;/span&gt; &lt;span class="nx"&gt;type&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;text&amp;quot;&lt;/span&gt; &lt;span class="o"&gt;/&amp;gt;&lt;/span&gt;
+    &lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="nx"&gt;br&lt;/span&gt; &lt;span class="o"&gt;/&amp;gt;&lt;/span&gt;  &lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="nx"&gt;br&lt;/span&gt; &lt;span class="o"&gt;/&amp;gt;&lt;/span&gt;  
+&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="nx"&gt;input&lt;/span&gt; &lt;span class="nx"&gt;type&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;submit&amp;quot;&lt;/span&gt; &lt;span class="o"&gt;/&amp;gt;&lt;/span&gt;
+&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="err"&gt;/form&amp;gt;&lt;/span&gt;
 
-&lt;/p&gt;
+&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="nx"&gt;script&lt;/span&gt; &lt;span class="nx"&gt;type&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;text/javascript&amp;quot;&lt;/span&gt; &lt;span class="nx"&gt;language&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;javascript&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&lt;/span&gt;
 
-I'm not a fan of Javascript if only because it runs on the client and
-can be a big security hole. If it's merely written poorly it can crash
-the browser or confuse the heck out of the user (rendering your HTML
-Form useless).
+&lt;span class="kd"&gt;function&lt;/span&gt; &lt;span class="nx"&gt;validateMyForm&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; 
+&lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;document&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;getElementById&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;startx&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;).&lt;/span&gt;&lt;span class="nx"&gt;value&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; 
+        &lt;span class="p"&gt;{&lt;/span&gt;
+            &lt;span class="nx"&gt;alert&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;Please enter a Starting X value (integer)&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+            &lt;span class="nb"&gt;document&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;getElementById&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;startx&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;).&lt;/span&gt;&lt;span class="nx"&gt;focus&lt;/span&gt;&lt;span class="p"&gt;();&lt;/span&gt;
+            &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="kc"&gt;false&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+        &lt;span class="p"&gt;}&lt;/span&gt;
+        &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;document&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;getElementById&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;starty&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;).&lt;/span&gt;&lt;span class="nx"&gt;value&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; 
+        &lt;span class="p"&gt;{&lt;/span&gt;
+            &lt;span class="nx"&gt;alert&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;Please enter a Starting Y value (integer)&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+            &lt;span class="nb"&gt;document&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;getElementById&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;starty&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;).&lt;/span&gt;&lt;span class="nx"&gt;focus&lt;/span&gt;&lt;span class="p"&gt;();&lt;/span&gt;
+            &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="kc"&gt;false&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+        &lt;span class="p"&gt;}&lt;/span&gt;
+        &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;document&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;testform&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;email&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;value&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+            &lt;span class="nx"&gt;alert&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;Please enter your email&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+            &lt;span class="nb"&gt;document&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;myForm&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;email&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;focus&lt;/span&gt;&lt;span class="p"&gt;();&lt;/span&gt;
+            &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="kc"&gt;false&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+        &lt;span class="p"&gt;}&lt;/span&gt;
 
-&lt;/p&gt;
+        &lt;span class="c1"&gt;//if we&amp;#39;ve passed all of the above checks&lt;/span&gt;
+    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="kc"&gt;true&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
 
-But here's the source code on how to do the most basic user input
-validation:
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="err"&gt;/script&amp;gt; &lt;/span&gt;
+&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="err"&gt;/body&amp;gt;&lt;/span&gt;
+&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="err"&gt;/html&amp;gt;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
 
-&lt;/p&gt;
-&lt;p&gt;
-    &lt;html&gt;&lt;head&gt;&lt;title&gt;javascript form validation&lt;/title&gt;&lt;/head&gt;&lt;body&gt;&lt;!-- onSubmit tells the browser that there is a javascript function to run when the user hits the submit button --&gt;&lt;FORM ACTION="javascript-form-validation.htm" NAME="testform" onSubmit="return validateMyForm()"&gt; Starting X Point: &lt;input name="startx" type="text"&gt;&lt;br /&gt;    Starting Y Point: &lt;input name="starty" type="text"&gt;&lt;br /&gt;    Email Address: &lt;input id="email" maxlength="80" name="email" size="20" type="text" /&gt;  &lt;br /&gt;  &lt;br /&gt;  &lt;input type="submit" /&gt;&lt;/form&gt;&lt;script type="text/javascript" language="javascript"&gt;function validateMyForm() {    if (document.getElementById('startx').value == '')   {        alert('Please enter a Starting X value (integer)');      document.getElementById('startx').focus();       return false;    }    if (document.getElementById('starty').value == '')   {        alert('Please enter a Starting Y value (integer)');      document.getElementById('starty').focus();       return false;    }    if (document.testform.email.value == '') {       alert('Please enter your email');        document.myForm.email.focus();       return false;    }     //if we've passed all of the above checksreturn true;}&lt;/script&gt; &lt;/body&gt;&lt;/html&gt;
 
-There is a ton more that you can do with Javascript (including for loops
-on checkboxes minimum 2 out of 5, regular expressions on email
-addresses, etc.) so hopefully I'll get to it this year!
-
-&lt;/p&gt;
-
-Working Example:
-[http://kittyandbear.net/john/web-tutorials/javascript-form-validation.htm][]
-
-&lt;/p&gt;
-
-P.S. You must have Javascript enabled on your browser to see the example
-and some browsers will pop up "ActiveX Warnings" - if you're paranoid
-only run Javascript that you've coded yourself!
-
-&lt;/p&gt;
-&lt;p&gt;
-&lt;/div&gt;
-
-&lt;p&gt;&lt;/div&gt;
-&lt;/div&gt;
-&lt;/p&gt;&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;http://kittyandbear.net/john/web-tutorials/javascript-form-validation.htm
-&lt;/pre&gt;&lt;/div&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">John Pfeiffer</dc:creator><pubDate>Wed, 27 Jan 2010 20:44:00 -0800</pubDate><guid>tag:blog.john-pfeiffer.com,2010-01-27:365-26-javascript-validation-of-an-html-form</guid></item><item><title>PHP User Input HTML Sanitization and Math: 365 programming project day twenty five</title><link>http://blog.john-pfeiffer.com/php-user-input-html-sanitization-and-math-365-programming-project-day-twenty-five</link><description>&lt;p&gt;HTML forms are quick way to get user data but PHP requires a PHP server. &lt;/p&gt;
+&lt;p&gt;There is a ton more that you can do with Javascript (including for loops on checkboxes minimum 2 out of 5, regular expressions on email addresses, etc.) so hopefully I'll get to it this year!&lt;/p&gt;
+&lt;p&gt;P.S. You must have Javascript enabled on your browser to see the example and some browsers will pop up "ActiveX Warnings" - if you're paranoid only run Javascript that you've coded yourself!&lt;/p&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">john pfeiffer</dc:creator><pubDate>Wed, 27 Jan 2010 20:44:00 -0800</pubDate><guid>tag:blog.john-pfeiffer.com,2010-01-27:javascript-validation-of-an-html-form-365-programming-project-day-twenty-six</guid><category>javascript</category><category>html</category><category>form validation</category></item><item><title>PHP User Input HTML Sanitization and Math: 365 programming project day twenty five</title><link>http://blog.john-pfeiffer.com/php-user-input-html-sanitization-and-math-365-programming-project-day-twenty-five</link><description>&lt;p&gt;HTML forms are quick way to get user data but PHP requires a PHP server. &lt;/p&gt;
 &lt;p&gt;Luckily I have one and together it's quite easy to create a page that gets some info from a user and then does some calculations (in this case nothing fancy).&lt;/p&gt;
 &lt;p&gt;I've done a little more User Input Sanitization than usual - basically the rule is: "If you'll display it, clean up the HTML output, if you'll send it to a linux script, strip the slashes, and if you send it to a database, clean up any MySQL stuff"...&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="x"&gt;&amp;lt;html&amp;gt; &amp;lt;head&amp;gt; &amp;lt;/head&amp;gt;&lt;/span&gt;
