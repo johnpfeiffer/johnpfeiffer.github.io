@@ -7555,171 +7555,62 @@ butter, ?
 &lt;li&gt;&lt;a href="http://john-pfeiffer.com/category/cooking"&gt;Cooking&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;&lt;/div&gt;
-&lt;/p&gt;&lt;/p&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">John Pfeiffer</dc:creator><pubDate>Sat, 30 Jan 2010 09:47:00 -0800</pubDate><guid>tag:blog.john-pfeiffer.com,2010-01-30:pancakes-from-scratch-recipe-v2</guid></item><item><title>365-28 Maintaining old ASP website with Javascript downloads</title><link>http://blog.john-pfeiffer.com/365-28-maintaining-old-asp-website-with-javascript-downloads</link><description>&lt;div class="field field-name-body field-type-text-with-summary field-label-hidden"&gt;
-&lt;div class="field-items"&gt;
-&lt;div class="field-item even"&gt;
-Our company has an outdated website which was a semi-custom "product
-catalog" from 2003 (or earlier) that uses SQL and ASP to create dynamic
-pages and a "webadmin" area to update the catalog (advertised as user
-friendly because no source code needed).
+&lt;/p&gt;&lt;/p&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">John Pfeiffer</dc:creator><pubDate>Sat, 30 Jan 2010 09:47:00 -0800</pubDate><guid>tag:blog.john-pfeiffer.com,2010-01-30:pancakes-from-scratch-recipe-v2</guid></item><item><title>Maintaining an old ASP website with Javascript downloads: 365 programming project day twenty eight</title><link>http://blog.john-pfeiffer.com/maintaining-an-old-asp-website-with-javascript-downloads-365-programming-project-day-twenty-eight</link><description>&lt;p&gt;Our company has an outdated website which was a semi-custom "product catalog" from 2003 (or earlier) that uses SQL and ASP to create dynamic pages and a "webadmin" area to update the catalog (advertised as user friendly because no source code needed).&lt;/p&gt;
+&lt;p&gt;Modern Content Management Systems (Drupal anyone?) have made this obsolete but like many corporations, "If it's only broken a little and employees bend over backwards to make it work then don't fix or replace it until there's a disaster."&lt;/p&gt;
+&lt;p&gt;I have had the masochistic pleasure of learning the system: everything in one folder of .asp files calling lots of other ASP files (and a couple of .js files) and calls to the SQL database with obscure 4 digit codes.&lt;/p&gt;
+&lt;p&gt;Here's an example of me using my programming skills during the day for what might seem a simple request, "Please add another PDF to a page on the Website"...&lt;/p&gt;
+&lt;p&gt;The first step was to upload the PDF into the database (so that it would be magically assigned a 4 digit number in the SQL).&lt;/p&gt;
+&lt;p&gt;The webadmin was typically user unfriendly: &lt;/p&gt;
+&lt;p&gt;&lt;em&gt;Login -&amp;gt; Menu with a blank page -&amp;gt; click Catalog tab and finally see the left navigation bar:&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Catalog Main&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Catalog Structure&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Catalog Products&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Table Headers&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;hmmm...  &lt;/p&gt;
+&lt;p&gt;I got lucky and on my second attempt found Catalog Structure -&amp;gt; Displays -&amp;gt; Intelligent Display Platform&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Up Arrow, Down Arrow, Edit, Delete&lt;/strong&gt;  &lt;/p&gt;
+&lt;p&gt;Given the options I picked the obvious (no, not delete!)&lt;/p&gt;
+&lt;p&gt;Stuffed in about twenty hot linked words and options I then found "Product Family Files"&lt;/p&gt;
+&lt;p&gt;Counter-intuitively clicking on a "..." button to access a popup window to upload a new file...&lt;/p&gt;
+&lt;p&gt;A byzantine system: scrolling through what appears to be every PDF file in the system to verify that my 5.7" file isn't already there... &lt;/p&gt;
+&lt;p&gt;Then using a Browse button (on the bottom of the screen) to see the PDF on my desktop, then seperately clicking the Upload button. Finally clicking on a "SELECT" button (at the top of the screen) to finally add it to the database (without any friendly message, just a refresh, so I scrolled through all 300+ items to make sure it was listed).&lt;/p&gt;
+&lt;p&gt;Bored yet?&lt;/p&gt;
+&lt;p&gt;Oh, at this point you've got the PDF selected but you still have to click ADD to actually put it in a table for that Product Family.&lt;/p&gt;
+&lt;p&gt;So... where's the Javascript?&lt;/p&gt;
+&lt;p&gt;Well this particular page that needs to be updated is actually a custom job that appears instead of the default... and it may even be that I did the work!&lt;/p&gt;
+&lt;p&gt;So each Product Family is reached by clicking on a link on the homepage, but those links are the inscrutable type:&lt;/p&gt;
+&lt;p&gt;&lt;a href="http://protect-the-guilty/displays_products.asp?prodFamID=4148"&gt;http://protect-the-guilty/displays_products.asp?prodFamID=4148&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;I "hacked" the scripts.js file (which contains all of the Javascript functions, so maybe they got one thing right)...&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="cm"&gt;/* MODIFIED FUNCTION TO GO TO SPECIFIC PAGE INSTEAD OF PULLING FROM DATABASE FOR CERTAIN PRODUCTS*/&lt;/span&gt;
 
-&lt;/p&gt;
+&lt;span class="kd"&gt;function&lt;/span&gt; &lt;span class="nx"&gt;GoToProductLine&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;prodLineID&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;partOfFilePath&lt;/span&gt;&lt;span class="p"&gt;){&lt;/span&gt;
 
-Modern Content Management Systems (Drupal anyone?) have made this
-obsolete but like many corporations, "If it's only broken a little and
-employees bend over backwards to make it work then don't fix or replace
-it until there's a disaster."
+    &lt;span class="k"&gt;if&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;prodLineID&lt;/span&gt; &lt;span class="o"&gt;!=&lt;/span&gt; &lt;span class="mi"&gt;4136&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;prodLineID&lt;/span&gt; &lt;span class="o"&gt;!=&lt;/span&gt; &lt;span class="mi"&gt;4536&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="p"&gt;{&lt;/span&gt; 
+        &lt;span class="nx"&gt;location&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;href&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nx"&gt;partOfFilePath&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;_families.asp?prodLineID=&amp;quot;&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="nx"&gt;prodLineID&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="k"&gt;else&lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="nx"&gt;location&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;href&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s2"&gt;&amp;quot;umr.asp&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
 
-&lt;/p&gt;
 
-I have had the masochistic pleasure of learning the system: everything
-in one folder of .asp files calling lots of other ASP files (and a
-couple of .js files) and calls to the SQL database with obscure 4 digit
-codes.
+&lt;p&gt;So to locate the "actual" magic 4 digit ID of the PDF I had to go to the original (non redirected) webpage...&lt;/p&gt;
+&lt;p&gt;&lt;a href="http://protect-the-guilty/displays_products.asp?prodFamID=4148"&gt;http://protect-the-guilty/displays_products.asp?prodFamID=4148&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;View the Source  &lt;/p&gt;
+&lt;p&gt;Find the following bit of text:  &lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nt"&gt;&amp;lt;td&amp;gt;&amp;lt;a&lt;/span&gt; &lt;span class="na"&gt;href=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;javascript:void(0)&amp;quot;&lt;/span&gt; &lt;span class="na"&gt;class=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;regular&amp;quot;&lt;/span&gt; &lt;span class="na"&gt;onclick=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;DownloadFile(1245);&amp;quot;&lt;/span&gt;&lt;span class="nt"&gt;&amp;gt;&lt;/span&gt;Example_Datasheet_Rev_1.0&lt;span class="nt"&gt;&amp;lt;/a&amp;gt;&amp;lt;/td&amp;gt;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
 
-&lt;/p&gt;
 
-Here's an example of me using my programming skills during the day for
-what might seem a simple request, "Please add another PDF to a page on
-the Website"...
+&lt;p&gt;Whew, almost there!&lt;/p&gt;
+&lt;p&gt;Next, download the "customized.asp" file and save a backup copy (ALWAYS SAVE A BACKUP!).&lt;/p&gt;
+&lt;p&gt;Then update the "customized.asp" file by adding your special code to the right place...  &lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nt"&gt;&amp;lt;td&amp;gt;&amp;lt;a&lt;/span&gt; &lt;span class="na"&gt;href=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;javascript:void(0)&amp;quot;&lt;/span&gt; &lt;span class="na"&gt;class=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;regular&amp;quot;&lt;/span&gt; &lt;span class="na"&gt;onclick=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;DownloadFile(1245);&amp;quot;&lt;/span&gt;&lt;span class="nt"&gt;&amp;gt;&lt;/span&gt;Example_Datasheet_Rev_1.0&lt;span class="nt"&gt;&amp;lt;/a&amp;gt;&amp;lt;/td&amp;gt;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
 
-&lt;/p&gt;
 
-The first step was to upload the PDF into the database (so that it would
-be magically assigned a 4 digit number in the SQL).
-
-&lt;/p&gt;
-
-The webadmin was typically user unfriendly:  
-
-Login -\&gt; Menu with a blank page -\&gt; click Catalog tab and finally see
-the left navigation bar:  
-&lt;strong&gt;  
-
-Catalog Main  
-
-Catalog Structure  
-
-Catalog Products  
-
-Table Headers  
-&lt;/strong&gt;
-
-&lt;/p&gt;
-
-hmmm...  
-
-I got lucky and on my second attempt found Catalog Structure -\&gt;
-Displays -\&gt; Intelligent Display Platform
-
-&lt;/p&gt;
-
-**Up Arrow, Down Arrow, Edit, Delete**  
-
-Given the options I picked the obvious (no, not delete!)
-
-&lt;/p&gt;
-
-Stuffed in about twenty hot linked words and options I then found
-"Product Family Files"
-
-&lt;/p&gt;
-
-Counter-intuitively clicking on a "..." button to access a popup window
-to upload a new file...
-
-&lt;/p&gt;
-
-A byzantine system: scrolling through what appears to be every PDF file
-in the system to verify that my 5.7" file isn't already there... then
-using a Browse button (on the bottom of the screen) to see the PDF on my
-desktop, then seperately clicking the Upload button. Finally clicking on
-a "SELECT" button (at the top of the screen) to finally add it to the
-database (without any friendly message, just a refresh, so I scrolled
-through all 300+ items to make sure it was listed).
-
-&lt;/p&gt;
-
-Bored yet?
-
-&lt;/p&gt;
-
-Oh, at this point you've got the PDF selected but you still have to
-click ADD to actually put it in a table for that Product Family.
-
-&lt;/p&gt;
-
-So... where's the Javascript?
-
-&lt;/p&gt;
-
-Well this particular page that needs to be updated is actually a custom
-job that appears instead of the default... and it may even be that I did
-the work!
-
-&lt;/p&gt;
-
-So each Product Family is reached by clicking on a link on the homepage,
-but those links are the inscrutable type:
-
-&lt;/p&gt;
-
-[http://protect-the-guilty/displays\_products.asp?prodFamID=4148][]
-
-&lt;/p&gt;
-
-I "hacked" the scripts.js file (which contains all of the Javascript
-functions, so maybe they got one thing right)...
-
-&lt;/p&gt;
-&lt;p&gt;
-    /* MODIFIED FUNCTION TO GO TO SPECIFIC PAGE INSTEAD OF PULLING FROM DATABASE FOR CERTAIN PRODUCTS*/function GoToProductLine(prodLineID, partOfFilePath){   if( (prodLineID != 4136) &amp;&amp; (prodLineID != 4536) )   {        location.href = partOfFilePath + "_families.asp?prodLineID=" + prodLineID;   }else{       location.href = "umr.asp";   }}
-
-So to locate the "actual" magic 4 digit ID of the PDF I had to go to the
-original (non redirected) webpage...
-
-&lt;/p&gt;
-
-[http://protect-the-guilty/displays\_products.asp?prodFamID=4148][]  
-
-View the Source  
-
-Find the following bit of text:  
-&lt;strong&gt;  
-
-&lt;td\&gt;&lt;a href="javascript:void(0)" class="regular"
-onclick="DownloadFile(1245);"\&gt;Example\_Datasheet\_Rev\_1.0&lt;/a\&gt;&lt;/td\&gt;  
-&lt;/strong&gt;  
-
-Whew, almost there!
-
-&lt;/p&gt;
-
-Next, download the "customized.asp" file and save a backup copy (ALWAYS
-SAVE A BACKUP!).
-
-&lt;/p&gt;
-
-Then update the "customized.asp" file by adding your special code to the
-right place...  
-&lt;strong&gt;  
-
-&lt;td\&gt;&lt;a href="javascript:void(0)" class="regular"
-onclick="DownloadFile(1245);"\&gt;Example\_Datasheet\_Rev\_1.0&lt;/a\&gt;&lt;/td\&gt;  
-&lt;/strong&gt;
-
-&lt;/p&gt;
-
-Once you've uploaded and tested it you can look at the clock and happily
-say, "Uploading 1 pdf took me 2 frickin hours!"
-
-&lt;/p&gt;
-&lt;p&gt;
-&lt;/div&gt;
-
-&lt;p&gt;&lt;/div&gt;
-&lt;/div&gt;
-&lt;/p&gt;&lt;/p&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">John Pfeiffer</dc:creator><pubDate>Thu, 28 Jan 2010 15:59:00 -0800</pubDate><guid>tag:blog.john-pfeiffer.com,2010-01-28:365-28-maintaining-old-asp-website-with-javascript-downloads</guid></item><item><title>DOS batch file using a for loop to test a vpn with ping: 365 programming project day twenty seven</title><link>http://blog.john-pfeiffer.com/dos-batch-file-using-a-for-loop-to-test-a-vpn-with-ping-365-programming-project-day-twenty-seven</link><description>&lt;p&gt;Once again my work demands creative programming solutions. I have a new ISP with a brand new modem and I want to know if a VPN will stay connected overnight... BUT it's not a good test without some traffic...&lt;/p&gt;
+&lt;p&gt;Once you've uploaded and tested it you can look at the clock and happily say, "Uploading 1 pdf took me 2 frickin hours!"&lt;/p&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">john pfeiffer</dc:creator><pubDate>Thu, 28 Jan 2010 15:59:00 -0800</pubDate><guid>tag:blog.john-pfeiffer.com,2010-01-28:maintaining-an-old-asp-website-with-javascript-downloads-365-programming-project-day-twenty-eight</guid><category>windows</category><category>asp</category><category>javascript</category></item><item><title>DOS batch file using a for loop to test a vpn with ping: 365 programming project day twenty seven</title><link>http://blog.john-pfeiffer.com/dos-batch-file-using-a-for-loop-to-test-a-vpn-with-ping-365-programming-project-day-twenty-seven</link><description>&lt;p&gt;Once again my work demands creative programming solutions. I have a new ISP with a brand new modem and I want to know if a VPN will stay connected overnight... BUT it's not a good test without some traffic...&lt;/p&gt;
 &lt;p&gt;Enter the DOS/Windows Batch file... like a linux script or VBS, a .bat file is a series of commands which allow a creative programmer to do quite a bit.&lt;/p&gt;
 &lt;p&gt;Using a text editor create your first .bat file: ping-test-vpn.bat  &lt;/p&gt;
 &lt;p&gt;(Yes, I realize we skipped the steps using echo "hello world", that a % sign means a variable, defining that a mapped network drive to a folder on another computer... oh well, break this one into little pieces if it's too much to swallow at once.)&lt;/p&gt;
