@@ -7428,30 +7428,133 @@ classic...
 
 &lt;p&gt;&lt;/div&gt;
 &lt;/div&gt;
-&lt;/p&gt;&lt;/p&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">John Pfeiffer</dc:creator><pubDate>Mon, 01 Feb 2010 21:46:00 -0800</pubDate><guid>tag:blog.john-pfeiffer.com,2010-02-01:365-32-debugging-and-accidental-difficulties-with-getchar-and-loops</guid></item><item><title>365-31 Command Line Clock continued (winclockv2)</title><link>http://blog.john-pfeiffer.com/365-31-command-line-clock-continued-winclockv2</link><description>&lt;div class="field field-name-body field-type-text-with-summary field-label-hidden"&gt;
-&lt;div class="field-items"&gt;
-&lt;div class="field-item even"&gt;
-Slowly working towards the final product, indeed I do see that I have a
-working executable at every stage (even if the steps are small and the
-tests are numerous)...
+&lt;/p&gt;&lt;/p&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">John Pfeiffer</dc:creator><pubDate>Mon, 01 Feb 2010 21:46:00 -0800</pubDate><guid>tag:blog.john-pfeiffer.com,2010-02-01:365-32-debugging-and-accidental-difficulties-with-getchar-and-loops</guid></item><item><title>C programming command line clock continued (winclockv2): 365 programming project day thirty one</title><link>http://blog.john-pfeiffer.com/c-programming-command-line-clock-continued-winclockv2-365-programming-project-day-thirty-one</link><description>&lt;p&gt;Slowly working towards the final product, indeed I do see that I have a working executable at every stage (even if the steps are small and the tests are numerous)...&lt;/p&gt;
+&lt;p&gt;(The looping part does not quite work yet...)&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="cm"&gt;/* &lt;/span&gt;
+&lt;span class="cm"&gt;2010-01-31 john pfeiffer, MS windows clock&lt;/span&gt;
 
-&lt;/p&gt;
+&lt;span class="cm"&gt;PROGRAM DESIGN&lt;/span&gt;
+&lt;span class="cm"&gt;    MS window with X, quit button, and current system time displayed&lt;/span&gt;
+&lt;span class="cm"&gt;    Hour:minute:second  (hh:mm:ss)&lt;/span&gt;
 
-(The looping part does not quite work yet...)
+&lt;span class="cm"&gt;HIGH LEVEL FUNCTIONS&lt;/span&gt;
 
-&lt;/p&gt;
-&lt;p&gt;
-    /* 2010-01-31 john pfeiffer, MS windows clockPROGRAM DESIGN   MS window with X, quit button, and current system time displayed Hour:minute:second  (hh:mm:ss)HIGH LEVEL FUNCTIONS      update current time  see if user clicked button       quit if button clicked    display current time on windowORGANIC ITERATIVE BUILDS  1. build a program to show current time (in c/dos) then exits immediately        *TEST: should show correct system time       each time user presses enter show new current time (ctrl+c to exit)      TEST: should show correct system time on each click   2. build a windows "quit button app" (can reuse previous work)       TEST: program should quit cleanly 3. windows with current time (once) and quit button      TEST: program should show correct system time and when button clicked quit    4. windows with current time constantly updating and quit button     (will the processor be overloaded while waiting?  need semaphores?)*/#include &lt;stdio.h&gt;#include &lt;time.h&gt;#include &lt;string.h&gt;/*   stdio.h is for displaying output to command line time.h is for time() string.h is to help format any strings created*//* returns a string with the current time */void get_current_time( char current_time[] );void display_time( char current_time[] );void clear_current_time( char current_time[] );int main(int argc, char* argv[]){  char c = 'n';    char current_time[128];/* show that the string has garbage that is cleaned out */  printf("\nDISPLAY current time variable (initial garbage)\n");   display_time( current_time );    /*    Loop depending on the user to continue updating*/ do{       printf("\nEMPTY current time variable.\n");      clear_current_time( current_time );           printf("\nDISPLAY current time variable:\n");        display_time( current_time );     printf("\nUPDATE current time variable.\n");     get_current_time( current_time );     /* DEBUGGING     printf("%s\n", current_time);        */        printf("\nDISPLAY current time variable:\n");        display_time( current_time );      c = 'n';    /* ensure that the user must force a continuance */      printf("\nPRESS y to update the current time variable again:\n");        c = getchar();    }while( c == 'y' );   return 0;}/* end main *//* begin function definitions *//* Get the current time from the system and update the time string */void get_current_time( char current_time[128] ){   time_t tempTime;  /* initialize the variable, otherwise only returns 1970 date */  tempTime = time(NULL);    /* DEBUGGING printf("%s\n", asctime(localtime(&amp;tempTime)));   */   strcpy(current_time, asctime(localtime(&amp;tempTime)));  /* DEBUGGING printf("%s\n", current_time);    */}/* output the current time string ... to the command line */void display_time( char current_time[128] ){   printf("CURRENT TIME: %s\n",current_time);}void clear_current_time( char current_time[128] ){    memset( current_time, 0, sizeof(current_time));}
+&lt;span class="cm"&gt;    update current time&lt;/span&gt;
+&lt;span class="cm"&gt;    see if user clicked button&lt;/span&gt;
+&lt;span class="cm"&gt;        quit if button clicked&lt;/span&gt;
 
-To Be Continued...
+&lt;span class="cm"&gt;    display current time on window&lt;/span&gt;
 
-&lt;/p&gt;
-&lt;p&gt;
-&lt;/div&gt;
 
-&lt;p&gt;&lt;/div&gt;
-&lt;/div&gt;
-&lt;/p&gt;&lt;/p&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">John Pfeiffer</dc:creator><pubDate>Mon, 01 Feb 2010 14:15:00 -0800</pubDate><guid>tag:blog.john-pfeiffer.com,2010-02-01:365-31-command-line-clock-continued-winclockv2</guid></item><item><title>C programming display the current time: 365 programming project day thirty</title><link>http://blog.john-pfeiffer.com/c-programming-display-the-current-time-365-programming-project-day-thirty</link><description>&lt;p&gt;I am trying to follow best practice as I've learned from the Mythical Man Month (Fred Brooks), the Cathedral and the Bazaar's (Eric Raymond)...&lt;/p&gt;
+&lt;span class="cm"&gt;ORGANIC ITERATIVE BUILDS&lt;/span&gt;
+&lt;span class="cm"&gt;    1. build a program to show current time (in c/dos) then exits immediately&lt;/span&gt;
+&lt;span class="cm"&gt;        *TEST: should show correct system time &lt;/span&gt;
+&lt;span class="cm"&gt;        each time user presses enter show new current time (ctrl+c to exit)&lt;/span&gt;
+&lt;span class="cm"&gt;        TEST: should show correct system time on each click&lt;/span&gt;
+
+&lt;span class="cm"&gt;    2. build a windows &amp;quot;quit button app&amp;quot; (can reuse previous work)&lt;/span&gt;
+&lt;span class="cm"&gt;        TEST: program should quit cleanly&lt;/span&gt;
+
+&lt;span class="cm"&gt;    3. windows with current time (once) and quit button&lt;/span&gt;
+&lt;span class="cm"&gt;        TEST: program should show correct system time and when button clicked quit&lt;/span&gt;
+
+&lt;span class="cm"&gt;    4. windows with current time constantly updating and quit button&lt;/span&gt;
+&lt;span class="cm"&gt;        (will the processor be overloaded while waiting?  need semaphores?)&lt;/span&gt;
+&lt;span class="cm"&gt;*/&lt;/span&gt;
+
+
+
+&lt;span class="cp"&gt;#include &amp;lt;stdio.h&amp;gt;&lt;/span&gt;
+&lt;span class="cp"&gt;#include &amp;lt;time.h&amp;gt;&lt;/span&gt;
+&lt;span class="cp"&gt;#include &amp;lt;string.h&amp;gt;&lt;/span&gt;
+
+&lt;span class="cm"&gt;/*  &lt;/span&gt;
+&lt;span class="cm"&gt;    stdio.h is for displaying output to command line&lt;/span&gt;
+&lt;span class="cm"&gt;    time.h is for time()&lt;/span&gt;
+&lt;span class="cm"&gt;    string.h is to help format any strings created&lt;/span&gt;
+&lt;span class="cm"&gt;*/&lt;/span&gt;
+
+&lt;span class="cm"&gt;/* returns a string with the current time */&lt;/span&gt;
+&lt;span class="kt"&gt;void&lt;/span&gt; &lt;span class="nf"&gt;get_current_time&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="kt"&gt;char&lt;/span&gt; &lt;span class="n"&gt;current_time&lt;/span&gt;&lt;span class="p"&gt;[]&lt;/span&gt; &lt;span class="p"&gt;);&lt;/span&gt;
+
+&lt;span class="kt"&gt;void&lt;/span&gt; &lt;span class="nf"&gt;display_time&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="kt"&gt;char&lt;/span&gt; &lt;span class="n"&gt;current_time&lt;/span&gt;&lt;span class="p"&gt;[]&lt;/span&gt; &lt;span class="p"&gt;);&lt;/span&gt;
+
+&lt;span class="kt"&gt;void&lt;/span&gt; &lt;span class="nf"&gt;clear_current_time&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="kt"&gt;char&lt;/span&gt; &lt;span class="n"&gt;current_time&lt;/span&gt;&lt;span class="p"&gt;[]&lt;/span&gt; &lt;span class="p"&gt;);&lt;/span&gt;
+
+&lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="nf"&gt;main&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="n"&gt;argc&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kt"&gt;char&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;argv&lt;/span&gt;&lt;span class="p"&gt;[])&lt;/span&gt;
+&lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="kt"&gt;char&lt;/span&gt; &lt;span class="n"&gt;c&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="sc"&gt;&amp;#39;n&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+        &lt;span class="kt"&gt;char&lt;/span&gt; &lt;span class="n"&gt;current_time&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;128&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;
+
+    &lt;span class="cm"&gt;/* show that the string has garbage that is cleaned out */&lt;/span&gt;
+        &lt;span class="n"&gt;printf&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;&lt;/span&gt;&lt;span class="se"&gt;\n&lt;/span&gt;&lt;span class="s"&gt;DISPLAY current time variable (initial garbage)&lt;/span&gt;&lt;span class="se"&gt;\n&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+        &lt;span class="n"&gt;display_time&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="n"&gt;current_time&lt;/span&gt; &lt;span class="p"&gt;);&lt;/span&gt;
+
+    &lt;span class="cm"&gt;/*&lt;/span&gt;
+&lt;span class="cm"&gt;        Loop depending on the user to continue updating&lt;/span&gt;
+&lt;span class="cm"&gt;    */&lt;/span&gt;
+        &lt;span class="k"&gt;do&lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;
+
+            &lt;span class="n"&gt;printf&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;&lt;/span&gt;&lt;span class="se"&gt;\n&lt;/span&gt;&lt;span class="s"&gt;EMPTY current time variable.&lt;/span&gt;&lt;span class="se"&gt;\n&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+            &lt;span class="n"&gt;clear_current_time&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="n"&gt;current_time&lt;/span&gt; &lt;span class="p"&gt;);&lt;/span&gt;
+
+            &lt;span class="n"&gt;printf&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;&lt;/span&gt;&lt;span class="se"&gt;\n&lt;/span&gt;&lt;span class="s"&gt;DISPLAY current time variable:&lt;/span&gt;&lt;span class="se"&gt;\n&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+            &lt;span class="n"&gt;display_time&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="n"&gt;current_time&lt;/span&gt; &lt;span class="p"&gt;);&lt;/span&gt;
+
+            &lt;span class="n"&gt;printf&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;&lt;/span&gt;&lt;span class="se"&gt;\n&lt;/span&gt;&lt;span class="s"&gt;UPDATE current time variable.&lt;/span&gt;&lt;span class="se"&gt;\n&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+            &lt;span class="n"&gt;get_current_time&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="n"&gt;current_time&lt;/span&gt; &lt;span class="p"&gt;);&lt;/span&gt;
+
+            &lt;span class="cm"&gt;/* DEBUGGING&lt;/span&gt;
+&lt;span class="cm"&gt;            printf(&amp;quot;%s\n&amp;quot;, current_time);&lt;/span&gt;
+&lt;span class="cm"&gt;            */&lt;/span&gt;
+
+            &lt;span class="n"&gt;printf&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;&lt;/span&gt;&lt;span class="se"&gt;\n&lt;/span&gt;&lt;span class="s"&gt;DISPLAY current time variable:&lt;/span&gt;&lt;span class="se"&gt;\n&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+            &lt;span class="n"&gt;display_time&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="n"&gt;current_time&lt;/span&gt; &lt;span class="p"&gt;);&lt;/span&gt;
+
+
+            &lt;span class="n"&gt;c&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="sc"&gt;&amp;#39;n&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;    &lt;span class="cm"&gt;/* ensure that the user must force a continuance */&lt;/span&gt;
+            &lt;span class="n"&gt;printf&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;&lt;/span&gt;&lt;span class="se"&gt;\n&lt;/span&gt;&lt;span class="s"&gt;PRESS y to update the current time variable again:&lt;/span&gt;&lt;span class="se"&gt;\n&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+            &lt;span class="n"&gt;c&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;getchar&lt;/span&gt;&lt;span class="p"&gt;();&lt;/span&gt;
+
+        &lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="k"&gt;while&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="n"&gt;c&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="sc"&gt;&amp;#39;y&amp;#39;&lt;/span&gt; &lt;span class="p"&gt;);&lt;/span&gt;
+
+        &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="cm"&gt;/* end main */&lt;/span&gt;
+
+&lt;span class="cm"&gt;/* begin function definitions */&lt;/span&gt;
+
+&lt;span class="cm"&gt;/* Get the current time from the system and update the time string */&lt;/span&gt;
+&lt;span class="kt"&gt;void&lt;/span&gt; &lt;span class="nf"&gt;get_current_time&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="kt"&gt;char&lt;/span&gt; &lt;span class="n"&gt;current_time&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;128&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="kt"&gt;time_t&lt;/span&gt; &lt;span class="n"&gt;tempTime&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+
+        &lt;span class="cm"&gt;/* initialize the variable, otherwise only returns 1970 date */&lt;/span&gt;
+        &lt;span class="n"&gt;tempTime&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;time&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;NULL&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+
+        &lt;span class="cm"&gt;/* DEBUGGING&lt;/span&gt;
+&lt;span class="cm"&gt;        printf(&amp;quot;%s\n&amp;quot;, asctime(localtime(&amp;amp;tempTime)));&lt;/span&gt;
+&lt;span class="cm"&gt;        */&lt;/span&gt;
+        &lt;span class="n"&gt;strcpy&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;current_time&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;asctime&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;localtime&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;tempTime&lt;/span&gt;&lt;span class="p"&gt;)));&lt;/span&gt;
+
+        &lt;span class="cm"&gt;/* DEBUGGING&lt;/span&gt;
+&lt;span class="cm"&gt;        printf(&amp;quot;%s\n&amp;quot;, current_time);&lt;/span&gt;
+&lt;span class="cm"&gt;        */&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+
+&lt;span class="cm"&gt;/* output the current time string ... to the command line */&lt;/span&gt;
+&lt;span class="kt"&gt;void&lt;/span&gt; &lt;span class="nf"&gt;display_time&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="kt"&gt;char&lt;/span&gt; &lt;span class="n"&gt;current_time&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;128&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="n"&gt;printf&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;CURRENT TIME: %s&lt;/span&gt;&lt;span class="se"&gt;\n&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="n"&gt;current_time&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+
+&lt;span class="kt"&gt;void&lt;/span&gt; &lt;span class="nf"&gt;clear_current_time&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="kt"&gt;char&lt;/span&gt; &lt;span class="n"&gt;current_time&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;128&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="n"&gt;memset&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="n"&gt;current_time&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="k"&gt;sizeof&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;current_time&lt;/span&gt;&lt;span class="p"&gt;));&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;To Be Continued...&lt;/p&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">john pfeiffer</dc:creator><pubDate>Mon, 01 Feb 2010 14:15:00 -0800</pubDate><guid>tag:blog.john-pfeiffer.com,2010-02-01:c-programming-command-line-clock-continued-winclockv2-365-programming-project-day-thirty-one</guid><category>c</category><category>time</category><category>clock</category></item><item><title>C programming display the current time: 365 programming project day thirty</title><link>http://blog.john-pfeiffer.com/c-programming-display-the-current-time-365-programming-project-day-thirty</link><description>&lt;p&gt;I am trying to follow best practice as I've learned from the Mythical Man Month (Fred Brooks), the Cathedral and the Bazaar's (Eric Raymond)...&lt;/p&gt;
 &lt;p&gt;C programming seems natural to me but I always want to stretch myself a little bit so here's a "C Clock" program that will eventually evolve into a "Windows Clock" program.&lt;/p&gt;
 &lt;p&gt;So here is a modular design, released early with plenty of comments, debugging ability, and grown locally and organically:&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="cm"&gt;/* &lt;/span&gt;
