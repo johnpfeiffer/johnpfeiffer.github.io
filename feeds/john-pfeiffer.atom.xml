@@ -6992,56 +6992,136 @@ Are you ready for URL's and page titles?
 
 &lt;p&gt;&lt;/div&gt;
 &lt;/div&gt;
-&lt;/p&gt;&lt;/p&gt;</summary></entry><entry><title>365-35 WinClock v3</title><link href="http://blog.john-pfeiffer.com/365-35-winclock-v3" rel="alternate"></link><updated>2010-02-11T13:42:00-08:00</updated><author><name>John Pfeiffer</name></author><id>tag:blog.john-pfeiffer.com,2010-02-11:365-35-winclock-v3</id><summary type="html">&lt;div class="field field-name-body field-type-text-with-summary field-label-hidden"&gt;
-&lt;div class="field-items"&gt;
-&lt;div class="field-item even"&gt;
-My windows clock is slowly progressing...
+&lt;/p&gt;&lt;/p&gt;</summary></entry><entry><title>c programming windows clock v3: 365 programming project day thirty five</title><link href="http://blog.john-pfeiffer.com/c-programming-windows-clock-v3-365-programming-project-day-thirty-five" rel="alternate"></link><updated>2010-02-11T13:42:00-08:00</updated><author><name>john pfeiffer</name></author><id>tag:blog.john-pfeiffer.com,2010-02-11:c-programming-windows-clock-v3-365-programming-project-day-thirty-five</id><summary type="html">&lt;p&gt;My windows clock project is slowly progressing...&lt;/p&gt;
+&lt;p&gt;Now I can create a window with a QUIT button and display the current system time (only once)...&lt;/p&gt;
+&lt;p&gt;If you want to know more about the project from the beginning search the site for winclock (or click on the time tag).&lt;/p&gt;
+&lt;p&gt;I've stripped out most of the project header stuff - perhaps in the future I'll just have it as an "include" so that it's in the project but since it doesn't change much I only have to look at it when I refer back to it (instead of at the top of the file ALL THE TIME!)&lt;/p&gt;
+&lt;p&gt;Ok, enough planning and review, here's the code:&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;notepad gcwin.bat&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;gcc.exe -o %1.exe %1 -Iinclude -Llib -Wall -ansi -mwindows&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;winclock-v3.c&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="cm"&gt;/* 2010-02-08  john pfeiffer, MS windows clock v3 (the windows)&lt;/span&gt;
+&lt;span class="cm"&gt;*/&lt;/span&gt;
 
-&lt;/p&gt;
+&lt;span class="cp"&gt;#include &amp;lt;time.h&amp;gt;&lt;/span&gt;
+&lt;span class="cp"&gt;#include &amp;lt;string.h&amp;gt;&lt;/span&gt;
 
-Now I can create a window with a QUIT button and display the current
-system time (only once)...
+&lt;span class="cp"&gt;#include &amp;lt;windows.h&amp;gt;&lt;/span&gt;
+&lt;span class="cp"&gt;#define  IDC_MyExitButton 40001 &lt;/span&gt;&lt;span class="cm"&gt;/* case sensitive! random high number to keep windows happy */&lt;/span&gt;&lt;span class="cp"&gt;&lt;/span&gt;
 
-&lt;/p&gt;
 
-If you want to know more about the project from the beginning search the
-site for winclock (or click on the time.h tag).
+&lt;span class="n"&gt;LRESULT&lt;/span&gt; &lt;span class="n"&gt;CALLBACK&lt;/span&gt; &lt;span class="nf"&gt;WindowProcedure&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="n"&gt;HWND&lt;/span&gt; &lt;span class="n"&gt;hwnd&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;UINT&lt;/span&gt; &lt;span class="n"&gt;message&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;WPARAM&lt;/span&gt; &lt;span class="n"&gt;wParam&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;LPARAM&lt;/span&gt; &lt;span class="n"&gt;lParam&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
 
-&lt;/p&gt;
+&lt;span class="kt"&gt;void&lt;/span&gt; &lt;span class="nf"&gt;get_current_time&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="kt"&gt;char&lt;/span&gt; &lt;span class="n"&gt;current_time&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;128&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="p"&gt;);&lt;/span&gt;
 
-I've stripped out most of the project header stuff - perhaps in the
-future I'll just have it as an "include" so that it's in the project but
-since it doesn't change much I only have to look at it when I refer back
-to it (instead of at the top of the file ALL THE TIME!)
+&lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="n"&gt;WINAPI&lt;/span&gt; &lt;span class="nf"&gt;WinMain&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="n"&gt;HINSTANCE&lt;/span&gt; &lt;span class="n"&gt;hThisInstance&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;HINSTANCE&lt;/span&gt; &lt;span class="n"&gt;hPrevInstance&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;LPSTR&lt;/span&gt; &lt;span class="n"&gt;lpszArgument&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="n"&gt;ncmdshow&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;               
+&lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="n"&gt;HWND&lt;/span&gt; &lt;span class="n"&gt;hwnd&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;           &lt;span class="cm"&gt;/* The handle for our window */&lt;/span&gt;
+    &lt;span class="n"&gt;HWND&lt;/span&gt; &lt;span class="n"&gt;ButtonPushed&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;NULL&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
 
-&lt;/p&gt;
+    &lt;span class="n"&gt;MSG&lt;/span&gt; &lt;span class="n"&gt;messages&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;        &lt;span class="cm"&gt;/* Messages to the application  */&lt;/span&gt;
+    &lt;span class="n"&gt;WNDCLASS&lt;/span&gt; &lt;span class="n"&gt;wc&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;         &lt;span class="cm"&gt;/* Data structure for our defined windowclass */&lt;/span&gt;
 
-Ok, enough planning and review, here's the code:
+    &lt;span class="n"&gt;wc&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;style&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="n"&gt;wc&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;lpfnWndProc&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;WindowProcedure&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;   &lt;span class="cm"&gt;/* This function is called by windows */&lt;/span&gt;
+    &lt;span class="n"&gt;wc&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;cbClsExtra&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;                   &lt;span class="cm"&gt;/* No extra bytes after the window class */&lt;/span&gt;
+    &lt;span class="n"&gt;wc&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;cbWndExtra&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;                   &lt;span class="cm"&gt;/* structure or the window instance */&lt;/span&gt;
+    &lt;span class="n"&gt;wc&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;hInstance&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;hThisInstance&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;        &lt;span class="cm"&gt;/* handle to the owner */&lt;/span&gt;
+    &lt;span class="n"&gt;wc&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;hIcon&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;NULL&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;                     &lt;span class="cm"&gt;/* no special application icon */&lt;/span&gt;
+    &lt;span class="n"&gt;wc&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;hCursor&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;LoadCursor&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;NULL&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;IDC_ARROW&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt; &lt;span class="cm"&gt;/* default cursor */&lt;/span&gt;
+    &lt;span class="n"&gt;wc&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;hbrBackground&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;HBRUSH&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="n"&gt;GetStockObject&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;LTGRAY_BRUSH&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;   
+    &lt;span class="n"&gt;wc&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;lpszMenuName&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;NULL&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;                   &lt;span class="cm"&gt;/* No menu */&lt;/span&gt;
+    &lt;span class="n"&gt;wc&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;lpszClassName&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;WindowsApp&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;          &lt;span class="cm"&gt;/* the name of the windows class */&lt;/span&gt;
 
-&lt;/p&gt;
 
-gcwin.bat  
+    &lt;span class="cm"&gt;/* Register the window class, if fail quit the program with an error value */&lt;/span&gt;
+    &lt;span class="k"&gt;if&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="n"&gt;RegisterClass&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;wc&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt; &lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt;
 
-gcc.exe -o %1.exe %1 -Iinclude -Llib -Wall -ansi -mwindows
+    &lt;span class="cm"&gt;/* The class is registered, let&amp;#39;s instantiate our window */&lt;/span&gt;
+    &lt;span class="n"&gt;hwnd&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;CreateWindowEx&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;WindowsApp&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;Windows Title&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+        &lt;span class="n"&gt;WS_OVERLAPPEDWINDOW&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;CW_USEDEFAULT&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;CW_USEDEFAULT&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;CW_USEDEFAULT&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; 
+        &lt;span class="n"&gt;CW_USEDEFAULT&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nb"&gt;NULL&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nb"&gt;NULL&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;hThisInstance&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nb"&gt;NULL&lt;/span&gt; &lt;span class="p"&gt;);&lt;/span&gt;
 
-&lt;/p&gt;
+        &lt;span class="cm"&gt;/* create button and store the handle */&lt;/span&gt;
+    &lt;span class="n"&gt;ButtonPushed&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;CreateWindow&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; 
+        &lt;span class="s"&gt;&amp;quot;button&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;                       &lt;span class="cm"&gt;/* class name */&lt;/span&gt;
+        &lt;span class="s"&gt;&amp;quot;Push to Quit&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;                 &lt;span class="cm"&gt;/* button caption */&lt;/span&gt;
+        &lt;span class="n"&gt;WS_CHILD&lt;/span&gt; &lt;span class="o"&gt;|&lt;/span&gt;&lt;span class="n"&gt;WS_VISIBLE&lt;/span&gt; &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="n"&gt;BS_PUSHBUTTON&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;  &lt;span class="cm"&gt;/* the styles */&lt;/span&gt;
+        &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;                            &lt;span class="cm"&gt;/* the left and top coordinates */&lt;/span&gt;
+        &lt;span class="mi"&gt;150&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;50&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;                         &lt;span class="cm"&gt;/* width and height */&lt;/span&gt;
+        &lt;span class="n"&gt;hwnd&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;                           &lt;span class="cm"&gt;/* parent window handle */&lt;/span&gt;
+        &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;HMENU&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="n"&gt;IDC_MyExitButton&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;        &lt;span class="cm"&gt;/* the ID of your button */&lt;/span&gt;
+        &lt;span class="n"&gt;hThisInstance&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;                  &lt;span class="cm"&gt;/* the instance of your application */&lt;/span&gt;
+        &lt;span class="nb"&gt;NULL&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;;&lt;/span&gt;                         &lt;span class="cm"&gt;/* unnecessary extra */&lt;/span&gt;
 
-winclock-v3.c
+    &lt;span class="n"&gt;ShowWindow&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;hwnd&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;ncmdshow&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;     &lt;span class="cm"&gt;/* Make the window visible on the screen */&lt;/span&gt;
+    &lt;span class="n"&gt;UpdateWindow&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;hwnd&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;             &lt;span class="cm"&gt;/* update with changes */&lt;/span&gt;
 
-&lt;/p&gt;
-&lt;p&gt;
-    /* 2010-02-08  john pfeiffer, MS windows clock v3 (the windows)*/#include &lt;time.h&gt;#include &lt;string.h&gt;#include &lt;windows.h&gt;#define  IDC_MyExitButton 40001 /* case sensitive! random high number to keep windows happy */LRESULT CALLBACK WindowProcedure( HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);void get_current_time( char current_time[128] );int WINAPI WinMain( HINSTANCE hThisInstance, HINSTANCE hPrevInstance, LPSTR lpszArgument,            int ncmdshow)               {    HWND hwnd;           /* The handle for our window */    HWND ButtonPushed = NULL;    MSG messages;        /* Messages to the application  */    WNDCLASS wc;         /* Data structure for our defined windowclass */    wc.style = 0;    wc.lpfnWndProc = WindowProcedure;   /* This function is called by windows */    wc.cbClsExtra = 0;                   /* No extra bytes after the window class */    wc.cbWndExtra = 0;                   /* structure or the window instance */    wc.hInstance = hThisInstance;       /* handle to the owner */    wc.hIcon = NULL;                    /* no special application icon */    wc.hCursor = LoadCursor(NULL, IDC_ARROW); /* default cursor */    wc.hbrBackground = (HBRUSH) GetStockObject(LTGRAY_BRUSH);     wc.lpszMenuName = NULL;                /* No menu */    wc.lpszClassName = "WindowsApp";        /* the name of the windows class */            /* Register the window class, if fail quit the program with an error value */    if( RegisterClass(&amp;wc) ==0 ){ return -1;  }    /* The class is registered, let's instantiate our window */    hwnd = CreateWindowEx( 1, "WindowsApp", "Windows Title",       WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,     NULL, NULL, hThisInstance, NULL ); /* create button and store the handle */  ButtonPushed = CreateWindow(         "button",                       /* class name */        "Push to Quit",                  /* button caption */        WS_CHILD |WS_VISIBLE | BS_PUSHBUTTON,  /* the styles */        0,0,                            /* the left and top coordinates */        150,50,                         /* width and height */        hwnd,                           /* parent window handle */        (HMENU)IDC_MyExitButton,        /* the ID of your button */        hThisInstance,                  /* the instance of your application */        NULL) ;                         /* unnecessary extra */    ShowWindow(hwnd, ncmdshow);       /* Make the window visible on the screen */  UpdateWindow(hwnd);             /* update with changes */    /* Run the message loop. It will run until GetMessage( ) returns 0 */    while( GetMessage(&amp;messages, NULL, 0, 0) )    {                TranslateMessage(&amp;messages);         DispatchMessage(&amp;messages);      }    /* The program return-value is 0 - The value that PostQuitMessage( ) gave */    return messages.wParam;}/* This function is called by the Windows function DispatchMessage( ) */LRESULT CALLBACK WindowProcedure( HWND hwnd, UINT message,  WPARAM wParam, LPARAM lParam){    char current_time[128];    PAINTSTRUCT ps;       /* a structure for a paint job (see below */    RECT rect;      /* a struct to hold rectangle values (e.g. x,y coordinates) */    HDC hdc;            /* handle to a DC (buffer) for the screen */    switch (message)                  /* handle the messages */    {     case WM_COMMAND:         switch(LOWORD(wParam))    /* find out what's been clicked */        {            case IDC_MyExitButton:                    PostQuitMessage(0);                break;                                                default:                break;            }        break;  case WM_PAINT:       GetClientRect( hwnd, &amp;rect );       /* get the size of our window */     hdc = BeginPaint( hwnd, &amp;ps );      /* begin painting to the buffer */        get_current_time( current_time );     DrawText( hdc, TEXT(current_time), -1, &amp;rect, DT_CENTER | DT_VCENTER | DT_SINGLELINE);              EndPaint( hwnd, &amp;ps);        return 0; case WM_DESTROY:     PostQuitMessage(0);        /* send a WM_QUIT */        break;        default:                   /* for messages that we don't deal with */ return DefWindowProc(hwnd, message, wParam, lParam);    }    return 0;}/* Get the current time from the system and update the time string */void get_current_time( char current_time[128] ){  time_t tempTime;/* initialize the variable, otherwise only returns 1970 date */   tempTime = time(NULL);   strcpy(current_time, asctime(localtime(&amp;tempTime)));}
+    &lt;span class="cm"&gt;/* Run the message loop. It will run until GetMessage( ) returns 0 */&lt;/span&gt;
+    &lt;span class="k"&gt;while&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="n"&gt;GetMessage&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;messages&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nb"&gt;NULL&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="p"&gt;{&lt;/span&gt;           
+        &lt;span class="n"&gt;TranslateMessage&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;messages&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt; 
+        &lt;span class="n"&gt;DispatchMessage&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;messages&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;  
+    &lt;span class="p"&gt;}&lt;/span&gt;
 
-For the binary executable (and the source code as .c file)  
-[http://kittyandbear.net/john/blog-prog/winclock-v3.zip][]
+    &lt;span class="cm"&gt;/* The program return-value is 0 - The value that PostQuitMessage( ) gave */&lt;/span&gt;
+    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;messages&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;wParam&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
 
-&lt;/p&gt;
-&lt;p&gt;
-&lt;/div&gt;
 
-&lt;p&gt;&lt;/div&gt;
-&lt;/div&gt;
-&lt;/p&gt;&lt;/p&gt;</summary></entry><entry><title>Customize your linux bash console: bashrc, aliases, colors, hotkeys, history length</title><link href="http://blog.john-pfeiffer.com/customize-your-linux-bash-console-bashrc-aliases-colors-hotkeys-history-length" rel="alternate"></link><updated>2010-02-10T16:00:00-08:00</updated><author><name>john pfeiffer</name></author><id>tag:blog.john-pfeiffer.com,2010-02-10:customize-your-linux-bash-console-bashrc-aliases-colors-hotkeys-history-length</id><summary type="html">
+&lt;span class="cm"&gt;/* This function is called by the Windows function DispatchMessage( ) */&lt;/span&gt;
+&lt;span class="n"&gt;LRESULT&lt;/span&gt; &lt;span class="n"&gt;CALLBACK&lt;/span&gt; &lt;span class="nf"&gt;WindowProcedure&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="n"&gt;HWND&lt;/span&gt; &lt;span class="n"&gt;hwnd&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;UINT&lt;/span&gt; &lt;span class="n"&gt;message&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;WPARAM&lt;/span&gt; &lt;span class="n"&gt;wParam&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;LPARAM&lt;/span&gt; &lt;span class="n"&gt;lParam&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="kt"&gt;char&lt;/span&gt; &lt;span class="n"&gt;current_time&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;128&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;
+    &lt;span class="n"&gt;PAINTSTRUCT&lt;/span&gt; &lt;span class="n"&gt;ps&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;  &lt;span class="cm"&gt;/* a structure for a paint job (see below */&lt;/span&gt;
+    &lt;span class="n"&gt;RECT&lt;/span&gt; &lt;span class="n"&gt;rect&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;       &lt;span class="cm"&gt;/* a struct to hold rectangle values (e.g. x,y coordinates) */&lt;/span&gt;
+    &lt;span class="n"&gt;HDC&lt;/span&gt; &lt;span class="n"&gt;hdc&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;            &lt;span class="cm"&gt;/* handle to a DC (buffer) for the screen */&lt;/span&gt;
+
+    &lt;span class="k"&gt;switch&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;message&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;                  &lt;span class="cm"&gt;/* handle the messages */&lt;/span&gt;
+    &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="k"&gt;case&lt;/span&gt; &lt;span class="nl"&gt;WM_COMMAND&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+            &lt;span class="k"&gt;switch&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;LOWORD&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;wParam&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;    &lt;span class="cm"&gt;/* find out what&amp;#39;s been clicked */&lt;/span&gt;
+            &lt;span class="p"&gt;{&lt;/span&gt;
+                &lt;span class="k"&gt;case&lt;/span&gt; &lt;span class="nl"&gt;IDC_MyExitButton&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+                    &lt;span class="n"&gt;PostQuitMessage&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+                    &lt;span class="k"&gt;break&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;                                
+                &lt;span class="k"&gt;default&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;
+                    &lt;span class="k"&gt;break&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+            &lt;span class="p"&gt;}&lt;/span&gt;
+            &lt;span class="k"&gt;break&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+
+        &lt;span class="k"&gt;case&lt;/span&gt; &lt;span class="nl"&gt;WM_PAINT&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+            &lt;span class="n"&gt;GetClientRect&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="n"&gt;hwnd&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;rect&lt;/span&gt; &lt;span class="p"&gt;);&lt;/span&gt;       &lt;span class="cm"&gt;/* get the size of our window */&lt;/span&gt;
+            &lt;span class="n"&gt;hdc&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;BeginPaint&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="n"&gt;hwnd&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;ps&lt;/span&gt; &lt;span class="p"&gt;);&lt;/span&gt;      &lt;span class="cm"&gt;/* begin painting to the buffer */&lt;/span&gt;
+            &lt;span class="n"&gt;get_current_time&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="n"&gt;current_time&lt;/span&gt; &lt;span class="p"&gt;);&lt;/span&gt;
+            &lt;span class="n"&gt;DrawText&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="n"&gt;hdc&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;TEXT&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;current_time&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;rect&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;DT_CENTER&lt;/span&gt; &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="n"&gt;DT_VCENTER&lt;/span&gt; &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="n"&gt;DT_SINGLELINE&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+            &lt;span class="n"&gt;EndPaint&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="n"&gt;hwnd&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;ps&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+            &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+
+        &lt;span class="k"&gt;case&lt;/span&gt; &lt;span class="nl"&gt;WM_DESTROY&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+            &lt;span class="n"&gt;PostQuitMessage&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;       &lt;span class="cm"&gt;/* send a WM_QUIT */&lt;/span&gt;
+            &lt;span class="k"&gt;break&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+        &lt;span class="k"&gt;default&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;                         &lt;span class="cm"&gt;/* for messages that we don&amp;#39;t deal with */&lt;/span&gt;
+            &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;DefWindowProc&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;hwnd&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;message&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;wParam&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;lParam&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt;
+    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+
+
+&lt;span class="cm"&gt;/* Get the current time from the system and update the time string */&lt;/span&gt;
+&lt;span class="kt"&gt;void&lt;/span&gt; &lt;span class="nf"&gt;get_current_time&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="kt"&gt;char&lt;/span&gt; &lt;span class="n"&gt;current_time&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;128&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="kt"&gt;time_t&lt;/span&gt; &lt;span class="n"&gt;tempTime&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="cm"&gt;/* initialize the variable, otherwise only returns 1970 date */&lt;/span&gt;
+    &lt;span class="n"&gt;tempTime&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;time&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;NULL&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;  
+    &lt;span class="n"&gt;strcpy&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;current_time&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;asctime&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;localtime&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;tempTime&lt;/span&gt;&lt;span class="p"&gt;)));&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;</summary><category term="c"></category><category term="time"></category><category term="clock"></category><category term="windows"></category><category term="gcc"></category></entry><entry><title>Customize your linux bash console: bashrc, aliases, colors, hotkeys, history length</title><link href="http://blog.john-pfeiffer.com/customize-your-linux-bash-console-bashrc-aliases-colors-hotkeys-history-length" rel="alternate"></link><updated>2010-02-10T16:00:00-08:00</updated><author><name>john pfeiffer</name></author><id>tag:blog.john-pfeiffer.com,2010-02-10:customize-your-linux-bash-console-bashrc-aliases-colors-hotkeys-history-length</id><summary type="html">
 &lt;p&gt;The hidden file &lt;strong&gt;.bashrc&lt;/strong&gt; in each user's home directory (~ or or /home/username or /root) controls the configuration of how the console (and certain commands) behave.&lt;/p&gt;
 &lt;p&gt;NOTE CENTOS/REDHAT also uses &lt;strong&gt;.bash_profile&lt;/strong&gt;&lt;/p&gt;
 &lt;p&gt;The shell is the program that interfaces between the user and the Linux kernel. There are different shells with different features.&lt;/p&gt;
