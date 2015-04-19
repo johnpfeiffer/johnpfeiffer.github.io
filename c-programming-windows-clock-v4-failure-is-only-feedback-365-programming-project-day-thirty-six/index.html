@@ -6,8 +6,8 @@
         <meta name="author" content="john pfeiffer" />
         <meta name="copyright" content="john pfeiffer" />
 
-<meta name="keywords" content="c, time, clock, windows, gcc, programming, " />
-        <title>C programming windows clock v3: 365 programming project day thirty five  · johnpfeiffer
+<meta name="keywords" content=", programming, " />
+        <title>C programming windows clock v4 (failure is only feedback): 365 programming project day thirty six  · johnpfeiffer
 </title>
         <link href="http://cdn-images.mailchimp.com/embedcode/slim-081711.css" rel="stylesheet" type="text/css">
         <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css" rel="stylesheet">
@@ -65,39 +65,41 @@
 <article>
 <div class="row-fluid">
     <header class="page_header span10 offset2">
-    <h1><a href="http://blog.john-pfeiffer.com/c-programming-windows-clock-v3-365-programming-project-day-thirty-five"> C programming windows clock v3: 365 programming project day thirty five  </a></h1>
+    <h1><a href="http://blog.john-pfeiffer.com/c-programming-windows-clock-v4-failure-is-only-feedback-365-programming-project-day-thirty-six"> C programming windows clock v4 (failure is only feedback): 365 programming project day thirty six  </a></h1>
     </header>
 </div>
 
 <div class="row-fluid">
         <div class="span8 offset2 article-content">
 
-            <p>My windows clock project is slowly progressing...</p>
-<p>Now I can create a window with a QUIT button and display the current system time (only once)...</p>
-<p>If you want to know more about the project from the beginning search the site for winclock (or click on the time tag).</p>
-<p>I've stripped out most of the project header stuff - perhaps in the future I'll just have it as an "include" so that it's in the project but since it doesn't change much I only have to look at it when I refer back to it (instead of at the top of the file ALL THE TIME!)</p>
-<p>Ok, enough planning and review, here's the code:</p>
-<p><strong>notepad gcwin.bat</strong></p>
-<p><code>gcc.exe -o %1.exe %1 -Iinclude -Llib -Wall -ansi -mwindows</code></p>
-<blockquote>
-<p>winclock-v3.c</p>
-</blockquote>
-<div class="highlight"><pre><span class="cm">/* 2010-02-08  john pfeiffer, MS windows clock v3 (the windows)</span>
+            <p>It seems I've bitten off more than I thought with regularly updating a Window every second...</p>
+<p>I need to go back and learn more about how <strong>WM_PAINT</strong> works in windows because my current version is very funky... though it does work!</p>
+<p>A couple of obvious other things: <strong>WM_TIMER</strong> and perhaps <strong>strcpy</strong> instead of <strong>get_current_time</strong> again...</p>
+<p>The reason I've chosen the awkward system of getting the system time over and over instead of the "convenient" windows timer is that I'm trying to learn and understand what I can do with programming, not how to copy and paste someone else's function.</p>
+<p>The "modular" aspect of <strong>get_current_time</strong> returning a string becomes very interesting as theoretically I could modify it to get time from an atomic clock or the internet and the application wouldn't know the difference.</p>
+<p>Anyways, here's some source code that does compile (but I think it has a very slow memory leak so don't leave it running all night... LOL)</p>
+<div class="highlight"><pre><span class="cm">/* 2010-02-12  john pfeiffer, MS windows clock v4 (updating time)</span>
+<span class="cm">todo: wm_paint, wm_timer, strcpy instead of get_current?</span>
 <span class="cm">*/</span>
 
+<span class="cp">#include &lt;stdlib.h&gt;</span>
+<span class="cp">#include &lt;stdio.h&gt;</span>
 <span class="cp">#include &lt;time.h&gt;</span>
 <span class="cp">#include &lt;string.h&gt;</span>
 
 <span class="cp">#include &lt;windows.h&gt;</span>
-<span class="cp">#define  IDC_MyExitButton 40001 </span><span class="cm">/* case sensitive! random high number to keep windows happy */</span><span class="cp"></span>
+<span class="cp">#define  IDC_ExitButton 40001</span>
 
 
 <span class="n">LRESULT</span> <span class="n">CALLBACK</span> <span class="nf">WindowProcedure</span><span class="p">(</span> <span class="n">HWND</span> <span class="n">hwnd</span><span class="p">,</span> <span class="n">UINT</span> <span class="n">message</span><span class="p">,</span> <span class="n">WPARAM</span> <span class="n">wParam</span><span class="p">,</span> <span class="n">LPARAM</span> <span class="n">lParam</span><span class="p">);</span>
 
 <span class="kt">void</span> <span class="nf">get_current_time</span><span class="p">(</span> <span class="kt">char</span> <span class="n">current_time</span><span class="p">[</span><span class="mi">128</span><span class="p">]</span> <span class="p">);</span>
 
-<span class="kt">int</span> <span class="n">WINAPI</span> <span class="nf">WinMain</span><span class="p">(</span> <span class="n">HINSTANCE</span> <span class="n">hThisInstance</span><span class="p">,</span> <span class="n">HINSTANCE</span> <span class="n">hPrevInstance</span><span class="p">,</span> <span class="n">LPSTR</span> <span class="n">lpszArgument</span><span class="p">,</span> <span class="kt">int</span> <span class="n">ncmdshow</span><span class="p">)</span>               
+<span class="kt">int</span> <span class="n">WINAPI</span> <span class="nf">WinMain</span><span class="p">(</span> <span class="n">HINSTANCE</span> <span class="n">hThisInstance</span><span class="p">,</span> <span class="n">HINSTANCE</span> <span class="n">hPrevInstance</span><span class="p">,</span> <span class="n">LPSTR</span> <span class="n">lpszArgument</span><span class="p">,</span>   <span class="kt">int</span> <span class="n">ncmdshow</span><span class="p">)</span>
 <span class="p">{</span>
+    <span class="kt">char</span> <span class="n">current_time</span><span class="p">[</span><span class="mi">128</span><span class="p">];</span>
+    <span class="kt">char</span> <span class="n">temp_time</span><span class="p">[</span><span class="mi">128</span><span class="p">];</span>
+
     <span class="n">HWND</span> <span class="n">hwnd</span><span class="p">;</span>           <span class="cm">/* The handle for our window */</span>
     <span class="n">HWND</span> <span class="n">ButtonPushed</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
 
@@ -119,15 +121,15 @@
     <span class="cm">/* Register the window class, if fail quit the program with an error value */</span>
     <span class="k">if</span><span class="p">(</span> <span class="n">RegisterClass</span><span class="p">(</span><span class="o">&amp;</span><span class="n">wc</span><span class="p">)</span> <span class="o">==</span><span class="mi">0</span> <span class="p">)</span>
     <span class="p">{</span>
-        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>  
     <span class="p">}</span>
 
     <span class="cm">/* The class is registered, let&#39;s instantiate our window */</span>
-    <span class="n">hwnd</span> <span class="o">=</span> <span class="n">CreateWindowEx</span><span class="p">(</span> <span class="mi">1</span><span class="p">,</span> <span class="s">&quot;WindowsApp&quot;</span><span class="p">,</span> <span class="s">&quot;Windows Title&quot;</span><span class="p">,</span>
-        <span class="n">WS_OVERLAPPEDWINDOW</span><span class="p">,</span> <span class="n">CW_USEDEFAULT</span><span class="p">,</span> <span class="n">CW_USEDEFAULT</span><span class="p">,</span> <span class="n">CW_USEDEFAULT</span><span class="p">,</span> 
-        <span class="n">CW_USEDEFAULT</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="n">hThisInstance</span><span class="p">,</span> <span class="nb">NULL</span> <span class="p">);</span>
+    <span class="n">hwnd</span> <span class="o">=</span> <span class="n">CreateWindowEx</span><span class="p">(</span> <span class="mi">1</span><span class="p">,</span> <span class="s">&quot;WindowsApp&quot;</span><span class="p">,</span> <span class="s">&quot;Windows Title&quot;</span><span class="p">,</span> <span class="n">WS_OVERLAPPEDWINDOW</span><span class="p">,</span>
+            <span class="n">CW_USEDEFAULT</span><span class="p">,</span> <span class="n">CW_USEDEFAULT</span><span class="p">,</span> <span class="n">CW_USEDEFAULT</span><span class="p">,</span> <span class="n">CW_USEDEFAULT</span><span class="p">,</span>
+            <span class="nb">NULL</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="n">hThisInstance</span><span class="p">,</span> <span class="nb">NULL</span> <span class="p">);</span>
 
-        <span class="cm">/* create button and store the handle */</span>
+    <span class="cm">/* create button and store the handle */</span>
     <span class="n">ButtonPushed</span> <span class="o">=</span> <span class="n">CreateWindow</span><span class="p">(</span> 
         <span class="s">&quot;button&quot;</span><span class="p">,</span>                       <span class="cm">/* class name */</span>
         <span class="s">&quot;Push to Quit&quot;</span><span class="p">,</span>                 <span class="cm">/* button caption */</span>
@@ -135,16 +137,35 @@
         <span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span>                            <span class="cm">/* the left and top coordinates */</span>
         <span class="mi">150</span><span class="p">,</span><span class="mi">50</span><span class="p">,</span>                         <span class="cm">/* width and height */</span>
         <span class="n">hwnd</span><span class="p">,</span>                           <span class="cm">/* parent window handle */</span>
-        <span class="p">(</span><span class="n">HMENU</span><span class="p">)</span><span class="n">IDC_MyExitButton</span><span class="p">,</span>        <span class="cm">/* the ID of your button */</span>
+        <span class="p">(</span><span class="n">HMENU</span><span class="p">)</span><span class="n">IDC_ExitButton</span><span class="p">,</span>        <span class="cm">/* the ID of your button */</span>
         <span class="n">hThisInstance</span><span class="p">,</span>                  <span class="cm">/* the instance of your application */</span>
         <span class="nb">NULL</span><span class="p">)</span> <span class="p">;</span>                         <span class="cm">/* unnecessary extra */</span>
 
     <span class="n">ShowWindow</span><span class="p">(</span><span class="n">hwnd</span><span class="p">,</span> <span class="n">ncmdshow</span><span class="p">);</span>     <span class="cm">/* Make the window visible on the screen */</span>
     <span class="n">UpdateWindow</span><span class="p">(</span><span class="n">hwnd</span><span class="p">);</span>             <span class="cm">/* update with changes */</span>
 
+    <span class="n">get_current_time</span><span class="p">(</span> <span class="n">temp_time</span> <span class="p">);</span>   <span class="cm">/* get the current time initially */</span>
+
     <span class="cm">/* Run the message loop. It will run until GetMessage( ) returns 0 */</span>
     <span class="k">while</span><span class="p">(</span> <span class="n">GetMessage</span><span class="p">(</span><span class="o">&amp;</span><span class="n">messages</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="p">)</span>
-    <span class="p">{</span>           
+    <span class="p">{</span>
+        <span class="cm">/* nasty polling business, should be done with WM_TIMER */</span>
+        <span class="cm">/* if strings aren&#39;t the same then update the window */</span>
+        <span class="n">get_current_time</span><span class="p">(</span> <span class="n">current_time</span> <span class="p">);</span>
+
+        <span class="k">if</span><span class="p">(</span> <span class="n">strcmp</span><span class="p">(</span><span class="n">current_time</span><span class="p">,</span> <span class="n">temp_time</span><span class="p">)</span> <span class="p">)</span>
+        <span class="p">{</span>   
+            <span class="cm">/* debugging - am I getting the time comparison? */</span>
+            <span class="n">MessageBox</span><span class="p">(</span><span class="n">hwnd</span><span class="p">,</span> <span class="n">current_time</span><span class="p">,</span> <span class="n">temp_time</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+
+            <span class="cm">/* theoretically the rest of this forces the window to refresh */</span>
+            <span class="n">UpdateWindow</span><span class="p">(</span><span class="n">hwnd</span><span class="p">);</span>
+
+            <span class="n">ShowWindow</span><span class="p">(</span><span class="n">hwnd</span><span class="p">,</span> <span class="n">ncmdshow</span><span class="p">);</span>
+            <span class="cm">/* update the new &quot;old time&quot; */</span>
+            <span class="n">get_current_time</span><span class="p">(</span> <span class="n">temp_time</span> <span class="p">);</span>               
+        <span class="p">}</span>
+
         <span class="n">TranslateMessage</span><span class="p">(</span><span class="o">&amp;</span><span class="n">messages</span><span class="p">);</span> 
         <span class="n">DispatchMessage</span><span class="p">(</span><span class="o">&amp;</span><span class="n">messages</span><span class="p">);</span>  
     <span class="p">}</span>
@@ -158,18 +179,19 @@
 <span class="n">LRESULT</span> <span class="n">CALLBACK</span> <span class="nf">WindowProcedure</span><span class="p">(</span> <span class="n">HWND</span> <span class="n">hwnd</span><span class="p">,</span> <span class="n">UINT</span> <span class="n">message</span><span class="p">,</span> <span class="n">WPARAM</span> <span class="n">wParam</span><span class="p">,</span> <span class="n">LPARAM</span> <span class="n">lParam</span><span class="p">)</span>
 <span class="p">{</span>
     <span class="kt">char</span> <span class="n">current_time</span><span class="p">[</span><span class="mi">128</span><span class="p">];</span>
-    <span class="n">PAINTSTRUCT</span> <span class="n">ps</span><span class="p">;</span>  <span class="cm">/* a structure for a paint job (see below */</span>
-    <span class="n">RECT</span> <span class="n">rect</span><span class="p">;</span>       <span class="cm">/* a struct to hold rectangle values (e.g. x,y coordinates) */</span>
+    <span class="n">PAINTSTRUCT</span> <span class="n">ps</span><span class="p">;</span>     <span class="cm">/* a structure for a paint job (see below */</span>
+    <span class="n">RECT</span> <span class="n">rect</span><span class="p">;</span>     <span class="cm">/* a struct to hold rectangle values (e.g. x,y coordinates) */</span>
     <span class="n">HDC</span> <span class="n">hdc</span><span class="p">;</span>            <span class="cm">/* handle to a DC (buffer) for the screen */</span>
 
-    <span class="k">switch</span> <span class="p">(</span><span class="n">message</span><span class="p">)</span>                  <span class="cm">/* handle the messages */</span>
+    <span class="k">switch</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>                  <span class="cm">/* handle the messages */</span>
     <span class="p">{</span>
         <span class="k">case</span> <span class="nl">WM_COMMAND</span><span class="p">:</span>
             <span class="k">switch</span><span class="p">(</span><span class="n">LOWORD</span><span class="p">(</span><span class="n">wParam</span><span class="p">))</span>    <span class="cm">/* find out what&#39;s been clicked */</span>
             <span class="p">{</span>
-                <span class="k">case</span> <span class="nl">IDC_MyExitButton</span><span class="p">:</span>
+                <span class="k">case</span> <span class="nl">IDC_ExitButton</span><span class="p">:</span>
                     <span class="n">PostQuitMessage</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
-                    <span class="k">break</span><span class="p">;</span>                                
+                    <span class="k">break</span><span class="p">;</span>
+
                 <span class="k">default</span><span class="o">:</span>
                     <span class="k">break</span><span class="p">;</span>
             <span class="p">}</span>
@@ -177,20 +199,22 @@
 
         <span class="k">case</span> <span class="nl">WM_PAINT</span><span class="p">:</span>
             <span class="n">GetClientRect</span><span class="p">(</span> <span class="n">hwnd</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">rect</span> <span class="p">);</span>       <span class="cm">/* get the size of our window */</span>
+            <span class="n">InvalidateRect</span> <span class="p">(</span> <span class="n">hwnd</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="n">TRUE</span> <span class="p">);</span>
             <span class="n">hdc</span> <span class="o">=</span> <span class="n">BeginPaint</span><span class="p">(</span> <span class="n">hwnd</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">ps</span> <span class="p">);</span>      <span class="cm">/* begin painting to the buffer */</span>
+
             <span class="n">get_current_time</span><span class="p">(</span> <span class="n">current_time</span> <span class="p">);</span>
             <span class="n">DrawText</span><span class="p">(</span> <span class="n">hdc</span><span class="p">,</span> <span class="n">TEXT</span><span class="p">(</span><span class="n">current_time</span><span class="p">),</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">rect</span><span class="p">,</span> <span class="n">DT_CENTER</span> <span class="o">|</span> <span class="n">DT_VCENTER</span> <span class="o">|</span> <span class="n">DT_SINGLELINE</span><span class="p">);</span>
             <span class="n">EndPaint</span><span class="p">(</span> <span class="n">hwnd</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">ps</span><span class="p">);</span>
-            <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
-
+            <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>    
         <span class="k">case</span> <span class="nl">WM_DESTROY</span><span class="p">:</span>
-            <span class="n">PostQuitMessage</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>       <span class="cm">/* send a WM_QUIT */</span>
+            <span class="n">PostQuitMessage</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>       
             <span class="k">break</span><span class="p">;</span>
-        <span class="k">default</span><span class="o">:</span>                         <span class="cm">/* for messages that we don&#39;t deal with */</span>
+
+        <span class="k">default</span><span class="o">:</span>                   <span class="cm">/* for messages that we don&#39;t deal with */</span>
             <span class="k">return</span> <span class="n">DefWindowProc</span><span class="p">(</span><span class="n">hwnd</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">wParam</span><span class="p">,</span> <span class="n">lParam</span><span class="p">);</span>
     <span class="p">}</span>
     <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
-<span class="p">}</span>
+<span class="p">}</span><span class="cm">/* end of WinMain */</span>
 
 
 <span class="cm">/* Get the current time from the system and update the time string */</span>
@@ -207,9 +231,9 @@
             <nav>
             <ul class="articles_timeline">
  
-                <li class="previous_article">« <a href="http://blog.john-pfeiffer.com/customize-your-linux-bash-console-bashrc-aliases-colors-hotkeys-history-length" title="Previous: Customize your linux bash console: bashrc, aliases, colors, hotkeys, history length">Customize your linux bash console: bashrc, aliases, colors, hotkeys, history length</a></li>
+                <li class="previous_article">« <a href="http://blog.john-pfeiffer.com/drupal-basic-site-configuration-the-search-block" title="Previous: Drupal Basic Site Configuration: the Search Block">Drupal Basic Site Configuration: the Search Block</a></li>
  
-                <li class="next_article"><a href="http://blog.john-pfeiffer.com/drupal-basic-site-configuration-the-search-block" title="Next: Drupal Basic Site Configuration: the Search Block">Drupal Basic Site Configuration: the Search Block</a> »</li>
+                <li class="next_article"><a href="http://blog.john-pfeiffer.com/how-to-center-with-css-365-programming-project-day-thirty-seven" title="Next: How to center with CSS: 365 programming project day thirty seven">How to center with CSS: 365 programming project day thirty seven</a> »</li>
             </ul>
             </nav>
             </aside>
@@ -218,27 +242,9 @@
         <div class="span2" style="float:right;font-size:0.9em;">
  
             <h4>Published</h4>
-            <time pubdate="pubdate" datetime="2010-02-11T13:42:00-08:00">Feb 11, 2010</time>
+            <time pubdate="pubdate" datetime="2010-02-12T14:47:00-08:00">Feb 12, 2010</time>
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#programming-ref">programming</a> 
-            <h4>Tags</h4>
-            <ul class="list-of-tags tags-in-article"> 
-                <li><a href="/tags.html#c-ref">c
-                    <span>5</span>
-</a></li>
-                <li><a href="/tags.html#clock-ref">clock
-                    <span>3</span>
-</a></li>
-                <li><a href="/tags.html#gcc-ref">gcc
-                    <span>5</span>
-</a></li>
-                <li><a href="/tags.html#time-ref">time
-                    <span>3</span>
-</a></li>
-                <li><a href="/tags.html#windows-ref">windows
-                    <span>5</span>
-</a></li>
-            </ul>
 
         </div>
         </section>

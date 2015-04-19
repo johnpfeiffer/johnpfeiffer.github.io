@@ -6719,280 +6719,264 @@ with a little weird bug on the right column...
 
 &lt;p&gt;&lt;/div&gt;
 &lt;/div&gt;
-&lt;/p&gt;&lt;/p&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">John Pfeiffer</dc:creator><pubDate>Thu, 18 Feb 2010 14:57:00 -0800</pubDate><guid>tag:blog.john-pfeiffer.com,2010-02-18:365-38-better-css-3-column-header-footer-layout</guid></item><item><title>365-37 How to center with CSS</title><link>http://blog.john-pfeiffer.com/365-37-how-to-center-with-css</link><description>&lt;div class="field field-name-body field-type-text-with-summary field-label-hidden"&gt;
-&lt;div class="field-items"&gt;
-&lt;div class="field-item even"&gt;
-This is a tiny post, but it covers a very important part of how a CSS
-layout might look: how do you center something?
-
-&lt;/p&gt;
-
-The "Centering CSS Blocks Trick" forces the text (or image too,
-hopefully, depending on a post 2006 browser)...
-
-&lt;/p&gt;
-
-THE CSS  
-
-\#footer {
-
-&lt;/p&gt;
-
-text-align: center;  
-
-bottom: 0px;  
-
-margin-left: auto;  
-
-margin-right: auto;  
-
-width: 30%;  
-
-z-index: 0;  
-
-position: relative;  
-
-}
-
-&lt;/p&gt;
-
-THE HTML
-
-&lt;/p&gt;
-
-footer text goes here
-
-&lt;/p&gt;
-
-Note that the text-align instruction is perhaps redundant but it's
-better to be safe (and more universally compatible).
-
-&lt;/p&gt;
-
-To VERTICALLY CENTER things takes a bit of creativity,  
-
-basically you must pretend that an "inner div" is actually a table cell
-and use the "new" property of vertical-align (alot like html table cell
-valign)...
-
-&lt;/p&gt;
-
-\#contentsContainer {
-
-&lt;/p&gt;
-
-/\* height must be a fixed number \*/  
-
-height: 200px;  
-
-width: 100%;
-
-&lt;/p&gt;
-
-border: 1px solid green;  
-
-text-align: center;
-
-&lt;/p&gt;
-
-display: table-cell;  
-
-vertical-align: middle;
-
-&lt;/p&gt;
-
-position: relative;
-
-&lt;/p&gt;
-
-}
-
-&lt;/p&gt;
-
-\#contents{  
-
-border: 1px solid blue;  
-
-/\* height must be a fixed number \*/  
-
-height:40px;  
-
-position:relative;  
-
-}
-
-&lt;/p&gt;
-
-CONTENTS Lots of contents Vertically and horizontally centered CONTENTS
-
-&lt;/p&gt;
-
-test more content
-
-&lt;/p&gt;
-
-Whew, back to work!
-
-&lt;/p&gt;
-&lt;p&gt;
-&lt;/div&gt;
-
-&lt;p&gt;&lt;/div&gt;
-&lt;/div&gt;
-&lt;/p&gt;&lt;/p&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">John Pfeiffer</dc:creator><pubDate>Wed, 17 Feb 2010 15:05:00 -0800</pubDate><guid>tag:blog.john-pfeiffer.com,2010-02-17:365-37-how-to-center-with-css</guid></item><item><title>365-36 Winclock v4 (failure is only feedback)</title><link>http://blog.john-pfeiffer.com/365-36-winclock-v4-failure-is-only-feedback</link><description>&lt;div class="field field-name-body field-type-text-with-summary field-label-hidden"&gt;
-&lt;div class="field-items"&gt;
-&lt;div class="field-item even"&gt;
-It seems I've bitten off more than I thought with regularly updating a
-Window every second...
-
-&lt;/p&gt;
-
-I need to go back and learn more about how WM\_PAINT works in windows
-because my current version is very funky... though it does work!
-
-&lt;/p&gt;
-
-A couple of obvious other things: WM\_TIMER and perhaps strcpy instead
-of get\_current\_time again...
-
-&lt;/p&gt;
-
-The reason I've chosen the awkward system of getting the system time
-over and over instead of the "convenient" windows timer is that I'm
-trying to learn and understand what I can do with programming, not how
-to copy and paste someone else's function.
-
-&lt;/p&gt;
-
-The "modular" aspect of get\_current\_time returning a string becomes
-very interesting as theoretically I could modify it to get time from an
-atomic clock or the internet and the application wouldn't know the
-difference.
-
-&lt;/p&gt;
-
-Anyways, here's some source code that does compile (but I think it has a
-very slow memory leak so don't leave it running all night... LOL)
-
-&lt;/p&gt;
-&lt;p&gt;
-    /* 2010-02-12  john pfeiffer, MS windows clock v4 (updating time)todo: wm_paint, wm_timer, strcpy instead of get_current?*/#include &lt;stdlib.h&gt;#include &lt;stdio.h&gt;#include &lt;time.h&gt;#include &lt;string.h&gt;#include &lt;windows.h&gt;#define  IDC_ExitButton 40001 LRESULT CALLBACK WindowProcedure( HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);void get_current_time( char current_time[128] );int WINAPI WinMain( HINSTANCE hThisInstance, HINSTANCE hPrevInstance, LPSTR lpszArgument,           int ncmdshow)               { char current_time[128];  char temp_time[128];    HWND hwnd;           /* The handle for our window */    HWND ButtonPushed = NULL;    MSG messages;        /* Messages to the application  */    WNDCLASS wc;         /* Data structure for our defined windowclass */    wc.style = 0;    wc.lpfnWndProc = WindowProcedure;   /* This function is called by windows */    wc.cbClsExtra = 0;                   /* No extra bytes after the window class */    wc.cbWndExtra = 0;                   /* structure or the window instance */    wc.hInstance = hThisInstance;       /* handle to the owner */    wc.hIcon = NULL;                    /* no special application icon */    wc.hCursor = LoadCursor(NULL, IDC_ARROW); /* default cursor */    wc.hbrBackground = (HBRUSH) GetStockObject(LTGRAY_BRUSH);     wc.lpszMenuName = NULL;                /* No menu */    wc.lpszClassName = "WindowsApp";        /* the name of the windows class */            /* Register the window class, if fail quit the program with an error value */    if( RegisterClass(&amp;wc) ==0 ){ return -1;  }    /* The class is registered, let's instantiate our window */    hwnd = CreateWindowEx( 1, "WindowsApp", "Windows Title",       WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,     NULL, NULL, hThisInstance, NULL ); /* create button and store the handle */  ButtonPushed = CreateWindow(         "button",                       /* class name */        "Push to Quit",                  /* button caption */        WS_CHILD |WS_VISIBLE | BS_PUSHBUTTON,  /* the styles */        0,0,                            /* the left and top coordinates */        150,50,                         /* width and height */        hwnd,                           /* parent window handle */        (HMENU)IDC_ExitButton,        /* the ID of your button */        hThisInstance,                  /* the instance of your application */        NULL) ;                         /* unnecessary extra */    ShowWindow(hwnd, ncmdshow);     /* Make the window visible on the screen */  UpdateWindow(hwnd);             /* update with changes */     get_current_time( temp_time );   /* get the current time initially */    /* Run the message loop. It will run until GetMessage( ) returns 0 */    while( GetMessage(&amp;messages, NULL, 0, 0) )    {        /* nasty polling business, should be done with WM_TIMER */   /* if strings aren't the same then update the window */      get_current_time( current_time );     if( strcmp(current_time, temp_time) )        {   /* debugging - am I getting the time comparison? */           MessageBox(hwnd, current_time, temp_time, 0);/* theoretically the rest of this forces the window to refresh */         UpdateWindow(hwnd);                   ShowWindow(hwnd, ncmdshow);/* update the new "old time" */            get_current_time( temp_time );                    }             TranslateMessage(&amp;messages);         DispatchMessage(&amp;messages);      }    /* The program return-value is 0 - The value that PostQuitMessage( ) gave */    return messages.wParam;}/* This function is called by the Windows function DispatchMessage( ) */LRESULT CALLBACK WindowProcedure( HWND hwnd, UINT message,  WPARAM wParam, LPARAM lParam){    char current_time[128];    PAINTSTRUCT ps;       /* a structure for a paint job (see below */    RECT rect;      /* a struct to hold rectangle values (e.g. x,y coordinates) */    HDC hdc;            /* handle to a DC (buffer) for the screen */    switch (message)                  /* handle the messages */    {     case WM_COMMAND:         switch(LOWORD(wParam))    /* find out what's been clicked */        {            case IDC_ExitButton:                    PostQuitMessage(0);                break;                                                default:                break;            }        break;    case WM_PAINT:        GetClientRect( hwnd, &amp;rect );       /* get the size of our window */     InvalidateRect ( hwnd, NULL, TRUE );     hdc = BeginPaint( hwnd, &amp;ps );      /* begin painting to the buffer */        get_current_time( current_time );     DrawText( hdc, TEXT(current_time), -1, &amp;rect, DT_CENTER | DT_VCENTER | DT_SINGLELINE);              EndPaint( hwnd, &amp;ps);        return 0; case WM_DESTROY:     PostQuitMessage(0);               break;        default:                   /* for messages that we don't deal with */  return DefWindowProc(hwnd, message, wParam, lParam);    }    return 0;}/* end of WinMain *//* Get the current time from the system and update the time string */void get_current_time( char current_time[128] ){  time_t tempTime;/* initialize the variable, otherwise only returns 1970 date */   tempTime = time(NULL);   strcpy(current_time, asctime(localtime(&amp;tempTime)));}
-
-Download the message box driven clock binary (if you dare!):  
-[http://kittyandbear.net/john/blog-prog/winclock-v4.zip][]
-
-&lt;/p&gt;
-&lt;p&gt;
-&lt;/div&gt;
-
-&lt;p&gt;&lt;/div&gt;
-&lt;/div&gt;
-&lt;/p&gt;&lt;/p&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">John Pfeiffer</dc:creator><pubDate>Fri, 12 Feb 2010 14:47:00 -0800</pubDate><guid>tag:blog.john-pfeiffer.com,2010-02-12:365-36-winclock-v4-failure-is-only-feedback</guid></item><item><title>Drupal Basic Site Configuration the Search Block</title><link>http://blog.john-pfeiffer.com/drupal-basic-site-configuration-the-search-block</link><description>&lt;div class="field field-name-body field-type-text-with-summary field-label-hidden"&gt;
-&lt;div class="field-items"&gt;
-&lt;div class="field-item even"&gt;
-A basic Drupal theme has "regions" where you can put things...
-
-&lt;/p&gt;
-&lt;p&gt;
-                headerleft side                  right side           content           footer
-
-Blocks are the "extra parts" that can appear in addition to your "node"
-(stuff in the Content only)
-
-&lt;/p&gt;
-
-While it is easy to get advanced functionality with a few clicks, it can
-be a chore to remember the order and location of those clicks.
-
-&lt;/p&gt;
-
-ENABLE SITE SEARCH
-
-&lt;/p&gt;
-
-Administer -\&gt; Site Building -\&gt; Modules -\&gt; List  
-
-Click the checkbox next to SEARCH to enable it.
-
-&lt;/p&gt;
-
-Hit the SAVE button (way down at the bottom).
-
-&lt;/p&gt;
-
-Now you have to give Anonymous users (or just Authenticated Users, or
-maybe your custom category of LOLcatz?) permission to actually see/use
-the Search.  
-
-Administer -\&gt; User Management -\&gt; Permissions  
-
-Click the check boxes next to Search Module for the Anonymous and
-Authenticated User columns (note you can also give access to Advanced
-Search... cool.)
-
-&lt;/p&gt;
-
-Hit the SAVE button (way down at the bottom).
-
-&lt;/p&gt;
-
-NOTE that the "administrator/root" user isn't a column (and therefore
-you can't remove your own permission to administer the site... not that
-anyone'd ever be so silly...)
-
-&lt;/p&gt;
-
-For Garland, specifically, when you add the Search it will make a
-"double" so you have to  
-
-disable the one that's built into the theme...  
-
-Administer -\&gt; Site Building -\&gt; Themes -\&gt; Configure -\&gt; Global
-Settings
-
-&lt;/p&gt;
-
-Whew! Almost there...
-
-&lt;/p&gt;
-
-Administer -\&gt; Site Building -\&gt; Blocks -\&gt; List
-
-&lt;/p&gt;
-
-From here you can either drag and drop (or use the "dropdown" next to
-the Block name) to get the Search into the region of the page you want.
-
-&lt;/p&gt;
-
-Hit the SAVE button (way down at the bottom) before doing anything else.
-(Very frequently I forget to press save and all of my changes don't get
-saved... must be a bug.)
-
-&lt;/p&gt;
-
-THEN click on "Configure" next to the Search Block to specify some
-details. (e.g. Search only appears on the page, or the title above the
-Search Block will be FIND, or only show the Search Block to certain user
-roles...)
-
-&lt;/p&gt;
-
-OK, hit your SAVE button one last time... not only can you, super root
-administrator see Search but hopefully Anonymous users can now find your
-secret buried treasure...
-
-&lt;/p&gt;
-
-Are you ready for URL's and page titles?
-
-&lt;/p&gt;
-&lt;p&gt;
-&lt;/div&gt;
-
-&lt;p&gt;&lt;/div&gt;
-&lt;/div&gt;
-&lt;/p&gt;&lt;/p&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">John Pfeiffer</dc:creator><pubDate>Thu, 11 Feb 2010 21:35:00 -0800</pubDate><guid>tag:blog.john-pfeiffer.com,2010-02-11:drupal-basic-site-configuration-the-search-block</guid></item><item><title>c programming windows clock v3: 365 programming project day thirty five</title><link>http://blog.john-pfeiffer.com/c-programming-windows-clock-v3-365-programming-project-day-thirty-five</link><description>&lt;p&gt;My windows clock project is slowly progressing...&lt;/p&gt;
+&lt;/p&gt;&lt;/p&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">John Pfeiffer</dc:creator><pubDate>Thu, 18 Feb 2010 14:57:00 -0800</pubDate><guid>tag:blog.john-pfeiffer.com,2010-02-18:365-38-better-css-3-column-header-footer-layout</guid></item><item><title>How to center with CSS: 365 programming project day thirty seven</title><link>http://blog.john-pfeiffer.com/how-to-center-with-css-365-programming-project-day-thirty-seven</link><description>&lt;p&gt;This is a tiny post, but it covers a very important part of how a CSS layout might look: how do you center something?&lt;/p&gt;
+&lt;p&gt;The "Centering CSS Blocks Trick" forces the text (or image too, hopefully, depending on a post 2006 browser)...&lt;/p&gt;
+&lt;h3 id="css-center-horizontal"&gt;CSS center (horizontal)&lt;/h3&gt;
+&lt;h4 id="css"&gt;CSS&lt;/h4&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nf"&gt;#footer&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="k"&gt;text-align&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="k"&gt;center&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="k"&gt;bottom&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="m"&gt;0px&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="k"&gt;margin-left&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="k"&gt;auto&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="k"&gt;margin-right&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="k"&gt;auto&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="k"&gt;width&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="m"&gt;30%&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="k"&gt;z-index&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="k"&gt;position&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="k"&gt;relative&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h4 id="html"&gt;HTML&lt;/h4&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nt"&gt;&amp;lt;div&lt;/span&gt; &lt;span class="na"&gt;id=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;footer&amp;quot;&lt;/span&gt;&lt;span class="nt"&gt;&amp;gt;&lt;/span&gt;footer text goes here&lt;span class="nt"&gt;&amp;lt;div&amp;gt;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Note that the text-align instruction is perhaps redundant but it's better to be safe (and more universally compatible).&lt;/p&gt;
+&lt;h3 id="css-centering-vertically"&gt;CSS centering vertically&lt;/h3&gt;
+&lt;p&gt;To VERTICALLY CENTER things takes a bit of creativity,  basically you must pretend that an "inner div" is actually a table cell and use the "new" property of vertical-align (alot like html table cell valign)...&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nt"&gt;&amp;lt;html&amp;gt;&amp;lt;head&amp;gt;&lt;/span&gt;
+&lt;span class="nt"&gt;&amp;lt;style &lt;/span&gt;&lt;span class="na"&gt;type=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;text/css&amp;quot;&lt;/span&gt;&lt;span class="nt"&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class="nf"&gt;#contentsContainer&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="c"&gt;/* height must be a fixed number */&lt;/span&gt;
+        &lt;span class="k"&gt;height&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="m"&gt;200px&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+        &lt;span class="k"&gt;width&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="m"&gt;100%&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+
+        &lt;span class="k"&gt;border&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="m"&gt;1px&lt;/span&gt; &lt;span class="k"&gt;solid&lt;/span&gt; &lt;span class="nb"&gt;green&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+        &lt;span class="k"&gt;text-align&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="k"&gt;center&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+
+        &lt;span class="k"&gt;display&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="k"&gt;table-cell&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+        &lt;span class="k"&gt;vertical-align&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="k"&gt;middle&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+
+        &lt;span class="k"&gt;position&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="k"&gt;relative&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt;
+
+    &lt;span class="nf"&gt;#contents&lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="k"&gt;border&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="m"&gt;1px&lt;/span&gt; &lt;span class="k"&gt;solid&lt;/span&gt; &lt;span class="nb"&gt;blue&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+        &lt;span class="c"&gt;/* height must be a fixed number */&lt;/span&gt;
+        &lt;span class="k"&gt;height&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="m"&gt;40px&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+        &lt;span class="k"&gt;position&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="k"&gt;relative&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt;
+&lt;span class="nt"&gt;&amp;lt;/style&amp;gt;&lt;/span&gt;
+&lt;span class="nt"&gt;&amp;lt;/head&amp;gt;&amp;lt;body&amp;gt;&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;lt;div&lt;/span&gt; &lt;span class="na"&gt;id=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;contentsContainer&amp;quot;&lt;/span&gt;&lt;span class="nt"&gt;&amp;gt;&lt;/span&gt;
+        CONTENTS Lots of contents Vertically and horizontally centered CONTENTS
+        &lt;span class="nt"&gt;&amp;lt;div&lt;/span&gt; &lt;span class="na"&gt;id=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;contents&amp;quot;&lt;/span&gt;&lt;span class="nt"&gt;&amp;gt;&lt;/span&gt;
+            test more content (this is horizontally centered too)
+        &lt;span class="nt"&gt;&amp;lt;/div&amp;gt;&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;lt;/div&amp;gt;&lt;/span&gt;
+&lt;span class="nt"&gt;&amp;lt;/body&amp;gt;&amp;lt;/html&amp;gt;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h3 id="inline-css-centered"&gt;Inline CSS centered&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nt"&gt;&amp;lt;div&lt;/span&gt; &lt;span class="na"&gt;style=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;text-align: center; width: 100%; margin-left: auto; margin-right: auto;&amp;quot;&lt;/span&gt;&lt;span class="nt"&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;lt;img&lt;/span&gt; &lt;span class="na"&gt;alt=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;Logo&amp;quot;&lt;/span&gt; &lt;span class="na"&gt;src=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;/img/icons/logo_256.png&amp;quot;&lt;/span&gt;&lt;span class="nt"&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;lt;h2&amp;gt;&lt;/span&gt;Welcome&lt;span class="nt"&gt;&amp;lt;/h2&amp;gt;&lt;/span&gt;
+&lt;span class="nt"&gt;&amp;lt;/div&amp;gt;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Whew, back to work!&lt;/p&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">john pfeiffer</dc:creator><pubDate>Wed, 17 Feb 2010 15:05:00 -0800</pubDate><guid>tag:blog.john-pfeiffer.com,2010-02-17:how-to-center-with-css-365-programming-project-day-thirty-seven</guid></item><item><title>C programming windows clock v4 (failure is only feedback): 365 programming project day thirty six</title><link>http://blog.john-pfeiffer.com/c-programming-windows-clock-v4-failure-is-only-feedback-365-programming-project-day-thirty-six</link><description>&lt;p&gt;It seems I've bitten off more than I thought with regularly updating a Window every second...&lt;/p&gt;
+&lt;p&gt;I need to go back and learn more about how &lt;strong&gt;WM_PAINT&lt;/strong&gt; works in windows because my current version is very funky... though it does work!&lt;/p&gt;
+&lt;p&gt;A couple of obvious other things: &lt;strong&gt;WM_TIMER&lt;/strong&gt; and perhaps &lt;strong&gt;strcpy&lt;/strong&gt; instead of &lt;strong&gt;get_current_time&lt;/strong&gt; again...&lt;/p&gt;
+&lt;p&gt;The reason I've chosen the awkward system of getting the system time over and over instead of the "convenient" windows timer is that I'm trying to learn and understand what I can do with programming, not how to copy and paste someone else's function.&lt;/p&gt;
+&lt;p&gt;The "modular" aspect of &lt;strong&gt;get_current_time&lt;/strong&gt; returning a string becomes very interesting as theoretically I could modify it to get time from an atomic clock or the internet and the application wouldn't know the difference.&lt;/p&gt;
+&lt;p&gt;Anyways, here's some source code that does compile (but I think it has a very slow memory leak so don't leave it running all night... LOL)&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="cm"&gt;/* 2010-02-12  john pfeiffer, MS windows clock v4 (updating time)&lt;/span&gt;
+&lt;span class="cm"&gt;todo: wm_paint, wm_timer, strcpy instead of get_current?&lt;/span&gt;
+&lt;span class="cm"&gt;*/&lt;/span&gt;
+
+&lt;span class="cp"&gt;#include &amp;lt;stdlib.h&amp;gt;&lt;/span&gt;
+&lt;span class="cp"&gt;#include &amp;lt;stdio.h&amp;gt;&lt;/span&gt;
+&lt;span class="cp"&gt;#include &amp;lt;time.h&amp;gt;&lt;/span&gt;
+&lt;span class="cp"&gt;#include &amp;lt;string.h&amp;gt;&lt;/span&gt;
+
+&lt;span class="cp"&gt;#include &amp;lt;windows.h&amp;gt;&lt;/span&gt;
+&lt;span class="cp"&gt;#define  IDC_ExitButton 40001&lt;/span&gt;
+
+
+&lt;span class="n"&gt;LRESULT&lt;/span&gt; &lt;span class="n"&gt;CALLBACK&lt;/span&gt; &lt;span class="nf"&gt;WindowProcedure&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="n"&gt;HWND&lt;/span&gt; &lt;span class="n"&gt;hwnd&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;UINT&lt;/span&gt; &lt;span class="n"&gt;message&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;WPARAM&lt;/span&gt; &lt;span class="n"&gt;wParam&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;LPARAM&lt;/span&gt; &lt;span class="n"&gt;lParam&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+
+&lt;span class="kt"&gt;void&lt;/span&gt; &lt;span class="nf"&gt;get_current_time&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="kt"&gt;char&lt;/span&gt; &lt;span class="n"&gt;current_time&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;128&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="p"&gt;);&lt;/span&gt;
+
+&lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="n"&gt;WINAPI&lt;/span&gt; &lt;span class="nf"&gt;WinMain&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="n"&gt;HINSTANCE&lt;/span&gt; &lt;span class="n"&gt;hThisInstance&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;HINSTANCE&lt;/span&gt; &lt;span class="n"&gt;hPrevInstance&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;LPSTR&lt;/span&gt; &lt;span class="n"&gt;lpszArgument&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;   &lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="n"&gt;ncmdshow&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="kt"&gt;char&lt;/span&gt; &lt;span class="n"&gt;current_time&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;128&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;
+    &lt;span class="kt"&gt;char&lt;/span&gt; &lt;span class="n"&gt;temp_time&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;128&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;
+
+    &lt;span class="n"&gt;HWND&lt;/span&gt; &lt;span class="n"&gt;hwnd&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;           &lt;span class="cm"&gt;/* The handle for our window */&lt;/span&gt;
+    &lt;span class="n"&gt;HWND&lt;/span&gt; &lt;span class="n"&gt;ButtonPushed&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;NULL&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+
+    &lt;span class="n"&gt;MSG&lt;/span&gt; &lt;span class="n"&gt;messages&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;        &lt;span class="cm"&gt;/* Messages to the application  */&lt;/span&gt;
+    &lt;span class="n"&gt;WNDCLASS&lt;/span&gt; &lt;span class="n"&gt;wc&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;         &lt;span class="cm"&gt;/* Data structure for our defined windowclass */&lt;/span&gt;
+
+    &lt;span class="n"&gt;wc&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;style&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="n"&gt;wc&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;lpfnWndProc&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;WindowProcedure&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;   &lt;span class="cm"&gt;/* This function is called by windows */&lt;/span&gt;
+    &lt;span class="n"&gt;wc&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;cbClsExtra&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;                   &lt;span class="cm"&gt;/* No extra bytes after the window class */&lt;/span&gt;
+    &lt;span class="n"&gt;wc&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;cbWndExtra&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;                   &lt;span class="cm"&gt;/* structure or the window instance */&lt;/span&gt;
+    &lt;span class="n"&gt;wc&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;hInstance&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;hThisInstance&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;        &lt;span class="cm"&gt;/* handle to the owner */&lt;/span&gt;
+    &lt;span class="n"&gt;wc&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;hIcon&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;NULL&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;                     &lt;span class="cm"&gt;/* no special application icon */&lt;/span&gt;
+    &lt;span class="n"&gt;wc&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;hCursor&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;LoadCursor&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;NULL&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;IDC_ARROW&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt; &lt;span class="cm"&gt;/* default cursor */&lt;/span&gt;
+    &lt;span class="n"&gt;wc&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;hbrBackground&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;HBRUSH&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="n"&gt;GetStockObject&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;LTGRAY_BRUSH&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;   
+    &lt;span class="n"&gt;wc&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;lpszMenuName&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;NULL&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;                   &lt;span class="cm"&gt;/* No menu */&lt;/span&gt;
+    &lt;span class="n"&gt;wc&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;lpszClassName&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;WindowsApp&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;          &lt;span class="cm"&gt;/* the name of the windows class */&lt;/span&gt;
+
+
+    &lt;span class="cm"&gt;/* Register the window class, if fail quit the program with an error value */&lt;/span&gt;
+    &lt;span class="k"&gt;if&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="n"&gt;RegisterClass&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;wc&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt; &lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;  
+    &lt;span class="p"&gt;}&lt;/span&gt;
+
+    &lt;span class="cm"&gt;/* The class is registered, let&amp;#39;s instantiate our window */&lt;/span&gt;
+    &lt;span class="n"&gt;hwnd&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;CreateWindowEx&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;WindowsApp&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;Windows Title&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;WS_OVERLAPPEDWINDOW&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+            &lt;span class="n"&gt;CW_USEDEFAULT&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;CW_USEDEFAULT&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;CW_USEDEFAULT&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;CW_USEDEFAULT&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+            &lt;span class="nb"&gt;NULL&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nb"&gt;NULL&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;hThisInstance&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nb"&gt;NULL&lt;/span&gt; &lt;span class="p"&gt;);&lt;/span&gt;
+
+    &lt;span class="cm"&gt;/* create button and store the handle */&lt;/span&gt;
+    &lt;span class="n"&gt;ButtonPushed&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;CreateWindow&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; 
+        &lt;span class="s"&gt;&amp;quot;button&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;                       &lt;span class="cm"&gt;/* class name */&lt;/span&gt;
+        &lt;span class="s"&gt;&amp;quot;Push to Quit&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;                 &lt;span class="cm"&gt;/* button caption */&lt;/span&gt;
+        &lt;span class="n"&gt;WS_CHILD&lt;/span&gt; &lt;span class="o"&gt;|&lt;/span&gt;&lt;span class="n"&gt;WS_VISIBLE&lt;/span&gt; &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="n"&gt;BS_PUSHBUTTON&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;  &lt;span class="cm"&gt;/* the styles */&lt;/span&gt;
+        &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;                            &lt;span class="cm"&gt;/* the left and top coordinates */&lt;/span&gt;
+        &lt;span class="mi"&gt;150&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;50&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;                         &lt;span class="cm"&gt;/* width and height */&lt;/span&gt;
+        &lt;span class="n"&gt;hwnd&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;                           &lt;span class="cm"&gt;/* parent window handle */&lt;/span&gt;
+        &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;HMENU&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="n"&gt;IDC_ExitButton&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;        &lt;span class="cm"&gt;/* the ID of your button */&lt;/span&gt;
+        &lt;span class="n"&gt;hThisInstance&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;                  &lt;span class="cm"&gt;/* the instance of your application */&lt;/span&gt;
+        &lt;span class="nb"&gt;NULL&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;;&lt;/span&gt;                         &lt;span class="cm"&gt;/* unnecessary extra */&lt;/span&gt;
+
+    &lt;span class="n"&gt;ShowWindow&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;hwnd&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;ncmdshow&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;     &lt;span class="cm"&gt;/* Make the window visible on the screen */&lt;/span&gt;
+    &lt;span class="n"&gt;UpdateWindow&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;hwnd&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;             &lt;span class="cm"&gt;/* update with changes */&lt;/span&gt;
+
+    &lt;span class="n"&gt;get_current_time&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="n"&gt;temp_time&lt;/span&gt; &lt;span class="p"&gt;);&lt;/span&gt;   &lt;span class="cm"&gt;/* get the current time initially */&lt;/span&gt;
+
+    &lt;span class="cm"&gt;/* Run the message loop. It will run until GetMessage( ) returns 0 */&lt;/span&gt;
+    &lt;span class="k"&gt;while&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="n"&gt;GetMessage&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;messages&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nb"&gt;NULL&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="cm"&gt;/* nasty polling business, should be done with WM_TIMER */&lt;/span&gt;
+        &lt;span class="cm"&gt;/* if strings aren&amp;#39;t the same then update the window */&lt;/span&gt;
+        &lt;span class="n"&gt;get_current_time&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="n"&gt;current_time&lt;/span&gt; &lt;span class="p"&gt;);&lt;/span&gt;
+
+        &lt;span class="k"&gt;if&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="n"&gt;strcmp&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;current_time&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;temp_time&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="p"&gt;{&lt;/span&gt;   
+            &lt;span class="cm"&gt;/* debugging - am I getting the time comparison? */&lt;/span&gt;
+            &lt;span class="n"&gt;MessageBox&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;hwnd&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;current_time&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;temp_time&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+
+            &lt;span class="cm"&gt;/* theoretically the rest of this forces the window to refresh */&lt;/span&gt;
+            &lt;span class="n"&gt;UpdateWindow&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;hwnd&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+
+            &lt;span class="n"&gt;ShowWindow&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;hwnd&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;ncmdshow&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+            &lt;span class="cm"&gt;/* update the new &amp;quot;old time&amp;quot; */&lt;/span&gt;
+            &lt;span class="n"&gt;get_current_time&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="n"&gt;temp_time&lt;/span&gt; &lt;span class="p"&gt;);&lt;/span&gt;               
+        &lt;span class="p"&gt;}&lt;/span&gt;
+
+        &lt;span class="n"&gt;TranslateMessage&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;messages&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt; 
+        &lt;span class="n"&gt;DispatchMessage&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;messages&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;  
+    &lt;span class="p"&gt;}&lt;/span&gt;
+
+    &lt;span class="cm"&gt;/* The program return-value is 0 - The value that PostQuitMessage( ) gave */&lt;/span&gt;
+    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;messages&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;wParam&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+
+
+&lt;span class="cm"&gt;/* This function is called by the Windows function DispatchMessage( ) */&lt;/span&gt;
+&lt;span class="n"&gt;LRESULT&lt;/span&gt; &lt;span class="n"&gt;CALLBACK&lt;/span&gt; &lt;span class="nf"&gt;WindowProcedure&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="n"&gt;HWND&lt;/span&gt; &lt;span class="n"&gt;hwnd&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;UINT&lt;/span&gt; &lt;span class="n"&gt;message&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;WPARAM&lt;/span&gt; &lt;span class="n"&gt;wParam&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;LPARAM&lt;/span&gt; &lt;span class="n"&gt;lParam&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="kt"&gt;char&lt;/span&gt; &lt;span class="n"&gt;current_time&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;128&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;
+    &lt;span class="n"&gt;PAINTSTRUCT&lt;/span&gt; &lt;span class="n"&gt;ps&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;     &lt;span class="cm"&gt;/* a structure for a paint job (see below */&lt;/span&gt;
+    &lt;span class="n"&gt;RECT&lt;/span&gt; &lt;span class="n"&gt;rect&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;     &lt;span class="cm"&gt;/* a struct to hold rectangle values (e.g. x,y coordinates) */&lt;/span&gt;
+    &lt;span class="n"&gt;HDC&lt;/span&gt; &lt;span class="n"&gt;hdc&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;            &lt;span class="cm"&gt;/* handle to a DC (buffer) for the screen */&lt;/span&gt;
+
+    &lt;span class="k"&gt;switch&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;message&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;                  &lt;span class="cm"&gt;/* handle the messages */&lt;/span&gt;
+    &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="k"&gt;case&lt;/span&gt; &lt;span class="nl"&gt;WM_COMMAND&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+            &lt;span class="k"&gt;switch&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;LOWORD&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;wParam&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;    &lt;span class="cm"&gt;/* find out what&amp;#39;s been clicked */&lt;/span&gt;
+            &lt;span class="p"&gt;{&lt;/span&gt;
+                &lt;span class="k"&gt;case&lt;/span&gt; &lt;span class="nl"&gt;IDC_ExitButton&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+                    &lt;span class="n"&gt;PostQuitMessage&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+                    &lt;span class="k"&gt;break&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+
+                &lt;span class="k"&gt;default&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;
+                    &lt;span class="k"&gt;break&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+            &lt;span class="p"&gt;}&lt;/span&gt;
+            &lt;span class="k"&gt;break&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+
+        &lt;span class="k"&gt;case&lt;/span&gt; &lt;span class="nl"&gt;WM_PAINT&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+            &lt;span class="n"&gt;GetClientRect&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="n"&gt;hwnd&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;rect&lt;/span&gt; &lt;span class="p"&gt;);&lt;/span&gt;       &lt;span class="cm"&gt;/* get the size of our window */&lt;/span&gt;
+            &lt;span class="n"&gt;InvalidateRect&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="n"&gt;hwnd&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nb"&gt;NULL&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;TRUE&lt;/span&gt; &lt;span class="p"&gt;);&lt;/span&gt;
+            &lt;span class="n"&gt;hdc&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;BeginPaint&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="n"&gt;hwnd&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;ps&lt;/span&gt; &lt;span class="p"&gt;);&lt;/span&gt;      &lt;span class="cm"&gt;/* begin painting to the buffer */&lt;/span&gt;
+
+            &lt;span class="n"&gt;get_current_time&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="n"&gt;current_time&lt;/span&gt; &lt;span class="p"&gt;);&lt;/span&gt;
+            &lt;span class="n"&gt;DrawText&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="n"&gt;hdc&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;TEXT&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;current_time&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;rect&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;DT_CENTER&lt;/span&gt; &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="n"&gt;DT_VCENTER&lt;/span&gt; &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="n"&gt;DT_SINGLELINE&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+            &lt;span class="n"&gt;EndPaint&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="n"&gt;hwnd&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;ps&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+            &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;    
+        &lt;span class="k"&gt;case&lt;/span&gt; &lt;span class="nl"&gt;WM_DESTROY&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+            &lt;span class="n"&gt;PostQuitMessage&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;       
+            &lt;span class="k"&gt;break&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+
+        &lt;span class="k"&gt;default&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;                   &lt;span class="cm"&gt;/* for messages that we don&amp;#39;t deal with */&lt;/span&gt;
+            &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;DefWindowProc&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;hwnd&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;message&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;wParam&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;lParam&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt;
+    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="cm"&gt;/* end of WinMain */&lt;/span&gt;
+
+
+&lt;span class="cm"&gt;/* Get the current time from the system and update the time string */&lt;/span&gt;
+&lt;span class="kt"&gt;void&lt;/span&gt; &lt;span class="nf"&gt;get_current_time&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="kt"&gt;char&lt;/span&gt; &lt;span class="n"&gt;current_time&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;128&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="kt"&gt;time_t&lt;/span&gt; &lt;span class="n"&gt;tempTime&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="cm"&gt;/* initialize the variable, otherwise only returns 1970 date */&lt;/span&gt;
+    &lt;span class="n"&gt;tempTime&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;time&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;NULL&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;  
+    &lt;span class="n"&gt;strcpy&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;current_time&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;asctime&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;localtime&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;tempTime&lt;/span&gt;&lt;span class="p"&gt;)));&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">john pfeiffer</dc:creator><pubDate>Fri, 12 Feb 2010 14:47:00 -0800</pubDate><guid>tag:blog.john-pfeiffer.com,2010-02-12:c-programming-windows-clock-v4-failure-is-only-feedback-365-programming-project-day-thirty-six</guid></item><item><title>Drupal Basic Site Configuration: the Search Block</title><link>http://blog.john-pfeiffer.com/drupal-basic-site-configuration-the-search-block</link><description>
+&lt;p&gt;A basic Drupal theme has "regions" where you can put things...&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;            header  
+left side                  right side
+            content
+
+            footer
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Blocks are the "extra parts" that can appear in addition to your "node" (stuff in the Content only)&lt;/p&gt;
+&lt;p&gt;While it is easy to get advanced functionality with a few clicks, it can be a chore to remember the order and location of those clicks.&lt;/p&gt;
+&lt;h3 id="enable-site-search"&gt;Enable Site Search&lt;/h3&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Administer -&amp;gt; Site Building -&amp;gt; Modules -&amp;gt; List  &lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Click the checkbox next to &lt;strong&gt;SEARCH&lt;/strong&gt; to enable it.&lt;/p&gt;
+&lt;p&gt;Hit the &lt;strong&gt;SAVE&lt;/strong&gt; button (&lt;em&gt;way down at the bottom&lt;/em&gt;).&lt;/p&gt;
+&lt;h3 id="site-search-permissions"&gt;Site Search Permissions&lt;/h3&gt;
+&lt;p&gt;Now you have to give Anonymous users (or just Authenticated Users, or maybe your custom category of LOLcatz?) permission to actually see/use the Search.  &lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Administer -&amp;gt; User Management -&amp;gt; Permissions  &lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Click the check boxes next to Search Module for the Anonymous and Authenticated User columns (note you can also give access to Advanced Search... cool.)&lt;/p&gt;
+&lt;p&gt;Hit the &lt;strong&gt;SAVE&lt;/strong&gt; button (&lt;em&gt;way down at the bottom&lt;/em&gt;).&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;NOTE that the "administrator/root" user isn't a column (and therefore you can't remove your own permission to administer the site... not that anyone'd ever be so silly...)&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;For Garland, specifically, when you add the Search it will make a "double" so you have to disable the one that's built into the theme...  &lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Administer -&amp;gt; Site Building -&amp;gt; Themes -&amp;gt; Configure -&amp;gt; Global Settings&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Whew! Almost there...&lt;/p&gt;
+&lt;h3 id="adding-a-site-search-block"&gt;Adding a Site Search Block&lt;/h3&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Administer -&amp;gt; Site Building -&amp;gt; Blocks -&amp;gt; List&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;From here you can either drag and drop (or use the "dropdown" next to the Block name) to get the Search into the region of the page you want.&lt;/p&gt;
+&lt;p&gt;Hit the &lt;strong&gt;SAVE&lt;/strong&gt; button (way down at the bottom) before doing anything else.&lt;/p&gt;
+&lt;p&gt;(Very frequently I forget to press save and all of my changes don't get saved... must be a bug.)&lt;/p&gt;
+&lt;p&gt;THEN click on &lt;strong&gt;"Configure"&lt;/strong&gt; next to the Search Block to specify some details. (e.g. Search only appears on the page, or the title above the Search Block will be FIND, or only show the Search Block to certain user roles...)&lt;/p&gt;
+&lt;p&gt;OK, hit your &lt;strong&gt;SAVE&lt;/strong&gt; button one last time... not only can you, super root administrator see Search but hopefully Anonymous users can now find your secret buried treasure...&lt;/p&gt;
+&lt;p&gt;Are you ready for URL's and page titles?&lt;/p&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">john pfeiffer</dc:creator><pubDate>Thu, 11 Feb 2010 21:35:00 -0800</pubDate><guid>tag:blog.john-pfeiffer.com,2010-02-11:drupal-basic-site-configuration-the-search-block</guid><category>drupal</category></item><item><title>C programming windows clock v3: 365 programming project day thirty five</title><link>http://blog.john-pfeiffer.com/c-programming-windows-clock-v3-365-programming-project-day-thirty-five</link><description>&lt;p&gt;My windows clock project is slowly progressing...&lt;/p&gt;
 &lt;p&gt;Now I can create a window with a QUIT button and display the current system time (only once)...&lt;/p&gt;
 &lt;p&gt;If you want to know more about the project from the beginning search the site for winclock (or click on the time tag).&lt;/p&gt;
 &lt;p&gt;I've stripped out most of the project header stuff - perhaps in the future I'll just have it as an "include" so that it's in the project but since it doesn't change much I only have to look at it when I refer back to it (instead of at the top of the file ALL THE TIME!)&lt;/p&gt;
