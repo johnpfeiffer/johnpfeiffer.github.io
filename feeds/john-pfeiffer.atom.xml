@@ -6447,84 +6447,181 @@ L"AppClass"; Then your program will have "undefined behavior" =)
 &lt;li&gt;&lt;a href="http://john-pfeiffer.com/category/tags/programming"&gt;Programming&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;&lt;/div&gt;
-&lt;/p&gt;&lt;/p&gt;</summary></entry><entry><title>365-? Windows CE programming: A win32 api button</title><link href="http://blog.john-pfeiffer.com/365-windows-ce-programming-a-win32-api-button" rel="alternate"></link><updated>2010-03-16T20:27:00-07:00</updated><author><name>John Pfeiffer</name></author><id>tag:blog.john-pfeiffer.com,2010-03-16:365-windows-ce-programming-a-win32-api-button</id><summary type="html">&lt;div class="field field-name-body field-type-text-with-summary field-label-hidden"&gt;
-&lt;div class="field-items"&gt;
-&lt;div class="field-item even"&gt;
-Win CE uses a subset of the win32 API which is neat because technically
-anything written for it can be compiled for a "full" windows as well.
+&lt;/p&gt;&lt;/p&gt;</summary></entry><entry><title>Windows CE programming: A win32 api button: 365 programming project day forty</title><link href="http://blog.john-pfeiffer.com/windows-ce-programming-a-win32-api-button-365-programming-project-day-forty" rel="alternate"></link><updated>2010-03-16T20:27:00-07:00</updated><author><name>john pfeiffer</name></author><id>tag:blog.john-pfeiffer.com,2010-03-16:windows-ce-programming-a-win32-api-button-365-programming-project-day-forty</id><summary type="html">&lt;p&gt;Win CE uses a subset of the win32 API which is neat because technically anything written for it can be compiled for a "full" windows as well.   &lt;/p&gt;
+&lt;p&gt;Even though the Win32 API is very outdated I prefer the concept of building blocks and getting your hands dirty with implementation - that's how you really learn how things work. &lt;/p&gt;
+&lt;p&gt;C# and .Net, especially with a super GUI IDE, make it easy to quickly build something but also
+obscure why performance might be slow, why different parts aren't integrating together, and really require you to build based on the vision of the platform designers - for better or for worse.  &lt;/p&gt;
+&lt;p&gt;This is probably why many programs written in C that are speed critical have important parts hand written in assembly. So here's a Windows API button for Win CE...&lt;/p&gt;
+&lt;p&gt;Don't forget the batch file for pocket gcc:&lt;/p&gt;
+&lt;p&gt;\pgcc\cc1plus \pgcc\source-code.txt -o \pgcc\cwms.s -I \pgcc\include -include \pgcc\fixincl.h -fms-extensions \pgcc\as \pgcc\cwms.s -o \pgcc\cwmo.o \pgcc\ld \pgcc\cwmo.o -o \pgcc\cwme.exe -L \pgcc\lib -l cpplib -l corelibc -l coredll -l aygshell -l runtime -l portlib&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="cm"&gt;/* 2010-03-06 john pfeiffer wince quit button&lt;/span&gt;
+&lt;span class="cm"&gt;*/&lt;/span&gt;
+
+&lt;span class="cp"&gt;#define WIN32_LEAN_AND_MEAN&lt;/span&gt;
+&lt;span class="cp"&gt;#include &amp;lt;windows.h&amp;gt;&lt;/span&gt;
+
+&lt;span class="cm"&gt;/* these three are included for pocketgcc compatibility */&lt;/span&gt;
+&lt;span class="cp"&gt;#include &amp;lt;windowsx.h&amp;gt;&lt;/span&gt;
+&lt;span class="cp"&gt;#include &amp;lt;commctrl.h&amp;gt;&lt;/span&gt;
+&lt;span class="cp"&gt;#include &amp;lt;aygshell.h&amp;gt;&lt;/span&gt;
+
+&lt;span class="cm"&gt;/* not only do we have those complex included Windows headers&lt;/span&gt;
+&lt;span class="cm"&gt;but we have to define a special numeric ID for our buttons */&lt;/span&gt;
+
+&lt;span class="cp"&gt;#define  IDC_ExitButton      40099&lt;/span&gt;
+&lt;span class="cp"&gt;#define  IDC_clearScreen    40098&lt;/span&gt;
+
+&lt;span class="cm"&gt;/* HDC = handle to device context - a logical buffer of the screen. &lt;/span&gt;
+&lt;span class="cm"&gt;You &amp;quot;write&amp;quot; things to it and then it can write to the display in a chunk.&lt;/span&gt;
+&lt;span class="cm"&gt;A paint structure contains the info about the area being painted.&lt;/span&gt;
+
+&lt;span class="cm"&gt;Direct from MSDN...&lt;/span&gt;
+&lt;span class="cm"&gt;typedef struct tagPAINTSTRUCT {&lt;/span&gt;
+&lt;span class="cm"&gt;  HDC  hdc;&lt;/span&gt;
+&lt;span class="cm"&gt;  BOOL fErase;&lt;/span&gt;
+&lt;span class="cm"&gt;  RECT rcPaint;&lt;/span&gt;
+&lt;span class="cm"&gt;  BOOL fRestore;&lt;/span&gt;
+&lt;span class="cm"&gt;  BOOL fIncUpdate;&lt;/span&gt;
+&lt;span class="cm"&gt;  BYTE rgbReserved[32];&lt;/span&gt;
+&lt;span class="cm"&gt;} PAINTSTRUCT, *PPAINTSTRUCT;&lt;/span&gt;
+
+&lt;span class="cm"&gt;*/&lt;/span&gt;
+
+&lt;span class="n"&gt;VOID&lt;/span&gt; &lt;span class="n"&gt;APIENTRY&lt;/span&gt; &lt;span class="nf"&gt;initializeBackground&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;HWND&lt;/span&gt; &lt;span class="n"&gt;hwnd&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="p"&gt;{&lt;/span&gt;   &lt;span class="n"&gt;HDC&lt;/span&gt;  &lt;span class="n"&gt;hdc&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="n"&gt;PAINTSTRUCT&lt;/span&gt; &lt;span class="n"&gt;ps&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="n"&gt;hdc&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;BeginPaint&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;hwnd&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;ps&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;    &lt;span class="cm"&gt;/* prepares the window for painting */&lt;/span&gt;
+    &lt;span class="n"&gt;EndPaint&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;hwnd&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;ps&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;            &lt;span class="cm"&gt;/* done painting */&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+
+&lt;span class="cm"&gt;/* This is the prototype to the &amp;quot;do everything&amp;quot; window message&lt;/span&gt;
+&lt;span class="cm"&gt;processing switch function */&lt;/span&gt;
+
+&lt;span class="n"&gt;LRESULT&lt;/span&gt; &lt;span class="n"&gt;CALLBACK&lt;/span&gt; &lt;span class="nf"&gt;MenuWndProc&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;HWND&lt;/span&gt; &lt;span class="n"&gt;hwnd&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;UINT&lt;/span&gt; &lt;span class="n"&gt;message&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;WPARAM&lt;/span&gt; &lt;span class="n"&gt;wParam&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;LPARAM&lt;/span&gt; &lt;span class="n"&gt;lParam&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+
+&lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="n"&gt;APIENTRY&lt;/span&gt; &lt;span class="nf"&gt;WinMain&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;
+    &lt;span class="n"&gt;HINSTANCE&lt;/span&gt; &lt;span class="n"&gt;hInstance&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="n"&gt;HINSTANCE&lt;/span&gt; &lt;span class="n"&gt;hPrevInstance&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="n"&gt;LPTSTR&lt;/span&gt; &lt;span class="n"&gt;lpCmdLine&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="n"&gt;ncmdshow&lt;/span&gt; &lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="p"&gt;{&lt;/span&gt; 
+    &lt;span class="n"&gt;HWND&lt;/span&gt; &lt;span class="n"&gt;hwnd&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;NULL&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;  
+    &lt;span class="n"&gt;HWND&lt;/span&gt; &lt;span class="n"&gt;ExitButton&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;NULL&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;         &lt;span class="cm"&gt;/* each button gets a window handle */&lt;/span&gt;
+    &lt;span class="n"&gt;HWND&lt;/span&gt; &lt;span class="n"&gt;clearScreenButton&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;NULL&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+
+    &lt;span class="n"&gt;MSG&lt;/span&gt; &lt;span class="n"&gt;msg&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;   
+    &lt;span class="n"&gt;WNDCLASS&lt;/span&gt; &lt;span class="n"&gt;wc&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="n"&gt;RECT&lt;/span&gt; &lt;span class="n"&gt;rc&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+
+    &lt;span class="n"&gt;wc&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;style&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;CS_HREDRAW&lt;/span&gt; &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="n"&gt;CS_VREDRAW&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;         
+    &lt;span class="n"&gt;wc&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;lpfnWndProc&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;WNDPROC&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="n"&gt;MenuWndProc&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt; 
+    &lt;span class="n"&gt;wc&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;cbClsExtra&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="n"&gt;wc&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;cbWndExtra&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="n"&gt;wc&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;hInstance&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;hInstance&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="n"&gt;wc&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;hIcon&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="n"&gt;wc&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;hCursor&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="n"&gt;wc&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;hbrBackground&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;HBRUSH&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="n"&gt;GetStockObject&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;WHITE_BRUSH&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+    &lt;span class="n"&gt;wc&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;lpszMenuName&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;NULL&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="n"&gt;wc&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;lpszClassName&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;LPTSTR&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="s"&gt;L&amp;quot;Menu App&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+
+    &lt;span class="k"&gt;if&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;!&lt;/span&gt;&lt;span class="n"&gt;RegisterClass&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;wc&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+    &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="n"&gt;MessageBox&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;NULL&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;TEXT&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;errors &amp;quot;&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt; &lt;span class="s"&gt;L&amp;quot;IMPORTANT&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;MB_OK&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+        &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt;
+
+    &lt;span class="cm"&gt;/* create our main window letting windows decide the placement &amp;amp; size */&lt;/span&gt;
+    &lt;span class="n"&gt;hwnd&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;CreateWindow&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;L&amp;quot;Menu App&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s"&gt;L&amp;quot;quit button app&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;WS_VISIBLE&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+        &lt;span class="n"&gt;CW_USEDEFAULT&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;CW_USEDEFAULT&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; 
+        &lt;span class="n"&gt;CW_USEDEFAULT&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;CW_USEDEFAULT&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;        
+        &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;HWND&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="nb"&gt;NULL&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nb"&gt;NULL&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;hInstance&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;LPSTR&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="nb"&gt;NULL&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+
+    &lt;span class="cm"&gt;/* ----------- ----------- ----------- ----------- */&lt;/span&gt;
+    &lt;span class="cm"&gt;/* here we get the coordinate dimensions of the main window */&lt;/span&gt;
+    &lt;span class="n"&gt;GetWindowRect&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;hwnd&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;rc&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
 
 
+    &lt;span class="cm"&gt;/* this makes a quit button at the bottom of the screen */&lt;/span&gt;
+    &lt;span class="n"&gt;ExitButton&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;CreateWindow&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; 
+        &lt;span class="s"&gt;L&amp;quot;BUTTON&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s"&gt;L&amp;quot;Quit&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;WS_CHILD&lt;/span&gt; &lt;span class="o"&gt;|&lt;/span&gt; 
+        &lt;span class="n"&gt;WS_VISIBLE&lt;/span&gt; &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="n"&gt;BS_PUSHBUTTON&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; 
+        &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;rc&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;bottom&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;rc&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;top&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;rc&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;right&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="mi"&gt;6&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;)),&lt;/span&gt;
+        &lt;span class="cm"&gt;/* button top left corner x,y */&lt;/span&gt;
+        &lt;span class="n"&gt;rc&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;right&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="mi"&gt;6&lt;/span&gt; &lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;rc&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;right&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="mi"&gt;6&lt;/span&gt; &lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="cm"&gt;/* width &amp;amp; height */&lt;/span&gt;
+        &lt;span class="n"&gt;hwnd&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;HMENU&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="n"&gt;IDC_ExitButton&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; 
+        &lt;span class="n"&gt;hInstance&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nb"&gt;NULL&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
 
-Even though the Win32 API is very outdated I prefer the concept of
-building blocks and getting your hands dirty with implementation -
-that's how you really learn how things work. C\# and .Net, especially
-with a super GUI IDE, make it easy to quickly build something but also
-obscure why performance might be slow, why different parts aren't
-integrating together, and really require you to build based on the
-vision of the platform designers - for better or for worse.  
+    &lt;span class="n"&gt;clearScreenButton&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;CreateWindow&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; 
+            &lt;span class="s"&gt;L&amp;quot;BUTTON&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s"&gt;L&amp;quot;Clear&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;WS_CHILD&lt;/span&gt; &lt;span class="o"&gt;|&lt;/span&gt; 
+            &lt;span class="n"&gt;WS_VISIBLE&lt;/span&gt; &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="n"&gt;BS_PUSHBUTTON&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; 
+            &lt;span class="cm"&gt;/* button top left corner x,y */&lt;/span&gt;
+            &lt;span class="mi"&gt;50&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;rc&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;bottom&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;rc&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;top&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;rc&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;right&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="mi"&gt;6&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;)),&lt;/span&gt;
+            &lt;span class="cm"&gt;/* width &amp;amp; height */&lt;/span&gt;
+            &lt;span class="n"&gt;rc&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;right&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="mi"&gt;6&lt;/span&gt; &lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;rc&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;right&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="mi"&gt;6&lt;/span&gt; &lt;span class="p"&gt;,&lt;/span&gt;
+            &lt;span class="n"&gt;hwnd&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;HMENU&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="n"&gt;IDC_clearScreen&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+            &lt;span class="n"&gt;hInstance&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nb"&gt;NULL&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+
+    &lt;span class="n"&gt;ShowWindow&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;hwnd&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;ncmdshow&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt; 
+    &lt;span class="n"&gt;UpdateWindow&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;hwnd&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+
+    &lt;span class="k"&gt;while&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;GetMessage&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;msg&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nb"&gt;NULL&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt; 
+    &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="n"&gt;TranslateMessage&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;msg&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;                  
+        &lt;span class="n"&gt;DispatchMessage&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;msg&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt; 
+    &lt;span class="p"&gt;}&lt;/span&gt;   
+    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;msg&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;wParam&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt; &lt;span class="cm"&gt;/* end WinMain */&lt;/span&gt;
+
+&lt;span class="cm"&gt;/* ----------- ----------- ----------- ----------- */&lt;/span&gt;
+
+&lt;span class="n"&gt;LRESULT&lt;/span&gt; &lt;span class="n"&gt;CALLBACK&lt;/span&gt; &lt;span class="nf"&gt;MenuWndProc&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;HWND&lt;/span&gt; &lt;span class="n"&gt;hwnd&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;  &lt;span class="n"&gt;UINT&lt;/span&gt; &lt;span class="n"&gt;message&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;WPARAM&lt;/span&gt; &lt;span class="n"&gt;wParam&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;  &lt;span class="n"&gt;LPARAM&lt;/span&gt; &lt;span class="n"&gt;lParam&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="cm"&gt;/* here we test for what events happened/the user might have done */&lt;/span&gt;
+    &lt;span class="k"&gt;switch&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;message&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; 
+    &lt;span class="p"&gt;{&lt;/span&gt;   
+        &lt;span class="k"&gt;case&lt;/span&gt; &lt;span class="nl"&gt;WM_CREATE&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; 
+            &lt;span class="n"&gt;initializeBackground&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="n"&gt;hwnd&lt;/span&gt; &lt;span class="p"&gt;);&lt;/span&gt;   &lt;span class="cm"&gt;/* draw the main window */&lt;/span&gt;
+            &lt;span class="k"&gt;break&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;      
+        &lt;span class="k"&gt;case&lt;/span&gt; &lt;span class="nl"&gt;WM_DESTROY&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; 
+            &lt;span class="n"&gt;PostQuitMessage&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;    
+            &lt;span class="k"&gt;break&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;   
+        &lt;span class="k"&gt;case&lt;/span&gt; &lt;span class="nl"&gt;WM_LBUTTONDOWN&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;    &lt;span class="cm"&gt;/* left button pressed / tap on screen */&lt;/span&gt;
+            &lt;span class="k"&gt;break&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+        &lt;span class="k"&gt;case&lt;/span&gt; &lt;span class="nl"&gt;WM_MOUSEMOVE&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;      &lt;span class="cm"&gt;/* mouse pointer is moving */&lt;/span&gt;
+            &lt;span class="cm"&gt;/*     if(wParam &amp;amp; MK_LBUTTON)*/&lt;/span&gt;
+            &lt;span class="k"&gt;break&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+        &lt;span class="k"&gt;case&lt;/span&gt; &lt;span class="nl"&gt;WM_COMMAND&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+            &lt;span class="k"&gt;switch&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;LOWORD&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;wParam&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+            &lt;span class="p"&gt;{&lt;/span&gt;
+                &lt;span class="k"&gt;case&lt;/span&gt; &lt;span class="nl"&gt;IDC_ExitButton&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;        &lt;span class="cm"&gt;/* quit button pressed */&lt;/span&gt;
+                    &lt;span class="n"&gt;PostQuitMessage&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+                    &lt;span class="k"&gt;break&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+                &lt;span class="k"&gt;case&lt;/span&gt; &lt;span class="nl"&gt;IDC_clearScreen&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;     &lt;span class="cm"&gt;/* clear button pressed */&lt;/span&gt;
+                    &lt;span class="n"&gt;InvalidateRect&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;hwnd&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nb"&gt;NULL&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;TRUE&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+                    &lt;span class="k"&gt;break&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;      &lt;span class="cm"&gt;/* wipe the main window */&lt;/span&gt;
+                &lt;span class="k"&gt;default&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;
+                    &lt;span class="k"&gt;break&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;          
+            &lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="cm"&gt;/* end case command */&lt;/span&gt;      
+            &lt;span class="k"&gt;break&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;  
+        &lt;span class="k"&gt;case&lt;/span&gt; &lt;span class="nl"&gt;WM_PAINT&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+            &lt;span class="n"&gt;initializeBackground&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="n"&gt;hwnd&lt;/span&gt; &lt;span class="p"&gt;);&lt;/span&gt;
+            &lt;span class="k"&gt;break&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;      
+        &lt;span class="k"&gt;default&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;      
+            &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;DefWindowProc&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;hwnd&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;message&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;wParam&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;lParam&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+            &lt;span class="k"&gt;break&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;      
+        &lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="cm"&gt;/*  end case message */&lt;/span&gt;
+    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
 
 
-
-This is probably why many programs written in C that are speed critical
-have important parts hand written in assembly. So here's a Windows API
-button for Win CE...  
-
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-- - - - - - - - - - - -  
-
-Don't forget the batch file:  
-
-\\pgcc\\cc1plus \\pgcc\\source-code.txt -o \\pgcc\\cwms.s -I
-\\pgcc\\include -include \\pgcc\\fixincl.h -fms-extensions \\pgcc\\as
-\\pgcc\\cwms.s -o \\pgcc\\cwmo.o \\pgcc\\ld \\pgcc\\cwmo.o -o
-\\pgcc\\cwme.exe -L \\pgcc\\lib -l cpplib -l corelibc -l coredll -l
-aygshell -l runtime -l portlib  
-[Download the pocketgcc binaries][]
-
-&lt;/p&gt;
-&lt;p&gt;
-    /* 2010-03-06 john pfeiffer wince quit button*/#define WIN32_LEAN_AND_MEAN#include &lt;windows.h&gt;/* these three are included for pocketgcc compatibility */#include &lt;windowsx.h&gt;#include &lt;commctrl.h&gt;#include &lt;aygshell.h&gt;/* not only do we have those complex included Windows headersbut we have to define a special numeric ID for our buttons */#define  IDC_ExitButton      40099#define  IDC_clearScreen    40098/* HDC = handle to device context - a logical buffer of the screen. You "write" things to it and then it can write to the display in a chunk.A paint structure contains the info about the area being painted.Direct from MSDN...typedef struct tagPAINTSTRUCT {  HDC  hdc;  BOOL fErase;  RECT rcPaint;  BOOL fRestore;  BOOL fIncUpdate;  BYTE rgbReserved[32];} PAINTSTRUCT, *PPAINTSTRUCT;*/VOID APIENTRY initializeBackground(  HWND hwnd ){  HDC  hdc;    PAINTSTRUCT ps;  hdc = BeginPaint(hwnd, &amp;ps);    /* prepares the window for painting */   EndPaint(hwnd, &amp;ps);            /* done painting */}/* This is the prototype to the "do everything" window messageprocessing switch function */LRESULT CALLBACK MenuWndProc( HWND hwnd,   UINT message, WPARAM wParam,   LPARAM lParam); int APIENTRY WinMain(    HINSTANCE hInstance,    HINSTANCE hPrevInstance,    LPTSTR lpCmdLine, int ncmdshow ){     HWND hwnd = NULL;      HWND ExitButton = NULL;         /* each button gets a window handle */    HWND clearScreenButton = NULL;         MSG msg;       WNDCLASS wc;    RECT rc;    wc.style = CS_HREDRAW | CS_VREDRAW;             wc.lpfnWndProc = (WNDPROC)MenuWndProc;     wc.cbClsExtra = 0;    wc.cbWndExtra = 0;    wc.hInstance = hInstance;    wc.hIcon = 0;    wc.hCursor = 0;    wc.hbrBackground = (HBRUSH) GetStockObject(WHITE_BRUSH);    wc.lpszMenuName = NULL;    wc.lpszClassName = (LPTSTR) L"Menu App";      if(!  RegisterClass (&amp;wc)){     MessageBox(NULL, TEXT("errors "),  L"IMPORTANT", MB_OK);     return 0; }/* create our main window letting windows decide the placement &amp; size */    hwnd = CreateWindow (L"Menu App", L"quit button app", WS_VISIBLE,        CW_USEDEFAULT, CW_USEDEFAULT,        CW_USEDEFAULT, CW_USEDEFAULT,                (HWND)NULL, NULL, hInstance, (LPSTR)NULL);/* ----------- ----------- ----------- ----------- *//* here we get the coordinate dimensions of the main window */    GetWindowRect(hwnd, &amp;rc);/* this makes a quit button at the bottom of the screen */    ExitButton = CreateWindow(       L"BUTTON", L"Quit", WS_CHILD |       WS_VISIBLE | BS_PUSHBUTTON,      0, (rc.bottom - (rc.top + (rc.right/6) )),       /* button top left corner x,y */     rc.right/6 , rc.right/6 , /* width &amp; height */       hwnd, (HMENU)IDC_ExitButton,         hInstance, NULL);     clearScreenButton = CreateWindow(        L"BUTTON", L"Clear", WS_CHILD |      WS_VISIBLE | BS_PUSHBUTTON,      /* button top left corner x,y */     50, (rc.bottom - (rc.top + (rc.right/6) )),      /* width &amp; height */     rc.right/6 , rc.right/6 ,        hwnd, (HMENU) IDC_clearScreen,       hInstance, NULL);     ShowWindow(hwnd, ncmdshow);  UpdateWindow(hwnd);   while(GetMessage(&amp;msg, NULL, 0, 0))  {               TranslateMessage(&amp;msg);                          DispatchMessage(&amp;msg);    }       return msg.wParam;} /* end WinMain *//* ----------- ----------- ----------- ----------- */LRESULT CALLBACK MenuWndProc( HWND hwnd,  UINT message, WPARAM wParam,  LPARAM lParam ) {         /* here we test for what events happened/the user might have done */    switch (message)     {         case WM_CREATE:          initializeBackground( hwnd );   /* draw the main window */        break;              case WM_DESTROY:             PostQuitMessage(0);            break;           case WM_LBUTTONDOWN:    /* left button pressed / tap on screen */        break;     case WM_MOUSEMOVE:      /* mouse pointer is moving */            /*     if(wParam &amp; MK_LBUTTON)*/       break;       case WM_COMMAND:                       switch(LOWORD(wParam))               {                    case IDC_ExitButton:        /* quit button pressed */                     PostQuitMessage(0);                 break;               case IDC_clearScreen:     /* clear button pressed */                 InvalidateRect( hwnd, NULL, TRUE);               break;      /* wipe the main window */               default:             break;                   }/* end case command */              break;       case WM_PAINT:           initializeBackground( hwnd );        break;              default:                  return DefWindowProc(hwnd, message, wParam, lParam);     break;          }/*  end case message */    return 0;} 
-
-As you can see a button is just a predefined "window" object... but
-hopefully I'll figure out how to design my own button infrastructure so
-that I better understand the challenges, have increased portability, and
-maybe even enhanced functionality! ...  
-
-
-
-Further research when compiling using GCC on Windows XP gave warnings
-about the "long" formatting of some text,  
-
-
-
-e.g. the "L" **MessageBox(NULL, TEXT("errors "), L"IMPORTANT",
-MB\_OK);**  
-
-
-
-If you don't remove the "L" designation then your buttons won't appear
-in your binary compiled for Windows XP...   
-
-
-**clearScreenButton = CreateWindow( L"BUTTON", L"Clear", WS\_CHILD**  
-
-
-
-Should be: clearScreenButton = CreateWindow( "BUTTON", "Clear",
-WS\_CHILD  
-
-
-
-If you forget to remove the L from wc.lpszClassName = (LPTSTR)
-L"AppClass"; Then your program will have "undefined behavior" =)  
-
-&lt;/p&gt;
-&lt;p&gt;
-&lt;/div&gt;
-
-&lt;p&gt;&lt;/div&gt;
-&lt;/div&gt;
-&lt;/p&gt;&lt;/p&gt;</summary></entry><entry><title>How to customize a Drupal Zen theme Primary Links into Horizontal: 365 programming project day thirty nine</title><link href="http://blog.john-pfeiffer.com/how-to-customize-a-drupal-zen-theme-primary-links-into-horizontal-365-programming-project-day-thirty-nine" rel="alternate"></link><updated>2010-02-23T20:52:00-08:00</updated><author><name>john pfeiffer</name></author><id>tag:blog.john-pfeiffer.com,2010-02-23:how-to-customize-a-drupal-zen-theme-primary-links-into-horizontal-365-programming-project-day-thirty-nine</id><summary type="html">
+&lt;p&gt;As you can see a button is just a predefined "window" object... &lt;/p&gt;
+&lt;p&gt;but hopefully I'll figure out how to design my own button infrastructure so that I better understand the challenges, have increased portability, and maybe even enhanced functionality! ...  &lt;/p&gt;
+&lt;p&gt;Further research when compiling using GCC on Windows XP gave warnings about the "long" formatting of some text,&lt;/p&gt;
+&lt;p&gt;e.g. the "L" &lt;strong&gt;MessageBox(NULL, TEXT("errors "), L"IMPORTANT", MB_OK);&lt;/strong&gt;  &lt;/p&gt;
+&lt;p&gt;If you don't remove the "L" designation then your buttons won't appear in your binary compiled for Windows XP...&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;clearScreenButton = CreateWindow(L"BUTTON", L"Clear", WS_CHILD&lt;/strong&gt; &lt;/p&gt;
+&lt;p&gt;Should be: clearScreenButton = CreateWindow("BUTTON", "Clear", WS_CHILD  &lt;/p&gt;
+&lt;p&gt;If you forget to remove the L from wc.lpszClassName = (LPTSTR) L"AppClass"; Then your program will have "undefined behavior" =)&lt;/p&gt;</summary><category term="windows"></category><category term="win ce"></category><category term="c"></category><category term="win32"></category></entry><entry><title>How to customize a Drupal Zen theme Primary Links into Horizontal: 365 programming project day thirty nine</title><link href="http://blog.john-pfeiffer.com/how-to-customize-a-drupal-zen-theme-primary-links-into-horizontal-365-programming-project-day-thirty-nine" rel="alternate"></link><updated>2010-02-23T20:52:00-08:00</updated><author><name>john pfeiffer</name></author><id>tag:blog.john-pfeiffer.com,2010-02-23:how-to-customize-a-drupal-zen-theme-primary-links-into-horizontal-365-programming-project-day-thirty-nine</id><summary type="html">
 &lt;p&gt;I'm squeezing my brain to get Drupal theme customization and CSS working as quickly as possible (while working a more than a full time job and doing something besides computers every once in a while)...&lt;/p&gt;
 &lt;p&gt;"Creating" a Zen sub theme is relatively easy, mostly a lot of copying, replacing STARTERKIT, and uploading again to a different directory...&lt;/p&gt;
 &lt;h3 id="web-admin-configs"&gt;Web Admin configs&lt;/h3&gt;
