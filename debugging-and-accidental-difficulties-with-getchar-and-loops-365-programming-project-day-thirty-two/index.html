@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en-US">
+    <head>
+        <meta charset="utf-8"> 
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="author" content="john pfeiffer" />
+        <meta name="copyright" content="john pfeiffer" />
+
+<meta name="keywords" content="c, getchar, gcc, programming, " />
+        <title>Debugging and "Accidental Difficulties" with getchar and loops: 365 programming project day thirty two  · johnpfeiffer
+</title>
+        <link href="http://cdn-images.mailchimp.com/embedcode/slim-081711.css" rel="stylesheet" type="text/css">
+        <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="http://blog.john-pfeiffer.com/theme/css/style.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="http://blog.john-pfeiffer.com/theme/css/solarizedlight.css" media="screen">
+        <link rel="shortcut icon" href="http://blog.john-pfeiffer.com/theme/images/favicon.ico" type="image/x-icon" />
+        <link rel="apple-touch-icon" href="http://blog.john-pfeiffer.com/theme/images/apple-touch-icon.png" />
+        <link rel="apple-touch-icon" sizes="57x57" href="http://blog.john-pfeiffer.com/theme/images/apple-touch-icon-57x57.png" />
+        <link rel="apple-touch-icon" sizes="72x72" href="http://blog.john-pfeiffer.com/theme/images/apple-touch-icon-72x72.png" />
+        <link rel="apple-touch-icon" sizes="114x114" href="http://blog.john-pfeiffer.com/theme/images/apple-touch-icon-114x114.png" />
+        <link rel="apple-touch-icon" sizes="144x144" href="http://blog.john-pfeiffer.com/theme/images/apple-touch-icon-144x144.png" />
+        <link rel="icon" href="http://blog.john-pfeiffer.com/theme/images/apple-touch-icon-144x144.png" />
+    <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-3758734-9']);
+    _gaq.push(['_trackPageview']);
+    (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+    </script>
+    </head>
+    <body>
+	<div id="content-sans-footer">
+        <div class="dropdown-backdrop">
+
+			<div class="navbar navbar-static-top">
+				<div class="navbar-inner">
+					<div class="container">
+						<a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+							<span class="icon-bar"></span>
+							<span class="icon-bar"></span>
+							<span class="icon-bar"></span>
+						</a>
+						<a class="brand" href="http://blog.john-pfeiffer.com/"><span class=site-name>johnpfeiffer</span></a>
+						<div class="nav-collapse collapse">
+							<ul class="nav pull-right top-menu">
+								<li ><a href="http://blog.john-pfeiffer.com">Home</a></li>
+								<li ><a href="http://blog.john-pfeiffer.com/john-likes">John Likes</a></li>
+								<li ><a href="http://blog.john-pfeiffer.com/categories.html">Categories</a></li>
+								<li ><a href="http://blog.john-pfeiffer.com/tags.html">Tags</a></li>
+								<li ><a href="http://blog.john-pfeiffer.com/archives.html">Archives</a></li>
+								<li><form class="navbar-search" action="http://blog.john-pfeiffer.com/search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="container-fluid">
+			<div class="row-fluid">
+				<div class="span1"></div>
+				<div class="span10">
+<article>
+<div class="row-fluid">
+    <header class="page_header span10 offset2">
+    <h1><a href="http://blog.john-pfeiffer.com/debugging-and-accidental-difficulties-with-getchar-and-loops-365-programming-project-day-thirty-two"> Debugging and "Accidental Difficulties" with getchar and loops: 365 programming project day thirty two  </a></h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+        <div class="span8 offset2 article-content">
+
+            <p>So for fun I tried to "port" my code (of winclockv2.c) into Linux and compile it with gcc.  </p>
+<p>Remarkably easy since most Linux distributions come with GCC installed (in case you need to build a new application from source code... it sounds scary until you've done it once or twice and then it's easy). </p>
+<p>Just open up a text editor, paste it in, save it (getchar-loop.c). The only thing to change was my Windows "batch" file,  </p>
+<p><code>touch gc.sh</code></p>
+<p><code>chmod +x gc.sh</code>  </p>
+<p><code>nano gc.sh</code></p>
+<div class="highlight"><pre><span class="c">#!/bin/bash  </span>
+gcc -o <span class="nv">$1</span>.exe <span class="nv">$1</span> -Wall -ansi
+</pre></div>
+
+
+<p><code>./gc.sh getchar-loop.c</code></p>
+<p>So today's entry is an offshoot program I wrote to investigate why my previous version loop control wasn't working correctly. A little googling showed me that this particular "getchar() buffer problem" is a classic...</p>
+<div class="highlight"><pre><span class="cm">/* 2010-02-01 john pfeiffer  </span>
+<span class="cm"> getchar() only takes one character from the buffer, </span>
+<span class="cm"> but when a user presses &quot;enter&quot;... </span>
+<span class="cm"> that&#39;s another character in the buffer...</span>
+<span class="cm">*/</span>
+
+<span class="cp">#include &lt;stdio.h&gt;</span>
+
+<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+    <span class="kt">char</span> <span class="n">c</span><span class="o">=</span><span class="sc">&#39;n&#39;</span><span class="p">;</span>
+    <span class="kt">char</span> <span class="n">buffer</span><span class="p">;</span>
+    <span class="n">printf</span><span class="p">(</span><span class="s">&quot;This program will take in one character you type&quot;</span><span class="p">);</span> 
+    <span class="n">printf</span><span class="p">(</span><span class="s">&quot; and display it back to you.</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
+    <span class="n">printf</span><span class="p">(</span><span class="s">&quot;GeekSpeak = Demo the extra </span><span class="se">\&quot;\n\&quot;</span><span class="s"> in the&quot;</span><span class="p">);</span>
+    <span class="n">printf</span><span class="p">(</span><span class="s">&quot; getchar() from user </span><span class="se">\&quot;</span><span class="s">loop dilemma</span><span class="se">\&quot;\n</span><span class="s">&quot;</span><span class="p">);</span>
+
+    <span class="k">do</span>
+    <span class="p">{</span>
+        <span class="n">printf</span><span class="p">(</span><span class="s">&quot;Please enter one character and press enter...&quot;</span><span class="p">);</span>
+        <span class="n">printf</span><span class="p">(</span><span class="s">&quot;(y to quit)... Do not attempt to type in a word or else!</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>    
+        <span class="n">c</span> <span class="o">=</span> <span class="n">getchar</span><span class="p">();</span>
+        <span class="n">printf</span><span class="p">(</span><span class="s">&quot;%c</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="n">c</span><span class="p">);</span>
+    <span class="p">}</span> <span class="k">while</span><span class="p">(</span><span class="n">c</span> <span class="o">!=</span> <span class="sc">&#39;y&#39;</span><span class="p">);</span>
+
+    <span class="cm">/* we must clear the stdin buffer of extra char&#39;s and the \n for the y!*/</span>
+    <span class="k">do</span>
+    <span class="p">{</span>    <span class="n">buffer</span> <span class="o">=</span> <span class="n">getchar</span><span class="p">();</span>        
+    <span class="p">}</span>
+    <span class="k">while</span><span class="p">(</span><span class="n">buffer</span> <span class="o">!=</span> <span class="sc">&#39;\n&#39;</span> <span class="p">);</span>
+
+    <span class="n">printf</span><span class="p">(</span><span class="s">&quot;Ha ha, to quit press &#39;y&#39; again&quot;</span><span class="p">);</span>
+    <span class="n">printf</span><span class="s">&quot;((this corrected version will only display the first char entered).</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
+    <span class="k">do</span>
+    <span class="p">{</span>
+        <span class="n">printf</span><span class="p">(</span><span class="s">&quot;Press a key or enter a word, then press enter (use y to quit):</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>    
+        <span class="n">c</span> <span class="o">=</span> <span class="n">getchar</span><span class="p">();</span>
+
+        <span class="k">do</span>
+        <span class="p">{</span>    <span class="n">buffer</span> <span class="o">=</span> <span class="n">getchar</span><span class="p">();</span>        
+        <span class="p">}</span> <span class="k">while</span><span class="p">(</span><span class="n">buffer</span> <span class="o">!=</span> <span class="sc">&#39;\n&#39;</span> <span class="p">);</span>
+
+        <span class="n">printf</span><span class="p">(</span><span class="s">&quot;%c</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="n">c</span><span class="p">);</span>
+    <span class="p">}</span> <span class="k">while</span><span class="p">(</span> <span class="n">c</span> <span class="o">!=</span> <span class="sc">&#39;y&#39;</span><span class="p">);</span>
+
+    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span><span class="cm">/* end of main */</span>
+</pre></div>
+            <aside>
+            <hr/>
+            <nav>
+            <ul class="articles_timeline">
+ 
+                <li class="previous_article">« <a href="http://blog.john-pfeiffer.com/c-programming-command-line-clock-continued-winclockv2-365-programming-project-day-thirty-one" title="Previous: C programming command line clock continued (winclockv2): 365 programming project day thirty one">C programming command line clock continued (winclockv2): 365 programming project day thirty one</a></li>
+ 
+                <li class="next_article"><a href="http://blog.john-pfeiffer.com/replace-windows-xp-sp3-notepad-with-notepad2" title="Next: Replace Windows XP SP3 notepad with notepad2">Replace Windows XP SP3 notepad with notepad2</a> »</li>
+            </ul>
+            </nav>
+            </aside>
+        </div>
+        <section>
+        <div class="span2" style="float:right;font-size:0.9em;">
+ 
+            <h4>Published</h4>
+            <time pubdate="pubdate" datetime="2010-02-01T21:46:00-08:00">Feb 1, 2010</time>
+            <h4>Category</h4>
+            <a class="category-link" href="/categories.html#programming-ref">programming</a> 
+            <h4>Tags</h4>
+            <ul class="list-of-tags tags-in-article"> 
+                <li><a href="/tags.html#c-ref">c
+                    <span>9</span>
+</a></li>
+                <li><a href="/tags.html#gcc-ref">gcc
+                    <span>5</span>
+</a></li>
+                <li><a href="/tags.html#getchar-ref">getchar
+                    <span>1</span>
+</a></li>
+            </ul>
+
+        </div>
+        </section>
+</div>
+</article>
+				</div>
+				<div class="span1"></div>
+			</div>
+		</div>
+    </div>
+<footer>
+<div id="footer">
+    <ul class="footer-content">
+    </ul>
+</div>
+</footer>            <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+	<script src="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+    </body>
+</html>
