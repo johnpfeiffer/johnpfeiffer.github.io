@@ -3,10 +3,10 @@
     <head>
         <meta charset="utf-8"> 
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta name="author" content="John Pfeiffer" />
-        <meta name="copyright" content="John Pfeiffer" />
+        <meta name="author" content="john pfeiffer" />
+        <meta name="copyright" content="john pfeiffer" />
 
-<meta name="keywords" content=", linux, " />
+<meta name="keywords" content="blackberry, bes, besx, windows server, exchange server 2003, it, " />
         <title>Blackberry Enterprise Server Express on same domain as BES (windows and exchange 2003)  · johnpfeiffer
 </title>
         <link href="http://cdn-images.mailchimp.com/embedcode/slim-081711.css" rel="stylesheet" type="text/css">
@@ -70,556 +70,296 @@
 </div>
 
 <div class="row-fluid">
-        <div class="span8 offset2 article-content">
-
-            <div class="field field-name-body field-type-text-with-summary field-label-hidden">
-<div class="field-items">
-<div class="field-item even">
-Blackberry Express Server install: Windows 2003 with Exchange Server
-2003 with BES 5 already installed
-
-</p>
-
-Why Blackberry Express? Well it's the core Blackberry experience (email
-+ contacts + calendar) but  
-
-only requires a data plan, not a special (expensive) Blackberry plan.
-
-</p>
-
-The big item missing: Wireless activation is only available with BES
-dataplan.  
-[http://crackberry.com/blackberry-101-lecture-2-bes-and-bis-whats-difference][]
-
-</p>
-
-The dilemma, if you already have a BES installation, can you setup a
-BESX too?
-
-</p>
-
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-- - - - - - -  
-
-"the two BES servers cannot be in the same BES Domain, but can be in the
-same AD tree and access the same exchange server. "
-
-</p>
-
-"provided BlackBerry Enterprise Server Express is introduced as a new
-deployment with its own  
-
-BlackBerry domain, as defined by the BlackBerry configuration
-database... the BlackBerry Enterprise  
-
-Server and BlackBerry Enterprise Server Express can run independently in
-the same Microsoft Exchange  
-
-environment in a Microsoft Windows Domain and would be managed from
-separate BlackBerry Administration  
-
-Service consoles."
-
-</p>
-
-Apparently there is a difference between a BES Domain and a windows
-domain... Basically a BES Domain  
-
-SHOULD only be the BES installation & Database, therefore you should be
-able to have multiple BES  
-
-installations in the same Windows Domain (e.g. a large corporation with
-many exchange servers all  
-
-in the same Windows Domain?).
-
-</p>
-
-I will try it with my own twist - Not only a separate BESX installation
-on a windows 2003 server BUT  
-
-also creating a separate BESADMIN for the new BESX installation.
-
-</p>
-
-[http://supportforums.blackberry.com/t5/BlackBerry-Professional-Software/...][]
-
-</p>
-
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-- - - - - - -
-
-</p>
-
-\1. Setup a Windows 2003 Server SP2 in the Domain (exchange sys mgmr
-must match version to exch server!)  
-
-NEEDS at least 1GB RAM - but give it more if you suffer performance
-issues!
-
-</p>
-
-A. Install Exchange 2003 SP2 System Manager (Requires Exchange Install
-CD -\> Deployment Tools)  
-
-exch2k3\\setup\\i386\\setup.exe =\> Action = Custom  
-
-Action = Install (next to MS Exch System Management Tools) ... NEXT ...
-112MB required, NEXT
-
-</p>
-
-B. Download & Install Exchange Service Pack 2 (E3SP2ENG.exe for an old
-Exchange 2k3 cd)  
-[http://www.microsoft.com/downloads/details.aspx?FamilyID=535bef85-3096-4...][]
-
-</p>
-
-E3SP2ENG\\setup\\i386\\update.exe (goes from version 6.5 to ? requiring
-2 & 13 MB space)
-
-</p>
-
-C. Ensure TCP port 3101 (outgoing) is open on your firewall
-
-</p>
-
-D. Ensure your anti-spam is not blocking "blackberry.net"
-
-</p>
-
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-- - - - - - -  
-
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-- - - - - - -  
-[http://www.blackberry.com/btsc/viewContent.do?externalId=KB02276][]
-
-</p>
-
-\1. CREATE a user BESADMIN for the Domain (in Active Directory Users and
-Computers)  
-
-On the exchange server with the Mailbox enabled user creation dsa.msc
--\> right click = new user
-
-</p>
-
-\2. PERMISSION SEND AS: On the domain, dsa.msc  
-
-From the Active Directory "View" option choose Advanced Features
-
-</p>
-
-A. Right click on the root of the domain for Properties -\> Security -\>
-Advanced  
-
-Add BESADMIN and Apply Onto = User Objects (dropdown) , Allow = Send As
-(checkbox)
-
-</p>
-
-B. Maybe? more secure: only right click on each OU or user that will be
-using Blackberry and  
-
-give the BESADMIN "Send As" permission
-
-</p>
-
-\3. PERMISSIONS Exch 2k3 System Manager -\> Administrative Groups right
-click the Group for your BES  
-
-(e.g. First Administrative Group) -\> Delegate Control -\> Add  
-
-Browse -\> Role = Exchange View Only Administrator
-
-</p>
-
-\4. PERMISSIONS Exchange Server: Start \> Programs \> Microsoft Exchange
-\> System Manager  
-
-Administrative Groups \> First Administrative Group \> Servers \> right
-click SERVERNAME (properties)  
-
-Security -\> find the BESADMIN and enable checkboxes:
-
-</p>
-
-\* Administer Information Store  
-
-\* Send As  
-
-\* Receive As
-
-</p>
-
-(Click on Advanced and ensure that "Allow inheritable permissions" is
-checked)
-
-</p>
-
-\5. PERMISSIONS Local Admin: each server that will have Blackberry
-Enterprise Server Express components
-
-</p>
-
-My Computer right click -\> Manage -\> Local Users & Groups -\> Groups
--\> Administrators  
-
-Add = BESADMIN
-
-</p>
-
-\6. My Computer right click -\> Properties -\> Remote -\> Enable Remote
-Desktop -\>  
-
-Select RemoteDesktop Users =\> Add = BESADMIN
-
-</p>
-
-\7. PERMISSIONS Log on Locally & Log on as a Service  
-
-Start -\> Administrative Tools -\> Local Security Settings =\> Local
-Policies -\> User Rights Assignment  
-
-double click Log on Locally & Log on as a Service and add BESADMIN
-
-</p>
-
-\8. BLACKBERRY warn that you need the Microsoft hotfixes 823343 and
-894470  
-[http://support.microsoft.com/kb/823343][] and
-[http://support.microsoft.com/kb/894470][]  
-
-Verify by c:\\exchsvr\\bin\\cdo.dll 708KB right click Version 6.5.7232
-or later
-
-</p>
-
-\9. REBOOT the server (ok, just an old habit)  
-
-Log in as the BESADMIN user  
-
-C:\\Research In Motion\\BlackBerry Enterprise Server 5.0.1\\setup.exe
-
-</p>
-
-A. Create a Blackberry Configuration Database (aka BES Domain?)  
-
-B. Blackberry Enterprise Server with all components  
-
-C. preinstallation checklist will show you everything is ready (or will
-be auto installed)  
-
-D. Install MS SQL Server 2005 Express SP3
-
-</p>
-
-E. note that the extracted setup folder is very similar to the target
-install folder  
-
-C:\\Research In Motion\\BlackBerry Enterprise Server 5.0.1  
-
-C:\\Program Files\\Research In Motion\\BlackBerry Enterprise Server\\  
-
-enter BESADMIN password and the NAME of the Server where the SQL Express
-will be installed  
-
-(e.g. the name of the server you are installed Blackberry Express!)
-
-</p>
-
-F. read the summary, click INSTALL ... watch & wait.
-
-</p>
-
-G. You are prompted to restart the computer - do so and then log in
-again with the BESADMIN user.  
-
-H. Installation continues with the Database Information ... just click
-Next  
-
-The database BESMgmt doesn't exist, would you like to create it ... YES
-
-</p>
-
-I. Enter Blackberry CAL Key e.g. besexp-123456-123456-123456-123456  
-
-SRP Host name: gb.srp.blackberry.com and port number: 3101 were already
-provided  
-
-SRP identifier = (Serial Number from Blackberry download) S12345678  
-
-SRP authentication key = (Licence Key from Blackberry download)  
-
-1234-1234-1234-1234-1234-1234-1234-1234-1234-1234  
-
-CLICK VERIFY BUTTON 1 AND BUTTON 2 (should be successful and valid!
-NEEDS dashes - inbetween!)
-
-</p>
-
-J. Microsoft Exchange Server popup - type in the Exchange Server Name  
-
-K. Administration Settings (already filled in by default) CLICK NEXT  
-
-(no, I don't want to use SSL between the Blackberry Admin and my LAN
-browser)
-
-</p>
-
-L. Type in the BESADMIN password and click NEXT  
-
-M. Advanced Administration = leave as windows default click NEXT  
-
-N. click Start Services button  
-
-BlackBerry Router has successfully started.  
-
-BlackBerry Attachment Service has successfully started.  
-
-BlackBerry Dispatcher has successfully started.  
-
-BlackBerry MDS Connection Service has successfully started.  
-
-BlackBerry Alert has successfully started.  
-
-BlackBerry Administration Service - NCC has successfully started.  
-
-BlackBerry Administration Service - AS has successfully started.  
-
-BlackBerry Controller has successfully started.
-
-</p>
-
-O. Make a note of the Web Admin address(es)  
-[https://SERVERNAME.DOMAIN.CO.LOCAL:3443/webconsole/login][]  
-[https://SERVERNAME.DOMAIN.CO.LOCAL:3443/webdesktop/login][]
-
-</p>
-
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-- - - - - - -  
-
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-- - - - - - -  
-
-Test your Blackberry Express Installation
-
-</p>
-
-A. Locally on the Server you can check services.msc (all BB services
-started)  
-
-and eventvwr.msc (no Blackberry errors)
-
-</p>
-
-B. Use a browser (IE8?)
-[https://SERVERNAME.DOMAIN.CO.LOCAL:3443/webconsole/login][]  
-
-(don't worry about the Browser "Security Alert" as it will be a self
-signed SSL certificate,  
-
-you can install the certificate and add it to Trusted Sites too...)
-
-</p>
-
-Install the RimWebComponents.cab
-
-</p>
-
-C. Create a user (you just need their email address - user should only
-be on one BES Domain  
-
-so not on BES 5 and BES X at the same time!)  
-
-Create User with an Activation Password (e.g. something simple that
-times out in 4 hours)
-
-</p>
-
-Wait until it gives you the OK message that the user was created (and
-activation email sent)
-
-</p>
-
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-- - - - - - -  
-
-ASSIGN A DEVICE TO A USER
-([http://docs.blackberry.com/en/admin/deliverables/14334/][] )  
-
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-- - - - - - -
-
-</p>
-
-A. Using the Blackberry Administration Service (web)  
-[https://SERVERNAME.DOMAIN.CO.LOCAL:3443/webconsole/login][]
-
-</p>
-
-On the left there's a DEVICES area -\> Attached Devices (if it doesn't
-expand?)
-
-</p>
-
-Connect the BlackBerry device to the computer.  
-
-Click Manage current device -\> Click Assign current device -\> Search
-for a user account
-
-</p>
-
-B. Users can activate their BlackBerry devices by connecting them to
-computers using a USB cable  
-
-or Bluetooth connection and logging in (with a browser) to the
-BlackBerry Web Desktop Manager.  
-[https://SERVERNAME.DOMAIN.CO.LOCAL:3443/webdesktop/login][]
-
-</p>
-
-When users complete the activation process, the BESX synchronizes
-through the BlackBerry Router.  
-
-If a connection to the BlackBerry Router is interrupted, the data
-transfer continues over the  
-
-wireless network.
-
-</p>
-
-C. Blackberry Desktop Manager installed on a computer (and connected to
-their Outlook Profile)  
-
-Attach/Connect to a Device
-
-</p>
-
-Z. Not likely to be enabled but theoretically after sending the
-Activation Password the  
-
-BlackBerry Enterprise Server sends an email message with an etp.dat
-
-</p>
-
-On the Device choose Options -\> Advanced Options -\> Enterprise
-Activation
-
-</p>
-
-"Activation request failed. A service connection is unvailable"
-
-</p>
-
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-- - - - - - -  
-
-TIPS  
-
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-- - - - - - -
-
-</p>
-
-\1. Setup a default Password requirement
-
-</p>
-
-Policy -\> Manage IT Policies -\> Edit IT Policy (default) -\> Device
-Only Tab
-
-</p>
-
-\2. Increase the default synchronization of messages when activating
-
-</p>
-
-Servers and components -\> BlackBerry Solution topology \> BlackBerry
-Domain \> Component view \> Email  
-
-Click on the "instance" (e.g. computername\_EMAIL) -\> click on
-Messaging tab  
-
-Scroll down and click on "Edit Instance"
-
-</p>
-
-Change Message prepopulation settings to 14 days and 750 messages  
-
-scroll down and click SAVE ALL
-
-</p>
-
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-- - - - - - -  
-
-USELESS STEPS FROM BLACKBERRY  
-
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-- - - - - - -
-
-</p>
-
-A. Install SQL Express Service Pack 3 (already included in the
-Blackberry Express Install!)  
-[http://www.microsoft.com/downloads/details.aspx?FamilyID=3181842a-4090-4...][]
-
-</p>
-
-OTHERWISE theoretically you could re-use an existing SQL database (maybe
-with old Blackberry data?)
-
-</p>
-
-Install CDO support (for Exch 2010)
-[http://support.microsoft.com/kb/917481][]  
-
-Microsoft Exchange Server MAPI Client and Collaboration Data Objects
-1.2.1  
-[http://www.microsoft.com/downloads/details.aspx?FamilyID=4825F157-5816-4...][]
-
-</p>
-
-TEST your BESADMIN account access to User Accounts  
-
-(double click on the self extracting BESX\_express\_5.0.1.exe but DO NOT
-run setup.exe)
-
-</p>
-
-C:\\Research In Motion\\BlackBerry Enterprise Server
-5.0.1\\tools\\IEMSTest.exe
-
-</p>
-
-The setup application configures the startup type for the BlackBerry
-Mail Store Service,  
-
-BlackBerry Policy Service, and BlackBerry Synchronization Service to
-manual.
-
-</p>
-
-You cannot activate a BlackBerry device that is associated with the
-BlackBerry Internet Service over  
-
-the wireless network or over wifi.
-
-</p>
-<p>
+    <div class="span2 table-of-content">
+        <nav>
+        <h4>Contents</h4>
+        <div class="toc">
+<ul>
+<li><a href="#why-blackberry-express">Why Blackberry Express?</a></li>
+<li><a href="#the-dilemma-if-you-already-have-a-bes-installation-can-you-setup-a-besx-too">The dilemma, if you already have a BES installation, can you setup a BESX too?</a></li>
+<li><a href="#windows-server-and-exchange-server-setup">Windows Server and Exchange Server Setup</a></li>
+<li><a href="#permissions-for-a-service-account-for-blackberry-enterprise-server-for-microsoft-exchange">Permissions for a service account for BlackBerry Enterprise Server for Microsoft Exchange</a></li>
+<li><a href="#installing-blackberry-and-database">Installing Blackberry (and Database)</a></li>
+<li><a href="#test-your-blackberry-express-installation">Test your Blackberry Express Installation</a></li>
+<li><a href="#assign-a-device-to-a-user">Assign a device to a User</a></li>
+<li><a href="#tips">Tips</a></li>
+<li><a href="#useless-steps-from-blackberry">Useless Steps from Blackberry</a></li>
+</ul>
 </div>
+        </nav>
+    </div>
+    <div class="span8 article-content">
 
-<p></div>
-</div>
-</p></p>
-<div class="highlight"><pre>http://crackberry.com/blackberry-101-lecture-2-bes-and-bis-whats-difference
-http://supportforums.blackberry.com/t5/BlackBerry-Professional-Software/Installing-BESX-when-BES-5-exists/m-p/488112
-http://www.microsoft.com/downloads/details.aspx?FamilyID=535bef85-3096-45f8-aa43-60f1f58b3c40&amp;displaylang=en
-http://www.microsoft.com/downloads/details.aspx?FamilyID=3181842a-4090-4431-acdd-9a1c832e65a6&amp;displaylang=en
-http://www.microsoft.com/downloads/details.aspx?FamilyID=4825F157-5816-4802-850D-67A0C5423770&amp;displayLang=en
+            
+<p>Goal: Blackberry Express Server install: Windows 2003 with Exchange Server 2003 with BES 5 already installed</p>
+<h3 id="why-blackberry-express">Why Blackberry Express?</h3>
+<p>Well it's the core Blackberry experience (email + contacts + calendar) but only requires a data plan, not a special (expensive) Blackberry plan.</p>
+<p>The big item missing: Wireless activation is only available with BES dataplan.</p>
+<p><a href="http://crackberry.com/blackberry-101-lecture-2-bes-and-bis-whats-difference">http://crackberry.com/blackberry-101-lecture-2-bes-and-bis-whats-difference</a></p>
+<h3 id="the-dilemma-if-you-already-have-a-bes-installation-can-you-setup-a-besx-too">The dilemma, if you already have a BES installation, can you setup a BESX too?</h3>
+<p>"the two BES servers cannot be in the same BES Domain, but can be in the same AD tree and access the same exchange server."</p>
+<p>"provided BlackBerry Enterprise Server Express is introduced as a new deployment with its own BlackBerry domain, as defined by the BlackBerry configuration database... the BlackBerry Enterprise Server and BlackBerry Enterprise Server Express can run independently in the same Microsoft Exchange environment in a Microsoft Windows Domain and would be managed from separate BlackBerry Administration Service consoles."</p>
+<p>Apparently there is a difference between a BES Domain and a windows domain... </p>
+<p>Basically a BES Domain SHOULD only be the BES installation and Database, therefore you should be
+able to have multiple BES installations in the same Windows Domain (e.g. a large corporation with
+many exchange servers all in the same Windows Domain?).</p>
+<p>I will try it with my own twist - Not only a separate BESX installation on a windows 2003 server BUT also creating a separate BESADMIN for the new BESX installation.</p>
+<p><a href="http://supportforums.blackberry.com/t5/BlackBerry-Professional-Software/Installing-BESX-when-BES-5-exists/m-p/488112">http://supportforums.blackberry.com/t5/BlackBerry-Professional-Software/Installing-BESX-when-BES-5-exists/m-p/488112</a></p>
+<h3 id="windows-server-and-exchange-server-setup">Windows Server and Exchange Server Setup</h3>
+<ol>
+<li>
+<p>Setup a Windows 2003 Server SP2 in the Domain (exchange sys mgmr must match version to exchange server!)</p>
+<blockquote>
+<p>NEEDS at least 1GB RAM - but give it more if you suffer performance issues!</p>
+</blockquote>
+</li>
+<li>
+<p>Install Exchange 2003 SP2 System Manager (Requires Exchange Install CD -&gt; Deployment Tools)</p>
+<ul>
+<li>exch2k3\setup\i386\setup.exe =&gt; Action = Custom</li>
+<li>Action = Install (next to MS Exch System Management Tools) ... NEXT... 112MB required, NEXT</li>
+</ul>
+</li>
+<li>
+<p>Download and Install Exchange Service Pack 2 (E3SP2ENG.exe for an old Exchange 2k3 cd)  </p>
+<ul>
+<li><a href="http://www.microsoft.com/downloads/details.aspx?FamilyID=535bef85-3096-45f8-aa43-60f1f58b3c40&amp;displaylang=en">http://www.microsoft.com/downloads/details.aspx?FamilyID=535bef85-3096-45f8-aa43-60f1f58b3c40&amp;displaylang=en</a></li>
+<li>E3SP2ENG\setup\i386\update.exe (goes from version 6.5 to ? requiring 2 &amp; 13 MB space)</li>
+</ul>
+</li>
+<li>
+<p>Ensure TCP port 3101 (outgoing) is open on your firewall</p>
+</li>
+<li>Ensure your anti-spam is not blocking "blackberry.net"</li>
+</ol>
+<h3 id="permissions-for-a-service-account-for-blackberry-enterprise-server-for-microsoft-exchange">Permissions for a service account for BlackBerry Enterprise Server for Microsoft Exchange</h3>
+<p><a href="http://www.blackberry.com/btsc/viewContent.do?externalId=KB02276">http://www.blackberry.com/btsc/viewContent.do?externalId=KB02276</a></p>
+<ol>
+<li>
+<p>CREATE a user BESADMIN for the Domain (in Active Directory Users and Computers)  </p>
+<ul>
+<li>On the exchange server with the Mailbox enabled user creation <code>dsa.msc</code> -&gt; right click = new user</li>
+</ul>
+</li>
+<li>
+<p>PERMISSION SEND AS: On the domain, <code>dsa.msc</code></p>
+<ul>
+<li>From the Active Directory "View" option choose Advanced Features</li>
+</ul>
+</li>
+<li>
+<p>Right click on the root of the domain for Properties -&gt; Security -&gt; Advanced  </p>
+<ul>
+<li>Add BESADMIN and Apply Onto = User Objects (dropdown) , Allow = Send As (checkbox)</li>
+</ul>
+</li>
+<li>
+<p>Maybe? more secure: only right click on each OU or user that will be using Blackberry and<br/>
+give the BESADMIN "Send As" permission</p>
+</li>
+<li>
+<p>PERMISSIONS Exch 2k3 System Manager -&gt; Administrative Groups right click the Group for your BES  </p>
+<ul>
+<li>(e.g. First Administrative Group) -&gt; Delegate Control -&gt; Add  Browse -&gt; Role = Exchange View Only Administrator</li>
+</ul>
+</li>
+<li>
+<p>PERMISSIONS Exchange Server: Start -&gt; Programs -&gt; Microsoft Exchange -&gt; System Manager  </p>
+<p>Administrative Groups -&gt; First Administrative Group -&gt; Servers -&gt; right click SERVERNAME (properties) Security -&gt; find the BESADMIN and enable checkboxes:</p>
+<ul>
+<li>Administer Information Store</li>
+<li>Send As</li>
+<li>Receive As</li>
+</ul>
+<p>(Click on Advanced and ensure that "Allow inheritable permissions" is checked)</p>
+</li>
+<li>
+<p>PERMISSIONS Local Admin: each server that will have Blackberry Enterprise Server Express components</p>
+<ul>
+<li>My Computer right click -&gt; Manage -&gt; Local Users and Groups -&gt; Groups -&gt; Administrators  </li>
+<li>Add = BESADMIN</li>
+</ul>
+</li>
+<li>
+<p>My Computer right click -&gt; Properties -&gt; Remote -&gt; Enable Remote Desktop -&gt; Select RemoteDesktop Users =&gt; Add = BESADMIN</p>
+</li>
+<li>
+<p>PERMISSIONS Log on Locally and Log on as a Service  </p>
+<ul>
+<li>Start -&gt; Administrative Tools -&gt; Local Security Settings =&gt; Local Policies -&gt; User Rights Assignment</li>
+<li>double click Log on Locally &amp; Log on as a Service and add BESADMIN</li>
+</ul>
+</li>
+</ol>
+<h3 id="installing-blackberry-and-database">Installing Blackberry (and Database)</h3>
+<ol>
+<li>
+<p>BLACKBERRY warn that you need the Microsoft hotfixes 823343 and 894470 , <a href="http://support.microsoft.com/kb/823343">http://support.microsoft.com/kb/823343</a> , <a href="http://support.microsoft.com/kb/894470">http://support.microsoft.com/kb/894470</a></p>
+<blockquote>
+<p>Verify by c:\exchsvr\bin\cdo.dll 708KB right click Version 6.5.7232 or later</p>
+</blockquote>
+</li>
+<li>
+<p>REBOOT the server (ok, just an old habit)  </p>
+<ul>
+<li>Log in as the BESADMIN user  </li>
+<li><code>C:\Research In Motion\BlackBerry Enterprise Server 5.0.1\setup.exe</code></li>
+</ul>
+</li>
+<li>
+<p>Create a Blackberry Configuration Database (aka BES Domain?)  </p>
+</li>
+<li>Blackberry Enterprise Server with all components  </li>
+<li>preinstallation checklist will show you everything is ready (or will be auto installed)  </li>
+<li>Install MS SQL Server 2005 Express SP3</li>
+<li>
+<p>note that the extracted setup folder is very similar to the target install folder  </p>
+<ul>
+<li><code>C:\Research In Motion\BlackBerry Enterprise Server 5.0.1</code></li>
+<li><code>C:\Program Files\Research In Motion\BlackBerry Enterprise Server\</code></li>
+<li>enter BESADMIN password and the NAME of the Server where the SQL Express will be installed  </li>
+<li>(e.g. the name of the server you are installed Blackberry Express!)</li>
+</ul>
+</li>
+<li>
+<p>read the summary, click INSTALL ... watch and wait.</p>
+</li>
+<li>
+<p>You are prompted to restart the computer - do so and then log in again with the BESADMIN user.  </p>
+</li>
+<li>
+<p>Installation continues with the Database Information ... just click Next  </p>
+<ul>
+<li>The database BESMgmt doesn't exist, would you like to create it ... YES</li>
+</ul>
+</li>
+<li>
+<p>Enter Blackberry CAL Key e.g. besexp-123456-123456-123456-123456</p>
+<ul>
+<li>SRP Host name: gb.srp.blackberry.com and port number: 3101 were already provided  </li>
+<li>SRP identifier = (Serial Number from Blackberry download) S12345678</li>
+<li>SRP authentication key = (Licence Key from Blackberry download)</li>
+<li>1234-1234-1234-1234-1234-1234-1234-1234-1234-1234</li>
+</ul>
+<p>CLICK VERIFY BUTTON 1 AND BUTTON 2 (should be successful and valid! NEEDS dashes - inbetween!)</p>
+</li>
+<li>
+<p>Microsoft Exchange Server popup - type in the Exchange Server Name</p>
+</li>
+<li>
+<p>Administration Settings (already filled in by default) CLICK NEXT</p>
+<blockquote>
+<p>(no, I don't want to use SSL between the Blackberry Admin and my LAN browser)</p>
+</blockquote>
+</li>
+<li>
+<p>Type in the BESADMIN password and click NEXT</p>
+</li>
+<li>
+<p>Advanced Administration = leave as windows default click NEXT</p>
+</li>
+<li>
+<p>click Start Services button</p>
+<ul>
+<li>BlackBerry Router has successfully started.</li>
+<li>BlackBerry Attachment Service has successfully started.</li>
+<li>BlackBerry Dispatcher has successfully started.</li>
+<li>BlackBerry MDS Connection Service has successfully started.</li>
+<li>BlackBerry Alert has successfully started.</li>
+<li>BlackBerry Administration Service - NCC has successfully started.</li>
+<li>BlackBerry Administration Service - AS has successfully started.</li>
+<li>BlackBerry Controller has successfully started.</li>
+</ul>
+</li>
+<li>
+<p>Make a note of the Web Admin address(es)</p>
+<ul>
+<li><a href="https://SERVERNAME.DOMAIN.CO.LOCAL:3443/webconsole/login">https://SERVERNAME.DOMAIN.CO.LOCAL:3443/webconsole/login</a></li>
+<li><a href="https://SERVERNAME.DOMAIN.CO.LOCAL:3443/webdesktop/login">https://SERVERNAME.DOMAIN.CO.LOCAL:3443/webdesktop/login</a></li>
+</ul>
+</li>
+</ol>
+<h3 id="test-your-blackberry-express-installation">Test your Blackberry Express Installation</h3>
+<ol>
+<li>Locally on the Server you can check services.msc (all BB services started) and eventvwr.msc (no Blackberry errors)</li>
+<li>
+<p>Use a browser (IE8?) <a href="https://SERVERNAME.DOMAIN.CO.LOCAL:3443/webconsole/login">https://SERVERNAME.DOMAIN.CO.LOCAL:3443/webconsole/login</a></p>
+<ul>
+<li>(don't worry about the Browser "Security Alert" as it will be a self signed SSL certificate, you can install the certificate and add it to Trusted Sites too...)</li>
+<li>Install the RimWebComponents.cab</li>
+</ul>
+</li>
+<li>
+<p>Create a user (you just need their email address - user should only be on one BES Domain so not on BES 5 and BES X at the same time!)</p>
+</li>
+<li>Create User with an Activation Password (e.g. something simple that times out in 4 hours)</li>
+<li>Wait until it gives you the OK message that the user was created (and activation email sent)</li>
+</ol>
+<h3 id="assign-a-device-to-a-user">Assign a device to a User</h3>
+<p><a href="http://docs.blackberry.com/en/admin/deliverables/14334">http://docs.blackberry.com/en/admin/deliverables/14334</a></p>
+<ol>
+<li>
+<p>Using the Blackberry Administration Service (web)  <a href="https://SERVERNAME.DOMAIN.CO.LOCAL:3443/webconsole/login">https://SERVERNAME.DOMAIN.CO.LOCAL:3443/webconsole/login</a></p>
+<ul>
+<li>On the left there's a DEVICES area -&gt; Attached Devices (if it doesn't expand?)</li>
+<li>Connect the BlackBerry device to the computer.  </li>
+<li>Click Manage current device -&gt; Click Assign current device -&gt; Search for a user account</li>
+</ul>
+</li>
+<li>
+<p>Users can activate their BlackBerry devices by connecting them to computers using a USB cable or Bluetooth connection and logging in (with a browser) to the BlackBerry Web Desktop Manager.  </p>
+<ul>
+<li><a href="https://SERVERNAME.DOMAIN.CO.LOCAL:3443/webdesktop/login">https://SERVERNAME.DOMAIN.CO.LOCAL:3443/webdesktop/login</a></li>
+<li>When users complete the activation process, the BESX synchronizes through the BlackBerry Router.  </li>
+<li>If a connection to the BlackBerry Router is interrupted, the data transfer continues over the  wireless network.</li>
+</ul>
+</li>
+<li>
+<p>Blackberry Desktop Manager installed on a computer (and connected to their Outlook Profile)  </p>
+<ul>
+<li>Attach/Connect to a Device</li>
+</ul>
+</li>
+<li>
+<p>Not likely to be enabled but theoretically after sending the Activation Password the BlackBerry Enterprise Server sends an email message with an etp.dat</p>
+<ul>
+<li>On the Device choose Options -&gt; Advanced Options -&gt; Enterprise Activation</li>
+<li>"Activation request failed. A service connection is unvailable"</li>
+</ul>
+</li>
+</ol>
+<h3 id="tips">Tips</h3>
+<ol>
+<li>
+<p>Setup a default Password requirement</p>
+<ul>
+<li>Policy -&gt; Manage IT Policies -&gt; Edit IT Policy (default) -&gt; Device Only Tab</li>
+</ul>
+</li>
+<li>
+<p>Increase the default synchronization of messages when activating</p>
+<ul>
+<li>Servers and components -&gt; BlackBerry Solution topology -&gt; BlackBerry Domain -&gt; Component view -&gt; Email</li>
+<li>Click on the "instance" (e.g. computername_EMAIL) -&gt; click on Messaging tab  </li>
+<li>Scroll down and click on "Edit Instance"</li>
+<li>Change Message prepopulation settings to 14 days and 750 messages  </li>
+<li>scroll down and click SAVE ALL</li>
+</ul>
+</li>
+</ol>
+<h3 id="useless-steps-from-blackberry">Useless Steps from Blackberry</h3>
+<p><strong>Install SQL Express Service Pack 3 (already included in the Blackberry Express Install!)</strong></p>
+<div class="highlight"><pre>- &lt;http://www.microsoft.com/downloads/details.aspx?FamilyID=3181842a-4090-4431-acdd-9a1c832e65a6&amp;displaylang=en&gt;
+- OTHERWISE theoretically you could re-use an existing SQL database (maybe with old Blackberry data?)
+- Install CDO support (for Exch 2010) &lt;http://support.microsoft.com/kb/917481&gt;
+- Microsoft Exchange Server MAPI Client and Collaboration Data Objects 1.2.1  
+- &lt;http://www.microsoft.com/downloads/details.aspx?FamilyID=4825F157-5816-4802-850D-67A0C5423770&amp;displayLang=en&gt;
+</pre></div>
+<p><strong>TEST your BESADMIN account access to User Accounts</strong></p>
+<div class="highlight"><pre>- double click on the self extracting BESX_express_5.0.1.exe but DO NOT run setup.exe)
+- `C:\Research In Motion\BlackBerry Enterprise Server 5.0.1\tools\IEMSTest.exe`
+- The setup application configures the startup type for the BlackBerry Mail Store Service, BlackBerry Policy Service, and BlackBerry Synchronization Service to manual.
+- You cannot activate a BlackBerry device that is associated with the BlackBerry Internet Service over  the wireless network or over wifi.
 </pre></div>
             <aside>
             <hr/>
@@ -639,7 +379,25 @@ http://www.microsoft.com/downloads/details.aspx?FamilyID=4825F157-5816-4802-850D
             <h4>Published</h4>
             <time pubdate="pubdate" datetime="2010-05-03T13:41:00-07:00">May 3, 2010</time>
             <h4>Category</h4>
-            <a class="category-link" href="/categories.html#linux-ref">linux</a> 
+            <a class="category-link" href="/categories.html#it-ref">it</a> 
+            <h4>Tags</h4>
+            <ul class="list-of-tags tags-in-article"> 
+                <li><a href="/tags.html#bes-ref">bes
+                    <span>1</span>
+</a></li>
+                <li><a href="/tags.html#besx-ref">besx
+                    <span>1</span>
+</a></li>
+                <li><a href="/tags.html#blackberry-ref">blackberry
+                    <span>1</span>
+</a></li>
+                <li><a href="/tags.html#exchange-server-2003-ref">exchange server 2003
+                    <span>1</span>
+</a></li>
+                <li><a href="/tags.html#windows-server-ref">windows server
+                    <span>1</span>
+</a></li>
+            </ul>
 
         </div>
         </section>
