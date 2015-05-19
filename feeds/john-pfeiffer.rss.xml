@@ -3021,329 +3021,148 @@ original page but have strange interactions for a .txt file...&lt;/p&gt;
 &lt;li&gt;Add any further subdomain redirects (e.g. www.example1.com) by repeating steps 1 and 2&lt;/li&gt;
 &lt;/ol&gt;
 &lt;h3 id="more-info"&gt;more info&lt;/h3&gt;
-&lt;p&gt;&lt;a href="http://docs.aws.amazon.com/AmazonS3/latest/dev/how-to-page-redirect.html"&gt;http://docs.aws.amazon.com/AmazonS3/latest/dev/how-to-page-redirect.html&lt;/a&gt;&lt;/p&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">john pfeiffer</dc:creator><pubDate>Fri, 13 Apr 2012 23:57:00 -0700</pubDate><guid>tag:blog.john-pfeiffer.com,2012-04-13:content/amazon-s3-bucket-html-redirect</guid><category>Amazon</category><category>S3</category><category>redirect</category></item><item><title>Self configuration tests for scalability</title><link>http://blog.john-pfeiffer.com/self-configuration-tests-for-scalability</link><description>&lt;div class="field field-name-body field-type-text-with-summary field-label-hidden"&gt;
-&lt;div class="field-items"&gt;
-&lt;div class="field-item even"&gt;
-Goal: Customers (Users = system admins) able to self verify
-configuration.
-
-\1. Used the Java API to quickly prototype a solution and exported a
-runnable .jar file  
-
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
-
-import com.emc.esu.api.EsuApi;  
-
-import com.emc.esu.api.rest.EsuRestApi;  
-
-import com.emc.esu.api.EsuException;  
-
-import com.emc.esu.api.ObjectId;  
-
-import com.emc.esu.api.ObjectInfo;  
-
-import org.apache.log4j.Level;  
-
-import org.apache.log4j.Logger;  
-
-import org.apache.log4j.ConsoleAppender;  
-
-import org.apache.log4j.PatternLayout;
-
-&lt;/p&gt;
-
-public class AtmosConnect  
-
-{  
-
-static Logger rootLogger = Logger.getRootLogger();  
-
-public static void main( String[] args )  
-
-{  
-
-if( !rootLogger.getAllAppenders().hasMoreElements() )  
-
-{ rootLogger.setLevel( Level.INFO );  
-
-rootLogger.addAppender( new ConsoleAppender( new
-PatternLayout(PatternLayout.TTCC\_CONVERSION\_PATTERN ) ) );  
-
-rootLogger.info("Entering application");  
-
-}
-
-&lt;/p&gt;
-
-if( args.length != 4 )  
-
-{ System.out.println( args.length + " does not equal the 4 required
-arguments.");  
-
-System.out.println( "version 0.1: java -jar AtmosConnect.jar HOST PORT
-SUBTENANTID/UID SECRETKEY" );  
-
-System.exit( 1 );  
-
-}
-
-&lt;/p&gt;
-
-String HOST = args[0];  
-
-int PORT = Integer.parseInt( args[1] );  
-
-String FULLTOKENID = args[2];  
-
-String SECRETKEY = args[3];
-
-&lt;/p&gt;
-
-displayConnectionCredentials( HOST , PORT , FULLTOKENID , SECRETKEY );  
-
-EsuApi myEsuAPI = null;  
-
-try{ myEsuAPI = new EsuRestApi( HOST, PORT, FULLTOKENID, SECRETKEY );  
-
-}catch( EsuException e )  
-
-{ System.out.println( "EsuRestApi Constructor failed.");  
-
-System.out.println( e.getMessage() );  
-
-e.printStackTrace();  
-
-}
-
-&lt;/p&gt;
-
-ObjectId myObjectId = null;  
-
-myObjectId = createAtmosObject( myObjectId , myEsuAPI );  
-
-displayAtmosObject( myObjectId , myEsuAPI );  
-
-deleteAtmosObject( myObjectId , myEsuAPI );
-
-&lt;/p&gt;
-
-rootLogger.info("Application Successful");  
-
-} // end main()
-
-&lt;/p&gt;
-
-private static void displayConnectionCredentials( String HOST , int PORT
-, String FULLTOKENID , String SECRETKEY )  
-
-{  
-
-System.out.println( "Connecting to Host: " + HOST );  
-
-System.out.println( "Connecting on Port: " + PORT );  
-
-System.out.println( "Full Token ID: " + FULLTOKENID );  
-
-System.out.println( "Secret Key: \*\*\*\*\*\*\*\*\*\*\*\*\*\*" );  
-
-//System.out.println( "Secret Key: " + SECRETKEY );  
-
-}
-
-&lt;/p&gt;
-
-private static ObjectId createAtmosObject( ObjectId myObjectId , EsuApi
-myEsuAPI )  
-
-{  
-
-try  
-
-{ myObjectId = myEsuAPI.createObject( null, null,
-null,"application/octet-stream");  
-
-System.out.println( "Created object: " + myObjectId.toString() );  
-
-} catch( Exception e )  
-
-{  
-
-System.out.println("Create Object failed.");  
-
-System.out.println( e );  
-
-//e.printStackTrace();  
-
-// JUnit Tests: Invalid Host, Port, SubtenantID, UID, Shared Secret,
-etc.  
-
-}  
-
-return myObjectId;  
-
-}
-
-&lt;/p&gt;
-
-private static void displayAtmosObject( ObjectId myObjectId , EsuApi
-myEsuAPI )  
-
-{  
-
-ObjectInfo myObjectInfo = null;  
-
-myObjectInfo = myEsuAPI.getObjectInfo( myObjectId );  
-
-//System.out.println( "ObjectInfo: " + myObjectInfo.toString() );  
-
-//System.out.println( "ObjectInfo as XML: " + myObjectInfo.getRawXml()
-);  
-
-}
-
-&lt;/p&gt;
-
-private static void deleteAtmosObject( ObjectId myObjectId , EsuApi
-myEsuAPI )  
-
-{  
-
-try  
-
-{ System.out.println( "Trying to delete Server Object: " +
-myObjectId.toString() );  
-
-myEsuAPI.deleteObject( myObjectId );  
-
-System.out.println("Test Object deleted on Server: " +
-myObjectId.toString() );  
-
-} catch(Exception e)  
-
-{ System.out.println("Delete Object " + myObjectId.toString() + " failed
-" + e);  
-
-//e.printStackTrace();  
-
-}  
-
-}  
-
-} // end class
-
-&lt;/p&gt;
-
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
-
-\2. Verify bash commands that will help extract the configuration:  
-
-/bin/grep -i 'emcIpAddress='
-/var/lib/tomcat6/webapps/storagegateway/WEB-INF/app.properties | cut -f
-2 -d '='
-
-&lt;/p&gt;
-
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
-
-\3. Modify the perl console menu script
-
-&lt;/p&gt;
-
-start on stopped rc RUNLEVEL=[2345]  
-
+&lt;p&gt;&lt;a href="http://docs.aws.amazon.com/AmazonS3/latest/dev/how-to-page-redirect.html"&gt;http://docs.aws.amazon.com/AmazonS3/latest/dev/how-to-page-redirect.html&lt;/a&gt;&lt;/p&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">john pfeiffer</dc:creator><pubDate>Fri, 13 Apr 2012 23:57:00 -0700</pubDate><guid>tag:blog.john-pfeiffer.com,2012-04-13:content/amazon-s3-bucket-html-redirect</guid><category>Amazon</category><category>S3</category><category>redirect</category></item><item><title>Self configuration tests for scalability</title><link>http://blog.john-pfeiffer.com/self-configuration-tests-for-scalability</link><description>
+&lt;p&gt;Goal: Customers (Users = system admins) able to self verify configuration.&lt;/p&gt;
+&lt;p&gt;The more a user can self verify with software, the less support required per customer deployment.&lt;/p&gt;
+&lt;p&gt;I used the Java API to quickly prototype a solution and exported a runnable .jar file...&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://code.google.com/p/atmos-java/"&gt;https://code.google.com/p/atmos-java/&lt;/a&gt;&lt;/p&gt;
+&lt;h3 id="java-source-code-for-a-configuration-validation"&gt;Java source code for a configuration validation&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;com.emc.esu.api.EsuApi&lt;/span&gt;&lt;span class="o"&gt;;&lt;/span&gt;
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;com.emc.esu.api.rest.EsuRestApi&lt;/span&gt;&lt;span class="o"&gt;;&lt;/span&gt;
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;com.emc.esu.api.EsuException&lt;/span&gt;&lt;span class="o"&gt;;&lt;/span&gt;
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;com.emc.esu.api.ObjectId&lt;/span&gt;&lt;span class="o"&gt;;&lt;/span&gt;
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;com.emc.esu.api.ObjectInfo&lt;/span&gt;&lt;span class="o"&gt;;&lt;/span&gt;
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;org.apache.log4j.Level&lt;/span&gt;&lt;span class="o"&gt;;&lt;/span&gt;
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;org.apache.log4j.Logger&lt;/span&gt;&lt;span class="o"&gt;;&lt;/span&gt;
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;org.apache.log4j.ConsoleAppender&lt;/span&gt;&lt;span class="o"&gt;;&lt;/span&gt;
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;org.apache.log4j.PatternLayout&lt;/span&gt;&lt;span class="o"&gt;;&lt;/span&gt;
+
+&lt;span class="kd"&gt;public&lt;/span&gt; &lt;span class="kd"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;AtmosConnect&lt;/span&gt;
+&lt;span class="o"&gt;{&lt;/span&gt;
+    &lt;span class="kd"&gt;static&lt;/span&gt; &lt;span class="n"&gt;Logger&lt;/span&gt; &lt;span class="n"&gt;rootLogger&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;Logger&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;getRootLogger&lt;/span&gt;&lt;span class="o"&gt;();&lt;/span&gt;
+    &lt;span class="kd"&gt;public&lt;/span&gt; &lt;span class="kd"&gt;static&lt;/span&gt; &lt;span class="kt"&gt;void&lt;/span&gt; &lt;span class="nf"&gt;main&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt; &lt;span class="n"&gt;String&lt;/span&gt;&lt;span class="o"&gt;[]&lt;/span&gt; &lt;span class="n"&gt;args&lt;/span&gt; &lt;span class="o"&gt;)&lt;/span&gt;
+    &lt;span class="o"&gt;{&lt;/span&gt;
+        &lt;span class="k"&gt;if&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt; &lt;span class="o"&gt;!&lt;/span&gt;&lt;span class="n"&gt;rootLogger&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;getAllAppenders&lt;/span&gt;&lt;span class="o"&gt;().&lt;/span&gt;&lt;span class="na"&gt;hasMoreElements&lt;/span&gt;&lt;span class="o"&gt;()&lt;/span&gt; &lt;span class="o"&gt;)&lt;/span&gt;
+        &lt;span class="o"&gt;{&lt;/span&gt;   &lt;span class="n"&gt;rootLogger&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;setLevel&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt; &lt;span class="n"&gt;Level&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;INFO&lt;/span&gt; &lt;span class="o"&gt;);&lt;/span&gt;
+            &lt;span class="n"&gt;rootLogger&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;addAppender&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt; &lt;span class="k"&gt;new&lt;/span&gt; &lt;span class="n"&gt;ConsoleAppender&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt; &lt;span class="k"&gt;new&lt;/span&gt; &lt;span class="n"&gt;PatternLayout&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;PatternLayout&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;TTCC_CONVERSION_PATTERN&lt;/span&gt; &lt;span class="o"&gt;)&lt;/span&gt; &lt;span class="o"&gt;)&lt;/span&gt; &lt;span class="o"&gt;);&lt;/span&gt;
+            &lt;span class="n"&gt;rootLogger&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;info&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="s"&gt;"Entering application"&lt;/span&gt;&lt;span class="o"&gt;);&lt;/span&gt;
+        &lt;span class="o"&gt;}&lt;/span&gt;
+
+        &lt;span class="k"&gt;if&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt; &lt;span class="n"&gt;args&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;length&lt;/span&gt; &lt;span class="o"&gt;!=&lt;/span&gt; &lt;span class="mi"&gt;4&lt;/span&gt; &lt;span class="o"&gt;)&lt;/span&gt;
+        &lt;span class="o"&gt;{&lt;/span&gt;   &lt;span class="n"&gt;System&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;out&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;println&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt; &lt;span class="n"&gt;args&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;length&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="s"&gt;" does not equal the 4 required arguments."&lt;/span&gt;&lt;span class="o"&gt;);&lt;/span&gt;
+            &lt;span class="n"&gt;System&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;out&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;println&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt; &lt;span class="s"&gt;"version 0.1: java -jar AtmosConnect.jar HOST PORT SUBTENANTID/UID SECRETKEY"&lt;/span&gt; &lt;span class="o"&gt;);&lt;/span&gt;
+            &lt;span class="n"&gt;System&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;exit&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt; &lt;span class="o"&gt;);&lt;/span&gt;
+        &lt;span class="o"&gt;}&lt;/span&gt;
+
+        &lt;span class="n"&gt;String&lt;/span&gt; &lt;span class="n"&gt;HOST&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;args&lt;/span&gt;&lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="o"&gt;];&lt;/span&gt;
+        &lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="n"&gt;PORT&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;Integer&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;parseInt&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt; &lt;span class="n"&gt;args&lt;/span&gt;&lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="o"&gt;]&lt;/span&gt; &lt;span class="o"&gt;);&lt;/span&gt;
+        &lt;span class="n"&gt;String&lt;/span&gt; &lt;span class="n"&gt;FULLTOKENID&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;args&lt;/span&gt;&lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="o"&gt;];&lt;/span&gt;
+        &lt;span class="n"&gt;String&lt;/span&gt; &lt;span class="n"&gt;SECRETKEY&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;args&lt;/span&gt;&lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="o"&gt;];&lt;/span&gt;
+
+        &lt;span class="n"&gt;displayConnectionCredentials&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt; &lt;span class="n"&gt;HOST&lt;/span&gt; &lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="n"&gt;PORT&lt;/span&gt; &lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="n"&gt;FULLTOKENID&lt;/span&gt; &lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="n"&gt;SECRETKEY&lt;/span&gt; &lt;span class="o"&gt;);&lt;/span&gt;
+        &lt;span class="n"&gt;EsuApi&lt;/span&gt; &lt;span class="n"&gt;myEsuAPI&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="kc"&gt;null&lt;/span&gt;&lt;span class="o"&gt;;&lt;/span&gt;
+        &lt;span class="k"&gt;try&lt;/span&gt;&lt;span class="o"&gt;{&lt;/span&gt;        &lt;span class="n"&gt;myEsuAPI&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="k"&gt;new&lt;/span&gt; &lt;span class="n"&gt;EsuRestApi&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt; &lt;span class="n"&gt;HOST&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="n"&gt;PORT&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="n"&gt;FULLTOKENID&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="n"&gt;SECRETKEY&lt;/span&gt; &lt;span class="o"&gt;);&lt;/span&gt;
+        &lt;span class="o"&gt;}&lt;/span&gt;&lt;span class="k"&gt;catch&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt; &lt;span class="n"&gt;EsuException&lt;/span&gt; &lt;span class="n"&gt;e&lt;/span&gt; &lt;span class="o"&gt;)&lt;/span&gt;
+        &lt;span class="o"&gt;{&lt;/span&gt;   &lt;span class="n"&gt;System&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;out&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;println&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt; &lt;span class="s"&gt;"EsuRestApi Constructor failed."&lt;/span&gt;&lt;span class="o"&gt;);&lt;/span&gt;
+            &lt;span class="n"&gt;System&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;out&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;println&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt; &lt;span class="n"&gt;e&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;getMessage&lt;/span&gt;&lt;span class="o"&gt;()&lt;/span&gt; &lt;span class="o"&gt;);&lt;/span&gt;
+            &lt;span class="n"&gt;e&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;printStackTrace&lt;/span&gt;&lt;span class="o"&gt;();&lt;/span&gt;
+        &lt;span class="o"&gt;}&lt;/span&gt;
+
+        &lt;span class="n"&gt;ObjectId&lt;/span&gt; &lt;span class="n"&gt;myObjectId&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="kc"&gt;null&lt;/span&gt;&lt;span class="o"&gt;;&lt;/span&gt;
+        &lt;span class="n"&gt;myObjectId&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;createAtmosObject&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt; &lt;span class="n"&gt;myObjectId&lt;/span&gt; &lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="n"&gt;myEsuAPI&lt;/span&gt; &lt;span class="o"&gt;);&lt;/span&gt;
+        &lt;span class="n"&gt;displayAtmosObject&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt; &lt;span class="n"&gt;myObjectId&lt;/span&gt; &lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="n"&gt;myEsuAPI&lt;/span&gt; &lt;span class="o"&gt;);&lt;/span&gt;
+        &lt;span class="n"&gt;deleteAtmosObject&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt; &lt;span class="n"&gt;myObjectId&lt;/span&gt; &lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="n"&gt;myEsuAPI&lt;/span&gt; &lt;span class="o"&gt;);&lt;/span&gt;
+
+        &lt;span class="n"&gt;rootLogger&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;info&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="s"&gt;"Application Successful"&lt;/span&gt;&lt;span class="o"&gt;);&lt;/span&gt;
+    &lt;span class="o"&gt;}&lt;/span&gt; &lt;span class="c1"&gt;// end main()&lt;/span&gt;
+
+    &lt;span class="kd"&gt;private&lt;/span&gt; &lt;span class="kd"&gt;static&lt;/span&gt; &lt;span class="kt"&gt;void&lt;/span&gt; &lt;span class="nf"&gt;displayConnectionCredentials&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt; &lt;span class="n"&gt;String&lt;/span&gt; &lt;span class="n"&gt;HOST&lt;/span&gt; &lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="n"&gt;PORT&lt;/span&gt; &lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="n"&gt;String&lt;/span&gt; &lt;span class="n"&gt;FULLTOKENID&lt;/span&gt; &lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="n"&gt;String&lt;/span&gt; &lt;span class="n"&gt;SECRETKEY&lt;/span&gt; &lt;span class="o"&gt;)&lt;/span&gt;
+    &lt;span class="o"&gt;{&lt;/span&gt;
+        &lt;span class="n"&gt;System&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;out&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;println&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt; &lt;span class="s"&gt;"Connecting to Host: "&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;HOST&lt;/span&gt; &lt;span class="o"&gt;);&lt;/span&gt;
+        &lt;span class="n"&gt;System&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;out&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;println&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt; &lt;span class="s"&gt;"Connecting on Port: "&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;PORT&lt;/span&gt; &lt;span class="o"&gt;);&lt;/span&gt;
+        &lt;span class="n"&gt;System&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;out&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;println&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt; &lt;span class="s"&gt;"Full Token ID: "&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;FULLTOKENID&lt;/span&gt; &lt;span class="o"&gt;);&lt;/span&gt;
+        &lt;span class="n"&gt;System&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;out&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;println&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt; &lt;span class="s"&gt;"Secret Key: **************"&lt;/span&gt; &lt;span class="o"&gt;);&lt;/span&gt;
+        &lt;span class="c1"&gt;//System.out.println( "Secret Key: " + SECRETKEY );&lt;/span&gt;
+    &lt;span class="o"&gt;}&lt;/span&gt;
+
+    &lt;span class="kd"&gt;private&lt;/span&gt; &lt;span class="kd"&gt;static&lt;/span&gt; &lt;span class="n"&gt;ObjectId&lt;/span&gt; &lt;span class="nf"&gt;createAtmosObject&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt; &lt;span class="n"&gt;ObjectId&lt;/span&gt; &lt;span class="n"&gt;myObjectId&lt;/span&gt; &lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="n"&gt;EsuApi&lt;/span&gt; &lt;span class="n"&gt;myEsuAPI&lt;/span&gt; &lt;span class="o"&gt;)&lt;/span&gt;
+    &lt;span class="o"&gt;{&lt;/span&gt;
+        &lt;span class="k"&gt;try&lt;/span&gt;
+        &lt;span class="o"&gt;{&lt;/span&gt;   &lt;span class="n"&gt;myObjectId&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;myEsuAPI&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;createObject&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt; &lt;span class="kc"&gt;null&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="kc"&gt;null&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="kc"&gt;null&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;&lt;span class="s"&gt;"application/octet-stream"&lt;/span&gt;&lt;span class="o"&gt;);&lt;/span&gt;
+            &lt;span class="n"&gt;System&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;out&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;println&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt; &lt;span class="s"&gt;"Created object: "&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;myObjectId&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;toString&lt;/span&gt;&lt;span class="o"&gt;()&lt;/span&gt; &lt;span class="o"&gt;);&lt;/span&gt;
+        &lt;span class="o"&gt;}&lt;/span&gt; &lt;span class="k"&gt;catch&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt; &lt;span class="n"&gt;Exception&lt;/span&gt; &lt;span class="n"&gt;e&lt;/span&gt; &lt;span class="o"&gt;)&lt;/span&gt;
+        &lt;span class="o"&gt;{&lt;/span&gt;
+            &lt;span class="n"&gt;System&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;out&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;println&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="s"&gt;"Create Object failed."&lt;/span&gt;&lt;span class="o"&gt;);&lt;/span&gt;
+            &lt;span class="n"&gt;System&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;out&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;println&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt; &lt;span class="n"&gt;e&lt;/span&gt; &lt;span class="o"&gt;);&lt;/span&gt;
+            &lt;span class="c1"&gt;//e.printStackTrace();&lt;/span&gt;
+            &lt;span class="c1"&gt;// JUnit Tests: Invalid Host, Port, SubtenantID, UID, Shared Secret, etc.&lt;/span&gt;
+        &lt;span class="o"&gt;}&lt;/span&gt;
+        &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;myObjectId&lt;/span&gt;&lt;span class="o"&gt;;&lt;/span&gt;
+    &lt;span class="o"&gt;}&lt;/span&gt;
+
+    &lt;span class="kd"&gt;private&lt;/span&gt; &lt;span class="kd"&gt;static&lt;/span&gt; &lt;span class="kt"&gt;void&lt;/span&gt; &lt;span class="nf"&gt;displayAtmosObject&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt; &lt;span class="n"&gt;ObjectId&lt;/span&gt; &lt;span class="n"&gt;myObjectId&lt;/span&gt; &lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="n"&gt;EsuApi&lt;/span&gt; &lt;span class="n"&gt;myEsuAPI&lt;/span&gt; &lt;span class="o"&gt;)&lt;/span&gt;
+    &lt;span class="o"&gt;{&lt;/span&gt;   &lt;span class="n"&gt;ObjectInfo&lt;/span&gt; &lt;span class="n"&gt;myObjectInfo&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="kc"&gt;null&lt;/span&gt;&lt;span class="o"&gt;;&lt;/span&gt;
+        &lt;span class="n"&gt;myObjectInfo&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;myEsuAPI&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;getObjectInfo&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt; &lt;span class="n"&gt;myObjectId&lt;/span&gt; &lt;span class="o"&gt;);&lt;/span&gt;
+        &lt;span class="c1"&gt;//System.out.println( "ObjectInfo: " + myObjectInfo.toString() );&lt;/span&gt;
+        &lt;span class="c1"&gt;//System.out.println( "ObjectInfo as XML: " + myObjectInfo.getRawXml() );&lt;/span&gt;
+    &lt;span class="o"&gt;}&lt;/span&gt;
+
+    &lt;span class="kd"&gt;private&lt;/span&gt; &lt;span class="kd"&gt;static&lt;/span&gt; &lt;span class="kt"&gt;void&lt;/span&gt; &lt;span class="nf"&gt;deleteAtmosObject&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt; &lt;span class="n"&gt;ObjectId&lt;/span&gt; &lt;span class="n"&gt;myObjectId&lt;/span&gt; &lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="n"&gt;EsuApi&lt;/span&gt; &lt;span class="n"&gt;myEsuAPI&lt;/span&gt; &lt;span class="o"&gt;)&lt;/span&gt;
+    &lt;span class="o"&gt;{&lt;/span&gt;
+        &lt;span class="k"&gt;try&lt;/span&gt;
+        &lt;span class="o"&gt;{&lt;/span&gt;   
+            &lt;span class="n"&gt;System&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;out&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;println&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt; &lt;span class="s"&gt;"Trying to delete Server Object: "&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;myObjectId&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;toString&lt;/span&gt;&lt;span class="o"&gt;()&lt;/span&gt; &lt;span class="o"&gt;);&lt;/span&gt;
+            &lt;span class="n"&gt;myEsuAPI&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;deleteObject&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt; &lt;span class="n"&gt;myObjectId&lt;/span&gt; &lt;span class="o"&gt;);&lt;/span&gt;
+            &lt;span class="n"&gt;System&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;out&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;println&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="s"&gt;"Test Object deleted on Server: "&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;myObjectId&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;toString&lt;/span&gt;&lt;span class="o"&gt;()&lt;/span&gt; &lt;span class="o"&gt;);&lt;/span&gt;
+        &lt;span class="o"&gt;}&lt;/span&gt; &lt;span class="k"&gt;catch&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;Exception&lt;/span&gt; &lt;span class="n"&gt;e&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
+        &lt;span class="o"&gt;{&lt;/span&gt;   &lt;span class="n"&gt;System&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;out&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;println&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="s"&gt;"Delete Object "&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;myObjectId&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;toString&lt;/span&gt;&lt;span class="o"&gt;()&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="s"&gt;" failed "&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;e&lt;/span&gt;&lt;span class="o"&gt;);&lt;/span&gt;
+            &lt;span class="c1"&gt;//e.printStackTrace();&lt;/span&gt;
+        &lt;span class="o"&gt;}&lt;/span&gt;
+    &lt;span class="o"&gt;}&lt;/span&gt;
+&lt;span class="o"&gt;}&lt;/span&gt; &lt;span class="c1"&gt;// end class&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;hr/&gt;
+&lt;h3 id="verify-the-bash-commands"&gt;Verify the bash commands&lt;/h3&gt;
+&lt;p&gt;Verify bash commands that will help extract the configuration:  &lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;/bin/grep -i 'emcIpAddress=' /var/lib/tomcat6/webapps/storagegateway/WEB-INF/app.properties | cut -f 2 -d '='
+&lt;/pre&gt;&lt;/div&gt;
+&lt;h3 id="modify-the-perl-console-menu-script"&gt;Modify the perl console menu script&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;start on stopped rc RUNLEVEL=[2345]  
 stop on runlevel [!2345]
 
-&lt;/p&gt;
-
-respawn  
+respawn
 
 exec /sbin/getty -n -l /etc/init.d/CONSOLEMENU.pl 38400 tty1
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;&lt;code&gt;sudo vi /etc/init.d/CONSOLEMENU.pl&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="k"&gt;sub &lt;/span&gt;&lt;span class="nf"&gt;testatmosconnect&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+&lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="nb"&gt;system&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;"clear"&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+    &lt;span class="k"&gt;my&lt;/span&gt; &lt;span class="nv"&gt;$sourcefilename&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s"&gt;"/var/lib/tomcat6/webapps/storagegateway/WEB-INF/app.properties"&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="k"&gt;my&lt;/span&gt; &lt;span class="nv"&gt;$applicationfilename&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s"&gt;"/var/lib/tomcat6/oxygen-storagegateway/atmosconnect.jar"&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
 
-&lt;/p&gt;
+    &lt;span class="k"&gt;if&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;e&lt;/span&gt; &lt;span class="nv"&gt;$sourcefilename&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="ow"&gt;and&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;e&lt;/span&gt; &lt;span class="nv"&gt;$applicationfilename&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="k"&gt;my&lt;/span&gt; &lt;span class="nv"&gt;$emcipaddress&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="sx"&gt;qx( /bin/grep -i 'emcIpAddress=' $sourcefilename | cut -f 2 -d '=' )&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+        &lt;span class="nb"&gt;chomp&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="nv"&gt;$emcipaddress&lt;/span&gt; &lt;span class="p"&gt;);&lt;/span&gt;
+        &lt;span class="k"&gt;my&lt;/span&gt; &lt;span class="nv"&gt;$emcportnumber&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="sx"&gt;qx( /bin/grep -i 'emcPortNumber=' $sourcefilename | cut -f 2 -d '=' )&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+        &lt;span class="nb"&gt;chomp&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="nv"&gt;$emcportnumber&lt;/span&gt; &lt;span class="p"&gt;);&lt;/span&gt;
+        &lt;span class="k"&gt;my&lt;/span&gt; &lt;span class="nv"&gt;$emcuid&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="sx"&gt;qx( /bin/grep -i 'emcUid=' $sourcefilename | cut -f 2 -d '=' )&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+        &lt;span class="nb"&gt;chomp&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="nv"&gt;$emcuid&lt;/span&gt; &lt;span class="p"&gt;);&lt;/span&gt;
+        &lt;span class="k"&gt;my&lt;/span&gt; &lt;span class="nv"&gt;$emcsharedsecret&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="sx"&gt;qx( /bin/grep -i 'emcSharedSecret=' $sourcefilename | cut -f 2 -d '=' )&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+        &lt;span class="nb"&gt;chomp&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="nv"&gt;$emcsharedsecret&lt;/span&gt; &lt;span class="p"&gt;);&lt;/span&gt;
 
-sudo vi /etc/init.d/CONSOLEMENU.pl
+        &lt;span class="k"&gt;my&lt;/span&gt; &lt;span class="nv"&gt;@status&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="sx"&gt;qx( /usr/bin/java -jar $applicationfilename $emcipaddress $emcportnumber $emcuid $emcsharedsecret )&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
 
-&lt;/p&gt;
-
-sub testatmosconnect()  
-
-{  
-
-system("clear");  
-
-my $sourcefilename =
-"/var/lib/tomcat6/webapps/storagegateway/WEB-INF/app.properties";  
-
-my $applicationfilename =
-"/var/lib/tomcat6/oxygen-storagegateway/atmosconnect.jar";
-
-&lt;/p&gt;
-
-if( (-e $sourcefilename) and (-e $applicationfilename) )  
-
-{  
-
-my $emcipaddress = qx( /bin/grep -i 'emcIpAddress=' $sourcefilename |
-cut -f 2 -d '=' );  
-
-chomp( $emcipaddress );  
-
-my $emcportnumber = qx( /bin/grep -i 'emcPortNumber=' $sourcefilename |
-cut -f 2 -d '=' );  
-
-chomp( $emcportnumber );  
-
-my $emcuid = qx( /bin/grep -i 'emcUid=' $sourcefilename | cut -f 2 -d
-'=' );  
-
-chomp( $emcuid );  
-
-my $emcsharedsecret = qx( /bin/grep -i 'emcSharedSecret='
-$sourcefilename | cut -f 2 -d '=' );  
-
-chomp( $emcsharedsecret );
-
-&lt;/p&gt;
-
-my @status = qx( /usr/bin/java -jar $applicationfilename $emcipaddress
-$emcportnumber $emcuid $emcsharedsecret );
-
-&lt;/p&gt;
-
-print "@status\\n";  
-
-}else  
-
-{ print "$sourcefilename or $applicationfilename does not exist.\\n";  
-
-}  
-
-} \# end atmosconnect()
-
-&lt;/p&gt;
-
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
-
-\4. User can self test if they've misconfigured the VM or there's
-missing conf files/app, etc. SUCCESS!
-
-&lt;/p&gt;
-
-\5. further unit and system tests, debug, refactor
-
-&lt;/p&gt;
-&lt;p&gt;
-&lt;/div&gt;
-
-&lt;p&gt;&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class="field field-name-taxonomy-vocabulary-1 field-type-taxonomy-term-reference field-label-above clearfix"&gt;&lt;/p&gt;
-&lt;h3 id="tags"&gt;tags:&lt;/h3&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;a href="http://john-pfeiffer.com/category/tags/programming"&gt;Programming&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;&lt;/div&gt;
-&lt;/p&gt;&lt;/p&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">John Pfeiffer</dc:creator><pubDate>Mon, 12 Mar 2012 02:42:00 -0700</pubDate><guid>tag:blog.john-pfeiffer.com,2012-03-12:self-configuration-tests-for-scalability</guid></item><item><title>Technology Careers (part 1)</title><link>http://blog.john-pfeiffer.com/technology-careers-part-1</link><description>
+        &lt;span class="k"&gt;print&lt;/span&gt; &lt;span class="s"&gt;"@status\n"&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="k"&gt;else&lt;/span&gt;
+    &lt;span class="p"&gt;{&lt;/span&gt;   &lt;span class="k"&gt;print&lt;/span&gt; &lt;span class="s"&gt;"$sourcefilename or $applicationfilename does not exist.\n"&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt; &lt;span class="c1"&gt;# end atmosconnect()&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;h3 id="goal-achieved"&gt;Goal Achieved&lt;/h3&gt;
+&lt;p&gt;A user can self test if they've misconfigured the VM or there's  missing conf files/app, etc. SUCCESS!&lt;/p&gt;
+&lt;p&gt;Next steps: further unit and system tests, debug, refactor&lt;/p&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">john pfeiffer</dc:creator><pubDate>Mon, 12 Mar 2012 02:42:00 -0700</pubDate><guid>tag:blog.john-pfeiffer.com,2012-03-12:self-configuration-tests-for-scalability</guid><category>java</category><category>perl</category><category>TDD</category></item><item><title>Technology Careers (part 1)</title><link>http://blog.john-pfeiffer.com/technology-careers-part-1</link><description>
 &lt;h3 id="a-system-administrator-is-like-a-firefighter"&gt;A System Administrator is like a Firefighter&lt;/h3&gt;
 &lt;p&gt;Always available to fix an emergency, but without the glamour; after putting out a fire a SysAdmin has to report (with vague implications of guilt): what happened, why it happened, and how it can be prevented in the future. (Who's fault is it?)&lt;/p&gt;
 &lt;p&gt;Good System Administrators are well paid but usually work on the invisible and complex "back end" and are on "on call".&lt;/p&gt;
