@@ -4477,373 +4477,125 @@ later, there are some comments but the code is mostly self explanatory:
 &lt;li&gt;&lt;a href="http://john-pfeiffer.com/category/tags/programming"&gt;Programming&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;&lt;/div&gt;
-&lt;/p&gt;&lt;/p&gt;</summary></entry><entry><title>Tiny Core Linux with Linksys Wireless Card - no CD required installation</title><link href="http://blog.john-pfeiffer.com/tiny-core-linux-with-linksys-wireless-card-no-cd-required-installation" rel="alternate"></link><updated>2010-08-04T01:52:00-07:00</updated><author><name>John Pfeiffer</name></author><id>tag:blog.john-pfeiffer.com,2010-08-04:tiny-core-linux-with-linksys-wireless-card-no-cd-required-installation</id><summary type="html">&lt;div class="field field-name-body field-type-text-with-summary field-label-hidden"&gt;
-&lt;div class="field-items"&gt;
-&lt;div class="field-item even"&gt;
-Tiny Core Linux is fast and works great... but it does take some effort
-to get setup... here's how I got my Linksys wpc54g (v3) pci wireless
-card working with WPA - and I didn't burn a tiny core cd!
-
-&lt;/p&gt;
-
-You can't repartition a hard drive while actually using it so you'll
-most likely need GParted (ie from SystemRescueCD bootable cd) so that
-you can repartition / resize to have a spare linux partition... AND use:
-
-&lt;/p&gt;
-
-mke2fs -t ext3 /dev/hda3 (or wherever it is...)
-
-&lt;/p&gt;
-
-PREREQUISITES:  
-
-grub bootloader installed (preferrably to the MBR)  
-
-tinycore.iso (cd image of tiny core installation/live cd)  
-
-uniextract or isobuster (to open files from iso's)  
-
-ext2fsd (winxp application that allows copying files in/out of an
-ext2/ext3 partition)
-
-&lt;/p&gt;
-
-tcz files from an FTP repository listed in the section "Install on a
-Hard Drive Without Being Connected to the Internet" from  
-[http://wiki.tinycorelinux.com/tiki-index.php][]
-
-&lt;/p&gt;
-
-wireless-2.6.29.1-tinycore.tcz  
-
-wireless\_tools.tcz  
-
-wpa\_supplicant.tcz  
-
-b43-fwcutter.tcz  
-
-open-ssl-0.9.8m.tcz
-
-&lt;/p&gt;
-
-NOTE: hda3 = third partition on the first hard drive, you may need to
-use fdisk -l  
-
-or Start -\&gt; Control Panel -\&gt; Administrative Tools -\&gt; Computer
-Managemt -\&gt; Disk Management
-
-&lt;/p&gt;
-
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-- - -  
-
-Extract the files from the tinycore.iso (using IsoBuster or
-UniExtract)...  
-
-OR if you have linux: mount -o loop /path-to-iso/image-filename.iso
-/mnt/custom
-
-&lt;/p&gt;
-
-we only need the bzImage and tinycore.gz files... (CAPITAL I ON THE
-bzImage!)
-
-&lt;/p&gt;
-
-USING Ext2 Volume Manager (ext2fsd) ... browse to your linux partition
-and create the following folder
-
-&lt;/p&gt;
-
-/boot/tinycore
-
-&lt;/p&gt;
-
-copy the "bzimage" and "tinycore.gz" files into the linux partition
-/boot/tinycore folder
-
-&lt;/p&gt;
-
-Also create the following text file: /tce/onboot.lst
-
-&lt;/p&gt;
-
-wireless-2.6.29.1-tinycore.tcz  
-
-wireless\_tools.tcz  
-
-b43-fwcutter.tcz  
-
-openssl-0.9.8m.tcz  
-
-wpa\_supplicant.tcz  
-
-nano.tcz
-
-&lt;/p&gt;
-
-BE CAREFUL TO NOT HAVE ANY MISSPELLINGS OR EXTRA SPACES
-
-&lt;/p&gt;
-
-Create the directory /tce/optional and copy the above .tcz files into
-it.
-
-&lt;/p&gt;
-
-TinyCore uses /tce/mydata.tgz to store your files in the /home and /opt
-directories.  
-
-(Therefore you could sneak something in if you wanted to...?)
-
-&lt;/p&gt;
-
-ALSO, it uses .ashrc (e.g. not BASH command prompt) so any aliases are
-in  
-
-/tce/mydata.tgz -\&gt; home/tc/.ashrc
-
-&lt;/p&gt;
-
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-- - -  
-
-MODIFY YOUR GRUB (LEGACY) MENU
-
-&lt;/p&gt;
-
-menu.lst
-
-&lt;/p&gt;
-
-title tinycore  
-
-root (hd0,2)  
-
-kernel /boot/tinycore/bzimage  
-
-initrd /boot/tinycore/tinycore.gz
-
-&lt;/p&gt;
-
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-- - -  
-
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-- - -  
-
-BUT my wifi depends on this Linksys wpc54g (v3) pci wireless card AND
-wpa encryption...
-
-&lt;/p&gt;
-
-So I've got "wl\_apsta.o" from my previous debian kernel 2.6.26 (with
-all  
-
-of the linux-header and make and compiling commands to get that
-binary...)
-
-&lt;/p&gt;
-
-Without the correct fw5 (b43 firmware) dmesg will contain (ie kernel
-firmware unhappy with wrong linksys driver)
-
-&lt;/p&gt;
-
-b43-phy0 ERROR: firmware file "b43/ucode5.fw"
-
-&lt;/p&gt;
-
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-- - -  
-
-COPY wl\_apsta.o into /mnt/hda3/tce  
-
-(with EXT2FSD or usb stick or whatever)
-
-&lt;/p&gt;
-
-Rather than hack into my-data.tgz we'll wait until we've booted into
-Tiny Core...  
-
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-- - -  
-
-BOOTING INTO TINY CORE IS VERY FAST... (fingers crossed about the
-
-&lt;/p&gt;
-
-Right Click -\&gt; Control Panel  
-
-OR funny icon in the middle with screwdriver = Control Panel
-
-&lt;/p&gt;
-
-First check that our "onboot.lst" hack worked: Apps Audit -\&gt; OnBoot -\&gt;
-Maintenance
-
-&lt;/p&gt;
-
-(could also use: nano /mnt/hda3/tce/onboot.lst )  
-
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-- - -
-
-&lt;/p&gt;
-
-WHEN YOU CHOOSE TO SAVE/BACKUP (or when prompted when closing to Save a
-Backup)  
-
-mydata.tgz is created and it includes any modifications to
-/opt/bootlocal.sh
-
-&lt;/p&gt;
-
-since things put in the bootlocal.sh script are run as root... my wifi
-hack works...
-
-&lt;/p&gt;
-
-nano bootlocal.sh
-
-&lt;/p&gt;
-
-mkdir /lib/firmware  
-
-b43-fwcutter -w /lib/firmware /mnt/hda3/tce/wl\_apsta.o  
-
-wpa\_supplicant -B -iwlan0 -c/mnt/hda3/tce/wpa\_supplicant.conf  
-
-udhcpc -H hostname -b -i wlan0
-
-&lt;/p&gt;
-
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-- - -  
-
-the /lib/firmware directory is necessary for the kernel to get the new
-drivers  
-
-the b43-fwcutter firmware cutter gets the drivers to the directory  
-
-wpa\_supplicant starts in the background using wlan0 and the config file
-wpa\_supplicant.conf
-
-&lt;/p&gt;
-
-wpa\_passphrase ssid-network-name \&gt; wpa\_supplicant.conf  
-
-//prompts for the wireless network password, after you type it in press
-enter
-
-&lt;/p&gt;
-
-udhcpc is busybox's dhcp client using "hostname", in the background on
-wlan0
-
-&lt;/p&gt;
-
-An alternative configuration in bootlocal.sh for a static ip would be...
-
-&lt;/p&gt;
-
-ifconfig wlan0 10.0.0.99 netmask 255.255.255.0 up  
-
-route add default gw 10.0.0.138  
-
-echo "nameserver 10.0.0.138" \&gt; /etc/resolv.conf
-
-&lt;/p&gt;
-
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-- - -  
-
-AFTER I REBOOTED ifconfig wlan0 //shows me my ip address  
-
-ping 10.0.0.138 and ping [http://kittyandbear.net][] //ALL OK!
-
-&lt;/p&gt;
-
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-- - -  
-
-Of course, now I have to install a browser...
-
-&lt;/p&gt;
-
-Since tinycore works from the core image and with then added
-modifications to be as lean and fast as possible you really need to
-explicitly choose what you want on your hard drive AND what you want
-started at boot time.
-
-&lt;/p&gt;
-
-Right Click -\&gt; AppsBrowser or funny icon on the bottom right (gears)
-
-&lt;/p&gt;
-
-File -\&gt; Install Local Extension (anything on your hard drive but not in
-onboot.lst)  
-
-By default it lists your TCE/optional directory, double click on the one
-you want...
-
-&lt;/p&gt;
-
-(If it isn't onboot and it isn't "installed" by above then it's not on
-your tinycore yet!)
-
-&lt;/p&gt;
-
-OR File -\&gt; AppsBrowser ... when you choose to install something from
-the "repository" be prepared to wait for about 5 minutes for it to load
-the hundreds of packages...
-
-&lt;/p&gt;
-
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-- - -  
-
-RANDOM TINYCORE NOTES:
-
-&lt;/p&gt;
-
-Right Click -\&gt; Shells -\&gt; Shell Dark or funny icon on the bottom left
-(terminal with prompt)
-
-&lt;/p&gt;
-
-Right Click -\&gt; Control Panel -\&gt; System Stats OR funny icon in the
-middle with screwdriver = Panel -\&gt; System Stats
-
-&lt;/p&gt;
-
-dmesg TAB shows you the b43 stuff  
-
-cpu is cpu type  
-
-mem is RAM free  
-
-net is network devices installed...
-
-&lt;/p&gt;
-
-loadkmap &lt; /usr/share/kmap/uk.kmap
-
-&lt;/p&gt;
-&lt;p&gt;
-&lt;/div&gt;
-
-&lt;p&gt;&lt;/div&gt;
-&lt;/div&gt;
-&lt;div class="field field-name-taxonomy-vocabulary-1 field-type-taxonomy-term-reference field-label-above clearfix"&gt;&lt;/p&gt;
-&lt;h3 id="tags"&gt;tags:&lt;/h3&gt;
+&lt;/p&gt;&lt;/p&gt;</summary></entry><entry><title>Tiny Core Linux with Linksys Wireless Card - no CD required installation</title><link href="http://blog.john-pfeiffer.com/tiny-core-linux-with-linksys-wireless-card-no-cd-required-installation" rel="alternate"></link><updated>2010-08-04T01:52:00-07:00</updated><author><name>john pfeiffer</name></author><id>tag:blog.john-pfeiffer.com,2010-08-04:tiny-core-linux-with-linksys-wireless-card-no-cd-required-installation</id><summary type="html">
+&lt;p&gt;Tiny Core Linux is fast and works great... but it does take some effort to get setup... &lt;/p&gt;
+&lt;p&gt;Here's how I got my Linksys wpc54g (v3) pci wireless card working with WPA - and I didn't burn a tiny core cd!&lt;/p&gt;
+&lt;p&gt;You can't repartition a hard drive while actually using it so you'll most likely need GParted (ie from SystemRescueCD bootable cd) so that you can repartition / (root) and resize to have a spare linux partition... AND use:&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;mke2fs -t ext3 /dev/hda3&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;(or wherever it is...)
+hda3 = third partition on the first hard drive, you may need to use &lt;code&gt;fdisk -l&lt;/code&gt;
+or Start -&amp;gt; Control Panel -&amp;gt; Administrative Tools -&amp;gt; Computer Management -&amp;gt; Disk Management&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id="prerequisites"&gt;Prerequisites&lt;/h3&gt;
 &lt;ul&gt;
-&lt;li&gt;&lt;a href="http://john-pfeiffer.com/category/tags/linux"&gt;Linux&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;grub bootloader installed (preferrably to the MBR)  &lt;/li&gt;
+&lt;li&gt;tinycore.iso (cd image of tiny core installation/live cd)  &lt;/li&gt;
+&lt;li&gt;uniextract or isobuster (to open files from iso's)  &lt;/li&gt;
+&lt;li&gt;ext2fsd (winxp application that allows copying files in/out of an ext2/ext3 partition)&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;&lt;/div&gt;
-&lt;/p&gt;&lt;/p&gt;</summary></entry><entry><title>Electric Car Rebate... Why not go European?</title><link href="http://blog.john-pfeiffer.com/electric-car-rebate-why-not-go-european" rel="alternate"></link><updated>2010-08-02T13:13:00-07:00</updated><author><name>john pfeiffer</name></author><id>tag:blog.john-pfeiffer.com,2010-08-02:electric-car-rebate-why-not-go-european</id><summary type="html">&lt;p&gt;I don't expect anybody to read this as Slashdot articles grow exponentially in comments each hour but...&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;tcz&lt;/em&gt; files from an FTP repository listed in the section "Install on a Hard Drive Without Being Connected to the Internet" from  &lt;a href="http://wiki.tinycorelinux.net/wiki:start#installing"&gt;http://wiki.tinycorelinux.net/wiki:start#installing&lt;/a&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;wireless-2.6.29.1-tinycore.tcz  &lt;/li&gt;
+&lt;li&gt;wireless_tools.tcz  &lt;/li&gt;
+&lt;li&gt;wpa_supplicant.tcz  &lt;/li&gt;
+&lt;li&gt;b43-fwcutter.tcz  &lt;/li&gt;
+&lt;li&gt;open-ssl-0.9.8m.tcz&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="getting-the-pieces-ready"&gt;Getting the pieces ready&lt;/h3&gt;
+&lt;ol&gt;
+&lt;li&gt;Extract the files from the &lt;strong&gt;tinycore.iso&lt;/strong&gt; (using IsoBuster or UniExtract)...&lt;br/&gt;
+OR if you have linux: &lt;code&gt;mount -o loop /path-to-iso/image-filename.iso /mnt/custom&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;We only need the &lt;strong&gt;bzImage&lt;/strong&gt; and &lt;strong&gt;tinycore.gz&lt;/strong&gt; files... &lt;blockquote&gt;
+&lt;p&gt;CAPITAL I ON THE bzImage!&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;li&gt;USING Ext2 Volume Manager (ext2fsd) ... browse to your linux partition and create the following folder: &lt;strong&gt;/boot/tinycore&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;Copy the "bzimage" and "tinycore.gz" files into the linux partition &lt;strong&gt;/boot/tinycore folder&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;Also create the following text file: &lt;strong&gt;/tce/onboot.lst&lt;/strong&gt;&lt;div class="highlight"&gt;&lt;pre&gt;wireless-2.6.29.1-tinycore.tcz
+wireless_tools.tcz
+b43-fwcutter.tcz
+openssl-0.9.8m.tcz
+wpa_supplicant.tcz
+nano.tcz
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;blockquote&gt;
+&lt;p&gt;BE CAREFUL TO NOT HAVE ANY MISSPELLINGS OR EXTRA SPACES&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Finally, create the directory /tce/optional and copy the above .tcz files into it.&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;TinyCore uses /tce/mydata.tgz to store your files in the /home and /opt directories. (Therefore you could sneak something in if you wanted to...?)&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;ALSO, it uses .ashrc (e.g. not BASH command prompt) so any aliases are in /tce/mydata.tgz -&amp;gt; home/tc/.ashrc&lt;/em&gt;&lt;/p&gt;
+&lt;h3 id="modify-your-grub-legacy-menu"&gt;Modify your Grub (legacy) menu&lt;/h3&gt;
+&lt;p&gt;&lt;strong&gt;menu.lst&lt;/strong&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;title tinycore  
+root (hd0,2)  
+kernel /boot/tinycore/bzimage  
+initrd /boot/tinycore/tinycore.gz
+&lt;/pre&gt;&lt;/div&gt;
+&lt;h3 id="oh-wait-wifi-drivers"&gt;Oh Wait, Wifi Drivers!&lt;/h3&gt;
+&lt;p&gt;BUT my wifi depends on this Linksys wpc54g (v3) pci wireless card AND wpa encryption...&lt;/p&gt;
+&lt;p&gt;So I've got &lt;strong&gt;wl_apsta.o&lt;/strong&gt; from my previous debian kernel 2.6.26 (with all of the linux-header and make and compiling commands to get that binary...)&lt;/p&gt;
+&lt;p&gt;Without the correct fw5 (b43 firmware) &lt;code&gt;dmesg&lt;/code&gt; will contain:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;b43-phy0 ERROR: firmware file "b43/ucode5.fw"
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;kernel firmware unhappy with wrong linksys driver&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;COPY &lt;strong&gt;wl_apsta.o&lt;/strong&gt; into &lt;strong&gt;/mnt/hda3/tce&lt;/strong&gt; (with EXT2FSD or usb stick or whatever)&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;Rather than hack into my-data.tgz we'll wait until we've booted into Tiny Core...&lt;/em&gt;&lt;/p&gt;
+&lt;h3 id="booting-into-tiny-core-linux"&gt;Booting into Tiny Core Linux&lt;/h3&gt;
+&lt;p&gt;BOOTING INTO TINY CORE IS VERY FAST... (fingers crossed about everything before)&lt;/p&gt;
+&lt;p&gt;Right Click -&amp;gt; Control Panel or a funny icon in the middle with screwdriver = Control Panel&lt;/p&gt;
+&lt;p&gt;First check that our "onboot.lst" hack worked: Apps Audit -&amp;gt; OnBoot -&amp;gt; Maintenance&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;(could also use: nano /mnt/hda3/tce/onboot.lst)&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;WHEN YOU CHOOSE TO SAVE/BACKUP&lt;/strong&gt; (or when prompted when closing to Save a Backup)  &lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;mydata.tgz&lt;/strong&gt; is created and it includes any modifications to &lt;strong&gt;/opt/bootlocal.sh&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;since things put in the &lt;strong&gt;bootlocal.sh&lt;/strong&gt; script are run as root... my wifi hack works...&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;nano bootlocal.sh&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;mkdir /lib/firmware  
+b43-fwcutter -w /lib/firmware /mnt/hda3/tce/wl_apsta.o  
+wpa_supplicant -B -iwlan0 -c/mnt/hda3/tce/wpa_supplicant.conf  
+udhcpc -H hostname -b -i wlan0
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;the /lib/firmware directory is necessary for the kernel to get the new drivers  &lt;/p&gt;
+&lt;p&gt;the b43-fwcutter firmware cutter gets the drivers to the directory  &lt;/p&gt;
+&lt;p&gt;wpa_supplicant starts in the background using wlan0 and the config file wpa_supplicant.conf&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;wpa_passphrase ssid-network-name &amp;gt; wpa_supplicant.conf&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;prompts for the wireless network password, after you type it in press enter&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;udhcpc is busybox's dhcp client using "hostname", in the background on wlan0&lt;/p&gt;
+&lt;p&gt;An alternative configuration in bootlocal.sh for a static ip would be...&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;ifconfig wlan0 10.0.0.99 netmask 255.255.255.0 up  
+route add default gw 10.0.0.138  
+echo "nameserver 10.0.0.138" &amp;gt; /etc/resolv.conf
+&lt;/pre&gt;&lt;/div&gt;
+&lt;h3 id="verify-after-reboot"&gt;Verify after reboot&lt;/h3&gt;
+&lt;p&gt;AFTER I REBOOTED ifconfig wlan0 //shows me my ip address  &lt;/p&gt;
+&lt;p&gt;&lt;code&gt;ping 10.0.0.138&lt;/code&gt; and &lt;code&gt;ping http://kittyandbear.net&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;ALL OK!&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id="adding-a-browser-to-tiny-core-linux"&gt;Adding a browser to Tiny Core Linux&lt;/h3&gt;
+&lt;p&gt;Of course, now I have to install a browser...&lt;/p&gt;
+&lt;p&gt;Since tinycore works from the core image and with then added modifications to be as lean and fast as possible you really need to explicitly choose what you want on your hard drive AND what you want started at boot time.&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Right Click -&amp;gt; AppsBrowser or funny icon on the bottom right (gears)&lt;/li&gt;
+&lt;li&gt;File -&amp;gt; Install Local Extension (anything on your hard drive but not in onboot.lst)  &lt;/li&gt;
+&lt;li&gt;By default it lists your TCE/optional directory, double click on the one you want...
+(If it isn't onboot and it isn't "installed" by above then it's not on your tinycore yet!)&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;OR File -&amp;gt; AppsBrowser ... when you choose to install something from the "repository" be prepared to wait for about 5 minutes for it to load the hundreds of packages...&lt;/p&gt;
+&lt;h3 id="miscellaneous-tiny-core-linux-notes"&gt;Miscellaneous Tiny Core Linux Notes&lt;/h3&gt;
+&lt;p&gt;Right Click -&amp;gt; Shells -&amp;gt; Shell Dark or funny icon on the bottom left (terminal with prompt)&lt;/p&gt;
+&lt;p&gt;Right Click -&amp;gt; Control Panel -&amp;gt; System Stats OR funny icon in the middle with screwdriver = Panel -&amp;gt; System Stats&lt;/p&gt;
+&lt;p&gt;dmesg TAB shows you the b43 stuff  &lt;/p&gt;
+&lt;p&gt;cpu is cpu type  &lt;/p&gt;
+&lt;p&gt;mem is RAM free  &lt;/p&gt;
+&lt;p&gt;net is network devices installed...&lt;/p&gt;
+&lt;p&gt;loadkmap &amp;lt; /usr/share/kmap/uk.kmap&lt;/p&gt;</summary><category term="linux"></category><category term="tiny core linux"></category></entry><entry><title>Electric Car Rebate... Why not go European?</title><link href="http://blog.john-pfeiffer.com/electric-car-rebate-why-not-go-european" rel="alternate"></link><updated>2010-08-02T13:13:00-07:00</updated><author><name>john pfeiffer</name></author><id>tag:blog.john-pfeiffer.com,2010-08-02:electric-car-rebate-why-not-go-european</id><summary type="html">&lt;p&gt;I don't expect anybody to read this as Slashdot articles grow exponentially in comments each hour but...&lt;/p&gt;
 &lt;p&gt;The price of petrol in London is about 116 pence per liter &lt;a href="http://www.whatprice.co.uk/petrol-prices"&gt;http://www.whatprice.co.uk/petrol-prices&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;1 US gallon = 3.78 liter&lt;/code&gt;&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;4.39 GBP (pounds) per gallon&lt;/code&gt;&lt;/p&gt;
