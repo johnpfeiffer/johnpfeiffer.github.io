@@ -2676,15 +2676,15 @@ complexity/costs (people!), flexibility for load, and redundancy...&lt;/p&gt;
 &lt;p&gt;BUT for Production you'll need some Cloud strategy (AWS competitors: RedHat OpenShift, RackSpace Cloud, IBM, ATT Compute, Google AppEngine, etc. means lower prices and improved services)&lt;/p&gt;
 &lt;p&gt;Unless, as you've already mentioned, "if you happen to have hanging around a pile of cash and tech expertise that's underutilized..."&lt;/p&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">john pfeiffer</dc:creator><pubDate>Thu, 08 Nov 2012 17:06:00 -0800</pubDate><guid>tag:blog.john-pfeiffer.com,2012-11-08:server-operations-cloud-versus-build-your-own</guid><category>cloud</category><category>startup planning</category><category>ops</category></item><item><title>Tomcat deployment on Openshift for free</title><link>http://blog.john-pfeiffer.com/tomcat-deployment-on-openshift-for-free</link><description>
 &lt;p&gt;openshift is the cloud PaaS offering from RedHat&lt;/p&gt;
-&lt;h3 id="prerequisites"&gt;Prerequisites&lt;/h3&gt;
+&lt;h3 id="prerequisites-and-dependencies"&gt;Prerequisites and dependencies&lt;/h3&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;sudo apt-get update
 sudo apt-get install ruby1.9.3 git-core
 //yay for ubuntu 12.04
 
 sudo gem install rhc
+//red hat openshift client
 &lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;//red hat client&lt;/p&gt;
-&lt;hr/&gt;
+&lt;h3 id="openshift-client-tools-setup"&gt;OpenShift Client tools setup&lt;/h3&gt;
 &lt;p&gt;&lt;code&gt;rhc setup&lt;/code&gt;&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;Created local config file: /home/ubuntu/.openshift/express.conf
 The express.conf file contains user configuration, and can be transferred to different computers.
@@ -2706,23 +2706,23 @@ Your public ssh key must be uploaded to the OpenShift server. Would you like us 
 &lt;p&gt;&lt;code&gt;rhc app create -a john -t diy-0.1&lt;/code&gt;&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;rhc app show -a john&lt;/code&gt;&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;rhc app cartridge list&lt;/code&gt;&lt;/p&gt;
-&lt;h2 id="your-local-git-repo"&gt;Your local git repo&lt;/h2&gt;
+&lt;h3 id="your-local-git-repo"&gt;Your local git repo&lt;/h3&gt;
 &lt;p&gt;ON YOUR LOCAL MACHINE BROWSE TO WHERE YOU WANT TO STORE YOUR GIT REPO&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;git clone ssh://a261d0fc2932413694456e3473fdc972@APPNAME-DOMAIN.rhcloud.com/~/git/...&lt;/code&gt;&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;git status&lt;/code&gt;&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;git pull&lt;/code&gt;&lt;/p&gt;
-&lt;h2 id="repo-layout-of-johnrepo"&gt;REPO LAYOUT of ~/john/repo&lt;/h2&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="na"&gt;.openshift&lt;/span&gt;&lt;span class="err"&gt;/&lt;/span&gt;&lt;span class="no"&gt;action_hooks&lt;/span&gt;&lt;span class="err"&gt;/&lt;/span&gt;&lt;span class="no"&gt;start&lt;/span&gt; &lt;span class="p"&gt;-&lt;/span&gt; &lt;span class="no"&gt;Script&lt;/span&gt; &lt;span class="no"&gt;that&lt;/span&gt; &lt;span class="no"&gt;gets&lt;/span&gt; &lt;span class="no"&gt;run&lt;/span&gt; &lt;span class="no"&gt;to&lt;/span&gt; &lt;span class="no"&gt;start&lt;/span&gt; &lt;span class="no"&gt;your&lt;/span&gt; &lt;span class="no"&gt;application&lt;/span&gt;  
-&lt;span class="no"&gt;.openshift&lt;/span&gt;&lt;span class="err"&gt;/&lt;/span&gt;&lt;span class="no"&gt;action_hooks&lt;/span&gt;&lt;span class="err"&gt;/&lt;/span&gt;&lt;span class="no"&gt;stop&lt;/span&gt; &lt;span class="p"&gt;-&lt;/span&gt; &lt;span class="no"&gt;Script&lt;/span&gt; &lt;span class="no"&gt;that&lt;/span&gt; &lt;span class="no"&gt;gets&lt;/span&gt; &lt;span class="no"&gt;run&lt;/span&gt; &lt;span class="no"&gt;to&lt;/span&gt; &lt;span class="no"&gt;stop&lt;/span&gt; &lt;span class="no"&gt;your&lt;/span&gt; &lt;span class="no"&gt;application&lt;/span&gt;  
-&lt;span class="no"&gt;.openshift&lt;/span&gt;&lt;span class="err"&gt;/&lt;/span&gt;&lt;span class="no"&gt;action_hooks&lt;/span&gt;&lt;span class="err"&gt;/&lt;/span&gt;&lt;span class="no"&gt;pre_build&lt;/span&gt; &lt;span class="p"&gt;-&lt;/span&gt; &lt;span class="no"&gt;Script&lt;/span&gt; &lt;span class="no"&gt;that&lt;/span&gt; &lt;span class="no"&gt;gets&lt;/span&gt; &lt;span class="no"&gt;run&lt;/span&gt; &lt;span class="no"&gt;every&lt;/span&gt; &lt;span class="no"&gt;git&lt;/span&gt; &lt;span class="no"&gt;push&lt;/span&gt; &lt;span class="no"&gt;before&lt;/span&gt; &lt;span class="no"&gt;the&lt;/span&gt; &lt;span class="no"&gt;build&lt;/span&gt;  
-&lt;span class="no"&gt;.openshift&lt;/span&gt;&lt;span class="err"&gt;/&lt;/span&gt;&lt;span class="no"&gt;action_hooks&lt;/span&gt;&lt;span class="err"&gt;/&lt;/span&gt;&lt;span class="no"&gt;build&lt;/span&gt; &lt;span class="p"&gt;-&lt;/span&gt; &lt;span class="no"&gt;Script&lt;/span&gt; &lt;span class="no"&gt;that&lt;/span&gt; &lt;span class="no"&gt;gets&lt;/span&gt; &lt;span class="no"&gt;run&lt;/span&gt; &lt;span class="no"&gt;every&lt;/span&gt; &lt;span class="no"&gt;git&lt;/span&gt; &lt;span class="no"&gt;push&lt;/span&gt; &lt;span class="no"&gt;as&lt;/span&gt; &lt;span class="no"&gt;part&lt;/span&gt; &lt;span class="no"&gt;of&lt;/span&gt; &lt;span class="no"&gt;the&lt;/span&gt; &lt;span class="no"&gt;build&lt;/span&gt; &lt;span class="no"&gt;process&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="no"&gt;on&lt;/span&gt; &lt;span class="no"&gt;the&lt;/span&gt; &lt;span class="no"&gt;CI&lt;/span&gt; &lt;span class="no"&gt;system&lt;/span&gt; &lt;span class="no"&gt;if&lt;/span&gt; &lt;span class="no"&gt;available&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;  
-&lt;span class="no"&gt;.openshift&lt;/span&gt;&lt;span class="err"&gt;/&lt;/span&gt;&lt;span class="no"&gt;action_hooks&lt;/span&gt;&lt;span class="err"&gt;/&lt;/span&gt;&lt;span class="no"&gt;deploy&lt;/span&gt; &lt;span class="p"&gt;-&lt;/span&gt; &lt;span class="no"&gt;Script&lt;/span&gt; &lt;span class="no"&gt;that&lt;/span&gt; &lt;span class="no"&gt;gets&lt;/span&gt; &lt;span class="no"&gt;run&lt;/span&gt; &lt;span class="no"&gt;every&lt;/span&gt; &lt;span class="no"&gt;git&lt;/span&gt; &lt;span class="no"&gt;push&lt;/span&gt; &lt;span class="no"&gt;after&lt;/span&gt; &lt;span class="no"&gt;build&lt;/span&gt; &lt;span class="no"&gt;but&lt;/span&gt; &lt;span class="no"&gt;before&lt;/span&gt; &lt;span class="no"&gt;the&lt;/span&gt; &lt;span class="no"&gt;app&lt;/span&gt; &lt;span class="no"&gt;is&lt;/span&gt; &lt;span class="no"&gt;restarted&lt;/span&gt;  
-&lt;span class="no"&gt;.openshift&lt;/span&gt;&lt;span class="err"&gt;/&lt;/span&gt;&lt;span class="no"&gt;action_hooks&lt;/span&gt;&lt;span class="err"&gt;/&lt;/span&gt;&lt;span class="no"&gt;post_deploy&lt;/span&gt; &lt;span class="p"&gt;-&lt;/span&gt; &lt;span class="no"&gt;Script&lt;/span&gt; &lt;span class="no"&gt;that&lt;/span&gt; &lt;span class="no"&gt;gets&lt;/span&gt; &lt;span class="no"&gt;run&lt;/span&gt; &lt;span class="no"&gt;every&lt;/span&gt; &lt;span class="no"&gt;git&lt;/span&gt; &lt;span class="no"&gt;push&lt;/span&gt; &lt;span class="no"&gt;after&lt;/span&gt; &lt;span class="no"&gt;the&lt;/span&gt; &lt;span class="no"&gt;app&lt;/span&gt; &lt;span class="no"&gt;is&lt;/span&gt; &lt;span class="no"&gt;restarted&lt;/span&gt;
+&lt;h3 id="repo-layout-of-johnrepo"&gt;REPO LAYOUT of ~/john/repo&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;.openshift/action_hooks/start - Script that gets run to start your application  
+.openshift/action_hooks/stop - Script that gets run to stop your application  
+.openshift/action_hooks/pre_build - Script that gets run every git push before the build  
+.openshift/action_hooks/build - Script that gets run every git push as part of the build process &lt;span class="o"&gt;(&lt;/span&gt;on the CI system &lt;span class="k"&gt;if&lt;/span&gt; available&lt;span class="o"&gt;)&lt;/span&gt;  
+.openshift/action_hooks/deploy - Script that gets run every git push after build but before the app is restarted  
+.openshift/action_hooks/post_deploy - Script that gets run every git push after the app is restarted
 
-&lt;span class="nf"&gt;diy&lt;/span&gt;  
-&lt;span class="no"&gt;misc&lt;/span&gt;  
-&lt;span class="no"&gt;README&lt;/span&gt;  
-&lt;span class="no"&gt;static&lt;/span&gt;&lt;span class="err"&gt;/&lt;/span&gt; &lt;span class="no"&gt;If&lt;/span&gt; &lt;span class="no"&gt;it&lt;/span&gt; &lt;span class="no"&gt;exists&lt;/span&gt; &lt;span class="no"&gt;externally&lt;/span&gt; &lt;span class="no"&gt;exposed&lt;/span&gt; &lt;span class="no"&gt;static&lt;/span&gt; &lt;span class="no"&gt;content&lt;/span&gt; &lt;span class="no"&gt;goes&lt;/span&gt; &lt;span class="no"&gt;here&lt;/span&gt;
+diy  
+misc  
+README  
+static/ If it exists externally exposed static content goes here
 &lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;CHANGES ARE ONE DIRECTIONAL FROM THE GIT CLONE TO THE OPENSHIFT BOX&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;mv diy/testrubyserver.rb ../misc&lt;/code&gt;&lt;/p&gt;
@@ -2760,7 +2760,7 @@ remote: Running .openshift/action_hooks/post_deploy
 &lt;p&gt;expands to 13MB, note that JAVA is already installed by default&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;p&gt;&lt;code&gt;rm apache-tomcat-7.0.29.tar.gz&lt;/code&gt;&lt;/p&gt;
-&lt;h2 id="openshift-ports-and-proxy"&gt;Openshift ports and proxy&lt;/h2&gt;
+&lt;h3 id="openshift-ports-and-proxy"&gt;Openshift ports and proxy&lt;/h3&gt;
 &lt;p&gt;Since OpenShift has a proxy setup that passes port 80 to your local server on port 8080, BUT  &lt;/p&gt;
 &lt;p&gt;OpenShift does not allow users to bind to any port below 15000 other than 8080, so...&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;ssh 33d90ea45fd91e42096651d937e@john-pfeiffer.rhcloud.com&lt;/code&gt;&lt;/p&gt;
@@ -2783,30 +2783,30 @@ OPENSHIFT_INTERNAL_IP=127.13.29.1&lt;/p&gt;
 &lt;p&gt;ADDING Tomcat to your default start and stop scripts (which are used during every git push)&lt;/p&gt;
 &lt;p&gt;In your local git repo there is a hidden directory ".openshift"&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;cd APPNAME/.openshift/action_hooks&lt;/code&gt;&lt;/p&gt;
-&lt;h2 id="openshiftaction_hooksstart"&gt;.openshift/action_hooks/start&lt;/h2&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="cp"&gt;#&lt;/span&gt;&lt;span class="nf"&gt;nohup&lt;/span&gt;&lt;span class="x"&gt; &lt;/span&gt;&lt;span class="p"&gt;$&lt;/span&gt;&lt;span class="nv"&gt;OPENSHIFT_REPO_DIR&lt;/span&gt;&lt;span class="x"&gt;/diy/testrubyserver.rb&lt;/span&gt;
-&lt;span class="p"&gt;$&lt;/span&gt;&lt;span class="nv"&gt;OPENSHIFT_INTERNAL_IP&lt;/span&gt;&lt;span class="x"&gt; &lt;/span&gt;&lt;span class="p"&gt;$&lt;/span&gt;&lt;span class="nv"&gt;OPENSHIFT_REPO_DIR&lt;/span&gt;&lt;span class="x"&gt;/diy &amp;gt; &lt;/span&gt;&lt;span class="p"&gt;$&lt;/span&gt;&lt;span class="nv"&gt;OPENSHIFT_LOG_DIR&lt;/span&gt;&lt;span class="x"&gt;/server.log 2&amp;gt;&amp;amp;1 &amp;amp;&lt;/span&gt;
+&lt;h3 id="vi-openshiftaction_hooksstart"&gt;vi .openshift/action_hooks/start&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="c"&gt;#nohup $OPENSHIFT_REPO_DIR/diy/testrubyserver.rb&lt;/span&gt;
+&lt;span class="nv"&gt;$OPENSHIFT_INTERNAL_IP&lt;/span&gt; &lt;span class="nv"&gt;$OPENSHIFT_REPO_DIR&lt;/span&gt;/diy &amp;gt; &lt;span class="nv"&gt;$OPENSHIFT_LOG_DIR&lt;/span&gt;/server.log 2&amp;gt;&lt;span class="p"&gt;&amp;amp;&lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt; &lt;span class="p"&gt;&amp;amp;&lt;/span&gt;
 
-&lt;span class="x"&gt;cd &lt;/span&gt;&lt;span class="p"&gt;$&lt;/span&gt;&lt;span class="nv"&gt;OPENSHIFT&lt;/span&gt;&lt;span class="x"&gt;\_DATA\_DIR/apache-tomcat-7.0.29/bin&lt;/span&gt;
-&lt;span class="x"&gt;nohup sh startup.sh&lt;/span&gt;
-&lt;span class="x"&gt;echo "completed tomcat7 startup"&lt;/span&gt;
+&lt;span class="nb"&gt;cd&lt;/span&gt; &lt;span class="nv"&gt;$OPENSHIFT&lt;/span&gt;&lt;span class="se"&gt;\_&lt;/span&gt;DATA&lt;span class="se"&gt;\_&lt;/span&gt;DIR/apache-tomcat-7.0.29/bin
+nohup sh startup.sh
+&lt;span class="nb"&gt;echo&lt;/span&gt; &lt;span class="s2"&gt;"completed tomcat7 startup"&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
-&lt;h2 id="openshiftaction_hooksstop"&gt;.openshift/action_hooks/stop&lt;/h2&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="x"&gt;cd &lt;/span&gt;&lt;span class="p"&gt;$&lt;/span&gt;&lt;span class="nv"&gt;OPENSHIFT_DATA_DIR&lt;/span&gt;&lt;span class="x"&gt;/apache-tomcat-7.0.29/bin  &lt;/span&gt;
-&lt;span class="x"&gt;nohup sh shutdown.sh  &lt;/span&gt;
-&lt;span class="x"&gt;echo "completed tomcat7 shutdown"  &lt;/span&gt;
-&lt;span class="x"&gt;exit 0&lt;/span&gt;
+&lt;h3 id="vi-openshiftaction_hooksstop"&gt;vi .openshift/action_hooks/stop&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nb"&gt;cd&lt;/span&gt; &lt;span class="nv"&gt;$OPENSHIFT_DATA_DIR&lt;/span&gt;/apache-tomcat-7.0.29/bin  
+nohup sh shutdown.sh  
+&lt;span class="nb"&gt;echo&lt;/span&gt; &lt;span class="s2"&gt;"completed tomcat7 shutdown"&lt;/span&gt;  
+&lt;span class="nb"&gt;exit &lt;/span&gt;0
 &lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;&lt;code&gt;git add -A&lt;/code&gt;&lt;/p&gt;
 &lt;p&gt;`git commit -m "removed testrubyserver.rb and added tomcat to start/stop scripts"  &lt;/p&gt;
 &lt;p&gt;&lt;code&gt;git push&lt;/code&gt;&lt;/p&gt;
-&lt;p&gt;&lt;a href="http://APPNAME-DOMAINNAME.rhcloud.com"&gt;http://APPNAME-DOMAINNAME.rhcloud.com&lt;/a&gt;&lt;/p&gt;
-&lt;h2 id="autodeploy-the-latest"&gt;Autodeploy the latest&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;&lt;a href="http://APPNAME-DOMAINNAME.rhcloud.com"&gt;http://APPNAME-DOMAINNAME.rhcloud.com&lt;/a&gt;&lt;/strong&gt;&lt;/p&gt;
+&lt;h3 id="autodeploy-the-latest"&gt;Autodeploy the latest&lt;/h3&gt;
 &lt;p&gt;MOVE YOUR WEBAPPS DIRECTORY TO THE GIT REPO SO THAT A GIT PUSH WILL AUTO DEPLOY THE NEWEST&lt;/p&gt;
-&lt;p&gt;mv $OPENSHIFT_DATA_DIR/apache-tomcat-7.0.29/webapps ~/john/repo/diy/webapps&lt;/p&gt;
-&lt;p&gt;ln -s ~/john/repo/diy/webapps webapps&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;mv $OPENSHIFT_DATA_DIR/apache-tomcat-7.0.29/webapps ~/john/repo/diy/webapps&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;ln -s ~/john/repo/diy/webapps webapps&lt;/code&gt;&lt;/p&gt;
 &lt;p&gt;Strongly advised to remove the manager and example apps (just deploy your .war's)&lt;/p&gt;
-&lt;p&gt;//rhc app stop -a APPNAME -p YOURPASSWORD &lt;/p&gt;
+&lt;p&gt;&lt;code&gt;rhc app stop -a APPNAME -p YOURPASSWORD&lt;/code&gt;&lt;/p&gt;
 &lt;blockquote&gt;
 &lt;p&gt;yes, it uses your RHCloud account username and password for app management&lt;/p&gt;
 &lt;/blockquote&gt;
@@ -2817,16 +2817,18 @@ OPENSHIFT_INTERNAL_IP=127.13.29.1&lt;/p&gt;
 &lt;p&gt;rhc app start -a APPNAME -p YOURPASSWORD&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;h3 id="once-youve-sshd-in"&gt;ONCE YOU'VE SSH'D IN...&lt;/h3&gt;
-&lt;p&gt;help  &lt;/p&gt;
-&lt;p&gt;ps|ls|  &lt;/p&gt;
-&lt;p&gt;ctl_app start [stop|restart|status]  &lt;/p&gt;
-&lt;p&gt;mysql | mongo | quota&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;help&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;ps|ls|
+ctl_app start [stop|restart|status]
+mysql | mongo | quota
+&lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;NOTE: sometimes it's easier to use a UI &lt;a href="https://openshift.redhat.com/app/console/applications"&gt;https://openshift.redhat.com/app/console/applications&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;My Account -&amp;gt; Public Keys&lt;/p&gt;
 &lt;p&gt;My Applications -&amp;gt; APPLICATION_NAME -&amp;gt;&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;rhc app add-alias -a myapp --alias myapp.net&lt;/code&gt;&lt;/p&gt;
 &lt;h2 id="future-thoughts"&gt;Future Thoughts&lt;/h2&gt;
-&lt;p&gt;Eclipse + m2e (maven plugin) + jetty plugin for fast and easy dependency management -&amp;gt; mvn install + added custom script can put your .war into your local openshift repo for continuous deployment.&lt;/p&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">john pfeiffer</dc:creator><pubDate>Tue, 11 Sep 2012 13:48:00 -0700</pubDate><guid>tag:blog.john-pfeiffer.com,2012-09-11:tomcat-deployment-on-openshift-for-free</guid><category>cloud</category><category>paas</category><category>openshift</category><category>tomcat</category></item><item><title>Creating Economies of Scale in Software Development</title><link>http://blog.john-pfeiffer.com/creating-economies-of-scale-in-software-development</link><description>
+&lt;p&gt;Eclipse + m2e (maven plugin) + jetty plugin for fast and easy dependency management -&amp;gt; mvn install + added custom script can put your .war into your local openshift repo for continuous deployment.&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://www.openshift.com/"&gt;https://www.openshift.com/&lt;/a&gt;&lt;/p&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">john pfeiffer</dc:creator><pubDate>Tue, 11 Sep 2012 13:48:00 -0700</pubDate><guid>tag:blog.john-pfeiffer.com,2012-09-11:tomcat-deployment-on-openshift-for-free</guid><category>cloud</category><category>paas</category><category>openshift</category><category>tomcat</category></item><item><title>Creating Economies of Scale in Software Development</title><link>http://blog.john-pfeiffer.com/creating-economies-of-scale-in-software-development</link><description>
 &lt;h3 id="planning-to-be-a-successful-software-company"&gt;Planning to be a successful software company&lt;/h3&gt;
 &lt;p&gt;Economies of Scale in Software Development is about planning to be successful.&lt;/p&gt;
 &lt;p&gt;Software development is rather cheap when compared to physical manufacturing but that doesn't mean it doesn't cost money to create a product or service.&lt;/p&gt;
