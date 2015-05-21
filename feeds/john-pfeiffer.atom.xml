@@ -6480,7 +6480,47 @@ gcc -o &lt;span class="nv"&gt;$1&lt;/span&gt;.exe &lt;span class="nv"&gt;$1&lt;/
 &lt;/pre&gt;&lt;/div&gt;
 
 
-&lt;p&gt;Of course this isn't a finished product - but its a solid foundation that outlines what the next few posts will be about...&lt;/p&gt;</summary><category term="c"></category><category term="time"></category><category term="clock"></category></entry><entry><title>Pancakes from Scratch Recipe v2</title><link href="http://blog.john-pfeiffer.com/pancakes-from-scratch-recipe-v2" rel="alternate"></link><updated>2010-01-30T09:47:00-08:00</updated><author><name>john pfeiffer</name></author><id>tag:blog.john-pfeiffer.com,2010-01-30:pancakes-from-scratch-recipe-v2</id><summary type="html">&lt;p&gt;You're hungry, you want something "home cooked", and you have the following:&lt;/p&gt;
+&lt;p&gt;Of course this isn't a finished product - but its a solid foundation that outlines what the next few posts will be about...&lt;/p&gt;</summary><category term="c"></category><category term="time"></category><category term="clock"></category></entry><entry><title>WinCE Custom Include to Modularize Functions: 365 programming project day twenty nine</title><link href="http://blog.john-pfeiffer.com/wince-custom-include-to-modularize-functions-365-programming-project-day-twenty-nine" rel="alternate"></link><updated>2010-01-30T13:57:00-08:00</updated><author><name>john pfeiffer</name></author><id>tag:blog.john-pfeiffer.com,2010-01-30:wince-custom-include-to-modularize-functions-365-programming-project-day-twenty-nine</id><summary type="html">&lt;p&gt;I've again used some "empty" time in the London Tube to stretch my brain a little bit by doing some more WinCE Windows Programming.&lt;/p&gt;
+&lt;p&gt;While it may not seem like much of an accomplishment, using my fingernail on the screen keyboard to eke out code on a moving underground train requires a certain zen attitude... wait... wait... hit the key... oh... the wrong thing showed up (because obviously I pressed the right key)...&lt;/p&gt;
+&lt;p&gt;ok, backspace and do it again... oh, that wasn't backspace, that was ]... and sometimes it looks like ]]]]].&lt;/p&gt;
+&lt;p&gt;I'm trying to not only read/learn best practice, but practice best practice.&lt;/p&gt;
+&lt;p&gt;Once again I am relying on PGCC (pocket GCC) though it does apparently have the limitation of only doing WinMain (not c's usual main); I suppose a "big goal" I might have for WinCE programming would be to one day use it to compile GCC on my IPAQ (overnight?). &lt;/p&gt;
+&lt;p&gt;The ever mysterious "c.bat" (yes, the filename is very short for onscreen typing challenged fingernails)&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;\pgcc\cc1plus \pgcc\cwm.txt -o \pgcc\cwms.s -I \pgcc\include 
+ -include \pgcc\fixincl.h -fms-extensions \pgcc\as \pgcc\cwms.s 
+ -o \pgcc\cwmo.o \pgcc\ld \pgcc\cwmo.o -o \pgcc\cwme.exe -L \pgcc\lib 
+ -l cpplib -l corelibc -l coredll -l aygshell -l runtime -l portlib CWM.TXT
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h3 id="cwmtxt"&gt;CWM.TXT&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="cp"&gt;#define WIN32_LEAN_AND_MEAN&lt;/span&gt;
+&lt;span class="cp"&gt;#include  #include &amp;quot;func.h&amp;quot;&lt;/span&gt;
+&lt;span class="cm"&gt;/*  MODULAR BY INCLUDE    Function definitions hidden in includesabove I&amp;#39;ve told the compiler to use the func.h file as well as windows.h */&lt;/span&gt;
+&lt;span class="cm"&gt;/* declare the function before main */&lt;/span&gt;
+&lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="nf"&gt;outputText&lt;/span&gt;&lt;span class="p"&gt;();&lt;/span&gt;
+&lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="n"&gt;APIENTRY&lt;/span&gt; &lt;span class="nf"&gt;WinMain&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="n"&gt;HINSTANCE&lt;/span&gt; &lt;span class="n"&gt;hInstance&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;HINSTANCE&lt;/span&gt; &lt;span class="n"&gt;hPrevInstance&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; 
+    &lt;span class="n"&gt;LPTSTR&lt;/span&gt; &lt;span class="n"&gt;lpCmdLine&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="n"&gt;ncmdshow&lt;/span&gt; &lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="n"&gt;printf&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;pre function &lt;/span&gt;&lt;span class="se"&gt;\n&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+    &lt;span class="cm"&gt;/* this is the big moment, calling a function defined in another file! */&lt;/span&gt;
+    &lt;span class="n"&gt;outputText&lt;/span&gt;&lt;span class="p"&gt;();&lt;/span&gt;
+    &lt;span class="n"&gt;printf&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;post function &lt;/span&gt;&lt;span class="se"&gt;\n&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+    &lt;span class="cm"&gt;/* So that if I run it in the Windows Explorer I can still see the output */&lt;/span&gt;
+    &lt;span class="n"&gt;printf&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;Press return  to quit&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+    &lt;span class="n"&gt;getchar&lt;/span&gt;&lt;span class="p"&gt;();&lt;/span&gt;
+    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h3 id="funch"&gt;func.h&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="cm"&gt;/* function definitions go here */&lt;/span&gt;
+&lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="nf"&gt;outputText&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="n"&gt;printf&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;function include &lt;/span&gt;&lt;span class="se"&gt;\n&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;</summary><category term="win ce"></category><category term="win32"></category><category term="gcc"></category><category term="best practice"></category></entry><entry><title>Pancakes from Scratch Recipe v2</title><link href="http://blog.john-pfeiffer.com/pancakes-from-scratch-recipe-v2" rel="alternate"></link><updated>2010-01-30T09:47:00-08:00</updated><author><name>john pfeiffer</name></author><id>tag:blog.john-pfeiffer.com,2010-01-30:pancakes-from-scratch-recipe-v2</id><summary type="html">&lt;p&gt;You're hungry, you want something "home cooked", and you have the following:&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;1 egg  &lt;/li&gt;
 &lt;li&gt;1.5 cups of flour  &lt;/li&gt;
