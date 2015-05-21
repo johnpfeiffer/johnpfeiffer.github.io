@@ -6863,7 +6863,147 @@ interact
 &lt;li&gt;Oh, and it's very important to &lt;strong&gt;"interact"&lt;/strong&gt;, which returns the command prompt back to the user/operating system.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;Whew... that's just the tip of the iceberg of how "expect" greatly extends the functionality of Linux scripts!&lt;/p&gt;
-&lt;p&gt;Later I hope to demonstrate some VBScript (for windows) and maybe even a script on how to run a "non interactive FTP session" (as most FTP programs require "interaction" aka human at the keyboard)...&lt;/p&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">john pfeiffer</dc:creator><pubDate>Thu, 21 Jan 2010 22:11:00 -0800</pubDate><guid>tag:blog.john-pfeiffer.com,2010-01-21:script-programming-linux-expect-script-passwd-365-programming-project-day-twenty-two</guid></item><item><title>A Simple Windows Button: 365-programming project day six</title><link>http://blog.john-pfeiffer.com/a-simple-windows-button-365-programming-project-day-six</link><description>&lt;p&gt;Windows programming is a bit ugly - you have to selectively ignore the stuff "you know". On the positive side I've figured out how to insert code as preformatted (Drupal Input Filter -&amp;gt; extending the "safe HTML") so this should be easier to copy paste.&lt;/p&gt;
+&lt;p&gt;Later I hope to demonstrate some VBScript (for windows) and maybe even a script on how to run a "non interactive FTP session" (as most FTP programs require "interaction" aka human at the keyboard)...&lt;/p&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">john pfeiffer</dc:creator><pubDate>Thu, 21 Jan 2010 22:11:00 -0800</pubDate><guid>tag:blog.john-pfeiffer.com,2010-01-21:script-programming-linux-expect-script-passwd-365-programming-project-day-twenty-two</guid></item><item><title>Windows programming in WinCE on an HP IPAQ: 365 programming project day twenty one</title><link>http://blog.john-pfeiffer.com/windows-programming-in-wince-on-an-hp-ipaq-365-programming-project-day-twenty-one</link><description>&lt;p&gt;As the number of portable computers (we might call them mobile phones or smart phones or pda's etc.) explodes they need software. &lt;/p&gt;
+&lt;p&gt;One thing Microsoft got right is that Windows CE, the stripped down version of Windows for Mobile Devices, uses most of the same basic programming platform/language as "normal" desktop windows programming. &lt;/p&gt;
+&lt;p&gt;The following is a very interesting learning experience I've had (and a useful way to pass otherwise idle waiting time in the "Tube") programming Windows Applications in WinCE.&lt;/p&gt;
+&lt;h3 id="a-compiler-for-wince-pocketgcc"&gt;A Compiler for WinCE: pocketgcc&lt;/h3&gt;
+&lt;p&gt;The first thing you need is a WinCE compiler - my choice was pocketgcc (even though it hasn't been updated since 2003), because a port of GCC to WinCE means a stable tool that I already know (sorta) how to use. &lt;/p&gt;
+&lt;p&gt;&lt;a href="http://pocketgcc.sourceforge.net/"&gt;http://pocketgcc.sourceforge.net/&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;The next hurdle after downloading and copying them onto my device (HP Ipaq) and double tapping (clicking) to install them was to use the CMD to cd \pgcc&lt;/p&gt;
+&lt;p&gt;Then I used a text editor (either Word or pocketnotepad) to create a batch file (yes, technically I suppose a batch file is a program too!) with the following cryptic lines... &lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;\pgcc\cc1plus \pgcc\source-code.txt -o \pgcc\cwms.s -I \pgcc\include 
+ -include \pgcc\fixincl.h -fms-extensions \pgcc\as \pgcc\cwms.s 
+ -o \pgcc\cwmo.o \pgcc\ld \pgcc\cwmo.o -o \pgcc\cwme.exe -L \pgcc\lib 
+ -l cpplib -l corelibc -l coredll -l aygshell -l runtime -l portlib
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;ul&gt;
+&lt;li&gt;The cc1plus.exe (compiler?) outputs the assembly code file but also includes the "fixincl.h" file and uses the -fms-extensions option (no, I haven't actually yet learned exactly why). &lt;/li&gt;
+&lt;li&gt;The as.exe program turns the assembly into object code. &lt;/li&gt;
+&lt;li&gt;Finally the loader turns the object code into an executable with the appropriate libraries. &lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;The following source code should look very familiar to my earlier Windows Programming examples.&lt;/p&gt;
+&lt;p&gt;I've added comments here that are not in my "production" IPAQ environment source code because the screen is too small with lots of scrolling already...&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="cp"&gt;#define WIN32_LEAN_AND_MEAN&lt;/span&gt;
+&lt;span class="cp"&gt;#include &amp;lt;windows.h&amp;gt;&lt;/span&gt;
+&lt;span class="cp"&gt;#include &amp;lt;windowsx.h&amp;gt;&lt;/span&gt;
+&lt;span class="cp"&gt;#include &amp;lt;commctrl.h&amp;gt;&lt;/span&gt;
+&lt;span class="cp"&gt;#include &amp;lt;aygshell.h&amp;gt;&lt;/span&gt;
+&lt;span class="cp"&gt;#define  IDC_ExitButton 40099&lt;/span&gt;
+&lt;span class="cm"&gt;/* the IDC object requires a number, I just give them high unused ones */&lt;/span&gt;
+
+&lt;span class="cm"&gt;/* the above includes are a bit of a mystery to me but the program&lt;/span&gt;
+&lt;span class="cm"&gt;doesn&amp;#39;t work without them and I figure they must be specific to WinCE */&lt;/span&gt;
+
+&lt;span class="cm"&gt;/* instead of function stubs, main, then function declarations I do them&lt;/span&gt;
+&lt;span class="cm"&gt;all before main() ... but of course I have to remember to always declare&lt;/span&gt;
+&lt;span class="cm"&gt;before using... so do as I say: always declare functions (and then remember&lt;/span&gt;
+&lt;span class="cm"&gt;to update them and the stub), not as I do... */&lt;/span&gt;
+
+&lt;span class="n"&gt;VOID&lt;/span&gt; &lt;span class="n"&gt;APIENTRY&lt;/span&gt; &lt;span class="nf"&gt;HandlePaint&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;  &lt;span class="n"&gt;HWND&lt;/span&gt; &lt;span class="n"&gt;hwnd&lt;/span&gt;  &lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="n"&gt;HDC&lt;/span&gt; &lt;span class="n"&gt;hdc&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;            &lt;span class="cm"&gt;/* handle to device context */&lt;/span&gt;
+    &lt;span class="n"&gt;PAINTSTRUCT&lt;/span&gt; &lt;span class="n"&gt;ps&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;     
+    &lt;span class="n"&gt;RECT&lt;/span&gt; &lt;span class="n"&gt;rc&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;            &lt;span class="cm"&gt;/* rectangle structure */&lt;/span&gt;
+    &lt;span class="n"&gt;TCHAR&lt;/span&gt; &lt;span class="n"&gt;tszOut&lt;/span&gt;&lt;span class="p"&gt;[]&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;TEXT&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;hello!&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+
+    &lt;span class="n"&gt;hdc&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;BeginPaint&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;hwnd&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;ps&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+
+    &lt;span class="n"&gt;GetClientRect&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;hwnd&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;LPRECT&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;rc&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+
+    &lt;span class="cm"&gt;/* the cryptic stuff below outputs a text string in a rectangle */&lt;/span&gt;
+    &lt;span class="n"&gt;DrawText&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;hdc&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+        &lt;span class="n"&gt;tszOut&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+        &lt;span class="n"&gt;_tcslen&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;tszOut&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt;
+        &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;LPRECT&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;rc&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+        &lt;span class="n"&gt;DT_VCENTER&lt;/span&gt; &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="n"&gt;DT_CENTER&lt;/span&gt; &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="n"&gt;DT_SINGLELINE&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+    &lt;span class="n"&gt;EndPaint&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;hwnd&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;ps&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+
+&lt;span class="cm"&gt;/* below is the most important function after main() where the &amp;quot;large windows &lt;/span&gt;
+&lt;span class="cm"&gt;switch&amp;quot; figures out what the user has done and responds */&lt;/span&gt;
+
+&lt;span class="n"&gt;LRESULT&lt;/span&gt; &lt;span class="n"&gt;CALLBACK&lt;/span&gt; &lt;span class="nf"&gt;MenuWndProc&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="n"&gt;HWND&lt;/span&gt; &lt;span class="n"&gt;hwnd&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;UINT&lt;/span&gt; &lt;span class="n"&gt;message&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; 
+    &lt;span class="n"&gt;WPARAM&lt;/span&gt; &lt;span class="n"&gt;wParam&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;LPARAM&lt;/span&gt; &lt;span class="n"&gt;lParam&lt;/span&gt; &lt;span class="p"&gt;)&lt;/span&gt;  &lt;span class="cm"&gt;/* w &amp;amp; l param&amp;#39;s are extra data like x,y */&lt;/span&gt;
+&lt;span class="p"&gt;{&lt;/span&gt;  
+    &lt;span class="k"&gt;switch&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;message&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;              
+    &lt;span class="p"&gt;{&lt;/span&gt;   
+        &lt;span class="k"&gt;case&lt;/span&gt; &lt;span class="nl"&gt;WM_COMMAND&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;            &lt;span class="cm"&gt;/* there&amp;#39;s a command from the user */&lt;/span&gt;
+            &lt;span class="k"&gt;switch&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;LOWORD&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;wParam&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;      &lt;span class="cm"&gt;/* to find out what command */&lt;/span&gt;
+            &lt;span class="p"&gt;{&lt;/span&gt;   &lt;span class="k"&gt;case&lt;/span&gt; &lt;span class="nl"&gt;IDC_ExitButton&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;    &lt;span class="cm"&gt;/* the user pressed the button */&lt;/span&gt;   
+                    &lt;span class="n"&gt;PostQuitMessage&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+                    &lt;span class="k"&gt;break&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+                &lt;span class="k"&gt;default&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;
+                    &lt;span class="k"&gt;break&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;        
+            &lt;span class="p"&gt;}&lt;/span&gt;     
+            &lt;span class="k"&gt;break&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;  
+        &lt;span class="k"&gt;case&lt;/span&gt; &lt;span class="nl"&gt;WM_DESTROY&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; 
+            &lt;span class="n"&gt;PostQuitMessage&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt; &lt;span class="cm"&gt;/* closes the program */&lt;/span&gt;
+            &lt;span class="k"&gt;break&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;   
+        &lt;span class="k"&gt;case&lt;/span&gt; &lt;span class="nl"&gt;WM_PAINT&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+            &lt;span class="n"&gt;HandlePaint&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;hwnd&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;  &lt;span class="cm"&gt;/* calls a &amp;quot;modular&amp;quot; drawing function */&lt;/span&gt;
+            &lt;span class="k"&gt;break&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+
+        &lt;span class="k"&gt;default&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;      
+            &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;DefWindowProc&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;hwnd&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;message&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;wParam&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;lParam&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+            &lt;span class="k"&gt;break&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt;
+    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+
+
+&lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="n"&gt;APIENTRY&lt;/span&gt; &lt;span class="nf"&gt;WinMain&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; &lt;span class="n"&gt;HINSTANCE&lt;/span&gt; &lt;span class="n"&gt;hInstance&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;HINSTANCE&lt;/span&gt; &lt;span class="n"&gt;hPrevInstance&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="n"&gt;LPTSTR&lt;/span&gt; &lt;span class="n"&gt;lpCmdLine&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="n"&gt;ncmdshow&lt;/span&gt; &lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="n"&gt;HWND&lt;/span&gt; &lt;span class="n"&gt;hwnd&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;NULL&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="n"&gt;HWND&lt;/span&gt; &lt;span class="n"&gt;ExitButton&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;NULL&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;      &lt;span class="cm"&gt;/* a handle to our button &amp;quot;window&amp;quot; */&lt;/span&gt;
+    &lt;span class="n"&gt;MSG&lt;/span&gt; &lt;span class="n"&gt;msg&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;   
+    &lt;span class="n"&gt;WNDCLASS&lt;/span&gt; &lt;span class="n"&gt;wc&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="n"&gt;HMENU&lt;/span&gt; &lt;span class="n"&gt;hMenu&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+
+    &lt;span class="n"&gt;wc&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;style&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;CS_HREDRAW&lt;/span&gt; &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="n"&gt;CS_VREDRAW&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt; 
+    &lt;span class="n"&gt;wc&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;lpfnWndProc&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;WNDPROC&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="n"&gt;MenuWndProc&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt; 
+    &lt;span class="n"&gt;wc&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;cbClsExtra&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="n"&gt;wc&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;cbWndExtra&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="n"&gt;wc&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;hInstance&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;hInstance&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="n"&gt;wc&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;hIcon&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="n"&gt;wc&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;hCursor&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="n"&gt;wc&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;hbrBackground&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;HBRUSH&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="n"&gt;GetStockObject&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;WHITE_BRUSH&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+    &lt;span class="n"&gt;wc&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;lpszMenuName&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;NULL&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="n"&gt;wc&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;lpszClassName&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;LPTSTR&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="s"&gt;L&amp;quot;Menu App&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;  
+    &lt;span class="cm"&gt;/* WinCE seems to require strings cast as LONG? */&lt;/span&gt;
+
+    &lt;span class="k"&gt;if&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;!&lt;/span&gt; &lt;span class="n"&gt;RegisterClass&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;wc&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+    &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="n"&gt;MessageBox&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;NULL&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;TEXT&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;errors &amp;quot;&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt; &lt;span class="s"&gt;L&amp;quot;IMPORTANT&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;MB_OK&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+        &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt;
+
+    &lt;span class="cm"&gt;/* the size and placement of our program window */&lt;/span&gt;
+    &lt;span class="n"&gt;hwnd&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;CreateWindow&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;L&amp;quot;Menu App&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s"&gt;L&amp;quot;2nd prog hello&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; 
+        &lt;span class="n"&gt;WS_VISIBLE&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;30&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;200&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;150&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+        &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;HWND&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="nb"&gt;NULL&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nb"&gt;NULL&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;hInstance&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;LPSTR&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="nb"&gt;NULL&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+
+    &lt;span class="cm"&gt;/* the size and placement of our button child of hwnd &amp;quot;window&amp;quot; */&lt;/span&gt;
+    &lt;span class="n"&gt;ExitButton&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;CreateWindow&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt; 
+        &lt;span class="s"&gt;L&amp;quot;BUTTON&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s"&gt;L&amp;quot;quit&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;WS_CHILD&lt;/span&gt; &lt;span class="o"&gt;|&lt;/span&gt; 
+        &lt;span class="n"&gt;WS_VISIBLE&lt;/span&gt; &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="n"&gt;BS_PUSHBUTTON&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; 
+        &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;30&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;100&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="mi"&gt;100&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;hwnd&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;HMENU&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="n"&gt;IDC_ExitButton&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; 
+        &lt;span class="n"&gt;hInstance&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nb"&gt;NULL&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+
+    &lt;span class="n"&gt;ShowWindow&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;hwnd&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;ncmdshow&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+    &lt;span class="n"&gt;UpdateWindow&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;hwnd&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+
+    &lt;span class="k"&gt;while&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;GetMessage&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;msg&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nb"&gt;NULL&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+    &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="n"&gt;TranslateMessage&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;msg&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+        &lt;span class="n"&gt;DispatchMessage&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;msg&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt;
+        &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;msg&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;wParam&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+
+&lt;span class="p"&gt;}&lt;/span&gt; &lt;span class="cm"&gt;/* end WinMain */&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">john pfeiffer</dc:creator><pubDate>Thu, 21 Jan 2010 13:26:00 -0800</pubDate><guid>tag:blog.john-pfeiffer.com,2010-01-21:windows-programming-in-wince-on-an-hp-ipaq-365-programming-project-day-twenty-one</guid><category>win ce</category><category>win32</category><category>gcc</category><category>pocketgcc</category></item><item><title>A Simple Windows Button: 365-programming project day six</title><link>http://blog.john-pfeiffer.com/a-simple-windows-button-365-programming-project-day-six</link><description>&lt;p&gt;Windows programming is a bit ugly - you have to selectively ignore the stuff "you know". On the positive side I've figured out how to insert code as preformatted (Drupal Input Filter -&amp;gt; extending the "safe HTML") so this should be easier to copy paste.&lt;/p&gt;
 &lt;p&gt;Also, Notepad2 has a handy "turn tabs into spaces" that I shall start using more often...&lt;/p&gt;
 &lt;p&gt;I've built on the previous Windows Program that put some text on the screen so most of it should look familiar.&lt;/p&gt;
 &lt;p&gt;Remember, this was compiled with a gcc port (see earlier post for the link to the binary)&lt;/p&gt;
