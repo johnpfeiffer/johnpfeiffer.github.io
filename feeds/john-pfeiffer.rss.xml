@@ -2,7 +2,7 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>johnpfeiffer</title><link>http://blog.john-pfeiffer.com/</link><description></description><atom:link href="http://blog.john-pfeiffer.com/feeds/john-pfeiffer.rss.xml" rel="self"></atom:link><lastBuildDate>Thu, 21 May 2015 20:00:00 -0700</lastBuildDate><item><title>HAProxy in Docker</title><link>http://blog.john-pfeiffer.com/haproxy-in-docker</link><description>
 &lt;p&gt;Not only are Containers fast, one of the biggest advantages of Containers is the ability to reduce complexity.&lt;/p&gt;
 &lt;p&gt;Docker can turn an application/service, it's dependencies, and even the OS level requirements into a single blackbox package (that you can still inspect inside if you really want to).&lt;/p&gt;
-&lt;p&gt;Here's a trivial example of how I can leverage the haproxy Docker image/container to load balance two web servers.&lt;/p&gt;
+&lt;p&gt;Here's a trivial example of how I can leverage the HAProxy Docker image/container to load balance two web servers. (aka "reverse proxy" &lt;a href="http://en.wikipedia.org/wiki/Reverse_proxy"&gt;http://en.wikipedia.org/wiki/Reverse_proxy&lt;/a&gt;)&lt;/p&gt;
 &lt;blockquote&gt;
 &lt;p&gt;There are new problems that go along with the benefits of any new technology, see&lt;/p&gt;
 &lt;/blockquote&gt;
@@ -75,6 +75,69 @@ sudo docker run -p 8443:8443 --add-host&lt;span class="o"&gt;=&lt;/span&gt;docke
 &lt;span class="nt"&gt;&amp;lt;/body&amp;gt;&lt;/span&gt;
 &lt;span class="nt"&gt;&amp;lt;/html&amp;gt;&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
+&lt;h3 id="haproxy-stats"&gt;HAProxy Stats&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;sudo docker rm -f myhaproxy&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;global
+    debug
+
+defaults
+    log global
+    mode    http
+    timeout connect 5000
+    timeout client 5000
+    timeout server 5000
+
+listen http_proxy :8443
+    mode tcp
+    balance roundrobin
+    server srv1 docker:8000 check
+    server srv2 docker:8001 check
+
+# optional section to enable statistics for haproxy protected by basic auth (replace with your own user and password)
+listen stats :1936
+    stats enable
+    stats uri /
+    stats realm HAProxyStatistics
+    stats auth user:password
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;&lt;code&gt;./start-haproxy.sh&lt;/code&gt;&lt;/p&gt;
+&lt;h3 id="nginx-forward-proxy"&gt;nginx forward proxy&lt;/h3&gt;
+&lt;h4 id="nginxconf"&gt;nginx.conf&lt;/h4&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nt"&gt;worker_processes&lt;/span&gt;  &lt;span class="nt"&gt;1&lt;/span&gt;&lt;span class="o"&gt;;&lt;/span&gt;
+
+&lt;span class="nt"&gt;events&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="n"&gt;worker_connections&lt;/span&gt;  &lt;span class="m"&gt;1024&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+
+&lt;span class="nt"&gt;http&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="n"&gt;include&lt;/span&gt;       &lt;span class="n"&gt;mime&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;types&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="n"&gt;default_type&lt;/span&gt;  &lt;span class="n"&gt;application&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;octet&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;stream&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+
+    &lt;span class="n"&gt;sendfile&lt;/span&gt;        &lt;span class="n"&gt;on&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="n"&gt;keepalive_timeout&lt;/span&gt;  &lt;span class="m"&gt;65&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+
+    &lt;span class="n"&gt;gzip&lt;/span&gt;  &lt;span class="n"&gt;on&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+
+    &lt;span class="n"&gt;server&lt;/span&gt; &lt;span class="err"&gt;{&lt;/span&gt;
+        &lt;span class="n"&gt;listen&lt;/span&gt;       &lt;span class="m"&gt;8080&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+
+        &lt;span class="n"&gt;location&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt; &lt;span class="err"&gt;{&lt;/span&gt;
+            &lt;span class="n"&gt;resolver&lt;/span&gt; &lt;span class="m"&gt;8&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="m"&gt;8&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="m"&gt;8&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="m"&gt;8&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+            &lt;span class="n"&gt;proxy_pass&lt;/span&gt; &lt;span class="n"&gt;http&lt;/span&gt;&lt;span class="o"&gt;://&lt;/span&gt;&lt;span class="err"&gt;$&lt;/span&gt;&lt;span class="n"&gt;http_host&lt;/span&gt;&lt;span class="err"&gt;$&lt;/span&gt;&lt;span class="n"&gt;uri&lt;/span&gt;&lt;span class="err"&gt;$&lt;/span&gt;&lt;span class="n"&gt;is_args&lt;/span&gt;&lt;span class="err"&gt;$&lt;/span&gt;&lt;span class="n"&gt;args&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+        &lt;span class="p"&gt;}&lt;/span&gt;
+
+        &lt;span class="nt"&gt;error_page&lt;/span&gt;   &lt;span class="nt"&gt;500&lt;/span&gt; &lt;span class="nt"&gt;502&lt;/span&gt; &lt;span class="nt"&gt;503&lt;/span&gt; &lt;span class="nt"&gt;504&lt;/span&gt;  &lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nt"&gt;50x&lt;/span&gt;&lt;span class="nc"&gt;.html&lt;/span&gt;&lt;span class="o"&gt;;&lt;/span&gt;
+        &lt;span class="nt"&gt;location&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nt"&gt;50x&lt;/span&gt;&lt;span class="nc"&gt;.html&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+            &lt;span class="n"&gt;root&lt;/span&gt;   &lt;span class="n"&gt;html&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+        &lt;span class="p"&gt;}&lt;/span&gt;
+    &lt;span class="err"&gt;}&lt;/span&gt;
+&lt;span class="err"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;&lt;code&gt;docker run -it -p 8080:8080 --name mynginx -v /opt/mydata/nginx.conf:/etc/nginx/nginx.conf:ro nginx&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;configure your browser to use 127.0.0.1:8080 as it's proxy and watch the log statements fly by when you test http://blog.john-pfeiffer.com&lt;/p&gt;
+&lt;p&gt;NOTE: this does not support HTTPS &lt;a href="http://forum.nginx.org/read.php?2,15124,15256#msg-15256"&gt;http://forum.nginx.org/read.php?2,15124,15256#msg-15256&lt;/a&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
 &lt;h3 id="more-info"&gt;more info&lt;/h3&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;a href="https://registry.hub.docker.com/_/haproxy/"&gt;https://registry.hub.docker.com/_/haproxy/&lt;/a&gt;&lt;/li&gt;

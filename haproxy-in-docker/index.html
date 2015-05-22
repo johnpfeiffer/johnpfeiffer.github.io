@@ -81,6 +81,11 @@
 </li>
 <li><a href="#vim-optmydatahaproxycfg">vim /opt/mydata/haproxy.cfg</a></li>
 <li><a href="#start-haproxysh">start haproxy.sh</a></li>
+<li><a href="#haproxy-stats">HAProxy Stats</a></li>
+<li><a href="#nginx-forward-proxy">nginx forward proxy</a><ul>
+<li><a href="#nginxconf">nginx.conf</a></li>
+</ul>
+</li>
 <li><a href="#more-info">more info</a></li>
 </ul>
 </div>
@@ -91,7 +96,7 @@
             
 <p>Not only are Containers fast, one of the biggest advantages of Containers is the ability to reduce complexity.</p>
 <p>Docker can turn an application/service, it's dependencies, and even the OS level requirements into a single blackbox package (that you can still inspect inside if you really want to).</p>
-<p>Here's a trivial example of how I can leverage the haproxy Docker image/container to load balance two web servers.</p>
+<p>Here's a trivial example of how I can leverage the HAProxy Docker image/container to load balance two web servers. (aka "reverse proxy" <a href="http://en.wikipedia.org/wiki/Reverse_proxy">http://en.wikipedia.org/wiki/Reverse_proxy</a>)</p>
 <blockquote>
 <p>There are new problems that go along with the benefits of any new technology, see</p>
 </blockquote>
@@ -164,6 +169,69 @@ sudo docker run -p 8443:8443 --add-host<span class="o">=</span>docker:<span clas
 <span class="nt">&lt;/body&gt;</span>
 <span class="nt">&lt;/html&gt;</span>
 </pre></div>
+<h3 id="haproxy-stats">HAProxy Stats</h3>
+<p><code>sudo docker rm -f myhaproxy</code></p>
+<div class="highlight"><pre>global
+    debug
+
+defaults
+    log global
+    mode    http
+    timeout connect 5000
+    timeout client 5000
+    timeout server 5000
+
+listen http_proxy :8443
+    mode tcp
+    balance roundrobin
+    server srv1 docker:8000 check
+    server srv2 docker:8001 check
+
+# optional section to enable statistics for haproxy protected by basic auth (replace with your own user and password)
+listen stats :1936
+    stats enable
+    stats uri /
+    stats realm HAProxyStatistics
+    stats auth user:password
+</pre></div>
+<p><code>./start-haproxy.sh</code></p>
+<h3 id="nginx-forward-proxy">nginx forward proxy</h3>
+<h4 id="nginxconf">nginx.conf</h4>
+<div class="highlight"><pre><span class="nt">worker_processes</span>  <span class="nt">1</span><span class="o">;</span>
+
+<span class="nt">events</span> <span class="p">{</span>
+    <span class="n">worker_connections</span>  <span class="m">1024</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="nt">http</span> <span class="p">{</span>
+    <span class="n">include</span>       <span class="n">mime</span><span class="o">.</span><span class="n">types</span><span class="p">;</span>
+    <span class="n">default_type</span>  <span class="n">application</span><span class="o">/</span><span class="n">octet</span><span class="o">-</span><span class="n">stream</span><span class="p">;</span>
+
+    <span class="n">sendfile</span>        <span class="n">on</span><span class="p">;</span>
+    <span class="n">keepalive_timeout</span>  <span class="m">65</span><span class="p">;</span>
+
+    <span class="n">gzip</span>  <span class="n">on</span><span class="p">;</span>
+
+    <span class="n">server</span> <span class="err">{</span>
+        <span class="n">listen</span>       <span class="m">8080</span><span class="p">;</span>
+
+        <span class="n">location</span> <span class="o">/</span> <span class="err">{</span>
+            <span class="n">resolver</span> <span class="m">8</span><span class="o">.</span><span class="m">8</span><span class="o">.</span><span class="m">8</span><span class="o">.</span><span class="m">8</span><span class="p">;</span>
+            <span class="n">proxy_pass</span> <span class="n">http</span><span class="o">://</span><span class="err">$</span><span class="n">http_host</span><span class="err">$</span><span class="n">uri</span><span class="err">$</span><span class="n">is_args</span><span class="err">$</span><span class="n">args</span><span class="p">;</span>
+        <span class="p">}</span>
+
+        <span class="nt">error_page</span>   <span class="nt">500</span> <span class="nt">502</span> <span class="nt">503</span> <span class="nt">504</span>  <span class="o">/</span><span class="nt">50x</span><span class="nc">.html</span><span class="o">;</span>
+        <span class="nt">location</span> <span class="o">=</span> <span class="o">/</span><span class="nt">50x</span><span class="nc">.html</span> <span class="p">{</span>
+            <span class="n">root</span>   <span class="n">html</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="err">}</span>
+<span class="err">}</span>
+</pre></div>
+<p><code>docker run -it -p 8080:8080 --name mynginx -v /opt/mydata/nginx.conf:/etc/nginx/nginx.conf:ro nginx</code></p>
+<blockquote>
+<p>configure your browser to use 127.0.0.1:8080 as it's proxy and watch the log statements fly by when you test http://blog.john-pfeiffer.com</p>
+<p>NOTE: this does not support HTTPS <a href="http://forum.nginx.org/read.php?2,15124,15256#msg-15256">http://forum.nginx.org/read.php?2,15124,15256#msg-15256</a></p>
+</blockquote>
 <h3 id="more-info">more info</h3>
 <ul>
 <li><a href="https://registry.hub.docker.com/_/haproxy/">https://registry.hub.docker.com/_/haproxy/</a></li>
