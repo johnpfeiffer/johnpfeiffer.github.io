@@ -79,9 +79,12 @@
 <li><a href="#some-backend-web-servers">Some backend web servers</a></li>
 </ul>
 </li>
-<li><a href="#vim-optmydatahaproxycfg">vim /opt/mydata/haproxy.cfg</a></li>
+<li><a href="#optmydatahaproxycfg">/opt/mydata/haproxy.cfg</a></li>
 <li><a href="#start-haproxysh">start haproxy.sh</a></li>
-<li><a href="#haproxy-stats">HAProxy Stats</a></li>
+<li><a href="#haproxy-stats">HAProxy Stats</a><ul>
+<li><a href="#optmydatahaproxycfg_1">### /opt/mydata/haproxy.cfg</a></li>
+</ul>
+</li>
 <li><a href="#nginx-forward-proxy">nginx forward proxy</a><ul>
 <li><a href="#nginxconf">nginx.conf</a></li>
 </ul>
@@ -96,9 +99,16 @@
             
 <p>Not only are Containers fast, one of the biggest advantages of Containers is the ability to reduce complexity.</p>
 <p>Docker can turn an application/service, it's dependencies, and even the OS level requirements into a single blackbox package (that you can still inspect inside if you really want to).</p>
+<p>One thing I really like is less code.  Seriously.  Configuration over coding (whenever I don't need customization) means far less maintenance and bugs.</p>
 <p>Here's a trivial example of how I can leverage the HAProxy Docker image/container to load balance two web servers. (aka "reverse proxy" <a href="http://en.wikipedia.org/wiki/Reverse_proxy">http://en.wikipedia.org/wiki/Reverse_proxy</a>)</p>
+<div class="highlight"><pre>    client -&gt; all other sites
+      |
+reverse proxy (haproxy)
+  /         \
+BackendA  BackendB
+</pre></div>
 <blockquote>
-<p>There are new problems that go along with the benefits of any new technology, see</p>
+<p>There are new problems that go along with the benefits of any new technology, see the complicated networking/port coordination</p>
 </blockquote>
 <h3 id="prerequisites">Prerequisites</h3>
 <p>sudo docker pull haproxy:1.5</p>
@@ -116,7 +126,7 @@ python -m SimpleHTTPServer 8001 &amp;
 <blockquote>
 <p>Clearly a trivial example (more likely two remote hosts in logical/geographic disparate areas if aiming for High Availability, or at least on different hosts to scale with more resources)</p>
 </blockquote>
-<h3 id="vim-optmydatahaproxycfg">vim /opt/mydata/haproxy.cfg</h3>
+<h3 id="optmydatahaproxycfg">/opt/mydata/haproxy.cfg</h3>
 <div class="highlight"><pre>global
         debug
 
@@ -142,6 +152,17 @@ sudo docker run -p 8443:8443 --add-host<span class="o">=</span>docker:<span clas
 <blockquote>
 <p>Now that the docker container's /etc/hosts file has the Host IP Address injected (with the name "docker") the haproxy config file probably makes more sense</p>
 </blockquote>
+<ul>
+<li>running the container</li>
+<li>the host port 8443 mapped to the container port 8443</li>
+<li>injecting into the container /etc/hosts the Host IP Address as "docker"</li>
+<li>ephemeral container (automatic cleanup on termination)</li>
+<li>interactive</li>
+<li>tty</li>
+<li>readonly mapping of the /opt/mydata/haproxy.cfg file on the host to /usr/local/etc/haproxy/haproxy.cfg</li>
+<li>name the container myhaproxy (each container name must be unique)</li>
+<li>the container is using the haproxy version 1.5 Docker Image</li>
+</ul>
 <p><code>./start-haproxy.sh</code></p>
 <p><code>curl localhost:8443</code></p>
 <div class="highlight"><pre><span class="cp">&lt;!DOCTYPE html PUBLIC "-//W3C//DTD HTML 3.2 Final//EN"&gt;</span><span class="nt">&lt;html&gt;</span>
@@ -171,6 +192,7 @@ sudo docker run -p 8443:8443 --add-host<span class="o">=</span>docker:<span clas
 </pre></div>
 <h3 id="haproxy-stats">HAProxy Stats</h3>
 <p><code>sudo docker rm -f myhaproxy</code></p>
+<h4 id="optmydatahaproxycfg_1">### /opt/mydata/haproxy.cfg</h4>
 <div class="highlight"><pre>global
     debug
 
@@ -196,6 +218,7 @@ listen stats :1936
 </pre></div>
 <p><code>./start-haproxy.sh</code></p>
 <h3 id="nginx-forward-proxy">nginx forward proxy</h3>
+<p>client -&gt; forward proxy (nginx) -&gt; all other sites</p>
 <h4 id="nginxconf">nginx.conf</h4>
 <div class="highlight"><pre><span class="nt">worker_processes</span>  <span class="nt">1</span><span class="o">;</span>
 

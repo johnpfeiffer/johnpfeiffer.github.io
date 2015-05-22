@@ -2,9 +2,16 @@
 <feed xmlns="http://www.w3.org/2005/Atom"><title>johnpfeiffer</title><link href="http://blog.john-pfeiffer.com/" rel="alternate"></link><link href="http://blog.john-pfeiffer.com/feeds/john-pfeiffer.atom.xml" rel="self"></link><id>http://blog.john-pfeiffer.com/</id><updated>2015-05-21T20:00:00-07:00</updated><entry><title>HAProxy in Docker</title><link href="http://blog.john-pfeiffer.com/haproxy-in-docker" rel="alternate"></link><updated>2015-05-21T20:00:00-07:00</updated><author><name>john pfeiffer</name></author><id>tag:blog.john-pfeiffer.com,2015-05-21:haproxy-in-docker</id><summary type="html">
 &lt;p&gt;Not only are Containers fast, one of the biggest advantages of Containers is the ability to reduce complexity.&lt;/p&gt;
 &lt;p&gt;Docker can turn an application/service, it's dependencies, and even the OS level requirements into a single blackbox package (that you can still inspect inside if you really want to).&lt;/p&gt;
+&lt;p&gt;One thing I really like is less code.  Seriously.  Configuration over coding (whenever I don't need customization) means far less maintenance and bugs.&lt;/p&gt;
 &lt;p&gt;Here's a trivial example of how I can leverage the HAProxy Docker image/container to load balance two web servers. (aka "reverse proxy" &lt;a href="http://en.wikipedia.org/wiki/Reverse_proxy"&gt;http://en.wikipedia.org/wiki/Reverse_proxy&lt;/a&gt;)&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;    client -&amp;gt; all other sites
+      |
+reverse proxy (haproxy)
+  /         \
+BackendA  BackendB
+&lt;/pre&gt;&lt;/div&gt;
 &lt;blockquote&gt;
-&lt;p&gt;There are new problems that go along with the benefits of any new technology, see&lt;/p&gt;
+&lt;p&gt;There are new problems that go along with the benefits of any new technology, see the complicated networking/port coordination&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;h3 id="prerequisites"&gt;Prerequisites&lt;/h3&gt;
 &lt;p&gt;sudo docker pull haproxy:1.5&lt;/p&gt;
@@ -22,7 +29,7 @@ python -m SimpleHTTPServer 8001 &amp;amp;
 &lt;blockquote&gt;
 &lt;p&gt;Clearly a trivial example (more likely two remote hosts in logical/geographic disparate areas if aiming for High Availability, or at least on different hosts to scale with more resources)&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;h3 id="vim-optmydatahaproxycfg"&gt;vim /opt/mydata/haproxy.cfg&lt;/h3&gt;
+&lt;h3 id="optmydatahaproxycfg"&gt;/opt/mydata/haproxy.cfg&lt;/h3&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;global
         debug
 
@@ -48,6 +55,17 @@ sudo docker run -p 8443:8443 --add-host&lt;span class="o"&gt;=&lt;/span&gt;docke
 &lt;blockquote&gt;
 &lt;p&gt;Now that the docker container's /etc/hosts file has the Host IP Address injected (with the name "docker") the haproxy config file probably makes more sense&lt;/p&gt;
 &lt;/blockquote&gt;
+&lt;ul&gt;
+&lt;li&gt;running the container&lt;/li&gt;
+&lt;li&gt;the host port 8443 mapped to the container port 8443&lt;/li&gt;
+&lt;li&gt;injecting into the container /etc/hosts the Host IP Address as "docker"&lt;/li&gt;
+&lt;li&gt;ephemeral container (automatic cleanup on termination)&lt;/li&gt;
+&lt;li&gt;interactive&lt;/li&gt;
+&lt;li&gt;tty&lt;/li&gt;
+&lt;li&gt;readonly mapping of the /opt/mydata/haproxy.cfg file on the host to /usr/local/etc/haproxy/haproxy.cfg&lt;/li&gt;
+&lt;li&gt;name the container myhaproxy (each container name must be unique)&lt;/li&gt;
+&lt;li&gt;the container is using the haproxy version 1.5 Docker Image&lt;/li&gt;
+&lt;/ul&gt;
 &lt;p&gt;&lt;code&gt;./start-haproxy.sh&lt;/code&gt;&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;curl localhost:8443&lt;/code&gt;&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="cp"&gt;&amp;lt;!DOCTYPE html PUBLIC "-//W3C//DTD HTML 3.2 Final//EN"&amp;gt;&lt;/span&gt;&lt;span class="nt"&gt;&amp;lt;html&amp;gt;&lt;/span&gt;
@@ -77,6 +95,7 @@ sudo docker run -p 8443:8443 --add-host&lt;span class="o"&gt;=&lt;/span&gt;docke
 &lt;/pre&gt;&lt;/div&gt;
 &lt;h3 id="haproxy-stats"&gt;HAProxy Stats&lt;/h3&gt;
 &lt;p&gt;&lt;code&gt;sudo docker rm -f myhaproxy&lt;/code&gt;&lt;/p&gt;
+&lt;h4 id="optmydatahaproxycfg_1"&gt;### /opt/mydata/haproxy.cfg&lt;/h4&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;global
     debug
 
@@ -102,6 +121,7 @@ listen stats :1936
 &lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;&lt;code&gt;./start-haproxy.sh&lt;/code&gt;&lt;/p&gt;
 &lt;h3 id="nginx-forward-proxy"&gt;nginx forward proxy&lt;/h3&gt;
+&lt;p&gt;client -&amp;gt; forward proxy (nginx) -&amp;gt; all other sites&lt;/p&gt;
 &lt;h4 id="nginxconf"&gt;nginx.conf&lt;/h4&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nt"&gt;worker_processes&lt;/span&gt;  &lt;span class="nt"&gt;1&lt;/span&gt;&lt;span class="o"&gt;;&lt;/span&gt;
 
@@ -2070,7 +2090,7 @@ SITEMAP = {
 &lt;li&gt;&lt;a href="https://bitbucket.org/johnpfeiffer/docker/src"&gt;https://bitbucket.org/johnpfeiffer/docker/src&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;</summary><category term="python"></category><category term="pelican"></category><category term="blog"></category><category term="static site"></category></entry><entry><title>Cumulus compatible S3, nginx, and HMAC signed requests</title><link href="http://blog.john-pfeiffer.com/cumulus-compatible-s3-nginx-and-hmac-signed-requests" rel="alternate"></link><updated>2013-11-26T17:10:00-08:00</updated><author><name>john pfeiffer</name></author><id>tag:blog.john-pfeiffer.com,2013-11-26:cumulus-compatible-s3-nginx-and-hmac-signed-requests</id><summary type="html">&lt;p&gt;With the exceptionally fast, reliable and popular web server &lt;strong&gt;&lt;a href="http://nginx.org/"&gt;nginx&lt;/a&gt;&lt;/strong&gt; as a front end customers can use a browser to access their uploaded files via a simple URL, the same as the SaaS Amazon S3 implementation, without knowing about the &lt;strong&gt;&lt;a href="http://www.nimbusproject.org/doc/nimbus/faq/#what-is-cumulus"&gt;Cumulus backend&lt;/a&gt;&lt;/strong&gt;.&lt;/p&gt;
 &lt;p&gt;Unfortunately there were edge cases around the encodings of spaces, pluses, slashes, etc. where nginx + Cumulus was returning "Access Denied" when trying to GET a file.&lt;/p&gt;
-&lt;p&gt;Examining the relevant RFC's (&lt;a href="http://tools.ietf.org/html/rfc3986#section-2.1"&gt;http://tools.ietf.org/html/rfc3986#section-2.1&lt;/a&gt;), PHP﻿
+&lt;p&gt;Examining the relevant RFC's (&lt;a href="http://tools.ietf.org/html/rfc3986#section-2.1"&gt;http://tools.ietf.org/html/rfc3986#section-2.1&lt;/a&gt;), PHP
 (&lt;a href="http://php.net/manual/en/function.rawurlencode.php"&gt;http://php.net/manual/en/function.rawurlencode.php&lt;/a&gt;) and Python  ﻿(&lt;a href="http://docs.python.org/2/library/urllib.html"&gt;http://docs.python.org/2/library/urllib.html&lt;/a&gt;) references, and examining the logs, I could see the files were PUT correctly, &lt;a href="http://s3tools.org/s3cmd"&gt;s3cmd&lt;/a&gt; could retrieve the  binary objects (files) from Cumulus fine... but the logs were showing a change in the URL's.&lt;/p&gt;
 &lt;p&gt;Increasing the &lt;a href="http://nginx.org/en/docs/debugging_log.html"&gt;debugging in nginx&lt;/a&gt;, digging into the &lt;a href="https://github.com/nimbusproject/nimbus/tree/master/cumulus"&gt;Cumulus source
 code&lt;/a&gt; and &lt;a href="https://github.com/anomalizer/ngx_aws_auth"&gt;nginx AWS Authentication Module&lt;/a&gt; (and adding more logging statements in  Python and C respectively), I realized there was a mismatch in the REST URL signature process.&lt;/p&gt;
@@ -2078,13 +2098,13 @@ code&lt;/a&gt; and &lt;a href="https://github.com/anomalizer/ngx_aws_auth"&gt;ng
 &lt;p&gt;A lot of digging into nginx configs and source, along with learning a bit about nginx module development and hacking the source of the ngx_aws_auth module, I finally came up with a matching signature process, (success!)&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;ngx_aws_auth/ngx_http_aws_auth.c&lt;/strong&gt;  &lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="cm"&gt;/* uses the source and length to copy the uri, does not escape characters&lt;/span&gt;
-&lt;span class="cm"&gt;(the argument signature is compatible wit ngx_escape_uri)&lt;/span&gt;
+&lt;span class="cm"&gt;(the argument signature is compatible with ngx_escape_uri)&lt;/span&gt;
 &lt;span class="cm"&gt;*/&lt;/span&gt;
 &lt;span class="kt"&gt;uintptr_t&lt;/span&gt; &lt;span class="nf"&gt;ngx_uri_extractor&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;u_char&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;dst&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;u_char&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;src&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kt"&gt;size_t&lt;/span&gt; &lt;span class="n"&gt;size&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kt"&gt;ngx_uint_t&lt;/span&gt; &lt;span class="n"&gt;type&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;span class="p"&gt;{&lt;/span&gt;
     &lt;span class="k"&gt;while&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;size&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
-    &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;dst&lt;/span&gt;&lt;span class="o"&gt;++&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;src&lt;/span&gt;&lt;span class="o"&gt;++&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
-    &lt;span class="n"&gt;size&lt;/span&gt;&lt;span class="o"&gt;--&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+        &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;dst&lt;/span&gt;&lt;span class="o"&gt;++&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;src&lt;/span&gt;&lt;span class="o"&gt;++&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+        &lt;span class="n"&gt;size&lt;/span&gt;&lt;span class="o"&gt;--&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
     &lt;span class="p"&gt;}&lt;/span&gt;
     &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;uintptr_t&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="n"&gt;dst&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
 &lt;span class="p"&gt;}&lt;/span&gt;

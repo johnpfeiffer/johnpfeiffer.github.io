@@ -74,7 +74,7 @@
 
             <p>With the exceptionally fast, reliable and popular web server <strong><a href="http://nginx.org/">nginx</a></strong> as a front end customers can use a browser to access their uploaded files via a simple URL, the same as the SaaS Amazon S3 implementation, without knowing about the <strong><a href="http://www.nimbusproject.org/doc/nimbus/faq/#what-is-cumulus">Cumulus backend</a></strong>.</p>
 <p>Unfortunately there were edge cases around the encodings of spaces, pluses, slashes, etc. where nginx + Cumulus was returning "Access Denied" when trying to GET a file.</p>
-<p>Examining the relevant RFC's (<a href="http://tools.ietf.org/html/rfc3986#section-2.1">http://tools.ietf.org/html/rfc3986#section-2.1</a>), PHP﻿
+<p>Examining the relevant RFC's (<a href="http://tools.ietf.org/html/rfc3986#section-2.1">http://tools.ietf.org/html/rfc3986#section-2.1</a>), PHP
 (<a href="http://php.net/manual/en/function.rawurlencode.php">http://php.net/manual/en/function.rawurlencode.php</a>) and Python  ﻿(<a href="http://docs.python.org/2/library/urllib.html">http://docs.python.org/2/library/urllib.html</a>) references, and examining the logs, I could see the files were PUT correctly, <a href="http://s3tools.org/s3cmd">s3cmd</a> could retrieve the  binary objects (files) from Cumulus fine... but the logs were showing a change in the URL's.</p>
 <p>Increasing the <a href="http://nginx.org/en/docs/debugging_log.html">debugging in nginx</a>, digging into the <a href="https://github.com/nimbusproject/nimbus/tree/master/cumulus">Cumulus source
 code</a> and <a href="https://github.com/anomalizer/ngx_aws_auth">nginx AWS Authentication Module</a> (and adding more logging statements in  Python and C respectively), I realized there was a mismatch in the REST URL signature process.</p>
@@ -82,13 +82,13 @@ code</a> and <a href="https://github.com/anomalizer/ngx_aws_auth">nginx AWS Auth
 <p>A lot of digging into nginx configs and source, along with learning a bit about nginx module development and hacking the source of the ngx_aws_auth module, I finally came up with a matching signature process, (success!)</p>
 <p><strong>ngx_aws_auth/ngx_http_aws_auth.c</strong>  </p>
 <div class="highlight"><pre><span class="cm">/* uses the source and length to copy the uri, does not escape characters</span>
-<span class="cm">(the argument signature is compatible wit ngx_escape_uri)</span>
+<span class="cm">(the argument signature is compatible with ngx_escape_uri)</span>
 <span class="cm">*/</span>
 <span class="kt">uintptr_t</span> <span class="nf">ngx_uri_extractor</span><span class="p">(</span><span class="n">u_char</span> <span class="o">*</span><span class="n">dst</span><span class="p">,</span> <span class="n">u_char</span> <span class="o">*</span><span class="n">src</span><span class="p">,</span> <span class="kt">size_t</span> <span class="n">size</span><span class="p">,</span> <span class="kt">ngx_uint_t</span> <span class="n">type</span><span class="p">)</span>
 <span class="p">{</span>
     <span class="k">while</span> <span class="p">(</span><span class="n">size</span><span class="p">)</span> <span class="p">{</span>
-    <span class="o">*</span><span class="n">dst</span><span class="o">++</span> <span class="o">=</span> <span class="o">*</span><span class="n">src</span><span class="o">++</span><span class="p">;</span>
-    <span class="n">size</span><span class="o">--</span><span class="p">;</span>
+        <span class="o">*</span><span class="n">dst</span><span class="o">++</span> <span class="o">=</span> <span class="o">*</span><span class="n">src</span><span class="o">++</span><span class="p">;</span>
+        <span class="n">size</span><span class="o">--</span><span class="p">;</span>
     <span class="p">}</span>
     <span class="k">return</span> <span class="p">(</span><span class="kt">uintptr_t</span><span class="p">)</span> <span class="n">dst</span><span class="p">;</span>
 <span class="p">}</span>
