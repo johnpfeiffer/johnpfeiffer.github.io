@@ -1,5 +1,86 @@
 <?xml version="1.0" encoding="utf-8"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>johnpfeiffer</title><link>http://blog.john-pfeiffer.com/</link><description></description><atom:link href="http://blog.john-pfeiffer.com/feeds/john-pfeiffer.rss.xml" rel="self"></atom:link><lastBuildDate>Sat, 01 Nov 2014 00:00:00 -0700</lastBuildDate><item><title>Subunit and Subunit2JunitXML to get JUnitXML test result output from UnitTest</title><link>http://blog.john-pfeiffer.com/subunit-and-subunit2junitxml-to-get-junitxml-test-result-output-from-unittest</link><description>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>johnpfeiffer</title><link>http://blog.john-pfeiffer.com/</link><description></description><atom:link href="http://blog.john-pfeiffer.com/feeds/john-pfeiffer.rss.xml" rel="self"></atom:link><lastBuildDate>Thu, 21 May 2015 20:00:00 -0700</lastBuildDate><item><title>HAProxy in Docker</title><link>http://blog.john-pfeiffer.com/haproxy-in-docker</link><description>
+&lt;p&gt;Not only are Containers fast, one of the biggest advantages of Containers is the ability to reduce complexity.&lt;/p&gt;
+&lt;p&gt;Docker can turn an application/service, it's dependencies, and even the OS level requirements into a single blackbox package (that you can still inspect inside if you really want to).&lt;/p&gt;
+&lt;p&gt;Here's a trivial example of how I can leverage the haproxy Docker image/container to load balance two web servers.&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;There are new problems that go along with the benefits of any new technology, see&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id="prerequisites"&gt;Prerequisites&lt;/h3&gt;
+&lt;p&gt;sudo docker pull haproxy:1.5&lt;/p&gt;
+&lt;h4 id="some-backend-web-servers"&gt;Some backend web servers&lt;/h4&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;mkdir -p /tmp/BackendA
+echo "foo" &amp;gt; /tmp/BackendA/foo.txt
+cd /tmp/BackendA
+python -m SimpleHTTPServer 8000 &amp;amp;
+
+mkdir -p /tmp/BackendB
+echo "bar" &amp;gt; /tmp/BackendB/bar.txt
+cd /tmp/BackendB
+python -m SimpleHTTPServer 8001 &amp;amp;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Clearly a trivial example (more likely two remote hosts in logical/geographic disparate areas if aiming for High Availability, or at least on different hosts to scale with more resources)&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id="vim-optmydatahaproxycfg"&gt;vim /opt/mydata/haproxy.cfg&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;global
+        debug
+
+defaults
+        log global
+        mode    http
+        timeout connect 5000
+        timeout client 5000
+        timeout server 5000
+
+listen http_proxy :8443
+        mode tcp
+        balance roundrobin
+        server srv1 docker:8000 check
+        server srv2 docker:8001 check
+&lt;/pre&gt;&lt;/div&gt;
+&lt;h3 id="start-haproxysh"&gt;start haproxy.sh&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="c"&gt;#!/bin/bash&lt;/span&gt;
+&lt;span class="nv"&gt;HOSTIP&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="sb"&gt;`&lt;/span&gt;ip addr show &lt;span class="p"&gt;|&lt;/span&gt; grep docker0 &lt;span class="p"&gt;|&lt;/span&gt; grep global &lt;span class="p"&gt;|&lt;/span&gt; awk &lt;span class="s1"&gt;'{print $2}'&lt;/span&gt; &lt;span class="p"&gt;|&lt;/span&gt; cut -d / -f1&lt;span class="sb"&gt;`&lt;/span&gt;
+
+sudo docker run -p 8443:8443 --add-host&lt;span class="o"&gt;=&lt;/span&gt;docker:&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;HOSTIP&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt; --rm -it -v /opt/mydata/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro --name myhaproxy haproxy:1.5
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Now that the docker container's /etc/hosts file has the Host IP Address injected (with the name "docker") the haproxy config file probably makes more sense&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;code&gt;./start-haproxy.sh&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;curl localhost:8443&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="cp"&gt;&amp;lt;!DOCTYPE html PUBLIC "-//W3C//DTD HTML 3.2 Final//EN"&amp;gt;&lt;/span&gt;&lt;span class="nt"&gt;&amp;lt;html&amp;gt;&lt;/span&gt;
+&lt;span class="nt"&gt;&amp;lt;title&amp;gt;&lt;/span&gt;Directory listing for /&lt;span class="nt"&gt;&amp;lt;/title&amp;gt;&lt;/span&gt;
+&lt;span class="nt"&gt;&amp;lt;body&amp;gt;&lt;/span&gt;
+&lt;span class="nt"&gt;&amp;lt;h2&amp;gt;&lt;/span&gt;Directory listing for /&lt;span class="nt"&gt;&amp;lt;/h2&amp;gt;&lt;/span&gt;
+&lt;span class="nt"&gt;&amp;lt;hr&amp;gt;&lt;/span&gt;
+&lt;span class="nt"&gt;&amp;lt;ul&amp;gt;&lt;/span&gt;
+&lt;span class="nt"&gt;&amp;lt;li&amp;gt;&amp;lt;a&lt;/span&gt; &lt;span class="na"&gt;href=&lt;/span&gt;&lt;span class="s"&gt;"bar.txt"&lt;/span&gt;&lt;span class="nt"&gt;&amp;gt;&lt;/span&gt;bar.txt&lt;span class="nt"&gt;&amp;lt;/a&amp;gt;&lt;/span&gt;
+&lt;span class="nt"&gt;&amp;lt;/ul&amp;gt;&lt;/span&gt;
+&lt;span class="nt"&gt;&amp;lt;hr&amp;gt;&lt;/span&gt;
+&lt;span class="nt"&gt;&amp;lt;/body&amp;gt;&lt;/span&gt;
+&lt;span class="nt"&gt;&amp;lt;/html&amp;gt;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;&lt;code&gt;curl localhost:8443&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="cp"&gt;&amp;lt;!DOCTYPE html PUBLIC "-//W3C//DTD HTML 3.2 Final//EN"&amp;gt;&lt;/span&gt;&lt;span class="nt"&gt;&amp;lt;html&amp;gt;&lt;/span&gt;
+&lt;span class="nt"&gt;&amp;lt;title&amp;gt;&lt;/span&gt;Directory listing for /&lt;span class="nt"&gt;&amp;lt;/title&amp;gt;&lt;/span&gt;
+&lt;span class="nt"&gt;&amp;lt;body&amp;gt;&lt;/span&gt;
+&lt;span class="nt"&gt;&amp;lt;h2&amp;gt;&lt;/span&gt;Directory listing for /&lt;span class="nt"&gt;&amp;lt;/h2&amp;gt;&lt;/span&gt;
+&lt;span class="nt"&gt;&amp;lt;hr&amp;gt;&lt;/span&gt;
+&lt;span class="nt"&gt;&amp;lt;ul&amp;gt;&lt;/span&gt;
+&lt;span class="nt"&gt;&amp;lt;li&amp;gt;&amp;lt;a&lt;/span&gt; &lt;span class="na"&gt;href=&lt;/span&gt;&lt;span class="s"&gt;"foo.txt"&lt;/span&gt;&lt;span class="nt"&gt;&amp;gt;&lt;/span&gt;foo.txt&lt;span class="nt"&gt;&amp;lt;/a&amp;gt;&lt;/span&gt;
+&lt;span class="nt"&gt;&amp;lt;/ul&amp;gt;&lt;/span&gt;
+&lt;span class="nt"&gt;&amp;lt;hr&amp;gt;&lt;/span&gt;
+&lt;span class="nt"&gt;&amp;lt;/body&amp;gt;&lt;/span&gt;
+&lt;span class="nt"&gt;&amp;lt;/html&amp;gt;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;h3 id="more-info"&gt;more info&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://registry.hub.docker.com/_/haproxy/"&gt;https://registry.hub.docker.com/_/haproxy/&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://cbonte.github.io/haproxy-dconv/configuration-1.5.html"&gt;https://cbonte.github.io/haproxy-dconv/configuration-1.5.html&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="http://docs.docker.com/reference/commandline/cli/#adding-entries-to-a-container-hosts-file"&gt;http://docs.docker.com/reference/commandline/cli/#adding-entries-to-a-container-hosts-file&lt;/a&gt; &lt;/li&gt;
+&lt;/ul&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">john pfeiffer</dc:creator><pubDate>Thu, 21 May 2015 20:00:00 -0700</pubDate><guid>tag:blog.john-pfeiffer.com,2015-05-21:haproxy-in-docker</guid><category>docker</category><category>haproxy</category></item><item><title>Subunit and Subunit2JunitXML to get JUnitXML test result output from UnitTest</title><link>http://blog.john-pfeiffer.com/subunit-and-subunit2junitxml-to-get-junitxml-test-result-output-from-unittest</link><description>
 &lt;p&gt;Test results from differing systems or multiple test runs need a common format.&lt;/p&gt;
 &lt;p&gt;JUnit XML is almost a de facto standard for test results given almost all major Continuous Integration products support it.&lt;/p&gt;
 &lt;ul&gt;
@@ -1548,6 +1629,31 @@ apt-get install redis-tools
 redis-cli -h 172.17.0.72 keys *
 1) mykey
 &lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;&lt;strong&gt; Add a route to the Host From inside a Container/Guest &lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href="http://docs.docker.com/reference/commandline/cli/#adding-entries-to-a-container-hosts-file"&gt;http://docs.docker.com/reference/commandline/cli/#adding-entries-to-a-container-hosts-file&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;HOST: 
+1. ip addr show
+1. ip addr show | grep docker0
+1. ip addr show | grep docker0 | grep global | awk '{print $2}' | cut -d / -f1
+1. HOSTIP=&lt;code&gt;ip addr show | grep docker0 | grep global | awk '{print $2}' | cut -d / -f1&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;sudo docker run -i -t --rm --add-host=docker:${HOSTIP} python:2 /bin/bash&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="n"&gt;root&lt;/span&gt;&lt;span class="mi"&gt;@1&lt;/span&gt;&lt;span class="nl"&gt;bbe25092f19&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="err"&gt;#&lt;/span&gt; &lt;span class="n"&gt;cat&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;etc&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;hosts&lt;/span&gt;
+
+&lt;span class="mf"&gt;172.17.0.7&lt;/span&gt;      &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="n"&gt;bbe25092f19&lt;/span&gt;
+&lt;span class="mf"&gt;127.0.0.1&lt;/span&gt;       &lt;span class="n"&gt;localhost&lt;/span&gt;
+ &lt;span class="o"&gt;::&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;     &lt;span class="n"&gt;localhost&lt;/span&gt; &lt;span class="n"&gt;ip6&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;localhost&lt;/span&gt; &lt;span class="n"&gt;ip6&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;loopback&lt;/span&gt;
+&lt;span class="n"&gt;fe00&lt;/span&gt;&lt;span class="o"&gt;::&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt; &lt;span class="n"&gt;ip6&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;localnet&lt;/span&gt;
+&lt;span class="n"&gt;ff00&lt;/span&gt;&lt;span class="o"&gt;::&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt; &lt;span class="n"&gt;ip6&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;mcastprefix&lt;/span&gt;
+&lt;span class="n"&gt;ff02&lt;/span&gt;&lt;span class="o"&gt;::&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt; &lt;span class="n"&gt;ip6&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;allnodes&lt;/span&gt;
+&lt;span class="n"&gt;ff02&lt;/span&gt;&lt;span class="o"&gt;::&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt; &lt;span class="n"&gt;ip6&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;allrouters&lt;/span&gt;
+
+&lt;span class="mf"&gt;172.17.42.1&lt;/span&gt;     &lt;span class="n"&gt;docker&lt;/span&gt;
+
+&lt;span class="n"&gt;root&lt;/span&gt;&lt;span class="mi"&gt;@1&lt;/span&gt;&lt;span class="nl"&gt;bbe25092f19&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="err"&gt;#&lt;/span&gt; &lt;span class="n"&gt;ping&lt;/span&gt; &lt;span class="n"&gt;docker&lt;/span&gt;
+
+&lt;span class="n"&gt;PING&lt;/span&gt; &lt;span class="n"&gt;docker&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mf"&gt;172.17.42.1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;56&lt;/span&gt; &lt;span class="n"&gt;data&lt;/span&gt; &lt;span class="n"&gt;bytes&lt;/span&gt;
+&lt;span class="mi"&gt;64&lt;/span&gt; &lt;span class="n"&gt;bytes&lt;/span&gt; &lt;span class="n"&gt;from&lt;/span&gt; &lt;span class="mf"&gt;172.17.42.1&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="n"&gt;icmp_seq&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt; &lt;span class="n"&gt;ttl&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mi"&gt;64&lt;/span&gt; &lt;span class="n"&gt;time&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mf"&gt;0.158&lt;/span&gt; &lt;span class="n"&gt;ms&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
 &lt;hr/&gt;
 &lt;h2 id="troubleshooting"&gt;Troubleshooting&lt;/h2&gt;
 &lt;h3 id="building-images-with-dockerfile"&gt;Building images with Dockerfile&lt;/h3&gt;
@@ -1576,7 +1682,7 @@ look closely at error messages, i.e. make: not found and ensure that an early RU
 &lt;ul&gt;
 &lt;li&gt;&lt;a href="http://docs.docker.com/reference/api/registry_api"&gt;http://docs.docker.com/reference/api/registry_api&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href="https://www.digitalocean.com/community/tutorials/how-to-set-up-a-private-docker-registry-on-ubuntu-14-04"&gt;https://www.digitalocean.com/community/tutorials/how-to-set-up-a-private-docker-registry-on-ubuntu-14-04&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">john pfeiffer</dc:creator><pubDate>Thu, 10 Jul 2014 17:00:00 -0700</pubDate><guid>tag:blog.john-pfeiffer.com,2014-07-10:docker-intro-install-run-and-port-forward</guid></item><item><title>Markdown syntax cheatsheet</title><link>http://blog.john-pfeiffer.com/markdown-syntax-cheatsheet</link><description>
+&lt;/ul&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">john pfeiffer</dc:creator><pubDate>Thu, 10 Jul 2014 17:00:00 -0700</pubDate><guid>tag:blog.john-pfeiffer.com,2014-07-10:docker-intro-install-run-and-port-forward</guid><category>docker</category><category>containers</category></item><item><title>Markdown syntax cheatsheet</title><link>http://blog.john-pfeiffer.com/markdown-syntax-cheatsheet</link><description>
 &lt;h3 id="markdown-syntax"&gt;Markdown Syntax&lt;/h3&gt;
 &lt;ul&gt;
 &lt;li&gt;html &amp;lt;em&amp;gt; is markdown &lt;code&gt;*emphasis* or _italics_&lt;/code&gt; = &lt;em&gt;emphasis&lt;/em&gt; or &lt;em&gt;italics&lt;/em&gt; &lt;/li&gt;
