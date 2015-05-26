@@ -1,5 +1,56 @@
 <?xml version="1.0" encoding="utf-8"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>johnpfeiffer</title><link>http://blog.john-pfeiffer.com/</link><description></description><atom:link href="http://blog.john-pfeiffer.com/feeds/john-pfeiffer.rss.xml" rel="self"></atom:link><lastBuildDate>Thu, 21 May 2015 20:00:00 -0700</lastBuildDate><item><title>HAProxy in Docker</title><link>http://blog.john-pfeiffer.com/haproxy-in-docker</link><description>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>johnpfeiffer</title><link>http://blog.john-pfeiffer.com/</link><description></description><atom:link href="http://blog.john-pfeiffer.com/feeds/john-pfeiffer.rss.xml" rel="self"></atom:link><lastBuildDate>Mon, 25 May 2015 10:00:00 -0700</lastBuildDate><item><title>Pragmatic testing, from Makefile to CI with Docker</title><link>http://blog.john-pfeiffer.com/pragmatic-testing-from-makefile-to-ci-with-docker</link><description>
+&lt;p&gt;A colleague recently suggested "Hey, why don't you run those tests from outside of the target server under test?"&lt;/p&gt;
+&lt;p&gt;And I thought to myself, "Hmm.... why are we doing it that way?  Was I just dumb when I did this the first time?&lt;/p&gt;
+&lt;p&gt;The answer is the journey of successfully testing a successful product and the pragmatic choices made along the way.  I believe that engineering requires compromises because without achieving short term progress we would have never reached our bigger, long term goals.&lt;/p&gt;
+&lt;h3 id="humble-beginnings-with-makefile"&gt;Humble beginnings with Makefile&lt;/h3&gt;
+&lt;p&gt;Our initial project was to deliver an OVA (open virtualization archive) that packaged all of the services (and dependencies) into an easy to deploy and maintain virtual appliance.&lt;/p&gt;
+&lt;p&gt;Will, as the project lead, had already spent some time setting up the build environment using vStudio and an Ubuntu ISO but one of our first issues after generating an OVA was to try and determine if it was "good".  Could it even be deployed?  Did it have the services installed correctly?&lt;/p&gt;
+&lt;p&gt;I leveraged the Makefile that we were already using for the build to create a "test": deploy the latest OVA artifact and check that it was basically sound.&lt;/p&gt;
+&lt;p&gt;This was a good start as, at the very least, we could quickly determine and bisect where we were producing bad builds.&lt;/p&gt;
+&lt;h3 id="adding-some-tests-but-where"&gt;Adding some tests, but where?&lt;/h3&gt;
+&lt;p&gt;Once the initial spike ("tracer bullet") was done I began adding in selenium python based tests to verify the Web UI interface.&lt;/p&gt;
+&lt;p&gt;Since our Continuous Integration system was basically bash and Makefile (which was also our build system) I opted to run the tests from inside of each deployed Virtual Machine.&lt;/p&gt;
+&lt;p&gt;This allowed for isolation of the test execution from the build process and for each test run.  &lt;/p&gt;
+&lt;p&gt;While not ideal for product acceptance testing it provided a basic safety net that allowed us to know if a breaking change occurred upstream and was the first automated verification (followed by lots of manual testing) of the exact OVA we were shipping to Customers in the Beta.&lt;/p&gt;
+&lt;h3 id="bamboo-continuous-integration-for-visibility-and-the-team"&gt;Bamboo Continuous Integration for visibility and the team&lt;/h3&gt;
+&lt;p&gt;A further improvement was to improve visibility of the test results.  In parallel, after the team discussion during "HipCon" and with motivation from Don and Sam, I setup a private Bamboo installation in our VM area and helped get Integration tests setup for our upstream backend code.&lt;/p&gt;
+&lt;p&gt;Once again I stuck with the tried and true "tests inside of the target virtual machine" pattern as the Bamboo server was only using "local agents" and I was concerned about trying to maintain a clean environment and the resources required as the number of test plans scaled.&lt;/p&gt;
+&lt;p&gt;Additionally I migrated all of the previous test plans from the "build factory" into Bamboo which really helped with failed test visibility and tracking over time.&lt;/p&gt;
+&lt;p&gt;The unit tests continued to run in a different SaaS version of Bamboo so I avoided scope creep and left things that were working alone.&lt;/p&gt;
+&lt;h3 id="migrating-to-a-managed-service"&gt;Migrating to a managed service&lt;/h3&gt;
+&lt;p&gt;One of the most asked questions whenever a new person joined was "Why are the tests spread across so many different servers/services"?  I had to answer that question so many times!  The answer basically boiled down to "the testing grew organically as different people in the team solved the problem they faced".  Unsatisfactory? "Be the change you seek" didn't seem to get anyone else to solve the problem for me ;)&lt;/p&gt;
+&lt;p&gt;Using the opportunity presented by a service outage issue I pushed forward a plan I had to migrate all of the test plans into a newly provisioned Bamboo server run by Build Engineering. (awthanks)&lt;/p&gt;
+&lt;p&gt;There was an awesome team effort by a lot of people to make that happen (made even more challenging by doing it when the source service was out). (awesome)&lt;/p&gt;
+&lt;p&gt;This solved quite a few problems:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;The Unit, Integration, and Product Acceptance tests were all finally combined under one roof... one UI to rule them all!&lt;/li&gt;
+&lt;li&gt;New people joining the team needing access to Bamboo: since I hadn't linked it to any directory/authentication I was adding users manually - we were finally able to leverage an Atlassian backend Directory system&lt;/li&gt;
+&lt;li&gt;I had been managing upgrades and maintenance of the Bamboo software (not fun and not my core expertise)&lt;/li&gt;
+&lt;li&gt;I began to worry about the resource consumption (since this was running on hardware that also provided for our Build Factory) - no longer a worry with lots of Remote Agents and Elastic Agents (all provided by Build Engineering)&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;Bonuses:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;More plugins and capabilities and knowledge from the Bamboo server and Build Engineering expertise&lt;/li&gt;
+&lt;li&gt;Plan Templates to keep test plans in version control and macros for common functionality&lt;/li&gt;
+&lt;li&gt;A successful spike of using Docker for unit testing&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;With so much going on during the migration I avoided changing the testing paradigm, so tests continued to execute inside of each VM/EC2 Instance deployed. (shrug)&lt;/p&gt;
+&lt;h3 id="adopting-docker-and-refactoring"&gt;Adopting Docker and refactoring&lt;/h3&gt;
+&lt;p&gt;Remember that question at the beginning?  When something goes wrong, while it makes sense to separate "fixing it" from "improving it" I'm a big fan of taking advantage of having the hood open to go the extra mile and leave the campground cleaner =)&lt;/p&gt;
+&lt;p&gt;So some of the selenium based tests were failing and it occurred to me that some of how we were changing our dependency infrastructure at the operating system level could be the cause.  After some unproductive poking around I tried to reproduce and isolate the issue by running the tests from outside of the VM.&lt;/p&gt;
+&lt;p&gt;Aha! In that moment I realized that this was actually the desired (original intention, honest!) way to run the blackbox product acceptance tests.&lt;/p&gt;
+&lt;p&gt;So I pulled up my sleeves and tried out the "hot fancy new silver bullet technology that solves every problem".&lt;/p&gt;
+&lt;h4 id="why-docker"&gt;Why Docker?&lt;/h4&gt;
+&lt;p&gt;Docker encourages design of modular, deterministic and defined, single purpose components that are easy to reuse and compose into larger services. &lt;/p&gt;
+&lt;p&gt;Not only are (Docker) Containers fast, one of the biggest advantages of Containers is the ability to reduce complexity. Docker can turn an application/service, it's dependencies, and even the OS level requirements into a single blackbox package (that you can still inspect inside if you really want to).&lt;/p&gt;
+&lt;p&gt;So I built a Docker Image containing python selenium and &lt;a href="http://phantomjs.org/"&gt;http://phantomjs.org/&lt;/a&gt; (a headless javascript based browser) and other dependencies.&lt;/p&gt;
+&lt;p&gt;Sure enough I the tests passed when leveraging the previous Docker spike to run my new docker container. (success)&lt;/p&gt;
+&lt;p&gt;Refactoring the bamboo plan (since it was leveraging Plan Templates and the Groovy DSL macros) didn't take too long and with other stakeholders PR/approval we're moving full speed ahead towards the "ideal" solution. (It only took about 2 years).&lt;/p&gt;
+&lt;h3 id="what-does-this-all-mean"&gt;What does this all mean?&lt;/h3&gt;
+&lt;p&gt;It's easy to draw up how things should work according to best practice.  It's even easier if it's work that someone else has to do and there aren't any deadlines.&lt;/p&gt;
+&lt;p&gt;Success comes in stages.  Overengineering and premature optimization cost way more in opportunity cost and thrown away work than doing things the "wrong way".&lt;/p&gt;
+&lt;p&gt;This story could be massaged to fit a parable of "Lean and Agile" but it's really just common sense about transparently understanding the cost/value tradeof of the work, solving the current needs, and moving forward onto something better (by keeping informed of new solutions) when the opportunity shows up.&lt;/p&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">john pfeiffer</dc:creator><pubDate>Mon, 25 May 2015 10:00:00 -0700</pubDate><guid>tag:blog.john-pfeiffer.com,2015-05-25:pragmatic-testing-from-makefile-to-ci-with-docker</guid><category>testing</category><category>selenium</category><category>docker</category></item><item><title>HAProxy in Docker</title><link>http://blog.john-pfeiffer.com/haproxy-in-docker</link><description>
 &lt;p&gt;Not only are Containers fast, one of the biggest advantages of Containers is the ability to reduce complexity.&lt;/p&gt;
 &lt;p&gt;Docker can turn an application/service, it's dependencies, and even the OS level requirements into a single blackbox package (that you can still inspect inside if you really want to).&lt;/p&gt;
 &lt;p&gt;One thing I really like is less code.  Seriously.  Configuration over coding (whenever I don't need customization) means far less maintenance and bugs.&lt;/p&gt;
