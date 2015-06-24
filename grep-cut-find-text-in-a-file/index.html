@@ -6,8 +6,8 @@
         <meta name="author" content="john pfeiffer" />
         <meta name="copyright" content="john pfeiffer" />
 
-<meta name="keywords" content="security, password, it, " />
-        <title>Yes, Change your Password regularly  · johnpfeiffer
+<meta name="keywords" content="grep, linux, bash, linux, " />
+        <title>grep cut find text in a file  · johnpfeiffer
 </title>
         <link href="http://cdn-images.mailchimp.com/embedcode/slim-081711.css" rel="stylesheet" type="text/css">
         <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css" rel="stylesheet">
@@ -65,7 +65,7 @@
 <article>
 <div class="row-fluid">
     <header class="page_header span10 offset2">
-    <h1><a href="http://blog.john-pfeiffer.com/yes-change-your-password-regularly"> Yes, Change your Password regularly  </a></h1>
+    <h1><a href="http://blog.john-pfeiffer.com/grep-cut-find-text-in-a-file"> grep cut find text in a file  </a></h1>
     </header>
 </div>
 
@@ -75,10 +75,8 @@
         <h4>Contents</h4>
         <div class="toc">
 <ul>
-<li><a href="#security-is-risk-management">Security is risk management</a></li>
-<li><a href="#what-about-at-least-changing-the-password-once-a-year">What about at least changing the password once a year?</a></li>
-<li><a href="#dependency-visibility">Dependency Visibility</a></li>
-<li><a href="#but-i-use-a-password-management-tool">But I use a password management tool!</a></li>
+<li><a href="#cut-to-only-display-a-part-of-a-path">cut to only display a part of a path</a></li>
+<li><a href="#more-info">more info</a></li>
 </ul>
 </div>
         </nav>
@@ -86,41 +84,110 @@
     <div class="span8 article-content">
 
             
-<h3 id="security-is-risk-management">Security is risk management</h3>
-<p>The hundreds of articles about "changing passwords doesn't improve security" are just hype/noise without context.</p>
-<p>There is an absolute spectrum of password management that creates untenable risk (no password or simply the word "password") all the way to very low risk (100 random characters of every category changed every day) but at an unbearable overhead.</p>
-<p>While "changing the highly complex password every 90 days" is considered inefficient and draconian...</p>
-<h3 id="what-about-at-least-changing-the-password-once-a-year">What about at least changing the password once a year?</h3>
-<p>While it's likely that an external attacker or disgruntled employee will use a compromised password immediately, it doesn't mean there isn't a good reason to choose a frequency of password change:</p>
-<blockquote>
-<p>If a sticky note attached to a laptop sold at a garage sale is still valid for the company's online bank account then you're in trouble.</p>
-</blockquote>
-<p>Reduce the risk, have a policy to manage that window of access to something you're comfortable with.</p>
-<h3 id="dependency-visibility">Dependency Visibility</h3>
-<p>The opportunity to improve your infrastructure is well worth the cost of finding every hard coded place that a password is embedded in your organization:</p>
+<p>grep is an amazing tool for getting efficiently finding text</p>
+<table>
+<thead>
+<tr>
+<th>command</th>
+<th>notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>grep "hidden treasure" /home/ubuntu/*.txt</code></td>
+<td><em>search only txt files</em></td>
+</tr>
+<tr>
+<td><code>grep -r "hidden treasure" /home/ubuntu</code></td>
+<td><em>recursive search</em></td>
+</tr>
+<tr>
+<td><code>grep -H -r "hidden treasure" /home/ubuntu</code></td>
+<td><em>only print the filenames + search text of matches</em></td>
+</tr>
+<tr>
+<td><code>grep -H treasure /etc/* -R &lt;code&gt;&amp;#124;&lt;/code&gt; cut -d: -f1</code></td>
+<td><em>only print the filename of matches by piping to cut</em></td>
+</tr>
+<tr>
+<td><code>grep -Hir "hidden treasure" .</code></td>
+<td><em>case insensitive search the current directory</em></td>
+</tr>
+<tr>
+<td><code>grep ab.d file</code></td>
+<td><em>find a single character wildcard</em></td>
+</tr>
+<tr>
+<td><code>grep "ab.*e" file</code></td>
+<td><em>find a infinite repitions of a single character, word ends in e</em></td>
+</tr>
+<tr>
+<td><code>grep "ab.*e." file</code></td>
+<td>find a infinite repitions of a single character, word ends with a single character*</td>
+</tr>
+<tr>
+<td><code>grep "ab[c-e]f" file</code></td>
+<td><em>find with a wildcard of a subset of range of characters</em></td>
+</tr>
+<tr>
+<td><code>grep -i "IpAddress=" app.properties &amp;#124; cut -f 2 -d "="</code></td>
+<td>* after grep use cut to further parse the text*</td>
+</tr>
+</tbody>
+</table>
+<p>Useful parameters:
+- <code>-n</code> = line number
+- <code>-v</code> = invert the match so do NOT show lines that match (typically grep</p>
+<h3 id="cut-to-only-display-a-part-of-a-path">cut to only display a part of a path</h3>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17</pre></div></td><td class="code"><div class="highlight"><pre><span class="c">#!/bin/bash</span>
+<span class="c"># iterate through the list of subdirectories</span>
+<span class="c"># cut out each subdirectory name (using forward slash delimiter)</span>
+<span class="c"># compare a text file within to a similarly organized TEMP directory</span>
+
+<span class="nv">DIRECTORY</span><span class="o">=</span>/var/lib/tomcat6/webapps/*
+
+<span class="k">for</span> dir in <span class="nv">$DIRECTORY</span>
+<span class="k">do</span>
+  <span class="k">if</span> <span class="o">[</span> -d <span class="nv">$dir</span> <span class="o">]</span><span class="p">;</span>
+  <span class="k">then</span>
+    <span class="nb">echo</span> <span class="nv">$dir</span>
+    <span class="nv">NAME</span><span class="o">=</span><span class="sb">`</span><span class="nb">echo</span> <span class="nv">$dir</span> <span class="p">|</span> cut -f <span class="m">6</span> -d <span class="s2">"/"</span><span class="sb">`</span>
+    diff <span class="nv">$dir</span>/WEB-INF/app.properties /var/lib/tomcat6/TEMP/<span class="nv">$NAME</span>/WEB-INF/app.properties
+  <span class="k">fi</span>
+
+<span class="k">done</span>
+</pre></div>
+</td></tr></table>
+<h3 id="more-info">more info</h3>
 <ul>
-<li>The password was just changed</li>
-<li>You quickly find something is not working</li>
-<li>You either change the password back or refactor/reorganized and break the dependency</li>
+<li><a href="https://en.wikipedia.org/wiki/Grep">https://en.wikipedia.org/wiki/Grep</a></li>
+<li><a href="http://www.gnu.org/savannah-checkouts/gnu/grep/manual/grep.html">http://www.gnu.org/savannah-checkouts/gnu/grep/manual/grep.html</a></li>
+<li><a href="http://tldp.org/LDP/Bash-Beginners-Guide/html/sect_04_02.html">http://tldp.org/LDP/Bash-Beginners-Guide/html/sect_04_02.html</a></li>
 </ul>
-<p><strong>Far better than:</strong>
-- a random event like a forgotten password reset by one individual in the organization
-- creates a mystery problem in mission critical systems for everyone else to track down</p>
-<h3 id="but-i-use-a-password-management-tool">But I use a password management tool!</h3>
-<p>Password management tools have to store their passwords somewhere (hopefully encrypted).  </p>
-<p>Over time there is a chance that a "bad actor" will end up with your local password store.</p>
-<p>Man in the middle attacks (NSA anyone?) can snatch credentials from secure channels.</p>
-<p>There is an even higher likelihood that the remote services you are using will be compromised (database or password hashes leak).</p>
-<p>Given time hackers can use rainbow tables and GPU based brute force attacks they will crack your password.</p>
-<p><strong>Every time you change your password you reset the clock on every type of attack</strong></p>
             <aside>
             <hr/>
             <nav>
             <ul class="articles_timeline">
  
-                <li class="previous_article">« <a href="http://blog.john-pfeiffer.com/grep-cut-find-text-in-a-file" title="Previous: grep cut find text in a file">grep cut find text in a file</a></li>
+                <li class="previous_article">« <a href="http://blog.john-pfeiffer.com/a-concise-summary-of-amazing-ideas" title="Previous: A concise summary of amazing ideas">A concise summary of amazing ideas</a></li>
  
-                <li class="next_article"><a href="http://blog.john-pfeiffer.com/test-driven-development-introduction-and-qa-domains" title="Next: Test Driven Development Introduction and QA Domains">Test Driven Development Introduction and QA Domains</a> »</li>
+                <li class="next_article"><a href="http://blog.john-pfeiffer.com/yes-change-your-password-regularly" title="Next: Yes, Change your Password regularly">Yes, Change your Password regularly</a> »</li>
             </ul>
             </nav>
             </aside>
@@ -129,16 +196,19 @@
         <div class="span2" style="float:right;font-size:0.9em;">
  
             <h4>Published</h4>
-            <time pubdate="pubdate" datetime="2011-12-27T17:10:00-08:00">Dec 27, 2011</time>
+            <time pubdate="pubdate" datetime="2011-11-12T02:37:00-08:00">Nov 12, 2011</time>
             <h4>Category</h4>
-            <a class="category-link" href="/categories.html#it-ref">it</a> 
+            <a class="category-link" href="/categories.html#linux-ref">linux</a> 
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article"> 
-                <li><a href="/tags.html#password-ref">password
+                <li><a href="/tags.html#bash-ref">bash
+                    <span>2</span>
+</a></li>
+                <li><a href="/tags.html#grep-ref">grep
                     <span>1</span>
 </a></li>
-                <li><a href="/tags.html#security-ref">security
-                    <span>3</span>
+                <li><a href="/tags.html#linux-ref">linux
+                    <span>5</span>
 </a></li>
             </ul>
 
