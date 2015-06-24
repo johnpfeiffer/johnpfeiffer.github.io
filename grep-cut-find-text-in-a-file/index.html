@@ -75,6 +75,7 @@
         <h4>Contents</h4>
         <div class="toc">
 <ul>
+<li><a href="#grep-parameters-and-examples-explained">grep parameters and examples explained</a></li>
 <li><a href="#cut-to-only-display-a-part-of-a-path">cut to only display a part of a path</a></li>
 <li><a href="#more-info">more info</a></li>
 </ul>
@@ -85,6 +86,17 @@
 
             
 <p>grep is an amazing tool for getting efficiently finding text</p>
+<h3 id="grep-parameters-and-examples-explained">grep parameters and examples explained</h3>
+<p><code>grep -r -i -w -n -A2 -B1 'hidden' /tmp</code></p>
+<ul>
+<li>search the /tmp directory and subdirectories recursively</li>
+<li>case insensitive</li>
+<li>only match the whole word, so "thidden" would not be returned as a match</li>
+<li>print the line number in the file where it was found</li>
+<li>print the two lines after the grep match</li>
+<li>print the one line before the grep match</li>
+<li>start the search in the /tmp directory</li>
+</ul>
 <table>
 <thead>
 <tr>
@@ -96,22 +108,6 @@
 <tr>
 <td><code>grep "hidden treasure" /home/ubuntu/*.txt</code></td>
 <td><em>search only txt files</em></td>
-</tr>
-<tr>
-<td><code>grep -r "hidden treasure" /home/ubuntu</code></td>
-<td><em>recursive search</em></td>
-</tr>
-<tr>
-<td><code>grep -H -r "hidden treasure" /home/ubuntu</code></td>
-<td><em>only print the filenames + search text of matches</em></td>
-</tr>
-<tr>
-<td><code>grep -H treasure /etc/* -R &lt;code&gt;&amp;#124;&lt;/code&gt; cut -d: -f1</code></td>
-<td><em>only print the filename of matches by piping to cut</em></td>
-</tr>
-<tr>
-<td><code>grep -Hir "hidden treasure" .</code></td>
-<td><em>case insensitive search the current directory</em></td>
 </tr>
 <tr>
 <td><code>grep ab.d file</code></td>
@@ -129,33 +125,17 @@
 <td><code>grep "ab[c-e]f" file</code></td>
 <td><em>find with a wildcard of a subset of range of characters</em></td>
 </tr>
-<tr>
-<td><code>grep -i "IpAddress=" app.properties &amp;#124; cut -f 2 -d "="</code></td>
-<td>* after grep use cut to further parse the text*</td>
-</tr>
 </tbody>
 </table>
 <p>Useful parameters:
-- <code>-n</code> = line number
-- <code>-v</code> = invert the match so do NOT show lines that match (typically grep</p>
+- <code>-v</code> = invert the match so do NOT show lines that match (typically | grep -v 'myexclude')
+- <code>-x</code> = whole line match only</p>
+<p><code>grep ubuntu /etc/passwd | cut -d: -f3</code></p>
+<blockquote>
+<p>only print the user id by piping the match to cut which delimits by colon and outputs the 3rd column</p>
+</blockquote>
 <h3 id="cut-to-only-display-a-part-of-a-path">cut to only display a part of a path</h3>
-<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
- 2
- 3
- 4
- 5
- 6
- 7
- 8
- 9
-10
-11
-12
-13
-14
-15
-16
-17</pre></div></td><td class="code"><div class="highlight"><pre><span class="c">#!/bin/bash</span>
+<div class="highlight"><pre><span class="c">#!/bin/bash</span>
 <span class="c"># iterate through the list of subdirectories</span>
 <span class="c"># cut out each subdirectory name (using forward slash delimiter)</span>
 <span class="c"># compare a text file within to a similarly organized TEMP directory</span>
@@ -167,18 +147,17 @@
   <span class="k">if</span> <span class="o">[</span> -d <span class="nv">$dir</span> <span class="o">]</span><span class="p">;</span>
   <span class="k">then</span>
     <span class="nb">echo</span> <span class="nv">$dir</span>
-    <span class="nv">NAME</span><span class="o">=</span><span class="sb">`</span><span class="nb">echo</span> <span class="nv">$dir</span> <span class="p">|</span> cut -f <span class="m">6</span> -d <span class="s2">"/"</span><span class="sb">`</span>
+    <span class="nv">NAME</span><span class="o">=</span><span class="sb">`</span><span class="nb">echo</span> <span class="nv">$dir</span> <span class="p">|</span> cut -d <span class="s2">"/"</span> -f <span class="m">6</span> <span class="sb">`</span>
     diff <span class="nv">$dir</span>/WEB-INF/app.properties /var/lib/tomcat6/TEMP/<span class="nv">$NAME</span>/WEB-INF/app.properties
   <span class="k">fi</span>
-
 <span class="k">done</span>
 </pre></div>
-</td></tr></table>
 <h3 id="more-info">more info</h3>
 <ul>
 <li><a href="https://en.wikipedia.org/wiki/Grep">https://en.wikipedia.org/wiki/Grep</a></li>
-<li><a href="http://www.gnu.org/savannah-checkouts/gnu/grep/manual/grep.html">http://www.gnu.org/savannah-checkouts/gnu/grep/manual/grep.html</a></li>
+<li><a href="http://www.gnu.org/software/grep/manual/grep.html">http://www.gnu.org/software/grep/manual/grep.html</a></li>
 <li><a href="http://tldp.org/LDP/Bash-Beginners-Guide/html/sect_04_02.html">http://tldp.org/LDP/Bash-Beginners-Guide/html/sect_04_02.html</a></li>
+<li><a href="http://linux.die.net/man/1/cut">http://linux.die.net/man/1/cut</a></li>
 </ul>
             <aside>
             <hr/>
