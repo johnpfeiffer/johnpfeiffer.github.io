@@ -109,6 +109,14 @@
 <li><a href="#redis">Redis</a></li>
 </ul>
 </li>
+<li><a href="#docker-compose">Docker Compose</a><ul>
+<li><a href="#apppy">app.py</a></li>
+<li><a href="#requirementstxt">requirements.txt</a></li>
+<li><a href="#dockerfile">Dockerfile</a></li>
+<li><a href="#docker-composeyml">docker-compose.yml</a></li>
+<li><a href="#docker-compose-up">docker-compose up</a></li>
+</ul>
+</li>
 <li><a href="#troubleshooting">Troubleshooting</a><ul>
 <li><a href="#building-images-with-dockerfile">Building images with Dockerfile</a></li>
 </ul>
@@ -540,6 +548,78 @@ redis-cli -h 172.17.0.72 keys *
 <span class="n">PING</span> <span class="n">docker</span> <span class="p">(</span><span class="mf">172.17.42.1</span><span class="p">)</span><span class="o">:</span> <span class="mi">56</span> <span class="n">data</span> <span class="n">bytes</span>
 <span class="mi">64</span> <span class="n">bytes</span> <span class="n">from</span> <span class="mf">172.17.42.1</span><span class="o">:</span> <span class="n">icmp_seq</span><span class="o">=</span><span class="mi">0</span> <span class="n">ttl</span><span class="o">=</span><span class="mi">64</span> <span class="n">time</span><span class="o">=</span><span class="mf">0.158</span> <span class="n">ms</span>
 </pre></div>
+<hr/>
+<h2 id="docker-compose">Docker Compose</h2>
+<p>Complex real systems have multiple dependencies and following the recommended Docker pattern of "do one thing per container" means needing a way to start/orchestrate a bunch of things at once.</p>
+<p>While there are some amazing open source projects (<a href="http://kubernetes.io/">http://kubernetes.io/</a> , <a href="http://mesos.apache.org/documentation/latest/docker-containerizer/">http://mesos.apache.org/documentation/latest/docker-containerizer/</a>) it is instructive to start with the simplest model provided directly from Docker, <a href="https://docs.docker.com/compose/">https://docs.docker.com/compose/</a></p>
+<p><code>sudo pip install --upgrade docker-compose</code>
+<code>docker-compose --version</code></p>
+<h3 id="apppy">app.py</h3>
+<div class="highlight"><pre><span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">Flask</span>
+<span class="kn">from</span> <span class="nn">redis</span> <span class="kn">import</span> <span class="n">Redis</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="n">app</span> <span class="o">=</span> <span class="n">Flask</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+<span class="n">redis</span> <span class="o">=</span> <span class="n">Redis</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="s">'redis'</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">6379</span><span class="p">)</span>
+
+<span class="nd">@app.route</span><span class="p">(</span><span class="s">'/'</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">hello</span><span class="p">():</span>
+    <span class="n">redis</span><span class="o">.</span><span class="n">incr</span><span class="p">(</span><span class="s">'hits'</span><span class="p">)</span>
+    <span class="k">return</span> <span class="s">'Hello World! I have been seen </span><span class="si">%s</span><span class="s"> times.'</span> <span class="o">%</span> <span class="n">redis</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">'hits'</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">"__main__"</span><span class="p">:</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="s">"0.0.0.0"</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</pre></div>
+<h3 id="requirementstxt">requirements.txt</h3>
+<div class="highlight"><pre>flask
+redis
+</pre></div>
+<h3 id="dockerfile">Dockerfile</h3>
+<div class="highlight"><pre>FROM python:2.7
+ADD . /code
+WORKDIR /code
+RUN pip install -r requirements.txt
+CMD python app.py
+</pre></div>
+<h3 id="docker-composeyml">docker-compose.yml</h3>
+<div class="highlight"><pre><span class="n">web</span><span class="o">:</span>
+  <span class="n">build</span><span class="o">:</span> <span class="o">.</span>
+  <span class="n">ports</span><span class="o">:</span>
+   <span class="o">-</span> <span class="s2">"5000:5000"</span>
+  <span class="n">volumes</span><span class="o">:</span>
+   <span class="o">-</span> <span class="o">.:/</span><span class="n">code</span>
+  <span class="n">links</span><span class="o">:</span>
+   <span class="o">-</span> <span class="n">redis</span>
+<span class="n">redis</span><span class="o">:</span>
+  <span class="n">image</span><span class="o">:</span> <span class="n">redis</span>
+</pre></div>
+<ul>
+<li>dependencies like redis are "linked" for network access (ordering in the file is important)</li>
+<li>"web" app (which comes from the current directory Dockerfile)</li>
+<li>ports: exposes ports to the host (all of these are just like the docker run CLI parameters)</li>
+<li>volumes: allows live editing of app.py</li>
+<li>redis comes from the public docker registry image (not a Dockerfile nor a private registry) and is using the default tag of "latest"</li>
+</ul>
+<h3 id="docker-compose-up">docker-compose up</h3>
+<p><code>docker-compose up</code></p>
+<blockquote>
+<p>this will docker pull redis and build from the Dockerfile and then start them all in the correct order</p>
+</blockquote>
+<p><code>docker-compose ps</code></p>
+<blockquote>
+<p>run this command in the directory with the docker-compose.yml to see the state of the system</p>
+</blockquote>
+<div class="highlight"><pre>         Name                      Command             State           Ports          
+-------------------------------------------------------------------------------------
+composeexample_redis_1   /entrypoint.sh redis-server   Up      6379/tcp               
+composeexample_web_1     /bin/sh -c python app.py      Up      0.0.0.0:5000-&gt;5000/tcp
+</pre></div>
+<p><code>docker ps -a</code></p>
+<p><code>docker-compose stop</code></p>
+<p><a href="http://localhost:5000/">http://localhost:5000/</a></p>
+<blockquote>
+<p>Hello World! I have been seen 2 times.</p>
+</blockquote>
+<p><a href="https://bitbucket.org/johnpfeiffer/docker/src">https://bitbucket.org/johnpfeiffer/docker/src</a></p>
 <hr/>
 <h2 id="troubleshooting">Troubleshooting</h2>
 <h3 id="building-images-with-dockerfile">Building images with Dockerfile</h3>
