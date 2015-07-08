@@ -25,6 +25,7 @@
 &lt;h3 id="packer-to-the-rescue"&gt;Packer to the rescue&lt;/h3&gt;
 &lt;p&gt;Packer is from the same people who brought you Vagrant &lt;a href="https://www.vagrantup.com/"&gt;https://www.vagrantup.com/&lt;/a&gt; , that really easy way to set up a virtual machine... http://blog.john-pfeiffer.com/using-vagrant-to-deploy-instances-on-aws&lt;/p&gt;
 &lt;p&gt;It is very straightforward to read and actually you can still leverage chef (unless you realize that a series of shell commands is all you wanted anyways...)&lt;/p&gt;
+&lt;p&gt;This leads to the better path of "immutable servers" &lt;a href="http://martinfowler.com/bliki/ImmutableServer.html"&gt;http://martinfowler.com/bliki/ImmutableServer.html&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;packer --version&lt;/code&gt;&lt;/p&gt;
 &lt;h4 id="my_example_boxjson"&gt;my_example_box.json&lt;/h4&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="p"&gt;{&lt;/span&gt;
@@ -82,13 +83,15 @@
       &lt;span class="s2"&gt;"/sbin/ip a"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
       &lt;span class="s2"&gt;"curl -s http://checkip.amazonaws.com"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
       &lt;span class="s2"&gt;"ls -ahl /tmp"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
-      &lt;span class="s2"&gt;"sudo dpkg -i --force-confnew /tmp/*.deb"&lt;/span&gt;
+      &lt;span class="s2"&gt;"sudo dpkg -i --force-confnew /tmp/*.deb"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+      &lt;span class="s2"&gt;"machine_state_validation.sh"&lt;/span&gt;
     &lt;span class="p"&gt;]&lt;/span&gt;
   &lt;span class="p"&gt;}]&lt;/span&gt;
 &lt;span class="p"&gt;}&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 &lt;blockquote&gt;
 &lt;p&gt;The access credentials are instead be environment variables: AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY&lt;/p&gt;
+&lt;p&gt;Post instantiation validation is a really handy safeguard as statistically something always goes wrong somewhere and it's far cheaper to find out with a quick test versus a system that loses data.&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;h3 id="why-not-docker-containers"&gt;Why not docker containers?&lt;/h3&gt;
 &lt;p&gt;Actually I prefer docker containers as the artifact and deployment vehicle for services but it's not the only hammer in your toolbelt.  And you have to setup the Docker hosts somehow, right? &lt;/p&gt;
