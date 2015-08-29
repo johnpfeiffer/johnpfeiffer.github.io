@@ -79,6 +79,10 @@
 <li><a href="#vagrant-provisioning">Vagrant provisioning</a></li>
 <li><a href="#advanced-vagrantfile-example">Advanced Vagrantfile example</a></li>
 <li><a href="#vagrant-and-ec2-vpc-ami-that-does-not-haveallow-sudo">Vagrant and EC2 VPC (AMI that does not have/allow sudo)</a></li>
+<li><a href="#virtualbox">VirtualBox</a><ul>
+<li><a href="#vagrantfile">Vagrantfile</a></li>
+</ul>
+</li>
 <li><a href="#more-info">more info</a></li>
 <li><a href="#troubleshooting">Troubleshooting</a></li>
 </ul>
@@ -338,6 +342,42 @@ INFO interface: info: Machine not provisioning because `--no-provision` is speci
 </ul>
 </li>
 </ul>
+<h3 id="virtualbox">VirtualBox</h3>
+<p>A really easy A way to start an Ubuntu 14.04 box locally with VirtualBox, the shell provisioner is less elegant than chef/puppet/ansible but gets the job done (installs Docker and Docker Compose)</p>
+<p><a href="https://www.virtualbox.org/wiki/Linux_Downloads">https://www.virtualbox.org/wiki/Linux_Downloads</a></p>
+<h4 id="vagrantfile">Vagrantfile</h4>
+<div class="highlight"><pre>VERSIONS = {
+  'trusty' =&gt; {
+    'box' =&gt; "canonical-ubuntu-14.04",
+    'box_url' =&gt; "https://cloud-images.ubuntu.com/vagrant/trusty/current/trusty-server-cloudimg-amd64-vagrant-disk1.box",
+    'ami' =&gt; "ami-018c9568",
+  },
+}
+
+
+Vagrant.configure("2") do |config|
+    config.ssh.forward_agent = true
+
+    version = VERSIONS[("trusty")]
+
+    config.vm.provider "virtualbox" do |v, override|
+      v.customize ["modifyvm", :id, "--memory", ENV['hipchat_memory'] || 4096]
+      v.customize ["modifyvm", :id, "--cpus", ENV['hipchat_cpus'] || 2]
+
+      override.vm.network :private_network, ip: "192.168.33.10"
+      override.vm.box = version['box']
+      override.vm.box_url = version['box_url']
+    end
+
+    config.vm.provision :shell, :inline =&gt; "sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 36A1D7869245C8950F966E92D8576A8BA88D21E9"
+    config.vm.provision :shell, :inline =&gt; "sudo sh -c 'echo deb https://get.docker.io/ubuntu docker main &gt; /etc/apt/sources.list.d/docker.list'"
+    config.vm.provision :shell, :inline =&gt; "sudo apt-get update"
+    config.vm.provision :shell, :inline =&gt; "sudo apt-get install -y lxc-docker python-pip"
+    config.vm.provision :shell, :inline =&gt; "sudo pip install --upgrade pip"
+    config.vm.provision :shell, :inline =&gt; "sudo pip install --upgrade docker-compose"
+
+end
+</pre></div>
 <h3 id="more-info">more info</h3>
 <p><code>ps aux | grep vagrant</code></p>
 <blockquote>
