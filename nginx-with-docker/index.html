@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en-US">
+    <head>
+        <meta charset="utf-8"> 
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="author" content="john pfeiffer" />
+        <meta name="copyright" content="john pfeiffer" />
+
+<meta name="keywords" content="docker, nginx, virtualization, " />
+        <title>nginx with Docker  · johnpfeiffer
+</title>
+        <link href="http://cdn-images.mailchimp.com/embedcode/slim-081711.css" rel="stylesheet" type="text/css">
+        <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="http://blog.john-pfeiffer.com/theme/css/style.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="http://blog.john-pfeiffer.com/theme/css/solarizedlight.css" media="screen">
+        <link rel="shortcut icon" href="http://blog.john-pfeiffer.com/theme/images/favicon.ico" type="image/x-icon" />
+        <link rel="apple-touch-icon" href="http://blog.john-pfeiffer.com/theme/images/apple-touch-icon.png" />
+        <link rel="apple-touch-icon" sizes="57x57" href="http://blog.john-pfeiffer.com/theme/images/apple-touch-icon-57x57.png" />
+        <link rel="apple-touch-icon" sizes="72x72" href="http://blog.john-pfeiffer.com/theme/images/apple-touch-icon-72x72.png" />
+        <link rel="apple-touch-icon" sizes="114x114" href="http://blog.john-pfeiffer.com/theme/images/apple-touch-icon-114x114.png" />
+        <link rel="apple-touch-icon" sizes="144x144" href="http://blog.john-pfeiffer.com/theme/images/apple-touch-icon-144x144.png" />
+        <link rel="icon" href="http://blog.john-pfeiffer.com/theme/images/apple-touch-icon-144x144.png" />
+    <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-3758734-9']);
+    _gaq.push(['_trackPageview']);
+    (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+    </script>
+    </head>
+    <body>
+	<div id="content-sans-footer">
+        <div class="dropdown-backdrop">
+
+			<div class="navbar navbar-static-top">
+				<div class="navbar-inner">
+					<div class="container">
+						<a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+							<span class="icon-bar"></span>
+							<span class="icon-bar"></span>
+							<span class="icon-bar"></span>
+						</a>
+						<a class="brand" href="http://blog.john-pfeiffer.com/"><span class=site-name>johnpfeiffer</span></a>
+						<div class="nav-collapse collapse">
+							<ul class="nav pull-right top-menu">
+								<li ><a href="http://blog.john-pfeiffer.com">Home</a></li>
+								<li ><a href="http://blog.john-pfeiffer.com/john-likes">John Likes</a></li>
+								<li ><a href="http://blog.john-pfeiffer.com/categories.html">Categories</a></li>
+								<li ><a href="http://blog.john-pfeiffer.com/tags.html">Tags</a></li>
+								<li ><a href="http://blog.john-pfeiffer.com/archives.html">Archives</a></li>
+								<li><form class="navbar-search" action="http://blog.john-pfeiffer.com/search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="container-fluid">
+			<div class="row-fluid">
+				<div class="span1"></div>
+				<div class="span10">
+<article>
+<div class="row-fluid">
+    <header class="page_header span10 offset2">
+    <h1><a href="http://blog.john-pfeiffer.com/nginx-with-docker"> nginx with Docker  </a></h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+    <div class="span2 table-of-content">
+        <nav>
+        <h4>Contents</h4>
+        <div class="toc">
+<ul>
+<li><a href="#docker-pull-nginx">docker pull nginx</a><ul>
+<li><a href="#docker-nginx-interactive">docker nginx interactive</a></li>
+<li><a href="#docker-nginx-interactive_1">docker nginx interactive</a></li>
+<li><a href="#nginxconf">nginx.conf</a></li>
+</ul>
+</li>
+<li><a href="#build-your-own-nginx-dockerfile">Build your own nginx Dockerfile</a></li>
+</ul>
+</div>
+        </nav>
+    </div>
+    <div class="span8 article-content">
+
+            
+<ul>
+<li><a href="http://nginx.org/en/">http://nginx.org/en/</a></li>
+<li>nginx is one of the most popular performant web servers in the world (and it's pretty handy as a reverse proxy or load balancer too!). 
+<a href="http://nginx.org/en/docs/http/load_balancing.html">http://nginx.org/en/docs/http/load_balancing.html</a></li>
+</ul>
+<p><a href="https://github.com/nginx/nginx">https://github.com/nginx/nginx</a> is written in c (very performant but often needs to be compiled , especially with any of the extra 3rd party modules <a href="https://www.nginx.com/resources/wiki/modules/">https://www.nginx.com/resources/wiki/modules/</a>).</p>
+<h2 id="docker-pull-nginx">docker pull nginx</h2>
+<p>One quick way to attempt to leverage nginx as a front end for your projects is using containers with Docker <a href="https://hub.docker.com/_/nginx/">https://hub.docker.com/_/nginx/</a></p>
+<div class="highlight"><pre>sudo su
+docker pull nginx:latest
+docker images
+</pre></div>
+<p><a href="https://hub.docker.com/r/library/nginx/tags/">https://hub.docker.com/r/library/nginx/tags/</a> contains what other versions of nginx are provided by the vendor as Docker Images, the default build/image has quite a few modules <a href="http://nginx.org/en/docs/">http://nginx.org/en/docs/</a></p>
+<blockquote>
+<p>all future references to docker commands will assume you are root or typing sudo first</p>
+</blockquote>
+<h3 id="docker-nginx-interactive">docker nginx interactive</h3>
+<p><code>docker run --rm --publish 127.0.0.1:80:80 nginx</code></p>
+<blockquote>
+<p>starts an ephemeral container that binds the container port 80 to the local Host port 80 (binding to 127.0.0.1 prevents any other access except from the Host) , note by not explicitly sharing port 443 it is not connected/available</p>
+</blockquote>
+<div class="highlight"><pre>docker ps -a
+CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS                 PORTS                           NAMES
+3fccf15a3c24        nginx               "nginx -g 'daemon off"   3 seconds ago       Up 2 seconds        127.0.0.1:80-&gt;80/tcp, 443/tcp   pensive_elion
+
+netstat -antp
+Proto Recv-Q Send-Q Local Address           Foreign Address         State       PID/Program name
+tcp        0      0 127.0.0.1:80            0.0.0.0:*               LISTEN      5826/docker-proxy
+
+
+curl 127.0.0.1:80
+</pre></div>
+<blockquote>
+<p><code>&lt;h1&gt;Welcome to nginx!&lt;/h1&gt;</code> is part of the default nginx home page, (success)</p>
+</blockquote>
+<p>You will notice the access logs are being output to the console (where the docker container is running).</p>
+<div class="highlight"><pre>192.168.1.100 - - [01/Jan/1970:01:00:59 +0000] "GET / HTTP/1.1" 200 612 "-" "curl/7.38.0" "-"
+</pre></div>
+<p>Control + C will terminate the container</p>
+<h3 id="docker-nginx-interactive_1">docker nginx interactive</h3>
+<p><code>docker run --rm -i -t --publish 127.0.0.1:80:80 nginx /bin/bash</code></p>
+<blockquote>
+<p>Starting as root inside the container </p>
+</blockquote>
+<div class="highlight"><pre><span class="n">root</span><span class="mi">@557</span><span class="nl">ac197e2c1</span><span class="p">:</span><span class="o">/</span><span class="err">#</span> <span class="n">which</span> <span class="n">nginx</span>
+    <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">sbin</span><span class="o">/</span><span class="n">nginx</span>
+
+<span class="n">root</span><span class="mi">@557</span><span class="nl">ac197e2c1</span><span class="p">:</span><span class="o">/</span><span class="err">#</span> <span class="n">nginx</span> <span class="o">-</span><span class="n">V</span>
+    <span class="n">nginx</span> <span class="nl">version</span><span class="p">:</span> <span class="n">nginx</span><span class="o">/</span><span class="mf">1.9.7</span>
+    <span class="n">built</span> <span class="n">by</span> <span class="n">gcc</span> <span class="mf">4.9.2</span> <span class="p">(</span><span class="n">Debian</span> <span class="mf">4.9.2</span><span class="o">-</span><span class="mi">10</span><span class="p">)</span> 
+    <span class="n">built</span> <span class="n">with</span> <span class="n">OpenSSL</span> <span class="mf">1.0.1</span><span class="n">k</span> <span class="mi">8</span> <span class="n">Jan</span> <span class="mi">2015</span>
+    <span class="n">TLS</span> <span class="n">SNI</span> <span class="n">support</span> <span class="n">enabled</span>
+    <span class="n">configure</span> <span class="nl">arguments</span><span class="p">:</span> <span class="o">--</span><span class="n">prefix</span><span class="o">=/</span><span class="n">etc</span><span class="o">/</span><span class="n">nginx</span> <span class="o">--</span><span class="n">sbin</span><span class="o">-</span><span class="n">path</span><span class="o">=/</span><span class="n">usr</span><span class="o">/</span><span class="n">sbin</span><span class="o">/</span><span class="n">nginx</span> <span class="o">--</span><span class="n">conf</span><span class="o">-</span><span class="n">path</span><span class="o">=/</span><span class="n">etc</span><span class="o">/</span><span class="n">nginx</span><span class="o">/</span><span class="n">nginx</span><span class="p">.</span><span class="n">conf</span> <span class="o">--</span><span class="n">error</span><span class="o">-</span><span class="n">log</span><span class="o">-</span><span class="n">path</span><span class="o">=/</span><span class="n">var</span><span class="o">/</span><span class="n">log</span><span class="o">/</span><span class="n">nginx</span><span class="o">/</span><span class="n">error</span><span class="p">.</span><span class="n">log</span> <span class="o">--</span><span class="n">http</span><span class="o">-</span><span class="n">log</span><span class="o">-</span><span class="n">path</span><span class="o">=/</span><span class="n">var</span><span class="o">/</span><span class="n">log</span><span class="o">/</span><span class="n">nginx</span><span class="o">/</span><span class="n">access</span><span class="p">.</span><span class="n">log</span> <span class="o">--</span><span class="n">pid</span><span class="o">-</span><span class="n">path</span><span class="o">=/</span><span class="n">var</span><span class="o">/</span><span class="n">run</span><span class="o">/</span><span class="n">nginx</span><span class="p">.</span><span class="n">pid</span> <span class="o">--</span><span class="n">lock</span><span class="o">-</span><span class="n">path</span><span class="o">=/</span><span class="n">var</span><span class="o">/</span><span class="n">run</span><span class="o">/</span><span class="n">nginx</span><span class="p">.</span><span class="n">lock</span> <span class="o">--</span><span class="n">http</span><span class="o">-</span><span class="n">client</span><span class="o">-</span><span class="n">body</span><span class="o">-</span><span class="n">temp</span><span class="o">-</span><span class="n">path</span><span class="o">=/</span><span class="n">var</span><span class="o">/</span><span class="n">cache</span><span class="o">/</span><span class="n">nginx</span><span class="o">/</span><span class="n">client_temp</span> <span class="o">--</span><span class="n">http</span><span class="o">-</span><span class="n">proxy</span><span class="o">-</span><span class="n">temp</span><span class="o">-</span><span class="n">path</span><span class="o">=/</span><span class="n">var</span><span class="o">/</span><span class="n">cache</span><span class="o">/</span><span class="n">nginx</span><span class="o">/</span><span class="n">proxy_temp</span> <span class="o">--</span><span class="n">http</span><span class="o">-</span><span class="n">fastcgi</span><span class="o">-</span><span class="n">temp</span><span class="o">-</span><span class="n">path</span><span class="o">=/</span><span class="n">var</span><span class="o">/</span><span class="n">cache</span><span class="o">/</span><span class="n">nginx</span><span class="o">/</span><span class="n">fastcgi_temp</span> <span class="o">--</span><span class="n">http</span><span class="o">-</span><span class="n">uwsgi</span><span class="o">-</span><span class="n">temp</span><span class="o">-</span><span class="n">path</span><span class="o">=/</span><span class="n">var</span><span class="o">/</span><span class="n">cache</span><span class="o">/</span><span class="n">nginx</span><span class="o">/</span><span class="n">uwsgi_temp</span> <span class="o">--</span><span class="n">http</span><span class="o">-</span><span class="n">scgi</span><span class="o">-</span><span class="n">temp</span><span class="o">-</span><span class="n">path</span><span class="o">=/</span><span class="n">var</span><span class="o">/</span><span class="n">cache</span><span class="o">/</span><span class="n">nginx</span><span class="o">/</span><span class="n">scgi_temp</span> <span class="o">--</span><span class="n">user</span><span class="o">=</span><span class="n">nginx</span> <span class="o">--</span><span class="n">group</span><span class="o">=</span><span class="n">nginx</span> <span class="o">--</span><span class="n">with</span><span class="o">-</span><span class="n">http_ssl_module</span> <span class="o">--</span><span class="n">with</span><span class="o">-</span><span class="n">http_realip_module</span> <span class="o">--</span><span class="n">with</span><span class="o">-</span><span class="n">http_addition_module</span> <span class="o">--</span><span class="n">with</span><span class="o">-</span><span class="n">http_sub_module</span> <span class="o">--</span><span class="n">with</span><span class="o">-</span><span class="n">http_dav_module</span> <span class="o">--</span><span class="n">with</span><span class="o">-</span><span class="n">http_flv_module</span> <span class="o">--</span><span class="n">with</span><span class="o">-</span><span class="n">http_mp4_module</span> <span class="o">--</span><span class="n">with</span><span class="o">-</span><span class="n">http_gunzip_module</span> <span class="o">--</span><span class="n">with</span><span class="o">-</span><span class="n">http_gzip_static_module</span> <span class="o">--</span><span class="n">with</span><span class="o">-</span><span class="n">http_random_index_module</span> <span class="o">--</span><span class="n">with</span><span class="o">-</span><span class="n">http_secure_link_module</span> <span class="o">--</span><span class="n">with</span><span class="o">-</span><span class="n">http_stub_status_module</span> <span class="o">--</span><span class="n">with</span><span class="o">-</span><span class="n">http_auth_request_module</span> <span class="o">--</span><span class="n">with</span><span class="o">-</span><span class="n">threads</span> <span class="o">--</span><span class="n">with</span><span class="o">-</span><span class="n">stream</span> <span class="o">--</span><span class="n">with</span><span class="o">-</span><span class="n">stream_ssl_module</span> <span class="o">--</span><span class="n">with</span><span class="o">-</span><span class="n">mail</span> <span class="o">--</span><span class="n">with</span><span class="o">-</span><span class="n">mail_ssl_module</span> <span class="o">--</span><span class="n">with</span><span class="o">-</span><span class="n">file</span><span class="o">-</span><span class="n">aio</span> <span class="o">--</span><span class="n">with</span><span class="o">-</span><span class="n">http_v2_module</span> <span class="o">--</span><span class="n">with</span><span class="o">-</span><span class="n">cc</span><span class="o">-</span><span class="n">opt</span><span class="o">=</span><span class="err">'</span><span class="o">-</span><span class="n">g</span> <span class="o">-</span><span class="n">O2</span> <span class="o">-</span><span class="n">fstack</span><span class="o">-</span><span class="n">protector</span><span class="o">-</span><span class="k">strong</span> <span class="o">-</span><span class="n">Wformat</span> <span class="o">-</span><span class="n">Werror</span><span class="o">=</span><span class="n">format</span><span class="o">-</span><span class="n">security</span> <span class="o">-</span><span class="n">Wp</span><span class="p">,</span><span class="o">-</span><span class="n">D_FORTIFY_SOURCE</span><span class="o">=</span><span class="mi">2</span><span class="err">'</span> <span class="o">--</span><span class="n">with</span><span class="o">-</span><span class="n">ld</span><span class="o">-</span><span class="n">opt</span><span class="o">=</span><span class="err">'</span><span class="o">-</span><span class="n">Wl</span><span class="p">,</span><span class="o">-</span><span class="n">z</span><span class="p">,</span><span class="n">relro</span> <span class="o">-</span><span class="n">Wl</span><span class="p">,</span><span class="o">--</span><span class="n">as</span><span class="o">-</span><span class="n">needed</span><span class="err">'</span> <span class="o">--</span><span class="n">with</span><span class="o">-</span><span class="n">ipv6</span>
+</pre></div>
+<p>Test your config file:</p>
+<p><code>nginx -t -c /etc/nginx/nginx.conf -g "daemon off;"</code></p>
+<blockquote>
+<p>nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
+nginx: configuration file /etc/nginx/nginx.conf test is successful</p>
+</blockquote>
+<p><a href="https://www.nginx.com/resources/wiki/start/topics/tutorials/commandline/">https://www.nginx.com/resources/wiki/start/topics/tutorials/commandline/</a></p>
+<h3 id="nginxconf">nginx.conf</h3>
+<p>While there are quite a few ways to configure nginx one choice to make with Docker is to either</p>
+<ol>
+<li>
+<p><code>docker run --name some-nginx -v /some/nginx.conf:/etc/nginx/nginx.conf:ro -d nginx</code></p>
+<blockquote>
+<p>run docker as a daemon with a specified Container Name and override the container nginx.conf file with /some/nginx.conf from the hose</p>
+</blockquote>
+</li>
+<li>
+<p>Use a Dockerfile (based on the upstream nginx Docker image) to copy your own configuration file and other custom bits in and build your own custom Docker image (a highly recommended way of not being completely dependent on an upstream provider - especially if you push your Docker Image to your own private registry afterwards)</p>
+</li>
+</ol>
+<p>e.g. <a href="https://hub.docker.com/r/jwilder/nginx-proxy/~/dockerfile/">https://hub.docker.com/r/jwilder/nginx-proxy/~/dockerfile/</a> which also has "Foreman in Go lang" and makes use of expecting the Host to provide the SSL certificates</p>
+<ul>
+<li><a href="https://www.nginx.com/resources/admin-guide/nginx-web-server/">https://www.nginx.com/resources/admin-guide/nginx-web-server/</a></li>
+<li>
+<p><a href="https://www.nginx.com/resources/wiki/start/topics/examples/full/">https://www.nginx.com/resources/wiki/start/topics/examples/full/</a></p>
+<p>docker run --rm --publish 127.0.0.1:80:80 nginx /bin/bash -c "nginx -t -c /etc/nginx/nginx.conf"
+    nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
+    nginx: configuration file /etc/nginx/nginx.conf test is successful</p>
+</li>
+</ul>
+<h2 id="build-your-own-nginx-dockerfile">Build your own nginx Dockerfile</h2>
+<p>If you require 3rd party modules then you will have to build nginx from source, e.g.
+<a href="https://github.com/openresty/headers-more-nginx-module#installation">https://github.com/openresty/headers-more-nginx-module#installation</a></p>
+<p>That being the case you'll probably want to have a build process with 2 Docker files:</p>
+<ol>
+<li>the first Dockerfile will contain build-essentials, gcc, make, etc. so that you can build the binary from source (with any 3rd party modules) <a href="http://nginx.org/en/docs/configure.html">http://nginx.org/en/docs/configure.html</a></li>
+<li>The second docker image would be your "production container" where you copy in the custom nginx binary, install the dependencies (i.e. openssl), and setup the default config.</li>
+</ol>
+            <aside>
+            <hr/>
+            <nav>
+            <ul class="articles_timeline">
+ 
+                <li class="previous_article">« <a href="http://blog.john-pfeiffer.com/meeting-bjarne-stroustrup-creator-of-c-plus-plus-in-the-atlassian-dev-den" title="Previous: Meeting Bjarne Stroustrup, creator of C plus plus, in the Atlassian Dev Den">Meeting Bjarne Stroustrup, creator of C plus plus, in the Atlassian Dev Den</a></li>
+ 
+                <li class="next_article"><a href="http://blog.john-pfeiffer.com/build-automation-using-packer-to-build-an-ami" title="Next: Build Automation using packer to build an AMI">Build Automation using packer to build an AMI</a> »</li>
+            </ul>
+            </nav>
+            </aside>
+        </div>
+        <section>
+        <div class="span2" style="float:right;font-size:0.9em;">
+ 
+            <h4>Published</h4>
+            <time pubdate="pubdate" datetime="2015-06-13T08:00:00-07:00">Jun 13, 2015</time>
+            <h4>Category</h4>
+            <a class="category-link" href="/categories.html#virtualization-ref">virtualization</a> 
+            <h4>Tags</h4>
+            <ul class="list-of-tags tags-in-article"> 
+                <li><a href="/tags.html#docker-ref">docker
+                    <span>4</span>
+</a></li>
+                <li><a href="/tags.html#nginx-ref">nginx
+                    <span>2</span>
+</a></li>
+            </ul>
+
+        </div>
+        </section>
+</div>
+</article>
+				</div>
+				<div class="span1"></div>
+			</div>
+		</div>
+    </div>
+<footer>
+<div id="footer">
+    <ul class="footer-content">
+    </ul>
+</div>
+</footer>            <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+	<script src="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+    </body>
+</html>
