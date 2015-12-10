@@ -88,7 +88,8 @@
 <li><a href="#controlling-containers">Controlling Containers</a><ul>
 <li><a href="#starting-a-container-from-an-image">Starting a container (from an image)</a><ul>
 <li><a href="#create-a-container">Create a container</a></li>
-<li><a href="#start-a-container-attaching-to-a-container">Start a container (attaching to a container)</a></li>
+<li><a href="#start-resume-a-container">Start (resume) a container</a></li>
+<li><a href="#attaching-to-a-running-container">Attaching to a running container</a></li>
 </ul>
 </li>
 <li><a href="#stopping-a-container">Stopping a container</a></li>
@@ -289,9 +290,27 @@ root@f5878ed6016e:/# df -h
 </blockquote>
 </li>
 </ul>
-<h4 id="start-a-container-attaching-to-a-container">Start a container (attaching to a container)</h4>
+<h4 id="start-resume-a-container">Start (resume) a container</h4>
 <p>After a container has already been created (which starts it so ironically this is actually a "restart")</p>
 <p><code>docker start --interactive --attach container_id_or_name</code></p>
+<h4 id="attaching-to-a-running-container">Attaching to a running container</h4>
+<div class="highlight"><pre>docker ps -a 
+CONTAINER ID ... STATUS        NAMES
+9e0ebf4421dd ... Up 6 seconds  myexample
+
+docker attach 9e0ebf4421dd
+docker attach myexample
+</pre></div>
+<blockquote>
+<p>since the above will expect the container to have /bin/bash it will reuse the instance of shell</p>
+</blockquote>
+<div class="highlight"><pre>sudo docker exec -i -t 9e0ebf4421dd /bin/bash
+# ps aux
+# exit
+</pre></div>
+<blockquote>
+<p>instead a new /bin/bash is executed inside creating a second shell - use the exit command to not leave it around</p>
+</blockquote>
 <h3 id="stopping-a-container">Stopping a container</h3>
 <p>Part of the efficiency in docker is that containers can <strong>run in the background automatically</strong></p>
 <div class="highlight"><pre>docker run --detach --name myredis redis
