@@ -101,6 +101,8 @@
 <li><a href="#add-a-port-to-a-container">Add a port to a container</a></li>
 <li><a href="#logs-from-the-containers">Logs from the containers</a></li>
 <li><a href="#host-data-with-a-docker-container">Host data with a Docker Container</a></li>
+<li><a href="#managing-or-limiting-the-resources-available-to-a-container">Managing or limiting the resources available to a Container</a></li>
+<li><a href="#using-docker-for-a-gui-application">Using Docker for a GUI application</a></li>
 <li><a href="#saving-a-docker-container-as-a-new-image">Saving a docker container as a new image</a><ul>
 <li><a href="#docker-commit-for-a-container-ubuntutrusty-with-git">docker commit for a container: ubuntu:trusty with git</a></li>
 </ul>
@@ -484,6 +486,29 @@ docker save 49b5a7a88d5 | sudo docker-squash -t ubuntu-utopic-pelican:squash | d
 <blockquote>
 <p>create an interactive container named "mydata" that maps /tmp/mydata from the host onto /opt/mydata (warning: overriding any existing!)</p>
 </blockquote>
+<hr/>
+<h2 id="managing-or-limiting-the-resources-available-to-a-container">Managing or limiting the resources available to a Container</h2>
+<p><a href="https://docs.docker.com/engine/reference/run/#runtime-constraints-on-resources">https://docs.docker.com/engine/reference/run/#runtime-constraints-on-resources</a></p>
+<p>docker run -i -t --rm --cpuset-cpu 0 --memory 512m ubuntu:14.04 /bin/bash</p>
+<blockquote>
+<p>the usual ubuntu trusty bash prompt but anything we run will be
+pinned to cpu 0 (i.e. 25% of a 4 core system) and have
+at most 512 MB of RAM and 512 MB of swap available</p>
+</blockquote>
+<hr/>
+<h2 id="using-docker-for-a-gui-application">Using Docker for a GUI application</h2>
+<p>Mostly outside of the vision of containerization (neither isolation nor performance exactly) is using Docker to run GUI applications without installing them on the Host.</p>
+<p>Jessie Frazelle has done some excellent work pointing out how sharing the X11 socket from the host means lots of apps can run "without being installed" <a href="https://github.com/jfrazelle/dockerfiles">https://github.com/jfrazelle/dockerfiles</a></p>
+<p>One tip she did not include was the part about XManager security, run the following if you run into an error</p>
+<p><code>xhost local:root</code>
+- <a href="https://www.netsarang.com/knowledgebase/xmanager/3898/xhost_and_how_to_use_it">https://www.netsarang.com/knowledgebase/xmanager/3898/xhost_and_how_to_use_it</a>
+- <a href="http://www.x.org/archive/X11R6.8.0/doc/xhost.1.html">http://www.x.org/archive/X11R6.8.0/doc/xhost.1.html</a></p>
+<p><code>xhost local:root; docker run --rm -v /tmp/.X11-unix:/tmp/.X11-unix -e DISPLAY=unix$DISPLAY --device /dev/snd jess/chromium</code>
+- modify the xhost security to allow access to x windows
+- ephemeral so do not save anything
+- share the X11 unix socket
+- bind to the current display (i.e. :0.0)
+- allow sound from the Docker container</p>
 <hr/>
 <h2 id="saving-a-docker-container-as-a-new-image">Saving a docker container as a new image</h2>
 <p><code>docker commit --help</code></p>
