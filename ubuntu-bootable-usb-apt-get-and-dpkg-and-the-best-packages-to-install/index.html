@@ -85,7 +85,6 @@
 </ul>
 </li>
 <li><a href="#best-ubuntu-packages">Best Ubuntu Packages</a><ul>
-<li><a href="#docker">Docker</a></li>
 <li><a href="#gui">GUI</a></li>
 <li><a href="#music-and-video">music and video</a><ul>
 <li><a href="#spotify-in-ubuntu-1504">spotify in ubuntu 15.04</a></li>
@@ -101,6 +100,11 @@
 <li><a href="#ruby-and-openshift-cli">Ruby and OpenShift CLI</a></li>
 </ul>
 </li>
+<li><a href="#ssd-optimization">SSD Optimization</a><ul>
+<li><a href="#write-logs-to-tmpfs-instead-of-disk">Write Logs to tmpfs instead of disk</a></li>
+<li><a href="#customize-grub-boot-options">Customize Grub Boot Options</a></li>
+</ul>
+</li>
 </ul>
 </div>
         </nav>
@@ -108,7 +112,9 @@
     <div class="span8 article-content">
 
             
-<p>If you have a modern computer (BIOS) that can boot from USB it is well worth it since having the latest Ubuntu ISO on DVD tends to pile up.</p>
+<p>If you have a modern computer (BIOS) that can boot from USB it is well worth it since having the latest Ubuntu ISO on DVD tends to pile up extra plastic.</p>
+<p>After setting up the Operating System you will need to install some software (packages).</p>
+<p>And if you have an SSD drive you will want to optimize your OS to not wear it out unnecessarily.</p>
 <h2 id="write-an-iso-to-usb">Write an ISO to usb</h2>
 <div class="highlight"><pre>fdisk -l
 umount /dev/sdc1
@@ -134,6 +140,11 @@ sudo dd if=/home/ubuntu/Desktop/ubuntu-14.04.1-server-amd64.iso of=/dev/sdc
 </blockquote>
 <p>Now you can fix grub or /etc/passwd or free up some hard drive space</p>
 <h2 id="package-management-with-apt-commands">package management with apt commands</h2>
+<p>Debian has precompiled packages of binaries and libraries that can very easily be installed via the command line (or GUI) using Advanced Packaging Tool (APT) </p>
+<p><a href="https://wiki.debian.org/Apt">https://wiki.debian.org/Apt</a></p>
+<p>Since apt is a wonderful wrapper/manager of dpkg when you're in doubt most likely there is a dpkg command that will do what you need but it may take a lot of research and 8 parameters to do it ;]</p>
+<p><a href="https://en.wikipedia.org/wiki/Advanced_Packaging_Tool">https://en.wikipedia.org/wiki/Advanced_Packaging_Tool</a></p>
+<p><em>Hint: Ubuntu is based upon Debian</em></p>
 <h3 id="pro-tip-force-ipv4-to-avoid-lengthy-ipv6-timeouts">Pro Tip: Force ipv4 to avoid lengthy IPV6 timeouts</h3>
 <p><code>sudo apt-get -o Acquire::ForceIPv4=true update</code></p>
 <p><code>sudo apt-get -o Acquire::ForceIPv4=true install vim</code></p>
@@ -142,10 +153,13 @@ sudo dd if=/home/ubuntu/Desktop/ubuntu-14.04.1-server-amd64.iso of=/dev/sdc
 <p>persistent config to always use ipv4</p>
 </blockquote>
 <h3 id="apt-cache">apt-cache</h3>
-<p>debian has precompiled packages of binaries and libraries that can very easily be installed via the command line (or GUI) using Advanced Packaging Tool (APT) <a href="https://wiki.debian.org/Apt">https://wiki.debian.org/Apt</a></p>
 <p><code>apt-cache search ssh</code></p>
 <blockquote>
 <p>to find packages with the name ssh</p>
+</blockquote>
+<p><code>apt-cache search ssh | grep server</code></p>
+<blockquote>
+<p>if there are too many results pipe to grep to filter down the results</p>
 </blockquote>
 <p><code>apt-cache show ssh</code></p>
 <blockquote>
@@ -160,7 +174,27 @@ sudo dd if=/home/ubuntu/Desktop/ubuntu-14.04.1-server-amd64.iso of=/dev/sdc
 <p>to show the package dependencies</p>
 </blockquote>
 <h3 id="apt-get">apt-get</h3>
-<p><code>sudo apt-get install ssh</code></p>
+<p><code>sudo apt-get install --dry-run byobu</code></p>
+<blockquote>
+<p>simulate what will happen but do not change the system</p>
+</blockquote>
+<p><code>sudo apt-get install --download-only byobu</code></p>
+<blockquote>
+<p>packages are retrieved but not installed</p>
+</blockquote>
+<p><code>sudo apt-get install --yes byobu</code></p>
+<blockquote>
+<p>install and pre-emptively answer yes to the yes/no prompt</p>
+</blockquote>
+<p>`sudo apt-get install --reinstall byobu</p>
+<blockquote>
+<p>reinstall even if the package is installed</p>
+</blockquote>
+<p>`sudo apt-get install --fix-broken byobu</p>
+<blockquote>
+<p>attempt to fix broken dependencies</p>
+</blockquote>
+<p><a href="http://manpages.ubuntu.com/manpages/precise/man8/apt-get.8.html">http://manpages.ubuntu.com/manpages/precise/man8/apt-get.8.html</a></p>
 <h3 id="apt-key">apt-key</h3>
 <p><code>sudo apt-key update</code></p>
 <blockquote>
@@ -173,8 +207,13 @@ sudo dd if=/home/ubuntu/Desktop/ubuntu-14.04.1-server-amd64.iso of=/dev/sdc
 <div class="highlight"><pre>sudo apt-get update
 sudo apt-get install -y byobu build-essential elinks unzip unrar nano vim wget curl ntp rcconf dialog git-core
 
-wget -qO- https://bootstrap.pypa.io/get-pip.py | sudo python
+sudo apt-get install -y python-pip &amp;&amp; sudo pip install --upgrade pip
 </pre></div>
+<blockquote>
+<p>pip is the package manager for python packages (different from the debian OS packages) so useful if you do any python development or run python applications
+An alternative to the usually stale OS pip version is to use the not entirely secure grab the .py file from the internet and run it...
+wget -qO- https://bootstrap.pypa.io/get-pip.py | sudo python</p>
+</blockquote>
 <ul>
 <li>byobu = console terminal multi screen (survives network disconnects) <a href="http://byobu.co">http://byobu.co</a></li>
 <li>build-essential = tools for compiling and building debian packages <a href="http://packages.ubuntu.com/lucid/build-essential">http://packages.ubuntu.com/lucid/build-essential</a></li>
@@ -183,11 +222,13 @@ wget -qO- https://bootstrap.pypa.io/get-pip.py | sudo python
 <li>nano = a simple text editor (much easier than vi/vim for just writing new text)</li>
 <li>wget and curl = utilities to download files</li>
 <li>ntp = network time protocol client daemon to keep your clock in sync</li>
+<li>rcconf = easier way to manage what services start at boot <a href="https://packages.debian.org/jessie/rcconf">https://packages.debian.org/jessie/rcconf</a></li>
+<li>dialog = user friendly dialog boxes for shell scripts (dependency for rcconf)</li>
 <li>
-<p>rcconf = easier way to manage what services start at boot <a href="https://packages.debian.org/jessie/rcconf">https://packages.debian.org/jessie/rcconf</a></p>
+<p>git-core = the distributed version control software that is eating the developer world</p>
 </li>
 <li>
-<p>python-setuptools = Sometimes required to install pip (the "drug dealer" for python based software) <a href="http://pythonhosted.org//setuptools">http://pythonhosted.org//setuptools</a></p>
+<p>python-setuptools = Sometimes required to install pip  <a href="http://pythonhosted.org/setuptools">http://pythonhosted.org/setuptools</a></p>
 </li>
 <li>
 <p>icedtea = open java (plugin = browser java)</p>
@@ -195,34 +236,40 @@ wget -qO- https://bootstrap.pypa.io/get-pip.py | sudo python
 <li>
 <p>openvpn = opensource vpn client <a href="https://openvpn.net">https://openvpn.net</a></p>
 </li>
-</ul>
+<li>
+<p>openconnect = opensource compatible with cisco anyconnect vpn <a href="https://en.wikipedia.org/wiki/OpenConnect">https://en.wikipedia.org/wiki/OpenConnect</a></p>
+</li>
+<li>
 <p>jdk = java development kit</p>
+</li>
+<li>iced-tea-7-plugin = open source java 7 support for browsers</li>
+</ul>
 <p><code>sudo apt-get install openjdk-8-jdk</code></p>
 <blockquote>
 <p>NOT SURE IN UTOPIC: sudo apt-get install openjdk-7-jre openjdk-7-jdk icedtea-7-plugin</p>
 </blockquote>
-<h3 id="docker">Docker</h3>
-<p>docker = virtual machine/container platform based on a unionfs</p>
-<div class="highlight"><pre>sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 36A1D7869245C8950F966E92D8576A8BA88D21E9
-echo "deb https://get.docker.io/ubuntu docker main" &gt; /etc/apt/sources.list.d/docker.list
-
-sudo apt-get install lxc-docker
-</pre></div>
 <h3 id="gui">GUI</h3>
 <p><strong>Xubuntu Desktop</strong> is my preferred "lightweight" GUI for Ubuntu: <a href="http://xubuntu.org">http://xubuntu.org</a></p>
-<p><code>apt-get install -y chromium-browser pepperflashplugin-nonfree geany arandr keepassx xdiskusage rdesktop</code></p>
+<p><code>apt-get install -y chromium-browser pepperflashplugin-nonfree geany keepassx xdiskusage</code>
+<code>apt-get install -y arandr rdesktop</code></p>
 <ul>
 <li>chromium-browser = opensource branch/clone of google chrome browser</li>
 <li>geany = tabbed text notepad (with syntax highlighting)</li>
-<li>arandr = multi display gui config</li>
 <li>keepassx = secure password inventory (has a mini version for  iphone too)</li>
 <li>xdiskusage = graphical view of disk space usage by folder and file</li>
 <li>
-<p>rdesktop = RDP client</p>
+<p>arandr = multi display gui config</p>
 </li>
 <li>
-<p>grdesktop = gnome UI for rdesktop</p>
+<p>rdesktop = RDP client</p>
 </li>
+<li>grdesktop = gnome UI for rdesktop</li>
+</ul>
+<p><code>sudo echo "autologin-user=ubuntu" &gt;&gt;  /etc/lightdm/lightdm.conf.d/10-xubuntu.conf</code></p>
+<blockquote>
+<p>Better yet use the UI and just choose auto login ;)</p>
+</blockquote>
+<ul>
 <li>
 <p>dropbox = cloud file storage</p>
 <p>deb http://linux.dropbox.com/ubuntu utopic main
@@ -284,17 +331,85 @@ apt-get -f install
 </ul>
 <h3 id="ruby-and-openshift-cli">Ruby and OpenShift CLI</h3>
 <p>https://gorails.com/setup/ubuntu/14.04</p>
-<p>sudo apt-get install git-core curl zlib1g-dev build-essential libssl-dev libreadline-dev libyaml-dev libsqlite3-dev sqlite3 libxml2-dev libxslt1-dev libcurl4-openssl-dev python-software-properties
-libgdbm-dev libncurses5-dev automake libtool bison libffi-dev</p>
-<p>source ~/.rvm/scripts/rvm
+<p><code>sudo apt-get install git-core curl zlib1g-dev build-essential libssl-dev libreadline-dev libyaml-dev libsqlite3-dev sqlite3 \</code>
+<code>libxml2-dev libxslt1-dev libcurl4-openssl-dev python-software-properties libgdbm-dev libncurses5-dev automake libtool bison libffi-dev</code></p>
+<div class="highlight"><pre>source ~/.rvm/scripts/rvm
 echo "source ~/.rvm/scripts/rvm" &gt;&gt; ~/.bashrc
 rvm install 2.1.2
 rvm use 2.1.2 --default
 ruby -v
-echo "gem: --no-ri --no-rdoc" &gt; ~/.gemrc</p>
-<p>gem install rhc
-red hat client for openshift</p>
-<p>sudo echo "autologin-user=ubuntu" &gt;&gt;  /etc/lightdm/lightdm.conf.d/10-xubuntu.conf </p>
+echo "gem: --no-ri --no-rdoc" &gt; ~/.gemrc
+
+gem install rhc
+</pre></div>
+<blockquote>
+<p>red hat client for openshift</p>
+</blockquote>
+<h2 id="ssd-optimization">SSD Optimization</h2>
+<h3 id="write-logs-to-tmpfs-instead-of-disk">Write Logs to tmpfs instead of disk</h3>
+<p>tmpfs ram (memory) virtual disk will just use memory (which I guess is overly abundant now) instead of wearing out the Solid State Drive</p>
+<p><code>sudo vi /etc/fstab</code></p>
+<div class="highlight"><pre># /etc/fstab: static file system information.
+#
+# Use 'blkid' to print the universally unique identifier for a
+# device; this may be used with UUID= as a more robust way to name devices
+# that works even if disks are added and removed. See fstab(5).
+#
+# &lt;file system&gt; &lt;mount point&gt;   &lt;type&gt;  &lt;options&gt;       &lt;dump&gt;  &lt;pass&gt;
+# / was on /dev/sda2 during installation
+UUID=b7577587-22db-42f6-95d1-264a24f9dd90 /               ext4    noatime,errors=remount-ro 0       1
+tmpfs    /tmp        tmpfs    defaults,noatime    0  0
+tmpfs    /var/tmp    tmpfs    defaults,noatime    0  0
+tmpfs    /var/log/apparmor    tmpfs    defaults,noatime    0  0
+tmpfs    /var/log/apt    tmpfs    defaults,noatime    0  0
+tmpfs    /var/log/cups    tmpfs    defaults,noatime    0  0
+tmpfs    /var/log/dist-upgrade tmpfs    defaults,noatime    0  0
+tmpfs    /var/log/installer tmpfs    defaults,noatime    0  0
+tmpfs    /var/log/lightdm  tmpfs    defaults,noatime    0  0
+tmpfs    /var/log/udev tmpfs    defaults,noatime    0  0
+tmpfs    /var/log/unattended-upgrades tmpfs    defaults,noatime    0  0
+</pre></div>
+<blockquote>
+<p>the tmpfs disks created in my fstab were discovered through trial and error and will differ based on what applications are actually running (Xubuntu!)</p>
+<p>an older simpler example causes errors as applications create /var/log/SOMETHING directories during installation and then expect them on boot every time later</p>
+</blockquote>
+<div class="highlight"><pre>/dev/sda1 /     ext4    noatime,errors=remount-ro 0 1
+
+tmpfs    /tmp        tmpfs    defaults,noatime    0  0
+tmpfs    /var/tmp    tmpfs    defaults,noatime    0  0
+tmpfs    /var/log    tmpfs    defaults,noatime    0  0
+</pre></div>
+<blockquote>
+<p>here is a list of directories that probably need to be generated
+<em>for dir in apparmor apt cups dist-upgrade fsck gdm installer news samba unattended-upgrades ; do</em>
+<em>  mkdir -p /var/log/$dir</em>
+<em>done</em></p>
+</blockquote>
+<h3 id="customize-grub-boot-options">Customize Grub Boot Options</h3>
+<p>I prefer seeing my bootup screens so I remove some but add the SSD enhancement</p>
+<div class="highlight"><pre>vi nano /etc/default/grub
+    GRUB_TIMEOUT=1
+    #   GRUB_CMDLINE_LINUX_DEFAULT="quiet splash"
+    GRUB_CMDLINE_LINUX_DEFAULT="elevator=noop"
+
+sudo update-grub2
+cat /boot/grub/grub.cfg
+    root=UUID=f0ae2c59-83d2-42e7-81c4-2e870b6b255d ro quiet splash elevator=noop
+</pre></div>
+<blockquote>
+<p>only prompt for 1 second
+remove the quiet so the console displays all of the boot information
+the noop scheduler is a simple FIFO scheduler which is usually optimal for SSD or virtual machines <a href="https://en.wikipedia.org/wiki/Noop_scheduler">https://en.wikipedia.org/wiki/Noop_scheduler</a> since any OS attempt at optimization may cnoflict with more accurate information from the Disk or Hypervisor
+update-grub2 is to apply the update <a href="https://help.ubuntu.com/community/Grub2">https://help.ubuntu.com/community/Grub2</a>
+manually verify the changes by examining all of the boot menu options (i.e. find the noop line)</p>
+</blockquote>
+<div class="highlight"><pre>cat /sys/block/sda/queue/scheduler
+    [noop] deadline cfq
+</pre></div>
+<blockquote>
+<p>list what schedulers are available , <a href="http://www.linuxhowtos.org/System/iosched.htm">http://www.linuxhowtos.org/System/iosched.htm</a>, note that noop is selected</p>
+</blockquote>
+<p><em>Note: the above command needs to be run as root, but sudo does not work with it on my system. Run sudo -i if you have a problem to get a root prompt.)</em></p>
             <aside>
             <hr/>
             <nav>
