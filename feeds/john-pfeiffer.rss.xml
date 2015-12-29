@@ -8,7 +8,7 @@
 &lt;li&gt;Bitbucket also has a free static site capability (as long as the DNS is USERNAME.bitbucket.org), so no server/hosting required&lt;/li&gt;
 &lt;li&gt;Bitbucket have free private repositories&lt;/li&gt;
 &lt;li&gt;The Bitbucket static site repository can be private (only the html exposed will be visible to anonymous users)&lt;/li&gt;
-&lt;li&gt;Shippable have a free plan with 1 container that will do your builds (fine by my, Docker is fast!)&lt;/li&gt;
+&lt;li&gt;Shippable have a free plan with 1 container that will do your builds (fine by me, Docker is fast!)&lt;/li&gt;
 &lt;li&gt;Pelican converts markdown into .html and you can still use javascript for fancy things &lt;a href="http://docs.getpelican.com/"&gt;http://docs.getpelican.com/&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;The basic process is to be triggered by a git push to the private repository of new/updated source markdown, use pelican to process it into .html, and then publish (git push) the new/updated .html to the static site repository.&lt;/p&gt;
@@ -21,7 +21,7 @@
 &lt;h2 id="bitbucket-setup"&gt;Bitbucket setup&lt;/h2&gt;
 &lt;h3 id="create-the-source-and-target-repositories"&gt;Create The Source and Target Repositories&lt;/h3&gt;
 &lt;p&gt;Create a new private repository (for your markdown), consider prefixing the name with source or something (good names makes for good maintenance)&lt;/p&gt;
-&lt;p&gt;Make sure you have cloned the pelican project and setup a basic static site: &lt;/p&gt;
+&lt;p&gt;Make sure you have cloned the pelican project and setup a basic static site: &lt;a href="http://blog.john-pfeiffer.com/how-to-set-up-a-pelican-static-blog-site/"&gt;http://blog.john-pfeiffer.com/how-to-set-up-a-pelican-static-blog-site/&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;Inside your .gitignore you will probably want to exclude .pyc and ./output and any other pelican created artifacts.&lt;/p&gt;
 &lt;p&gt;Inside your repository at the root level you will need a shippable.yaml file:&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="n"&gt;language&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="n"&gt;python&lt;/span&gt;
@@ -49,15 +49,14 @@
 &lt;/blockquote&gt;
 &lt;p&gt;&lt;a href="https://confluence.atlassian.com/bitbucket/publishing-a-website-on-bitbucket-cloud-221449776.html"&gt;https://confluence.atlassian.com/bitbucket/publishing-a-website-on-bitbucket-cloud-221449776.html&lt;/a&gt;&lt;/p&gt;
 &lt;h3 id="get-oauth-access"&gt;Get OAuth Access&lt;/h3&gt;
-&lt;p&gt;Generate a Consumer OAuth2 Token with https://confluence.atlassian.com/bitbucket/oauth-on-bitbucket-cloud-238027431.html#OAuthonBitbucketCloud-Createaconsumer&lt;/p&gt;
-&lt;p&gt;Use curl to verify your token (this is how Shippable will get a 1 hour expiring access token to work on the target output repository.&lt;/p&gt;
-&lt;p&gt;curl https://bitbucket.org/site/oauth2/access_token -d grant_type=client_credentials -u yourkeyhere:yoursecrethere&lt;/p&gt;
+&lt;p&gt;Generate a Consumer OAuth2 Token with &lt;a href="https://confluence.atlassian.com/bitbucket/oauth-on-bitbucket-cloud-238027431.html#OAuthonBitbucketCloud-Createaconsumer"&gt;https://confluence.atlassian.com/bitbucket/oauth-on-bitbucket-cloud-238027431.html#OAuthonBitbucketCloud-Createaconsumer&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Use curl to verify your token (this is how Shippable will get a 1 hour expiring access token to work on the target output repository)&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;curl https://bitbucket.org/site/oauth2/access_token -d grant_type=client_credentials -u yourkeyhere:yoursecrethere
+&lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;&lt;a href="http://stackoverflow.com/questions/24965307/how-to-manipulate-bitbucket-repository-with-token"&gt;http://stackoverflow.com/questions/24965307/how-to-manipulate-bitbucket-repository-with-token&lt;/a&gt;&lt;/p&gt;
 &lt;h2 id="shippable-setup"&gt;Shippable setup&lt;/h2&gt;
 &lt;p&gt;Enable the integration with Bitbucket: &lt;a href="http://docs.shippable.com/#step-0-prerequisite"&gt;http://docs.shippable.com/#step-0-prerequisite&lt;/a&gt;&lt;/p&gt;
-&lt;blockquote&gt;
-&lt;p&gt;Right from the beginning Shippable tries to ask which source repository provider (either GitHub or Bitbucket) you will be using.&lt;/p&gt;
-&lt;/blockquote&gt;
+&lt;p&gt;&lt;em&gt;Right from the beginning Shippable tries to ask which source repository provider (either GitHub or Bitbucket) you will be using.&lt;/em&gt;&lt;/p&gt;
 &lt;p&gt;Use Shippable's OAuth implementation (Account Integration) to pick which Bitbucket repository&lt;/p&gt;
 &lt;p&gt;Home -&amp;gt; CI (dropdown) -&amp;gt; Bitbucket (hopefully you have a different avatar between Bitbucket and GitHub)&lt;/p&gt;
 &lt;blockquote&gt;
@@ -107,10 +106,12 @@ Fill it in with something like OAUTH_USER=yourkeyhere:yoursecrethere&lt;/p&gt;
     &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;ls&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;ahl&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 &lt;blockquote&gt;
-&lt;p&gt;Adding the bitbucket oauth2 consumer key and secret (separated by a colon) as an encrypted environment variable
-using curl to generate a temporary access_token and extracting it into a local environment variable
-cloning with the access)token and removing the previous contents and replacing them with the newly generated output
-leveraging the CI variables to indicate on the output html repository what markdown source commits triggered this build&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Adding the bitbucket oauth2 consumer key and secret (separated by a colon) as an encrypted environment variable&lt;/li&gt;
+&lt;li&gt;using curl to generate a temporary access_token and extracting it into a local environment variable&lt;/li&gt;
+&lt;li&gt;cloning with the access)token and removing the previous contents and replacing them with the newly generated output&lt;/li&gt;
+&lt;li&gt;leveraging the CI variables to indicate on the output html repository what markdown source commits triggered this build&lt;/li&gt;
+&lt;/ul&gt;
 &lt;/blockquote&gt;
 &lt;h2 id="reviewing-the-output"&gt;Reviewing the output&lt;/h2&gt;
 &lt;p&gt;The full output of the run is available at something like https://app.shippable.com/builds/1234dec1d00e020c0011234&lt;/p&gt;
@@ -123,7 +124,7 @@ leveraging the CI variables to indicate on the output html repository what markd
 &lt;/ol&gt;
 &lt;h2 id="misc"&gt;Misc&lt;/h2&gt;
 &lt;p&gt;One thing that is interesting about this is that using OAuth tokens through a service is merely wrapping all of the manual steps I have in a previous blog post into a nice SaaS wrapper =)
-&lt;/p&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">john pfeiffer</dc:creator><pubDate>Mon, 21 Dec 2015 12:24:00 -0800</pubDate><guid>tag:blog.john-pfeiffer.com,2015-12-21:static-site-with-bitbucket-and-shippable-and-pelican</guid><category>static site</category><category>pelican</category><category>bitbucket</category><category>shippable ci</category><category>ci</category><category>cd</category></item><item><title>Build Automation using packer to build an AMI</title><link>http://blog.john-pfeiffer.com/build-automation-using-packer-to-build-an-ami</link><description>
+&lt;a href="http://blog.john-pfeiffer.com/publish-a-pelican-blog-using-a-bitbucket-post-webhook/"&gt;http://blog.john-pfeiffer.com/publish-a-pelican-blog-using-a-bitbucket-post-webhook/&lt;/a&gt;&lt;/p&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">john pfeiffer</dc:creator><pubDate>Mon, 21 Dec 2015 12:24:00 -0800</pubDate><guid>tag:blog.john-pfeiffer.com,2015-12-21:static-site-with-bitbucket-and-shippable-and-pelican</guid><category>static site</category><category>pelican</category><category>bitbucket</category><category>shippable ci</category><category>ci</category><category>cd</category></item><item><title>Build Automation using packer to build an AMI</title><link>http://blog.john-pfeiffer.com/build-automation-using-packer-to-build-an-ami</link><description>
 &lt;h3 id="why-build-automation"&gt;Why build automation?&lt;/h3&gt;
 &lt;p&gt;Software has always been about automation and leveraging the computer's capacity for precision and repetition.&lt;/p&gt;
 &lt;p&gt;Somehow though, software is sometimes still deployed using a series of often poorly documented steps (to physical hardware even!). I've been there, it ain't pretty. (badpokerface)&lt;/p&gt;
