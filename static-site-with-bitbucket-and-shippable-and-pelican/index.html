@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en-US">
+    <head>
+        <meta charset="utf-8"> 
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="author" content="john pfeiffer" />
+        <meta name="copyright" content="john pfeiffer" />
+
+<meta name="keywords" content="static site, pelican, bitbucket, shippable ci, ci, cd, programming, " />
+        <title>Static site with Bitbucket and Shippable and Pelican  · johnpfeiffer
+</title>
+        <link href="http://cdn-images.mailchimp.com/embedcode/slim-081711.css" rel="stylesheet" type="text/css">
+        <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="http://blog.john-pfeiffer.com/theme/css/style.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="http://blog.john-pfeiffer.com/theme/css/solarizedlight.css" media="screen">
+        <link rel="shortcut icon" href="http://blog.john-pfeiffer.com/theme/images/favicon.ico" type="image/x-icon" />
+        <link rel="apple-touch-icon" href="http://blog.john-pfeiffer.com/theme/images/apple-touch-icon.png" />
+        <link rel="apple-touch-icon" sizes="57x57" href="http://blog.john-pfeiffer.com/theme/images/apple-touch-icon-57x57.png" />
+        <link rel="apple-touch-icon" sizes="72x72" href="http://blog.john-pfeiffer.com/theme/images/apple-touch-icon-72x72.png" />
+        <link rel="apple-touch-icon" sizes="114x114" href="http://blog.john-pfeiffer.com/theme/images/apple-touch-icon-114x114.png" />
+        <link rel="apple-touch-icon" sizes="144x144" href="http://blog.john-pfeiffer.com/theme/images/apple-touch-icon-144x144.png" />
+        <link rel="icon" href="http://blog.john-pfeiffer.com/theme/images/apple-touch-icon-144x144.png" />
+    <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-3758734-9']);
+    _gaq.push(['_trackPageview']);
+    (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+    </script>
+    </head>
+    <body>
+	<div id="content-sans-footer">
+        <div class="dropdown-backdrop">
+
+			<div class="navbar navbar-static-top">
+				<div class="navbar-inner">
+					<div class="container">
+						<a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+							<span class="icon-bar"></span>
+							<span class="icon-bar"></span>
+							<span class="icon-bar"></span>
+						</a>
+						<a class="brand" href="http://blog.john-pfeiffer.com/"><span class=site-name>johnpfeiffer</span></a>
+						<div class="nav-collapse collapse">
+							<ul class="nav pull-right top-menu">
+								<li ><a href="http://blog.john-pfeiffer.com">Home</a></li>
+								<li ><a href="http://blog.john-pfeiffer.com/john-likes">John Likes</a></li>
+								<li ><a href="http://blog.john-pfeiffer.com/categories.html">Categories</a></li>
+								<li ><a href="http://blog.john-pfeiffer.com/tags.html">Tags</a></li>
+								<li ><a href="http://blog.john-pfeiffer.com/archives.html">Archives</a></li>
+								<li><form class="navbar-search" action="http://blog.john-pfeiffer.com/search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="container-fluid">
+			<div class="row-fluid">
+				<div class="span1"></div>
+				<div class="span10">
+<article>
+<div class="row-fluid">
+    <header class="page_header span10 offset2">
+    <h1><a href="http://blog.john-pfeiffer.com/static-site-with-bitbucket-and-shippable-and-pelican"> Static site with Bitbucket and Shippable and Pelican  </a></h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+    <div class="span2 table-of-content">
+        <nav>
+        <h4>Contents</h4>
+        <div class="toc">
+<ul>
+<li><a href="#running-software-costs-money">Running Software Costs Money</a></li>
+<li><a href="#a-free-and-efficient-static-web-site">A Free and Efficient Static Web Site</a></li>
+<li><a href="#bitbucket-setup">Bitbucket setup</a><ul>
+<li><a href="#create-the-source-and-target-repositories">Create The Source and Target Repositories</a></li>
+<li><a href="#get-oauth-access">Get OAuth Access</a></li>
+</ul>
+</li>
+<li><a href="#shippable-setup">Shippable setup</a></li>
+<li><a href="#putting-it-all-together">Putting it all together</a></li>
+<li><a href="#reviewing-the-output">Reviewing the output</a></li>
+<li><a href="#misc">Misc</a></li>
+</ul>
+</div>
+        </nav>
+    </div>
+    <div class="span8 article-content">
+
+            
+<h2 id="running-software-costs-money">Running Software Costs Money</h2>
+<p>One of the most overlooked costs in running a service is operations.  While Research and Development (aka coding) is often cited as the largest expense (software developer salaries! <a href="https://www.quora.com/What-are-the-average-operating-costs-of-SaaS-companies">https://www.quora.com/What-are-the-average-operating-costs-of-SaaS-companies</a>), and 80% (or more) of (successful) software's life is maintenance (<a href="http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3610582/">http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3610582/</a>), you have to run the darn thing all the time.</p>
+<h2 id="a-free-and-efficient-static-web-site">A Free and Efficient Static Web Site</h2>
+<p>What is one cost effective (free!) and efficient solution to running a static site?</p>
+<ul>
+<li>Bitbucket also has a free static site capability (as long as the DNS is USERNAME.bitbucket.org), so no server/hosting required</li>
+<li>Bitbucket have free private repositories</li>
+<li>The Bitbucket static site repository can be private (only the html exposed will be visible to anonymous users)</li>
+<li>Shippable have a free plan with 1 container that will do your builds (fine by my, Docker is fast!)</li>
+<li>Pelican converts markdown into .html and you can still use javascript for fancy things <a href="http://docs.getpelican.com/">http://docs.getpelican.com/</a></li>
+</ul>
+<p>The basic process is to be triggered by a git push to the private repository of new/updated source markdown, use pelican to process it into .html, and then publish (git push) the new/updated .html to the static site repository.</p>
+<p>One reason to use two seperate repositories instead of only one repository is that if you make a commit to your markdown source repository that will trigger a CI run which will push the updated .html files to the repository which would be detected and maybe trigger an infinite loop.  Or at the least interleave your source code changes with generated output changes in the commit logs.  =]</p>
+<p>An alternative is using multiple branches but you'd better hope nobody ever deletes your source branch by accident.</p>
+<p>Another alternative is to include an IF statement in your shippable code to not push if the diff/md5 of the source files (or maybe check against the output .html?) still match.  </p>
+<blockquote>
+<p>I say keep it super simple ;)</p>
+</blockquote>
+<h2 id="bitbucket-setup">Bitbucket setup</h2>
+<h3 id="create-the-source-and-target-repositories">Create The Source and Target Repositories</h3>
+<p>Create a new private repository (for your markdown), consider prefixing the name with source or something (good names makes for good maintenance)</p>
+<p>Make sure you have cloned the pelican project and setup a basic static site: </p>
+<p>Inside your .gitignore you will probably want to exclude .pyc and ./output and any other pelican created artifacts.</p>
+<p>Inside your repository at the root level you will need a shippable.yaml file:</p>
+<div class="highlight"><pre><span class="n">language</span><span class="o">:</span> <span class="n">python</span>
+<span class="n">python</span><span class="o">:</span>
+    <span class="o">-</span> <span class="s2">"2.7"</span>
+<span class="n">install</span><span class="o">:</span>
+    <span class="o">-</span> <span class="n">pip</span> <span class="n">install</span> <span class="n">pelican</span> <span class="n">Markdown</span> <span class="n">beautifulsoup4</span>
+<span class="n">script</span><span class="o">:</span>
+    <span class="o">-</span> <span class="n">rm</span> <span class="o">-</span><span class="n">rf</span> <span class="o">./</span><span class="n">output</span>
+    <span class="o">-</span> <span class="n">rm</span> <span class="o">-</span><span class="n">rf</span> <span class="o">./</span><span class="n">cache</span>
+    <span class="o">-</span> <span class="n">rm</span> <span class="o">-</span><span class="n">rf</span> <span class="o">./</span><span class="n">plugins</span><span class="o">/*</span>
+    <span class="o">-</span> <span class="n">mv</span> <span class="o">./</span><span class="n">pelican</span><span class="o">-</span><span class="n">project</span><span class="o">/*</span> <span class="o">.</span>
+    <span class="o">-</span> <span class="n">ls</span> <span class="o">-</span><span class="n">ahl</span> <span class="o">./</span><span class="n">content</span>
+    <span class="o">-</span> <span class="n">pelican</span> <span class="o">./</span><span class="n">content</span> <span class="o">-</span><span class="n">o</span> <span class="o">./</span><span class="n">output</span> <span class="o">-</span><span class="n">s</span> <span class="o">./</span><span class="n">publishconf</span><span class="o">.</span><span class="na">py</span>
+<span class="n">after_script</span><span class="o">:</span>
+    <span class="o">-</span> <span class="n">ls</span> <span class="o">-</span><span class="n">ahl</span>
+    <span class="o">-</span> <span class="n">ls</span> <span class="o">-</span><span class="n">ahl</span> <span class="o">./</span><span class="n">output</span>
+</pre></div>
+<blockquote>
+<p>This assumes that the pelican-project is a subdirectory in the repository using the best practice of leaving the top level of a repository for build and test artifacts and isolating the source code into a subdirectory.</p>
+</blockquote>
+<p>Create another private repository for your public html.  It MUST be named USERNAME.bitbucket.org to make use of the bitbucket static site capabilities.</p>
+<blockquote>
+<p>(yes, the name must include those dots/domain name of the service)</p>
+</blockquote>
+<p><a href="https://confluence.atlassian.com/bitbucket/publishing-a-website-on-bitbucket-cloud-221449776.html">https://confluence.atlassian.com/bitbucket/publishing-a-website-on-bitbucket-cloud-221449776.html</a></p>
+<h3 id="get-oauth-access">Get OAuth Access</h3>
+<p>Generate a Consumer OAuth2 Token with https://confluence.atlassian.com/bitbucket/oauth-on-bitbucket-cloud-238027431.html#OAuthonBitbucketCloud-Createaconsumer</p>
+<p>Use curl to verify your token (this is how Shippable will get a 1 hour expiring access token to work on the target output repository.</p>
+<p>curl https://bitbucket.org/site/oauth2/access_token -d grant_type=client_credentials -u yourkeyhere:yoursecrethere</p>
+<p><a href="http://stackoverflow.com/questions/24965307/how-to-manipulate-bitbucket-repository-with-token">http://stackoverflow.com/questions/24965307/how-to-manipulate-bitbucket-repository-with-token</a></p>
+<h2 id="shippable-setup">Shippable setup</h2>
+<p>Enable the integration with Bitbucket: <a href="http://docs.shippable.com/#step-0-prerequisite">http://docs.shippable.com/#step-0-prerequisite</a></p>
+<blockquote>
+<p>Right from the beginning Shippable tries to ask which source repository provider (either GitHub or Bitbucket) you will be using.</p>
+</blockquote>
+<p>Use Shippable's OAuth implementation (Account Integration) to pick which Bitbucket repository</p>
+<p>Home -&gt; CI (dropdown) -&gt; Bitbucket (hopefully you have a different avatar between Bitbucket and GitHub)</p>
+<blockquote>
+<p>Press "Sync" if you have a newly created repository that is not listed yet</p>
+</blockquote>
+<p>Add the Bitbucket OAuth2 Key and Secret as a Shippable secure environment variable in the format KEY:SECRET</p>
+<blockquote>
+<p>Go to https://app.shippable.com/projects/1234d2ea1895ca4474661234/settings and look for the Encrypt section
+Fill it in with something like OAUTH_USER=yourkeyhere:yoursecrethere</p>
+</blockquote>
+<p><a href="http://shippable-docs-20.readthedocs.org/en/latest/config.html#secure-environment-variables">http://shippable-docs-20.readthedocs.org/en/latest/config.html#secure-environment-variables</a></p>
+<p>Copy the output to your shippable.yml file</p>
+<h2 id="putting-it-all-together">Putting it all together</h2>
+<p>Update the source repository top level shippable.yaml file:</p>
+<div class="highlight"><pre><span class="n">language</span><span class="p">:</span> <span class="n">python</span>
+<span class="n">python</span><span class="p">:</span>
+    <span class="o">-</span> <span class="s">"2.7"</span>
+<span class="n">install</span><span class="p">:</span>
+    <span class="o">-</span> <span class="n">pip</span> <span class="n">install</span> <span class="n">pelican</span> <span class="n">Markdown</span> <span class="n">beautifulsoup4</span>
+<span class="n">env</span><span class="p">:</span>
+    <span class="o">-</span> <span class="n">secure</span><span class="p">:</span> <span class="n">yourencryptedkeyandsecret</span><span class="o">==</span>
+<span class="n">script</span><span class="p">:</span>
+    <span class="o">-</span> <span class="n">rm</span> <span class="o">-</span><span class="n">f</span> <span class="n">token</span><span class="o">.</span><span class="n">json</span>
+    <span class="o">-</span> <span class="n">rm</span> <span class="o">-</span><span class="n">rf</span> <span class="o">./</span><span class="n">output</span>
+    <span class="o">-</span> <span class="n">rm</span> <span class="o">-</span><span class="n">rf</span> <span class="o">./</span><span class="n">cache</span>
+    <span class="o">-</span> <span class="n">rm</span> <span class="o">-</span><span class="n">rf</span> <span class="o">./</span><span class="n">plugins</span><span class="o">/*</span>
+    <span class="o">-</span> <span class="n">mv</span> <span class="o">./</span><span class="n">pelican</span><span class="o">-</span><span class="n">project</span><span class="o">/*</span> <span class="o">.</span>
+    <span class="o">-</span> <span class="n">ls</span> <span class="o">-</span><span class="n">ahl</span>
+    <span class="o">-</span> <span class="n">ls</span> <span class="o">-</span><span class="n">ahl</span> <span class="o">./</span><span class="n">content</span>
+    <span class="o">-</span> <span class="n">pelican</span> <span class="o">./</span><span class="n">content</span> <span class="o">-</span><span class="n">o</span> <span class="o">./</span><span class="n">output</span> <span class="o">-</span><span class="n">s</span> <span class="o">./</span><span class="n">publishconf</span><span class="o">.</span><span class="n">py</span>
+    <span class="o">-</span> <span class="n">ls</span> <span class="o">-</span><span class="n">ahl</span> <span class="o">./</span><span class="n">output</span>
+    <span class="o">-</span> <span class="n">curl</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">bitbucket</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">site</span><span class="o">/</span><span class="n">oauth2</span><span class="o">/</span><span class="n">access_token</span> <span class="o">-</span><span class="n">d</span> <span class="n">grant_type</span><span class="o">=</span><span class="n">client_credentials</span> <span class="o">-</span><span class="n">u</span> <span class="err">$</span><span class="n">OAUTH_USER</span> <span class="o">&gt;&gt;</span> <span class="n">token</span><span class="o">.</span><span class="n">json</span>
+    <span class="o">-</span> <span class="n">BBTOKEN</span><span class="o">=</span><span class="err">$</span><span class="p">(</span><span class="n">cat</span> <span class="n">token</span><span class="o">.</span><span class="n">json</span> <span class="o">|</span> <span class="n">python</span> <span class="o">-</span><span class="n">c</span> <span class="s">'import sys, json; print json.load(sys.stdin)["access_token"]'</span><span class="p">)</span>
+    <span class="o">-</span> <span class="n">git</span> <span class="n">clone</span> <span class="s">"https://x-token-auth:$BBTOKEN==@bitbucket.org/USERNAME/USERNAME.bitbucket.org"</span>
+    <span class="o">-</span> <span class="n">ls</span> <span class="o">-</span><span class="n">ahl</span> <span class="n">USERNAME</span><span class="o">.</span><span class="n">bitbucket</span><span class="o">.</span><span class="n">org</span><span class="o">/</span>
+    <span class="o">-</span> <span class="n">rm</span> <span class="o">-</span><span class="n">rf</span> <span class="n">USERNAME</span><span class="o">.</span><span class="n">bitbucket</span><span class="o">.</span><span class="n">org</span><span class="o">/*</span>
+    <span class="o">-</span> <span class="n">cd</span> <span class="n">USERNAME</span><span class="o">.</span><span class="n">bitbucket</span><span class="o">.</span><span class="n">org</span>
+    <span class="o">-</span> <span class="n">mv</span> <span class="o">../</span><span class="n">output</span><span class="o">/*</span> <span class="o">.</span>
+    <span class="o">-</span> <span class="n">ls</span> <span class="o">-</span><span class="n">ahl</span> <span class="o">.</span>
+    <span class="o">-</span> <span class="n">git</span> <span class="n">config</span> <span class="n">user</span><span class="o">.</span><span class="n">email</span> <span class="s">"me@example.com"</span>
+    <span class="o">-</span> <span class="n">git</span> <span class="n">config</span> <span class="n">user</span><span class="o">.</span><span class="n">name</span> <span class="s">"John Pfeiffer"</span>
+    <span class="o">-</span> <span class="n">git</span> <span class="n">add</span> <span class="o">-</span><span class="n">f</span> <span class="o">.</span>
+    <span class="o">-</span> <span class="n">git</span> <span class="n">commit</span> <span class="o">-</span><span class="n">m</span> <span class="s">"build $BUILD_NUMBER commit $COMMIT"</span>
+    <span class="o">-</span> <span class="n">git</span> <span class="n">push</span> <span class="o">-</span><span class="n">fq</span> <span class="n">origin</span> <span class="n">master</span> <span class="o">&gt;</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">null</span>
+    <span class="o">-</span> <span class="n">rm</span> <span class="o">-</span><span class="n">f</span> <span class="o">../</span><span class="n">token</span><span class="o">.</span><span class="n">json</span>
+<span class="n">after_script</span><span class="p">:</span>
+    <span class="o">-</span> <span class="n">ls</span> <span class="o">-</span><span class="n">ahl</span>
+</pre></div>
+<blockquote>
+<p>Adding the bitbucket oauth2 consumer key and secret (separated by a colon) as an encrypted environment variable
+using curl to generate a temporary access_token and extracting it into a local environment variable
+cloning with the access)token and removing the previous contents and replacing them with the newly generated output
+leveraging the CI variables to indicate on the output html repository what markdown source commits triggered this build</p>
+</blockquote>
+<h2 id="reviewing-the-output">Reviewing the output</h2>
+<p>The full output of the run is available at something like https://app.shippable.com/builds/1234dec1d00e020c0011234</p>
+<p>This is really helpful for debugging (especially seeing how many seconds each step took)</p>
+<p>Possible improvements:</p>
+<ol>
+<li>use a python application best practice of documenting dependencies with a requirements.txt file at the top level</li>
+<li>putting all of the commands into a script like publish-in-ci.sh so that it could be run locally in a dev environment</li>
+<li>add the Dockerfile used for local development into the source repository to consolidate and simplify development in one place</li>
+</ol>
+<h2 id="misc">Misc</h2>
+<p>One thing that is interesting about this is that using OAuth tokens through a service is merely wrapping all of the manual steps I have in a previous blog post into a nice SaaS wrapper =)
+</p>
+            <aside>
+            <hr/>
+            <nav>
+            <ul class="articles_timeline">
+ 
+                <li class="previous_article">« <a href="http://blog.john-pfeiffer.com/build-automation-using-packer-to-build-an-ami" title="Previous: Build Automation using packer to build an AMI">Build Automation using packer to build an AMI</a></li>
+            </ul>
+            </nav>
+            </aside>
+        </div>
+        <section>
+        <div class="span2" style="float:right;font-size:0.9em;">
+ 
+            <h4>Published</h4>
+            <time pubdate="pubdate" datetime="2015-12-21T12:24:00-08:00">Dec 21, 2015</time>
+            <h4>Category</h4>
+            <a class="category-link" href="/categories.html#programming-ref">programming</a> 
+            <h4>Tags</h4>
+            <ul class="list-of-tags tags-in-article"> 
+                <li><a href="/tags.html#bitbucket-ref">bitbucket
+                    <span>2</span>
+</a></li>
+                <li><a href="/tags.html#cd-ref">cd
+                    <span>1</span>
+</a></li>
+                <li><a href="/tags.html#ci-ref">ci
+                    <span>1</span>
+</a></li>
+                <li><a href="/tags.html#pelican-ref">pelican
+                    <span>3</span>
+</a></li>
+                <li><a href="/tags.html#shippable-ci-ref">shippable ci
+                    <span>1</span>
+</a></li>
+                <li><a href="/tags.html#static-site-ref">static site
+                    <span>2</span>
+</a></li>
+            </ul>
+
+        </div>
+        </section>
+</div>
+</article>
+				</div>
+				<div class="span1"></div>
+			</div>
+		</div>
+    </div>
+<footer>
+<div id="footer">
+    <ul class="footer-content">
+    </ul>
+</div>
+</footer>            <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+	<script src="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+    </body>
+</html>
