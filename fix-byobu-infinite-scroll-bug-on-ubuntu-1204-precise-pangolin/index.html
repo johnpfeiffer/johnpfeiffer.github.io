@@ -77,6 +77,13 @@
 <ul>
 <li><a href="#easy-workaround-is">Easy workaround is:</a></li>
 <li><a href="#update-for-12042">UPDATE for 12.04.2!</a></li>
+<li><a href="#byobu-installation-and-basics">byobu installation and basics</a><ul>
+<li><a href="#installing-a-better-tmux-multiple-remote-virtual-console-screens">installing a better tmux (multiple remote virtual console screens)</a></li>
+<li><a href="#if-byobu-seems-stuck-when-using-vi">If byobu seems stuck when using vi</a></li>
+<li><a href="#moving-the-cursor-in-byobu-f7-and-beyond">Moving the cursor in byobu (f7 and beyond)</a></li>
+</ul>
+</li>
+<li><a href="#screen-the-previous-generation-of-remote-virtual-console-utility">screen - the previous generation of remote virtual console utility</a></li>
 </ul>
 </div>
         </nav>
@@ -88,21 +95,105 @@
 <p>(Quick, type exit before your screen disappears entirely!)</p>
 <p>Amazingly this bug shipped in the official Ubuntu Release even though byobu 5.17 lists it as a fixed.</p>
 <h2 id="easy-workaround-is">Easy workaround is:</h2>
-<div class="highlight"><pre>byobu-config
-Toggle status notifications
-Use the arrow keys to scroll down and space bar to disable the logo  
-Tab and Enter to Apply -&gt; then Exit
-</pre></div>
-<p>Now you can safely use "byobu" on the command line in Ubuntu 12.04!</p>
+<ol>
+<li><code>byobu-config</code></li>
+<li>Toggle status notifications</li>
+<li>Use the arrow keys to scroll down and space bar to disable the logo </li>
+<li>Tab and Enter to Apply -&gt; then Exit </li>
+</ol>
+<p>Now you can safely use "byobu" on the command line in Ubuntu 12.04! (apparently not persisting in 12.04.2?)</p>
 <p>p.s. Control + a (screen mode) and then Control + a , then c ... 
 now you've got multiple screens! </p>
 <p>(Control + a + 0 to go to screen 0, control + a + a to jump to the last used screen)</p>
 <p><a href="https://help.ubuntu.com/community/Byobu">https://help.ubuntu.com/community/Byobu</a></p>
+<p>Of course you can always use normal BASH navigation: <a href="http://www.gnu.org/software/bash/manual/html_node/Commands-For-Moving.html">http://www.gnu.org/software/bash/manual/html_node/Commands-For-Moving.html</a></p>
 <p>A fix for Windows Putty users ... Window -&gt; Translation -&gt; UTF8 (the ISO-8859 + byobu UTF8 logo = ugh)</p>
 <p>(An untested alternate workaround: .byobu/status::tmux_left : "logo" -&gt; "#logo" )</p>
 <h2 id="update-for-12042">UPDATE for 12.04.2!</h2>
 <p>byobu in Ubuntu 12.04 uses tmux as the backend. You can change this by running byobu-select-backend and selecting screen</p>
 <p>Thanks for the tip Eric!</p>
+<p>ALTERNATE:
+    .byobu/status::tmux_left : "logo" -&gt; "#logo" )</p>
+<h2 id="byobu-installation-and-basics">byobu installation and basics</h2>
+<h3 id="installing-a-better-tmux-multiple-remote-virtual-console-screens">installing a better tmux (multiple remote virtual console screens)</h3>
+<p>BYOBU = BETTER GUI FOR SCREEN + CPU/RAM USAGE + DATETIME <a href="https://help.ubuntu.com/community/Byobu">https://help.ubuntu.com/community/Byobu</a></p>
+<p>(an improvement on the classic "screen" = multi ssh screen with status and hotkeys)</p>
+<div class="highlight"><pre>sudo apt-get install byobu
+byobu-config
+</pre></div>
+<blockquote>
+<p>Toggle status notifications -&gt; spacebar to disable logo -&gt; Apply -&gt; Exit</p>
+</blockquote>
+<div class="highlight"><pre>byobu
+</pre></div>
+<ul>
+<li>F2 ... or control + a , then c to create a new screen</li>
+<li>F3 to move to a previous screen</li>
+<li>F4 to move to the next screen</li>
+<li>control + a , then 0 = to go to screen zero, etc.</li>
+<li>
+<p>control + a , then a = to go to the last used screen</p>
+<p>byobu-enable</p>
+<blockquote>
+<p>will have it start on every ssh connection</p>
+</blockquote>
+<p>byobu-disable</p>
+<blockquote>
+<p>stops auto-starting of byobu</p>
+</blockquote>
+</li>
+</ul>
+<h3 id="if-byobu-seems-stuck-when-using-vi">If byobu seems stuck when using vi</h3>
+<p>try Control + Q  (or Control + S)</p>
+<h3 id="moving-the-cursor-in-byobu-f7-and-beyond">Moving the cursor in byobu (f7 and beyond)</h3>
+<p>F7 = scrollback mode , vi like commands to search and copy paste</p>
+<div class="highlight"><pre>h - Move the cursor left by one character
+j - Move the cursor down by one line
+k - Move the cursor up by one line
+l - Move the cursor right by one character
+0 - Move to the beginning of the current line
+$ - Move to the end of the current line
+G - Moves to the specified line (defaults to the end of the buffer)
+/ - Search forward
+? - Search backward
+n - Moves to the next match, either forward or backword
+</pre></div>
+<h2 id="screen-the-previous-generation-of-remote-virtual-console-utility">screen - the previous generation of remote virtual console utility</h2>
+<div class="highlight"><pre>sudo apt-get install screen
+</pre></div>
+<p>SSH into your machine and type:</p>
+<div class="highlight"><pre>screen           //to start your screen session.
+ctrl + a + c     //to create a new session
+ctrl + a + d     //to disconnect from the screen session, then log out of your SSH session
+when you get disconnected/dropped by the network then log back in using SSH
+
+screen -ls          //shows current screen sessions
+
+There is a screen on:
+        19894.pts-1.servername    (Attached)
+1 Socket in /var/run/screen/S-username.
+
+
+screen -r    //When you're ready to reconnect to the last screen session
+
+screen -d 19894         //detach the screen from the other ssh session
+screen -r 19894         //connect to the screen to see everything's ok
+
+ctrl-a-d                //detach from the screen
+
+who -u                  //find the id of the "lost" ssh session
+sudo kill sessionid     //kill off the disconnected ssh session
+
+screen -r 19894         //resume work
+
+screen -r -d                //force detach an existing and attach a session
+</pre></div>
+<p>setting the config for no visual bell!</p>
+<p>in your /home/USERNAME (or /root) directory</p>
+<div class="highlight"><pre>touch .screenrc
+
+vbell off
+</pre></div>
             <aside>
             <hr/>
             <nav>
@@ -122,7 +213,7 @@ now you've got multiple screens! </p>
             <time pubdate="pubdate" datetime="2013-02-15T17:36:00-08:00">Feb 15, 2013</time>
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#linux-ref">linux</a> 
-            <h4>~192 words</h4>
+            <h4>~603 words</h4>
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article"> 
                 <li><a href="/tags.html#byobu-ref">byobu
