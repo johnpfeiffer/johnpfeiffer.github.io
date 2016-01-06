@@ -1,5 +1,71 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>johnpfeiffer</title><link href="http://blog.john-pfeiffer.com/" rel="alternate"></link><link href="http://blog.john-pfeiffer.com/feeds/john-pfeiffer.atom.xml" rel="self"></link><id>http://blog.john-pfeiffer.com/</id><updated>2015-12-21T12:24:00-08:00</updated><entry><title>Static site with Bitbucket and Shippable and Pelican</title><link href="http://blog.john-pfeiffer.com/static-site-with-bitbucket-and-shippable-and-pelican" rel="alternate"></link><updated>2015-12-21T12:24:00-08:00</updated><author><name>john pfeiffer</name></author><id>tag:blog.john-pfeiffer.com,2015-12-21:static-site-with-bitbucket-and-shippable-and-pelican</id><summary type="html">
+<feed xmlns="http://www.w3.org/2005/Atom"><title>johnpfeiffer</title><link href="http://blog.john-pfeiffer.com/" rel="alternate"></link><link href="http://blog.john-pfeiffer.com/feeds/john-pfeiffer.atom.xml" rel="self"></link><id>http://blog.john-pfeiffer.com/</id><updated>2016-01-05T20:00:00-08:00</updated><entry><title>Python packaging pip wheels</title><link href="http://blog.john-pfeiffer.com/python-packaging-pip-wheels" rel="alternate"></link><updated>2016-01-05T20:00:00-08:00</updated><author><name>john pfeiffer</name></author><id>tag:blog.john-pfeiffer.com,2016-01-05:python-packaging-pip-wheels</id><summary type="html">
+&lt;h3 id="installing-packages-with-python"&gt;Installing packages with python&lt;/h3&gt;
+&lt;p&gt;Pip is the standard way to install python packages&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;sudo pip install packagename
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;searches &lt;a href="https://pypi.python.org"&gt;https://pypi.python.org&lt;/a&gt; and finds the latest version of the package, full docs &lt;a href="https://pip.pypa.io/en/latest/"&gt;https://pip.pypa.io/en/latest/&lt;/a&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;If you get the package name wrong you will have installed something completely different.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;sudo pip search packagename
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;find packages similar to the name you provided (from pypi or whatever provider you are using)&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;a href="https://pip.pypa.io/en/stable/reference/pip_search/"&gt;https://pip.pypa.io/en/stable/reference/pip_search/&lt;/a&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;sudo pip freeze
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;displays what is installed&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id="virtualenv-for-sanity-and-isolation"&gt;Virtualenv for sanity and isolation&lt;/h3&gt;
+&lt;p&gt;A common mistake is to use the global pip installation of the Operating System to store all of the installed dependencies.  As soon as you have conflicting version requirements this breaks.  As soon as you have multiple applications/services installing globally it becomes unmanageable.&lt;/p&gt;
+&lt;p&gt;Virtualenv creates a virtual environment (basically injecting a PATH into the environment) for python binaries and package installation.&lt;/p&gt;
+&lt;h4 id="pinning-versions-and-guaranteed-sourcing"&gt;Pinning Versions and Guaranteed Sourcing&lt;/h4&gt;
+&lt;p&gt;One common mistake is to not pin version numbers and depend on &lt;a href="https://pypi.python.org"&gt;https://pypi.python.org&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Without pinning version numbers for your dependencies (listed one per line in requirements.txt) you will receive a nasty surprise when the maintainers make a breaking change and you get a newer version unexpectedly.  Since python is a dynamic language you may receive the worst kind of surprise in production (hopefully nothing as bad as data corruption or security issues).&lt;/p&gt;
+&lt;p&gt;When you do pin the version number BUT still depend on https://pypi.python.org to provide the file then the project maintainers may remove the version you are pinned to (causing your builds to fail - though some for some cowboys this will cause production deployments to fail).&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Pin the version of your dependencies, provide the dependencies locally or through a system under your control (your own pypi server or s3 bucket)&lt;/strong&gt; , explicit is better than implicit.&lt;/p&gt;
+&lt;h3 id="wheels-are-better-python-packaging"&gt;Wheels are better Python Packaging&lt;/h3&gt;
+&lt;p&gt;Wheels are (awesome), it's the beginning of trying to make python installations more deterministic and pip less dynamic at install time. &lt;a href="http://wheel.readthedocs.org/en/latest/"&gt;http://wheel.readthedocs.org/en/latest/&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;An output directory of the wheels of a project are known by convention as a "wheelhouse".&lt;/p&gt;
+&lt;p&gt;As a side effect the wheel directory, “/tmp/wheelhouse” in the example, contains installable copies of the exact versions of your application’s dependencies. By installing from those cached wheels you can recreate that environment quickly and with no surprises.&lt;/p&gt;
+&lt;p&gt;When you install using pip it looks for a “wheel file” (*.whl which is the newer zip compressed format, goodbye .egg) of the correct name for your (virtual) environment (e.g. py2 or py3 or x86 linux).  This wheel file saves time and bugs from installing a package/.egg  from source (usually that time is spent compiling C code for the python library). &lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;sudo pip install wheel; cd projectsource; python setup.py bdist_wheel; ls -l ./dist
+
+pip wheel  --find-links /root/wheelhouse --wheel-dir=/root/wheelhouse -r requirements.txt
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;&lt;a href="https://pip.pypa.io/en/stable/reference/pip_wheel/"&gt;https://pip.pypa.io/en/stable/reference/pip_wheel/&lt;/a&gt;
+&lt;a href="http://pip-python3.readthedocs.org/en/latest/reference/pip_wheel.html#build-system-interface"&gt;http://pip-python3.readthedocs.org/en/latest/reference/pip_wheel.html#build-system-interface&lt;/a&gt;&lt;/p&gt;
+&lt;h4 id="installing-using-a-wheel-file"&gt;installing using a wheel file&lt;/h4&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;pip install somepackage-version-py2.py3.whl
+pip freeze
+&lt;/pre&gt;&lt;/div&gt;
+&lt;h4 id="error-invalid-command-bdist_wheel"&gt;error: invalid command 'bdist_wheel'&lt;/h4&gt;
+&lt;p&gt;&lt;a href="https://pypi.python.org/pypi/docutils#downloads"&gt;https://pypi.python.org/pypi/docutils#downloads&lt;/a&gt; only provided a py3 wheel (facepalm)&lt;/p&gt;
+&lt;p&gt;Downloading the source .tar.gz and running python setup.py bdist_wheel resulted in:
+    error: invalid command 'bdist_wheel'&lt;/p&gt;
+&lt;p&gt;Reading the internet provided no comprehensible answers (lots of "setuptools does not match your version of pip or wheel or whatever")&lt;/p&gt;
+&lt;p&gt;The following hacking seems to have provided a solution:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;python --version
+pip --version
+cd /tmp
+wget https://pypi.python.org/packages/source/d/docutils/docutils-0.12.tar.gz#md5=4622263b62c5c771c03502afa3157768
+tar xf docutils-0.12.tar.gz
+cd docutils-0.12
+virtualenv venv
+source venv/bin/activate
+python --version
+pip --version
+pip install wheel
+pip freeze
+python setup.py install
+pip freeze
+pip wheel .
+ls /tmp/docutils-0.12/wheelhouse
+    docutils-0.12-py2-none-any.whl
+&lt;/pre&gt;&lt;/div&gt;</summary><category term="python"></category><category term="packaging"></category><category term="pip"></category><category term="wheels"></category></entry><entry><title>Static site with Bitbucket and Shippable and Pelican</title><link href="http://blog.john-pfeiffer.com/static-site-with-bitbucket-and-shippable-and-pelican" rel="alternate"></link><updated>2015-12-21T12:24:00-08:00</updated><author><name>john pfeiffer</name></author><id>tag:blog.john-pfeiffer.com,2015-12-21:static-site-with-bitbucket-and-shippable-and-pelican</id><summary type="html">
 &lt;h2 id="running-software-costs-money"&gt;Running Software Costs Money&lt;/h2&gt;
 &lt;p&gt;One of the most overlooked costs in running a service is operations.  While Research and Development (aka coding) is often cited as the largest expense (software developer salaries! &lt;a href="https://www.quora.com/What-are-the-average-operating-costs-of-SaaS-companies"&gt;https://www.quora.com/What-are-the-average-operating-costs-of-SaaS-companies&lt;/a&gt;), and 80% (or more) of (successful) software's life is maintenance (&lt;a href="http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3610582/"&gt;http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3610582/&lt;/a&gt;), you have to run the darn thing all the time.&lt;/p&gt;
 &lt;h2 id="a-free-and-efficient-static-web-site"&gt;A Free and Efficient Static Web Site&lt;/h2&gt;
