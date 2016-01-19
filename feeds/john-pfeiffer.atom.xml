@@ -3031,9 +3031,10 @@ Login Succeeded&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;A static site made of html pages is very easy to maintain&lt;/li&gt;
 &lt;li&gt;It is also more secure and performance is good too =)&lt;/li&gt;
-&lt;li&gt;Can use version control (git)&lt;/li&gt;
+&lt;li&gt;Allows for straightforward use of version control (git)&lt;/li&gt;
 &lt;li&gt;Developers prefer to be able to customize and add functionality (python and javascript)&lt;/li&gt;
-&lt;li&gt;Using widely adopted open source software reduces risk (python, pelican, javascript, elagant theme and tipue search)&lt;/li&gt;
+&lt;li&gt;Using widely adopted open source software reduces risk (more contributors, more testers, more bugfixes)&lt;/li&gt;
+&lt;li&gt;Using a widely adopted platform increases leverage (themes, plugins, tutorials, etc.)&lt;/li&gt;
 &lt;/ul&gt;
 &lt;h3 id="install-pelican"&gt;Install Pelican&lt;/h3&gt;
 &lt;p&gt;&lt;code&gt;sudo pip install pelican Markdown beautifulsoup4&lt;/code&gt;&lt;/p&gt;
@@ -3115,7 +3116,14 @@ This is the content of my first blog post.
 &lt;p&gt;Serving HTTP on 0.0.0.0 port 8000 ... (Control + C to quit)&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;p&gt;&lt;strong&gt;http://localhost:8000&lt;/strong&gt;&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;mkdir -p content/pages&lt;/code&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="http://docs.getpelican.com/en/latest/publish.html"&gt;http://docs.getpelican.com/en/latest/publish.html&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id="setup-a-static-pages-directory"&gt;Setup a static Pages directory&lt;/h4&gt;
+&lt;p&gt;Besides lots of articles in categories it can be useful to have a few pages like About or Contact
+    mkdir -p content/pages
+    echo "Title: About Us" &amp;gt; content/pages/about.md&lt;/p&gt;
+&lt;p&gt;&lt;a href="http://docs.getpelican.com/en/latest/content.html#pages"&gt;http://docs.getpelican.com/en/latest/content.html#pages&lt;/a&gt;&lt;/p&gt;
 &lt;hr/&gt;
 &lt;h3 id="publish"&gt;Publish&lt;/h3&gt;
 &lt;p&gt;I just use the pelicanconf output rather than publishconf, and I use git with a bitbucket static html site.&lt;/p&gt;
@@ -3129,26 +3137,28 @@ from __future__ import unicode_literals
 
 AUTHOR = u'john pfeiffer'
 SITENAME = u'johnpfeiffer'
-SITEURL = ''
+SITEURL = u'https://blog-john-pfeiffer.com'
 OUTPUT_PATH = 'output/'
 DEFAULT_DATE_FORMAT = '%Y-%m-%d'
+TIMEZONE="America/Los_Angeles"
+
 # Feed generation is usually not desired when developing
 FEED_ALL_ATOM = None
 CATEGORY_FEED_ATOM = None
 TRANSLATION_FEED_ATOM = None
 
-# clean urls for pages
-PAGE_URL = '{slug}'
+# clean urls for pages , trailing slash to support HTTPS
+PAGE_URL = '{slug}/'
 PAGE_SAVE_AS = '{slug}/index.html'
 # clean urls for articles
 ARTICLE_SAVE_AS = '{slug}/index.html'
-ARTICLE_URL = '{slug}'
+ARTICLE_URL = '{slug}/'
 
 DEFAULT_PAGINATION = 10
 
 THEME = 'themes/pelican-elegant'
 PLUGIN_PATHS = ['plugins']
-PLUGINS = ['sitemap', 'extract_toc', 'tipue_search']
+PLUGINS = ['sitemap', 'extract_toc', 'tipue_search', 'post_stats']
 MD_EXTENSIONS = ['codehilite(css_class=highlight)', 'extra', 'headerid', 'toc']
 DIRECT_TEMPLATES = (('index', 'tags', 'categories','archives', 'search', '404'))
 STATIC_PATHS = ['theme/images', 'images']
@@ -3167,8 +3177,97 @@ SITEMAP = {
     }
 }
 &lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Hint: if you use SSL (e.g. cloudflare) then make sure your SITEURL is https and there are trailing slashes on your clean url helpers PAGE_URL and ARTICLE_URL otherwise you may get mixed content warnings or mixed http and https links in your output html&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;cp -a pelicanconf.py publishconf.py
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Update publishconf.py with any final tweaks that should occur only in Production&lt;/p&gt;
+&lt;/blockquote&gt;
 &lt;hr/&gt;
-&lt;h3 id="importing-from-drupal"&gt;Importing from drupal&lt;/h3&gt;
+&lt;h3 id="pelican-themes"&gt;Pelican Themes&lt;/h3&gt;
+&lt;p&gt;&lt;a href="https://github.com/getpelican/pelican-themes"&gt;https://github.com/getpelican/pelican-themes&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;git clone --recursive https://github.com/getpelican/pelican-themes ~/pelican-themes&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href="http://pelican.readthedocs.org/en/latest/pelican-themes.html"&gt;http://pelican.readthedocs.org/en/latest/pelican-themes.html&lt;/a&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;mkdir themes
+cp -a pelican-themes/elegant themes/
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;This is the lazy way, the correct way is to only copy in the theme you are using ;)&lt;/p&gt;
+&lt;p&gt;FYI For the elegant with tipuesearch you need to also install the tipuesearch plugin&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="http://moparx.com/2014/04/adding-search-capabilities-within-your-pelican-powered-site-using-tipue-search/"&gt;http://moparx.com/2014/04/adding-search-capabilities-within-your-pelican-powered-site-using-tipue-search/&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="depedency-management-by-vendoring-in-version-control"&gt;Depedency Management by Vendoring in Version Control&lt;/h3&gt;
+&lt;p&gt;Dependencies are always hard and leveraging the work of others (themes and plugins) means you have to consider how to manage changes to those moving parts too.&lt;/p&gt;
+&lt;p&gt;Using your Build/CI/CD server to grab the latest themes/plugins is a mistake because while you would benefit from any new features and bug fixes you will also get burned (yes it has happened to me!) when you are publishing a blog post and suddenly your site doesn't work.  &lt;/p&gt;
+&lt;p&gt;(Oh are you using Continuous Post Deploy Smoke Tests and Realtime Everything Monitoring to detect this on your blog?)&lt;/p&gt;
+&lt;p&gt;I highly recommend "vendoring" by copying pelican-elegant into the themes subdirectory in your version control.&lt;/p&gt;
+&lt;p&gt;This sort of pinning makes an explicit choice that will ensure your site will continue to work until you choose to next upgrade.  Pinning in the Build/CI/CD server by git sha will also work but makes it harder to keep everything in one place for development.&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;The drawback of "vendoring" is the technical debt by the inevitable customization that occurs in this "directory separated" fork of the original&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr/&gt;
+&lt;h3 id="pelican-plugins"&gt;Pelican Plugins&lt;/h3&gt;
+&lt;p&gt;&lt;a href="https://github.com/getpelican/pelican-plugins"&gt;https://github.com/getpelican/pelican-plugins&lt;/a&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;git clone https://github.com/getpelican/pelican-plugins
+mkdir plugins
+cp -a pelican-plugins/sitemap plugins/
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;note this is the lazy way, a more precise way would be to only copy in the plugins used&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id="hacking-listjs-and-per-article-word-count-into-a-theme"&gt;Hacking ListJS and per Article word count into a theme&lt;/h3&gt;
+&lt;p&gt;Basically once you get the hang of the config file format (just python really) and the templating engine (HTML with some jinja2) you can add all sorts of interesting pieces.&lt;/p&gt;
+&lt;p&gt;In this example I leverage some javascript and another pelican plugin (python) to allow sorting and filtering on more data than the usual "archives.html" provides.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nt"&gt;&amp;lt;div&lt;/span&gt; &lt;span class="na"&gt;id=&lt;/span&gt;&lt;span class="s"&gt;"article-list"&lt;/span&gt;&lt;span class="nt"&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;lt;button&lt;/span&gt; &lt;span class="na"&gt;class=&lt;/span&gt;&lt;span class="s"&gt;"sort"&lt;/span&gt; &lt;span class="na"&gt;data-sort=&lt;/span&gt;&lt;span class="s"&gt;"date"&lt;/span&gt;&lt;span class="nt"&gt;&amp;gt;&lt;/span&gt;date&lt;span class="nt"&gt;&amp;lt;/button&amp;gt;&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;lt;button&lt;/span&gt; &lt;span class="na"&gt;class=&lt;/span&gt;&lt;span class="s"&gt;"sort"&lt;/span&gt; &lt;span class="na"&gt;data-sort=&lt;/span&gt;&lt;span class="s"&gt;"title"&lt;/span&gt;&lt;span class="nt"&gt;&amp;gt;&lt;/span&gt;title&lt;span class="nt"&gt;&amp;lt;/button&amp;gt;&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;lt;button&lt;/span&gt; &lt;span class="na"&gt;class=&lt;/span&gt;&lt;span class="s"&gt;"sort"&lt;/span&gt; &lt;span class="na"&gt;data-sort=&lt;/span&gt;&lt;span class="s"&gt;"wordcount"&lt;/span&gt;&lt;span class="nt"&gt;&amp;gt;&lt;/span&gt;word count&lt;span class="nt"&gt;&amp;lt;/button&amp;gt;&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;lt;button&lt;/span&gt; &lt;span class="na"&gt;class=&lt;/span&gt;&lt;span class="s"&gt;"sort"&lt;/span&gt; &lt;span class="na"&gt;data-sort=&lt;/span&gt;&lt;span class="s"&gt;"category"&lt;/span&gt;&lt;span class="nt"&gt;&amp;gt;&lt;/span&gt;category&lt;span class="nt"&gt;&amp;lt;/button&amp;gt;&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;lt;input&lt;/span&gt; &lt;span class="na"&gt;class=&lt;/span&gt;&lt;span class="s"&gt;"search"&lt;/span&gt; &lt;span class="na"&gt;placeholder=&lt;/span&gt;&lt;span class="s"&gt;"Find by filter"&lt;/span&gt; &lt;span class="na"&gt;style=&lt;/span&gt;&lt;span class="s"&gt;"margin-top: 10px; height: 16px;"&lt;/span&gt;&lt;span class="nt"&gt;/&amp;gt;&lt;/span&gt;
+    &lt;span class="ni"&gt;&amp;amp;nbsp;&lt;/span&gt; from &lt;span class="cp"&gt;{{&lt;/span&gt; &lt;span class="nv"&gt;dates&lt;/span&gt;&lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="nf"&gt;length&lt;/span&gt; &lt;span class="cp"&gt;}}&lt;/span&gt; articles
+
+    &lt;span class="nt"&gt;&amp;lt;ul&lt;/span&gt; &lt;span class="na"&gt;class=&lt;/span&gt;&lt;span class="s"&gt;"list"&lt;/span&gt;&lt;span class="nt"&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class="cp"&gt;{%&lt;/span&gt; &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="nv"&gt;category&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="nv"&gt;articles&lt;/span&gt; &lt;span class="k"&gt;in&lt;/span&gt; &lt;span class="nv"&gt;categories&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;
+        &lt;span class="cp"&gt;{%&lt;/span&gt; &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="nv"&gt;article&lt;/span&gt; &lt;span class="k"&gt;in&lt;/span&gt; &lt;span class="nv"&gt;articles&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;
+        &lt;span class="nt"&gt;&amp;lt;li&amp;gt;&lt;/span&gt;
+            &lt;span class="nt"&gt;&amp;lt;span&lt;/span&gt; &lt;span class="na"&gt;class=&lt;/span&gt;&lt;span class="s"&gt;"date"&lt;/span&gt; &lt;span class="na"&gt;style=&lt;/span&gt;&lt;span class="s"&gt;"padding-right: 10px;"&lt;/span&gt;&lt;span class="nt"&gt;&amp;gt;&lt;/span&gt;
+                &lt;span class="nt"&gt;&amp;lt;time&lt;/span&gt; &lt;span class="na"&gt;pubdate=&lt;/span&gt;&lt;span class="s"&gt;"pubdate"&lt;/span&gt; &lt;span class="na"&gt;datetime=&lt;/span&gt;&lt;span class="s"&gt;"&lt;/span&gt;&lt;span class="cp"&gt;{{&lt;/span&gt; &lt;span class="nv"&gt;article.date.isoformat&lt;/span&gt;&lt;span class="o"&gt;()&lt;/span&gt; &lt;span class="cp"&gt;}}&lt;/span&gt;&lt;span class="s"&gt;"&lt;/span&gt;&lt;span class="nt"&gt;&amp;gt;&lt;/span&gt;&lt;span class="cp"&gt;{{&lt;/span&gt; &lt;span class="nv"&gt;article.locale_date&lt;/span&gt; &lt;span class="cp"&gt;}}&lt;/span&gt;&lt;span class="nt"&gt;&amp;lt;/time&amp;gt;&lt;/span&gt;
+            &lt;span class="nt"&gt;&amp;lt;/span&amp;gt;&lt;/span&gt;
+            &lt;span class="nt"&gt;&amp;lt;a&lt;/span&gt; &lt;span class="na"&gt;href=&lt;/span&gt;&lt;span class="s"&gt;"&lt;/span&gt;&lt;span class="cp"&gt;{{&lt;/span&gt; &lt;span class="nv"&gt;SITEURL&lt;/span&gt; &lt;span class="cp"&gt;}}&lt;/span&gt;&lt;span class="s"&gt;/&lt;/span&gt;&lt;span class="cp"&gt;{{&lt;/span&gt; &lt;span class="nv"&gt;article.url&lt;/span&gt; &lt;span class="cp"&gt;}}&lt;/span&gt;&lt;span class="s"&gt;"&lt;/span&gt;&lt;span class="nt"&gt;&amp;gt;&amp;lt;span&lt;/span&gt; &lt;span class="na"&gt;class=&lt;/span&gt;&lt;span class="s"&gt;"title"&lt;/span&gt;&lt;span class="nt"&gt;&amp;gt;&lt;/span&gt;&lt;span class="cp"&gt;{{&lt;/span&gt; &lt;span class="nv"&gt;article.title&lt;/span&gt; &lt;span class="cp"&gt;}}&lt;/span&gt; &lt;span class="cp"&gt;{%&lt;/span&gt;&lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="nv"&gt;article.subtitle&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;
+                &lt;span class="nt"&gt;&amp;lt;small&amp;gt;&lt;/span&gt; &lt;span class="cp"&gt;{{&lt;/span&gt; &lt;span class="nv"&gt;article.subtitle&lt;/span&gt; &lt;span class="cp"&gt;}}&lt;/span&gt; &lt;span class="nt"&gt;&amp;lt;/small&amp;gt;&lt;/span&gt; &lt;span class="cp"&gt;{%&lt;/span&gt; &lt;span class="k"&gt;endif&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="nt"&gt;&amp;lt;/span&amp;gt;&lt;/span&gt; &lt;span class="nt"&gt;&amp;lt;/a&amp;gt;&lt;/span&gt;
+            &lt;span class="nt"&gt;&amp;lt;em&amp;gt;&amp;lt;span&lt;/span&gt; &lt;span class="na"&gt;class=&lt;/span&gt;&lt;span class="s"&gt;"wordcount"&lt;/span&gt;&lt;span class="nt"&gt;&amp;gt;&lt;/span&gt;(&lt;span class="cp"&gt;{{&lt;/span&gt; &lt;span class="nv"&gt;article.stats&lt;/span&gt;&lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="s1"&gt;'wc'&lt;/span&gt;&lt;span class="o"&gt;]&lt;/span&gt; &lt;span class="cp"&gt;}}&lt;/span&gt; words)&lt;span class="nt"&gt;&amp;lt;/span&amp;gt;&amp;lt;/em&amp;gt;&lt;/span&gt;
+            &lt;span class="nt"&gt;&amp;lt;em&amp;gt;&amp;lt;span&lt;/span&gt; &lt;span class="na"&gt;class=&lt;/span&gt;&lt;span class="s"&gt;"category"&lt;/span&gt;&lt;span class="nt"&gt;&amp;gt;&lt;/span&gt;&lt;span class="cp"&gt;{{&lt;/span&gt; &lt;span class="nv"&gt;article.category&lt;/span&gt; &lt;span class="cp"&gt;}}&lt;/span&gt;&lt;span class="nt"&gt;&amp;lt;/span&amp;gt;&amp;lt;/em&amp;gt;&lt;/span&gt;
+        &lt;span class="nt"&gt;&amp;lt;/li&amp;gt;&lt;/span&gt;
+        &lt;span class="cp"&gt;{%&lt;/span&gt; &lt;span class="k"&gt;endfor&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;
+    &lt;span class="cp"&gt;{%&lt;/span&gt; &lt;span class="k"&gt;endfor&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;lt;/ul&amp;gt;&lt;/span&gt;
+&lt;span class="nt"&gt;&amp;lt;/div&amp;gt;&lt;/span&gt;
+...
+...
+&lt;span class="nt"&gt;&amp;lt;script&lt;/span&gt; &lt;span class="na"&gt;type=&lt;/span&gt;&lt;span class="s"&gt;"text/javascript"&lt;/span&gt;&lt;span class="nt"&gt;&amp;gt;&lt;/span&gt;
+    var options = {
+        valueNames: [ 'date', 'title', 'wordcount', 'category'],
+        page: 1000
+    };
+    var hackerList = new List('article-list', options);
+    hackerList.sort('date', { order: "desc" })
+&lt;span class="nt"&gt;&amp;lt;/script&amp;gt;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://blog.john-pfeiffer.com/listjs-sort-filters-search-and-more-for-html-lists-and-tables-in-javascript/"&gt;https://blog.john-pfeiffer.com/listjs-sort-filters-search-and-more-for-html-lists-and-tables-in-javascript/&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://github.com/getpelican/pelican-plugins/tree/master/post_stats"&gt;https://github.com/getpelican/pelican-plugins/tree/master/post_stats&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="advanced-skipping-the-makefile"&gt;Advanced: skipping the Makefile&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;pelican --help
+pelican ./content -o ./output -s ./publishconf.py
+cd output ; python -m SimpleHTTPServer
+&lt;/pre&gt;&lt;/div&gt;
+&lt;hr/&gt;
+&lt;h3 id="importing-from-drupal-with-pelican-import"&gt;Importing from Drupal with pelican-import&lt;/h3&gt;
 &lt;p&gt;&lt;strong&gt;Hack the Drupal files to allow a lot more than 10 items per feed&lt;/strong&gt;
 &lt;code&gt;grep -r 'items per feed' .&lt;/code&gt;&lt;/p&gt;
 &lt;blockquote&gt;
@@ -3180,36 +3279,14 @@ SITEMAP = {
 &lt;p&gt;Add to the dropdown choices of 10, 15, 30 etc. the option of 999&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;hr/&gt;
-&lt;p&gt;&lt;code&gt;sudo apt-get install pandoc&lt;/code&gt;&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;sudo pip install feedparser&lt;/code&gt;&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;pelican-import -h&lt;/code&gt;&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;pelican-import --feed http://blog.example.com/rss.xml -o output/ -m markdown&lt;/code&gt;&lt;/p&gt;
-&lt;hr/&gt;
-&lt;h3 id="pelican-themes"&gt;Pelican Themes&lt;/h3&gt;
-&lt;p&gt;&lt;a href="https://github.com/getpelican/pelican-themes"&gt;https://github.com/getpelican/pelican-themes&lt;/a&gt;&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;git clone --recursive https://github.com/getpelican/pelican-themes ~/pelican-themes&lt;/code&gt;&lt;/p&gt;
-&lt;p&gt;&lt;a href="http://pelican.readthedocs.org/en/latest/pelican-themes.html"&gt;http://pelican.readthedocs.org/en/latest/pelican-themes.html&lt;/a&gt;&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;mkdir themes&lt;/code&gt;&lt;/p&gt;
-&lt;p&gt;`cp -a pelican-themes/elegant themes/&lt;/p&gt;
-&lt;blockquote&gt;
-&lt;p&gt;For the elegant with tipuesearch you need to install the tipuesearch plugin&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;a href="http://moparx.com/2014/04/adding-search-capabilities-within-your-pelican-powered-site-using-tipue-search/"&gt;http://moparx.com/2014/04/adding-search-capabilities-within-your-pelican-powered-site-using-tipue-search/&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-&lt;hr/&gt;
-&lt;h3 id="pelican-plugins"&gt;Pelican Plugins&lt;/h3&gt;
-&lt;p&gt;&lt;a href="https://github.com/getpelican/pelican-plugins"&gt;https://github.com/getpelican/pelican-plugins&lt;/a&gt;&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;git clone https://github.com/getpelican/pelican-plugins&lt;/code&gt;&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;mkdir plugins&lt;/code&gt;&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;cp -a pelican-plugins/sitemap plugins/&lt;/code&gt;&lt;/p&gt;
-&lt;h3 id="advanced-skipping-the-makefile"&gt;Advanced: skipping the Makefile&lt;/h3&gt;
-&lt;p&gt;&lt;code&gt;pelican --help&lt;/code&gt;&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;pelican ./content -o ./output -s ./publishconf.py&lt;/code&gt;&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;cd output ; python -m SimpleHTTPServer&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="n"&gt;sudo&lt;/span&gt; &lt;span class="n"&gt;apt&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;get&lt;/span&gt; &lt;span class="n"&gt;install&lt;/span&gt; &lt;span class="n"&gt;pandoc&lt;/span&gt;
+&lt;span class="n"&gt;sudo&lt;/span&gt; &lt;span class="n"&gt;pip&lt;/span&gt; &lt;span class="n"&gt;install&lt;/span&gt; &lt;span class="n"&gt;feedparser&lt;/span&gt;
+&lt;span class="n"&gt;pelican&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;h&lt;/span&gt;
+&lt;span class="n"&gt;pelican&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="o"&gt;--&lt;/span&gt;&lt;span class="n"&gt;feed&lt;/span&gt; &lt;span class="n"&gt;http&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="o"&gt;//&lt;/span&gt;&lt;span class="n"&gt;blog&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;example&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;com&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;rss&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;xml&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;o&lt;/span&gt; &lt;span class="n"&gt;output&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="n"&gt;markdown&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
 &lt;h3 id="more-info"&gt;more info&lt;/h3&gt;
 &lt;ul&gt;
-&lt;li&gt;&lt;a href="http://pelican.readthedocs.org/en/latest/settings.html"&gt;http://pelican.readthedocs.org/en/latest/settings.html&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://pelican.readthedocs.org/en/latest/settings.html"&gt;https://pelican.readthedocs.org/en/latest/settings.html&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;Tweaking default syntax highlighting:&lt;/li&gt;
 &lt;li&gt;
 &lt;ul&gt;
