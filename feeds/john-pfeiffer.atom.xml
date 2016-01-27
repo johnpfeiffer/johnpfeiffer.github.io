@@ -1316,31 +1316,111 @@ sudo dd if=/home/ubuntu/Desktop/ubuntu-14.04.1-server-amd64.iso of=/dev/sdc
 &lt;p&gt;to show the package dependencies&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;h3 id="apt-get"&gt;apt-get&lt;/h3&gt;
-&lt;p&gt;&lt;code&gt;sudo apt-get install --dry-run byobu&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;apt-get update
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;use /etc/apt/sources.list and /etc/apt/sources.list.d to update the package indices to determine if there are newer packages available
+    deb file:///file_store/archive trusty main universe
+a snippet for how to configure apt to use a local repository (e.g. use reprepro to make a local mirror)&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;sudo apt-get install --dry-run byobu
+&lt;/pre&gt;&lt;/div&gt;
 &lt;blockquote&gt;
 &lt;p&gt;simulate what will happen but do not change the system&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;p&gt;&lt;code&gt;sudo apt-get install --download-only byobu&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;sudo apt-get install --download-only byobu
+&lt;/pre&gt;&lt;/div&gt;
 &lt;blockquote&gt;
 &lt;p&gt;packages are retrieved but not installed&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;p&gt;&lt;code&gt;sudo apt-get install --yes byobu&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;sudo apt-get install --yes byobu
+&lt;/pre&gt;&lt;/div&gt;
 &lt;blockquote&gt;
 &lt;p&gt;install and pre-emptively answer yes to the yes/no prompt&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;p&gt;`sudo apt-get install --reinstall byobu&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;sudo apt-get install --reinstall byobu
+&lt;/pre&gt;&lt;/div&gt;
 &lt;blockquote&gt;
 &lt;p&gt;reinstall even if the package is installed&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;p&gt;`sudo apt-get install --fix-broken byobu&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;sudo apt-get install --fix-broken byobu
+&lt;/pre&gt;&lt;/div&gt;
 &lt;blockquote&gt;
 &lt;p&gt;attempt to fix broken dependencies&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;p&gt;&lt;a href="http://manpages.ubuntu.com/manpages/precise/man8/apt-get.8.html"&gt;http://manpages.ubuntu.com/manpages/precise/man8/apt-get.8.html&lt;/a&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;DEBIAN_FRONTEND=noninteractive apt-get -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" install --reinstall byobu
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;the most non interactive way to force install a package where all prompts are auto answered such that old configuration files are maintained&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="http://manpages.ubuntu.com/manpages/precise/man8/apt-get.8.html"&gt;http://manpages.ubuntu.com/manpages/precise/man8/apt-get.8.html&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href="https://help.ubuntu.com/community/AptGet/Howto"&gt;https://help.ubuntu.com/community/AptGet/Howto&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;apt-get upgrade&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;upgrades to the latest version of existing packages, no new packages (so if the new version has new dependencies nothing happens)
+apt-get dist-upgrade
+upgrades to the latest version of existing packages and will try to grab any new dependencies as required&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;apt-get install update-manager-core&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;newer versions of ubuntu require a helper utility, &lt;a href="http://packages.ubuntu.com/trusty/admin/update-manager-core"&gt;http://packages.ubuntu.com/trusty/admin/update-manager-core&lt;/a&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Before you do a major upgrade of Ubuntu you should bring all packages to the latest version... (apt-get update &amp;amp;&amp;amp; apt-get dist-upgrade)&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;do-release-upgrade -f DistUpgradeViewNonInteractive
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;non interactive upgrade to a new version of Ubuntu (hold onto your seat!), often requires a reboot after for kernel upgrades&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;lsb_release -a
+cat /etc/lsb_release
+uname -a
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;verify that your system has been upgraded (kernel too)&lt;/p&gt;
+&lt;/blockquote&gt;
 &lt;h3 id="apt-key"&gt;apt-key&lt;/h3&gt;
 &lt;p&gt;&lt;code&gt;sudo apt-key update&lt;/code&gt;&lt;/p&gt;
 &lt;blockquote&gt;
 &lt;p&gt;if apt errors: WARNING: The following packages cannot be authenticated&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id="dpkg-really-manages-everything"&gt;dpkg really manages everything&lt;/h2&gt;
+&lt;p&gt;Underneath apt is dpkg (and similar tools) which actually does all of the hard work but are sometimes hard to use =)&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;dpkg -l
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;lists all of the packages installed (name, version, architecture, description)
+    dpkg -l | grep foobar
+lists all of the packages but filters for something specific (i.e. a prefix or partial match)
+    dpkg -l packagename &amp;gt; myoutput.txt
+lists whether a specific package is installed or not and redirects the output to a file
+    dpkg --get-selections
+lists the package names and the state (installed, uninstalled, etc.)
+  dpkg-query -f '${binary:Package}\n' -W
+lists just the package names, slightly more convenient is &lt;code&gt;apt-cache pkgnames | sort&lt;/code&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;a href="https://wiki.debian.org/ListInstalledPackages"&gt;https://wiki.debian.org/ListInstalledPackages&lt;/a&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;you can also manually inspect /var/lib/apt and /var/lib/dpkg&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;dpkg -i packagename.deb
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;install the .deb file
+    dpkg -c packagename.deb
+list the contents of the .deb file
+    dpkg -L packagename
+list the locations of the installed files&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;dpkg -r packagename.deb
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;remove a package but leave the configuration files, also known as &lt;code&gt;dpkg --remove&lt;/code&gt;
+    dpkg --purge
+remove a package and delete all configuration files (even if they have been customized by the user)&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;h2 id="best-ubuntu-packages"&gt;Best Ubuntu Packages&lt;/h2&gt;
 &lt;blockquote&gt;
