@@ -128,8 +128,11 @@
 </ul>
 </li>
 <li><a href="#more-info">More Info</a><ul>
+<li><a href="#docker-api-and-the-docker-hub-public-registry">Docker API and the Docker Hub Public Registry</a><ul>
+<li><a href="#docker-engine-internal-api">Docker Engine internal API</a></li>
+</ul>
+</li>
 <li><a href="#private-docker-registry">Private Docker Registry</a><ul>
-<li><a href="#docker-api">Docker API</a></li>
 <li><a href="#searching-a-private-docker-registry">Searching a private docker registry</a></li>
 </ul>
 </li>
@@ -167,32 +170,39 @@
 <p><a href="https://www.docker.com/docker-toolbox">https://www.docker.com/docker-toolbox</a></p>
 <hr/>
 <h2 id="quick-start-summary">Quick Start Summary</h2>
-<p><code>docker run -it --rm -e MYVAR=123 busybox env</code></p>
+<div class="highlight"><pre>docker run --rm busybox /bin/sh -c "echo 'hi'"
+hi
+
+docker run -it --rm -e MYVAR=123 busybox env
+</pre></div>
 <blockquote>
 <p>"run" will pull the image from Docker Hub by default, e injects an environment variable, overrides the Docker Image CMD with "env"</p>
 </blockquote>
-<p><code>docker run -it --rm --entrypoint=/bin/bash python</code></p>
+<div class="highlight"><pre>docker run -it --rm --entrypoint=/bin/bash python
+</pre></div>
 <blockquote>
 <p>the entrypoint parameter overrides the Docker Image (in case they do not provide a helpfully overridable CMD)
 <a href="http://docs.docker.com/engine/reference/builder/#entrypoint">http://docs.docker.com/engine/reference/builder/#entrypoint</a></p>
 </blockquote>
 <hr/>
 <h2 id="download-a-docker-image">Download a docker image</h2>
-<p><code>sudo docker pull ubuntu:trusty</code> (<strong>grabs the latest, i.e. 14.04.1</strong>) or <code>sudo docker pull ubuntu:12.04.3</code></p>
+<p>Official Images are he easiest to experiment with: <a href="https://hub.docker.com/explore/">https://hub.docker.com/explore/</a></p>
+<div class="highlight"><pre>sudo docker pull ubuntu:trusty
+</pre></div>
 <blockquote>
-<p>critical! use the colon and a specific version! downloading all of the ubuntu images by accident sucks</p>
+<p>(<strong>grabs the latest, i.e. 14.04.1</strong>) or <code>sudo docker pull ubuntu:12.04.3</code></p>
 </blockquote>
-<p><code>sudo docker pull redis:latest</code></p>
+<p><strong>critical!</strong> use the colon and a specific version! downloading all of the ubuntu images by accident sucks =(</p>
+<div class="highlight"><pre>sudo docker pull redis:latest
+</pre></div>
 <blockquote>
 <p>choose the latest or a specific version to avoid downloading a lot of old crap</p>
 </blockquote>
 <p>Finding what versions of images (tags) you can pull requires using either the UI or the API:
-<a href="https://hub.docker.com/r/library/redis/tags/">https://hub.docker.com/r/library/redis/tags/</a></p>
-<ul>
-<li><code>docker pull redis:3</code></li>
-<li><code>docker pull redis:2.8</code></li>
-<li><code>docker pull redis:2.6</code></li>
-</ul>
+- <a href="https://hub.docker.com/r/library/redis/tags/">https://hub.docker.com/r/library/redis/tags/</a>
+- <code>docker pull redis:3</code>
+- <code>docker pull redis:2.8</code>
+- <code>docker pull redis:2.6</code></p>
 <blockquote>
 <p>Many of the tags are synonyms/symlinks, so latest is the same as 3 is the same as 3.0</p>
 </blockquote>
@@ -727,70 +737,105 @@ look closely at error messages, i.e. make: not found and ensure that an early RU
 </li>
 <li><a href="http://jpetazzo.github.io/2014/06/23/docker-ssh-considered-evil">http://jpetazzo.github.io/2014/06/23/docker-ssh-considered-evil</a></li>
 </ul>
+<h3 id="docker-api-and-the-docker-hub-public-registry">Docker API and the Docker Hub Public Registry</h3>
+<p>Docker used to have an API endpoint at registry.hub.docker.com/v1 but in a fairly typical move for them they changed it so a lot of internet "documentation" examples are wrong.</p>
+<p>Also the Docker Hub was deprecated as of 1.7 so this is the last docs on how to use it (because the service is still running or compatible)</p>
+<div class="highlight"><pre>curl https://index.docker.io/v1/_ping
+true
+</pre></div>
+<p>It uses basic authentication and while you can use the API to sign up it may just be easier to use the web site: <a href="https://hub.docker.com/">https://hub.docker.com/</a></p>
+<div class="highlight"><pre>curl https://username:password@index.docker.io/v1/users/
+"OK"
+</pre></div>
+<blockquote>
+<p>just curl with basic auth in order to check the credentials, the trailing slash is IMPORTANT </p>
+</blockquote>
+<p><strong>Using a browser with the Docker REST API is often more convenient as it caches the Basic Authentication</strong></p>
+<ul>
+<li><a href="https://docs.docker.com/v1.7/reference/api/docker-io_api/#users">https://docs.docker.com/v1.7/reference/api/docker-io_api/#users</a></li>
+<li><a href="https://docs.docker.com/v1.6/reference/api/registry_api/">https://docs.docker.com/v1.6/reference/api/registry_api/</a> (because the registry api was deprecated earlier?)</li>
+</ul>
+<p>To see all of the images for a given repository (it is json formatted and there will be a lot of results!)
+    curl https://username:password@index.docker.io/v1/repositories/python/images</p>
+<p><a href="https://docs.docker.com/v1.6/reference/api/registry_api/">https://docs.docker.com/v1.6/reference/api/registry_api/</a></p>
+<p>If you <code>docker search python</code> and want to see the tags (i.e. you do not want to pull every python image ever made), then try curl with REST:</p>
+<div class="highlight"><pre>curl https://username:password@index.docker.io/v1/repositories/python/tags
+
+[{"layer": "a2db1214", "name": "latest"}, {"layer": "edb21ec7", "name": "2"}, {"layer": "82b600dd", "name": "2-alpine"}, {"layer": "6a4e9662", "name": "2-onbuild"}, {"layer": "99b38a11", "name": "2-slim"}, {"layer": "fe724fa0", "name": "2-wheezy"}, {"layer": "edb21ec7", "name": "2.7"}, {"layer": "82b600dd", "name": "2.7-alpine"}, {"layer": "6a4e9662", "name": "2.7-onbuild"}, {"layer": "99b38a11", "name": "2.7-slim"}, {"layer": "fe724fa0", "name": "2.7-wheezy"}, {"layer": "c71c2739", "name": "2.7.10"}, {"layer": "f1f35fa4", "name": "2.7.10-onbuild"}, {"layer": "843123ac", "name": "2.7.10-slim"}, {"layer": "fde41dc3", "name": "2.7.10-wheezy"}, {"layer": "edb21ec7", "name": "2.7.11"}, {"layer": "82b600dd", "name": "2.7.11-alpine"}, {"layer": "6a4e9662", "name": "2.7.11-onbuild"}, {"layer": "99b38a11", "name": "2.7.11-slim"}, {"layer": "fe724fa0", "name": "2.7.11-wheezy"}, {"layer": "a87a2288", "name": "2.7.7"}, {"layer": "481b175a", "name": "2.7.8"}, {"layer": "fbb30ed2", "name": "2.7.8-onbuild"}, {"layer": "3cf7f142", "name": "2.7.8-slim"}, {"layer": "6a873836", "name": "2.7.8-wheezy"}, {"layer": "2d0d0130", "name": "2.7.9"}, {"layer": "10948f7c", "name": "2.7.9-onbuild"}, {"layer": "e86252d0", "name": "2.7.9-slim"}, {"layer": "a11d441b", "name": "2.7.9-wheezy"}, {"layer": "a2db1214", "name": "3"}, {"layer": "bb6cd371", "name": "3-alpine"}, {"layer": "80662aa6", "name": "3-onbuild"}, {"layer": "07bfefb9", "name": "3-slim"}, {"layer": "2edf9614", "name": "3-wheezy"}, {"layer": "7575f4a5", "name": "3.2"}, {"layer": "31b273f6", "name": "3.2-onbuild"}, {"layer": "ca0a0ed6", "name": "3.2-slim"}, {"layer": "f5644650", "name": "3.2-wheezy"}, {"layer": "7575f4a5", "name": "3.2.6"}, {"layer": "31b273f6", "name": "3.2.6-onbuild"}, {"layer": "ca0a0ed6", "name": "3.2.6-slim"}, {"layer": "f5644650", "name": "3.2.6-wheezy"}, {"layer": "84717b99", "name": "3.3"}, {"layer": "4de0c1a0", "name": "3.3-alpine"}, {"layer": "e0985e72", "name": "3.3-onbuild"}, {"layer": "3c0f39af", "name": "3.3-slim"}, {"layer": "a13ad718", "name": "3.3-wheezy"}, {"layer": "e663e96e", "name": "3.3.5"}, {"layer": "79d3367e", "name": "3.3.5-onbuild"}, {"layer": "84717b99", "name": "3.3.6"}, {"layer": "4de0c1a0", "name": "3.3.6-alpine"}, {"layer": "e0985e72", "name": "3.3.6-onbuild"}, {"layer": "3c0f39af", "name": "3.3.6-slim"}, {"layer": "a13ad718", "name": "3.3.6-wheezy"}, {"layer": "c7184f4f", "name": "3.4"}, {"layer": "e6310f15", "name": "3.4-alpine"}, {"layer": "c38d9f7b", "name": "3.4-onbuild"}, {"layer": "ab9f7f65", "name": "3.4-slim"}, {"layer": "c98c4a9d", "name": "3.4-wheezy"}, {"layer": "b504e00c", "name": "3.4.1"}, {"layer": "07e5901a", "name": "3.4.1-onbuild"}, {"layer": "ec50e6a0", "name": "3.4.2"}, {"layer": "ade8543e", "name": "3.4.2-onbuild"}, {"layer": "dd1dee45", "name": "3.4.2-slim"}, {"layer": "de6911d6", "name": "3.4.2-wheezy"}, {"layer": "48bc52cc", "name": "3.4.3"}, {"layer": "bf599bc6", "name": "3.4.3-onbuild"}, {"layer": "0b92f173", "name": "3.4.3-slim"}, {"layer": "b8845e5b", "name": "3.4.3-wheezy"}, {"layer": "c7184f4f", "name": "3.4.4"}, {"layer": "e6310f15", "name": "3.4.4-alpine"}, {"layer": "c38d9f7b", "name": "3.4.4-onbuild"}, {"layer": "ab9f7f65", "name": "3.4.4-slim"}, {"layer": "c98c4a9d", "name": "3.4.4-wheezy"}, {"layer": "a2db1214", "name": "3.5"}, {"layer": "bb6cd371", "name": "3.5-alpine"}, {"layer": "80662aa6", "name": "3.5-onbuild"}, {"layer": "07bfefb9", "name": "3.5-slim"}, {"layer": "c64596cb", "name": "3.5.0"}, {"layer": "c9744d7e", "name": "3.5.0-onbuild"}, {"layer": "ac60c7d8", "name": "3.5.0-slim"}, {"layer": "31ef8f64", "name": "3.5.0b3"}, {"layer": "7c5e081c", "name": "3.5.0b3-onbuild"}, {"layer": "0c47d2de", "name": "3.5.0b3-slim"}, {"layer": "a2db1214", "name": "3.5.1"}, {"layer": "bb6cd371", "name": "3.5.1-alpine"}, {"layer": "80662aa6", "name": "3.5.1-onbuild"}, {"layer": "07bfefb9", "name": "3.5.1-slim"}, {"layer": "bb6cd371", "name": "alpine"}, {"layer": "80662aa6", "name": "onbuild"}, {"layer": "07bfefb9", "name": "slim"}, {"layer": "2edf9614", "name": "wheezy"}]
+</pre></div>
+<h4 id="docker-engine-internal-api">Docker Engine internal API</h4>
+<p>If instead of the docker client you wish to interact more programatically...</p>
+<ul>
+<li><a href="https://docs.docker.com/engine/reference/api/docker_remote_api/">https://docs.docker.com/engine/reference/api/docker_remote_api/</a></li>
+<li><a href="https://github.com/docker/distribution">https://github.com/docker/distribution</a></li>
+</ul>
 <h3 id="private-docker-registry">Private Docker Registry</h3>
-<p><code>curl -i https://username:password@docker.example.com/v2/</code></p>
+<div class="highlight"><pre>curl -i https://username:password@docker.example.com/v2/
+</pre></div>
 <blockquote>
 <p>attempt to login to a private registry</p>
 </blockquote>
 <p><strong> Using the docker client to login to a private registry</strong>
-<code>docker login docker.example.com:443</code></p>
-<blockquote>
-<p>Username: user@example.com
-WARNING: login credentials saved in /home/USER/.docker/config.json
-Login Succeeded</p>
-</blockquote>
+    docker login docker.example.com:443
+    &gt; Username: user@example.com
+    &gt; WARNING: login credentials saved in /home/USER/.docker/config.json
+    &gt; Login Succeeded</p>
 <p><a href="https://docs.docker.com/registry/deploying/">https://docs.docker.com/registry/deploying/</a></p>
-<h4 id="docker-api">Docker API</h4>
-<p>The Docker API (when using a browser) often uses Basic Authentication</p>
-<ul>
-<li><a href="https://docs.docker.com/reference/api/docker_remote_api/">https://docs.docker.com/reference/api/docker_remote_api/</a></li>
-<li><a href="https://github.com/docker/distribution">https://github.com/docker/distribution</a></li>
-<li><a href="http://docs.docker.com/reference/api/registry_api">http://docs.docker.com/reference/api/registry_api</a></li>
-</ul>
-<p><code>https://docker.example.com/_ping</code></p>
+<div class="highlight"><pre>https://docker.example.com/_ping
+</pre></div>
 <blockquote>
 <p>{}</p>
 </blockquote>
-<p><code>https://docker.example.com/info</code>
-<code>https://docker.example.com/version</code></p>
+<div class="highlight"><pre>https://docker.example.com/info
+https://docker.example.com/version
+</pre></div>
 <blockquote>
 <p>note these commands may not be enabled or available in your private registry version </p>
 </blockquote>
-<p><code>https://docker.example.com/v1/repositories/library/ubuntu/tags</code></p>
+<div class="highlight"><pre>https://docker.example.com/v1/repositories/library/ubuntu/tags
+</pre></div>
 <blockquote>
 <p>{"13.04": "5e47ac691989afcd10285ea4e67b46bc0fdc98d90844e57a6d4221c1e3ab4388"}</p>
 </blockquote>
-<p><code>https://docker.example.com/v1/repositories/micros/baseimage-ubuntu/tags</code></p>
+<div class="highlight"><pre>https://docker.example.com/v1/repositories/micros/baseimage-ubuntu/tags
+</pre></div>
 <blockquote>
 <p>{"latest": "5a14c1498ff4983793f6e5eddd16868dbad257195f0e85c66ece94d881ecb28f"}</p>
 </blockquote>
-<p><code>https://docker.example.com/v1/repositories/micros/baseimage-ubuntu/images</code></p>
+<div class="highlight"><pre>https://docker.example.com/v1/repositories/micros/baseimage-ubuntu/images
+</pre></div>
 <blockquote>
 <p>list of the images available: [{"id":"8254ff58b098b72425854555204171352a69f5427ba83dee4642ba45d301d0b1"}]</p>
 </blockquote>
-<p><code>https://docker.example.com/v1/repositories/micros/baseimage-ubuntu/json</code></p>
+<div class="highlight"><pre>https://docker.example.com/v1/repositories/micros/baseimage-ubuntu/json
+</pre></div>
 <blockquote>
 <p>inspect an image (what OS, kernel, etc.) {"arch": "amd64", "docker_go_version": "go1.3.3", "docker_version": "1.3.3", "kernel": "3.16.7-tinycore64", "last_update": 1426041024, "os": "linux"}</p>
 </blockquote>
-<p><code>https://docker.example.com/v1/repositories/myuser/nginx/0348bf1e7cc54327b8c9ce8407c5b3eadade1ef1771d642d08ae16a6aad5bed5/json</code></p>
+<div class="highlight"><pre>https://docker.example.com/v1/repositories/myuser/nginx/0348bf1e7cc54327b8c9ce8407c5b3eadade1ef1771d642d08ae16a6aad5bed5/json
+</pre></div>
 <blockquote>
 <p>inspect a very specific image (by id)</p>
 </blockquote>
 <h4 id="searching-a-private-docker-registry">Searching a private docker registry</h4>
-<p><code>https://registry.hub.docker.com/v1/search?q=pfeiffer</code></p>
+<div class="highlight"><pre>https://registry.hub.docker.com/v1/search?q=pfeiffer
+</pre></div>
 <blockquote>
-<p>the public docker registry search query</p>
+<p>the public docker registry search query, deprecated in APIv2 so no longer functional</p>
 </blockquote>
-<p><code>docker search docker.example.com/myuser</code></p>
+<div class="highlight"><pre>docker search docker.example.com/myuser
+</pre></div>
 <blockquote>
-<p>the cli command returns a listing of all of the images for a user</p>
+<p>the cli command returns a listing of all of the images for a user, deprecated in APIv2 so no longer functional</p>
 </blockquote>
 <p>If there is a proxy in front: <code>docker search user:password@docker.example.com/myuser</code></p>
-<p><code>curl -s -X GET https://user:password@docker.example.com/v1/search</code></p>
+<div class="highlight"><pre>curl -s -X GET https://user:password@docker.example.com/v1/search
+</pre></div>
 <blockquote>
 <p>LIST ALL IMAGES: or use a browser https://docker.example.com/v1/search</p>
 </blockquote>
-<p><code>curl -X GET https://user:password@docker.example.com/v1/search?q=ubuntu</code></p>
+<div class="highlight"><pre>curl -X GET https://user:password@docker.example.com/v1/search?q=ubuntu
+</pre></div>
 <blockquote>
 <p>https://docker.example.com/v1/search?q=ubuntu
 {"num_results": 4, "query": "ubuntu", "results": [{"description": null, "name": "example/ubuntu"}, {"description": null, "name": "library/ubuntu"}, {"description": null, "name": "micros/baseimage-ubuntu-ansible"}, {"description": null, "name": "micros/baseimage-ubuntu"}]}</p>
@@ -817,7 +862,7 @@ Login Succeeded</p>
             <time pubdate="pubdate" datetime="2014-07-10T17:00:00-07:00">Jul 10, 2014</time>
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#virtualization-ref">virtualization</a> 
-            <h4>~2771 words</h4>
+            <h4>~3370 words</h4>
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article"> 
                 <li><a href="/tags.html#containers-ref">containers
