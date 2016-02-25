@@ -1,5 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>johnpfeiffer</title><link href="https://blog.john-pfeiffer.com/" rel="alternate"></link><link href="https://blog.john-pfeiffer.com/feeds/john-pfeiffer.atom.xml" rel="self"></link><id>https://blog.john-pfeiffer.com/</id><updated>2016-01-05T20:00:00-08:00</updated><entry><title>Python packaging pip wheels</title><link href="https://blog.john-pfeiffer.com/python-packaging-pip-wheels/" rel="alternate"></link><updated>2016-01-05T20:00:00-08:00</updated><author><name>john pfeiffer</name></author><id>tag:blog.john-pfeiffer.com,2016-01-05:python-packaging-pip-wheels/</id><summary type="html">
+<feed xmlns="http://www.w3.org/2005/Atom"><title>johnpfeiffer</title><link href="https://blog.john-pfeiffer.com/" rel="alternate"></link><link href="https://blog.john-pfeiffer.com/feeds/john-pfeiffer.atom.xml" rel="self"></link><id>https://blog.john-pfeiffer.com/</id><updated>2016-02-24T20:40:00-08:00</updated><entry><title>Debian Packages for Deployment</title><link href="https://blog.john-pfeiffer.com/debian-packages-for-deployment/" rel="alternate"></link><updated>2016-02-24T20:40:00-08:00</updated><author><name>john pfeiffer</name></author><id>tag:blog.john-pfeiffer.com,2016-02-24:debian-packages-for-deployment/</id><summary type="html">
+&lt;h3 id="what-is-a-debian-package"&gt;What is a Debian Package?&lt;/h3&gt;
+&lt;p&gt;A debian package is a way to distribute and install a collection of files (aka software) onto a system (i.e. Debian or Ubuntu).&lt;/p&gt;
+&lt;p&gt;While a piece of software might depend on other debian packages (e.g. libraries) usually a single .deb file represents some sort of module that serves a single purpose.&lt;/p&gt;
+&lt;p&gt;Once a debian package is built any client (dpkg or apt which also uses dpkg ;) can use it to install the software.&lt;/p&gt;
+&lt;h3 id="why-use-a-debian-package"&gt;Why use a Debian Package?&lt;/h3&gt;
+&lt;blockquote&gt;
+&lt;p&gt;When you're developing on your own box you can pretty much get away with anything&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;A complex and large scale production environment typically has a lot of costs (both operationally and in not becoming a bottleneck to dev velocity). Any opportunity to increase determinism and reduce risk is welcome.&lt;/p&gt;
+&lt;p&gt;Deploying source code directly from git version control doesn't always scale well (streaming tons of small files, dedicated read only service user direct to production, etc.) nor does it create enough determinism with dependency management.&lt;/p&gt;
+&lt;p&gt;As deployments become more frequent and the Continuous Integration becomes more complex it is really important to embrace the "build once" principle so that a single artifact (hopefully with all of its dependencies) can pass through the guantlet of integration testing and canary/incremental rollout.  &lt;/p&gt;
+&lt;p&gt;So now that you're convinced "Artifacts" are the way to go lets just skip .exe, .msi, .jar, .etc and go straight to...&lt;/p&gt;
+&lt;p&gt;The Debian Package is a "battle tested" format with lots of features (dependency requirements, preinst scripts, postinst scripts, etc.) but if there is a bug in a specific .deb file it is not always practical to get the full source code and rebuild the whole thing (especially considering static bindings and specific compilation environment/parameters).&lt;/p&gt;
+&lt;p&gt;One example people give is an erroneous pre install or post install script that is preventing either installation or removal.&lt;/p&gt;
+&lt;p&gt;The example below is more on just simply changing the control file "Description:"&lt;/p&gt;
+&lt;h3 id="how-to-unpack-a-debian-package-modify-the-control-file-and-repack-it"&gt;How to unpack a debian package, modify the control file, and repack it&lt;/h3&gt;
+&lt;p&gt;To unpack, modify, and repack a debian package:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;wget https://example.com/example.deb --output-document /tmp/example.deb
+docker run --rm --it --volume /tmp:/tmp ubuntu:14.04 /bin/bash
+apt-get update
+apt-get install vim
+cd /tmp
+mkdir emptydir
+dpkg-deb -R example.deb /tmp/emptydir
+ls -ahl /tmp/emptydir
+ls -ahl /tmp/emptydir/DEBIAN
+vi /tmp/emptydir/DEBIAN/control
+dpkg-deb -b emptydir /tmp/example-fixed.deb
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;On your host /tmp should now contain example.deb and example-fixed.deb&lt;/p&gt;
+&lt;h3 id="more-info"&gt;more info&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://www.debian.org/doc/manuals/debian-faq/ch-pkg_basics.en.html"&gt;https://www.debian.org/doc/manuals/debian-faq/ch-pkg_basics.en.html&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="http://unix.stackexchange.com/questions/138188/easily-unpack-deb-edit-postinst-and-repack-deb"&gt;http://unix.stackexchange.com/questions/138188/easily-unpack-deb-edit-postinst-and-repack-deb&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="http://manpages.ubuntu.com/manpages/hardy/man1/dpkg-deb.1.html"&gt;http://manpages.ubuntu.com/manpages/hardy/man1/dpkg-deb.1.html&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</summary><category term="debian"></category><category term="deb"></category><category term="build"></category><category term="packaging"></category><category term="deployment"></category><category term="scale"></category></entry><entry><title>Python packaging pip wheels</title><link href="https://blog.john-pfeiffer.com/python-packaging-pip-wheels/" rel="alternate"></link><updated>2016-01-05T20:00:00-08:00</updated><author><name>john pfeiffer</name></author><id>tag:blog.john-pfeiffer.com,2016-01-05:python-packaging-pip-wheels/</id><summary type="html">
 &lt;h3 id="installing-packages-with-python"&gt;Installing packages with python&lt;/h3&gt;
 &lt;p&gt;Pip is the standard way to install python packages&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;sudo pip install packagename
