@@ -78,13 +78,26 @@
 <li><a href="#write-an-iso-to-usb">Write an ISO to usb</a></li>
 <li><a href="#ubuntu-recovery-mode">Ubuntu Recovery mode</a></li>
 <li><a href="#package-management-with-apt-commands">package management with apt commands</a><ul>
-<li><a href="#pro-tip-force-ipv4-to-avoid-lengthy-ipv6-timeouts">Pro Tip: Force ipv4 to avoid lengthy IPV6 timeouts</a></li>
 <li><a href="#apt-cache">apt-cache</a></li>
-<li><a href="#apt-get">apt-get</a></li>
+<li><a href="#force-apt-to-use-ipv4-to-avoid-lengthy-ipv6-timeouts">Force Apt to use  IPv4 to avoid lengthy IPv6 timeouts</a></li>
+<li><a href="#apt-get">apt-get</a><ul>
+<li><a href="#updating-package-indices-with-apt-get-update">updating package indices with apt-get update</a></li>
+<li><a href="#installing-and-force-installing-with-apt">installing and force installing with apt</a></li>
+</ul>
+</li>
+<li><a href="#removing-packages-with-apt">removing packages with apt</a></li>
 <li><a href="#apt-key">apt-key</a></li>
 </ul>
 </li>
-<li><a href="#dpkg-really-manages-everything">dpkg really manages everything</a></li>
+<li><a href="#dpkg-really-manages-everything">dpkg really manages everything</a><ul>
+<li><a href="#listing-and-finding-packages-with-dpkg">listing and finding packages with dpkg</a><ul>
+<li><a href="#dpkg-logs">dpkg logs</a></li>
+<li><a href="#installing-and-removing-packages-with-dpkg">Installing and removing packages with dpkg</a></li>
+<li><a href="#to-manually-install-a-package-forcefully-if-synaptic-and-apt-get-are-stuck">to manually install a package (forcefully if synaptic and apt-get are stuck)</a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li><a href="#best-ubuntu-packages">Best Ubuntu Packages</a><ul>
 <li><a href="#gui">GUI</a></li>
 <li><a href="#music-and-video">music and video</a><ul>
@@ -146,13 +159,6 @@ sudo dd if=/home/ubuntu/Desktop/ubuntu-14.04.1-server-amd64.iso of=/dev/sdc
 <p>Since apt is a wonderful wrapper/manager of dpkg when you're in doubt most likely there is a dpkg command that will do what you need but it may take a lot of research and 8 parameters to do it ;]</p>
 <p><a href="https://en.wikipedia.org/wiki/Advanced_Packaging_Tool">https://en.wikipedia.org/wiki/Advanced_Packaging_Tool</a></p>
 <p><em>Hint: Ubuntu is based upon Debian</em></p>
-<h3 id="pro-tip-force-ipv4-to-avoid-lengthy-ipv6-timeouts">Pro Tip: Force ipv4 to avoid lengthy IPV6 timeouts</h3>
-<p><code>sudo apt-get -o Acquire::ForceIPv4=true update</code></p>
-<p><code>sudo apt-get -o Acquire::ForceIPv4=true install vim</code></p>
-<p><code>sudo echo 'Acquire::ForceIPv4 "true";' &gt; /etc/apt/apt.conf.d/99force-ipv4</code></p>
-<blockquote>
-<p>persistent config to always use ipv4</p>
-</blockquote>
 <h3 id="apt-cache">apt-cache</h3>
 <p><code>apt-cache search ssh</code></p>
 <blockquote>
@@ -174,7 +180,33 @@ sudo dd if=/home/ubuntu/Desktop/ubuntu-14.04.1-server-amd64.iso of=/dev/sdc
 <blockquote>
 <p>to show the package dependencies</p>
 </blockquote>
+<h3 id="force-apt-to-use-ipv4-to-avoid-lengthy-ipv6-timeouts">Force Apt to use  IPv4 to avoid lengthy IPv6 timeouts</h3>
+<div class="highlight"><pre><span></span><span class="nt">sudo</span> <span class="nt">apt-get</span> <span class="nt">-o</span> <span class="nt">Acquire</span><span class="o">:</span><span class="nd">:ForceIPv4</span><span class="o">=</span><span class="nt">true</span> <span class="nt">update</span>
+<span class="nt">sudo</span> <span class="nt">apt-get</span> <span class="nt">-o</span> <span class="nt">Acquire</span><span class="o">:</span><span class="nd">:ForceIPv4</span><span class="o">=</span><span class="nt">true</span> <span class="nt">install</span> <span class="nt">vim</span>
+<span class="nt">sudo</span> <span class="nt">echo</span> <span class="s1">'Acquire::ForceIPv4 "true";'</span> <span class="o">&gt;</span> <span class="o">/</span><span class="nt">etc</span><span class="o">/</span><span class="nt">apt</span><span class="o">/</span><span class="nt">apt</span><span class="nc">.conf.d</span><span class="o">/</span><span class="nt">99force-ipv4</span>
+</pre></div>
+<blockquote>
+<p>update, then install vim, then save the persistent config to always use ipv4</p>
+</blockquote>
 <h3 id="apt-get">apt-get</h3>
+<h4 id="updating-package-indices-with-apt-get-update">updating package indices with apt-get update</h4>
+<p>Apt contains indices that need to be updated from the upstream repositories</p>
+<p><strong>/etc/apt/sources.list</strong> is the main ubuntu repository listing</p>
+<p><strong>/etc/apt/sources.list.d</strong> is the directory where additional apt repositories can be added (usually from ppa or 3rd party vendors)</p>
+<ul>
+<li><a href="http://www.debian.org/mirror/mirrors_full">http://www.debian.org/mirror/mirrors_full</a> for the Debian package mirror sites</li>
+<li><a href="http://packages.ubuntu.com/">http://packages.ubuntu.com/</a> for a web ui based search of package details</li>
+</ul>
+<p>apt-get clean</p>
+<blockquote>
+<p>/var/cache/apt/archive folder keeps a copy of the downloaded .deb files
+you will need an internet connection to download again any removed .deb files</p>
+</blockquote>
+<div class="highlight"><pre><span></span>rm -rf /var/lib/apt/lists/*
+</pre></div>
+<blockquote>
+<p>remove the indices in case they have gotten orphaned or corrupted, needs to be followed by apt-get update to repopulate</p>
+</blockquote>
 <div class="highlight"><pre><span></span>apt-get update
 </pre></div>
 <blockquote>
@@ -182,6 +214,15 @@ sudo dd if=/home/ubuntu/Desktop/ubuntu-14.04.1-server-amd64.iso of=/dev/sdc
     deb file:///file_store/archive trusty main universe
 a snippet for how to configure apt to use a local repository (e.g. use reprepro to make a local mirror)</p>
 </blockquote>
+<div class="highlight"><pre><span></span>apt-cache dump
+</pre></div>
+<blockquote>
+<p>shows all installed packages</p>
+</blockquote>
+<p>To install netselect, a debian application that allows you to choose the "best" package mirror:
+    sudo apt-get install netselect netselect-apt
+    netselect-apt</p>
+<h4 id="installing-and-force-installing-with-apt">installing and force installing with apt</h4>
 <div class="highlight"><pre><span></span>sudo apt-get install --dry-run byobu
 </pre></div>
 <blockquote>
@@ -241,6 +282,19 @@ uname -a
 <blockquote>
 <p>verify that your system has been upgraded (kernel too)</p>
 </blockquote>
+<h3 id="removing-packages-with-apt">removing packages with apt</h3>
+<div class="highlight"><pre><span></span>apt-get remove wget
+</pre></div>
+<blockquote>
+<p>uninstall a package
+    apt-get purge wget
+remove the package and all files from disk</p>
+</blockquote>
+<div class="highlight"><pre><span></span>apt-get autoremove
+</pre></div>
+<blockquote>
+<p>attempt to clean up packages that are no longer needed (i.e. old versions of dependencies or unused kernel images)</p>
+</blockquote>
 <h3 id="apt-key">apt-key</h3>
 <p><code>sudo apt-key update</code></p>
 <blockquote>
@@ -248,6 +302,7 @@ uname -a
 </blockquote>
 <h2 id="dpkg-really-manages-everything">dpkg really manages everything</h2>
 <p>Underneath apt is dpkg (and similar tools) which actually does all of the hard work but are sometimes hard to use =)</p>
+<h3 id="listing-and-finding-packages-with-dpkg">listing and finding packages with dpkg</h3>
 <div class="highlight"><pre><span></span>dpkg -l
 </pre></div>
 <blockquote>
@@ -259,18 +314,30 @@ lists whether a specific package is installed or not and redirects the output to
     dpkg --get-selections
 lists the package names and the state (installed, uninstalled, etc.)
   dpkg-query -f '${binary:Package}\n' -W
-lists just the package names, slightly more convenient is <code>apt-cache pkgnames | sort</code></p>
+lists just the package names, slightly more convenient is <code>apt-cache pkgnames | sort</code>
+    dpkg -S stdio.h
+find a package that contains a specific file
+    dpkg -c packagename.deb
+list the contents of the .deb file</p>
 </blockquote>
 <p><a href="https://wiki.debian.org/ListInstalledPackages">https://wiki.debian.org/ListInstalledPackages</a></p>
 <blockquote>
 <p>you can also manually inspect /var/lib/apt and /var/lib/dpkg</p>
 </blockquote>
+<h4 id="dpkg-logs">dpkg logs</h4>
+<div class="highlight"><pre><span></span>vi /var/log/dpkg.log
+tail -f /var/log/dpkg.log
+</pre></div>
+<blockquote>
+<p>in conjunction with <code>apt-get upgrade -y</code></p>
+</blockquote>
+<h4 id="installing-and-removing-packages-with-dpkg">Installing and removing packages with dpkg</h4>
 <div class="highlight"><pre><span></span>dpkg -i packagename.deb
 </pre></div>
 <blockquote>
-<p>install the .deb file
-    dpkg -c packagename.deb
-list the contents of the .deb file
+<p>install the .deb file, <code>dpkg -i *.deb</code> will install all of the .deb files in the current directory
+    dpkg -i --force depends packagename.deb
+installs and turns a dependency error into a warning (i.e. libc6 circular dependency)
     dpkg -L packagename
 list the locations of the installed files
     dpkg -s packagename
@@ -284,13 +351,26 @@ or <code>dpkg -l | awk '$2=="packagename" { print $3 }'</code> to only print the
     dpkg --purge
 remove a package and delete all configuration files (even if they have been customized by the user)</p>
 </blockquote>
+<div class="highlight"><pre><span></span>dpkg --force-help
+</pre></div>
+<h4 id="to-manually-install-a-package-forcefully-if-synaptic-and-apt-get-are-stuck">to manually install a package (forcefully if synaptic and apt-get are stuck)</h4>
+<div class="highlight"><pre><span></span>mv /var/lib/dpkg/info/postgresql.* /tmp/
+dpkg --remove --force-remove-reinstreq postgresql-9.1
+</pre></div>
+<blockquote>
+<p>do the same for postgresql-common and other packages</p>
+</blockquote>
+<p>apt-get install postgresql-9.1
+apt-get purge postgresql-9.1 postgresql-client-9.1 postgresql-common postgresql-client-common</p>
+<blockquote>
+<p>in order to have apt-get remove all of the binaries</p>
+</blockquote>
 <h2 id="best-ubuntu-packages">Best Ubuntu Packages</h2>
 <blockquote>
 <p>as of Utopic 14.10</p>
 </blockquote>
 <div class="highlight"><pre><span></span>sudo apt-get update
-sudo apt-get install -y byobu build-essential elinks unzip unrar nano vim wget curl ntp rcconf dialog git-core
-
+sudo apt-get install -y byobu build-essential elinks unzip unrar nano vim wget curl ntp rcconf dialog git-core 
 sudo apt-get install -y python-pip &amp;&amp; sudo pip install --upgrade pip
 </pre></div>
 <blockquote>
@@ -513,7 +593,7 @@ manually verify the changes by examining all of the boot menu options (i.e. find
             <time pubdate="pubdate" datetime="2014-08-20T00:00:00-07:00">Aug 20, 2014</time>
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#linux-ref">linux</a> 
-            <h4>~1831 words</h4>
+            <h4>~2138 words</h4>
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article"> 
                 <li><a href="/tags.html#apt-get-ref">apt-get
