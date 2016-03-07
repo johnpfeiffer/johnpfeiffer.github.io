@@ -6,7 +6,7 @@
         <meta name="author" content="john pfeiffer" />
         <meta name="copyright" content="john pfeiffer" />
 
-<meta name="keywords" content=", programming, " />
+<meta name="keywords" content="selenium, python, programming, test, phantomjs, CI, programming, " />
         <title>Selenium headless browser automated testing with PhantomJS and Python  · johnpfeiffer
 </title>
         <link href="https://cdn-images.mailchimp.com/embedcode/slim-081711.css" rel="stylesheet" type="text/css">
@@ -80,6 +80,7 @@
 <li><a href="#run">Run</a></li>
 <li><a href="#example-python-script">Example python script</a></li>
 <li><a href="#advanced-python-example">Advanced Python example</a></li>
+<li><a href="#basic-polling-with-firefox-and-mac">Basic Polling with Firefox and Mac</a></li>
 <li><a href="#references">References</a></li>
 </ul>
 </div>
@@ -90,13 +91,19 @@
             
 <h3 id="overview">Overview</h3>
 <p>selenium: an automation framework for interactions with websites (like a programmatic browser) <a href="http://docs.seleniumhq.org/docs/02_selenium_ide.jsp#introduction">http://docs.seleniumhq.org/docs/02_selenium_ide.jsp#introduction</a></p>
+<p>webdriver is the interface: <a href="http://selenium-python.readthedocs.org/api.html">http://selenium-python.readthedocs.org/api.html</a> </p>
+<blockquote>
+<p>useful for looking up things like <code>driver.current_url</code></p>
+</blockquote>
 <p>phantomjs: headless browser <a href="http://phantomjs.org">http://phantomjs.org</a></p>
 <h3 id="install">Install</h3>
-<p><code>sudo pip install selenium</code></p>
-<p>wget <a href="https://bitbucket.org/ariya/phantomjs/downloads/phantomjs-1.9.8-linux-x86_64.tar.bz2">https://bitbucket.org/ariya/phantomjs/downloads/phantomjs-1.9.8-linux-x86_64.tar.bz2</a></p>
-<p><code>tar -xjvf phantomjs-1.9.8-linux-x86_64.tar.bz2</code></p>
+<div class="highlight"><pre><span></span>sudo pip install selenium
+wget &lt;https://bitbucket.org/ariya/phantomjs/downloads/phantomjs-1.9.8-linux-x86_64.tar.bz2&gt;
+tar -xjvf phantomjs-1.9.8-linux-x86_64.tar.bz2
+</pre></div>
 <h3 id="run">Run</h3>
-<p><code>phantomjs-1.9.8-linux-x86_64/bin/phantomjs --webdriver=9134</code></p>
+<div class="highlight"><pre><span></span>phantomjs-1.9.8-linux-x86_64/bin/phantomjs --webdriver=9134
+</pre></div>
 <blockquote>
 <p>ghostdriver included and running on port 9134</p>
 </blockquote>
@@ -109,8 +116,10 @@
 <span class="k">print</span> <span class="n">driver</span><span class="o">.</span><span class="n">current_url</span>
 <span class="n">driver</span><span class="o">.</span><span class="n">quit</span>
 <span class="k">print</span> <span class="s2">"done"</span>
+
+
+<span class="n">phantomjs</span><span class="o">-</span><span class="mf">1.9</span><span class="o">.</span><span class="mi">8</span><span class="o">-</span><span class="n">linux</span><span class="o">-</span><span class="n">x86_64</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">phantomjs</span> <span class="o">--</span><span class="n">webdriver</span><span class="o">=</span><span class="mi">9134</span> <span class="o">--</span><span class="n">ignore</span><span class="o">-</span><span class="n">ssl</span><span class="o">-</span><span class="n">errors</span><span class="o">=</span><span class="n">true</span>
 </pre></div>
-<p><code>phantomjs-1.9.8-linux-x86_64/bin/phantomjs --webdriver=9134 --ignore-ssl-errors=true</code></p>
 <h3 id="advanced-python-example">Advanced Python example</h3>
 <blockquote>
 <p>more complete example with python unittest framework (used the Firefox Selenium IDE plugin -&gt; Export)</p>
@@ -177,6 +186,71 @@
 <span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
     <span class="n">unittest</span><span class="o">.</span><span class="n">main</span><span class="p">()</span>
 </pre></div>
+<h3 id="basic-polling-with-firefox-and-mac">Basic Polling with Firefox and Mac</h3>
+<div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">urllib2</span>
+
+<span class="kn">from</span> <span class="nn">selenium</span> <span class="kn">import</span> <span class="n">webdriver</span>
+<span class="kn">from</span> <span class="nn">selenium.webdriver.firefox.firefox_binary</span> <span class="kn">import</span> <span class="n">FirefoxBinary</span>
+
+
+<span class="n">FIREFOX_MAC_PATH</span> <span class="o">=</span> <span class="s1">'/Applications/Firefox.app/Contents/MacOS/firefox-bin'</span>
+<span class="n">G_URL</span> <span class="o">=</span> <span class="s1">'https://g.example.com'</span>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s1">'__main__'</span><span class="p">:</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">print</span><span class="p">(</span><span class="s1">'Usage error: requires a username'</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span>
+    <span class="n">username</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="c1"># https://docs.python.org/2/library/datetime.html#strftime-strptime-behavior</span>
+    <span class="n">new_server_name</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">'</span><span class="si">%d</span><span class="s1">%b%H%M%S'</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">FIREFOX_MAC_PATH</span><span class="p">):</span>
+        <span class="n">driver</span> <span class="o">=</span> <span class="n">FirefoxBinary</span><span class="p">(</span><span class="n">firefox_path</span><span class="o">=</span><span class="n">FIREFOX_MAC_PATH</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">driver</span> <span class="o">=</span> <span class="n">webdriver</span><span class="o">.</span><span class="n">Firefox</span><span class="p">()</span>
+
+    <span class="n">driver</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">G_URL</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">driver</span><span class="o">.</span><span class="n">current_url</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">driver</span><span class="o">.</span><span class="n">current_url</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">'login'</span><span class="p">):</span>
+        <span class="n">driver</span><span class="o">.</span><span class="n">find_element_by_name</span><span class="p">(</span><span class="s1">'username'</span><span class="p">)</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="n">driver</span><span class="o">.</span><span class="n">find_element_by_name</span><span class="p">(</span><span class="s1">'username'</span><span class="p">)</span><span class="o">.</span><span class="n">send_keys</span><span class="p">(</span><span class="n">username</span><span class="p">)</span>
+        <span class="n">driver</span><span class="o">.</span><span class="n">find_element_by_css_selector</span><span class="p">(</span><span class="s1">'input[type="submit"]'</span><span class="p">)</span><span class="o">.</span><span class="n">click</span><span class="p">()</span>
+
+    <span class="n">driver</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'{}/deploy/simple_server'</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">G_URL</span><span class="p">))</span>
+    <span class="n">driver</span><span class="o">.</span><span class="n">find_element_by_name</span><span class="p">(</span><span class="s1">'name'</span><span class="p">)</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+    <span class="n">driver</span><span class="o">.</span><span class="n">find_element_by_name</span><span class="p">(</span><span class="s1">'name'</span><span class="p">)</span><span class="o">.</span><span class="n">send_keys</span><span class="p">(</span><span class="s1">'{}-{}'</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">username</span><span class="p">,</span> <span class="n">new_server_name</span><span class="p">))</span>
+    <span class="n">driver</span><span class="o">.</span><span class="n">find_element_by_name</span><span class="p">(</span><span class="s1">'hostname'</span><span class="p">)</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+    <span class="n">driver</span><span class="o">.</span><span class="n">find_element_by_name</span><span class="p">(</span><span class="s1">'hostname'</span><span class="p">)</span><span class="o">.</span><span class="n">send_keys</span><span class="p">(</span><span class="s1">'{}-{}'</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">username</span><span class="p">,</span> <span class="n">new_server_name</span><span class="p">))</span>
+    <span class="n">driver</span><span class="o">.</span><span class="n">find_element_by_css_selector</span><span class="p">(</span><span class="s1">'input[type="submit"]'</span><span class="p">)</span><span class="o">.</span><span class="n">click</span><span class="p">()</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="s1">'https://{}-{}.example.com'</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">username</span><span class="p">,</span> <span class="n">new_server_name</span><span class="p">)</span>
+
+    <span class="k">print</span><span class="p">(</span><span class="s1">'requested build of {}'</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">url</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="mi">20</span><span class="p">):</span>
+        <span class="n">status_code</span> <span class="o">=</span> <span class="mi">404</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">connection</span> <span class="o">=</span> <span class="n">urllib2</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span><span class="n">urllib2</span><span class="o">.</span><span class="n">Request</span><span class="p">(</span><span class="n">url</span><span class="p">))</span>
+            <span class="n">status_code</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">getcode</span><span class="p">()</span>
+            <span class="n">content</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+            <span class="k">print</span><span class="p">(</span><span class="s1">'waiting for {}'</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">url</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
+            <span class="k">break</span>
+        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">30</span><span class="p">)</span>
+
+    <span class="n">driver</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">driver</span><span class="o">.</span><span class="n">current_url</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">driver</span><span class="o">.</span><span class="n">title</span><span class="p">)</span>
+    <span class="n">driver</span><span class="o">.</span><span class="n">quit</span><span class="p">()</span>
+    <span class="k">print</span><span class="p">(</span><span class="s1">'done'</span><span class="p">)</span>
+</pre></div>
 <h3 id="references">References</h3>
 <ul>
 <li><a href="http://phantomjs.org/release-1.8.html">http://phantomjs.org/release-1.8.html</a></li>
@@ -202,7 +276,28 @@
             <time pubdate="pubdate" datetime="2013-09-17T21:04:00-07:00">Sep 17, 2013</time>
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#programming-ref">programming</a> 
-            <h4>~231 words</h4>
+            <h4>~348 words</h4>
+            <h4>Tags</h4>
+            <ul class="list-of-tags tags-in-article"> 
+                <li><a href="/tags.html#CI-ref">CI
+                    <span>2</span>
+</a></li>
+                <li><a href="/tags.html#phantomjs-ref">phantomjs
+                    <span>1</span>
+</a></li>
+                <li><a href="/tags.html#programming-ref">programming
+                    <span>6</span>
+</a></li>
+                <li><a href="/tags.html#python-ref">python
+                    <span>9</span>
+</a></li>
+                <li><a href="/tags.html#selenium-ref">selenium
+                    <span>2</span>
+</a></li>
+                <li><a href="/tags.html#test-ref">test
+                    <span>1</span>
+</a></li>
+            </ul>
 
         </div>
         </section>
