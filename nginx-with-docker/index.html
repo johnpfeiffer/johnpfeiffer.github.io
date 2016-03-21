@@ -75,6 +75,7 @@
         <h4>Contents</h4>
         <div class="toc">
 <ul>
+<li><a href="#nginx-overview">nginx overview</a></li>
 <li><a href="#docker-pull-nginx">docker pull nginx</a></li>
 <li><a href="#docker-nginx-interactive-container">docker nginx interactive container</a></li>
 <li><a href="#running-nginx-manually-in-the-interactive-docker-container">running nginx manually in the interactive docker container</a><ul>
@@ -84,7 +85,25 @@
 </ul>
 </li>
 <li><a href="#nginxconf">nginx.conf</a></li>
-<li><a href="#build-your-own-nginx-dockerfile">Build your own nginx Dockerfile</a></li>
+<li><a href="#build-your-own-nginx-dockerfile">Build your own nginx Dockerfile</a><ul>
+<li><a href="#converting-an-existing-nginx-3rd-party-module-to-a-dynamic-module">Converting an existing nginx 3rd party module to a dynamic module</a></li>
+</ul>
+</li>
+<li><a href="#configuring-nginx">Configuring nginx</a><ul>
+<li><a href="#etcnginxnginxconf">/etc/nginx/nginx.conf</a></li>
+<li><a href="#nginx-with-ssl">nginx with ssl</a><ul>
+<li><a href="#etcnginxnginxconf_1">/etc/nginx/nginx.conf</a></li>
+<li><a href="#openssl-self-signed-certificates">openssl self signed certificates</a></li>
+<li><a href="#dockerized-nginx-with-ssl">dockerized nginx with ssl</a></li>
+</ul>
+</li>
+<li><a href="#nginx-with-ssl-and-http2">nginx with ssl and http/2</a><ul>
+<li><a href="#etcnginxnginxconf_2">/etc/nginx/nginx.conf</a></li>
+<li><a href="#verifying-http2">Verifying HTTP/2</a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </div>
         </nav>
@@ -92,24 +111,28 @@
     <div class="span8 article-content">
 
             
-<ul>
-<li><a href="http://nginx.org/en/">http://nginx.org/en/</a></li>
-<li>nginx is one of the most popular performant web servers in the world (and it's pretty handy as a reverse proxy or load balancer too!). 
-<a href="http://nginx.org/en/docs/http/load_balancing.html">http://nginx.org/en/docs/http/load_balancing.html</a></li>
-</ul>
+<h2 id="nginx-overview">nginx overview</h2>
+<p><a href="http://nginx.org/en/">http://nginx.org/en/</a> is one of the most popular performant web servers in the world (and it's pretty handy as a reverse proxy or load balancer too!). <a href="http://nginx.org/en/docs/http/load_balancing.html">http://nginx.org/en/docs/http/load_balancing.html</a></p>
 <p><a href="https://github.com/nginx/nginx">https://github.com/nginx/nginx</a> is written in c (very performant but often needs to be compiled , especially with any of the extra 3rd party modules <a href="https://www.nginx.com/resources/wiki/modules/">https://www.nginx.com/resources/wiki/modules/</a>).</p>
+<p>A recent update means "...optionally load separate shared object files at runtime as modules" 
+<a href="https://www.nginx.com/blog/dynamic-modules-nginx-1-9-11/">https://www.nginx.com/blog/dynamic-modules-nginx-1-9-11/</a></p>
 <h2 id="docker-pull-nginx">docker pull nginx</h2>
+<p>With Docker most of the time is spent in preparation, configuration, and testing.  The advantage is that less time is wasted on compiling, packaging, etc. (for all those still eeking out another 1% in efficiency via esoteric flags and bundling all sorts of custom modules - good luck!)</p>
 <p>One quick way to attempt to leverage nginx as a front end for your projects is using containers with Docker <a href="https://hub.docker.com/_/nginx/">https://hub.docker.com/_/nginx/</a></p>
 <div class="highlight"><pre><span></span>sudo su
-docker pull nginx:latest
+docker pull nginx:alpine
 docker images
 </pre></div>
+<blockquote>
+<p>This will grab the latest image based on the very small alpine linux <a href="https://en.wikipedia.org/wiki/Alpine_Linux">https://en.wikipedia.org/wiki/Alpine_Linux</a>, around 13 MB vs 191 MB for the traditional nginx:latest which is based on debian jessie <a href="https://en.wikipedia.org/wiki/Debian">https://en.wikipedia.org/wiki/Debian</a></p>
+</blockquote>
 <p><a href="https://hub.docker.com/r/library/nginx/tags/">https://hub.docker.com/r/library/nginx/tags/</a> contains what other versions of nginx are provided by the vendor as Docker Images, the default build/image has quite a few modules <a href="http://nginx.org/en/docs/">http://nginx.org/en/docs/</a></p>
 <blockquote>
 <p>all future references to docker commands will assume you are root or typing sudo first</p>
 </blockquote>
 <h2 id="docker-nginx-interactive-container">docker nginx interactive container</h2>
-<p><code>docker run --rm --publish 127.0.0.1:80:80 nginx</code></p>
+<div class="highlight"><pre><span></span>docker run --rm --publish 127.0.0.1:80:80 nginx
+</pre></div>
 <blockquote>
 <p>starts an ephemeral container that binds the container port 80 to the local Host port 80 (binding to 127.0.0.1 prevents any other access except from the Host) , note by not explicitly sharing port 443 it is not connected/available</p>
 </blockquote>
@@ -130,9 +153,10 @@ curl 127.0.0.1:80
 <p>You will notice the access logs are being output to the console (where the docker container is running).</p>
 <div class="highlight"><pre><span></span>192.168.1.100 - - [01/Jan/1970:01:00:59 +0000] "GET / HTTP/1.1" 200 612 "-" "curl/7.38.0" "-"
 </pre></div>
-<p>Control + C will terminate the container</p>
+<p><code>Control + C</code> will terminate the container</p>
 <h2 id="running-nginx-manually-in-the-interactive-docker-container">running nginx manually in the interactive docker container</h2>
-<p><code>docker run --rm -i -t --publish 127.0.0.1:80:80 nginx /bin/bash</code></p>
+<div class="highlight"><pre><span></span>docker run --rm -i -t --publish 127.0.0.1:80:80 nginx /bin/bash
+</pre></div>
 <blockquote>
 <p>Starting as root inside the container </p>
 </blockquote>
@@ -191,6 +215,186 @@ nginx: configuration file /etc/nginx/nginx.conf test is successful</p>
 <li>the first Dockerfile will contain build-essentials, gcc, make, etc. so that you can build the binary from source (with any 3rd party modules) <a href="http://nginx.org/en/docs/configure.html">http://nginx.org/en/docs/configure.html</a></li>
 <li>The second docker image would be your "production container" where you copy in the custom nginx binary, install the dependencies (i.e. openssl), and setup the default config.</li>
 </ol>
+<h3 id="converting-an-existing-nginx-3rd-party-module-to-a-dynamic-module">Converting an existing nginx 3rd party module to a dynamic module</h3>
+<p>Since NGINX 1.9.11 supports dynamic modules and attempts to maintain API compatibility then it is possible to sometimes convert a module into a dynamic module (i.e. build the shared library object)</p>
+<div class="highlight"><pre><span></span>./configure --add-dynamic-module=/opt/source/ngx_my_module/
+make -f objs/Makefile modules
+</pre></div>
+<blockquote>
+<p>Look for .so files in the objs directory after compilation or the modules subdirectory during installation</p>
+</blockquote>
+<p><a href="https://www.nginx.com/resources/wiki/extending/converting/">https://www.nginx.com/resources/wiki/extending/converting/</a></p>
+<h2 id="configuring-nginx">Configuring nginx</h2>
+<p>There are entire books about how to configure nginx so I will just jot down some basics for myself.</p>
+<h3 id="etcnginxnginxconf">/etc/nginx/nginx.conf</h3>
+<div class="highlight"><pre><span></span>user nginx;
+worker_processes 4;
+pid /run/nginx.pid;
+
+events {
+    worker_connections 1024;
+}
+
+http {
+    server {
+        location / {
+            root /var/www;
+        }
+    }
+}
+
+include /etc/nginx/conf.d/*.conf;
+</pre></div>
+<blockquote>
+<p>Run the service as the www-data user and define 4 worker processes
+define an HTTP server that listens on port 80 by default
+the root location will return the contents of /var/www
+a best practice of using multiple configuration files in the conf.d directory (as a really long complex configuration in a single is difficult to maintain)</p>
+</blockquote>
+<div class="highlight"><pre><span></span>sudo docker run -it --rm --publish 0.0.0.0:80:80 --volume /tmp/nginx.conf:/etc/nginx/nginx.conf:ro  nginx:alpine /bin/sh
+</pre></div>
+<blockquote>
+<p>debug the image interactively by overriding the default CMD with a shell (remember that Alpine is limited so <code>apk update</code> and <code>apk add SOMENAME</code></p>
+</blockquote>
+<div class="highlight"><pre><span></span>sudo docker run --rm --publish 0.0.0.0:80:80 --volume /tmp/nginx.conf:/etc/nginx/nginx.conf:ro  nginx:alpine /bin/sh -c "nginx -t -c /etc/nginx/nginx.conf"
+</pre></div>
+<blockquote>
+<p>alternative method to just test your configuration file</p>
+</blockquote>
+<div class="highlight"><pre><span></span>sudo docker run --rm --publish 0.0.0.0:80:80 --volume /tmp/nginx.conf:/etc/nginx/nginx.conf:ro --volume /tmp/www:/var/www:ro  nginx:alpine
+</pre></div>
+<blockquote>
+<p>assumes you have a config file and some index file defined</p>
+</blockquote>
+<div class="highlight"><pre><span></span>/var/www/index.html
+<span class="nt">&lt;html&gt;&lt;body&gt;</span>hi<span class="nt">&lt;/body&gt;&lt;/html&gt;</span>
+</pre></div>
+<p>That's it, now you have nginx serving static files! (curl localhost OR use a browser and visit localhost or http://hostfqdn)</p>
+<blockquote>
+<p>of course /tmp is an insecure location so please store production nginx configuration files and web content from a secure directory in the docker host filesystem</p>
+</blockquote>
+<ul>
+<li><a href="http://nginx.org/en/docs/beginners_guide.html">http://nginx.org/en/docs/beginners_guide.html</a></li>
+<li><a href="http://nginx.org/en/docs/ngx_core_module.html#worker_processes">http://nginx.org/en/docs/ngx_core_module.html#worker_processes</a></li>
+</ul>
+<h3 id="nginx-with-ssl">nginx with ssl</h3>
+<p>It is hard to imagine running a production (or even test or dev server that should mirror production) without SSL since all traffic could be intercepted or hijacked.  It takes a little more work but clearly it is an important step in running a service that others will use.</p>
+<h4 id="etcnginxnginxconf_1">/etc/nginx/nginx.conf</h4>
+<div class="highlight"><pre><span></span>user nobody;
+worker_processes 4;
+pid /run/nginx.pid;
+
+events {
+    worker_connections 1024;
+}
+
+http {
+    server {
+        listen 443 ssl;
+
+        ssl_certificate /etc/nginx/server.crt;
+        ssl_certificate_key /etc/nginx/server.key;
+
+        location / {
+            root /var/www;
+        }
+    }
+}
+</pre></div>
+<h4 id="openssl-self-signed-certificates">openssl self signed certificates</h4>
+<div class="highlight"><pre><span></span>openssl req -subj '/CN=example.com/O=My Company Name LTD./C=US' -new -newkey rsa:2048 -days 365 -nodes -x509 -keyout /tmp/server.key -out /tmp/server.crt
+
+mkdir -p /tmp/www
+
+echo "<span class="nt">&lt;html&gt;&lt;body&gt;</span>hi<span class="nt">&lt;/body&gt;&lt;/html&gt;</span>" &gt; /tmp/www/index.html
+</pre></div>
+<h4 id="dockerized-nginx-with-ssl">dockerized nginx with ssl</h4>
+<div class="highlight"><pre><span></span>sudo docker run --rm --publish 0.0.0.0:443:443 --volume /tmp/nginx.conf:/etc/nginx/nginx.conf:ro --volume /tmp/server.crt:/etc/nginx/server.crt --volume /tmp/server.key:/etc/nginx/server.key --volume /tmp/www:/var/www:ro  nginx:alpine
+
+curl --insecure https://localhost
+firefox https://localhost
+</pre></div>
+<ul>
+<li><a href="http://nginx.org/en/docs/http/configuring_https_servers.html">http://nginx.org/en/docs/http/configuring_https_servers.html</a></li>
+</ul>
+<h3 id="nginx-with-ssl-and-http2">nginx with ssl and http/2</h3>
+<p><a href="https://en.wikipedia.org/wiki/HTTP/2">https://en.wikipedia.org/wiki/HTTP/2</a> is a new and more capable and performant standard for the venerable HTTP protocol.  It has widespread vendor support so you can use most modern servers (e.g. nginx) and most modern browsers (e.g. chrome) and get the benefits immediately. (With of course all sorts of fallbacks for legacy clients)</p>
+<h4 id="etcnginxnginxconf_2">/etc/nginx/nginx.conf</h4>
+<div class="highlight"><pre><span></span><span class="nt">user</span> <span class="nt">nobody</span><span class="o">;</span>
+<span class="nt">worker_processes</span> <span class="nt">4</span><span class="o">;</span>
+<span class="nt">pid</span> <span class="o">/</span><span class="nt">run</span><span class="o">/</span><span class="nt">nginx</span><span class="nc">.pid</span><span class="o">;</span>
+
+<span class="nt">events</span> <span class="p">{</span>
+    <span class="n">worker_connections</span> <span class="m">1024</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="nt">http</span> <span class="p">{</span>
+    <span class="n">server</span> <span class="err">{</span>
+        <span class="n">listen</span> <span class="m">80</span><span class="p">;</span>
+        <span class="n">location</span> <span class="o">/</span> <span class="err">{</span>
+            <span class="n">return</span> <span class="m">301</span> <span class="n">https</span><span class="o">://</span><span class="err">$</span><span class="n">host</span><span class="err">$</span><span class="n">request_uri</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="err">}</span>
+    <span class="nt">server</span> <span class="p">{</span>
+        <span class="n">listen</span> <span class="m">443</span> <span class="n">ssl</span> <span class="n">http2</span> <span class="n">default_server</span><span class="p">;</span>
+
+        <span class="n">ssl_certificate</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">nginx</span><span class="o">/</span><span class="n">server</span><span class="o">.</span><span class="n">crt</span><span class="p">;</span>
+        <span class="n">ssl_certificate_key</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">nginx</span><span class="o">/</span><span class="n">server</span><span class="o">.</span><span class="n">key</span><span class="p">;</span>
+
+        <span class="n">location</span> <span class="o">/</span> <span class="err">{</span>
+            <span class="n">root</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">www</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="err">}</span>
+<span class="err">}</span>
+</pre></div>
+<blockquote>
+<p>Assuming the previous nginx with ssl steps of creating a certificate and content, be aware that <strong>browsers permanently CACHE the 301 redirect</strong> so use Private Browsing mode otherwise you will never see a different result for localhost =[</p>
+</blockquote>
+<div class="highlight"><pre><span></span>sudo docker run --rm --publish 0.0.0.0:80:80 --publish 0.0.0.0:443:443 --volume /tmp/nginx.conf:/etc/nginx/nginx.conf:ro --volume /tmp/server.crt:/etc/nginx/server.crt --volume /tmp/server.key:/etc/nginx/server.key --volume /tmp/www:/var/www:ro  nginx:alpine
+</pre></div>
+<h4 id="verifying-http2">Verifying HTTP/2</h4>
+<p><strong>curl</strong></p>
+<div class="highlight"><pre><span></span>curl localhost
+
+<span class="nt">&lt;html&gt;</span>
+<span class="nt">&lt;head&gt;&lt;title&gt;</span>301 Moved Permanently<span class="nt">&lt;/title&gt;&lt;/head&gt;</span>
+<span class="nt">&lt;body</span> <span class="na">bgcolor=</span><span class="s">"white"</span><span class="nt">&gt;</span>
+<span class="nt">&lt;center&gt;&lt;h1&gt;</span>301 Moved Permanently<span class="nt">&lt;/h1&gt;&lt;/center&gt;</span>
+<span class="nt">&lt;hr&gt;&lt;center&gt;</span>nginx/1.9.12<span class="nt">&lt;/center&gt;</span>
+<span class="nt">&lt;/body&gt;</span>
+<span class="nt">&lt;/html&gt;</span>
+
+
+curl --insecure --location localhost
+
+<span class="nt">&lt;html&gt;&lt;body&gt;</span>hi<span class="nt">&lt;/body&gt;&lt;/html&gt;</span>
+</pre></div>
+<p><strong>openssl s_client</strong></p>
+<div class="highlight"><pre><span></span>openssl s_client -connect localhost:443 -nextprotoneg ''
+
+CONNECTED(00000003)
+Protocols advertised by server: h2, http/1.1
+</pre></div>
+<p><strong>chrome browser</strong></p>
+<p>Browse directly to https://localhost/ with the chrome extension installed: <a href="https://chrome.google.com/webstore/detail/http2-and-spdy-indicator/mpbpobfflnpcgagjijhmgnchggcjblin/related?hl=en">https://chrome.google.com/webstore/detail/http2-and-spdy-indicator/mpbpobfflnpcgagjijhmgnchggcjblin/related?hl=en</a></p>
+<p>The blue lightning symbol on the far far right (next to the "hamburger") indicates HTTP/2 is working.</p>
+<blockquote>
+<p><strong>browsers permanently CACHE the 301 redirect</strong> so connecting to http://localhost will forever see a different result for localhost =[</p>
+</blockquote>
+<ol>
+<li>Browse directly to https://localhost/  (If using a self signed certificate accept any warnings about insecure SSL)</li>
+<li>Chrome/Chromium Settings -&gt; More tools -&gt; Developer tools (aka Control + Shift + I)</li>
+<li>Click on the Network section</li>
+<li>Control + Shift + F5 to reload (or click on the arrow circling up)</li>
+<li>Right click on the Name colum in the result so that you can add results for column heading, "Protocol"</li>
+<li>Control + Shift + F5 to reload (or click on the arrow circling up)</li>
+</ol>
+<p>Protocol: h2</p>
+<ul>
+<li><a href="https://www.nginx.com/blog/nginx-1-9-5/">https://www.nginx.com/blog/nginx-1-9-5/</a></li>
+<li><a href="https://blog.cloudflare.com/tools-for-debugging-testing-and-using-http-2/">https://blog.cloudflare.com/tools-for-debugging-testing-and-using-http-2/</a></li>
+<li><a href="http://tech.finn.no/2015/09/25/setup-nginx-with-http2-for-local-development/">http://tech.finn.no/2015/09/25/setup-nginx-with-http2-for-local-development/</a></li>
+</ul>
             <aside>
             <hr/>
             <nav>
@@ -210,7 +414,7 @@ nginx: configuration file /etc/nginx/nginx.conf test is successful</p>
             <time pubdate="pubdate" datetime="2015-06-13T08:00:00-07:00">Jun 13, 2015</time>
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#virtualization-ref">virtualization</a> 
-            <h4>~639 words</h4>
+            <h4>~1455 words</h4>
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article"> 
                 <li><a href="/tags.html#docker-ref">docker
