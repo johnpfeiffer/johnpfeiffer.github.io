@@ -76,7 +76,7 @@
         <div class="toc">
 <ul>
 <li><a href="#install-docker">Install Docker</a><ul>
-<li><a href="#mac-or-windows">Mac or Windows</a></li>
+<li><a href="#installing-on-mac-or-windows">Installing on Mac or Windows</a></li>
 </ul>
 </li>
 <li><a href="#quick-start-summary">Quick Start Summary</a></li>
@@ -86,7 +86,7 @@
 </ul>
 </li>
 <li><a href="#controlling-containers">Controlling Containers</a><ul>
-<li><a href="#starting-a-container-from-an-image">Starting a container (from an image)</a><ul>
+<li><a href="#starting-a-container-from-an-image">Starting a container from an image</a><ul>
 <li><a href="#create-a-container">Create a container</a></li>
 <li><a href="#start-resume-a-container">Start (resume) a container</a></li>
 <li><a href="#attaching-to-a-running-container">Attaching to a running container</a></li>
@@ -133,6 +133,8 @@
 </ul>
 </li>
 <li><a href="#private-docker-registry">Private Docker Registry</a><ul>
+<li><a href="#login-to-a-private-docker-registry">Login to a private docker registry</a></li>
+<li><a href="#private-registry-basics-via-the-browser">private registry basics via the browser</a></li>
 <li><a href="#searching-a-private-docker-registry">Searching a private docker registry</a></li>
 </ul>
 </li>
@@ -144,12 +146,13 @@
     </div>
     <div class="span8 article-content">
 
-            <p>Docker is a union file system based layer system leveraging linux lxc containers for ultra lightweight virtualization/compartmentalization.</p>
+            <p>Docker is a union file system based layer system (previously leveraging linux lxc containers) for ultra lightweight virtualization/compartmentalization.</p>
 <p>Much like AWS cloud servers (api based dynamic deployment that should be tolerant of node failure) and automated deployment/configuration infrastructure (chef or puppet such that cloud servers are created idempotent, remotely and automatically managed at scale), Docker requires a change of mindset.</p>
 <p>Docker encourages design of modular, deterministic and defined, single purpose components that are easy to compose into larger services.</p>
+<p>As any tool, using it for managing complexity and packaging can be very helpful but it does expose other potential issues (composability, orchestration, security).</p>
 
 <ul>
-<li><strong>Images</strong> are the initial templates, each image has a unique ID</li>
+<li><strong>Images</strong> are the initial templates, each image has a unique ID <a href="https://docs.docker.com/engine/userguide/storagedriver/imagesandcontainers/#content-addressable-storage">https://docs.docker.com/engine/userguide/storagedriver/imagesandcontainers/#content-addressable-storage</a></li>
 <li><strong>Containers</strong> are the running virtual machines, each container has a unique ID  <a href="http://docs.docker.com/terms/container">http://docs.docker.com/terms/container</a></li>
 <li><em>From now on it is assumed you use <strong>sudo</strong> before any docker command!</em></li>
 </ul>
@@ -166,7 +169,7 @@
 <p>OPTIONAL STEP IF YOU HAD AN OLD DOCKER INSTALLATION
 <code>apt-get purge lxc-docker*</code></p>
 </blockquote>
-<h3 id="mac-or-windows">Mac or Windows</h3>
+<h3 id="installing-on-mac-or-windows">Installing on Mac or Windows</h3>
 <p><a href="https://www.docker.com/docker-toolbox">https://www.docker.com/docker-toolbox</a></p>
 <hr/>
 <h2 id="quick-start-summary">Quick Start Summary</h2>
@@ -178,66 +181,83 @@ docker run -it --rm -e MYVAR=123 busybox env
 <blockquote>
 <p>"run" will pull the image from Docker Hub by default, e injects an environment variable, overrides the Docker Image CMD with "env"</p>
 </blockquote>
-<div class="highlight"><pre><span></span>docker run -it --rm --entrypoint=/bin/bash python
+<div class="highlight"><pre><span></span>docker run -it --rm --entrypoint=/bin/sh python:latest
 </pre></div>
-<blockquote>
-<p>the entrypoint parameter overrides the Docker Image (in case they do not provide a helpfully overridable CMD)
-<a href="http://docs.docker.com/engine/reference/builder/#entrypoint">http://docs.docker.com/engine/reference/builder/#entrypoint</a></p>
-</blockquote>
+<ul>
+<li>run the docker container (from the latest public python image) and start the shell prompt instead of the python interpreter</li>
+<li>the entrypoint parameter overrides the Docker Image (in case they do not provide a helpfully overridable CMD)</li>
+<li><a href="http://docs.docker.com/engine/reference/builder/#entrypoint">http://docs.docker.com/engine/reference/builder/#entrypoint</a></li>
+</ul>
 <hr/>
 <h2 id="download-a-docker-image">Download a docker image</h2>
 <p>Official Images are he easiest to experiment with: <a href="https://hub.docker.com/explore/">https://hub.docker.com/explore/</a></p>
 <div class="highlight"><pre><span></span>sudo docker pull ubuntu:trusty
 </pre></div>
 <blockquote>
-<p>(<strong>grabs the latest, i.e. 14.04.1</strong>) or <code>sudo docker pull ubuntu:12.04.3</code></p>
+<p>(<strong>grabs the latest, i.e. 14.04.1</strong>) or use a different tag to download a more specific version <code>sudo docker pull ubuntu:12.04.3</code></p>
 </blockquote>
-<p><strong>critical!</strong> use the colon and a specific version! downloading all of the ubuntu images by accident sucks =(</p>
+<p><strong>CRITICAL WARNING!</strong> use the colon and a specific version! downloading all of the ubuntu images by accident sucks =(</p>
 <div class="highlight"><pre><span></span>sudo docker pull redis:latest
 </pre></div>
 <blockquote>
-<p>choose the latest or a specific version to avoid downloading a lot of old crap</p>
+<p>choose the latest for just messing around but...
+ALWAYS use a specific version to avoid having your dependencies change unexpectedly</p>
 </blockquote>
-<p>Finding what versions of images (tags) you can pull requires using either the UI or the API:
-- <a href="https://hub.docker.com/r/library/redis/tags/">https://hub.docker.com/r/library/redis/tags/</a>
-- <code>docker pull redis:3</code>
-- <code>docker pull redis:2.8</code>
-- <code>docker pull redis:2.6</code></p>
+<p>Finding what versions of images (tags) you can pull requires using either the UI or the API:</p>
+<ul>
+<li><a href="https://hub.docker.com/r/library/redis/tags/">https://hub.docker.com/r/library/redis/tags/</a></li>
+<li><code>docker pull redis:3</code></li>
+<li><code>docker pull redis:2.8</code></li>
+<li><code>docker pull redis:2.6</code></li>
+</ul>
 <blockquote>
 <p>Many of the tags are synonyms/symlinks, so latest is the same as 3 is the same as 3.0</p>
 </blockquote>
 <h3 id="remove-a-docker-image">Remove a docker image</h3>
-<p><code>docker rmi trustyssh</code></p>
-<p><code>docker rmi -f $(docker images --all --quiet | grep -v 5506de2b643b)</code></p>
+<div class="highlight"><pre><span></span>docker rmi redis
+
+docker rmi -f $(docker images --all --quiet | grep -v 5506de2b643b)
+</pre></div>
 <blockquote>
 <p>remove ALL images except one by taking the output (quiet means only image ids), excluding a specific one, and then force removing the images (by id)</p>
 </blockquote>
-<p><code>docker images --quiet --filter "dangling=true" | xargs docker rmi</code></p>
+<div class="highlight"><pre><span></span>docker images --quiet --filter "dangling=true" | xargs docker rmi
+</pre></div>
 <blockquote>
 <p>remove all images that do not have a tag and are not a parent of a tagged image</p>
 </blockquote>
-<p><code>docker rmi -f $(docker images --all --quiet)</code></p>
+<div class="highlight"><pre><span></span>docker rmi -f $(docker images --all --quiet)
+</pre></div>
 <blockquote>
 <p>remove ALL images</p>
 </blockquote>
-<p><code>du -sh /var/lib/docker/aufs</code></p>
+<div class="highlight"><pre><span></span>du -sh /var/lib/docker/aufs
+</pre></div>
 <blockquote>
-<p>72K    /var/lib/docker/aufs/</p>
+<p>Summarize the amount of disk space taken by images and layers, e.g.: 72K    /var/lib/docker/aufs/</p>
 </blockquote>
 <p>Sometimes a docker image is <strong>still connected to a container</strong> (already exited or forgotten)</p>
 <div class="highlight"><pre><span></span>docker ps -a
 docker rm name_or_id
-docker rm a1b2  **it will smart match the first characters of the container ID**
+
+docker rm a1b2
 docker rmi image_id
 </pre></div>
+<blockquote>
+<p><strong>it will "smart match" the first characters of the container ID</strong> the same as git short sha</p>
+</blockquote>
 <h3 id="docker-info">Docker info</h3>
-<p><code>docker</code></p>
+<div class="highlight"><pre><span></span>docker
+</pre></div>
 <blockquote>
 <p>get a helpful list of all the commands</p>
 </blockquote>
-<p><code>docker --version</code></p>
-<p><code>docker info</code></p>
-<div class="highlight"><pre><span></span>Containers: 1
+<div class="highlight"><pre><span></span>docker --version
+
+docker info
+
+:::text
+Containers: 1
 Images: 23
 Storage Driver: aufs
  Root Dir: /var/lib/docker/aufs
@@ -246,31 +266,34 @@ Execution Driver: native-0.2
 Kernel Version: 3.13.0-35-generic
 Operating System: Ubuntu 14.04.1 LTS
 WARNING: No swap limit support
+
+du -sh /var/lib/docker/aufs
 </pre></div>
-<p><code>du -sh /var/lib/docker/aufs</code></p>
 <blockquote>
 <p>469M    /var/lib/docker/aufs/</p>
 </blockquote>
-<p><code>docker ps --all</code></p>
+<div class="highlight"><pre><span></span>docker ps --all
+</pre></div>
 <blockquote>
 <p>no containers are running yet</p>
 </blockquote>
-<p><code>docker ps --help</code></p>
-<p><code>docker images --tree</code></p>
-<blockquote>
-<p>view the hashes and sizes of all of the parent images</p>
-</blockquote>
+<div class="highlight"><pre><span></span>docker ps --help
+</pre></div>
+<p><strong>docker images --tree</strong> is a deprecated command to view the hashes and sizes of all of the parent images</p>
 <hr/>
 <h2 id="controlling-containers">Controlling Containers</h2>
-<h3 id="starting-a-container-from-an-image">Starting a container (from an image)</h3>
+<h3 id="starting-a-container-from-an-image">Starting a container from an image</h3>
 <h4 id="create-a-container">Create a container</h4>
 <p>First you must create a container from an image:</p>
-<p><code>docker run</code></p>
+<div class="highlight"><pre><span></span>docker run
+</pre></div>
 <blockquote>
 <p>get a helpful list of how to run a container</p>
 </blockquote>
-<p><code>docker run --rm -i -t ubuntu:14.04 /bin/bash</code></p>
-<div class="highlight"><pre><span></span>creates a container
+<div class="highlight"><pre><span></span>docker run --rm -i -t ubuntu:14.04 /bin/bash
+
+:::text
+creates a container
 --rm: automatically remove the container when it exits
 -i: keep stdin open even if not attached
 -t: allocate a tty, attach stdin and stdout
@@ -286,12 +309,15 @@ root@f5878ed6016e:/# uname -a
 root@f5878ed6016e:/# df -h
 </pre></div>
 <p>Control-p then Control-q to detach the tty without exiting the shell</p>
-<p><code>docker ps</code></p>
-<p><code>docker run --detach --name myapp -p 127.0.0.1:5000:5000 training/webapp python app.py</code></p>
+<div class="highlight"><pre><span></span>docker ps
+
+docker run --detach --name myapp -p 127.0.0.1:5000:5000 training/webapp python app.py
+</pre></div>
 <blockquote>
 <p>detached with port 5000 available only to the host and executing the command python with parameter app.py</p>
 </blockquote>
-<p><code>docker exec myapp ls -ahl</code></p>
+<div class="highlight"><pre><span></span>docker exec myapp ls -ahl
+</pre></div>
 <blockquote>
 <p>runs the ls command inside the container named "myapp"</p>
 </blockquote>
@@ -304,7 +330,8 @@ root@f5878ed6016e:/# df -h
 </ul>
 <h4 id="start-resume-a-container">Start (resume) a container</h4>
 <p>After a container has already been created (which starts it so ironically this is actually a "restart")</p>
-<p><code>docker start --interactive --attach container_id_or_name</code></p>
+<div class="highlight"><pre><span></span>docker start --interactive --attach container_id_or_name
+</pre></div>
 <h4 id="attaching-to-a-running-container">Attaching to a running container</h4>
 <div class="highlight"><pre><span></span>docker ps -a 
 CONTAINER ID ... STATUS        NAMES
@@ -330,26 +357,34 @@ docker ps
 docker stop myredis
 </pre></div>
 <p>Another efficiency is that a docker container will only <strong>run as long as it takes to execute</strong> a command (and any <strong>changes are not forgotten</strong>)</p>
-<p><code>docker run ubuntu:trusty uname -a</code></p>
+<div class="highlight"><pre><span></span>docker run ubuntu:trusty uname -a
+</pre></div>
 <blockquote>
 <p>this runs the container only as long as it takes to execute the command</p>
 </blockquote>
-<p><code>docker attach f5878ed6016e</code></p>
+<div class="highlight"><pre><span></span>docker attach f5878ed6016e
+</pre></div>
 <p><code>Control + C</code> <em>(now we have exited the container and it will clean itself up)</em></p>
-<p><code>docker ps -a</code></p>
-<div class="highlight"><pre><span></span>spun up another container but only long enough to run the command
-CONTAINER ID IMAGE        COMMAND      CREATED      STATUS    PORTS         NAMES
+<div class="highlight"><pre><span></span>docker ps -a
+</pre></div>
+<blockquote>
+<p>spun up another container but only long enough to run the command</p>
+</blockquote>
+<div class="highlight"><pre><span></span>CONTAINER ID IMAGE        COMMAND      CREATED      STATUS    PORTS         NAMES
 e4b436320442 ubuntu:14.04 -uname -a  3 minutes ago              elegant_engelbart
 </pre></div>
 <h3 id="copying-a-file-out-of-a-container">Copying a file out of a container</h3>
-<p><code>docker cp &lt;containerId&gt;:/file/path/within/container /host/path/target</code></p>
+<div class="highlight"><pre><span></span>docker cp &lt;containerId&gt;:/file/path/within/container /host/path/target
+</pre></div>
 <p><a href="https://docs.docker.com/reference/commandline/cli/#cp">https://docs.docker.com/reference/commandline/cli/#cp</a></p>
 <h3 id="deleting-aka-removing-a-container">Deleting aka removing a container</h3>
-<p><code>docker rm e4b436320442</code></p>
+<div class="highlight"><pre><span></span>docker rm e4b436320442
+</pre></div>
 <blockquote>
 <p>Alternatively: <code>docker rm --force elegant_engelbart</code></p>
 </blockquote>
-<p><code>docker rm -f $(docker ps -a -q)</code></p>
+<div class="highlight"><pre><span></span>docker rm -f $(docker ps -a -q)
+</pre></div>
 <blockquote>
 <p>Deletes forcibly all containers (be careful!)</p>
 </blockquote>
@@ -359,8 +394,12 @@ e4b436320442 ubuntu:14.04 -uname -a  3 minutes ago              elegant_engelbar
 <p>One advantage to Dockerfile is that each command creates a separate layer so if a specific layer fails all of the previous intermediate images can be re-used.</p>
 <p>Also the version style of imagename:tag allows for chaining of upgrades of child images</p>
 <p>Containers as fast, reliable, and deterministic prod/qa/dev environments can also be extended to be just an improved experimentation sandbox (for those used to SSH and using Linux as a common base OS).</p>
-<p><code>mkdir -p dockerfiles/trustyssh</code></p>
-<p><code>vi dockerfiles/trustyssh/Dockerfile</code></p>
+<div class="highlight"><pre><span></span>mkdir -p dockerfiles/trustyssh
+vi dockerfiles/trustyssh/Dockerfile
+</pre></div>
+<blockquote>
+<p>one Dockerfile per directory</p>
+</blockquote>
 <div class="highlight"><pre><span></span>FROM ubuntu:trusty
 MAINTAINER John Pfeiffer "https://bitbucket.org/johnpfeiffer"
 
@@ -373,8 +412,10 @@ RUN sed -ri 's/^PermitRootLogin\s+.*/PermitRootLogin yes/' /etc/ssh/sshd_config
 RUN sed -ri 's/UsePAM yes/#UsePAM yes/g' /etc/ssh/sshd_config
 EXPOSE 22
 CMD    ["/usr/sbin/sshd", "-D"]
+
+
+docker build --tag=newimagename --rm ./dockerfiles/ubuntu-trusty-ssh
 </pre></div>
-<p><code>docker build --tag=newimagename --rm ./dockerfiles/ubuntu-trusty-ssh</code></p>
 <blockquote>
 <p>Each RUN command creates an intermediate container, so make sure you use the -rm option</p>
 </blockquote>
@@ -396,8 +437,10 @@ Ign http://archive.ubuntu.com trusty InRelease
   echo "cd /opt/mydata/pelican-project/output" &gt;&gt; /root/build-and-run.sh &amp;&amp; \
   echo "python -m SimpleHTTPServer" &gt;&gt; /root/build-and-run.sh &amp;&amp; \
   chmod +x /root/build-and-run.sh
+
+
+docker history ubuntu-utopic-pelican:latest
 </pre></div>
-<p><code>docker history ubuntu-utopic-pelican:latest</code></p>
 <blockquote>
 <p>view the history of hashes (which can be run by themselves) and timestamps and sizes</p>
 </blockquote>
@@ -770,17 +813,20 @@ true
 <li><a href="https://github.com/docker/distribution">https://github.com/docker/distribution</a></li>
 </ul>
 <h3 id="private-docker-registry">Private Docker Registry</h3>
+<h4 id="login-to-a-private-docker-registry">Login to a private docker registry</h4>
 <div class="highlight"><pre><span></span>curl -i https://username:password@docker.example.com/v2/
 </pre></div>
 <blockquote>
 <p>attempt to login to a private registry</p>
 </blockquote>
-<p><strong> Using the docker client to login to a private registry</strong>
-    docker login docker.example.com:443
-    &gt; Username: user@example.com
-    &gt; WARNING: login credentials saved in /home/USER/.docker/config.json
-    &gt; Login Succeeded</p>
-<p><a href="https://docs.docker.com/registry/deploying/">https://docs.docker.com/registry/deploying/</a></p>
+<p><strong> Using the docker client to login to a private registry </strong></p>
+<div class="highlight"><pre><span></span>docker login docker.example.com:443
+&gt; Username: user@example.com
+&gt; WARNING: login credentials saved in /home/USER/.docker/config.json
+&gt; Login Succeeded
+</pre></div>
+<h4 id="private-registry-basics-via-the-browser">private registry basics via the browser</h4>
+<p>How to deploy your own docker registry: <a href="https://docs.docker.com/registry/deploying/">https://docs.docker.com/registry/deploying/</a></p>
 <div class="highlight"><pre><span></span>https://docker.example.com/_ping
 </pre></div>
 <blockquote>
@@ -862,7 +908,7 @@ https://docker.example.com/version
             <time pubdate="pubdate" datetime="2014-07-10T17:00:00-07:00">Jul 10, 2014</time>
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#virtualization-ref">virtualization</a> 
-            <h4>~3370 words</h4>
+            <h4>~3482 words</h4>
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article"> 
                 <li><a href="/tags.html#containers-ref">containers

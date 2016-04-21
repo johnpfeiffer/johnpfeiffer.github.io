@@ -2677,12 +2677,13 @@ rm -rf /home/ubuntu/.vagrant.d
 &lt;p&gt;RESOLUTION: ensure the correct user, i.e. ec2-user or ubuntu etc. is used in the override.ssh.username to match what the AMI expects&lt;/p&gt;
 &lt;p&gt;ERROR: sudo: no tty present and no askpass program specified&lt;/p&gt;
 &lt;p&gt;RESOLUTION: your VM (or more likely, AMI) does not have tty or allow sudo so try using the config.ssh.pty = true (and make sure no provisioning commands require sudo)&lt;/p&gt;
-&lt;/blockquote&gt;</summary></entry><entry><title>Docker Intro install run and port forward</title><link href="https://blog.john-pfeiffer.com/docker-intro-install-run-and-port-forward/" rel="alternate"></link><published>2014-07-10T17:00:00-07:00</published><author><name>john pfeiffer</name></author><id>tag:blog.john-pfeiffer.com,2014-07-10:docker-intro-install-run-and-port-forward/</id><summary type="html">&lt;p&gt;Docker is a union file system based layer system leveraging linux lxc containers for ultra lightweight virtualization/compartmentalization.&lt;/p&gt;
+&lt;/blockquote&gt;</summary></entry><entry><title>Docker Intro install run and port forward</title><link href="https://blog.john-pfeiffer.com/docker-intro-install-run-and-port-forward/" rel="alternate"></link><published>2014-07-10T17:00:00-07:00</published><author><name>john pfeiffer</name></author><id>tag:blog.john-pfeiffer.com,2014-07-10:docker-intro-install-run-and-port-forward/</id><summary type="html">&lt;p&gt;Docker is a union file system based layer system (previously leveraging linux lxc containers) for ultra lightweight virtualization/compartmentalization.&lt;/p&gt;
 &lt;p&gt;Much like AWS cloud servers (api based dynamic deployment that should be tolerant of node failure) and automated deployment/configuration infrastructure (chef or puppet such that cloud servers are created idempotent, remotely and automatically managed at scale), Docker requires a change of mindset.&lt;/p&gt;
 &lt;p&gt;Docker encourages design of modular, deterministic and defined, single purpose components that are easy to compose into larger services.&lt;/p&gt;
+&lt;p&gt;As any tool, using it for managing complexity and packaging can be very helpful but it does expose other potential issues (composability, orchestration, security).&lt;/p&gt;
 
 &lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;Images&lt;/strong&gt; are the initial templates, each image has a unique ID&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Images&lt;/strong&gt; are the initial templates, each image has a unique ID &lt;a href="https://docs.docker.com/engine/userguide/storagedriver/imagesandcontainers/#content-addressable-storage"&gt;https://docs.docker.com/engine/userguide/storagedriver/imagesandcontainers/#content-addressable-storage&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;Containers&lt;/strong&gt; are the running virtual machines, each container has a unique ID  &lt;a href="http://docs.docker.com/terms/container"&gt;http://docs.docker.com/terms/container&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;em&gt;From now on it is assumed you use &lt;strong&gt;sudo&lt;/strong&gt; before any docker command!&lt;/em&gt;&lt;/li&gt;
 &lt;/ul&gt;
@@ -2699,7 +2700,7 @@ rm -rf /home/ubuntu/.vagrant.d
 &lt;p&gt;OPTIONAL STEP IF YOU HAD AN OLD DOCKER INSTALLATION
 &lt;code&gt;apt-get purge lxc-docker*&lt;/code&gt;&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;h3 id="mac-or-windows"&gt;Mac or Windows&lt;/h3&gt;
+&lt;h3 id="installing-on-mac-or-windows"&gt;Installing on Mac or Windows&lt;/h3&gt;
 &lt;p&gt;&lt;a href="https://www.docker.com/docker-toolbox"&gt;https://www.docker.com/docker-toolbox&lt;/a&gt;&lt;/p&gt;
 &lt;hr/&gt;
 &lt;h2 id="quick-start-summary"&gt;Quick Start Summary&lt;/h2&gt;
@@ -2711,66 +2712,83 @@ docker run -it --rm -e MYVAR=123 busybox env
 &lt;blockquote&gt;
 &lt;p&gt;"run" will pull the image from Docker Hub by default, e injects an environment variable, overrides the Docker Image CMD with "env"&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;docker run -it --rm --entrypoint=/bin/bash python
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;docker run -it --rm --entrypoint=/bin/sh python:latest
 &lt;/pre&gt;&lt;/div&gt;
-&lt;blockquote&gt;
-&lt;p&gt;the entrypoint parameter overrides the Docker Image (in case they do not provide a helpfully overridable CMD)
-&lt;a href="http://docs.docker.com/engine/reference/builder/#entrypoint"&gt;http://docs.docker.com/engine/reference/builder/#entrypoint&lt;/a&gt;&lt;/p&gt;
-&lt;/blockquote&gt;
+&lt;ul&gt;
+&lt;li&gt;run the docker container (from the latest public python image) and start the shell prompt instead of the python interpreter&lt;/li&gt;
+&lt;li&gt;the entrypoint parameter overrides the Docker Image (in case they do not provide a helpfully overridable CMD)&lt;/li&gt;
+&lt;li&gt;&lt;a href="http://docs.docker.com/engine/reference/builder/#entrypoint"&gt;http://docs.docker.com/engine/reference/builder/#entrypoint&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
 &lt;hr/&gt;
 &lt;h2 id="download-a-docker-image"&gt;Download a docker image&lt;/h2&gt;
 &lt;p&gt;Official Images are he easiest to experiment with: &lt;a href="https://hub.docker.com/explore/"&gt;https://hub.docker.com/explore/&lt;/a&gt;&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;sudo docker pull ubuntu:trusty
 &lt;/pre&gt;&lt;/div&gt;
 &lt;blockquote&gt;
-&lt;p&gt;(&lt;strong&gt;grabs the latest, i.e. 14.04.1&lt;/strong&gt;) or &lt;code&gt;sudo docker pull ubuntu:12.04.3&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;(&lt;strong&gt;grabs the latest, i.e. 14.04.1&lt;/strong&gt;) or use a different tag to download a more specific version &lt;code&gt;sudo docker pull ubuntu:12.04.3&lt;/code&gt;&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;p&gt;&lt;strong&gt;critical!&lt;/strong&gt; use the colon and a specific version! downloading all of the ubuntu images by accident sucks =(&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;CRITICAL WARNING!&lt;/strong&gt; use the colon and a specific version! downloading all of the ubuntu images by accident sucks =(&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;sudo docker pull redis:latest
 &lt;/pre&gt;&lt;/div&gt;
 &lt;blockquote&gt;
-&lt;p&gt;choose the latest or a specific version to avoid downloading a lot of old crap&lt;/p&gt;
+&lt;p&gt;choose the latest for just messing around but...
+ALWAYS use a specific version to avoid having your dependencies change unexpectedly&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;p&gt;Finding what versions of images (tags) you can pull requires using either the UI or the API:
-- &lt;a href="https://hub.docker.com/r/library/redis/tags/"&gt;https://hub.docker.com/r/library/redis/tags/&lt;/a&gt;
-- &lt;code&gt;docker pull redis:3&lt;/code&gt;
-- &lt;code&gt;docker pull redis:2.8&lt;/code&gt;
-- &lt;code&gt;docker pull redis:2.6&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;Finding what versions of images (tags) you can pull requires using either the UI or the API:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://hub.docker.com/r/library/redis/tags/"&gt;https://hub.docker.com/r/library/redis/tags/&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;docker pull redis:3&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;docker pull redis:2.8&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;docker pull redis:2.6&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
 &lt;blockquote&gt;
 &lt;p&gt;Many of the tags are synonyms/symlinks, so latest is the same as 3 is the same as 3.0&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;h3 id="remove-a-docker-image"&gt;Remove a docker image&lt;/h3&gt;
-&lt;p&gt;&lt;code&gt;docker rmi trustyssh&lt;/code&gt;&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;docker rmi -f $(docker images --all --quiet | grep -v 5506de2b643b)&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;docker rmi redis
+
+docker rmi -f $(docker images --all --quiet | grep -v 5506de2b643b)
+&lt;/pre&gt;&lt;/div&gt;
 &lt;blockquote&gt;
 &lt;p&gt;remove ALL images except one by taking the output (quiet means only image ids), excluding a specific one, and then force removing the images (by id)&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;p&gt;&lt;code&gt;docker images --quiet --filter "dangling=true" | xargs docker rmi&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;docker images --quiet --filter "dangling=true" | xargs docker rmi
+&lt;/pre&gt;&lt;/div&gt;
 &lt;blockquote&gt;
 &lt;p&gt;remove all images that do not have a tag and are not a parent of a tagged image&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;p&gt;&lt;code&gt;docker rmi -f $(docker images --all --quiet)&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;docker rmi -f $(docker images --all --quiet)
+&lt;/pre&gt;&lt;/div&gt;
 &lt;blockquote&gt;
 &lt;p&gt;remove ALL images&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;p&gt;&lt;code&gt;du -sh /var/lib/docker/aufs&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;du -sh /var/lib/docker/aufs
+&lt;/pre&gt;&lt;/div&gt;
 &lt;blockquote&gt;
-&lt;p&gt;72K    /var/lib/docker/aufs/&lt;/p&gt;
+&lt;p&gt;Summarize the amount of disk space taken by images and layers, e.g.: 72K    /var/lib/docker/aufs/&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;p&gt;Sometimes a docker image is &lt;strong&gt;still connected to a container&lt;/strong&gt; (already exited or forgotten)&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;docker ps -a
 docker rm name_or_id
-docker rm a1b2  **it will smart match the first characters of the container ID**
+
+docker rm a1b2
 docker rmi image_id
 &lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;it will "smart match" the first characters of the container ID&lt;/strong&gt; the same as git short sha&lt;/p&gt;
+&lt;/blockquote&gt;
 &lt;h3 id="docker-info"&gt;Docker info&lt;/h3&gt;
-&lt;p&gt;&lt;code&gt;docker&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;docker
+&lt;/pre&gt;&lt;/div&gt;
 &lt;blockquote&gt;
 &lt;p&gt;get a helpful list of all the commands&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;p&gt;&lt;code&gt;docker --version&lt;/code&gt;&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;docker info&lt;/code&gt;&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;Containers: 1
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;docker --version
+
+docker info
+
+:::text
+Containers: 1
 Images: 23
 Storage Driver: aufs
  Root Dir: /var/lib/docker/aufs
@@ -2779,31 +2797,34 @@ Execution Driver: native-0.2
 Kernel Version: 3.13.0-35-generic
 Operating System: Ubuntu 14.04.1 LTS
 WARNING: No swap limit support
+
+du -sh /var/lib/docker/aufs
 &lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;&lt;code&gt;du -sh /var/lib/docker/aufs&lt;/code&gt;&lt;/p&gt;
 &lt;blockquote&gt;
 &lt;p&gt;469M    /var/lib/docker/aufs/&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;p&gt;&lt;code&gt;docker ps --all&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;docker ps --all
+&lt;/pre&gt;&lt;/div&gt;
 &lt;blockquote&gt;
 &lt;p&gt;no containers are running yet&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;p&gt;&lt;code&gt;docker ps --help&lt;/code&gt;&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;docker images --tree&lt;/code&gt;&lt;/p&gt;
-&lt;blockquote&gt;
-&lt;p&gt;view the hashes and sizes of all of the parent images&lt;/p&gt;
-&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;docker ps --help
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;&lt;strong&gt;docker images --tree&lt;/strong&gt; is a deprecated command to view the hashes and sizes of all of the parent images&lt;/p&gt;
 &lt;hr/&gt;
 &lt;h2 id="controlling-containers"&gt;Controlling Containers&lt;/h2&gt;
-&lt;h3 id="starting-a-container-from-an-image"&gt;Starting a container (from an image)&lt;/h3&gt;
+&lt;h3 id="starting-a-container-from-an-image"&gt;Starting a container from an image&lt;/h3&gt;
 &lt;h4 id="create-a-container"&gt;Create a container&lt;/h4&gt;
 &lt;p&gt;First you must create a container from an image:&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;docker run&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;docker run
+&lt;/pre&gt;&lt;/div&gt;
 &lt;blockquote&gt;
 &lt;p&gt;get a helpful list of how to run a container&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;p&gt;&lt;code&gt;docker run --rm -i -t ubuntu:14.04 /bin/bash&lt;/code&gt;&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;creates a container
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;docker run --rm -i -t ubuntu:14.04 /bin/bash
+
+:::text
+creates a container
 --rm: automatically remove the container when it exits
 -i: keep stdin open even if not attached
 -t: allocate a tty, attach stdin and stdout
@@ -2819,12 +2840,15 @@ root@f5878ed6016e:/# uname -a
 root@f5878ed6016e:/# df -h
 &lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;Control-p then Control-q to detach the tty without exiting the shell&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;docker ps&lt;/code&gt;&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;docker run --detach --name myapp -p 127.0.0.1:5000:5000 training/webapp python app.py&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;docker ps
+
+docker run --detach --name myapp -p 127.0.0.1:5000:5000 training/webapp python app.py
+&lt;/pre&gt;&lt;/div&gt;
 &lt;blockquote&gt;
 &lt;p&gt;detached with port 5000 available only to the host and executing the command python with parameter app.py&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;p&gt;&lt;code&gt;docker exec myapp ls -ahl&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;docker exec myapp ls -ahl
+&lt;/pre&gt;&lt;/div&gt;
 &lt;blockquote&gt;
 &lt;p&gt;runs the ls command inside the container named "myapp"&lt;/p&gt;
 &lt;/blockquote&gt;
@@ -2837,7 +2861,8 @@ root@f5878ed6016e:/# df -h
 &lt;/ul&gt;
 &lt;h4 id="start-resume-a-container"&gt;Start (resume) a container&lt;/h4&gt;
 &lt;p&gt;After a container has already been created (which starts it so ironically this is actually a "restart")&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;docker start --interactive --attach container_id_or_name&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;docker start --interactive --attach container_id_or_name
+&lt;/pre&gt;&lt;/div&gt;
 &lt;h4 id="attaching-to-a-running-container"&gt;Attaching to a running container&lt;/h4&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;docker ps -a 
 CONTAINER ID ... STATUS        NAMES
@@ -2863,26 +2888,34 @@ docker ps
 docker stop myredis
 &lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;Another efficiency is that a docker container will only &lt;strong&gt;run as long as it takes to execute&lt;/strong&gt; a command (and any &lt;strong&gt;changes are not forgotten&lt;/strong&gt;)&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;docker run ubuntu:trusty uname -a&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;docker run ubuntu:trusty uname -a
+&lt;/pre&gt;&lt;/div&gt;
 &lt;blockquote&gt;
 &lt;p&gt;this runs the container only as long as it takes to execute the command&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;p&gt;&lt;code&gt;docker attach f5878ed6016e&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;docker attach f5878ed6016e
+&lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;&lt;code&gt;Control + C&lt;/code&gt; &lt;em&gt;(now we have exited the container and it will clean itself up)&lt;/em&gt;&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;docker ps -a&lt;/code&gt;&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;spun up another container but only long enough to run the command
-CONTAINER ID IMAGE        COMMAND      CREATED      STATUS    PORTS         NAMES
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;docker ps -a
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;spun up another container but only long enough to run the command&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;CONTAINER ID IMAGE        COMMAND      CREATED      STATUS    PORTS         NAMES
 e4b436320442 ubuntu:14.04 -uname -a  3 minutes ago              elegant_engelbart
 &lt;/pre&gt;&lt;/div&gt;
 &lt;h3 id="copying-a-file-out-of-a-container"&gt;Copying a file out of a container&lt;/h3&gt;
-&lt;p&gt;&lt;code&gt;docker cp &amp;lt;containerId&amp;gt;:/file/path/within/container /host/path/target&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;docker cp &amp;lt;containerId&amp;gt;:/file/path/within/container /host/path/target
+&lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;&lt;a href="https://docs.docker.com/reference/commandline/cli/#cp"&gt;https://docs.docker.com/reference/commandline/cli/#cp&lt;/a&gt;&lt;/p&gt;
 &lt;h3 id="deleting-aka-removing-a-container"&gt;Deleting aka removing a container&lt;/h3&gt;
-&lt;p&gt;&lt;code&gt;docker rm e4b436320442&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;docker rm e4b436320442
+&lt;/pre&gt;&lt;/div&gt;
 &lt;blockquote&gt;
 &lt;p&gt;Alternatively: &lt;code&gt;docker rm --force elegant_engelbart&lt;/code&gt;&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;p&gt;&lt;code&gt;docker rm -f $(docker ps -a -q)&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;docker rm -f $(docker ps -a -q)
+&lt;/pre&gt;&lt;/div&gt;
 &lt;blockquote&gt;
 &lt;p&gt;Deletes forcibly all containers (be careful!)&lt;/p&gt;
 &lt;/blockquote&gt;
@@ -2892,8 +2925,12 @@ e4b436320442 ubuntu:14.04 -uname -a  3 minutes ago              elegant_engelbar
 &lt;p&gt;One advantage to Dockerfile is that each command creates a separate layer so if a specific layer fails all of the previous intermediate images can be re-used.&lt;/p&gt;
 &lt;p&gt;Also the version style of imagename:tag allows for chaining of upgrades of child images&lt;/p&gt;
 &lt;p&gt;Containers as fast, reliable, and deterministic prod/qa/dev environments can also be extended to be just an improved experimentation sandbox (for those used to SSH and using Linux as a common base OS).&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;mkdir -p dockerfiles/trustyssh&lt;/code&gt;&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;vi dockerfiles/trustyssh/Dockerfile&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;mkdir -p dockerfiles/trustyssh
+vi dockerfiles/trustyssh/Dockerfile
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;one Dockerfile per directory&lt;/p&gt;
+&lt;/blockquote&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;FROM ubuntu:trusty
 MAINTAINER John Pfeiffer "https://bitbucket.org/johnpfeiffer"
 
@@ -2906,8 +2943,10 @@ RUN sed -ri 's/^PermitRootLogin\s+.*/PermitRootLogin yes/' /etc/ssh/sshd_config
 RUN sed -ri 's/UsePAM yes/#UsePAM yes/g' /etc/ssh/sshd_config
 EXPOSE 22
 CMD    ["/usr/sbin/sshd", "-D"]
+
+
+docker build --tag=newimagename --rm ./dockerfiles/ubuntu-trusty-ssh
 &lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;&lt;code&gt;docker build --tag=newimagename --rm ./dockerfiles/ubuntu-trusty-ssh&lt;/code&gt;&lt;/p&gt;
 &lt;blockquote&gt;
 &lt;p&gt;Each RUN command creates an intermediate container, so make sure you use the -rm option&lt;/p&gt;
 &lt;/blockquote&gt;
@@ -2929,8 +2968,10 @@ Ign http://archive.ubuntu.com trusty InRelease
   echo "cd /opt/mydata/pelican-project/output" &amp;gt;&amp;gt; /root/build-and-run.sh &amp;amp;&amp;amp; \
   echo "python -m SimpleHTTPServer" &amp;gt;&amp;gt; /root/build-and-run.sh &amp;amp;&amp;amp; \
   chmod +x /root/build-and-run.sh
+
+
+docker history ubuntu-utopic-pelican:latest
 &lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;&lt;code&gt;docker history ubuntu-utopic-pelican:latest&lt;/code&gt;&lt;/p&gt;
 &lt;blockquote&gt;
 &lt;p&gt;view the history of hashes (which can be run by themselves) and timestamps and sizes&lt;/p&gt;
 &lt;/blockquote&gt;
@@ -3303,17 +3344,20 @@ true
 &lt;li&gt;&lt;a href="https://github.com/docker/distribution"&gt;https://github.com/docker/distribution&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 &lt;h3 id="private-docker-registry"&gt;Private Docker Registry&lt;/h3&gt;
+&lt;h4 id="login-to-a-private-docker-registry"&gt;Login to a private docker registry&lt;/h4&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;curl -i https://username:password@docker.example.com/v2/
 &lt;/pre&gt;&lt;/div&gt;
 &lt;blockquote&gt;
 &lt;p&gt;attempt to login to a private registry&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;p&gt;&lt;strong&gt; Using the docker client to login to a private registry&lt;/strong&gt;
-    docker login docker.example.com:443
-    &amp;gt; Username: user@example.com
-    &amp;gt; WARNING: login credentials saved in /home/USER/.docker/config.json
-    &amp;gt; Login Succeeded&lt;/p&gt;
-&lt;p&gt;&lt;a href="https://docs.docker.com/registry/deploying/"&gt;https://docs.docker.com/registry/deploying/&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt; Using the docker client to login to a private registry &lt;/strong&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;docker login docker.example.com:443
+&amp;gt; Username: user@example.com
+&amp;gt; WARNING: login credentials saved in /home/USER/.docker/config.json
+&amp;gt; Login Succeeded
+&lt;/pre&gt;&lt;/div&gt;
+&lt;h4 id="private-registry-basics-via-the-browser"&gt;private registry basics via the browser&lt;/h4&gt;
+&lt;p&gt;How to deploy your own docker registry: &lt;a href="https://docs.docker.com/registry/deploying/"&gt;https://docs.docker.com/registry/deploying/&lt;/a&gt;&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;https://docker.example.com/_ping
 &lt;/pre&gt;&lt;/div&gt;
 &lt;blockquote&gt;
