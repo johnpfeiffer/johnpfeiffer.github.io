@@ -75,7 +75,11 @@
         <h4>Contents</h4>
         <div class="toc">
 <ul>
-<li><a href="#find">find</a></li>
+<li><a href="#find">find</a><ul>
+<li><a href="#find-and-exec-to-modify-a-set-of-files">find and exec to modify a set of files</a></li>
+<li><a href="#find-files-by-modified-time">find files by modified time</a></li>
+</ul>
+</li>
 <li><a href="#grep">grep</a><ul>
 <li><a href="#grep-parameters-and-examples-explained">grep parameters and examples explained</a><ul>
 <li><a href="#useful-parameters-for-grep">Useful parameters for grep</a></li>
@@ -127,44 +131,96 @@
 <p>copy archive which preserves timestamp (but will also overwrite the target - in this example probably zero bytes)</p>
 </blockquote>
 <h2 id="find">find</h2>
+<div class="highlight"><pre><span></span>find -name "MyCProgram.c"
+</pre></div>
+<blockquote>
+<p>case sensitive, starts in the current directory </p>
+</blockquote>
+<div class="highlight"><pre><span></span>find startdirectory -name 'partoffileordirname'
+</pre></div>
+<blockquote>
+<p>e.g. find /home/joe -name '.tx'
+which would return txt's as well as txv?'s</p>
+</blockquote>
+<div class="highlight"><pre><span></span>find / -iname "MyCProgram.c"
+</pre></div>
+<blockquote>
+<p>case insensitive, starts from root </p>
+</blockquote>
+<div class="highlight"><pre><span></span>find -maxdepth 1 -not -iname "MyCProgram.c"
+</pre></div>
+<blockquote>
+<p>case insensitive, starts from current directory, will search subdirectory(ies) and list all items //that do NOT match the query</p>
+</blockquote>
+<div class="highlight"><pre><span></span>find . -type f -exec ls -s {} \; | sort -n -r | head -5
+</pre></div>
+<blockquote>
+<p>the largest 5 files</p>
+</blockquote>
+<div class="highlight"><pre><span></span>find . -not -empty -type f -exec ls -s {} \; | sort -n | head -5
+</pre></div>
+<blockquote>
+<p>the smallest not empty 5 files </p>
+</blockquote>
+<div class="highlight"><pre><span></span>find . -type d
+</pre></div>
+<blockquote>
+<p>all directories in the current directory</p>
+</blockquote>
+<div class="highlight"><pre><span></span>find . -type f | wc
+</pre></div>
+<blockquote>
+<p>count the number of files (can recurse subdirectories)</p>
+</blockquote>
 <div class="highlight"><pre><span></span>find . -type f -iname '*.pyc' -exec mv {} /tmp/PYC/ \;
 </pre></div>
 <blockquote>
 <p>move all .pyc files (start from this directory and indefinitely recurse down)</p>
 </blockquote>
-<div class="highlight"><pre><span></span>find . -name "api" -exec cat {} \;
+<div class="highlight"><pre><span></span>find . -name "*api*" -exec cat {} \;
 </pre></div>
 <blockquote>
 <p>find everything containing api and cat it</p>
 </blockquote>
-<div class="highlight"><pre><span></span>find DIR1 DIR2 -maxdepth 1 -type f -exec basename {} \; | sort | uniq -d
+<h3 id="find-and-exec-to-modify-a-set-of-files">find and exec to modify a set of files</h3>
+<div class="highlight"><pre><span></span>find . -type f -name "*api*" -exec cat {} \; | grep objectid
 </pre></div>
 <blockquote>
-<p>lists all file names in directories, sorted, show only repeats</p>
-</blockquote>
-<div class="highlight"><pre><span></span>for f in ; do mv "<span class="nv">$f</span>" "$(echo <span class="nv">$f</span> | sed 's/-/\ /g')"; done find . -type f -iname ".py" | rename s/.py/.py.txt/ .py {} \;
-
-# only works on the current directory (no recursion?) find . -type f -iname '.py' | while read filename; do mv -v "<span class="cp">${</span><span class="n">filename</span><span class="cp">}</span>" "echo "<span class="cp">${</span><span class="n">filename</span><span class="cp">}</span>" | sed -e 's/\.py$/\.py.txt/'"; done
-</pre></div>
-<blockquote>
-<p>a lot of extra to get recursive rename</p>
-</blockquote>
-<div class="highlight"><pre><span></span>find . -type f -iname ".java" -exec grep -Hn "fileSizeInMB &lt; 100" {} \; find . -type f -iname ".java" -exec grep -Hni "case-insensitive-text" {} \;
-
-find . -type f | wc
-</pre></div>
-<blockquote>
-<p>count the number of files (can recurse subdirectories)</p>
+<p>find all files that contain an api and output the contents but filter to only display lines that contain "objectid"</p>
 </blockquote>
 <div class="highlight"><pre><span></span>find . -maxdepth 1 -type d -exec du -sh {} \;
 </pre></div>
 <blockquote>
 <p>only one level down if it's a directory show the disk usage summary (human sizes)</p>
 </blockquote>
-<div class="highlight"><pre><span></span><span class="nt">find</span> <span class="o">.</span> <span class="nt">-type</span> <span class="nt">f</span> <span class="nt">-name</span> <span class="s2">"api"</span> <span class="nt">-exec</span> <span class="nt">cat</span> <span class="p">{}</span> <span class="err">\</span><span class="o">;</span> <span class="o">|</span> <span class="nt">grep</span> <span class="nt">oid</span> 
+<div class="highlight"><pre><span></span>find DIR1 DIR2 -maxdepth 1 -type f -exec basename {} \; | sort | uniq -d
+</pre></div>
+<blockquote>
+<p>lists all file names in directories, sorted, show only repeats (aka duplicates)</p>
+</blockquote>
+<div class="highlight"><pre><span></span>find . -name '*.txt' -exec sh -c 'mv "$0" "<span class="cp">${</span><span class="mi">0</span><span class="o">%.</span><span class="n">txt</span><span class="cp">}</span>.java"' {} \;
+</pre></div>
+<blockquote>
+<p>find all .txt files and renames them to .java</p>
+</blockquote>
+<div class="highlight"><pre><span></span><span class="x">for f in ; do mv "</span><span class="p">$</span><span class="nv">f</span><span class="x">" "</span><span class="p">$(</span><span class="err">echo</span> <span class="p">$</span><span class="nv">f</span> <span class="err">|</span> <span class="err">sed</span> <span class="s1">'s/-/\ /g'</span><span class="p">)</span><span class="x">"; done find . -type f -iname ".py" | rename s/.py/.py.txt/ .py </span><span class="err">{</span><span class="x">} \;</span>
+</pre></div>
+<blockquote>
+<p>only works on the current directory (no recursion?)</p>
+</blockquote>
+<div class="highlight"><pre><span></span>find . -type f -iname '.py' | while read filename; do mv -v "<span class="cp">${</span><span class="n">filename</span><span class="cp">}</span>" "echo "<span class="cp">${</span><span class="n">filename</span><span class="cp">}</span>" | sed -e 's/\.py$/\.py.txt/'"; done
+</pre></div>
+<blockquote>
+<p>a lot of extra work to achieve a recursive rename from .py to .py.txt</p>
+</blockquote>
+<div class="highlight"><pre><span></span><span class="nt">find</span> <span class="o">.</span> <span class="nt">-type</span> <span class="nt">f</span> <span class="nt">-iname</span> <span class="s2">".java"</span> <span class="nt">-exec</span> <span class="nt">grep</span> <span class="nt">-Hn</span> <span class="s2">"fileSizeInMB &lt; 100"</span> <span class="p">{}</span> <span class="err">\</span><span class="o">;</span>
+
+<span class="nt">find</span> <span class="o">.</span> <span class="nt">-type</span> <span class="nt">f</span> <span class="nt">-iname</span> <span class="s2">".java"</span> <span class="nt">-exec</span> <span class="nt">grep</span> <span class="nt">-Hni</span> <span class="s2">"case-insensitive-text"</span> <span class="p">{}</span> <span class="err">\</span><span class="o">;</span>
+
+
 <span class="nt">find</span> <span class="o">.</span> <span class="nt">-type</span> <span class="nt">d</span> <span class="nt">-name</span> <span class="nt">directoryname</span><span class="o">*</span> <span class="nt">-exec</span> <span class="nt">ls</span> <span class="nt">-ahl</span> <span class="p">{}</span> <span class="err">\</span><span class="o">;</span>
 
-<span class="nt">sudo</span> <span class="nt">find</span> <span class="o">/</span><span class="nt">var</span><span class="o">/</span><span class="nt">www</span><span class="o">/</span><span class="nt">java</span> <span class="nt">-type</span> <span class="nt">f</span> <span class="nt">-iname</span> <span class="s2">".txt"</span> <span class="nt">-exec</span> <span class="nt">chown</span> <span class="nt">root</span><span class="nd">:www-data</span> <span class="p">{}</span> <span class="err">\</span><span class="o">;</span> 
+<span class="nt">sudo</span> <span class="nt">find</span> <span class="o">/</span><span class="nt">var</span><span class="o">/</span><span class="nt">www</span><span class="o">/</span><span class="nt">java</span> <span class="nt">-type</span> <span class="nt">f</span> <span class="nt">-iname</span> <span class="s2">".txt"</span> <span class="nt">-exec</span> <span class="nt">chown</span> <span class="nt">root</span><span class="nd">:www-data</span> <span class="p">{}</span> <span class="err">\</span><span class="o">;</span>
 <span class="nt">sudo</span> <span class="nt">find</span> <span class="o">/</span><span class="nt">var</span><span class="o">/</span><span class="nt">www</span><span class="o">/</span><span class="nt">java</span> <span class="nt">-type</span> <span class="nt">f</span> <span class="nt">-iname</span> <span class="s2">".txt"</span> <span class="nt">-exec</span> <span class="nt">chmod</span> <span class="nt">640</span> <span class="p">{}</span> <span class="err">\</span><span class="o">;</span> 
 <span class="nt">sudo</span> <span class="nt">find</span> <span class="o">/</span><span class="nt">var</span><span class="o">/</span><span class="nt">www</span><span class="o">/</span><span class="nt">d</span> <span class="nt">-type</span> <span class="nt">d</span> <span class="nt">-iname</span> <span class="s2">"web*"</span> <span class="nt">-exec</span> <span class="nt">chmod</span> <span class="nt">750</span> <span class="p">{}</span> <span class="err">\</span><span class="o">;</span>
 
@@ -177,25 +233,11 @@ find . -type f | wc
 
 find ~ -empty //check the home directory for empty files (size 0)
 
-find -name "MyCProgram.c"
+
+find / -mindepth 3 -maxdepth 5 -iname passwd
 </pre></div>
 <blockquote>
-<p>case sensitive, starts in the current directory </p>
-</blockquote>
-<div class="highlight"><pre><span></span>find / -iname "MyCProgram.c"
-</pre></div>
-<blockquote>
-<p>case insensitive, starts from root </p>
-</blockquote>
-<div class="highlight"><pre><span></span>find -maxdepth 1 -not -iname "MyCProgram.c"
-</pre></div>
-<blockquote>
-<p>case insensitive, starts from current directory, will search subdirectory(ies) and list all items //that do NOT match the query </p>
-</blockquote>
-<div class="highlight"><pre><span></span>find / -mindepth 3 -maxdepth 5 -iname passwd
-</pre></div>
-<blockquote>
-<p>case insensitive, starts from root, will search subdirectory levels between 2 and 4 </p>
+<p>case insensitive, starts from root, will search subdirectory levels between 2 and 4</p>
 </blockquote>
 <div class="highlight"><pre><span></span>find / 3 -maxdepth 5 -iname passwd &amp;
 </pre></div>
@@ -217,40 +259,25 @@ bash session ... once the job's done pressing enter will return you to the promp
 <div class="highlight"><pre><span></span>find / -perm 700 -type f
 </pre></div>
 <blockquote>
-<p>find all files from root below, with permissions set exactly to 700, only regular files (-type f) </p>
+<p>find all files from root below, with permissions set exactly to 700, only regular files (-type f)</p>
 </blockquote>
-<div class="highlight"><pre><span></span>// while the above just lists the files the below runs an ls -l to see everything about them... find / -perm 700 -type f -exec ls -l {} \;
-
-RUN "man find" IF YOU NEED TO FIND SOMETHING SPECIFIC ABOUT FILES AND PERMISSIONS
-
-// the largest 5 files... find . -type f -exec ls -s {} \; | sort -n -r | head -5
-
-// the smallest not empty 5 files find . -not -empty -type f -exec ls -s {} \; | sort -n | head -5
-
-// all directories find . -type d
-
-// any files newer than the one given find -newer file-i-made-yesterday
-
-// search the home directory size equal to 100 MB, use +100MB for greater than and -100MB for less than find ~ -size 100M
-</pre></div>
-<p><a href="http://www.thegeekstuff.com/2009/03/15-practical-linux-find-command-examples/">http://www.thegeekstuff.com/2009/03/15-practical-linux-find-command-examples/</a></p>
-<p>There is an implied AND operator with find but for OR or NOT...</p>
-<div class="highlight"><pre><span></span>find / -type f -mtime -7 | xargs tar -rf weekly_incremental.tar
-
-find / -name core -delete
+<div class="highlight"><pre><span></span>find / -perm 700 -type f -exec ls -l {} \;
 </pre></div>
 <blockquote>
-<p>same if using Gnu find</p>
+<p>while the above just lists the files the below runs an ls -l to see everything about them...</p>
 </blockquote>
+<p>RUN "man find" IF YOU NEED TO FIND SOMETHING SPECIFIC ABOUT FILES AND PERMISSIONS</p>
+<blockquote>
+<p>any files newer than the one given find -newer file-i-made-yesterday</p>
+</blockquote>
+<p>search the home directory size equal to 100 MB, use +100MB for greater than and -100MB for less than find ~ -size 100M</p>
+<p><a href="http://www.thegeekstuff.com/2009/03/15-practical-linux-find-command-examples/">http://www.thegeekstuff.com/2009/03/15-practical-linux-find-command-examples/</a></p>
+<h3 id="find-files-by-modified-time">find files by modified time</h3>
+<p>There is an implied AND operator with find but for OR or NOT...</p>
 <div class="highlight"><pre><span></span>find / -mmin -10
 </pre></div>
 <blockquote>
 <p>something modified 10 minutes ago</p>
-</blockquote>
-<div class="highlight"><pre><span></span>find / -user username
-</pre></div>
-<blockquote>
-<p>find all of the files a user owns..</p>
 </blockquote>
 <div class="highlight"><pre><span></span>find . -mtime 1
 </pre></div>
@@ -262,9 +289,25 @@ find / -name core -delete
 <blockquote>
 <p>find files modified more than 48 hours ago</p>
 </blockquote>
-<p>find . -mmin +5 -mmin -10 </p>
+<div class="highlight"><pre><span></span>find . -mmin +5 -mmin -10
+</pre></div>
 <blockquote>
 <p>find files modifed between # 6 and 9 minutes ago</p>
+</blockquote>
+<div class="highlight"><pre><span></span>find / -type f -mtime -7 | xargs tar -rf weekly_incremental.tar
+</pre></div>
+<blockquote>
+<p>find files modified in the last 7 days and create a .tar file from them</p>
+</blockquote>
+<div class="highlight"><pre><span></span>find / -name core -delete
+</pre></div>
+<blockquote>
+<p>same if using Gnu find</p>
+</blockquote>
+<div class="highlight"><pre><span></span>find / -user username
+</pre></div>
+<blockquote>
+<p>find all of the files a user owns..</p>
 </blockquote>
 <div class="highlight"><pre><span></span>-mtime +60 means you are looking for a file modified 60 days ago. -mtime -60 means less than 60 days. -mtime 60 If you skip + or - it means exactly 60 days.
 
@@ -272,12 +315,6 @@ find / -mtime 9 -mtime -10
 </pre></div>
 <blockquote>
 <p>24 hours</p>
-</blockquote>
-<div class="highlight"><pre><span></span>find startdirectory -name 'partoffileordirname'
-</pre></div>
-<blockquote>
-<p>e.g. find /home/joe -name '.tx'
-which would return txt's as well as txv?'s</p>
 </blockquote>
 <h2 id="grep">grep</h2>
 <p>grep is an amazing tool for getting efficiently finding text, <a href="http://www.gnu.org/software/grep/manual/grep.html">http://www.gnu.org/software/grep/manual/grep.html</a></p>
@@ -530,7 +567,7 @@ cat /dev/random &gt; /dev/null
             <time pubdate="pubdate" datetime="2011-11-12T02:37:00-08:00">Nov 12, 2011</time>
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#linux-ref">linux</a> 
-            <h4>~1723 words</h4>
+            <h4>~1802 words</h4>
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article"> 
                 <li><a href="/tags.html#awk-ref">awk
