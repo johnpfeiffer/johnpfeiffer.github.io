@@ -82,11 +82,16 @@
 <li><a href="#optmydatahaproxycfg">/opt/mydata/haproxy.cfg</a></li>
 <li><a href="#start-haproxysh">start haproxy.sh</a></li>
 <li><a href="#haproxy-stats">HAProxy Stats</a><ul>
-<li><a href="#optmydatahaproxycfg_1">### /opt/mydata/haproxy.cfg</a></li>
+<li><a href="#optmydatahaproxycfg_1">/opt/mydata/haproxy.cfg</a></li>
 </ul>
 </li>
 <li><a href="#nginx-forward-proxy">nginx forward proxy</a><ul>
 <li><a href="#nginxconf">nginx.conf</a></li>
+</ul>
+</li>
+<li><a href="#haproxy-as-a-limited-outbound-proxy">HAProxy as a limited outbound proxy</a><ul>
+<li><a href="#optmydatahaproxycfg_2">/opt/mydata/haproxy.cfg</a></li>
+<li><a href="#starting-the-haproxy-docker-container">starting the haproxy docker container</a></li>
 </ul>
 </li>
 <li><a href="#more-info">more info</a></li>
@@ -111,7 +116,8 @@ BackendA  BackendB
 <p>There are new problems that go along with the benefits of any new technology, see the complicated networking/port coordination</p>
 </blockquote>
 <h3 id="prerequisites">Prerequisites</h3>
-<p>sudo docker pull haproxy:1.5</p>
+<div class="highlight"><pre><span></span>sudo docker pull haproxy:1.5
+</pre></div>
 <h4 id="some-backend-web-servers">Some backend web servers</h4>
 <div class="highlight"><pre><span></span>mkdir -p /tmp/BackendA
 echo "foo" &gt; /tmp/BackendA/foo.txt
@@ -161,38 +167,41 @@ sudo docker run -p 8443:8443 --add-host<span class="o">=</span>docker:<span clas
 <li>tty</li>
 <li>readonly mapping of the /opt/mydata/haproxy.cfg file on the host to /usr/local/etc/haproxy/haproxy.cfg</li>
 <li>name the container myhaproxy (each container name must be unique)</li>
-<li>the container is using the haproxy version 1.5 Docker Image</li>
+<li>
+<p>the container is using the haproxy version 1.5 Docker Image</p>
+<p>./start-haproxy.sh</p>
+<p>curl localhost:8443</p>
+<p>:::html
+&lt;!DOCTYPE html PUBLIC "-//W3C//DTD HTML 3.2 Final//EN"&gt;<html>
+<title>Directory listing for /</title>
+<body>
+<h2>Directory listing for /</h2>
+<hr>
+<ul>
+<li><a href="bar.txt">bar.txt</a>
+</li></ul>
+<hr>
+</hr></hr></body>
+</html></p>
+<p>curl localhost:8443</p>
+<p>:::html
+&lt;!DOCTYPE html PUBLIC "-//W3C//DTD HTML 3.2 Final//EN"&gt;<html>
+<title>Directory listing for /</title>
+<body>
+<h2>Directory listing for /</h2>
+<hr>
+<ul>
+<li><a href="foo.txt">foo.txt</a>
+</li></ul>
+<hr>
+</hr></hr></body>
+</html></p>
+</li>
 </ul>
-<p><code>./start-haproxy.sh</code></p>
-<p><code>curl localhost:8443</code></p>
-<div class="highlight"><pre><span></span><span class="cp">&lt;!DOCTYPE html PUBLIC "-//W3C//DTD HTML 3.2 Final//EN"&gt;</span><span class="p">&lt;</span><span class="nt">html</span><span class="p">&gt;</span>
-<span class="p">&lt;</span><span class="nt">title</span><span class="p">&gt;</span>Directory listing for /<span class="p">&lt;/</span><span class="nt">title</span><span class="p">&gt;</span>
-<span class="p">&lt;</span><span class="nt">body</span><span class="p">&gt;</span>
-<span class="p">&lt;</span><span class="nt">h2</span><span class="p">&gt;</span>Directory listing for /<span class="p">&lt;/</span><span class="nt">h2</span><span class="p">&gt;</span>
-<span class="p">&lt;</span><span class="nt">hr</span><span class="p">&gt;</span>
-<span class="p">&lt;</span><span class="nt">ul</span><span class="p">&gt;</span>
-<span class="p">&lt;</span><span class="nt">li</span><span class="p">&gt;&lt;</span><span class="nt">a</span> <span class="na">href</span><span class="o">=</span><span class="s">"bar.txt"</span><span class="p">&gt;</span>bar.txt<span class="p">&lt;/</span><span class="nt">a</span><span class="p">&gt;</span>
-<span class="p">&lt;/</span><span class="nt">ul</span><span class="p">&gt;</span>
-<span class="p">&lt;</span><span class="nt">hr</span><span class="p">&gt;</span>
-<span class="p">&lt;/</span><span class="nt">body</span><span class="p">&gt;</span>
-<span class="p">&lt;/</span><span class="nt">html</span><span class="p">&gt;</span>
-</pre></div>
-<p><code>curl localhost:8443</code></p>
-<div class="highlight"><pre><span></span><span class="cp">&lt;!DOCTYPE html PUBLIC "-//W3C//DTD HTML 3.2 Final//EN"&gt;</span><span class="p">&lt;</span><span class="nt">html</span><span class="p">&gt;</span>
-<span class="p">&lt;</span><span class="nt">title</span><span class="p">&gt;</span>Directory listing for /<span class="p">&lt;/</span><span class="nt">title</span><span class="p">&gt;</span>
-<span class="p">&lt;</span><span class="nt">body</span><span class="p">&gt;</span>
-<span class="p">&lt;</span><span class="nt">h2</span><span class="p">&gt;</span>Directory listing for /<span class="p">&lt;/</span><span class="nt">h2</span><span class="p">&gt;</span>
-<span class="p">&lt;</span><span class="nt">hr</span><span class="p">&gt;</span>
-<span class="p">&lt;</span><span class="nt">ul</span><span class="p">&gt;</span>
-<span class="p">&lt;</span><span class="nt">li</span><span class="p">&gt;&lt;</span><span class="nt">a</span> <span class="na">href</span><span class="o">=</span><span class="s">"foo.txt"</span><span class="p">&gt;</span>foo.txt<span class="p">&lt;/</span><span class="nt">a</span><span class="p">&gt;</span>
-<span class="p">&lt;/</span><span class="nt">ul</span><span class="p">&gt;</span>
-<span class="p">&lt;</span><span class="nt">hr</span><span class="p">&gt;</span>
-<span class="p">&lt;/</span><span class="nt">body</span><span class="p">&gt;</span>
-<span class="p">&lt;/</span><span class="nt">html</span><span class="p">&gt;</span>
-</pre></div>
 <h3 id="haproxy-stats">HAProxy Stats</h3>
-<p><code>sudo docker rm -f myhaproxy</code></p>
-<h4 id="optmydatahaproxycfg_1">### /opt/mydata/haproxy.cfg</h4>
+<div class="highlight"><pre><span></span>sudo docker rm -f myhaproxy
+</pre></div>
+<h4 id="optmydatahaproxycfg_1">/opt/mydata/haproxy.cfg</h4>
 <div class="highlight"><pre><span></span>global
     debug
 
@@ -215,10 +224,14 @@ listen stats :1936
     stats uri /
     stats realm HAProxyStatistics
     stats auth user:password
+
+
+./start-haproxy.sh
 </pre></div>
-<p><code>./start-haproxy.sh</code></p>
 <h3 id="nginx-forward-proxy">nginx forward proxy</h3>
 <p>client -&gt; forward proxy (nginx) -&gt; all other sites</p>
+<div class="highlight"><pre><span></span>docker pull nginx:alpine
+</pre></div>
 <h4 id="nginxconf">nginx.conf</h4>
 <div class="highlight"><pre><span></span><span class="nt">worker_processes</span>  <span class="nt">1</span><span class="o">;</span>
 
@@ -249,17 +262,71 @@ listen stats :1936
         <span class="p">}</span>
     <span class="err">}</span>
 <span class="err">}</span>
+
+
+<span class="nt">docker</span> <span class="nt">run</span> <span class="nt">-it</span> <span class="nt">--rm</span> <span class="nt">-p</span> <span class="nt">8080</span><span class="nd">:8080</span> <span class="nt">-v</span> <span class="o">/</span><span class="nt">tmp</span><span class="o">/</span><span class="nt">nginx</span><span class="nc">.conf</span><span class="o">:/</span><span class="nt">etc</span><span class="o">/</span><span class="nt">nginx</span><span class="o">/</span><span class="nt">nginx</span><span class="nc">.conf</span><span class="nd">:ro</span> <span class="nt">--name</span> <span class="nt">mynginx</span> <span class="nt">nginx</span><span class="nd">:alpine</span>
 </pre></div>
-<p><code>docker run -it -p 8080:8080 --name mynginx -v /opt/mydata/nginx.conf:/etc/nginx/nginx.conf:ro nginx</code></p>
 <blockquote>
-<p>configure your browser to use 127.0.0.1:8080 as it's proxy and watch the log statements fly by when you test http://example.com</p>
-<p>NOTE: this does not support HTTPS <a href="http://forum.nginx.org/read.php?2,15124,15256#msg-15256">http://forum.nginx.org/read.php?2,15124,15256#msg-15256</a></p>
+<p>bind to port 8080 on the host and run an ephemeral container based on the alpine linux with nginx image that uses the /tmp/nginx config</p>
+</blockquote>
+<div class="highlight"><pre><span></span>http_proxy=127.0.0.1:8080 curl example.com
+</pre></div>
+<blockquote>
+<p>set the linux operating system proxy environment just for this one curl command and see the dockerized nginx forward proxy log show: 172.17.0.1 - - [06/May/2016:22:37:22 +0000] "GET HTTP://example.org/ HTTP/1.1" 200 1270 "-" "curl/7.35.0"</p>
+</blockquote>
+<p>Configure your browser (firefox) to use 127.0.0.1:8080 as the proxy for all protocols and watch the log statements fly by when you test http://example.com</p>
+<blockquote>
+<p>NOTE: this does not support HTTPS <a href="http://forum.nginx.org/read.php?2,15124,15256#msg-15256">http://forum.nginx.org/read.php?2,15124,15256#msg-15256</a> </p>
+<p>Attempting https://example.com will return "CONNECT example.com:443 HTTP/1.1" 400 173 "-" "-"  and the browser will show "Server not found"</p>
+</blockquote>
+<p><strong> Warning </strong> do not use <em>http_proxy=http://127.0.0.1:8080</em> as that will fail =[</p>
+<p>You can permanently set the environment proxy with export http_proxy=127.0.0.1:8080</p>
+<h3 id="haproxy-as-a-limited-outbound-proxy">HAProxy as a limited outbound proxy</h3>
+<div class="highlight"><pre><span></span>sudo docker pull haproxy:1.6-alpine
+</pre></div>
+<p>Now that you have the 10MB haproxy image...</p>
+<blockquote>
+<p>Note there is a limitation to haproxy in that it always assumes a syslog facility (no direct logging to stdout or files)</p>
+</blockquote>
+<ul>
+<li><a href="https://github.com/dockerfile/haproxy/issues/3">https://github.com/dockerfile/haproxy/issues/3</a></li>
+<li><a href="http://www.gnu.org/software/libc/manual/html_node/Overview-of-Syslog.html">http://www.gnu.org/software/libc/manual/html_node/Overview-of-Syslog.html</a></li>
+</ul>
+<h4 id="optmydatahaproxycfg_2">/opt/mydata/haproxy.cfg</h4>
+<p>This is the more readable config style which separates the frontend from backend and this is haproxy 1.6</p>
+<blockquote>
+<p>The logging probably does not work =(</p>
+</blockquote>
+<div class="highlight"><pre><span></span>global
+        debug
+        log /dev/log local0 info
+
+defaults
+        mode http
+        timeout connect 5s
+        timeout client 5s
+        timeout server 5s
+
+frontend myfrontend
+        bind *:8443
+        default_backend mybackend
+
+backend mybackend
+        server s1 example.com:443 ssl verify none
+</pre></div>
+<h4 id="starting-the-haproxy-docker-container">starting the haproxy docker container</h4>
+<div class="highlight"><pre><span></span>docker run -p 8443:8443 --rm -it -v /home/admin/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro -v /dev/log:/dev/log --name myhaproxy haproxy:1.6-alpine
+</pre></div>
+<blockquote>
+<p>Control + C to quit</p>
 </blockquote>
 <h3 id="more-info">more info</h3>
 <ul>
 <li><a href="https://registry.hub.docker.com/_/haproxy/">https://registry.hub.docker.com/_/haproxy/</a></li>
 <li><a href="https://cbonte.github.io/haproxy-dconv/configuration-1.5.html">https://cbonte.github.io/haproxy-dconv/configuration-1.5.html</a></li>
-<li><a href="http://docs.docker.com/reference/commandline/cli/#adding-entries-to-a-container-hosts-file">http://docs.docker.com/reference/commandline/cli/#adding-entries-to-a-container-hosts-file</a> </li>
+<li><a href="https://cbonte.github.io/haproxy-dconv/configuration-1.6.html">https://cbonte.github.io/haproxy-dconv/configuration-1.6.html</a></li>
+<li><a href="http://www.haproxy.org/git?p=haproxy-1.6.git;a=tree;f=examples">http://www.haproxy.org/git?p=haproxy-1.6.git;a=tree;f=examples</a></li>
+<li><a href="http://docs.docker.com/reference/commandline/cli/#adding-entries-to-a-container-hosts-file">http://docs.docker.com/reference/commandline/cli/#adding-entries-to-a-container-hosts-file</a></li>
 </ul>
             <aside>
             <hr/>
@@ -280,7 +347,7 @@ listen stats :1936
             <time pubdate="pubdate" datetime="2015-05-21T20:00:00-07:00">May 21, 2015</time>
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#virtualization-ref">virtualization</a> 
-            <h4>~548 words</h4>
+            <h4>~756 words</h4>
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article"> 
                 <li><a href="/tags.html#docker-ref">docker
