@@ -82,14 +82,19 @@
 </li>
 <li><a href="#installing-and-the-environment">Installing and the Environment</a></li>
 <li><a href="#download-and-install-an-ide">Download and install an IDE</a></li>
-<li><a href="#install-or-build-or-run">Install or Build or Run</a></li>
-<li><a href="#debugging-with-delve">Debugging with Delve</a></li>
+<li><a href="#install-or-build-or-run">Install or Build or Run</a><ul>
+<li><a href="#manual-cli-compilation-and-installation-and-execution">Manual CLI compilation and installation and execution</a></li>
+</ul>
+</li>
+<li><a href="#debugging-with-delve">Debugging with Delve</a><ul>
+<li><a href="#delve-debugging-and-running-your-application-with-f5-is-automatic-once-installed-correctly">Delve Debugging and running your application with F5 is automatic once installed correctly</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li><a href="#coding-and-compiling">Coding and Compiling</a><ul>
 <li><a href="#comments-types-strings-slices-for-loops">Comments Types Strings Slices For Loops</a><ul>
 <li><a href="#introgo">intro.go</a></li>
-<li><a href="#_1"></a></li>
 </ul>
 </li>
 <li><a href="#arrays-are-contiguous-memory-and-4-bytes-is-normal">arrays are contiguous memory and 4 bytes is normal</a></li>
@@ -105,6 +110,7 @@
 <li><a href="#binary-search">Binary Search</a></li>
 <li><a href="#efficient-string-append-and-replacement">Efficient String append and replacement</a></li>
 <li><a href="#testing-with-go">Testing with Go</a></li>
+<li><a href="#a-simple-web-server">A simple web server</a></li>
 <li><a href="#more-info">More Info</a></li>
 </ul>
 </li>
@@ -173,100 +179,116 @@
 </blockquote>
 <p>Unfortunately it is not quite simple to execute the code directly in VSCode <a href="https://github.com/Microsoft/vscode-go/issues/21">https://github.com/Microsoft/vscode-go/issues/21</a></p>
 <h3 id="install-or-build-or-run">Install or Build or Run</h3>
+<p>Because Go is a static language there is a compilation (and linking) phase where the source code is transformed into a binary.</p>
+<h4 id="manual-cli-compilation-and-installation-and-execution">Manual CLI compilation and installation and execution</h4>
 <p>The traditional command line method is:</p>
-<div class="highlight"><pre><span></span><span class="x">cd </span><span class="p">$</span><span class="nv">GOPATH</span><span class="x">/path-to-your-project</span>
+<div class="highlight"><pre><span></span><span class="x">cd </span><span class="p">$</span><span class="nv">GOPATH</span><span class="x">/path-to-your-project/PROJECTNAME</span>
 <span class="x">go install</span>
-<span class="p">$</span><span class="nv">GOPATH</span><span class="x">/bin</span>
+<span class="p">$</span><span class="nv">GOPATH</span><span class="x">/bin/PROJECTNAME</span>
 </pre></div>
 <ul>
 <li><a href="https://golang.org/doc/code.html#Command">https://golang.org/doc/code.html#Command</a></li>
 <li><a href="http://dave.cheney.net/2014/01/21/using-go-test-build-and-install">http://dave.cheney.net/2014/01/21/using-go-test-build-and-install</a></li>
 </ul>
+<p>A concrete example:</p>
+<ol>
+<li>Compile with: <code>cd /opt/goprojects/src/github.com/johnpfeiffer/intro/ ; go install</code></li>
+<li>Execute with: <code>/opt/goprojects/bin/intro</code></li>
+</ol>
 <h3 id="debugging-with-delve">Debugging with Delve</h3>
 <div class="highlight"><pre><span></span>go get github.com/derekparker/delve/cmd/dlv
 cd /opt/goprojects/src
 go install /derekparker/delve/cmd/dlv
-ls -ahl /opt/goprojects/bin/
+</pre></div>
+<p>The first time I attempted to do it manually:</p>
+<div class="highlight"><pre><span></span>ls -ahl /opt/goprojects/bin/
 cd /opt/goprojects/src/github.com/johnpfeiffer/YOURPROJECT
 /opt/goprojects/bin/dlv  debug --headless --listen=:2345 --log
 </pre></div>
 <p>Now in the VSCode IDE open the project folder and create your helloworld.go source file and Control + S to save (and auto gofmt) and then press <strong>F5</strong> and it will connect to the Delve Debugger and display the output</p>
+<h4 id="delve-debugging-and-running-your-application-with-f5-is-automatic-once-installed-correctly">Delve Debugging and running your application with F5 is automatic once installed correctly</h4>
+<ol>
+<li>The first time you run "Continue" with F5 on a file it will prompt you to setup your launch.json (and the IDE will open the default template for you)</li>
+<li>Use the IDE to go back to your source .go file and press F5 again, this time since the .vscode subdirectory was created and the default delve launch.json file was created, it will just start in debug mode with the Debug Console output at the bottom</li>
+</ol>
 <h2 id="coding-and-compiling">Coding and Compiling</h2>
 <p>For VSCode IDE keyboard shortcuts: <a href="https://code.visualstudio.com/docs/customization/keybindings">https://code.visualstudio.com/docs/customization/keybindings</a></p>
 <h3 id="comments-types-strings-slices-for-loops">Comments Types Strings Slices For Loops</h3>
 <p>The main package it where the execution begins (aka "main" in c <a href="https://en.wikipedia.org/wiki/Entry_point">https://en.wikipedia.org/wiki/Entry_point</a>)</p>
 <p>Comments are either single line with double slashes or block comments <a href="https://golang.org/doc/effective_go.html#commentary">https://golang.org/doc/effective_go.html#commentary</a></p>
 <h4 id="introgo">intro.go</h4>
-<div class="highlight"><pre><span></span><span class="n">package</span> <span class="n">main</span>
+<div class="highlight"><pre><span></span><span class="kn">package</span> <span class="nx">main</span>
 
-<span class="kn">import</span> <span class="s2">"fmt"</span>
+<span class="kn">import</span> <span class="s">"fmt"</span>
 
-<span class="o">//</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">golang</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">doc</span><span class="o">/</span><span class="n">effective_go</span><span class="o">.</span><span class="n">html</span><span class="c1">#mixed-caps</span>
-<span class="o">//</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">golang</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">ref</span><span class="o">/</span><span class="n">spec</span><span class="c1">#Constants</span>
-<span class="n">const</span> <span class="n">alphabetMax</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">26</span>
+<span class="c1">// https://golang.org/doc/effective_go.html#mixed-caps</span>
+<span class="c1">// https://golang.org/ref/spec#Constants</span>
+<span class="kd">const</span> <span class="nx">alphabetMax</span> <span class="kt">int</span> <span class="p">=</span> <span class="mi">26</span>
 
-<span class="n">func</span> <span class="n">main</span><span class="p">()</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
 
-    <span class="o">//</span> <span class="k">while</span>
-    <span class="n">j</span> <span class="p">:</span><span class="o">=</span> <span class="mi">0</span>
-    <span class="k">for</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="mi">4</span> <span class="p">{</span>
-        <span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">j</span><span class="p">)</span>
-        <span class="n">j</span> <span class="o">+=</span> <span class="mi">2</span>
+    <span class="c1">// while</span>
+    <span class="nx">j</span> <span class="o">:=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="nx">j</span> <span class="p">&lt;</span> <span class="mi">4</span> <span class="p">{</span>
+        <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">j</span><span class="p">)</span>
+        <span class="nx">j</span> <span class="o">+=</span> <span class="mi">2</span>
     <span class="p">}</span>
-    <span class="k">for</span> <span class="n">i</span> <span class="p">:</span><span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">;</span> <span class="n">i</span> <span class="o">+=</span> <span class="mi">2</span> <span class="p">{</span>
-        <span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+    <span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="p">&lt;</span> <span class="mi">4</span><span class="p">;</span> <span class="nx">i</span> <span class="o">+=</span> <span class="mi">2</span> <span class="p">{</span>
+        <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">i</span><span class="p">)</span>
     <span class="p">}</span>
     <span class="k">for</span> <span class="p">{</span>
-        <span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="s2">"break or return exits an infinite loop"</span><span class="p">)</span>
+        <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">"break or return exits an infinite loop"</span><span class="p">)</span>
         <span class="k">break</span>
     <span class="p">}</span>
 
-    <span class="o">//</span> <span class="n">arrays</span> <span class="n">are</span> <span class="n">contiguous</span> <span class="n">memory</span><span class="p">,</span> <span class="n">fixed</span> <span class="n">size</span> <span class="ow">and</span> <span class="nb">type</span>
-    <span class="o">//</span> <span class="n">prefer</span> <span class="n">Slices</span> <span class="n">which</span> <span class="n">are</span> <span class="n">Reference</span> <span class="n">Objects</span> <span class="n">that</span> <span class="n">wrap</span> <span class="n">the</span> <span class="n">underlying</span> <span class="n">arrays</span>
-    <span class="o">//</span> <span class="n">initialized</span> <span class="n">to</span> <span class="n">capacity</span> <span class="mi">5</span> <span class="k">with</span> <span class="n">values</span> <span class="n">inserted</span><span class="p">,</span> <span class="n">alternatively</span> <span class="n">just</span> <span class="n">initialized</span> <span class="n">to</span> <span class="n">empty</span> <span class="k">with</span><span class="p">:</span> <span class="n">var</span> <span class="n">a</span> <span class="p">[</span><span class="mi">5</span><span class="p">]</span><span class="n">string</span>
-    <span class="n">a</span> <span class="p">:</span><span class="o">=</span> <span class="p">[</span><span class="mi">5</span><span class="p">]</span><span class="n">string</span><span class="p">{</span><span class="s2">"a"</span><span class="p">,</span> <span class="s2">"b"</span><span class="p">,</span> <span class="s2">"c"</span><span class="p">,</span> <span class="s2">"d"</span><span class="p">,</span> <span class="s2">"e"</span><span class="p">}</span>
+    <span class="c1">// arrays are contiguous memory, fixed size and type</span>
+    <span class="c1">// initialized to capacity 5 with values inserted, alternatively just initialized to empty with: var a [5]string</span>
+    <span class="nx">a</span> <span class="o">:=</span> <span class="p">[</span><span class="mi">5</span><span class="p">]</span><span class="kt">string</span><span class="p">{</span><span class="s">"a"</span><span class="p">,</span> <span class="s">"b"</span><span class="p">,</span> <span class="s">"c"</span><span class="p">,</span> <span class="s">"d"</span><span class="p">,</span> <span class="s">"e"</span><span class="p">}</span>
 
-    <span class="k">for</span> <span class="n">i</span> <span class="p">:</span><span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">a</span><span class="p">);</span> <span class="n">i</span><span class="o">++</span> <span class="p">{</span>
-        <span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+    <span class="c1">// prefer Slices which are Reference Objects that wrap the underlying arrays</span>
+    <span class="c1">// https://blog.golang.org/go-slices-usage-and-internals</span>
+    <span class="nx">s</span> <span class="o">:=</span> <span class="p">[]</span><span class="kt">string</span>
+
+    <span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="p">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="nx">a</span><span class="p">);</span> <span class="nx">i</span><span class="o">++</span> <span class="p">{</span>
+        <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">i</span><span class="p">,</span> <span class="nx">a</span><span class="p">[</span><span class="nx">i</span><span class="p">])</span>
     <span class="p">}</span>
 
-    <span class="o">//</span> <span class="n">cleaner</span> <span class="n">way</span> <span class="n">of</span> <span class="n">iterating</span> <span class="n">over</span> <span class="n">key</span> <span class="ow">and</span> <span class="n">value</span>
-    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="p">:</span><span class="o">=</span> <span class="nb">range</span> <span class="n">a</span> <span class="p">{</span>
-        <span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+    <span class="c1">// cleaner way of iterating over key and value</span>
+    <span class="k">for</span> <span class="nx">k</span><span class="p">,</span> <span class="nx">v</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">a</span> <span class="p">{</span>
+        <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">k</span><span class="p">,</span> <span class="nx">v</span><span class="p">)</span>
     <span class="p">}</span>
-
+    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">s</span><span class="p">)</span>    <span class="c1">// []</span>
+    <span class="nx">s</span> <span class="p">=</span> <span class="nx">a</span><span class="p">[:]</span>
+<span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">s</span><span class="p">)</span>    <span class="c1">// [a b c d e]</span>
+<span class="nx">s</span> <span class="p">=</span> <span class="nx">a</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span>
+<span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">s</span><span class="p">)</span>    <span class="c1">// [c d e]</span>
 <span class="p">}</span>
 </pre></div>
-<h4 id="_1"></h4>
-<ol>
-<li>Compile with: <code>cd /opt/goprojects/src/github.com/johnpfeiffer/intro/ ; go install</code></li>
-<li>Execute with: <code>/opt/goprojects/bin/intro</code></li>
-</ol>
 <h3 id="arrays-are-contiguous-memory-and-4-bytes-is-normal">arrays are contiguous memory and 4 bytes is normal</h3>
-<div class="highlight"><pre><span></span>// int is usually the 4 byte int32 https://golang.org/ref/spec#Numeric_types
-b := [2]int{1, 2}
-// dereference the addresses that are holding the values 1 and 2
-fmt.Printf("%d %d\n", &amp;b[0], &amp;b[1])
+<div class="highlight"><pre><span></span><span class="c1">// int is usually the 4 byte int32 https://golang.org/ref/spec#Numeric_types</span>
+<span class="nx">b</span> <span class="o">:=</span> <span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="kt">int</span><span class="p">{</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">}</span>
+<span class="c1">// dereference the addresses that are holding the values 1 and 2</span>
+<span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">"%d %d\n"</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">b</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="o">&amp;</span><span class="nx">b</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
 
-// rune is also int32
-c := [2]rune{'a', 'ä'}
-fmt.Printf("%d %d\n", &amp;c[0], &amp;c[1])
+<span class="c1">// rune is also int32</span>
+<span class="nx">c</span> <span class="o">:=</span> <span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="kt">rune</span><span class="p">{</span><span class="sc">'a'</span><span class="p">,</span> <span class="sc">'ä'</span><span class="p">}</span>
+<span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">"%d %d\n"</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">c</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="o">&amp;</span><span class="nx">c</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
 </pre></div>
 <h3 id="fizzbuzz-and-switch">fizzbuzz and switch</h3>
 <p><a href="https://golang.org/ref/spec#Switch_statements">https://golang.org/ref/spec#Switch_statements</a></p>
-<div class="highlight"><pre><span></span>for i := 1; i &lt; 16; i++ {
-    // usually static case values and "switch i {" , note it will NOT fall through by default
-    switch {
-    case i%3 == 0 &amp;&amp; i%5 == 0:
-        fmt.Println("fizzbuzz")
-    case i%3 == 0:
-        fmt.Println("fizz")
-    case i%5 == 0:
-        fmt.Println("buzz")
-    default:
-        fmt.Println(i)
-    }
-}
+<div class="highlight"><pre><span></span><span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="mi">1</span><span class="p">;</span> <span class="nx">i</span> <span class="p">&lt;</span> <span class="mi">16</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">{</span>
+    <span class="c1">// usually static case values and "switch i {" , note it will NOT fall through by default</span>
+    <span class="k">switch</span> <span class="p">{</span>
+    <span class="k">case</span> <span class="nx">i</span><span class="o">%</span><span class="mi">3</span> <span class="o">==</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span> <span class="nx">i</span><span class="o">%</span><span class="mi">5</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">"fizzbuzz"</span><span class="p">)</span>
+    <span class="k">case</span> <span class="nx">i</span><span class="o">%</span><span class="mi">3</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">"fizz"</span><span class="p">)</span>
+    <span class="k">case</span> <span class="nx">i</span><span class="o">%</span><span class="mi">5</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">"buzz"</span><span class="p">)</span>
+    <span class="k">default</span><span class="p">:</span>
+        <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">i</span><span class="p">)</span>
+    <span class="p">}</span>
+<span class="p">}</span>
 </pre></div>
 <h3 id="time">time</h3>
 <div class="highlight"><pre><span></span><span class="kn">import</span> <span class="s2">"time"</span>
@@ -421,17 +443,17 @@ fmt.Println(err)
 </pre></div>
 <h3 id="efficient-string-append-and-replacement">Efficient String append and replacement</h3>
 <p><a href="http://stackoverflow.com/questions/1760757/how-to-efficiently-concatenate-strings-in-go">http://stackoverflow.com/questions/1760757/how-to-efficiently-concatenate-strings-in-go</a></p>
-<div class="highlight"><pre><span></span>func myReplace(source string) string {
-    var b bytes.Buffer
-    for _, c := range source {
-        if c == ' ' {
-            b.WriteString("%20")
-        } else {
-            b.WriteString(string(c))
-        }
-    }
-    return b.String()
-}
+<div class="highlight"><pre><span></span><span class="kd">func</span> <span class="nx">myReplace</span><span class="p">(</span><span class="nx">source</span> <span class="kt">string</span><span class="p">)</span> <span class="kt">string</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">b</span> <span class="nx">bytes</span><span class="p">.</span><span class="nx">Buffer</span>
+    <span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">c</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">source</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="nx">c</span> <span class="o">==</span> <span class="sc">' '</span> <span class="p">{</span>
+            <span class="nx">b</span><span class="p">.</span><span class="nx">WriteString</span><span class="p">(</span><span class="s">"%20"</span><span class="p">)</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="nx">b</span><span class="p">.</span><span class="nx">WriteString</span><span class="p">(</span><span class="nb">string</span><span class="p">(</span><span class="nx">c</span><span class="p">))</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="nx">b</span><span class="p">.</span><span class="nx">String</span><span class="p">()</span>
+<span class="p">}</span>
 </pre></div>
 <h3 id="testing-with-go">Testing with Go</h3>
 <ul>
@@ -439,6 +461,24 @@ fmt.Println(err)
 <li><a href="http://nathanleclaire.com/blog/2015/10/10/interfaces-and-composition-for-effective-unit-testing-in-golang/">http://nathanleclaire.com/blog/2015/10/10/interfaces-and-composition-for-effective-unit-testing-in-golang/</a></li>
 <li><a href="https://cloud.google.com/appengine/docs/go/tools/localunittesting/#Go_Introducing_the_Go_testing_package">https://cloud.google.com/appengine/docs/go/tools/localunittesting/#Go_Introducing_the_Go_testing_package</a></li>
 </ul>
+<h3 id="a-simple-web-server">A simple web server</h3>
+<div class="highlight"><pre><span></span><span class="kn">package</span> <span class="nx">main</span>
+
+<span class="kn">import</span> <span class="p">(</span>
+    <span class="s">"fmt"</span>
+    <span class="s">"net/http"</span>
+<span class="p">)</span>
+
+<span class="kd">func</span> <span class="nx">myHandler</span><span class="p">(</span><span class="nx">w</span> <span class="nx">http</span><span class="p">.</span><span class="nx">ResponseWriter</span><span class="p">,</span> <span class="nx">r</span> <span class="o">*</span><span class="nx">http</span><span class="p">.</span><span class="nx">Request</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Fprintf</span><span class="p">(</span><span class="nx">w</span><span class="p">,</span> <span class="s">"hi"</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+    <span class="nx">http</span><span class="p">.</span><span class="nx">HandleFunc</span><span class="p">(</span><span class="s">"/"</span><span class="p">,</span> <span class="nx">myHandler</span><span class="p">)</span>
+    <span class="nx">http</span><span class="p">.</span><span class="nx">ListenAndServe</span><span class="p">(</span><span class="s">":8080"</span><span class="p">,</span> <span class="kc">nil</span><span class="p">)</span>
+<span class="p">}</span>
+</pre></div>
+<p>Verify with <code>curl localhost:8080</code></p>
 <h3 id="more-info">More Info</h3>
 <ul>
 <li><a href="https://tour.golang.org/basics/">https://tour.golang.org/basics/</a></li>
@@ -462,7 +502,7 @@ fmt.Println(err)
             <time pubdate="pubdate" datetime="2015-11-15T21:19:00-08:00">Nov 15, 2015</time>
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#programming-ref">programming</a> 
-            <h4>~1106 words</h4>
+            <h4>~1279 words</h4>
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article"> 
                 <li><a href="/tags.html#arrays-ref">arrays
