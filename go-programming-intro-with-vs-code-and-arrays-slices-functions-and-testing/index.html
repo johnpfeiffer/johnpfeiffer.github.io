@@ -115,6 +115,7 @@
 <li><a href="#to-deploy-to-google-app-engine">To deploy to Google App Engine</a></li>
 </ul>
 </li>
+<li><a href="#handlerfunc-and-anonymous-functions-and-closure">HandlerFunc and Anonymous Functions and Closure</a></li>
 <li><a href="#more-info">More Info</a></li>
 </ul>
 </li>
@@ -536,6 +537,37 @@ cd /opt/goprojects/src/github.com/johnpfeiffer/YOURPROJECT
 </blockquote>
 <div class="highlight"><pre><span></span>/opt/go_appengine/appcfg.py -A MyApplicationId set_default_version /MyProjectFolder
 </pre></div>
+<h3 id="handlerfunc-and-anonymous-functions-and-closure">HandlerFunc and Anonymous Functions and Closure</h3>
+<p>The decorator pattern Anonymous functions an</p>
+<div class="highlight"><pre><span></span><span class="kn">package</span> <span class="nx">main</span>
+
+<span class="kn">import</span> <span class="p">(</span>
+    <span class="s">"fmt"</span>
+    <span class="s">"net/http"</span>
+<span class="p">)</span>
+
+<span class="cm">/* using an anonymous function and closure to wrap the HandlerFunc</span>
+<span class="cm">https://golang.org/pkg/net/http/#HandlerFunc</span>
+<span class="cm">https://medium.com/@matryer/the-http-handlerfunc-wrapper-technique-in-golang-c60bf76e6124</span>
+<span class="cm">*/</span>
+<span class="kd">func</span> <span class="nx">makeHandler</span><span class="p">(</span><span class="nx">name</span> <span class="kt">string</span><span class="p">)</span> <span class="nx">http</span><span class="p">.</span><span class="nx">HandlerFunc</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="kd">func</span><span class="p">(</span><span class="nx">w</span> <span class="nx">http</span><span class="p">.</span><span class="nx">ResponseWriter</span><span class="p">,</span> <span class="nx">r</span> <span class="o">*</span><span class="nx">http</span><span class="p">.</span><span class="nx">Request</span><span class="p">)</span> <span class="p">{</span>
+        <span class="c1">// https://golang.org/src/net/http/request.go</span>
+        <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">"serving: "</span><span class="p">,</span> <span class="nx">r</span><span class="p">.</span><span class="nx">URL</span><span class="p">.</span><span class="nx">Path</span><span class="p">)</span>
+        <span class="nx">fmt</span><span class="p">.</span><span class="nx">Fprintf</span><span class="p">(</span><span class="nx">w</span><span class="p">,</span> <span class="s">"&lt;h1&gt;%s&lt;/h1&gt;"</span><span class="p">,</span> <span class="nx">name</span><span class="p">)</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">"starting..."</span><span class="p">)</span>
+    <span class="nx">indexHandler</span> <span class="o">:=</span> <span class="nx">makeHandler</span><span class="p">(</span><span class="s">"Index"</span><span class="p">)</span>
+    <span class="nx">myHandler</span> <span class="o">:=</span> <span class="nx">makeHandler</span><span class="p">(</span><span class="s">"John"</span><span class="p">)</span>
+    <span class="c1">// https://golang.org/pkg/net/http/#HandleFunc , string, func(ResponseWriter, *Request)</span>
+    <span class="nx">http</span><span class="p">.</span><span class="nx">HandleFunc</span><span class="p">(</span><span class="s">"/"</span><span class="p">,</span> <span class="nx">indexHandler</span><span class="p">)</span>
+    <span class="nx">http</span><span class="p">.</span><span class="nx">HandleFunc</span><span class="p">(</span><span class="s">"/john"</span><span class="p">,</span> <span class="nx">myHandler</span><span class="p">)</span>
+    <span class="nx">http</span><span class="p">.</span><span class="nx">ListenAndServe</span><span class="p">(</span><span class="s">":8080"</span><span class="p">,</span> <span class="kc">nil</span><span class="p">)</span>
+<span class="p">}</span>
+</pre></div>
 <h3 id="more-info">More Info</h3>
 <ul>
 <li><a href="https://tour.golang.org/basics/">https://tour.golang.org/basics/</a></li>
@@ -560,7 +592,7 @@ cd /opt/goprojects/src/github.com/johnpfeiffer/YOURPROJECT
             <time pubdate="pubdate" datetime="2015-11-15T21:19:00-08:00">Nov 15, 2015</time>
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#programming-ref">programming</a> 
-            <h4>~1475 words</h4>
+            <h4>~1536 words</h4>
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article"> 
                 <li><a href="/tags.html#arrays-ref">arrays
