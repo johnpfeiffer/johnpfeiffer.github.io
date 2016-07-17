@@ -90,6 +90,16 @@
 </ul>
 </li>
 <li><a href="#a-simple-single-file-crud-app-using-the-google-appengine-database">A simple single file CRUD app using the Google AppEngine Database</a></li>
+<li><a href="#usrbinenv-python">!/usr/bin/env python</a></li>
+<li><a href="#2013-01-20-johnpfeiffer">2013-01-20 johnpfeiffer</a></li>
+<li><a href="#todo-navigation-bar">TODO: navigation bar</a></li>
+<li><a href="#todo-use-template-system">TODO: use template system</a></li>
+<li><a href="#todo-use-template-system_1">TODO: use template system</a></li>
+<li><a href="#q-dbquery-node-keys_only-is-faster-and-cheaper-than-retrieving-the-entities">q = db.Query( Node )    # keys_only is faster and cheaper than retrieving the entities</a></li>
+<li><a href="#qfilter-id-id">q.filter( "id=" , id )</a></li>
+<li><a href="#dbdelete">db.delete( )</a></li>
+<li><a href="#node_key-key">node_key =          # key</a></li>
+<li><a href="#url-handler-below-">url handler below -----------------------------</a></li>
 </ul>
 </div>
         </nav>
@@ -263,180 +273,155 @@ This is independent of and not a replacement for version control!</p>
 <hr/>
 <h2 id="a-simple-single-file-crud-app-using-the-google-appengine-database">A simple single file CRUD app using the Google AppEngine Database</h2>
 <p>Google AppEngine applications can leverage the platforms NoSQL database <a href="https://cloud.google.com/appengine/docs/python/datastore/">https://cloud.google.com/appengine/docs/python/datastore/</a></p>
-<p>The example application below also shows how to override the default 404 and 500 errors with custom jinja2 templates which would require installing the jinja2 dependency and an extra subdirectory named templates with the HTML
-- <a href="https://blog.john-pfeiffer.com/jinja2-a-web-html-template-layout-for-everyone/">https://blog.john-pfeiffer.com/jinja2-a-web-html-template-layout-for-everyone/</a>
-- <a href="https://cloud.google.com/appengine/docs/python/ndb/">https://cloud.google.com/appengine/docs/python/ndb/</a> has improved and deprecated the DB Datastore library used below</p>
-<div class="highlight"><pre><span></span><span class="ch">#!/usr/bin/env python</span>
-<span class="c1"># 2013-01-20 johnpfeiffer</span>
+<p>The example application below also shows how to override the default 404 and 500 errors with custom jinja2 templates which would require installing the jinja2 dependency and an extra subdirectory named templates with the HTML</p>
+<ul>
+<li><a href="https://blog.john-pfeiffer.com/jinja2-a-web-html-template-layout-for-everyone/">https://blog.john-pfeiffer.com/jinja2-a-web-html-template-layout-for-everyone/</a></li>
+<li>
+<p><a href="https://cloud.google.com/appengine/docs/python/ndb/">https://cloud.google.com/appengine/docs/python/ndb/</a> has improved and deprecated the DB Datastore library used below</p>
+<p>:::python</p>
+<h1 id="usrbinenv-python">!/usr/bin/env python</h1>
+<h1 id="2013-01-20-johnpfeiffer">2013-01-20 johnpfeiffer</h1>
+<p>import os
+import logging
+import traceback
+import cgi
+import datetime
+import webapp2
+import jinja2</p>
+<p>from google.appengine.ext import db</p>
+<p>jinja_environment = jinja2.Environment( loader=jinja2.FileSystemLoader( os.path.dirname( os.path.dirname( <strong>file</strong> ) ) ) )        </p>
+<p>class Node( db.Model ):
+    id = db.StringProperty()
+    name = db.StringProperty()
+    parent_id = db.StringProperty()
+    date = db.DateTimeProperty( auto_now_add = True )</p>
+<h1 id="todo-navigation-bar">TODO: navigation bar</h1>
+<p>class MainPage( webapp2.RequestHandler ):
+  def get( self ):
+    self.response.out.write( '<html><body>' )
+    self.response.out.write( """Welcome <br/></body></html></p>
+<div class="highlight"><pre><span></span>     <span class="nt">&lt;form</span> <span class="na">action=</span><span class="s">"/listnodes"</span> <span class="na">method=</span><span class="s">"get"</span><span class="nt">&gt;</span>
+         <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"submit"</span> <span class="na">value=</span><span class="s">"List Nodes"</span><span class="nt">&gt;</span>
+     <span class="nt">&lt;/form&gt;</span>
+     <span class="nt">&lt;br/&gt;</span>
+     <span class="nt">&lt;form</span> <span class="na">action=</span><span class="s">"/createnodeform"</span> <span class="na">method=</span><span class="s">"get"</span><span class="nt">&gt;</span>
+         <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"submit"</span> <span class="na">value=</span><span class="s">"Create Node"</span><span class="nt">&gt;</span>
+     <span class="nt">&lt;/form&gt;</span>
+     <span class="nt">&lt;form</span> <span class="na">action=</span><span class="s">"/deletenode"</span> <span class="na">method=</span><span class="s">"post"</span><span class="nt">&gt;</span>
+         <span class="nt">&lt;label&gt;</span>id<span class="nt">&lt;/label&gt;&lt;/td&gt;&lt;td&gt;&lt;input</span> <span class="na">type=</span><span class="s">"text"</span> <span class="na">id=</span><span class="s">"id"</span> <span class="na">name=</span><span class="s">"id"</span> <span class="nt">/&gt;</span>
+         <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"submit"</span> <span class="na">value=</span><span class="s">"Delete Node"</span><span class="nt">&gt;</span>
+     <span class="nt">&lt;/form&gt;</span>
 
-<span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">logging</span>
-<span class="kn">import</span> <span class="nn">traceback</span>
-<span class="kn">import</span> <span class="nn">cgi</span>
-<span class="kn">import</span> <span class="nn">datetime</span>
-<span class="kn">import</span> <span class="nn">webapp2</span>
-<span class="kn">import</span> <span class="nn">jinja2</span>
-
-<span class="kn">from</span> <span class="nn">google.appengine.ext</span> <span class="kn">import</span> <span class="n">db</span>
-
-<span class="n">jinja_environment</span> <span class="o">=</span> <span class="n">jinja2</span><span class="o">.</span><span class="n">Environment</span><span class="p">(</span> <span class="n">loader</span><span class="o">=</span><span class="n">jinja2</span><span class="o">.</span><span class="n">FileSystemLoader</span><span class="p">(</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span> <span class="n">__file__</span> <span class="p">)</span> <span class="p">)</span> <span class="p">)</span> <span class="p">)</span>
-
-<span class="k">class</span> <span class="nc">Node</span><span class="p">(</span> <span class="n">db</span><span class="o">.</span><span class="n">Model</span> <span class="p">):</span>
-    <span class="nb">id</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">StringProperty</span><span class="p">()</span>
-    <span class="n">name</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">StringProperty</span><span class="p">()</span>
-    <span class="n">parent_id</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">StringProperty</span><span class="p">()</span>
-    <span class="n">date</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">DateTimeProperty</span><span class="p">(</span> <span class="n">auto_now_add</span> <span class="o">=</span> <span class="bp">True</span> <span class="p">)</span>
-
-
-<span class="c1"># TODO: navigation bar</span>
-<span class="k">class</span> <span class="nc">MainPage</span><span class="p">(</span> <span class="n">webapp2</span><span class="o">.</span><span class="n">RequestHandler</span> <span class="p">):</span>
-  <span class="k">def</span> <span class="nf">get</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">out</span><span class="o">.</span><span class="n">write</span><span class="p">(</span> <span class="s1">'&lt;html&gt;&lt;body&gt;'</span> <span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">out</span><span class="o">.</span><span class="n">write</span><span class="p">(</span> <span class="s2">"""Welcome &lt;br/&gt;</span>
-
-<span class="s2">         &lt;form action="/listnodes" method="get"&gt;</span>
-<span class="s2">             &lt;input type="submit" value="List Nodes"&gt;</span>
-<span class="s2">         &lt;/form&gt;</span>
-<span class="s2">         &lt;br/&gt;</span>
-<span class="s2">         &lt;form action="/createnodeform" method="get"&gt;</span>
-<span class="s2">             &lt;input type="submit" value="Create Node"&gt;</span>
-<span class="s2">         &lt;/form&gt;</span>
-<span class="s2">         &lt;form action="/deletenode" method="post"&gt;</span>
-<span class="s2">             &lt;label&gt;id&lt;/label&gt;&lt;/td&gt;&lt;td&gt;&lt;input type="text" id="id" name="id" /&gt;</span>
-<span class="s2">             &lt;input type="submit" value="Delete Node"&gt;</span>
-<span class="s2">         &lt;/form&gt;</span>
-
-<span class="s2">         """</span>
-    <span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">out</span><span class="o">.</span><span class="n">write</span><span class="p">(</span> <span class="s2">"&lt;/body&gt;&lt;/html&gt;"</span> <span class="p">)</span>
-
-
-<span class="k">class</span> <span class="nc">ListNodes</span><span class="p">(</span> <span class="n">webapp2</span><span class="o">.</span><span class="n">RequestHandler</span> <span class="p">):</span>
-  <span class="k">def</span> <span class="nf">get</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">out</span><span class="o">.</span><span class="n">write</span><span class="p">(</span> <span class="s1">'&lt;html&gt;&lt;body&gt;'</span> <span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">out</span><span class="o">.</span><span class="n">write</span><span class="p">(</span> <span class="s1">'Welcome &lt;br/&gt;'</span> <span class="p">)</span>
-    <span class="n">q</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">Query</span><span class="p">(</span> <span class="n">Node</span> <span class="p">)</span>
-    <span class="n">q</span><span class="o">.</span><span class="n">order</span><span class="p">(</span> <span class="s2">"name"</span> <span class="p">)</span>
-    <span class="n">q</span><span class="o">.</span><span class="n">fetch</span><span class="p">(</span> <span class="mi">100</span> <span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">out</span><span class="o">.</span><span class="n">write</span><span class="p">(</span> <span class="s2">"</span><span class="si">%s</span><span class="s2"> , </span><span class="si">%s</span><span class="s2"> , </span><span class="si">%s</span><span class="s2"> ( </span><span class="si">%s</span><span class="s2"> )&lt;br/&gt;"</span> <span class="o">%</span> <span class="p">(</span> <span class="s2">"name"</span> <span class="p">,</span> <span class="s2">"id"</span> <span class="p">,</span> <span class="s2">"parent_id"</span> <span class="p">,</span> <span class="s2">"created"</span> <span class="p">)</span> <span class="p">)</span>
-    <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">q</span> <span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">out</span><span class="o">.</span><span class="n">write</span><span class="p">(</span> <span class="s2">"</span><span class="si">%s</span><span class="s2"> , </span><span class="si">%s</span><span class="s2"> , </span><span class="si">%s</span><span class="s2"> ( </span><span class="si">%s</span><span class="s2"> )&lt;br/&gt;"</span> <span class="o">%</span> <span class="p">(</span> <span class="n">node</span><span class="o">.</span><span class="n">name</span> <span class="p">,</span> <span class="n">node</span><span class="o">.</span><span class="n">id</span> <span class="p">,</span> <span class="n">node</span><span class="o">.</span><span class="n">parent</span> <span class="p">,</span> <span class="n">node</span><span class="o">.</span><span class="n">date</span> <span class="p">)</span> <span class="p">)</span>
-
-    <span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">out</span><span class="o">.</span><span class="n">write</span><span class="p">(</span> <span class="s2">"&lt;/body&gt;&lt;/html&gt;"</span> <span class="p">)</span>
-
-
-<span class="c1"># TODO: use template system</span>
-<span class="k">class</span> <span class="nc">CreateNode</span><span class="p">(</span> <span class="n">webapp2</span><span class="o">.</span><span class="n">RequestHandler</span> <span class="p">):</span>
-  <span class="k">def</span> <span class="nf">get</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">out</span><span class="o">.</span><span class="n">write</span><span class="p">(</span> <span class="s1">'&lt;html&gt;&lt;body&gt;'</span> <span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">write</span><span class="p">(</span> <span class="s1">'Create uses POST'</span> <span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">out</span><span class="o">.</span><span class="n">write</span><span class="p">(</span> <span class="s2">"&lt;/body&gt;&lt;/html&gt;"</span> <span class="p">)</span>
-
-  <span class="k">def</span> <span class="nf">post</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">out</span><span class="o">.</span><span class="n">write</span><span class="p">(</span> <span class="s1">'&lt;html&gt;&lt;body&gt;'</span> <span class="p">)</span>
-    <span class="n">post_values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">POST</span>
-
-    <span class="c1"># todo extract to helper for input validation and sanitization</span>
-    <span class="n">name</span> <span class="o">=</span> <span class="n">post_values</span><span class="p">[</span> <span class="s2">"nodename"</span> <span class="p">]</span>
-    <span class="nb">id</span> <span class="o">=</span> <span class="n">post_values</span><span class="p">[</span> <span class="s2">"id"</span> <span class="p">]</span>
-    <span class="n">parent_id</span> <span class="o">=</span> <span class="n">post_values</span><span class="p">[</span> <span class="s2">"parentid"</span> <span class="p">]</span>
-
-    <span class="k">if</span><span class="p">(</span> <span class="n">name</span> <span class="o">==</span> <span class="bp">None</span> <span class="ow">or</span> <span class="nb">id</span> <span class="o">==</span> <span class="bp">None</span> <span class="ow">or</span> <span class="n">parent_id</span> <span class="o">==</span> <span class="bp">None</span> <span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">out</span><span class="o">.</span><span class="n">write</span><span class="p">(</span> <span class="s1">'ERROR: DEBUG:'</span> <span class="p">,</span> <span class="n">post_values</span> <span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">node</span> <span class="o">=</span> <span class="n">Node</span><span class="p">()</span>
-        <span class="n">node</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
-        <span class="n">node</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="nb">id</span>
-        <span class="n">node</span><span class="o">.</span><span class="n">parent_id</span> <span class="o">=</span> <span class="n">parent_id</span>
-
-        <span class="n">node</span><span class="o">.</span><span class="n">put</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">out</span><span class="o">.</span><span class="n">write</span><span class="p">(</span> <span class="s1">'successfully created: '</span> <span class="o">+</span> <span class="n">name</span> <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">out</span><span class="o">.</span><span class="n">write</span><span class="p">(</span> <span class="s2">"""</span>
-<span class="s2">         &lt;form action="/listnodes" method="get"&gt;</span>
-<span class="s2">             &lt;input type="submit" value="List Nodes"&gt;</span>
-<span class="s2">         &lt;/form&gt;</span>
-<span class="s2">        """</span>
-        <span class="p">)</span>
-
-    <span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">out</span><span class="o">.</span><span class="n">write</span><span class="p">(</span> <span class="s2">"&lt;/body&gt;&lt;/html&gt;"</span> <span class="p">)</span>
-
-
-<span class="k">class</span> <span class="nc">CreateNodeForm</span><span class="p">(</span> <span class="n">webapp2</span><span class="o">.</span><span class="n">RequestHandler</span> <span class="p">):</span>
-    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">out</span><span class="o">.</span><span class="n">write</span><span class="p">(</span> <span class="s1">'&lt;html&gt;&lt;body&gt;'</span> <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">out</span><span class="o">.</span><span class="n">write</span><span class="p">(</span> <span class="s2">"""</span>
-<span class="s2">         &lt;form action="/createnode" method="post"&gt;</span>
-<span class="s2">            &lt;table&gt;</span>
-<span class="s2">                &lt;tr&gt;&lt;td&gt;&lt;label&gt;node name&lt;/label&gt;&lt;/td&gt;&lt;td&gt;&lt;input type="text" id="nodename" name="nodename" /&gt;&lt;/td&gt;&lt;/tr&gt;</span>
-<span class="s2">                &lt;tr&gt;&lt;td&gt;&lt;label&gt;id&lt;/label&gt;&lt;/td&gt;&lt;td&gt;&lt;input type="text" id="id" name="id" /&gt;&lt;/td&gt;&lt;/tr&gt;</span>
-<span class="s2">                &lt;tr&gt;&lt;td&gt;&lt;label&gt;parent id&lt;/label&gt;&lt;/td&gt;&lt;td&gt;&lt;input type="text" id="parentid" name="parentid" /&gt;&lt;/td&gt;&lt;/tr&gt;</span>
-<span class="s2">                &lt;tr&gt;&lt;td&gt;&lt;/td&gt;&lt;td&gt;&lt;input type="submit"&gt;&lt;/td&gt;&lt;/tr&gt;</span>
-<span class="s2">            &lt;/table&gt;</span>
-<span class="s2">          &lt;/form&gt;</span>
-<span class="s2">        """</span> <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">out</span><span class="o">.</span><span class="n">write</span><span class="p">(</span> <span class="s2">"&lt;/body&gt;&lt;/html&gt;"</span> <span class="p">)</span>
-
-
-<span class="c1"># TODO: use template system</span>
-<span class="k">class</span> <span class="nc">DeleteNode</span><span class="p">(</span> <span class="n">webapp2</span><span class="o">.</span><span class="n">RequestHandler</span> <span class="p">):</span>
-  <span class="k">def</span> <span class="nf">get</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">out</span><span class="o">.</span><span class="n">write</span><span class="p">(</span> <span class="s1">'&lt;html&gt;&lt;body&gt;'</span> <span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">write</span><span class="p">(</span> <span class="s1">'Delete uses POST'</span> <span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">out</span><span class="o">.</span><span class="n">write</span><span class="p">(</span> <span class="s2">"&lt;/body&gt;&lt;/html&gt;"</span> <span class="p">)</span>
-
-  <span class="k">def</span> <span class="nf">post</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">out</span><span class="o">.</span><span class="n">write</span><span class="p">(</span> <span class="s1">'&lt;html&gt;&lt;body&gt;'</span> <span class="p">)</span>
-    <span class="n">post_values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">POST</span>
-
-    <span class="c1"># todo extract to helper for input validation and sanitization</span>
-    <span class="nb">id</span> <span class="o">=</span> <span class="n">post_values</span><span class="p">[</span> <span class="s2">"id"</span> <span class="p">]</span>
-
-<span class="c1">#    q = db.Query( Node )    # keys_only is faster and cheaper than retrieving the entities</span>
-<span class="c1">#    q.filter( "id=" , id )</span>
-    <span class="n">q</span> <span class="o">=</span> <span class="n">Node</span><span class="o">.</span><span class="n">all</span><span class="p">(</span> <span class="n">keys_only</span> <span class="o">=</span> <span class="bp">True</span> <span class="p">)</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span> <span class="s2">"id="</span><span class="p">,</span> <span class="nb">id</span> <span class="p">)</span>
-    <span class="n">node_to_delete</span> <span class="o">=</span> <span class="n">q</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
-
-<span class="c1">#    db.delete( )</span>
-<span class="c1">#    node_key =          # __key__</span>
-
-    <span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">out</span><span class="o">.</span><span class="n">write</span><span class="p">(</span> <span class="s2">"</span><span class="si">%s</span><span class="s2"> , </span><span class="si">%s</span><span class="s2"> , </span><span class="si">%s</span><span class="s2"> ( </span><span class="si">%s</span><span class="s2"> )&lt;br/&gt;"</span> <span class="o">%</span> <span class="p">(</span> <span class="s2">"name"</span> <span class="p">,</span> <span class="nb">id</span> <span class="p">,</span> <span class="s2">"parent_id"</span> <span class="p">,</span> <span class="n">node_to_delete</span> <span class="p">)</span> <span class="p">)</span>
-
-
-    <span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">out</span><span class="o">.</span><span class="n">write</span><span class="p">(</span> <span class="s2">"&lt;/body&gt;&lt;/html&gt;"</span> <span class="p">)</span>
-
-
-
-<span class="c1"># url handler below -----------------------------</span>
-
-<span class="n">app</span> <span class="o">=</span> <span class="n">webapp2</span><span class="o">.</span><span class="n">WSGIApplication</span><span class="p">(</span> <span class="p">[</span>
-  <span class="p">(</span> <span class="s1">'/'</span><span class="p">,</span> <span class="n">MainPage</span> <span class="p">),</span>
-  <span class="p">(</span> <span class="s1">'/listnodes'</span> <span class="p">,</span> <span class="n">ListNodes</span> <span class="p">),</span>
-  <span class="p">(</span> <span class="s1">'/createnode'</span> <span class="p">,</span> <span class="n">CreateNode</span> <span class="p">),</span>
-  <span class="p">(</span> <span class="s1">'/createnodeform'</span> <span class="p">,</span> <span class="n">CreateNodeForm</span> <span class="p">),</span>
-  <span class="p">(</span> <span class="s1">'/deletenode'</span> <span class="p">,</span> <span class="n">DeleteNode</span> <span class="p">)</span>
-<span class="p">],</span> <span class="n">debug</span> <span class="o">=</span> <span class="bp">True</span> <span class="p">)</span>
-
-
-
-<span class="k">def</span> <span class="nf">handle_404</span> <span class="p">(</span><span class="n">request</span> <span class="p">,</span> <span class="n">response</span> <span class="p">,</span> <span class="n">exception</span><span class="p">)</span> <span class="p">:</span>
-    <span class="n">template_dictionary</span> <span class="o">=</span> <span class="p">{</span> <span class="s1">'title'</span> <span class="p">:</span> <span class="s1">'ERROR 404'</span> <span class="p">,</span> <span class="s1">'body_content'</span> <span class="p">:</span> <span class="n">exception</span><span class="o">.</span><span class="n">status</span> <span class="p">}</span>
-    <span class="n">template</span> <span class="o">=</span> <span class="n">jinja_environment</span><span class="o">.</span><span class="n">get_template</span> <span class="p">(</span> <span class="s1">'templates/error.html'</span> <span class="p">)</span>
-    <span class="n">response</span><span class="o">.</span><span class="n">write</span> <span class="p">(</span> <span class="n">template</span><span class="o">.</span><span class="n">render</span> <span class="p">(</span> <span class="n">template_dictionary</span> <span class="p">)</span> <span class="p">)</span>
-    <span class="n">response</span><span class="o">.</span><span class="n">set_status</span> <span class="p">(</span> <span class="n">exception</span><span class="o">.</span><span class="n">status_int</span> <span class="p">)</span>
-
-
-<span class="k">def</span> <span class="nf">handle_500</span> <span class="p">(</span><span class="n">request</span> <span class="p">,</span> <span class="n">response</span> <span class="p">,</span> <span class="n">exception</span><span class="p">)</span> <span class="p">:</span>
-    <span class="n">logging</span><span class="o">.</span><span class="n">error</span> <span class="p">(</span> <span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span> <span class="p">(</span> <span class="p">)</span> <span class="p">)</span>
-    <span class="n">logging</span><span class="o">.</span><span class="n">error</span> <span class="p">(</span> <span class="n">exception</span> <span class="p">)</span>
-    <span class="n">template_dictionary</span> <span class="o">=</span> <span class="p">{</span> <span class="s1">'title'</span> <span class="p">:</span> <span class="s1">'Meow'</span> <span class="p">,</span> <span class="s1">'body_content'</span> <span class="p">:</span> <span class="s1">'Meow.  Meow meow meow, meow meow.'</span> <span class="p">}</span>
-    <span class="n">template</span> <span class="o">=</span> <span class="n">jinja_environment</span><span class="o">.</span><span class="n">get_template</span> <span class="p">(</span> <span class="s1">'templates/error.html'</span> <span class="p">)</span>
-    <span class="n">response</span><span class="o">.</span><span class="n">write</span> <span class="p">(</span> <span class="n">template</span><span class="o">.</span><span class="n">render</span> <span class="p">(</span> <span class="n">template_dictionary</span> <span class="p">)</span> <span class="p">)</span>
-    <span class="n">response</span><span class="o">.</span><span class="n">set_status</span> <span class="p">(</span> <span class="mi">500</span> <span class="p">)</span>
-
-
-<span class="n">app</span><span class="o">.</span><span class="n">error_handlers</span> <span class="p">[</span> <span class="mi">404</span> <span class="p">]</span> <span class="o">=</span> <span class="n">handle_404</span>
-<span class="n">app</span><span class="o">.</span><span class="n">error_handlers</span> <span class="p">[</span> <span class="mi">500</span> <span class="p">]</span> <span class="o">=</span> <span class="n">handle_500</span>
+     """
+)
+self.response.out.write( "<span class="nt">&lt;/body&gt;&lt;/html&gt;</span>" )
 </pre></div>
+<p>class ListNodes( webapp2.RequestHandler ):
+  def get( self ):
+    self.response.out.write( '<html><body>' )
+    self.response.out.write( 'Welcome <br/>' )
+    q = db.Query( Node )
+    q.order( "name" )
+    q.fetch( 100 )
+    self.response.out.write( "%s , %s , %s ( %s )<br/>" % ( "name" , "id" , "parent_id" , "created" ) )
+    for node in q :
+        self.response.out.write( "%s , %s , %s ( %s )<br/>" % ( node.name , node.id , node.parent , node.date ) )</body></html></p>
+<div class="highlight"><pre><span></span>self.response.out.write( "<span class="nt">&lt;/body&gt;&lt;/html&gt;</span>" )
+</pre></div>
+<h1 id="todo-use-template-system">TODO: use template system</h1>
+<p>class CreateNode( webapp2.RequestHandler ):
+  def get( self ):
+    self.response.out.write( '<html><body>' )
+    self.response.write( 'Create uses POST' )
+    self.response.out.write( "</body></html>" )</p>
+<p>def post( self ):
+    self.response.out.write( '<html><body>' )
+    post_values = self.request.POST</body></html></p>
+<div class="highlight"><pre><span></span># todo extract to helper for input validation and sanitization
+name = post_values[ "nodename" ]
+id = post_values[ "id" ]
+parent_id = post_values[ "parentid" ]
+
+if( name == None or id == None or parent_id == None ):
+    self.response.out.write( 'ERROR: DEBUG:' , post_values )
+else:
+    node = Node()
+    node.name = name
+    node.id = id
+    node.parent_id = parent_id
+
+    node.put()
+    self.response.out.write( 'successfully created: ' + name )
+    self.response.out.write( """
+     <span class="nt">&lt;form</span> <span class="na">action=</span><span class="s">"/listnodes"</span> <span class="na">method=</span><span class="s">"get"</span><span class="nt">&gt;</span>
+         <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"submit"</span> <span class="na">value=</span><span class="s">"List Nodes"</span><span class="nt">&gt;</span>
+     <span class="nt">&lt;/form&gt;</span>
+    """
+    )
+
+self.response.out.write( "<span class="nt">&lt;/body&gt;&lt;/html&gt;</span>" )
+</pre></div>
+<p>class CreateNodeForm( webapp2.RequestHandler ):
+    def get( self ):
+        self.response.out.write( '<html><body>' )
+        self.response.out.write( """
+         <form action="/createnode" method="post">
+<table>
+<tr><td><label>node name</label></td><td><input id="nodename" name="nodename" type="text"/></td></tr>
+<tr><td><label>id</label></td><td><input id="id" name="id" type="text"/></td></tr>
+<tr><td><label>parent id</label></td><td><input id="parentid" name="parentid" type="text"/></td></tr>
+<tr><td></td><td><input type="submit"/></td></tr>
+</table>
+</form>
+        """ )
+        self.response.out.write( "</body></html>" )</p>
+<h1 id="todo-use-template-system_1">TODO: use template system</h1>
+<p>class DeleteNode( webapp2.RequestHandler ):
+  def get( self ):
+    self.response.out.write( '<html><body>' )
+    self.response.write( 'Delete uses POST' )
+    self.response.out.write( "</body></html>" )</p>
+<p>def post( self ):
+    self.response.out.write( '<html><body>' )
+    post_values = self.request.POST</body></html></p>
+<div class="highlight"><pre><span></span># todo extract to helper for input validation and sanitization
+id = post_values[ "id" ]
+</pre></div>
+<h1 id="q-dbquery-node-keys_only-is-faster-and-cheaper-than-retrieving-the-entities">q = db.Query( Node )    # keys_only is faster and cheaper than retrieving the entities</h1>
+<h1 id="qfilter-id-id">q.filter( "id=" , id )</h1>
+<div class="highlight"><pre><span></span>q = Node.all( keys_only = True ).filter( "id=", id )
+node_to_delete = q.run()
+</pre></div>
+<h1 id="dbdelete">db.delete( )</h1>
+<h1 id="node_key-key">node_key =          # <strong>key</strong></h1>
+<div class="highlight"><pre><span></span>self.response.out.write( "%s , %s , %s ( %s )<span class="nt">&lt;br/&gt;</span>" % ( "name" , id , "parent_id" , node_to_delete ) )
+
+self.response.out.write( "<span class="nt">&lt;/body&gt;&lt;/html&gt;</span>" )
+</pre></div>
+<h1 id="url-handler-below-">url handler below -----------------------------</h1>
+<p>app = webapp2.WSGIApplication( [
+  ( '/', MainPage ),
+  ( '/listnodes' , ListNodes ),
+  ( '/createnode' , CreateNode ),
+  ( '/createnodeform' , CreateNodeForm ),
+  ( '/deletenode' , DeleteNode )
+], debug = True )</p>
+<p>def handle_404 (request , response , exception) :
+    template_dictionary = { 'title' : 'ERROR 404' , 'body_content' : exception.status }
+    template = jinja_environment.get_template ( 'templates/error.html' )
+    response.write ( template.render ( template_dictionary ) )
+    response.set_status ( exception.status_int )</p>
+<p>def handle_500 (request , response , exception) :
+    logging.error ( traceback.print_exc ( ) )
+    logging.error ( exception )
+    template_dictionary = { 'title' : 'Meow' , 'body_content' : 'Meow.  Meow meow meow, meow meow.' }
+    template = jinja_environment.get_template ( 'templates/error.html' )
+    response.write ( template.render ( template_dictionary ) )
+    response.set_status ( 500 )</p>
+<p>app.error_handlers [ 404 ] = handle_404
+app.error_handlers [ 500 ] = handle_500</p>
+</li>
+</ul>
             <aside>
             <hr/>
             <nav>
@@ -456,7 +441,7 @@ This is independent of and not a replacement for version control!</p>
             <time pubdate="pubdate" datetime="2013-01-26T15:01:00-08:00">Jan 26, 2013</time>
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#programming-ref">programming</a> 
-            <h4>~1002 words</h4>
+            <h4>~969 words</h4>
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article"> 
                 <li><a href="/tags.html#google-app-engine-ref">google app engine
