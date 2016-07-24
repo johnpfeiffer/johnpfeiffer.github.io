@@ -11644,4 +11644,431 @@ Setting up libsdl-ttf2.0-0 (2.0.9-1) ...
 &lt;h2 id="download-locations"&gt;download locations&lt;/h2&gt;
 &lt;p&gt;&lt;a href="http://www.centos.org"&gt;http://www.centos.org&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;&lt;a href="http://download.virtualbox.org/virtualbox/rpm/rhel/"&gt;http://download.virtualbox.org/virtualbox/rpm/rhel/&lt;/a&gt; &lt;/p&gt;
-&lt;p&gt;&lt;a href="http://download.virtualbox.org/virtualbox/debian/sun_vbox.asc"&gt;http://download.virtualbox.org/virtualbox/debian/sun_vbox.asc&lt;/a&gt;&lt;/p&gt;</summary><category term="virtualbox"></category><category term="centos"></category></entry></feed>
+&lt;p&gt;&lt;a href="http://download.virtualbox.org/virtualbox/debian/sun_vbox.asc"&gt;http://download.virtualbox.org/virtualbox/debian/sun_vbox.asc&lt;/a&gt;&lt;/p&gt;</summary><category term="virtualbox"></category><category term="centos"></category></entry><entry><title>firewall iptables ufw ssh https nat forwarding redirect</title><link href="https://blog.john-pfeiffer.com/firewall-iptables-ufw-ssh-https-nat-forwarding-redirect/" rel="alternate"></link><published>2009-01-01T00:00:00-08:00</published><author><name>john pfeiffer</name></author><id>tag:blog.john-pfeiffer.com,2009-01-01:firewall-iptables-ufw-ssh-https-nat-forwarding-redirect/</id><summary type="html">
+&lt;p&gt;iptables is the tool to create a firewall in linux (manipulate the tables provided by the kernel firewall aka the netfilter)
+&lt;a href="https://en.wikipedia.org/wiki/Netfilter"&gt;https://en.wikipedia.org/wiki/Netfilter&lt;/a&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;which iptables
+sudo /sbin/iptables --version
+&lt;/pre&gt;&lt;/div&gt;
+&lt;h2 id="most-common-commands"&gt;Most common commands&lt;/h2&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;iptables -nvL
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;output the rules in the default "FILTER" table (INPUT, OUTPUT) in numeric , verbose, List all rules&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;a href="http://ipset.netfilter.org/iptables.man.html"&gt;http://ipset.netfilter.org/iptables.man.html&lt;/a&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;iptables -nvL --line-numbers
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;numeric so no hostname lookups, verbose, List the rules in the chain&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id="uncomplicated-firewall-ufw"&gt;Uncomplicated Firewall UFW&lt;/h2&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;sudo su
+ufw status verbose
+ufw allow 22
+ufw allow 443
+ufw default deny incoming
+ufw default deny outgoing
+ufw enable
+ufw status verbose
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;This is a much simpler way to configure some basic rules and enable the firewall
+Allowing 22 (SSH) and 443 (HTTPS) and denying all other incoming and outgoing traffic&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;ufw delete allow 443
+ufw show raw
+ufw disable
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;removing a rule is as simple as prefixing the allow or deny command with delete
+disabling the firewall allows all traffic&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;a href="https://wiki.ubuntu.com/UncomplicatedFirewall"&gt;https://wiki.ubuntu.com/UncomplicatedFirewall&lt;/a&gt;&lt;/p&gt;
+&lt;h2 id="interactive-commands"&gt;Interactive commands&lt;/h2&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;iptables -D INPUT 5
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;delete the 5th line&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;em&gt;don't forget chmod +x firewall-script-filename.sh and /sbin/service iptables save&lt;/em&gt;&lt;/p&gt;
+&lt;h3 id="iptables-allow-ping-with-a-ratelimit"&gt;iptables allow ping with a ratelimit&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;iptables -A INPUT -p icmp -m limit --limit 10/second -j ACCEPT
+iptables -A OUPUT -p icmp -j ACCEPT
+&amp;gt; allow 10 inbound icmp packets (not tcp nor udp) per second and allow all icmp traffic outbound
+
+iptables -A INPUT -p icmp --icmp-type echo-request -j ACCEPT
+&amp;gt; echo-request = 8 in numeric
+
+iptables -A OUTPUT -p icmp --icmp-type echo-reply -j ACCEPT
+&amp;gt; Allow outgoing ping replies, echo reply = 0 in numeric
+&lt;/pre&gt;&lt;/div&gt;
+&lt;h3 id="clean-out-the-old-iptables-very-insecure-settings"&gt;Clean out the old iptables - very insecure settings&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;iptables -F
+iptables --delete-chain
+iptables -t nat -F
+iptables -t mangle -F
+
+iptables -P INPUT ACCEPT
+iptables -P FORWARD ACCEPT
+iptables -P OUTPUT ACCEPT
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Flush out all of the iptables and delete all of the chains (including the nat and mangle tables)
+Set the default policies to accept all packets&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id="allow-ssh-ping-and-established-but-block-all-by-default"&gt;Allow SSH, ping, and Established but block all by default&lt;/h3&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt; 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="ch"&gt;#!/bin/sh&lt;/span&gt;
+iptables -I INPUT &lt;span class="m"&gt;1&lt;/span&gt; -i lo -j ACCEPT
+iptables -I OUTPUT &lt;span class="m"&gt;1&lt;/span&gt; -o lo -j ACCEPT
+&amp;gt; Always allow the loopback device
+
+iptables -A INPUT -p tcp --dport &lt;span class="m"&gt;22&lt;/span&gt; -j ACCEPT
+iptables -A OUTPUT -p tcp --sport &lt;span class="m"&gt;22&lt;/span&gt; -j ACCEPT
+&amp;gt; allow SSH server to accept connections
+
+iptables -A INPUT -i eth1 -p tcp --dport &lt;span class="m"&gt;22&lt;/span&gt; -j ACCEPT
+iptables -A OUTPUT -o eth1 -p tcp --sport &lt;span class="m"&gt;22&lt;/span&gt; -j ACCEPT
+&amp;gt; ssh server on eth1 on port 22
+
+iptables -P INPUT DROP
+iptables -P FORWARD DROP
+iptables -P OUTPUT DROP
+&amp;gt; default to block all traffic
+
+iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+&amp;gt; Accept packets belonging to established and related connections
+
+iptables -A INPUT -i eth1 -p icmp --icmp-type echo-request -j ACCEPT
+&amp;gt; Allow incoming ping requests from eth1 , echo-request &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="m"&gt;8&lt;/span&gt; in numeric
+
+iptables -A OUTPUT -o eth1 -p icmp --icmp-type echo-reply -j ACCEPT
+&amp;gt; Allow outgoing ping replies to eth1 , &lt;span class="nb"&gt;echo&lt;/span&gt; &lt;span class="nv"&gt;reply&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="m"&gt;0&lt;/span&gt; in numeric
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;hr/&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;cat /proc/sys/net/ipv4/ip_forward
+echo 1 &amp;gt; /proc/sys/net/ipv4/ip_forward
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;enable packet forwarding by the kernel, required to enable routing (especially with dual nics)&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id="bash-script-to-set-iptables-during-initd"&gt;bash script to set iptables during init.d&lt;/h3&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt; 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="ch"&gt;#!/bin/bash&lt;/span&gt;
+&lt;span class="c1"&gt;# script to set the initial firewall state as very restrictive&lt;/span&gt;
+&lt;span class="c1"&gt;# chmod +x SCRIPTNAME.sh&lt;/span&gt;
+&lt;span class="c1"&gt;# cd /etc/init.d&lt;/span&gt;
+&lt;span class="c1"&gt;# sudo update-rc.d SCRIPTNAME.sh defaults&lt;/span&gt;
+&lt;span class="c1"&gt;# sudo update-rc.d -f SCRIPTNAME.sh remove&lt;/span&gt;
+&lt;span class="c1"&gt;# or add it to /etc/rc.d/rc.local (which runs once after all other scripts)&lt;/span&gt;
+
+&lt;span class="c1"&gt;# clear any existing firewall&lt;/span&gt;
+iptables -F
+iptables -X
+iptables -F -t mangle
+iptables -F -t nat
+iptables -P INPUT DROP
+iptables -P FORWARD DROP
+iptables -P OUTPUT DROP
+
+&lt;span class="c1"&gt;# Protect against SYN flood attacks (see http://cr.yp.to/syncookies.html).&lt;/span&gt;
+&lt;span class="nb"&gt;echo&lt;/span&gt; &lt;span class="m"&gt;1&lt;/span&gt; &amp;gt; /proc/sys/net/ipv4/tcp_syncookies
+
+&lt;span class="c1"&gt;# Allow loopback&lt;/span&gt;
+iptables -A INPUT -i lo -j ACCEPT
+iptables -A OUTPUT -o lo -j ACCEPT
+
+&lt;span class="c1"&gt;# Allow DNS queries&lt;/span&gt;
+iptables -A OUTPUT -p udp --dport &lt;span class="m"&gt;53&lt;/span&gt; -m state --state NEW -j ACCEPT
+iptables -A INPUT -p udp --sport &lt;span class="m"&gt;53&lt;/span&gt; --dport 1024:65535  -m state --state ESTABLISHED -j ACCEPT
+
+&lt;span class="c1"&gt;# Allow NTP (query time server)&lt;/span&gt;
+iptables -A INPUT -p udp --dport &lt;span class="m"&gt;123&lt;/span&gt; -j ACCEPT
+iptables -A OUTPUT -p udp --sport &lt;span class="m"&gt;123&lt;/span&gt; -j ACCEPT
+
+&lt;span class="c1"&gt;# Allow SSH on port 22&lt;/span&gt;
+iptables -A INPUT -p tcp --dport &lt;span class="m"&gt;22&lt;/span&gt; -m state --state NEW,ESTABLISHED -j ACCEPT
+iptables -A OUTPUT -p tcp --sport &lt;span class="m"&gt;22&lt;/span&gt; -m state --state NEW,ESTABLISHED -j ACCEPT
+
+&lt;span class="c1"&gt;# Allow incoming HTTPS&lt;/span&gt;
+iptables -A INPUT -p tcp -s 0/0 --sport 1024:65535 --dport &lt;span class="m"&gt;443&lt;/span&gt; -m state --state NEW,ESTABLISHED -j ACCEPT
+iptables -A OUTPUT -p tcp -s 0/0 --sport &lt;span class="m"&gt;443&lt;/span&gt; --dport 1024:65535 -m state --state ESTABLISHED -j ACCEPT
+
+&lt;span class="c1"&gt;# Allow outgoing HTTPS (note state for INPUT is only ESTABLISHED)&lt;/span&gt;
+iptables -A OUTPUT -p tcp --dport &lt;span class="m"&gt;443&lt;/span&gt; -m state --state NEW,ESTABLISHED -j ACCEPT
+iptables -A INPUT -p tcp -s 0/0 --sport &lt;span class="m"&gt;443&lt;/span&gt; --dport 1024:65535 -m state --state ESTABLISHED -j ACCEPT
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;h3 id="web-server"&gt;Web Server&lt;/h3&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt; 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="ch"&gt;#!/bin/sh&lt;/span&gt;
+iptables -F
+iptables --delete-chain
+iptables -t nat -F
+iptables -t mangle -F
+
+iptables -P INPUT ACCEPT
+iptables -P FORWARD ACCEPT
+iptables -P OUTPUT ACCEPT
+
+&lt;span class="c1"&gt;# LOOPBACK 127.0.0.1&lt;/span&gt;
+iptables -I INPUT &lt;span class="m"&gt;1&lt;/span&gt; -i lo -j ACCEPT
+iptables -I OUTPUT &lt;span class="m"&gt;1&lt;/span&gt; -o lo -j ACCEPT
+
+&lt;span class="c1"&gt;# SSH&lt;/span&gt;
+iptables -A INPUT -p tcp --dport &lt;span class="m"&gt;22&lt;/span&gt; -j ACCEPT
+iptables -A OUTPUT -p tcp --sport &lt;span class="m"&gt;22&lt;/span&gt; -j ACCEPT
+
+&lt;span class="c1"&gt;# NTP&lt;/span&gt;
+iptables -A INPUT -p udp --dport &lt;span class="m"&gt;123&lt;/span&gt; -j ACCEPT
+iptables -A OUTPUT -p udp --sport &lt;span class="m"&gt;123&lt;/span&gt; -j ACCEPT
+
+&lt;span class="c1"&gt;# DNS&lt;/span&gt;
+iptables -A OUTPUT -p udp --dport &lt;span class="m"&gt;53&lt;/span&gt; -m state --state NEW -j ACCEPT
+iptables -A INPUT -p udp --sport &lt;span class="m"&gt;53&lt;/span&gt; --dport 1024:65535  -m state --state ESTABLISHED -j ACCEPT
+
+&lt;span class="c1"&gt;# HTTP&lt;/span&gt;
+iptables -A INPUT -p tcp --dport &lt;span class="m"&gt;80&lt;/span&gt; -j ACCEPT
+iptables -A OUTPUT -p tcp --sport &lt;span class="m"&gt;80&lt;/span&gt; -j ACCEPT
+
+
+&lt;span class="c1"&gt;# DROP ALL UNDEFINED PACKETS&lt;/span&gt;
+iptables -P INPUT DROP
+iptables -P FORWARD DROP
+iptables -P OUTPUT DROP
+
+&lt;span class="c1"&gt;# PING&lt;/span&gt;
+&lt;span class="c1"&gt;# iptables -A INPUT -p icmp -m limit --limit 6/second -j ACCEPT&lt;/span&gt;
+&lt;span class="c1"&gt;# iptables -A OUPUT -p icmp -j ACCEPT&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;h3 id="web-and-xmpp-server"&gt;Web and XMPP Server&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;vi /etc/iptables.rules.xmpp&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;*filter
+:INPUT DROP [3:572]
+:FORWARD DROP [0:0]
+:OUTPUT ACCEPT [10:1744]
+-A INPUT -i lo -j ACCEPT
+-A INPUT -p tcp -m tcp ! --tcp-flags FIN,SYN,RST,ACK SYN -m state --state NEW -j DROP
+-A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
+-A INPUT -p tcp -m tcp --dport 22 -m state --state NEW -j ACCEPT
+-A INPUT -p tcp -m tcp --dport 80 -m state --state NEW -j ACCEPT
+-A INPUT -p udp -m udp --dport 161 -m state --state NEW -j ACCEPT
+-A INPUT -p tcp -m tcp --dport 443 -m state --state NEW -j ACCEPT
+-A INPUT -p tcp -m tcp --dport 5222 -m state --state NEW -j ACCEPT
+-A INPUT -p tcp -m tcp --dport 5223 -m state --state NEW -j ACCEPT
+-A INPUT -p udp -m udp --dport 137 -j ACCEPT
+-A INPUT -p udp -m udp --dport 138 -j ACCEPT
+-A INPUT -p icmp -m icmp --icmp-type 8 -j ACCEPT
+-A INPUT -p icmp -m icmp --icmp-type 11 -j ACCEPT
+-A OUTPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
+-A OUTPUT -o lo -j ACCEPT
+-A OUTPUT -p tcp -m tcp --dport 22 -m state --state NEW -j ACCEPT
+-A OUTPUT -p udp -m udp --dport 53 -m state --state NEW -j ACCEPT
+-A OUTPUT -p udp -m udp --sport 161 -m state --state NEW -j ACCEPT
+-A OUTPUT -m state --state NEW -j LOG
+COMMIT
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;&lt;code&gt;iptables-restore &amp;lt; /etc/iptables.rules.xmpp&lt;/code&gt;&lt;/p&gt;
+&lt;hr/&gt;
+&lt;h3 id="ntp"&gt;NTP&lt;/h3&gt;
+&lt;p&gt;&lt;em&gt;Getting the time and date synchronized through a restricted firewall&lt;/em&gt;&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1
+2
+3
+4
+5
+6
+7
+8&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="ch"&gt;#!/bin/bash&lt;/span&gt;
+&lt;span class="c1"&gt;# ntpdate port 123&lt;/span&gt;
+iptables -A INPUT -p udp --dport &lt;span class="m"&gt;123&lt;/span&gt; -j ACCEPT
+iptables -A OUTPUT -p udp --sport &lt;span class="m"&gt;123&lt;/span&gt; -j ACCEPT
+
+&lt;span class="c1"&gt;# variation where rules are inserted as first items in the Tables&lt;/span&gt;
+&lt;span class="c1"&gt;# iptables -I INPUT 1 -p udp --dport 123 -j ACCEPT&lt;/span&gt;
+&lt;span class="c1"&gt;# iptables -I OUTPUT 1 -p udp --sport 123 -j ACCEPT&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Installing NTP...&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;sudo apt-get install ntp
+nano /etc/ntp.conf
+server ntp.ubuntu.com
+server pool.ntp.org
+
+/etc/init.d/ntp restart
+ls -ahl /etc/cron.daily   &amp;gt; verify that ntp is +x executable
+ntpq -p                   &amp;gt; verify the service is working
+
+&amp;gt; MANUAL = ntpdate pool.ntp.org will now return socket 123 is in use
+&lt;/pre&gt;&lt;/div&gt;
+&lt;hr/&gt;
+&lt;h3 id="nat-forwarding"&gt;NAT forwarding&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;iptables -A FORWARD -i eth1 -o eth0 -j ACCEPT
+iptables -A FORWARD -i eth0 -o eth1 -j ACCEPT
+iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;assuming that eth0 is your WAN and eth1 is your LAN&lt;/p&gt;
+&lt;p&gt;accept all forwarding from eth1 to eth0 and back&lt;/p&gt;
+&lt;p&gt;enable "nat" so that packets are addressed properly&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr/&gt;
+&lt;h3 id="cifs"&gt;CIFS&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;iptables -A INPUT -p tcp -s 10.10.10.250 --sport 445 -d 0/0 -j ACCEPT
+iptables -A OUTPUT -p tcp -s 0/0 --sport 1024:65535 -d 10.10.10.250 --dport 445 -m state --state NEW,ESTABLISHED -j ACCEPT
+&amp;gt; CIFS has been simplified to just use 445 TCP first...
+
+netbios-ns - 137/tcp # NETBIOS Name Service
+netbios-dgm - 138/tcp # NETBIOS Datagram Service
+netbios-ssn - 139/tcp # NETBIOS session service
+microsoft-ds - 445/tcp # if you are using Active Directory
+&lt;/pre&gt;&lt;/div&gt;
+&lt;h3 id="allow-ad-lookups-ldapldaps"&gt;Allow AD Lookups LDAP/LDAPS&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;iptables -A INPUT -p tcp -s 0/0 --sport 1024:65535 --dport 389 -m state --state NEW,ESTABLISHED -j ACCEPT
+iptables -A OUTPUT -p tcp -s 0/0 --sport 389 --dport 1024:65535 -m state --state ESTABLISHED -j ACCEPT
+
+iptables -A OUTPUT -p tcp --dport 389 -m state --state NEW,ESTABLISHED -j ACCEPT
+iptables -A INPUT -p tcp -s 0/0 --sport 389 --dport 1024:65535 -m state --state ESTABLISHED -j ACCEPT
+
+iptables -A INPUT -p tcp -s 0/0 --sport 1024:65535 --dport 636 -m state --state NEW,ESTABLISHED -j ACCEPT
+iptables -A OUTPUT -p tcp -s 0/0 --sport 636 --dport 1024:65535 -m state --state ESTABLISHED -j ACCEPT
+
+iptables -A OUTPUT -p tcp --dport 636 -m state --state NEW,ESTABLISHED -j ACCEPT
+iptables -A INPUT -p tcp -s 0/0 --sport 636 --dport 1024:65535 -m state --state ESTABLISHED -j ACCEPT
+&lt;/pre&gt;&lt;/div&gt;
+&lt;hr/&gt;
+&lt;h3 id="dmz-setup-with-dual-nic"&gt;DMZ Setup with dual nic&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;ATMOS = 10.10.254.195&lt;/li&gt;
+&lt;li&gt;LAN (router?) =  10.10.254.1&lt;/li&gt;
+&lt;li&gt;eth0 = LAN  10.10.254.254&lt;/li&gt;
+&lt;li&gt;eth1 = WAN 172.16.255.254&lt;/li&gt;
+&lt;li&gt;eth2 = DMZ  192.168.50.1&lt;/li&gt;
+&lt;li&gt;Router 172.16.255.1&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id="forward-traffic-between-dmz-and-lan"&gt;forward traffic between DMZ and LAN&lt;/h4&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;iptables -A FORWARD -i eth0 -o eth2 -m state --state NEW,ESTABLISHED,RELATED -j ACCEPT
+iptables -A FORWARD -i eth2 -o eth0 -m state --state ESTABLISHED,RELATED -j ACCEPT
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;forward traffic between DMZ and WAN servers SMTP, Mail etc&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;iptables -A FORWARD -i eth2 -o eth1 -m state --state ESTABLISHED,RELATED -j ACCEPT
+iptables -A FORWARD -i eth1 -o eth2 -m state --state NEW,ESTABLISHED,RELATED -j ACCEPT
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Route incoming SMTP (port 25 ) traffic to DMZ server 192.168.2.2
+    iptables -t nat -A PREROUTING -p tcp -i eth1 -d 202.54.1.1 --dport 25 -j DNAT --to-destination 192.168.2.2&lt;/p&gt;
+&lt;p&gt;Route incoming HTTP (port 80 ) traffic to DMZ server load balancer IP 192.168.2.3
+    iptables -t nat -A PREROUTING -p tcp -i eth1 -d 202.54.1.1 --dport 80 -j DNAT --to-destination 192.168.2.3&lt;/p&gt;
+&lt;p&gt;Route incoming HTTPS (port 443 ) traffic to DMZ server reverse load balancer IP 192.168.2.4
+    iptables -t nat -A PREROUTING -p tcp -i eth1 -d 202.54.1.1 --dport 443 -j DNAT --to-destination 192.168.2.4&lt;/p&gt;
+&lt;p&gt;End DMZ .. Add other rules&lt;/p&gt;
+&lt;/blockquote&gt;</summary><category term="linux"></category><category term="iptables"></category><category term="firewall"></category><category term="NAT"></category><category term="ufw"></category></entry></feed>
