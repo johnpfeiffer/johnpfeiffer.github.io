@@ -151,32 +151,7 @@ iptables -P OUTPUT ACCEPT
 Set the default policies to accept all packets</p>
 </blockquote>
 <h3 id="allow-ssh-ping-and-established-but-block-all-by-default">Allow SSH, ping, and Established but block all by default</h3>
-<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
- 2
- 3
- 4
- 5
- 6
- 7
- 8
- 9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="ch">#!/bin/sh</span>
+<div class="highlight"><pre><span></span><span class="ch">#!/bin/sh</span>
 iptables -I INPUT <span class="m">1</span> -i lo -j ACCEPT
 iptables -I OUTPUT <span class="m">1</span> -o lo -j ACCEPT
 &gt; Always allow the loopback device
@@ -203,7 +178,6 @@ iptables -A INPUT -i eth1 -p icmp --icmp-type echo-request -j ACCEPT
 iptables -A OUTPUT -o eth1 -p icmp --icmp-type echo-reply -j ACCEPT
 &gt; Allow outgoing ping replies to eth1 , <span class="nb">echo</span> <span class="nv">reply</span> <span class="o">=</span> <span class="m">0</span> in numeric
 </pre></div>
-</td></tr></table>
 <hr/>
 <div class="highlight"><pre><span></span>cat /proc/sys/net/ipv4/ip_forward
 echo 1 &gt; /proc/sys/net/ipv4/ip_forward
@@ -212,49 +186,7 @@ echo 1 &gt; /proc/sys/net/ipv4/ip_forward
 <p>enable packet forwarding by the kernel, required to enable routing (especially with dual nics)</p>
 </blockquote>
 <h3 id="bash-script-to-set-iptables-during-initd">bash script to set iptables during init.d</h3>
-<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
- 2
- 3
- 4
- 5
- 6
- 7
- 8
- 9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-27
-28
-29
-30
-31
-32
-33
-34
-35
-36
-37
-38
-39
-40
-41
-42
-43</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="ch">#!/bin/bash</span>
+<div class="highlight"><pre><span></span><span class="ch">#!/bin/bash</span>
 <span class="c1"># script to set the initial firewall state as very restrictive</span>
 <span class="c1"># chmod +x SCRIPTNAME.sh</span>
 <span class="c1"># cd /etc/init.d</span>
@@ -298,47 +230,8 @@ iptables -A OUTPUT -p tcp -s 0/0 --sport <span class="m">443</span> --dport 1024
 iptables -A OUTPUT -p tcp --dport <span class="m">443</span> -m state --state NEW,ESTABLISHED -j ACCEPT
 iptables -A INPUT -p tcp -s 0/0 --sport <span class="m">443</span> --dport 1024:65535 -m state --state ESTABLISHED -j ACCEPT
 </pre></div>
-</td></tr></table>
 <h3 id="web-server">Web Server</h3>
-<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
- 2
- 3
- 4
- 5
- 6
- 7
- 8
- 9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-27
-28
-29
-30
-31
-32
-33
-34
-35
-36
-37
-38
-39</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="ch">#!/bin/sh</span>
+<div class="highlight"><pre><span></span><span class="ch">#!/bin/sh</span>
 iptables -F
 iptables --delete-chain
 iptables -t nat -F
@@ -378,31 +271,30 @@ iptables -P OUTPUT DROP
 <span class="c1"># iptables -A INPUT -p icmp -m limit --limit 6/second -j ACCEPT</span>
 <span class="c1"># iptables -A OUPUT -p icmp -j ACCEPT</span>
 </pre></div>
-</td></tr></table>
 <h3 id="web-and-xmpp-server">Web and XMPP Server</h3>
 <p><code>vi /etc/iptables.rules.xmpp</code></p>
 <div class="highlight"><pre><span></span>*filter
-:INPUT DROP [3:572]
-:FORWARD DROP [0:0]
-:OUTPUT ACCEPT [10:1744]
+:INPUT DROP <span class="o">[</span>3:572<span class="o">]</span>
+:FORWARD DROP <span class="o">[</span>0:0<span class="o">]</span>
+:OUTPUT ACCEPT <span class="o">[</span>10:1744<span class="o">]</span>
 -A INPUT -i lo -j ACCEPT
 -A INPUT -p tcp -m tcp ! --tcp-flags FIN,SYN,RST,ACK SYN -m state --state NEW -j DROP
 -A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
--A INPUT -p tcp -m tcp --dport 22 -m state --state NEW -j ACCEPT
--A INPUT -p tcp -m tcp --dport 80 -m state --state NEW -j ACCEPT
--A INPUT -p udp -m udp --dport 161 -m state --state NEW -j ACCEPT
--A INPUT -p tcp -m tcp --dport 443 -m state --state NEW -j ACCEPT
--A INPUT -p tcp -m tcp --dport 5222 -m state --state NEW -j ACCEPT
--A INPUT -p tcp -m tcp --dport 5223 -m state --state NEW -j ACCEPT
--A INPUT -p udp -m udp --dport 137 -j ACCEPT
--A INPUT -p udp -m udp --dport 138 -j ACCEPT
--A INPUT -p icmp -m icmp --icmp-type 8 -j ACCEPT
--A INPUT -p icmp -m icmp --icmp-type 11 -j ACCEPT
+-A INPUT -p tcp -m tcp --dport <span class="m">22</span> -m state --state NEW -j ACCEPT
+-A INPUT -p tcp -m tcp --dport <span class="m">80</span> -m state --state NEW -j ACCEPT
+-A INPUT -p udp -m udp --dport <span class="m">161</span> -m state --state NEW -j ACCEPT
+-A INPUT -p tcp -m tcp --dport <span class="m">443</span> -m state --state NEW -j ACCEPT
+-A INPUT -p tcp -m tcp --dport <span class="m">5222</span> -m state --state NEW -j ACCEPT
+-A INPUT -p tcp -m tcp --dport <span class="m">5223</span> -m state --state NEW -j ACCEPT
+-A INPUT -p udp -m udp --dport <span class="m">137</span> -j ACCEPT
+-A INPUT -p udp -m udp --dport <span class="m">138</span> -j ACCEPT
+-A INPUT -p icmp -m icmp --icmp-type <span class="m">8</span> -j ACCEPT
+-A INPUT -p icmp -m icmp --icmp-type <span class="m">11</span> -j ACCEPT
 -A OUTPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
 -A OUTPUT -o lo -j ACCEPT
--A OUTPUT -p tcp -m tcp --dport 22 -m state --state NEW -j ACCEPT
--A OUTPUT -p udp -m udp --dport 53 -m state --state NEW -j ACCEPT
--A OUTPUT -p udp -m udp --sport 161 -m state --state NEW -j ACCEPT
+-A OUTPUT -p tcp -m tcp --dport <span class="m">22</span> -m state --state NEW -j ACCEPT
+-A OUTPUT -p udp -m udp --dport <span class="m">53</span> -m state --state NEW -j ACCEPT
+-A OUTPUT -p udp -m udp --sport <span class="m">161</span> -m state --state NEW -j ACCEPT
 -A OUTPUT -m state --state NEW -j LOG
 COMMIT
 </pre></div>
@@ -550,7 +442,7 @@ disabling the firewall allows all traffic</p>
             <time pubdate="pubdate" datetime="2009-01-01T00:00:00-08:00">Jan 1, 2009</time>
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#linux-ref">linux</a> 
-            <h4>~1904 words</h4>
+            <h4>~1799 words</h4>
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article"> 
                 <li><a href="/tags.html#firewall-ref">firewall
