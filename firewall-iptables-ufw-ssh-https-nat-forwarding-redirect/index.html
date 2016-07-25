@@ -76,7 +76,6 @@
         <div class="toc">
 <ul>
 <li><a href="#most-common-commands">Most common commands</a></li>
-<li><a href="#uncomplicated-firewall-ufw">Uncomplicated Firewall UFW</a></li>
 <li><a href="#interactive-commands">Interactive commands</a><ul>
 <li><a href="#iptables-allow-ping-with-a-ratelimit">iptables allow ping with a ratelimit</a></li>
 <li><a href="#clean-out-the-old-iptables-very-insecure-settings">Clean out the old iptables - very insecure settings</a></li>
@@ -94,6 +93,7 @@
 </li>
 </ul>
 </li>
+<li><a href="#uncomplicated-firewall-ufw">Uncomplicated Firewall UFW</a></li>
 </ul>
 </div>
         </nav>
@@ -118,29 +118,6 @@ sudo /sbin/iptables --version
 <blockquote>
 <p>numeric so no hostname lookups, verbose, List the rules in the chain</p>
 </blockquote>
-<h2 id="uncomplicated-firewall-ufw">Uncomplicated Firewall UFW</h2>
-<div class="highlight"><pre><span></span>sudo su
-ufw status verbose
-ufw allow 22
-ufw allow 443
-ufw default deny incoming
-ufw default deny outgoing
-ufw enable
-ufw status verbose
-</pre></div>
-<blockquote>
-<p>This is a much simpler way to configure some basic rules and enable the firewall
-Allowing 22 (SSH) and 443 (HTTPS) and denying all other incoming and outgoing traffic</p>
-</blockquote>
-<div class="highlight"><pre><span></span>ufw delete allow 443
-ufw show raw
-ufw disable
-</pre></div>
-<blockquote>
-<p>removing a rule is as simple as prefixing the allow or deny command with delete
-disabling the firewall allows all traffic</p>
-</blockquote>
-<p><a href="https://wiki.ubuntu.com/UncomplicatedFirewall">https://wiki.ubuntu.com/UncomplicatedFirewall</a></p>
 <h2 id="interactive-commands">Interactive commands</h2>
 <div class="highlight"><pre><span></span>iptables -D INPUT 5
 </pre></div>
@@ -528,12 +505,40 @@ iptables -A FORWARD -i eth1 -o eth2 -m state --state NEW,ESTABLISHED,RELATED -j 
     iptables -t nat -A PREROUTING -p tcp -i eth1 -d 202.54.1.1 --dport 443 -j DNAT --to-destination 192.168.2.4</p>
 <p>End DMZ .. Add other rules</p>
 </blockquote>
+<h2 id="uncomplicated-firewall-ufw">Uncomplicated Firewall UFW</h2>
+<p>The uncomplicated firewall is a much simpler way to configure some basic rules and enable the firewall</p>
+<div class="highlight"><pre><span></span>sudo su
+ufw status verbose
+ufw allow 22
+ufw allow 443
+ufw default deny incoming
+ufw default deny outgoing
+ufw enable
+ufw status verbose
+</pre></div>
+<blockquote>
+<p>Allowing 22 (SSH) and 443 (HTTPS) and denying all other incoming and outgoing traffic</p>
+</blockquote>
+<div class="highlight"><pre><span></span>ufw delete allow 443
+ufw show raw
+ufw disable
+</pre></div>
+<blockquote>
+<p>removing a rule is as simple as prefixing the allow or deny command with delete
+disabling the firewall allows all traffic</p>
+</blockquote>
+<p>Most unfortunately there are some basic gaps that make it not very production ready (i.e. if you know what you are doing just keep using iptables)
+1. ping, also known as icmp, packets (even just outbound) have to be handled in a very complex way, really not much better than iptables
+1. established connection traffic is not just easily allowed
+1. attempting to do something more complex very quickly requires very complex commands including just using iptables (lolwut)
+1. iptables -nvL becomes almost unreadable with the extra layer</p>
+<p><a href="https://wiki.ubuntu.com/UncomplicatedFirewall">https://wiki.ubuntu.com/UncomplicatedFirewall</a></p>
             <aside>
             <hr/>
             <nav>
             <ul class="articles_timeline">
  
-                <li class="next_article"><a href="https://blog.john-pfeiffer.com/how-to-install-virtualbox-3-on-centos-5-minimal/" title="Next: How To Install Virtualbox 3 on CentOS 5 Minimal">How To Install Virtualbox 3 on CentOS 5 Minimal</a> »</li>
+                <li class="next_article"><a href="https://blog.john-pfeiffer.com/systeminfo-hardware-diagnostic-listing-ram-processor-ubuntu-version-ps-top-iotop-lshw-dmidecode/" title="Next: Systeminfo hardware diagnostic listing ram processor ubuntu version ps top iotop lshw dmidecode">Systeminfo hardware diagnostic listing ram processor ubuntu version ps top iotop lshw dmidecode</a> »</li>
             </ul>
             </nav>
             </aside>
@@ -545,7 +550,7 @@ iptables -A FORWARD -i eth1 -o eth2 -m state --state NEW,ESTABLISHED,RELATED -j 
             <time pubdate="pubdate" datetime="2009-01-01T00:00:00-08:00">Jan 1, 2009</time>
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#linux-ref">linux</a> 
-            <h4>~1814 words</h4>
+            <h4>~1904 words</h4>
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article"> 
                 <li><a href="/tags.html#firewall-ref">firewall
@@ -555,7 +560,7 @@ iptables -A FORWARD -i eth1 -o eth2 -m state --state NEW,ESTABLISHED,RELATED -j 
                     <span>1</span>
 </a></li>
                 <li><a href="/tags.html#linux-ref">linux
-                    <span>6</span>
+                    <span>7</span>
 </a></li>
                 <li><a href="/tags.html#NAT-ref">NAT
                     <span>1</span>

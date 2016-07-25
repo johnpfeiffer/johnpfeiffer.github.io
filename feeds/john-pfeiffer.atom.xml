@@ -690,10 +690,18 @@ cd /opt/goprojects/src/github.com/johnpfeiffer/YOURPROJECT
 &lt;li&gt;It's really easy to do chef wrong: nested roles and recipes that keep exploding exponentially with circular dependencies which make you think software development starts looking easy again.&lt;/li&gt;
 &lt;li&gt;Community cookbooks are written to allow deployment on every architecture ever created (Debian, Ubuntu, RedHat, Windows, SPARC, etc.) which makes them challenging to read and debug, almost impossible to customize to do what you actually want.&lt;/li&gt;
 &lt;li&gt;The ruby based DSL isn't bad but it's pretty annoying to constantly make syntax errors (which unless you're all TDD rambo and use Kitchen you'll find during the never ending waiting many minutes for a deployment to fail)&lt;/li&gt;
-&lt;li&gt;It's difficult to debug the non intuitive "compilation phase" and "execution phase" way chef does its dependency tree magic&lt;/li&gt;
+&lt;li&gt;It's difficult to debug the non intuitive "compilation phase" and "execution phase" way chef does its dependency tree magic, and the "shoot yourself in the foot" is compounded with the apparently edge case necessary compile time run executions&lt;/li&gt;
 &lt;li&gt;The "best practices" have changed 3 or 4 times (write your own custom cookbooks, leverage the community cookbooks, write a custom wrapper for the community cookbook, don't ever use set_unless even though it still exists, etc.) and the 6 layers of variable overrides makes it hard to keep track of what the actual output of a script will be (don't worry, they have pages of documentation explaining it)&lt;/li&gt;
 &lt;li&gt;The recommended "chef client server architecture" does not scale to really large numbers well and creates administration overhead and a lot of authorization complexity - and my preferred method with "chef solo" still requires an annoying amount of bootstrap setup on the target machines.&lt;/li&gt;
-&lt;li&gt;It tends to encourage long lived mutable servers (with their therefore necessary expensive and obnoxious biological caretakers).&lt;/li&gt;
+&lt;li&gt;Polling not only creates network congestion but worse creates windows of uncertainty about deployment state and the possibility of nodes silently dropping out &lt;a href="https://docs.chef.io/chef_client.html"&gt;https://docs.chef.io/chef_client.html&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Chef tends to encourage the pattern of long lived mutable servers (with their therefore necessary expensive and obnoxious biological caretakers)&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href="https://docs.chef.io/resource_common.html#lazy-evaluation"&gt;https://docs.chef.io/resource_common.html#lazy-evaluation&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://docs.chef.io/resource_common.html#run-in-compile-phase"&gt;https://docs.chef.io/resource_common.html#run-in-compile-phase&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="http://erik.hollensbe.org/2013/03/16/the-chef-resource-run-queue/"&gt;http://erik.hollensbe.org/2013/03/16/the-chef-resource-run-queue/&lt;/a&gt;&lt;/li&gt;
 &lt;/ol&gt;
 &lt;p&gt;So is there a simpler way to just reliably, reproducibly, build a box?&lt;/p&gt;
 &lt;h3 id="packer-to-the-rescue"&gt;Packer to the rescue&lt;/h3&gt;
@@ -2033,23 +2041,28 @@ dd if=/home/ubuntu/Desktop/ubuntu-14.04.1-server-amd64.iso of=/dev/sdc
 &lt;p&gt;&lt;a href="https://en.wikipedia.org/wiki/Advanced_Packaging_Tool"&gt;https://en.wikipedia.org/wiki/Advanced_Packaging_Tool&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;&lt;em&gt;Hint: Ubuntu is based upon Debian&lt;/em&gt;&lt;/p&gt;
 &lt;h3 id="apt-cache"&gt;apt-cache&lt;/h3&gt;
-&lt;p&gt;&lt;code&gt;apt-cache search ssh&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;apt-cache search ssh
+&lt;/pre&gt;&lt;/div&gt;
 &lt;blockquote&gt;
 &lt;p&gt;to find packages with the name ssh&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;p&gt;&lt;code&gt;apt-cache search ssh | grep server&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;apt-cache search ssh | grep server
+&lt;/pre&gt;&lt;/div&gt;
 &lt;blockquote&gt;
 &lt;p&gt;if there are too many results pipe to grep to filter down the results&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;p&gt;&lt;code&gt;apt-cache show ssh&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;apt-cache show ssh
+&lt;/pre&gt;&lt;/div&gt;
 &lt;blockquote&gt;
 &lt;p&gt;to show the details about a specific package&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;p&gt;&lt;code&gt;apt-cache showpkg ssh&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;apt-cache showpkg ssh
+&lt;/pre&gt;&lt;/div&gt;
 &lt;blockquote&gt;
 &lt;p&gt;to show more general info about a package&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;p&gt;&lt;code&gt;apt-cache depends ssh&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;apt-cache depends ssh
+&lt;/pre&gt;&lt;/div&gt;
 &lt;blockquote&gt;
 &lt;p&gt;to show the package dependencies&lt;/p&gt;
 &lt;/blockquote&gt;
@@ -2163,7 +2176,7 @@ cat /etc/lsb_release
 uname -a
 &lt;/pre&gt;&lt;/div&gt;
 &lt;blockquote&gt;
-&lt;p&gt;verify that your system has been upgraded (kernel too)&lt;/p&gt;
+&lt;p&gt;verify that your system has been upgraded (kernel upgrades often require a reboot to become loaded in memory))&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;h3 id="removing-packages-with-apt"&gt;removing packages with apt&lt;/h3&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;apt-get remove wget
@@ -2182,7 +2195,8 @@ uname -a
 &lt;p&gt;attempt to clean up packages that are no longer needed (i.e. old versions of dependencies or unused kernel images)&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;h3 id="apt-key"&gt;apt-key&lt;/h3&gt;
-&lt;p&gt;&lt;code&gt;sudo apt-key update&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;sudo apt-key update
+&lt;/pre&gt;&lt;/div&gt;
 &lt;blockquote&gt;
 &lt;p&gt;if apt errors: WARNING: The following packages cannot be authenticated&lt;/p&gt;
 &lt;/blockquote&gt;
@@ -2294,21 +2308,26 @@ An alternative to the usually stale OS pip version is to use the not entirely se
 wget -qO- https://bootstrap.pypa.io/get-pip.py | sudo python&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;ul&gt;
-&lt;li&gt;byobu = console terminal multi screen (survives network disconnects) &lt;a href="http://byobu.co"&gt;http://byobu.co&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;openssh-server libssl = the secure remote shell service and encryption dependency &lt;a href="http://packages.ubuntu.com/search?keywords=openssh-server"&gt;http://packages.ubuntu.com/search?keywords=openssh-server&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;build-essential = tools for compiling and building debian packages &lt;a href="http://packages.ubuntu.com/lucid/build-essential"&gt;http://packages.ubuntu.com/lucid/build-essential&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;elinks = cli browser (just in case your GUI dies and you need to research) &lt;a href="http://kmandla.wordpress.com/2011/01/13/a-comparison-of-text-based-browsers"&gt;http://kmandla.wordpress.com/2011/01/13/a-comparison-of-text-based-browsers&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;byobu = console terminal multi screen (survives network disconnects) &lt;a href="http://byobu.co"&gt;http://byobu.co&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;wget and curl = utilities to download files&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;elinks = cli browser (just in case your GUI dies and you need to research) &lt;a href="http://kmandla.wordpress.com/2011/01/13/a-comparison-of-text-based-browsers"&gt;http://kmandla.wordpress.com/2011/01/13/a-comparison-of-text-based-browsers&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
 &lt;li&gt;unzip and unrar = utilities to decompress compressed things&lt;/li&gt;
 &lt;li&gt;nano = a simple text editor (much easier than vi/vim for just writing new text)&lt;/li&gt;
-&lt;li&gt;wget and curl = utilities to download files&lt;/li&gt;
 &lt;li&gt;ntp = network time protocol client daemon to keep your clock in sync&lt;/li&gt;
 &lt;li&gt;rcconf = easier way to manage what services start at boot &lt;a href="https://packages.debian.org/jessie/rcconf"&gt;https://packages.debian.org/jessie/rcconf&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;dialog = user friendly dialog boxes for shell scripts (dependency for rcconf)&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;dialog = user friendly dialog boxes for shell scripts (dependency for rcconf)&lt;/p&gt;
+&lt;/li&gt;
 &lt;li&gt;
 &lt;p&gt;git-core = the distributed version control software that is eating the developer world&lt;/p&gt;
 &lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;python-setuptools = Sometimes required to install pip  &lt;a href="http://pythonhosted.org/setuptools"&gt;http://pythonhosted.org/setuptools&lt;/a&gt;&lt;/p&gt;
-&lt;/li&gt;
+&lt;li&gt;python-setuptools = Sometimes required to install pip  &lt;a href="http://pythonhosted.org/setuptools"&gt;http://pythonhosted.org/setuptools&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;icedtea = open java (plugin = browser java)&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;sudo apt-get install openconnect network-manager-openconnect network-manager-openconnect-gnome&lt;/p&gt;
@@ -2320,16 +2339,23 @@ wget -qO- https://bootstrap.pypa.io/get-pip.py | sudo python&lt;/p&gt;
 &lt;li&gt;
 &lt;p&gt;jdk = java development kit&lt;/p&gt;
 &lt;/li&gt;
-&lt;li&gt;iced-tea-7-plugin = open source java 7 support for browsers&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;&lt;code&gt;sudo apt-get install openjdk-8-jdk&lt;/code&gt;&lt;/p&gt;
+&lt;li&gt;
+&lt;p&gt;iced-tea-7-plugin = open source java 7 support for browsers&lt;/p&gt;
+&lt;p&gt;sudo apt-get install openjdk-8-jre&lt;/p&gt;
 &lt;blockquote&gt;
-&lt;p&gt;NOT SURE IN UTOPIC: sudo apt-get install openjdk-7-jre openjdk-7-jdk icedtea-7-plugin&lt;/p&gt;
+&lt;p&gt;for just the java runtime (thank goodness not Oracle Sun)&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;openjdk-8-jdk&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;for the full java development kit - needed for some packages to run correctly&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;h3 id="gui"&gt;GUI&lt;/h3&gt;
 &lt;p&gt;&lt;strong&gt;Xubuntu Desktop&lt;/strong&gt; is my preferred "lightweight" GUI for Ubuntu: &lt;a href="http://xubuntu.org"&gt;http://xubuntu.org&lt;/a&gt;&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;apt-get install -y chromium-browser pepperflashplugin-nonfree geany keepassx xdiskusage&lt;/code&gt;
-&lt;code&gt;apt-get install -y arandr rdesktop&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;apt-get install -y chromium-browser pepperflashplugin-nonfree geany keepassx xdiskusage
+apt-get install -y arandr rdesktop
+&lt;/pre&gt;&lt;/div&gt;
 &lt;ul&gt;
 &lt;li&gt;chromium-browser = opensource branch/clone of google chrome browser, &lt;/li&gt;
 &lt;li&gt;
@@ -2346,12 +2372,15 @@ wget -qO- https://bootstrap.pypa.io/get-pip.py | sudo python&lt;/p&gt;
 &lt;li&gt;
 &lt;p&gt;rdesktop = RDP client&lt;/p&gt;
 &lt;/li&gt;
-&lt;li&gt;grdesktop = gnome UI for rdesktop&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;&lt;code&gt;sudo echo "autologin-user=ubuntu" &amp;gt;&amp;gt;  /etc/lightdm/lightdm.conf.d/10-xubuntu.conf&lt;/code&gt;&lt;/p&gt;
+&lt;li&gt;
+&lt;p&gt;grdesktop = gnome UI for rdesktop&lt;/p&gt;
+&lt;p&gt;sudo echo "autologin-user=ubuntu" &amp;gt;&amp;gt;  /etc/lightdm/lightdm.conf.d/10-xubuntu.conf&lt;/p&gt;
 &lt;blockquote&gt;
 &lt;p&gt;Better yet use the UI and just choose auto login ;)&lt;/p&gt;
 &lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;TODO: &lt;em&gt;Disable guest user&lt;/em&gt;, *Disable crash reports: apport *&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;
 &lt;p&gt;dropbox = cloud file storage&lt;/p&gt;
@@ -2367,14 +2396,16 @@ sudo apt-key adv --keyserver pgp.mit.edu --recv-keys 5044912E&lt;/p&gt;
 &lt;/li&gt;
 &lt;/ul&gt;
 &lt;h3 id="music-and-video"&gt;music and video&lt;/h3&gt;
-&lt;p&gt;&lt;code&gt;sudo apt-get install ubuntu-restricted-extras vlc&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;sudo apt-get install ubuntu-restricted-extras vlc
+&lt;/pre&gt;&lt;/div&gt;
 &lt;ul&gt;
 &lt;li&gt;vlc = movies/music&lt;/li&gt;
 &lt;li&gt;ubuntu-restricted-extras = all of the encumbered with licenses packages to generally just watch or listen to stuff :(&lt;/li&gt;
 &lt;/ul&gt;
 &lt;h4 id="spotify-in-ubuntu-1504"&gt;spotify in ubuntu 15.04&lt;/h4&gt;
 &lt;p&gt;&lt;a href="https://www.spotify.com/us/download/linux/"&gt;https://www.spotify.com/us/download/linux/&lt;/a&gt;&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys D2C19886&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys D2C19886
+&lt;/pre&gt;&lt;/div&gt;
 &lt;blockquote&gt;
 &lt;p&gt;trust the spotify repository&lt;/p&gt;
 &lt;p&gt;libnss3-1d : Depends: libnss3 (= 2:3.17.4-0ubuntu1) but 2:3.19.2-0ubuntu15.04.1 is to be installed
@@ -2385,8 +2416,9 @@ spotify is behind the times or only wants to support 14.04 and LTS releases =(&l
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;dpkg -i libnss3_3.17.4-0ubuntu1_amd64.deb
 apt-get install spotify-client
 apt-get -f install
+
+spotify: error while loading shared libraries: libgcrypt.so.11: cannot open shared object file: No such file or directory
 &lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;&lt;code&gt;spotify: error while loading shared libraries: libgcrypt.so.11: cannot open shared object file: No such file or directory&lt;/code&gt;&lt;/p&gt;
 &lt;blockquote&gt;
 &lt;p&gt;what fun, the internet explains 15.04 (vivid) and 15.10 (wily) use the new libgcrypt20 so...&lt;/p&gt;
 &lt;/blockquote&gt;
@@ -2400,10 +2432,12 @@ apt-get install --reinstall spotify-client
 &lt;li&gt;&lt;code&gt;sudo apt-get install pithos&lt;/code&gt;&lt;/li&gt;
 &lt;/ul&gt;
 &lt;h4 id="more-codecs-and-dvd-playback"&gt;more codecs and DVD playback&lt;/h4&gt;
-&lt;p&gt;&lt;code&gt;sudo apt-get install ffmpeg gstreamer0.10-plugins-bad lame libavcodec-extra&lt;/code&gt;
-&lt;code&gt;sudo /usr/share/doc/libdvdread4/install-css.sh&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;sudo apt-get install ffmpeg gstreamer0.10-plugins-bad lame libavcodec-extra
+sudo /usr/share/doc/libdvdread4/install-css.sh
+&lt;/pre&gt;&lt;/div&gt;
 &lt;h2 id="packages-you-will-probably-want-to-remove"&gt;Packages you will probably want to remove&lt;/h2&gt;
-&lt;p&gt;&lt;code&gt;apt-get remove brltty&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;apt-get remove brltty
+&lt;/pre&gt;&lt;/div&gt;
 &lt;blockquote&gt;
 &lt;p&gt;unless you are using braille on your computer&lt;/p&gt;
 &lt;/blockquote&gt;
@@ -2503,21 +2537,21 @@ manually verify the changes by examining all of the boot menu options (i.e. find
 &lt;li&gt;&lt;code&gt;passwd NEWUSERNAME&lt;/code&gt;&lt;/li&gt;
 &lt;li&gt;mkdir -p /home/NEWUSERNAME/.ssh&lt;/li&gt;
 &lt;li&gt;vi /home/NEWUSERNAME/.ssh/authorized_keys&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;visudo&lt;/p&gt;
-&lt;h1 id="includedir-etcsudoersd"&gt;includedir /etc/sudoers.d&lt;/h1&gt;
-&lt;p&gt;NEWUSERNAME    ALL = (ALL) NOPASSWD: ALL&lt;/p&gt;
-&lt;/li&gt;
+&lt;li&gt;visudo
+    &lt;code&gt;#includedir /etc/sudoers.d&lt;/code&gt;
+&lt;code&gt;NEWUSERNAME    ALL = (ALL) NOPASSWD: ALL&lt;/code&gt;&lt;/li&gt;
 &lt;/ol&gt;
 &lt;blockquote&gt;
-&lt;p&gt;of course set the timezone to UTC and use network time protocol
-1. dpkg-reconfigure tzdata
-1. apt-get update
-1. apt-get install byobu vim ntp
-1. Secure SSH by removing root login with vi /etc/ssh/sshd_config: &lt;code&gt;PermitRootLogin no&lt;/code&gt; , &lt;code&gt;PasswordAuthentication no&lt;/code&gt;
-1. Optionally change the SSH port to something different from the default: &lt;code&gt;Port 22&lt;/code&gt;
-1. /etc/init.d/ssh restart&lt;/p&gt;
+&lt;p&gt;of course set the timezone to UTC and use network time protocol&lt;/p&gt;
 &lt;/blockquote&gt;
+&lt;ol&gt;
+&lt;li&gt;dpkg-reconfigure tzdata&lt;/li&gt;
+&lt;li&gt;apt-get update&lt;/li&gt;
+&lt;li&gt;apt-get install byobu vim ntp&lt;/li&gt;
+&lt;li&gt;Secure SSH by removing root login with vi /etc/ssh/sshd_config: &lt;code&gt;PermitRootLogin no&lt;/code&gt; , &lt;code&gt;PasswordAuthentication no&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;Optionally change the SSH port to something different from the default: &lt;code&gt;Port 22&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;/etc/init.d/ssh restart&lt;/li&gt;
+&lt;/ol&gt;
 &lt;p&gt;Use the Digital Ocean Web UI to poweroff and take a snapshot of the fresh system&lt;/p&gt;</summary><category term="linux"></category><category term="ubuntu"></category><category term="xubuntu"></category><category term="usb boot"></category><category term="ubuntu recovery"></category><category term="dpkg"></category><category term="apt-get"></category><category term="dd"></category></entry><entry><title>ListJS: Sort, Filters, Search and more for HTML lists and tables in Javascript</title><link href="https://blog.john-pfeiffer.com/listjs-sort-filters-search-and-more-for-html-lists-and-tables-in-javascript/" rel="alternate"></link><published>2014-08-08T21:37:00-07:00</published><author><name>john pfeiffer</name></author><id>tag:blog.john-pfeiffer.com,2014-08-08:listjs-sort-filters-search-and-more-for-html-lists-and-tables-in-javascript/</id><summary type="html">
 &lt;p&gt;Self contained javascript library to make lists of information awesome!&lt;/p&gt;
 &lt;p&gt;&lt;a href="http://listjs.com/docs"&gt;http://listjs.com/docs&lt;/a&gt;&lt;/p&gt;
@@ -11644,7 +11678,474 @@ Setting up libsdl-ttf2.0-0 (2.0.9-1) ...
 &lt;h2 id="download-locations"&gt;download locations&lt;/h2&gt;
 &lt;p&gt;&lt;a href="http://www.centos.org"&gt;http://www.centos.org&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;&lt;a href="http://download.virtualbox.org/virtualbox/rpm/rhel/"&gt;http://download.virtualbox.org/virtualbox/rpm/rhel/&lt;/a&gt; &lt;/p&gt;
-&lt;p&gt;&lt;a href="http://download.virtualbox.org/virtualbox/debian/sun_vbox.asc"&gt;http://download.virtualbox.org/virtualbox/debian/sun_vbox.asc&lt;/a&gt;&lt;/p&gt;</summary><category term="virtualbox"></category><category term="centos"></category></entry><entry><title>firewall iptables ufw ssh https nat forwarding redirect</title><link href="https://blog.john-pfeiffer.com/firewall-iptables-ufw-ssh-https-nat-forwarding-redirect/" rel="alternate"></link><published>2009-01-01T00:00:00-08:00</published><author><name>john pfeiffer</name></author><id>tag:blog.john-pfeiffer.com,2009-01-01:firewall-iptables-ufw-ssh-https-nat-forwarding-redirect/</id><summary type="html">
+&lt;p&gt;&lt;a href="http://download.virtualbox.org/virtualbox/debian/sun_vbox.asc"&gt;http://download.virtualbox.org/virtualbox/debian/sun_vbox.asc&lt;/a&gt;&lt;/p&gt;</summary><category term="virtualbox"></category><category term="centos"></category></entry><entry><title>Systeminfo hardware diagnostic listing ram processor ubuntu version ps top iotop lshw dmidecode</title><link href="https://blog.john-pfeiffer.com/systeminfo-hardware-diagnostic-listing-ram-processor-ubuntu-version-ps-top-iotop-lshw-dmidecode/" rel="alternate"></link><published>2009-11-11T21:42:50-08:00</published><author><name>john pfeiffer</name></author><id>tag:blog.john-pfeiffer.com,2009-11-11:systeminfo-hardware-diagnostic-listing-ram-processor-ubuntu-version-ps-top-iotop-lshw-dmidecode/</id><summary type="html">
+&lt;p&gt;It is often critical to know exactly what is going on with your system.&lt;br/&gt;
+Linux is the defacto winner of the server world in large part because there are so many good tools.
+Especially since open source often needs to detect and reverse engineer drivers and compatibility for manufacturer hardware.&lt;/p&gt;
+&lt;h2 id="higher-level-utilities-for-process"&gt;higher level utilities for process&lt;/h2&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;ps
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;processes with their virtual memory size&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;top
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;processes and cpu usage, type q to quit&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;   q = quit
+   s = change interval of refresh (default is 3 seconds)
+   u = type a User and only show processes from that User
+   &amp;gt; = choose to sort by the next column
+   &amp;lt; = choose to sort by the previous
+
+ps -a
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;tree of all processes&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;ps -ef
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;full output of all processes including start time, uptime, cmd&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;ps -eo pid,ppid,rss,vsize,pcpu,pmem,cmd -ww --sort=pid
+
+ps -eo pid,ppid,rss,vsize,pcpu,pmem,cmd -ww --sort=rss
+
+rss = ram usage
+vsize = virtual memory include swap as well
+
+
+ps -eo rss,vsz,pid,cmd,cputime | sort -n | tail -20
+    (this will show you possible memory leaks)
+
+
+ps guxca
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;so the free command is funny  ( http://kbase.redhat.com/faq/docs/DOC-1139 )&lt;/p&gt;
+&lt;p&gt;the amount +/- buffers/cache is the "real" amount available to the system 
+(if the "lazy" kernel decided to free up something that's been buffered previously in order for a new app which needs the memory)&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&amp;lt;Physically Used Memory&amp;gt; = &amp;lt;Actual used memory&amp;gt; + &amp;lt;buffers&amp;gt; + &amp;lt;cache&amp;gt;
+
+&amp;lt;Physically Free Memory&amp;gt; = &amp;lt;Total Physical Memory&amp;gt; - &amp;lt;Actual used memory&amp;gt; - &amp;lt;buffers&amp;gt; - &amp;lt;cache&amp;gt;
+
+&amp;lt;Memory free for Applications&amp;gt; = &amp;lt;Total Physical Memory&amp;gt; - &amp;lt;Actual used memory&amp;gt;
+
+&amp;lt;Memory used  by Applications&amp;gt; = &amp;lt;Actual used memory&amp;gt; - &amp;lt;buffers&amp;gt; - &amp;lt;cache&amp;gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;h2 id="os-version"&gt;OS Version&lt;/h2&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;cat /etc/issue
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;just the version number of the OS, e.g. ubuntu shows 16.04&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;cat /etc/debian_version
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;only on debian/ubuntu... and shows squeeze/sid for natty 11.04, wheezy/sid for 11.10, jessie/sid
+- &lt;a href="https://www.debian.org/releases/"&gt;https://www.debian.org/releases/&lt;/a&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;cat /etc/lsb-release
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;full ubuntu version    &lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;lsb_release -a
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;a command to shows all of the ubuntu version information, e.g. cat /etc/lsb-release&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;lsb_release -c
+Codename:   natty
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;a command to just show the codename&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id="proc-is-realtime-info-about-the-system"&gt;/proc is realtime info about the system&lt;/h2&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;cat /proc/version
+cat /proc/cpuinfo
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;note: if there's "lm" (aka long mode) in the flags: fpu vme etc. area then you have 64bit capability...&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;cat /proc/meminfo
+head -1 /proc/meminfo
+
+ls -ld /proc/somepid
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;get some info about a specific process running via its pid number&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id="kernel-information"&gt;kernel information&lt;/h2&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;uname -a
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;kernel version, x64 or 32 bit, machine name , multi-processor SMP, etc.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;getconf -a
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;another way to get info about your kernel&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id="memory-and-disk-space"&gt;Memory and disk space&lt;/h2&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;free -m
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;free memory in megabytes including swap/buffer usage)&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;vmstat
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;/virtual memory stats&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;df -h
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;free disk space in human readable numbers&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;du
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;disk usage for a directory and subdirectories - needs parameters , like du -s (summary)&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;stat -f / -c "%a * %s / 1024" | bc
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;get the specific amount of free space available from the root file system, stat --help
+bc is a handy "built in calculator"&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id="hardware-listing"&gt;hardware listing&lt;/h2&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;fdisk -l
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;shows all of the hard disk devices available - what os, bootable, etc.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;lshw
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;exhaustive info about the hardware (tree by CLASS)&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;lshw -class network
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;hardware listing focused identification of Physical Network Adapter to logical name like eth0/wlan0&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;lshw -c video
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;show the video hardware&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;lspci
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;lists devices connected to the PCI bus requires pciutils.deb depends on libpci3 , all the pci hardware including usb bridges,agp cards
+common usages are "lspci | grep vga" or "lspci | grep eth"    &lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;lsusb
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;will show all the usb devices like mice, etc&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;dmidecode
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;listing of system hardware according to the BIOS (so not always reliable)
+&lt;a href="http://www.nongnu.org/dmidecode/"&gt;http://www.nongnu.org/dmidecode/&lt;/a&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;lsmod
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;installed driver modules&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;xdpyinfo
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;/xserver info&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;ls -l /lib/libc-*.so /lib/libc.so*
+ldd --version
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;version of linux glibc&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;dmesg
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;kernel messages = all the devices the kernel has found like hard disks,cdroms,etc&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;dmesg | grep CPU
+dmesg | grep mem
+dmesg | tail
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;shows the last 10 lines of the hardware boot up&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;/etc/modprobe.conf (kernel 2.6)
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;fedora/redhat&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;/etc/modules.conf (kernel 2.4)
+
+
+/etc/conf.modules (or for older systems)
+&lt;/pre&gt;&lt;/div&gt;
+&lt;h2 id="disk-io"&gt;disk IO&lt;/h2&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;iotop
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;like top but focused on I/O , &lt;a href="http://linux.die.net/man/1/iotop"&gt;http://linux.die.net/man/1/iotop&lt;/a&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id="network"&gt;network&lt;/h2&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;ifconfig -a
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;shows all of the ethernet devices available&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;ls -l /sys/class/net/eth0
+
+apt-get install bcm43xx-fwcutter
+mkdir -p /lib/hotplug/firmware; cp /lib/firmware/*.fw /lib/hotplug/firmware
+&lt;/pre&gt;&lt;/div&gt;
+&lt;h2 id="software-inventory-and-listing"&gt;software inventory and listing&lt;/h2&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;dpkg --list
+dpkg -l | grep foo
+dpkg --get-selections
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;debian/ubuntu listing of installed software packages &lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;pip freeze
+pip freeze | grep foo
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;python packaging manager listing of packages&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;rpm -qa
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;red hat installed software&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;tail -f /var/log/secure         //login logs
+tail -f /var/log/maillog            //mail logs
+
+last
+last -f btmp
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;last logins and then the last bad logins&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;cat /proc/meminfo
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;MemTotal = Total amount of physical RAM, in kilobytes.
+ MemFree  The amount of physical RAM, in kilobytes, left unused by the system. &lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;note that MemTotal - MemFree should match what free and top show you...
+
+Slab The total amount of memory, in kilobytes, used by the kernel to cache data structures for its own use.
+
+Mapped The total amount of memory, in kilobytes, which have been used to map devices, files, or libraries using the mmap command.
+
+So all of your processes from TOP + Slab + Mapped
+
+free
+             total       used       free     shared    buffers     cached
+Mem:        262364      78424     183940          0       2412      37756
+-/+ buffers/cache:      38256     224108
+Swap:       524280          0     524280
+
+used + buffer + cached = 118,592
+143,772
+
+
+top - 20:39:34 up  2:19,  1 user,  load average: 0.00, 0.00, 0.00
+Tasks:  55 total,   1 running,  54 sleeping,   0 stopped,   0 zombie
+Cpu(s):  0.0%us,  0.0%sy,  0.0%ni, 99.2%id,  0.0%wa,  0.0%hi,  0.0%si,  0.8%st
+Mem:    262364k total,    78408k used,   183956k free,     2428k buffers
+Swap:   524280k total,        0k used,   524280k free,    37756k cached
+
+
+ 3899 root      20   0 68112 2984 2316 S    0  1.1   0:00.42 sshd
+ 3575 klog      20   0  5492 2260  420 S    0  0.9   0:00.06 klogd
+ 3903 root      20   0 17544 1796 1328 S    0  0.7   0:00.16 bash
+ 4490 root      20   0 18860 1200  932 R    0  0.5   0:00.04 top
+ 3596 root      20   0 50916 1164  680 S    0  0.4   0:00.00 sshd
+ 3856 Debian-e  20   0 43432 1000  616 S    0  0.4   0:00.00 exim4
+    1 root      20   0  4020  944  656 S    0  0.4   0:00.36 init
+ 2300 root      16  -4 16832  932  372 S    0  0.4   0:00.46 udevd
+ 3874 root      20   0 18616  860  668 S    0  0.3   0:00.04 cron
+ 3550 syslog    20   0 12296  752  564 S    0  0.3   0:00.10 syslogd
+ 3510 root      20   0  3864  588  492 S    0  0.2   0:00.00 getty
+ 3513 root      20   0  3864  588  492 S    0  0.2   0:00.00 getty
+ 3516 root      20   0  3864  588  492 S    0  0.2   0:00.00 getty
+ 3572 root      20   0  8132  588  476 S    0  0.2   0:00.04 dd
+ 3509 root      20   0  3864  584  492 S    0  0.2   0:00.00 getty
+ 3512 root      20   0  3864  584  492 S    0  0.2   0:00.00 getty
+ 3898 root      20   0  3864  584  492 S    0  0.2   0:00.00 getty
+
+                            17,996 + 15,832 + 3,552 = 37,380... so still short of 78,424
+TOP + Slab + Mapped
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;&lt;a href="http://www.hpl.hp.com/personal/Jean_Tourrilhes/Linux/"&gt;http://www.hpl.hp.com/personal/Jean_Tourrilhes/Linux/&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href="http://backtrack.offensive-security.com/index.php/HCL:Wireless#Linksys_WPC54G_v3"&gt;http://backtrack.offensive-security.com/index.php/HCL:Wireless#Linksys_WPC54G_v3&lt;/a&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt; Linksys WPC54G v3
+
+    * Driver : bcm43xx/b43
+    * Chipset : Broadcom Corporation BCM4318 [AirForce One 54g] 802.11g Wireless LAN Controller (rev 02)
+    * Subsystem: Linksys WPC54G-EU version 3 [Wireless-G Notebook Adapter]
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Monitor mode currently supported but injection may or may not work with bcm43xx. Apparently a new driver is coming out dubbed as b43 and is only available in either kernel &amp;gt;=2.6.24 and/or wireless-2.6 git. Injection will work after patching b43 via mac80211 stack. bcm43xx driver will soon be deprecated and for this chipset it will not indicate PWR levels with airodump-ng. &lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;http://linuxwireless.org/en/users/Drivers/b43
+lspci -vnn | grep 14e4
+
+0001:01:01.0 Network controller [0280]: Broadcom Corporation BCM4318 [AirForce One 54g] 802.11g Wireless LAN Controller [14e4:4318] (rev 02)
+&lt;/pre&gt;&lt;/div&gt;
+&lt;hr/&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;cat /proc/interrupts
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;a file listing of all the interrupt IRQs used by your system&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;e.g.
+
+          CPU0
+   0:  2707402473          XT-PIC  timer
+   1:          67          XT-PIC  i8042
+   2:           0          XT-PIC  cascade
+   5:      411342          XT-PIC  eth1
+   8:           1          XT-PIC  rtc
+  10:     1898752          XT-PIC  eth0
+  11:           0          XT-PIC  uhci_hcd
+  12:          58          XT-PIC  i8042
+  14:     5075806          XT-PIC  ide0
+  15:         506          XT-PIC  ide1
+NMI:           0
+ERR:          43
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;if two devices try to use the same interrupts or memory access address they will be in conflict (won't work)&lt;/p&gt;
+&lt;hr/&gt;
+&lt;h2 id="dmidecode-in-depth-example"&gt;dmidecode in depth example&lt;/h2&gt;
+&lt;p&gt;DMI DECODE  for how much physical ram you COULD have...&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;dmidecode &amp;gt; hw.txt
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;dump the whole thing to a text file&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;less hw.txt
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;lots of info!&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;System Information
+        Manufacturer: HP
+        Product Name: ProLiant ML310 G5
+        Version: Not Specified
+        Serial Number: 
+        UUID: 
+        Wake-up Type: Power Switch
+        SKU Number: 
+        Family: ProLiant
+
+Processor Information
+        Socket Designation: Proc 1
+        Type: Central Processor
+        Family: Xeon
+        Manufacturer: Intel
+        ID: 77 06 01 00 FF FB EB BF
+        Signature: Type 0, Family 6, Model 23, Stepping 7
+
+
+        External Clock: 1333 MHz
+        Max Speed: 4800 MHz
+        Current Speed: 2500 MHz
+        Status: Populated, Enabled
+        Upgrade: ZIF Socket
+        L1 Cache Handle: 0x0710
+        L2 Cache Handle: 0x0720
+        L3 Cache Handle: 0x0730
+        Serial Number: Not Specified
+        Asset Tag: Not Specified
+        Part Number: Not Specified
+        Core Count: 4
+        Core Enabled: 4
+        Thread Count: 4
+        Characteristics:
+                64-bit capable
+&lt;/pre&gt;&lt;/div&gt;
+&lt;hr/&gt;
+&lt;p&gt;BECAUSE THERE IS SO MUCH INFORMATION PEOPLE USE TRICKS TO GET ONLY A CERTAIN PART&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nt"&gt;dmidecode&lt;/span&gt; &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="nt"&gt;perl&lt;/span&gt; &lt;span class="nt"&gt;-ne&lt;/span&gt; &lt;span class="s1"&gt;'$memory += $1 if /^\t+Size: (\d+)/ ; END { print "$memory\n" }'&lt;/span&gt;
+
+&lt;span class="nt"&gt;dmidecode&lt;/span&gt; &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="nt"&gt;perl&lt;/span&gt; &lt;span class="nt"&gt;-ne&lt;/span&gt; &lt;span class="s1"&gt;'$num_procs += 1 if /^\t+Type: Central Processor/ ; END { print "$num_procs\n"}'&lt;/span&gt;
+
+&lt;span class="nt"&gt;decode&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="nt"&gt;biosdecode&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="nt"&gt;and&lt;/span&gt; &lt;span class="nt"&gt;vpddecode&lt;/span&gt;       &lt;span class="o"&gt;//&lt;/span&gt;&lt;span class="nt"&gt;alternates&lt;/span&gt; &lt;span class="nt"&gt;to&lt;/span&gt; &lt;span class="nt"&gt;dmidecode&lt;/span&gt;&lt;span class="o"&gt;?&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;hr/&gt;
+&lt;p&gt;DMI SHORT CODES MAKE IT EASIER TO GET A SPECIFIC CHUNK&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;dmidecode --type 0
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;get info on the bios&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;dmidecode --type 16
+
+# dmidecode 2.9
+SMBIOS 2.4 present.
+
+Handle 0x1000, DMI type 16, 15 bytes
+Physical Memory Array
+        Location: System Board Or Motherboard
+        Use: System Memory
+        Error Correction Type: Single-bit ECC
+        Maximum Capacity: 8 GB
+        Error Information Handle: Not Provided
+        Number Of Devices: 4
+
+
+# Type  Short Description
+0   BIOS 
+1   System 
+2   Base Board 
+3   Chassis 
+4   Processor 
+5   Memory Controller 
+6   Memory Module 
+7   Cache 
+8   Port Connector 
+9   System Slots 
+10  On Board Devices 
+11  OEM Strings 
+12  System Configuration Options 
+13  BIOS Language 
+14  Group Associations 
+15  System Event Log 
+16  Physical Memory Array 
+17  Memory Device 
+18  32-bit Memory Error 
+19  Memory Array Mapped Address 
+20  Memory Device Mapped Address 
+21  Built-in Pointing Device 
+22  Portable Battery 
+23  System Reset 
+24  Hardware Security 
+25  System Power Controls 
+26  Voltage Probe 
+27  Cooling Device 
+28  Temperature Probe 
+29  Electrical Current Probe 
+30  Out-of-band Remote Access 
+31  Boot Integrity Services 
+32  System Boot 
+33  64-bit Memory Error 
+34  Management Device 
+35  Management Device Component 
+36  Management Device Threshold Data 
+37  Memory Channel 
+38  IPMI Device 
+39  Power Supply
+&lt;/pre&gt;&lt;/div&gt;</summary><category term="linux"></category><category term="systeminfo"></category><category term="hardware"></category><category term="diagnostic"></category><category term="listing"></category><category term="ram"></category><category term="processor"></category><category term="ubuntu"></category><category term="version"></category><category term="top"></category><category term="iotop"></category><category term="lshw dmidecode"></category></entry><entry><title>firewall iptables ufw ssh https nat forwarding redirect</title><link href="https://blog.john-pfeiffer.com/firewall-iptables-ufw-ssh-https-nat-forwarding-redirect/" rel="alternate"></link><published>2009-01-01T00:00:00-08:00</published><author><name>john pfeiffer</name></author><id>tag:blog.john-pfeiffer.com,2009-01-01:firewall-iptables-ufw-ssh-https-nat-forwarding-redirect/</id><summary type="html">
 &lt;p&gt;iptables is the tool to create a firewall in linux (manipulate the tables provided by the kernel firewall aka the netfilter)
 &lt;a href="https://en.wikipedia.org/wiki/Netfilter"&gt;https://en.wikipedia.org/wiki/Netfilter&lt;/a&gt;&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;which iptables
@@ -11662,29 +12163,6 @@ sudo /sbin/iptables --version
 &lt;blockquote&gt;
 &lt;p&gt;numeric so no hostname lookups, verbose, List the rules in the chain&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;h2 id="uncomplicated-firewall-ufw"&gt;Uncomplicated Firewall UFW&lt;/h2&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;sudo su
-ufw status verbose
-ufw allow 22
-ufw allow 443
-ufw default deny incoming
-ufw default deny outgoing
-ufw enable
-ufw status verbose
-&lt;/pre&gt;&lt;/div&gt;
-&lt;blockquote&gt;
-&lt;p&gt;This is a much simpler way to configure some basic rules and enable the firewall
-Allowing 22 (SSH) and 443 (HTTPS) and denying all other incoming and outgoing traffic&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;ufw delete allow 443
-ufw show raw
-ufw disable
-&lt;/pre&gt;&lt;/div&gt;
-&lt;blockquote&gt;
-&lt;p&gt;removing a rule is as simple as prefixing the allow or deny command with delete
-disabling the firewall allows all traffic&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;p&gt;&lt;a href="https://wiki.ubuntu.com/UncomplicatedFirewall"&gt;https://wiki.ubuntu.com/UncomplicatedFirewall&lt;/a&gt;&lt;/p&gt;
 &lt;h2 id="interactive-commands"&gt;Interactive commands&lt;/h2&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;iptables -D INPUT 5
 &lt;/pre&gt;&lt;/div&gt;
@@ -12071,4 +12549,32 @@ iptables -A FORWARD -i eth1 -o eth2 -m state --state NEW,ESTABLISHED,RELATED -j 
 &lt;p&gt;Route incoming HTTPS (port 443 ) traffic to DMZ server reverse load balancer IP 192.168.2.4
     iptables -t nat -A PREROUTING -p tcp -i eth1 -d 202.54.1.1 --dport 443 -j DNAT --to-destination 192.168.2.4&lt;/p&gt;
 &lt;p&gt;End DMZ .. Add other rules&lt;/p&gt;
-&lt;/blockquote&gt;</summary><category term="linux"></category><category term="iptables"></category><category term="firewall"></category><category term="NAT"></category><category term="ufw"></category></entry></feed>
+&lt;/blockquote&gt;
+&lt;h2 id="uncomplicated-firewall-ufw"&gt;Uncomplicated Firewall UFW&lt;/h2&gt;
+&lt;p&gt;The uncomplicated firewall is a much simpler way to configure some basic rules and enable the firewall&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;sudo su
+ufw status verbose
+ufw allow 22
+ufw allow 443
+ufw default deny incoming
+ufw default deny outgoing
+ufw enable
+ufw status verbose
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Allowing 22 (SSH) and 443 (HTTPS) and denying all other incoming and outgoing traffic&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;ufw delete allow 443
+ufw show raw
+ufw disable
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;removing a rule is as simple as prefixing the allow or deny command with delete
+disabling the firewall allows all traffic&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Most unfortunately there are some basic gaps that make it not very production ready (i.e. if you know what you are doing just keep using iptables)
+1. ping, also known as icmp, packets (even just outbound) have to be handled in a very complex way, really not much better than iptables
+1. established connection traffic is not just easily allowed
+1. attempting to do something more complex very quickly requires very complex commands including just using iptables (lolwut)
+1. iptables -nvL becomes almost unreadable with the extra layer&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://wiki.ubuntu.com/UncomplicatedFirewall"&gt;https://wiki.ubuntu.com/UncomplicatedFirewall&lt;/a&gt;&lt;/p&gt;</summary><category term="linux"></category><category term="iptables"></category><category term="firewall"></category><category term="NAT"></category><category term="ufw"></category></entry></feed>
