@@ -91,9 +91,6 @@
 </li>
 <li><a href="#configuring-nginx">Configuring nginx</a><ul>
 <li><a href="#etcnginxnginxconf">/etc/nginx/nginx.conf</a></li>
-</ul>
-</li>
-<li><a href="#include-etcnginxconfdconf">include /etc/nginx/conf.d/*.conf;</a><ul>
 <li><a href="#nginx-with-ssl">nginx with ssl</a><ul>
 <li><a href="#etcnginxnginxconf_1">/etc/nginx/nginx.conf</a></li>
 <li><a href="#openssl-self-signed-certificates">openssl self signed certificates</a></li>
@@ -105,6 +102,8 @@
 <li><a href="#verifying-http2">Verifying HTTP/2</a></li>
 </ul>
 </li>
+</ul>
+</li>
 <li><a href="#nginx-with-php-fpm">nginx with php-fpm</a><ul>
 <li><a href="#investigate-php-fpm-in-docker">Investigate php-fpm in Docker</a></li>
 <li><a href="#configure-nginx">Configure nginx</a><ul>
@@ -113,8 +112,6 @@
 </li>
 <li><a href="#docker-composeyml">docker-compose.yml</a></li>
 <li><a href="#docker-compose-up-to-start-nginx-and-php-fpm">docker-compose up to start nginx and php-fpm</a></li>
-</ul>
-</li>
 </ul>
 </li>
 </ul>
@@ -254,9 +251,8 @@ http {
             root /var/www;
         }
     }
-</pre></div>
-<h1 id="include-etcnginxconfdconf">include /etc/nginx/conf.d/*.conf;</h1>
-<div class="highlight"><pre><span></span>}
+    # include /etc/nginx/conf.d/*.conf;
+}
 </pre></div>
 <blockquote>
 <p>Run the service as the www-data user and define 4 worker processes
@@ -401,14 +397,16 @@ Protocols advertised by server: h2, http/1.1
 <li>Click on the Network section</li>
 <li>Control + Shift + F5 to reload (or click on the arrow circling up)</li>
 <li>Right click on the Name colum in the result so that you can add results for column heading, "Protocol"</li>
-<li>Control + Shift + F5 to reload (or click on the arrow circling up)</li>
-</ol>
+<li>
+<p>Control + Shift + F5 to reload (or click on the arrow circling up)</p>
 <p>Protocol: h2</p>
-<ul>
-<li><a href="https://www.nginx.com/blog/nginx-1-9-5/">https://www.nginx.com/blog/nginx-1-9-5/</a></li>
+</li>
+<li>
+<p><a href="https://www.nginx.com/blog/nginx-1-9-5/">https://www.nginx.com/blog/nginx-1-9-5/</a></p>
+</li>
 <li><a href="https://blog.cloudflare.com/tools-for-debugging-testing-and-using-http-2/">https://blog.cloudflare.com/tools-for-debugging-testing-and-using-http-2/</a></li>
 <li><a href="http://tech.finn.no/2015/09/25/setup-nginx-with-http2-for-local-development/">http://tech.finn.no/2015/09/25/setup-nginx-with-http2-for-local-development/</a></li>
-</ul>
+</ol>
 <h2 id="nginx-with-php-fpm">nginx with php-fpm</h2>
 <h3 id="investigate-php-fpm-in-docker">Investigate php-fpm in Docker</h3>
 <p>This hack is fun but proves unnecessary when using Docker Compose later...</p>
@@ -435,60 +433,62 @@ contains include=etc/php-fpm.d/*.conf
 <li><a href="http://php.net/manual/en/install.fpm.configuration.php">http://php.net/manual/en/install.fpm.configuration.php</a></li>
 </ul>
 <h3 id="configure-nginx">Configure nginx</h3>
-<p>vi /etc/nginx/nginx.conf</p>
-<div class="highlight"><pre><span></span><span class="n">worker_processes</span> <span class="mi">4</span><span class="p">;</span>
-<span class="n">pid</span> <span class="o">/</span><span class="n">run</span><span class="o">/</span><span class="n">nginx</span><span class="p">.</span><span class="n">pid</span><span class="p">;</span>
+<p><code>vi /etc/nginx/nginx.conf</code></p>
+<div class="highlight"><pre><span></span><span class="nt">worker_processes</span> <span class="nt">4</span><span class="o">;</span>
+<span class="nt">pid</span> <span class="o">/</span><span class="nt">run</span><span class="o">/</span><span class="nt">nginx</span><span class="nc">.pid</span><span class="o">;</span>
 
-<span class="n">events</span> <span class="p">{</span>
-    <span class="n">worker_connections</span> <span class="mi">1024</span><span class="p">;</span>
+<span class="nt">events</span> <span class="p">{</span>
+    <span class="n">worker_connections</span> <span class="m">1024</span><span class="p">;</span>
 <span class="p">}</span>
 
-<span class="n">http</span> <span class="p">{</span>
-    <span class="n">server</span> <span class="p">{</span>
-        <span class="n">location</span> <span class="o">/</span> <span class="p">{</span>
+<span class="nt">http</span> <span class="p">{</span>
+    <span class="n">server</span> <span class="err">{</span>
+        <span class="n">location</span> <span class="o">/</span> <span class="err">{</span>
             <span class="n">root</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">html</span><span class="p">;</span>
-            <span class="n">try_files</span> <span class="err">$</span><span class="n">uri</span> <span class="err">$</span><span class="n">uri</span><span class="o">/</span><span class="n">index</span><span class="p">.</span><span class="n">php</span><span class="p">;</span>
+            <span class="n">try_files</span> <span class="err">$</span><span class="n">uri</span> <span class="err">$</span><span class="n">uri</span><span class="o">/</span><span class="n">index</span><span class="o">.</span><span class="n">php</span><span class="p">;</span>
         <span class="p">}</span>
-        <span class="n">location</span> <span class="o">~</span> <span class="err">\</span><span class="p">.</span><span class="n">php</span><span class="err">$</span> <span class="p">{</span>
+        <span class="nt">location</span> <span class="o">~</span> <span class="err">\</span><span class="nc">.php</span><span class="o">$</span> <span class="p">{</span>
             <span class="n">root</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">html</span><span class="p">;</span>
             <span class="n">try_files</span> <span class="err">$</span><span class="n">uri</span> <span class="err">$</span><span class="n">uri</span><span class="o">/</span><span class="p">;</span>
-            <span class="n">fastcgi_index</span> <span class="n">index</span><span class="p">.</span><span class="n">php</span><span class="p">;</span>
+            <span class="n">fastcgi_index</span> <span class="n">index</span><span class="o">.</span><span class="n">php</span><span class="p">;</span>
 
-            <span class="cp"># depends on Docker linking or hostfile for fpm to resolve</span>
-            <span class="n">fastcgi_pass</span> <span class="nl">fpm</span><span class="p">:</span><span class="mi">9000</span><span class="p">;</span>
+            <span class="err">#</span> <span class="n">depends</span> <span class="n">on</span> <span class="n">Docker</span> <span class="n">linking</span> <span class="n">or</span> <span class="n">hostfile</span> <span class="n">for</span> <span class="n">fpm</span> <span class="n">to</span> <span class="n">resolve</span>
+            <span class="n">fastcgi_pass</span> <span class="n">fpm</span><span class="o">:</span><span class="m">9000</span><span class="p">;</span>
 
             <span class="n">fastcgi_param</span> <span class="n">SCRIPT_FILENAME</span> <span class="err">$</span><span class="n">document_root</span><span class="err">$</span><span class="n">fastcgi_script_name</span><span class="p">;</span>
-            <span class="cp"># https:</span><span class="c1">//web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2016-5385</span>
-            <span class="n">fastcgi_param</span> <span class="n">HTTP_PROXY</span> <span class="s">""</span><span class="p">;</span>
+            <span class="err">#</span> <span class="n">https</span><span class="o">://</span><span class="n">web</span><span class="o">.</span><span class="n">nvd</span><span class="o">.</span><span class="n">nist</span><span class="o">.</span><span class="n">gov</span><span class="o">/</span><span class="n">view</span><span class="o">/</span><span class="n">vuln</span><span class="o">/</span><span class="n">detail</span><span class="o">?</span><span class="n">vulnId</span><span class="o">=</span><span class="n">CVE</span><span class="m">-2016-5385</span>
+            <span class="n">fastcgi_param</span> <span class="n">HTTP_PROXY</span> <span class="s2">""</span><span class="p">;</span>
 
             <span class="n">include</span> <span class="n">fastcgi_params</span><span class="p">;</span>
         <span class="p">}</span>
-    <span class="p">}</span>
+    <span class="err">}</span>
 
-<span class="p">}</span>
-
-
-
-<span class="n">docker</span> <span class="n">run</span> <span class="o">-</span><span class="n">it</span> <span class="o">--</span><span class="n">rm</span> <span class="o">--</span><span class="n">publish</span> <span class="mf">0.0.0.0</span><span class="o">:</span><span class="mi">80</span><span class="o">:</span><span class="mi">80</span> <span class="o">--</span><span class="n">volume</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">nginx</span><span class="p">.</span><span class="nl">conf</span><span class="p">:</span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">nginx</span><span class="o">/</span><span class="n">nginx</span><span class="p">.</span><span class="nl">conf</span><span class="p">:</span><span class="n">ro</span> <span class="o">--</span><span class="n">volume</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="nl">html</span><span class="p">:</span><span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="nl">html</span><span class="p">:</span><span class="n">ro</span>  <span class="nl">nginx</span><span class="p">:</span><span class="n">alpine</span> <span class="o">/</span><span class="n">bin</span><span class="o">/</span><span class="n">sh</span>
-<span class="n">route</span> <span class="o">-</span><span class="n">n</span>
+<span class="err">}</span>
+</pre></div>
+<blockquote>
+<p>a basic nginx config that forwards .php requests to fpm on port 9000</p>
+</blockquote>
+<div class="highlight"><pre><span></span>docker run -it --rm --publish 0.0.0.0:80:80 --volume /tmp/nginx.conf:/etc/nginx/nginx.conf:ro --volume /tmp/www/html:/var/www/html:ro  nginx:alpine /bin/sh
+route -n
 </pre></div>
 <blockquote>
 <p>This manual command proves unnecessary with Docker Compose but can be useful to debug (i.e. run the php-fpm container first, then run this one since it depends on fpm)</p>
 </blockquote>
 <h4 id="some-test-content">Some Test Content</h4>
 <p>Create the following files to test the various cases...</p>
-<p><code>vi /tmp/www/html/foo.html</code>
-<html><body>hi</body></html></p>
+<p><code>vi /tmp/www/html/foo.html</code></p>
+<div class="highlight"><pre><span></span><span class="nt">&lt;html&gt;&lt;body&gt;</span>hi<span class="nt">&lt;/body&gt;&lt;/html&gt;</span>
+</pre></div>
 <p><code>vi /tmp/www/html/index.php</code></p>
 <div class="highlight"><pre><span></span><span class="cp">&lt;?php</span>
     <span class="k">print</span> <span class="s2">"&lt;html&gt;&lt;body&gt;hello&lt;/body&gt;&lt;/html&gt;"</span><span class="p">;</span>
 <span class="cp">?&gt;</span><span class="x"></span>
 </pre></div>
-<p><code>vi /tmp/www/html/bar.php</code>
-    :::php
-    &lt;?php
-        print "bar";
-    ?&gt;</p>
+<p><code>vi /tmp/www/html/bar.php</code></p>
+<div class="highlight"><pre><span></span><span class="cp">&lt;?php</span>
+    <span class="k">print</span> <span class="s2">"bar"</span><span class="p">;</span>
+<span class="cp">?&gt;</span><span class="x"></span>
+</pre></div>
 <h3 id="docker-composeyml">docker-compose.yml</h3>
 <div class="highlight"><pre><span></span># https://docs.docker.com/compose/compose-file/
 
@@ -539,7 +539,7 @@ curl localhost:80/index.php
             <time pubdate="pubdate" datetime="2015-06-13T08:00:00-07:00">Jun 13, 2015</time>
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#virtualization-ref">virtualization</a> 
-            <h4>~1714 words</h4>
+            <h4>~1726 words</h4>
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article"> 
                 <li><a href="/tags.html#docker-ref">docker
