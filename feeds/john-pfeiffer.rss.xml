@@ -1075,7 +1075,118 @@ Protocols advertised by server: h2, http/1.1
 &lt;li&gt;&lt;a href="https://www.nginx.com/blog/nginx-1-9-5/"&gt;https://www.nginx.com/blog/nginx-1-9-5/&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href="https://blog.cloudflare.com/tools-for-debugging-testing-and-using-http-2/"&gt;https://blog.cloudflare.com/tools-for-debugging-testing-and-using-http-2/&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href="http://tech.finn.no/2015/09/25/setup-nginx-with-http2-for-local-development/"&gt;http://tech.finn.no/2015/09/25/setup-nginx-with-http2-for-local-development/&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">john pfeiffer</dc:creator><pubDate>Sat, 13 Jun 2015 08:00:00 -0700</pubDate><guid isPermaLink="false">tag:blog.john-pfeiffer.com,2015-06-13:nginx-with-docker/</guid><category>docker</category><category>nginx</category></item><item><title>Meeting Bjarne Stroustrup, creator of C plus plus, in the Atlassian Dev Den</title><link>https://blog.john-pfeiffer.com/meeting-bjarne-stroustrup-creator-of-c-plus-plus-in-the-atlassian-dev-den/</link><description>
+&lt;/ul&gt;
+&lt;h2 id="nginx-with-php-fpm"&gt;nginx with php-fpm&lt;/h2&gt;
+&lt;h3 id="investigate-php-fpm-in-docker"&gt;Investigate php-fpm in Docker&lt;/h3&gt;
+&lt;p&gt;This hack is fun but proves unnecessary when using Docker Compose later...&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;docker pull php:5.5-fpm-alpine
+&lt;/pre&gt;&lt;/div&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href="https://hub.docker.com/_/php/"&gt;https://hub.docker.com/_/php/&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;:::bash
+ifconfig | grep Bc
+docker run -it --rm --publish 0.0.0.0:9000:9000 php:5.5-fpm-alpine /bin/sh
+route -n
+php-fpm --version
+sed -i 's/listen = 127.0.0.1:9000/listen = 0.0.0.0:9000/g' /usr/local/etc/php-fpm.d/www.conf
+php-fpm --fpm-config /usr/local/etc/php-fpm.conf&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;p&gt;ifconfig and route -n are to discover the docker host IP Address via the default gateway 172.17.0.1
+contains include=etc/php-fpm.d/*.conf
+/usr/local/etc/php-fpm.d/www.conf&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="http://php.net/manual/en/install.fpm.configuration.php"&gt;http://php.net/manual/en/install.fpm.configuration.php&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="configure-nginx"&gt;Configure nginx&lt;/h3&gt;
+&lt;p&gt;vi /etc/nginx/nginx.conf&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;worker_processes&lt;/span&gt; &lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="n"&gt;pid&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;run&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;nginx&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;pid&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+
+&lt;span class="n"&gt;events&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="n"&gt;worker_connections&lt;/span&gt; &lt;span class="mi"&gt;1024&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+
+&lt;span class="n"&gt;http&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="n"&gt;server&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="n"&gt;location&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+            &lt;span class="n"&gt;root&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;var&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;www&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;html&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+            &lt;span class="n"&gt;try_files&lt;/span&gt; &lt;span class="err"&gt;$&lt;/span&gt;&lt;span class="n"&gt;uri&lt;/span&gt; &lt;span class="err"&gt;$&lt;/span&gt;&lt;span class="n"&gt;uri&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;index&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;php&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+        &lt;span class="p"&gt;}&lt;/span&gt;
+        &lt;span class="n"&gt;location&lt;/span&gt; &lt;span class="o"&gt;~&lt;/span&gt; &lt;span class="err"&gt;\&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;php&lt;/span&gt;&lt;span class="err"&gt;$&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+            &lt;span class="n"&gt;root&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;var&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;www&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;html&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+            &lt;span class="n"&gt;try_files&lt;/span&gt; &lt;span class="err"&gt;$&lt;/span&gt;&lt;span class="n"&gt;uri&lt;/span&gt; &lt;span class="err"&gt;$&lt;/span&gt;&lt;span class="n"&gt;uri&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+            &lt;span class="n"&gt;fastcgi_index&lt;/span&gt; &lt;span class="n"&gt;index&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;php&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+
+            &lt;span class="cp"&gt;# depends on Docker linking or hostfile for fpm to resolve&lt;/span&gt;
+            &lt;span class="n"&gt;fastcgi_pass&lt;/span&gt; &lt;span class="nl"&gt;fpm&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="mi"&gt;9000&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+
+            &lt;span class="n"&gt;fastcgi_param&lt;/span&gt; &lt;span class="n"&gt;SCRIPT_FILENAME&lt;/span&gt; &lt;span class="err"&gt;$&lt;/span&gt;&lt;span class="n"&gt;document_root&lt;/span&gt;&lt;span class="err"&gt;$&lt;/span&gt;&lt;span class="n"&gt;fastcgi_script_name&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+            &lt;span class="cp"&gt;# https:&lt;/span&gt;&lt;span class="c1"&gt;//web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2016-5385&lt;/span&gt;
+            &lt;span class="n"&gt;fastcgi_param&lt;/span&gt; &lt;span class="n"&gt;HTTP_PROXY&lt;/span&gt; &lt;span class="s"&gt;""&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+
+            &lt;span class="n"&gt;include&lt;/span&gt; &lt;span class="n"&gt;fastcgi_params&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+        &lt;span class="p"&gt;}&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt;
+
+&lt;span class="p"&gt;}&lt;/span&gt;
+
+
+
+&lt;span class="n"&gt;docker&lt;/span&gt; &lt;span class="n"&gt;run&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;it&lt;/span&gt; &lt;span class="o"&gt;--&lt;/span&gt;&lt;span class="n"&gt;rm&lt;/span&gt; &lt;span class="o"&gt;--&lt;/span&gt;&lt;span class="n"&gt;publish&lt;/span&gt; &lt;span class="mf"&gt;0.0.0.0&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="mi"&gt;80&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="mi"&gt;80&lt;/span&gt; &lt;span class="o"&gt;--&lt;/span&gt;&lt;span class="n"&gt;volume&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;tmp&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;nginx&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nl"&gt;conf&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;etc&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;nginx&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;nginx&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nl"&gt;conf&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="n"&gt;ro&lt;/span&gt; &lt;span class="o"&gt;--&lt;/span&gt;&lt;span class="n"&gt;volume&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;tmp&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;www&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nl"&gt;html&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;var&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;www&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nl"&gt;html&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="n"&gt;ro&lt;/span&gt;  &lt;span class="nl"&gt;nginx&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="n"&gt;alpine&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;bin&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;sh&lt;/span&gt;
+&lt;span class="n"&gt;route&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;n&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;This manual command proves unnecessary with Docker Compose but can be useful to debug (i.e. run the php-fpm container first, then run this one since it depends on fpm)&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h4 id="some-test-content"&gt;Some Test Content&lt;/h4&gt;
+&lt;p&gt;Create the following files to test the various cases...&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;vi /tmp/www/html/foo.html&lt;/code&gt;
+&lt;html&gt;&lt;body&gt;hi&lt;/body&gt;&lt;/html&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;vi /tmp/www/html/index.php&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="cp"&gt;&amp;lt;?php&lt;/span&gt;
+    &lt;span class="k"&gt;print&lt;/span&gt; &lt;span class="s2"&gt;"&amp;lt;html&amp;gt;&amp;lt;body&amp;gt;hello&amp;lt;/body&amp;gt;&amp;lt;/html&amp;gt;"&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="cp"&gt;?&amp;gt;&lt;/span&gt;&lt;span class="x"&gt;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;&lt;code&gt;vi /tmp/www/html/bar.php&lt;/code&gt;
+    :::php
+    &amp;lt;?php
+        print "bar";
+    ?&amp;gt;&lt;/p&gt;
+&lt;h3 id="docker-composeyml"&gt;docker-compose.yml&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;# https://docs.docker.com/compose/compose-file/
+
+nginx:
+  image: nginx:alpine
+  ports:
+    - "80:80"
+  volumes:
+    - /tmp/nginx.conf:/etc/nginx/nginx.conf:ro
+    - /tmp/www/html:/var/www/html
+  links:
+    - fpm
+
+fpm:
+  image: php:5.5-fpm-alpine
+  ports:
+    - "9000:9000"
+  volumes:
+    - /tmp/www/html:/var/www/html
+
+# http://stackoverflow.com/questions/29905953/how-to-correctly-link-php-fpm-and-nginx-docker-containers-together
+# http://stackoverflow.com/questions/35388590/issue-with-docker-compose-container-command-not-found
+&lt;/pre&gt;&lt;/div&gt;
+&lt;h3 id="docker-compose-up-to-start-nginx-and-php-fpm"&gt;docker-compose up to start nginx and php-fpm&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;docker-compose up
+docker-compose rm -f
+curl localhost:80/foo.html
+curl localhost:80/bar.php
+curl localhost:80/index.php
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Another tiny step forward in tying together a lot of moving pieces =]&lt;/p&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">john pfeiffer</dc:creator><pubDate>Sat, 13 Jun 2015 08:00:00 -0700</pubDate><guid isPermaLink="false">tag:blog.john-pfeiffer.com,2015-06-13:nginx-with-docker/</guid><category>docker</category><category>nginx</category></item><item><title>Meeting Bjarne Stroustrup, creator of C plus plus, in the Atlassian Dev Den</title><link>https://blog.john-pfeiffer.com/meeting-bjarne-stroustrup-creator-of-c-plus-plus-in-the-atlassian-dev-den/</link><description>
 &lt;h3 id="bjarne-stroustrup-visits-atlassian"&gt;Bjarne Stroustrup visits Atlassian&lt;/h3&gt;
 &lt;p&gt;One of the things I looked forward to when joining Atlassian was being a part of a culture that celebrated software development.&lt;/p&gt;
 &lt;p&gt;Today I had the opportunity to meet Bjarne Stroustrup &lt;a href="http://www.stroustrup.com/"&gt;http://www.stroustrup.com/&lt;/a&gt;, creator of C++. (yey)&lt;/p&gt;
