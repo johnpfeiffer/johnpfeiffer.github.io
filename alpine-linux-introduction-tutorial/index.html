@@ -6,7 +6,7 @@
         <meta name="author" content="john pfeiffer" />
         <meta name="copyright" content="john pfeiffer" />
 
-<meta name="keywords" content="go, golang, vscode, programming, " />
+<meta name="keywords" content="alpine, linux, security, linux, " />
         <title>Alpine Linux Introduction Tutorial  · johnpfeiffer
 </title>
         <link href="https://cdn-images.mailchimp.com/embedcode/slim-081711.css" rel="stylesheet" type="text/css">
@@ -75,32 +75,14 @@
         <h4>Contents</h4>
         <div class="toc">
 <ul>
-<li><a href="#prerequisites">Prerequisites</a><ul>
-<li><a href="#download-and-install-the-go-language-compiler-and-tools">Download and install the go language compiler and tools</a><ul>
-<li><a href="#vim-and-docker">vim and Docker</a></li>
-</ul>
-</li>
-<li><a href="#installing-and-the-environment">Installing and the Environment</a></li>
-<li><a href="#download-and-install-an-ide">Download and install an IDE</a></li>
-<li><a href="#install-or-build-or-run">Install or Build or Run</a></li>
-<li><a href="#debugging-with-delve">Debugging with Delve</a></li>
-</ul>
-</li>
-<li><a href="#coding-and-compiling">Coding and Compiling</a><ul>
-<li><a href="#comments-types-strings-slices-for-loops">Comments Types Strings Slices For Loops</a><ul>
-<li><a href="#introgo">intro.go</a></li>
-<li><a href="#_1"></a></li>
-</ul>
-</li>
-<li><a href="#arrays-are-contiguous-memory-and-4-bytes-is-normal">arrays are contiguous memory and 4 bytes is normal</a></li>
-<li><a href="#fizzbuzz-and-switch">fizzbuzz and switch</a></li>
-<li><a href="#time">time</a></li>
-<li><a href="#palindrome-and-string-conversion-integer-to-ascii">palindrome and string conversion integer to ascii</a></li>
-<li><a href="#random-integers">Random Integers</a></li>
-<li><a href="#binary-search">Binary Search</a></li>
-<li><a href="#efficient-string-append-and-replacement">Efficient String append and replacement</a></li>
-<li><a href="#testing-with-go">Testing with Go</a></li>
-<li><a href="#more-info">More Info</a></li>
+<li><a href="#basics">Basics</a></li>
+<li><a href="#package-management">Package Management</a></li>
+<li><a href="#networking">Networking</a></li>
+<li><a href="#compiling">Compiling</a><ul>
+<li><a href="#prepare-musl-compiler-on-alpine-linux">prepare musl compiler on alpine linux</a></li>
+<li><a href="#hic">hi.c</a></li>
+<li><a href="#compiling_1">compiling</a></li>
+<li><a href="#compile-go-on-alpine-linux">compile go on alpine linux</a></li>
 </ul>
 </li>
 </ul>
@@ -110,315 +92,131 @@
     <div class="span8 article-content">
 
             
-<p>Introducing the Go Programming Language (aka golang) basics, interactive sandbox with <a href="http://play.golang.org">http://play.golang.org</a></p>
-<h2 id="prerequisites">Prerequisites</h2>
-<p>Tooling is often essential to productivity.</p>
-<h3 id="download-and-install-the-go-language-compiler-and-tools">Download and install the go language compiler and tools</h3>
-<h4 id="vim-and-docker">vim and Docker</h4>
-<p>Or alternatively just avoid the IDE and Environment and use vim and a docker container ;) <a href="https://hub.docker.com/_/golang/">https://hub.docker.com/_/golang/</a></p>
-<h3 id="installing-and-the-environment">Installing and the Environment</h3>
-<p><a href="https://golang.org/dl/">https://golang.org/dl/</a> and <code>cd /opt; tar xf go.tar.gz</code></p>
-<p>Instead of the ephemeral <code>export PATH=$PATH:/usr/local/go/bin</code> I prefer the persistent ~/.profile (or for all users /etc/profile though clearly /opt indicates a single user system ;)</p>
-<div class="highlight"><pre><span></span><span class="err">#</span><span class="x"> Go Programming</span>
-<span class="x">export GOROOT=/opt/go</span>
-<span class="x">export PATH=</span><span class="p">$</span><span class="nv">PATH</span><span class="x">:</span><span class="p">$</span><span class="nv">GOROOT</span><span class="x">/bin</span>
-<span class="x">export GOPATH=/opt/goprojects</span>
-<span class="x">export PATH=</span><span class="p">$</span><span class="nv">PATH</span><span class="x">:</span><span class="p">$</span><span class="nv">GOPATH</span><span class="x">/bin</span>
-
-<span class="x">source ~/.profile</span>
-</pre></div>
+<p>Alpine Linux is a minimalist secure linux distro.</p>
 <blockquote>
-<p>The last step gets you going without needing to reload your shell, full docs at <a href="https://golang.org/doc/install">https://golang.org/doc/install</a></p>
+<p>In security terms less "footprint" often means less vectors of attack and less complexity to analyze for vulnerabilities</p>
 </blockquote>
-<p><strong>WARNING</strong> be careful how you name your executables as the $GOPATH/bin will contain the names of the projects as binaries (so don't create a project or binary named bash!)</p>
-<h3 id="download-and-install-an-ide">Download and install an IDE</h3>
-<p>If you are used to larger projects then an IDE is quite helpful for colorization, auto completion, (right click or f12) goto definition, rename, build on save, auto formatting, etc.</p>
-<p>Suprisingly one of the most popular and effective golang IDE combinations is: <a href="https://code.visualstudio.com/Docs/?dv=linux64_deb">https://code.visualstudio.com/Docs/?dv=linux64_deb</a></p>
-<div class="highlight"><pre><span></span>dpkg -i vscode-amd64.deb
-</pre></div>
-<p>To install <a href="https://marketplace.visualstudio.com/items?itemName=lukehoban.Go">https://marketplace.visualstudio.com/items?itemName=lukehoban.Go</a> aka <a href="https://github.com/Microsoft/vscode-go">https://github.com/Microsoft/vscode-go</a> you actually:</p>
-<ol>
-<li>open Visual Studio Code</li>
-<li>Control + P (Launches VS Code Quick Open)</li>
-<li><code>ext install Go</code> (capital G for "lukehoban")</li>
-<li>restart when prompted</li>
-<li>File -&gt; Preferences -&gt; Color Theme (Light Visual Studio ;)</li>
-</ol>
-<blockquote>
-<p>At this point you probably need to reboot to get VSCode to recognize the GOPATH correctly</p>
-</blockquote>
-<p>In your shell where you setup the GOPATH run the following to get all of the analysis tools that "Go for Visual Studio Code" uses, though it's a lot easier to just use the IDE in the bottom right corner "Analysis Tools Missing"</p>
-<p>To take advantage of those tools (like gofmt on save), in your workspace (GOPATH) there will be a .vscode directory with settings.json <a href="https://code.visualstudio.com/docs/customization/userandworkspace">https://code.visualstudio.com/docs/customization/userandworkspace</a></p>
-<div class="highlight"><pre><span></span>// Place your settings in this file to overwrite default and user settings.
-{
-    "go.buildOnSave": true,
-    "go.lintOnSave": true,
-    "go.vetOnSave": true,
-    "go.buildFlags": [],
-    "go.lintFlags": [],
-    "go.vetFlags": [],
-    "go.coverOnSave": false,
-    "go.useCodeSnippetsOnFunctionSuggest": false,
-    "go.formatOnSave": true,
-    "go.formatTool": "goreturns"
-}
-</pre></div>
-<blockquote>
-<p>Just in case restart VSCode to recognize the updated settings</p>
-</blockquote>
-<p>Unfortunately it is not quite simple to execute the code directly in VSCode <a href="https://github.com/Microsoft/vscode-go/issues/21">https://github.com/Microsoft/vscode-go/issues/21</a></p>
-<h3 id="install-or-build-or-run">Install or Build or Run</h3>
-<p>The traditional command line method is:</p>
-<div class="highlight"><pre><span></span><span class="x">cd </span><span class="p">$</span><span class="nv">GOPATH</span><span class="x">/path-to-your-project</span>
-<span class="x">go install</span>
-<span class="p">$</span><span class="nv">GOPATH</span><span class="x">/bin</span>
-</pre></div>
+<p>Alpine Linux is becoming a preferred base OS for many foundational official Docker Images (python, php, ruby, nginx, redis, haproxy,) since downloading Docker Images (aka Deploying Docker Containers) can saturate the network at scale.</p>
 <ul>
-<li><a href="https://golang.org/doc/code.html#Command">https://golang.org/doc/code.html#Command</a></li>
-<li><a href="http://dave.cheney.net/2014/01/21/using-go-test-build-and-install">http://dave.cheney.net/2014/01/21/using-go-test-build-and-install</a></li>
+<li><a href="https://hub.docker.com/_/alpine/">https://hub.docker.com/_/alpine/</a></li>
+<li><a href="http://www.pcworld.com/article/3031765/is-docker-ditching-ubuntu-linux-confusion-reigns.html">http://www.pcworld.com/article/3031765/is-docker-ditching-ubuntu-linux-confusion-reigns.html</a></li>
+<li><a href="https://news.ycombinator.com/item?id=10998667">https://news.ycombinator.com/item?id=10998667</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Alpine_Linux">https://en.wikipedia.org/wiki/Alpine_Linux</a></li>
 </ul>
-<h3 id="debugging-with-delve">Debugging with Delve</h3>
-<div class="highlight"><pre><span></span>go get github.com/derekparker/delve/cmd/dlv
-cd /opt/goprojects/src
-go install /derekparker/delve/cmd/dlv
-ls -ahl /opt/goprojects/bin/
-cd /opt/goprojects/src/github.com/johnpfeiffer/YOURPROJECT
-/opt/goprojects/bin/dlv  debug --headless --listen=:2345 --log
+<h3 id="basics">Basics</h3>
+<p>Most of the very basic commands are similar to other linux distros like Debian/Ubuntu/Redhat, but of course there are differences ;)</p>
+<div class="highlight"><pre><span></span>/bin/sh
 </pre></div>
-<p>Now in the VSCode IDE open the project folder and create your helloworld.go source file and Control + S to save (and auto gofmt) and then press <strong>F5</strong> and it will connect to the Delve Debugger and display the output</p>
-<h2 id="coding-and-compiling">Coding and Compiling</h2>
-<p>For VSCode IDE keyboard shortcuts: <a href="https://code.visualstudio.com/docs/customization/keybindings">https://code.visualstudio.com/docs/customization/keybindings</a></p>
-<h3 id="comments-types-strings-slices-for-loops">Comments Types Strings Slices For Loops</h3>
-<p>The main package it where the execution begins (aka "main" in c <a href="https://en.wikipedia.org/wiki/Entry_point">https://en.wikipedia.org/wiki/Entry_point</a>)</p>
-<p>Comments are either single line with double slashes or block comments <a href="https://golang.org/doc/effective_go.html#commentary">https://golang.org/doc/effective_go.html#commentary</a></p>
-<h4 id="introgo">intro.go</h4>
+<blockquote>
+<p>busybox</p>
+</blockquote>
+<div class="highlight"><pre><span></span>cat /etc/passwd
+curl 127.0.0.1
+ls -l /usr/bin /usr/sbin | more
+</pre></div>
+<blockquote>
+<p>more busybox</p>
+</blockquote>
+<h3 id="package-management">Package Management</h3>
+<div class="highlight"><pre><span></span>apk --help
+apk update
+apk search iptables
+apk add iptables
+</pre></div>
+<p><a href="http://wiki.alpinelinux.org/wiki/Alpine_Linux_package_management">http://wiki.alpinelinux.org/wiki/Alpine_Linux_package_management</a></p>
+<h3 id="networking">Networking</h3>
+<div class="highlight"><pre><span></span>hostname
+cat /etc/resolv.conf
+ifconfig
+netstat -anp
+
+apk add iptables
+traceroute
+</pre></div>
+<h3 id="compiling">Compiling</h3>
+<h4 id="prepare-musl-compiler-on-alpine-linux">prepare musl compiler on alpine linux</h4>
+<blockquote>
+<p>WARNING: below did not work</p>
+</blockquote>
+<div class="highlight"><pre><span></span>docker pull alpine
+docker run -it --rm alpine /bin/sh
+
+apk update
+apk add musl-dev wget tar gzip gcc make
+
+wget http://www.musl-libc.org/releases/musl-1.1.15.tar.gz
+tar xf musl-1.1.15.tar.gz
+cd musl-1.1.15
+./configure
+make
+make install
+</pre></div>
+<blockquote>
+<p>Now we've installed the musl compiler?</p>
+</blockquote>
+<p>/usr/local/musl seemed terribly empty of binaries</p>
+<p><a href="http://dominik.honnef.co/posts/2015/06/go-musl/">http://dominik.honnef.co/posts/2015/06/go-musl/</a></p>
+<h4 id="hic">hi.c</h4>
+<div class="highlight"><pre><span></span><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp"></span>
+
+<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+  <span class="n">printf</span><span class="p">(</span><span class="s">"hi"</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+<h4 id="compiling_1">compiling</h4>
+<div class="highlight"><pre><span></span>apk add file
+gcc -static hi.c
+file a.out
+chmod +x a.out
+./a.out
+</pre></div>
+<blockquote>
+<p>hi
+The default is a.out: ELF 64-bit LSB executable, x86-64, version 1 (SYSV), statically linked, not stripped
+Note that this was just gcc not musl-gcc :(</p>
+</blockquote>
+<p><a href="http://www.musl-libc.org/how.html">http://www.musl-libc.org/how.html</a></p>
+<div class="highlight"><pre><span></span>docker run -it --rm alpine /bin/sh
+apk update
+apk add alpine-sdk
+</pre></div>
+<p>But maybe because it's already an alpine linux container the gcc already uses musl instead of libc and does not need the musl-gcc wrapper?</p>
+<h4 id="compile-go-on-alpine-linux">compile go on alpine linux</h4>
+<p>Just use the golang image based on alpine linux ;)</p>
+<p><a href="https://github.com/docker-library/docs/tree/master/golang">https://github.com/docker-library/docs/tree/master/golang</a></p>
+<div class="highlight"><pre><span></span>docker pull golang:alpine
+docker run -it --rm golang:alpine /bin/sh
+</pre></div>
+<blockquote>
+<p>Now that we've got the container running we can use the shell</p>
+</blockquote>
+<p><code>vi intro.go</code></p>
 <div class="highlight"><pre><span></span><span class="n">package</span> <span class="n">main</span>
 
 <span class="kn">import</span> <span class="s2">"fmt"</span>
 
-<span class="o">//</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">golang</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">doc</span><span class="o">/</span><span class="n">effective_go</span><span class="o">.</span><span class="n">html</span><span class="c1">#mixed-caps</span>
-<span class="o">//</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">golang</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">ref</span><span class="o">/</span><span class="n">spec</span><span class="c1">#Constants</span>
-<span class="n">const</span> <span class="n">alphabetMax</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">26</span>
-
 <span class="n">func</span> <span class="n">main</span><span class="p">()</span> <span class="p">{</span>
-
-    <span class="o">//</span> <span class="k">while</span>
-    <span class="n">j</span> <span class="p">:</span><span class="o">=</span> <span class="mi">0</span>
-    <span class="k">for</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="mi">4</span> <span class="p">{</span>
-        <span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">j</span><span class="p">)</span>
-        <span class="n">j</span> <span class="o">+=</span> <span class="mi">2</span>
-    <span class="p">}</span>
-    <span class="k">for</span> <span class="n">i</span> <span class="p">:</span><span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">;</span> <span class="n">i</span> <span class="o">+=</span> <span class="mi">2</span> <span class="p">{</span>
-        <span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
-    <span class="p">}</span>
-    <span class="k">for</span> <span class="p">{</span>
-        <span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="s2">"break or return exits an infinite loop"</span><span class="p">)</span>
-        <span class="k">break</span>
-    <span class="p">}</span>
-
-    <span class="o">//</span> <span class="n">arrays</span> <span class="n">are</span> <span class="n">contiguous</span> <span class="n">memory</span><span class="p">,</span> <span class="n">fixed</span> <span class="n">size</span> <span class="ow">and</span> <span class="nb">type</span>
-    <span class="o">//</span> <span class="n">prefer</span> <span class="n">Slices</span> <span class="n">which</span> <span class="n">are</span> <span class="n">Reference</span> <span class="n">Objects</span> <span class="n">that</span> <span class="n">wrap</span> <span class="n">the</span> <span class="n">underlying</span> <span class="n">arrays</span>
-    <span class="o">//</span> <span class="n">initialized</span> <span class="n">to</span> <span class="n">capacity</span> <span class="mi">5</span> <span class="k">with</span> <span class="n">values</span> <span class="n">inserted</span><span class="p">,</span> <span class="n">alternatively</span> <span class="n">just</span> <span class="n">initialized</span> <span class="n">to</span> <span class="n">empty</span> <span class="k">with</span><span class="p">:</span> <span class="n">var</span> <span class="n">a</span> <span class="p">[</span><span class="mi">5</span><span class="p">]</span><span class="n">string</span>
-    <span class="n">a</span> <span class="p">:</span><span class="o">=</span> <span class="p">[</span><span class="mi">5</span><span class="p">]</span><span class="n">string</span><span class="p">{</span><span class="s2">"a"</span><span class="p">,</span> <span class="s2">"b"</span><span class="p">,</span> <span class="s2">"c"</span><span class="p">,</span> <span class="s2">"d"</span><span class="p">,</span> <span class="s2">"e"</span><span class="p">}</span>
-
-    <span class="k">for</span> <span class="n">i</span> <span class="p">:</span><span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">a</span><span class="p">);</span> <span class="n">i</span><span class="o">++</span> <span class="p">{</span>
-        <span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
-    <span class="p">}</span>
-
-    <span class="o">//</span> <span class="n">cleaner</span> <span class="n">way</span> <span class="n">of</span> <span class="n">iterating</span> <span class="n">over</span> <span class="n">key</span> <span class="ow">and</span> <span class="n">value</span>
-    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="p">:</span><span class="o">=</span> <span class="nb">range</span> <span class="n">a</span> <span class="p">{</span>
-        <span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
-    <span class="p">}</span>
-
-<span class="p">}</span>
-</pre></div>
-<h4 id="_1"></h4>
-<ol>
-<li>Compile with: <code>cd /opt/goprojects/src/github.com/johnpfeiffer/intro/ ; go install</code></li>
-<li>Execute with: <code>/opt/goprojects/bin/intro</code></li>
-</ol>
-<h3 id="arrays-are-contiguous-memory-and-4-bytes-is-normal">arrays are contiguous memory and 4 bytes is normal</h3>
-<div class="highlight"><pre><span></span>// int is usually the 4 byte int32 https://golang.org/ref/spec#Numeric_types
-b := [2]int{1, 2}
-// dereference the addresses that are holding the values 1 and 2
-fmt.Printf("%d %d\n", &amp;b[0], &amp;b[1])
-
-// rune is also int32
-c := [2]rune{'a', 'ä'}
-fmt.Printf("%d %d\n", &amp;c[0], &amp;c[1])
-</pre></div>
-<h3 id="fizzbuzz-and-switch">fizzbuzz and switch</h3>
-<p><a href="https://golang.org/ref/spec#Switch_statements">https://golang.org/ref/spec#Switch_statements</a></p>
-<div class="highlight"><pre><span></span>for i := 1; i &lt; 16; i++ {
-    // usually static case values and "switch i {" , note it will NOT fall through by default
-    switch {
-    case i%3 == 0 &amp;&amp; i%5 == 0:
-        fmt.Println("fizzbuzz")
-    case i%3 == 0:
-        fmt.Println("fizz")
-    case i%5 == 0:
-        fmt.Println("buzz")
-    default:
-        fmt.Println(i)
-    }
-}
-</pre></div>
-<h3 id="time">time</h3>
-<div class="highlight"><pre><span></span><span class="kn">import</span> <span class="s2">"time"</span>
-<span class="o">//</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">golang</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">pkg</span><span class="o">/</span><span class="n">time</span><span class="o">/</span><span class="c1">#Now</span>
-<span class="n">now</span> <span class="p">:</span><span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">Now</span><span class="p">()</span>
-<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="s2">"local:"</span><span class="p">,</span> <span class="n">now</span><span class="p">)</span>
-<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">now</span><span class="o">.</span><span class="n">UnixNano</span><span class="p">()</span><span class="o">/</span><span class="mi">1000000</span><span class="p">,</span> <span class="s2">"ms"</span><span class="p">)</span>
-<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="s2">"in UTC:"</span><span class="p">,</span> <span class="n">now</span><span class="o">.</span><span class="n">UTC</span><span class="p">()</span><span class="o">.</span><span class="n">Format</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">UnixDate</span><span class="p">))</span>
-</pre></div>
-<h3 id="palindrome-and-string-conversion-integer-to-ascii">palindrome and string conversion integer to ascii</h3>
-<p>Besides the main function for executing you will obviously create re-usable packages which will contain functions.</p>
-<p>Here is the source code for a simple "is this string a palindrome" and "is this integer a palindrome" programs:</p>
-<div class="highlight"><pre><span></span><span class="n">package</span> <span class="n">main</span>
-
-<span class="kn">import</span> <span class="p">(</span>
-    <span class="s2">"fmt"</span>
-    <span class="s2">"strconv"</span>
-<span class="p">)</span>
-
-<span class="n">func</span> <span class="n">main</span><span class="p">()</span> <span class="p">{</span>
-    <span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">isPalindrome</span><span class="p">(</span><span class="s2">"a"</span><span class="p">))</span>
-    <span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">isPalindrome</span><span class="p">(</span><span class="s2">"ala"</span><span class="p">))</span>
-    <span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">isPalindrome</span><span class="p">(</span><span class="s2">"noon"</span><span class="p">))</span>
-    <span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">isPalindrome</span><span class="p">(</span><span class="s2">"ab"</span><span class="p">))</span>
-    <span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">isPalindrome</span><span class="p">(</span><span class="s2">"racecar"</span><span class="p">))</span>
-    <span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">isPalindrome</span><span class="p">(</span><span class="s2">"abfooba"</span><span class="p">))</span>
-
-    <span class="o">//</span> <span class="n">slower</span> <span class="ow">and</span> <span class="n">uses</span> <span class="n">extra</span> <span class="n">memory</span>
-    <span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">isPalindrome</span><span class="p">(</span><span class="n">strconv</span><span class="o">.</span><span class="n">Itoa</span><span class="p">(</span><span class="mi">1991</span><span class="p">)))</span>
-    <span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">isPalindrome</span><span class="p">(</span><span class="n">strconv</span><span class="o">.</span><span class="n">Itoa</span><span class="p">(</span><span class="mi">1981</span><span class="p">)))</span>
-
-    <span class="o">//</span> <span class="n">takes</span> <span class="n">advantage</span> <span class="n">of</span> <span class="n">math</span> <span class="p">(</span><span class="n">mindblown</span><span class="p">)</span>
-    <span class="n">number</span> <span class="p">:</span><span class="o">=</span> <span class="mi">9</span>
-    <span class="nb">reversed</span> <span class="p">:</span><span class="o">=</span> <span class="n">reverseInteger</span><span class="p">(</span><span class="n">number</span><span class="p">)</span>
-    <span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">number</span><span class="p">,</span> <span class="nb">reversed</span><span class="p">)</span>
-    <span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">number</span><span class="p">,</span> <span class="s2">"is a palindrome: "</span><span class="p">,</span> <span class="n">number</span> <span class="o">==</span> <span class="nb">reversed</span><span class="p">)</span>
-    <span class="n">number</span> <span class="o">=</span> <span class="mi">123</span>
-    <span class="nb">reversed</span> <span class="o">=</span> <span class="n">reverseInteger</span><span class="p">(</span><span class="n">number</span><span class="p">)</span>
-    <span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">number</span><span class="p">,</span> <span class="nb">reversed</span><span class="p">)</span>
-    <span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">number</span><span class="p">,</span> <span class="s2">"is a palindrome: "</span><span class="p">,</span> <span class="n">number</span> <span class="o">==</span> <span class="nb">reversed</span><span class="p">)</span>
-    <span class="n">number</span> <span class="o">=</span> <span class="mi">121</span>
-    <span class="nb">reversed</span> <span class="o">=</span> <span class="n">reverseInteger</span><span class="p">(</span><span class="n">number</span><span class="p">)</span>
-    <span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">number</span><span class="p">,</span> <span class="nb">reversed</span><span class="p">)</span>
-    <span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">number</span><span class="p">,</span> <span class="s2">"is a palindrome: "</span><span class="p">,</span> <span class="n">number</span> <span class="o">==</span> <span class="nb">reversed</span><span class="p">)</span>
+  <span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="s2">"hi"</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="n">func</span> <span class="n">isPalindrome</span><span class="p">(</span><span class="n">word</span> <span class="n">string</span><span class="p">)</span> <span class="nb">bool</span> <span class="p">{</span>
-    <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">value</span> <span class="p">:</span><span class="o">=</span> <span class="nb">range</span> <span class="n">word</span> <span class="p">{</span>
-        <span class="n">oppositeIndex</span> <span class="p">:</span><span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">word</span><span class="p">)</span> <span class="o">-</span> <span class="n">index</span> <span class="o">-</span> <span class="mi">1</span>
-        <span class="n">opposite</span> <span class="p">:</span><span class="o">=</span> <span class="n">rune</span><span class="p">(</span><span class="n">word</span><span class="p">[</span><span class="n">oppositeIndex</span><span class="p">])</span>
-        <span class="n">fmt</span><span class="o">.</span><span class="n">Printf</span><span class="p">(</span><span class="s2">"</span><span class="si">%d</span><span class="s2"> %T </span><span class="si">%c</span><span class="s2"> compared to </span><span class="si">%d</span><span class="s2"> </span><span class="si">%c</span><span class="s2"> </span><span class="se">\n</span><span class="s2">"</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">oppositeIndex</span><span class="p">,</span> <span class="n">opposite</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">index</span> <span class="o">&gt;=</span> <span class="n">oppositeIndex</span> <span class="p">{</span>
-            <span class="k">break</span>
-        <span class="p">}</span>
-        <span class="k">if</span> <span class="n">value</span> <span class="o">!=</span> <span class="n">opposite</span> <span class="p">{</span>
-            <span class="k">return</span> <span class="n">false</span>
-        <span class="p">}</span>
 
-    <span class="p">}</span>
-    <span class="k">return</span> <span class="n">true</span>
-<span class="p">}</span>
-
-<span class="n">func</span> <span class="n">reverseInteger</span><span class="p">(</span><span class="n">x</span> <span class="nb">int</span><span class="p">)</span> <span class="nb">int</span> <span class="p">{</span>
-    <span class="nb">reversed</span> <span class="p">:</span><span class="o">=</span> <span class="mi">0</span>
-    <span class="k">for</span> <span class="p">;</span> <span class="n">x</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">;</span> <span class="n">x</span> <span class="o">/=</span> <span class="mi">10</span> <span class="p">{</span>
-        <span class="n">remainder</span> <span class="p">:</span><span class="o">=</span> <span class="n">x</span> <span class="o">%</span> <span class="mi">10</span>
-        <span class="nb">reversed</span> <span class="o">=</span> <span class="p">(</span><span class="nb">reversed</span> <span class="o">*</span> <span class="mi">10</span><span class="p">)</span> <span class="o">+</span> <span class="n">remainder</span>
-        <span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">remainder</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="nb">reversed</span><span class="p">)</span>
-    <span class="p">}</span>
-    <span class="k">return</span> <span class="nb">reversed</span>
-<span class="p">}</span>
+<span class="n">go</span> <span class="n">run</span> <span class="n">intro</span><span class="o">.</span><span class="n">go</span>
 </pre></div>
-<h3 id="random-integers">Random Integers</h3>
-<p><code></code></p>
-<div class="highlight"><pre><span></span>// https://golang.org/pkg/crypto/rand/
-// https://golang.org/pkg/math/big/
-var max big.Int
-var myRandom *big.Int
-var err error
-max.SetUint64(10)
-myRandom, err = rand.Int(rand.Reader, &amp;max)
-
-fmt.Println(*myRandom)
-fmt.Println(err)
-</pre></div>
-<h3 id="binary-search">Binary Search</h3>
-<p>Using main and print is the poor man's Unit Testing ;)</p>
-<div class="highlight"><pre><span></span><span class="n">package</span> <span class="n">main</span>
-
-<span class="kn">import</span> <span class="p">(</span>
-    <span class="s2">"bytes"</span>
-    <span class="s2">"fmt"</span>
-<span class="p">)</span>
-
-<span class="o">//</span><span class="n">todo</span> <span class="k">pass</span> <span class="n">by</span> <span class="n">ref</span><span class="err">?</span>
-<span class="n">func</span> <span class="n">binarySearch</span><span class="p">(</span><span class="n">a</span> <span class="p">[]</span><span class="nb">int</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">low</span><span class="p">,</span> <span class="n">mid</span><span class="p">,</span> <span class="n">high</span> <span class="nb">int</span><span class="p">)</span> <span class="nb">int</span> <span class="p">{</span>
-    <span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="s2">"low ="</span><span class="p">,</span> <span class="n">low</span><span class="p">,</span> <span class="s2">"mid ="</span><span class="p">,</span> <span class="n">mid</span><span class="p">,</span> <span class="s2">"high ="</span><span class="p">,</span> <span class="n">high</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">a</span><span class="p">[</span><span class="n">mid</span><span class="p">]</span> <span class="o">==</span> <span class="n">target</span> <span class="p">{</span>
-        <span class="k">return</span> <span class="n">mid</span>
-    <span class="p">}</span>
-    <span class="k">if</span> <span class="n">mid</span> <span class="o">&gt;=</span> <span class="n">high</span> <span class="o">||</span> <span class="n">mid</span> <span class="o">&lt;=</span> <span class="n">low</span> <span class="p">{</span>
-        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
-    <span class="p">}</span>
-
-    <span class="k">if</span> <span class="n">a</span><span class="p">[</span><span class="n">mid</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">target</span> <span class="p">{</span>
-        <span class="n">low</span> <span class="o">=</span> <span class="n">mid</span> <span class="o">+</span> <span class="mi">1</span>
-    <span class="p">}</span>
-    <span class="k">if</span> <span class="n">a</span><span class="p">[</span><span class="n">mid</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">target</span> <span class="p">{</span>
-        <span class="n">high</span> <span class="o">=</span> <span class="n">mid</span>
-    <span class="p">}</span>
-    <span class="n">mid</span> <span class="o">=</span> <span class="p">((</span><span class="n">high</span> <span class="o">-</span> <span class="n">low</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="n">low</span>
-    <span class="k">return</span> <span class="n">binarySearch</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">low</span><span class="p">,</span> <span class="n">mid</span><span class="p">,</span> <span class="n">high</span><span class="p">)</span>
-<span class="p">}</span>
-
-<span class="n">func</span> <span class="n">main</span><span class="p">()</span> <span class="p">{</span>
-    <span class="n">a</span> <span class="p">:</span><span class="o">=</span> <span class="p">[]</span><span class="nb">int</span><span class="p">{</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">8</span><span class="p">}</span>
-    <span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
-    <span class="n">targets</span> <span class="p">:</span><span class="o">=</span> <span class="p">[]</span><span class="nb">int</span><span class="p">{</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">9</span><span class="p">}</span>
-    <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">t</span> <span class="p">:</span><span class="o">=</span> <span class="nb">range</span> <span class="n">targets</span> <span class="p">{</span>
-        <span class="n">result</span> <span class="p">:</span><span class="o">=</span> <span class="n">binarySearch</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">a</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">a</span><span class="p">))</span>
-        <span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="s2">"found"</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="s2">"at location"</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span>
-    <span class="p">}</span>
-
-<span class="p">}</span>
-</pre></div>
-<h3 id="efficient-string-append-and-replacement">Efficient String append and replacement</h3>
-<p><a href="http://stackoverflow.com/questions/1760757/how-to-efficiently-concatenate-strings-in-go">http://stackoverflow.com/questions/1760757/how-to-efficiently-concatenate-strings-in-go</a></p>
-<div class="highlight"><pre><span></span>func myReplace(source string) string {
-    var b bytes.Buffer
-    for _, c := range source {
-        if c == ' ' {
-            b.WriteString("%20")
-        } else {
-            b.WriteString(string(c))
-        }
-    }
-    return b.String()
-}
-</pre></div>
-<h3 id="testing-with-go">Testing with Go</h3>
-<ul>
-<li><a href="https://golang.org/pkg/testing/">https://golang.org/pkg/testing/</a></li>
-<li><a href="http://nathanleclaire.com/blog/2015/10/10/interfaces-and-composition-for-effective-unit-testing-in-golang/">http://nathanleclaire.com/blog/2015/10/10/interfaces-and-composition-for-effective-unit-testing-in-golang/</a></li>
-<li><a href="https://cloud.google.com/appengine/docs/go/tools/localunittesting/#Go_Introducing_the_Go_testing_package">https://cloud.google.com/appengine/docs/go/tools/localunittesting/#Go_Introducing_the_Go_testing_package</a></li>
-</ul>
-<h3 id="more-info">More Info</h3>
-<ul>
-<li><a href="https://tour.golang.org/basics/">https://tour.golang.org/basics/</a></li>
-</ul>
+<blockquote>
+<p>hi
+    ls -l
+    go build intro.go
+    ls -l
+    ./intro
+hi</p>
+</blockquote>
             <aside>
             <hr/>
             <nav>
             <ul class="articles_timeline">
  
-                <li class="previous_article">« <a href="https://blog.john-pfeiffer.com/build-automation-using-packer-to-build-an-ami/" title="Previous: Build Automation using packer to build an AMI">Build Automation using packer to build an AMI</a></li>
- 
-                <li class="next_article"><a href="https://blog.john-pfeiffer.com/static-site-with-bitbucket-and-shippable-and-pelican/" title="Next: Static site with Bitbucket and Shippable and Pelican">Static site with Bitbucket and Shippable and Pelican</a> »</li>
+                <li class="previous_article">« <a href="https://blog.john-pfeiffer.com/debian-packages-for-deployment/" title="Previous: Debian Packages for Deployment">Debian Packages for Deployment</a></li>
             </ul>
             </nav>
             </aside>
@@ -427,20 +225,20 @@ fmt.Println(err)
         <div class="span2" style="float:right;font-size:0.9em;">
  
             <h4>Published</h4>
-            <time pubdate="pubdate" datetime="2015-11-15T21:19:00-08:00">Nov 15, 2015</time>
+            <time pubdate="pubdate" datetime="2016-02-28T21:19:00-08:00">Feb 28, 2016</time>
             <h4>Category</h4>
-            <a class="category-link" href="/categories.html#programming-ref">programming</a> 
-            <h4>~1025 words</h4>
+            <a class="category-link" href="/categories.html#linux-ref">linux</a> 
+            <h4>~315 words</h4>
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article"> 
-                <li><a href="/tags.html#go-ref">go
+                <li><a href="/tags.html#alpine-ref">alpine
                     <span>1</span>
 </a></li>
-                <li><a href="/tags.html#golang-ref">golang
-                    <span>1</span>
+                <li><a href="/tags.html#linux-ref">linux
+                    <span>8</span>
 </a></li>
-                <li><a href="/tags.html#vscode-ref">vscode
-                    <span>1</span>
+                <li><a href="/tags.html#security-ref">security
+                    <span>4</span>
 </a></li>
             </ul>
 
