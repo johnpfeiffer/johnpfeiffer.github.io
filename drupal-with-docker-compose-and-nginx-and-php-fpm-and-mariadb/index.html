@@ -300,15 +300,7 @@ mysql:
 <li>A very nice tool to add is fail2ban (apt-get install fail2ban) but I want to ensure I tweak the configs correctly</li>
 </ul>
 <h4 id="install-dockersh">install-docker.sh</h4>
-<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
-2
-3
-4
-5
-6
-7
-8
-9</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="ch">#!/bin/sh</span>
+<div class="highlight"><pre><span></span><span class="ch">#!/bin/sh</span>
 <span class="c1"># ubuntu 16.04 is xenial , https://blog.john-pfeiffer.com/docker-intro-install-run-and-port-forward/</span>
 sudo apt-key adv --keyserver hkp://pgp.mit.edu:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
 sudo sh -c <span class="s2">"echo 'deb https://apt.dockerproject.org/repo ubuntu-xenial main' &gt; /etc/apt/sources.list.d/docker.list"</span>
@@ -318,27 +310,26 @@ sudo apt-get install -y docker-engine docker-compose <span class="o">||</span> <
 service docker status <span class="o">||</span> <span class="nb">exit</span> 1
 docker info <span class="o">||</span> <span class="nb">exit</span> 1
 </pre></div>
-</td></tr></table>
 <blockquote>
 <p>linux-image-extra is to ensure we have AUFS because docker needs a proper storage driver</p>
 </blockquote>
 <h4 id="docker-composeyml-with-drupal7-fpm-and-mariadb55">docker-compose.yml with drupal:7-fpm and mariadb:5.5</h4>
-<div class="highlight"><pre><span></span># https://hub.docker.com/_/drupal/
+<div class="highlight"><pre><span></span><span class="c"># https://hub.docker.com/_/drupal/</span>
 fpm:
   image: drupal:7-fpm
   ports:
-    - "127.0.0.1:9000:9000"
-#    - "9000:9000"
+    - <span class="s2">"127.0.0.1:9000:9000"</span>
+<span class="c">#    - "9000:9000"</span>
   volumes:
     - /var/www/html:/var/www/html/
   links:
     - mysql
 
-# https://hub.docker.com/_/mariadb/
+<span class="c"># https://hub.docker.com/_/mariadb/</span>
 mysql:
   image: mariadb:5.5
   ports:
-    - "3306:3306"
+    - <span class="s2">"3306:3306"</span>
   environment:
     - MYSQL_ROOT_PASSWORD
     - MYSQL_USER
@@ -349,146 +340,146 @@ mysql:
 <p>2 out of 3 ain't bad</p>
 </blockquote>
 <h4 id="nginxconf">nginx.conf</h4>
-<div class="highlight"><pre><span></span># slightly modified /etc/nginx/nginx.conf from "apt-get install nginx"
-# https://www.nginx.com/resources/wiki/start/topics/examples/full/
+<div class="highlight"><pre><span></span><span class="c1"># slightly modified /etc/nginx/nginx.conf from "apt-get install nginx"</span>
+<span class="c1"># https://www.nginx.com/resources/wiki/start/topics/examples/full/</span>
 
-user www-data;
-worker_processes auto;
-pid /run/nginx.pid;
+<span class="k">user</span> <span class="s">www-data</span><span class="p">;</span>
+<span class="k">worker_processes</span> <span class="s">auto</span><span class="p">;</span>
+<span class="k">pid</span> <span class="s">/run/nginx.pid</span><span class="p">;</span>
 
-events {
-        worker_connections 768;
-        # multi_accept on;
-}
+<span class="k">events</span> <span class="p">{</span>
+        <span class="kn">worker_connections</span> <span class="mi">768</span><span class="p">;</span>
+        <span class="c1"># multi_accept on;</span>
+<span class="p">}</span>
 
-http {
+<span class="k">http</span> <span class="p">{</span>
 
-        sendfile on;
-        tcp_nopush on;
-        tcp_nodelay on;
-        keepalive_timeout 65;
-        types_hash_max_size 2048;
-        server_tokens off;
+        <span class="kn">sendfile</span> <span class="no">on</span><span class="p">;</span>
+        <span class="kn">tcp_nopush</span> <span class="no">on</span><span class="p">;</span>
+        <span class="kn">tcp_nodelay</span> <span class="no">on</span><span class="p">;</span>
+        <span class="kn">keepalive_timeout</span> <span class="mi">65</span><span class="p">;</span>
+        <span class="kn">types_hash_max_size</span> <span class="mi">2048</span><span class="p">;</span>
+        <span class="kn">server_tokens</span> <span class="no">off</span><span class="p">;</span>
 
-        include /etc/nginx/mime.types;
-        default_type application/octet-stream;
+        <span class="kn">include</span> <span class="s">/etc/nginx/mime.types</span><span class="p">;</span>
+        <span class="kn">default_type</span> <span class="s">application/octet-stream</span><span class="p">;</span>
 
-        access_log /var/log/nginx/access.log;
-        error_log /var/log/nginx/error.log;
+        <span class="kn">access_log</span> <span class="s">/var/log/nginx/access.log</span><span class="p">;</span>
+        <span class="kn">error_log</span> <span class="s">/var/log/nginx/error.log</span><span class="p">;</span>
 
-        gzip on;
-        gzip_disable "msie6";
+        <span class="kn">gzip</span> <span class="no">on</span><span class="p">;</span>
+        <span class="kn">gzip_disable</span> <span class="s">"msie6"</span><span class="p">;</span>
 
-        gzip_types text/plain text/css application/json application/javascript text/xml application/xml application/xml+rss text/javascript;
+        <span class="kn">gzip_types</span> <span class="s">text/plain</span> <span class="s">text/css</span> <span class="s">application/json</span> <span class="s">application/javascript</span> <span class="s">text/xml</span> <span class="s">application/xml</span> <span class="s">application/xml+rss</span> <span class="s">text/javascript</span><span class="p">;</span>
 
-        include /etc/nginx/conf.d/*.conf;
+        <span class="kn">include</span> <span class="s">/etc/nginx/conf.d/*.conf</span><span class="p">;</span>
 
-}
+<span class="p">}</span>
 </pre></div>
 <h4 id="defaultconf">default.conf</h4>
-<div class="highlight"><pre><span></span><span class="nt">server</span> <span class="p">{</span>
-    <span class="n">listen</span>      <span class="m">80</span><span class="p">;</span>
-    <span class="n">server_name</span> <span class="n">physicstime</span><span class="o">.</span><span class="n">com</span><span class="p">;</span>
-    <span class="n">root</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">html</span><span class="p">;</span> <span class="err">##</span> <span class="o">&lt;--</span> <span class="n">Your</span> <span class="n">only</span> <span class="n">path</span> <span class="n">reference</span><span class="o">.</span>
+<div class="highlight"><pre><span></span><span class="k">server</span> <span class="p">{</span>
+    <span class="kn">listen</span>      <span class="mi">80</span><span class="p">;</span>
+    <span class="kn">server_name</span> <span class="s">physicstime.com</span><span class="p">;</span>
+    <span class="kn">root</span> <span class="s">/var/www/html</span><span class="p">;</span> <span class="c1">## &lt;-- Your only path reference.</span>
 
-    <span class="n">location</span> <span class="o">=</span> <span class="o">/</span><span class="n">favicon</span><span class="o">.</span><span class="n">ico</span> <span class="err">{</span>
-        <span class="n">log_not_found</span> <span class="n">off</span><span class="p">;</span>
-        <span class="n">access_log</span> <span class="n">off</span><span class="p">;</span>
+    <span class="kn">location</span> <span class="p">=</span> <span class="s">/favicon.ico</span> <span class="p">{</span>
+        <span class="kn">log_not_found</span> <span class="no">off</span><span class="p">;</span>
+        <span class="kn">access_log</span> <span class="no">off</span><span class="p">;</span>
     <span class="p">}</span>
 
-    <span class="nt">location</span> <span class="o">=</span> <span class="o">/</span><span class="nt">robots</span><span class="nc">.txt</span> <span class="p">{</span>
-        <span class="n">allow</span> <span class="n">all</span><span class="p">;</span>
-        <span class="n">log_not_found</span> <span class="n">off</span><span class="p">;</span>
-        <span class="n">access_log</span> <span class="n">off</span><span class="p">;</span>
+    <span class="kn">location</span> <span class="p">=</span> <span class="s">/robots.txt</span> <span class="p">{</span>
+        <span class="kn">allow</span> <span class="s">all</span><span class="p">;</span>
+        <span class="kn">log_not_found</span> <span class="no">off</span><span class="p">;</span>
+        <span class="kn">access_log</span> <span class="no">off</span><span class="p">;</span>
     <span class="p">}</span>
 
-    <span class="err">#</span> <span class="nt">Very</span> <span class="nt">rarely</span> <span class="nt">should</span> <span class="nt">these</span> <span class="nt">ever</span> <span class="nt">be</span> <span class="nt">accessed</span> <span class="nt">outside</span> <span class="nt">of</span> <span class="nt">your</span> <span class="nt">lan</span>
-    <span class="nt">location</span> <span class="o">~*</span> <span class="err">\</span><span class="o">.(</span><span class="nt">txt</span><span class="o">|</span><span class="nt">log</span><span class="o">)$</span> <span class="p">{</span>
-        <span class="n">deny</span> <span class="n">all</span><span class="p">;</span>
+    <span class="c1"># Very rarely should these ever be accessed outside of your lan</span>
+    <span class="kn">location</span> <span class="p">~</span><span class="sr">*</span> <span class="s">\.(txt|log)</span>$ <span class="p">{</span>
+        <span class="kn">deny</span> <span class="s">all</span><span class="p">;</span>
     <span class="p">}</span>
 
-    <span class="nt">location</span> <span class="o">~</span> <span class="err">\</span><span class="o">..*/.*</span><span class="err">\</span><span class="nc">.php</span><span class="o">$</span> <span class="p">{</span>
-        <span class="n">return</span> <span class="m">403</span><span class="p">;</span>
+    <span class="kn">location</span> <span class="p">~</span> <span class="sr">\..*/.*\.php$</span> <span class="p">{</span>
+        <span class="kn">return</span> <span class="mi">403</span><span class="p">;</span>
     <span class="p">}</span>
 
-    <span class="nt">location</span> <span class="o">~</span> <span class="o">^/</span><span class="nt">sites</span><span class="o">/.*/</span><span class="nt">private</span><span class="o">/</span> <span class="p">{</span>
-        <span class="n">return</span> <span class="m">403</span><span class="p">;</span>
+    <span class="kn">location</span> <span class="p">~</span> <span class="sr">^/sites/.*/private/</span> <span class="p">{</span>
+        <span class="kn">return</span> <span class="mi">403</span><span class="p">;</span>
     <span class="p">}</span>
 
-    <span class="err">#</span> <span class="nt">Allow</span> <span class="s2">"Well-Known URIs"</span> <span class="nt">as</span> <span class="nt">per</span> <span class="nt">RFC</span> <span class="nt">5785</span>
-    <span class="nt">location</span> <span class="o">~*</span> <span class="o">^/</span><span class="nc">.well-known</span><span class="o">/</span> <span class="p">{</span>
-        <span class="n">allow</span> <span class="n">all</span><span class="p">;</span>
+    <span class="c1"># Allow "Well-Known URIs" as per RFC 5785</span>
+    <span class="kn">location</span> <span class="p">~</span><span class="sr">*</span> <span class="s">^/.well-known/</span> <span class="p">{</span>
+        <span class="kn">allow</span> <span class="s">all</span><span class="p">;</span>
     <span class="p">}</span>
 
-    <span class="err">#</span> <span class="nt">Block</span> <span class="nt">access</span> <span class="nt">to</span> <span class="s2">"hidden"</span> <span class="nt">files</span> <span class="nt">and</span> <span class="nt">directories</span> <span class="nt">whose</span> <span class="nt">names</span> <span class="nt">begin</span> <span class="nt">with</span> <span class="nt">a</span>
-    <span class="err">#</span> <span class="nt">period</span><span class="o">.</span> <span class="nt">This</span> <span class="nt">includes</span> <span class="nt">directories</span> <span class="nt">used</span> <span class="nt">by</span> <span class="nt">version</span> <span class="nt">control</span> <span class="nt">systems</span> <span class="nt">such</span>
-    <span class="err">#</span> <span class="nt">as</span> <span class="nt">Subversion</span> <span class="nt">or</span> <span class="nt">Git</span> <span class="nt">to</span> <span class="nt">store</span> <span class="nt">control</span> <span class="nt">files</span><span class="o">.</span>
-    <span class="nt">location</span> <span class="o">~</span> <span class="o">(^|/)</span><span class="err">\</span><span class="o">.</span> <span class="p">{</span>
-        <span class="n">return</span> <span class="m">403</span><span class="p">;</span>
+    <span class="c1"># Block access to "hidden" files and directories whose names begin with a</span>
+    <span class="c1"># period. This includes directories used by version control systems such</span>
+    <span class="c1"># as Subversion or Git to store control files.</span>
+    <span class="kn">location</span> <span class="p">~</span> <span class="sr">(^|/)\.</span> <span class="p">{</span>
+        <span class="kn">return</span> <span class="mi">403</span><span class="p">;</span>
     <span class="p">}</span>
 
-    <span class="nt">location</span> <span class="o">/</span> <span class="p">{</span>
-        <span class="err">#</span> <span class="n">try_files</span> <span class="err">$</span><span class="n">uri</span> <span class="o">@</span><span class="n">rewrite</span><span class="p">;</span> <span class="err">#</span> <span class="n">For</span> <span class="n">Drupal</span> <span class="o">&lt;=</span> <span class="m">6</span>
-        <span class="n">try_files</span> <span class="err">$</span><span class="n">uri</span> <span class="o">/</span><span class="n">index</span><span class="o">.</span><span class="n">php</span><span class="o">?</span><span class="err">$</span><span class="n">query_string</span><span class="p">;</span> <span class="err">#</span> <span class="n">For</span> <span class="n">Drupal</span> <span class="o">&gt;=</span> <span class="m">7</span>
+    <span class="kn">location</span> <span class="s">/</span> <span class="p">{</span>
+        <span class="c1"># try_files $uri @rewrite; # For Drupal &lt;= 6</span>
+        <span class="kn">try_files</span> <span class="nv">$uri</span> <span class="s">/index.php?</span><span class="nv">$query_string</span><span class="p">;</span> <span class="c1"># For Drupal &gt;= 7</span>
     <span class="p">}</span>
 
-    <span class="nt">location</span> <span class="k">@rewrite</span> <span class="p">{</span>
-        <span class="nt">rewrite</span> <span class="o">^/(.*)$</span> <span class="o">/</span><span class="nt">index</span><span class="nc">.php</span><span class="o">?</span><span class="nt">q</span><span class="o">=$</span><span class="nt">1</span><span class="o">;</span>
+    <span class="kn">location</span> <span class="s">@rewrite</span> <span class="p">{</span>
+        <span class="kn">rewrite</span> <span class="s">^/(.*)</span>$ <span class="s">/index.php?q=</span><span class="nv">$1</span><span class="p">;</span>
     <span class="p">}</span>
 
-    <span class="err">#</span> <span class="nt">Don</span><span class="s1">'t allow direct access to PHP files in the vendor directory.</span>
-<span class="s1">    location ~ /vendor/.*\.php$ {</span>
-<span class="s1">        deny all;</span>
-<span class="s1">        return 404;</span>
-<span class="s1">    }</span>
-
-<span class="s1">    # In Drupal 8, we must also match new paths where the '</span><span class="nc">.php</span><span class="s1">' appears in</span>
-<span class="s1">    # the middle, such as update.php/selection. The rule we use is strict,</span>
-<span class="s1">    # and only allows this pattern with the update.php front controller.</span>
-<span class="s1">    # This allows legacy path aliases in the form of</span>
-<span class="s1">    # blog/index.php/legacy-path to continue to route to Drupal nodes. If</span>
-<span class="s1">    # you do not have any paths like that, then you might prefer to use a</span>
-<span class="s1">    # laxer rule, such as:</span>
-<span class="s1">    #   location ~ \.php(/|$) {</span>
-<span class="s1">    # The laxer rule will continue to work if Drupal uses this new URL</span>
-<span class="s1">    # pattern with front controllers other than update.php in a future</span>
-<span class="s1">    # release.</span>
-<span class="s1">    location ~ '</span><span class="err">\</span><span class="nc">.php</span><span class="o">$|^/</span><span class="nt">update</span><span class="nc">.php</span><span class="s1">' {</span>
-<span class="s1">        fastcgi_split_path_info ^(.+?\.php)(|/.*)$;</span>
-<span class="s1">        # Security note: If you'</span><span class="nt">re</span> <span class="nt">running</span> <span class="nt">a</span> <span class="nt">version</span> <span class="nt">of</span> <span class="nt">PHP</span> <span class="nt">older</span> <span class="nt">than</span> <span class="nt">the</span>
-        <span class="err">#</span> <span class="nt">latest</span> <span class="nt">5</span><span class="nc">.3</span><span class="o">,</span> <span class="nt">you</span> <span class="nt">should</span> <span class="nt">have</span> <span class="s2">"cgi.fix_pathinfo = 0;"</span> <span class="nt">in</span> <span class="nt">php</span><span class="nc">.ini</span><span class="o">.</span>
-        <span class="err">#</span> <span class="nt">See</span> <span class="nt">http</span><span class="o">://</span><span class="nt">serverfault</span><span class="nc">.com</span><span class="o">/</span><span class="nt">q</span><span class="o">/</span><span class="nt">627903</span><span class="o">/</span><span class="nt">94922</span> <span class="nt">for</span> <span class="nt">details</span><span class="o">.</span>
-        <span class="nt">include</span> <span class="nt">fastcgi_params</span><span class="o">;</span>
-        <span class="err">#</span> <span class="nt">Block</span> <span class="nt">httpoxy</span> <span class="nt">attacks</span><span class="o">.</span> <span class="nt">See</span> <span class="nt">https</span><span class="o">://</span><span class="nt">httpoxy</span><span class="nc">.org</span><span class="o">/.</span>
-        <span class="nt">fastcgi_param</span> <span class="nt">HTTP_PROXY</span> <span class="s2">""</span><span class="o">;</span>
-        <span class="nt">fastcgi_param</span> <span class="nt">SCRIPT_FILENAME</span> <span class="o">$</span><span class="nt">document_root</span><span class="o">$</span><span class="nt">fastcgi_script_name</span><span class="o">;</span>
-        <span class="nt">fastcgi_param</span> <span class="nt">PATH_INFO</span> <span class="o">$</span><span class="nt">fastcgi_path_info</span><span class="o">;</span>
-        <span class="nt">fastcgi_intercept_errors</span> <span class="nt">on</span><span class="o">;</span>
-        <span class="err">#</span> <span class="nt">PHP</span> <span class="nt">5</span> <span class="nt">socket</span> <span class="nt">location</span><span class="o">.</span>
-        <span class="nn">#fastcgi_pass</span> <span class="nt">unix</span><span class="o">:/</span><span class="nt">var</span><span class="o">/</span><span class="nt">run</span><span class="o">/</span><span class="nt">php5-fpm</span><span class="nc">.sock</span><span class="o">;</span>
-        <span class="err">#</span> <span class="nt">PHP</span> <span class="nt">7</span> <span class="nt">socket</span> <span class="nt">location</span><span class="o">.</span>
-        <span class="err">#</span> <span class="nt">fastcgi_pass</span> <span class="nt">unix</span><span class="o">:/</span><span class="nt">var</span><span class="o">/</span><span class="nt">run</span><span class="o">/</span><span class="nt">php</span><span class="o">/</span><span class="nt">php7</span><span class="nc">.0-fpm.sock</span><span class="o">;</span>
-
-        <span class="nt">fastcgi_pass</span> <span class="nt">127</span><span class="nc">.0.0.1</span><span class="nd">:9000</span><span class="o">;</span>
-        <span class="err">#</span> <span class="nt">fastcgi_pass</span> <span class="nt">fpm</span><span class="nd">:9000</span><span class="o">;</span>
-    <span class="err">}</span>
-
-    <span class="err">#</span> <span class="nt">Fighting</span> <span class="nt">with</span> <span class="nt">Styles</span><span class="o">?</span> <span class="nt">This</span> <span class="nt">little</span> <span class="nt">gem</span> <span class="nt">is</span> <span class="nt">amazing</span><span class="o">.</span>
-    <span class="err">#</span> <span class="nt">location</span> <span class="o">~</span> <span class="o">^/</span><span class="nt">sites</span><span class="o">/.*/</span><span class="nt">files</span><span class="o">/</span><span class="nt">imagecache</span><span class="o">/</span> <span class="p">{</span> <span class="err">#</span> <span class="n">For</span> <span class="n">Drupal</span> <span class="o">&lt;=</span> <span class="m">6</span>
-    <span class="n">location</span> <span class="o">~</span> <span class="o">^/</span><span class="n">sites</span><span class="o">/.*/</span><span class="n">files</span><span class="o">/</span><span class="n">styles</span><span class="o">/</span> <span class="err">{</span> <span class="err">#</span> <span class="n">For</span> <span class="n">Drupal</span> <span class="o">&gt;=</span> <span class="m">7</span>
-        <span class="n">try_files</span> <span class="err">$</span><span class="n">uri</span> <span class="o">@</span><span class="n">rewrite</span><span class="p">;</span>
+    <span class="c1"># Don't allow direct access to PHP files in the vendor directory.</span>
+    <span class="kn">location</span> <span class="p">~</span> <span class="sr">/vendor/.*\.php$</span> <span class="p">{</span>
+        <span class="kn">deny</span> <span class="s">all</span><span class="p">;</span>
+        <span class="kn">return</span> <span class="mi">404</span><span class="p">;</span>
     <span class="p">}</span>
 
-    <span class="err">#</span> <span class="nt">Handle</span> <span class="nt">private</span> <span class="nt">files</span> <span class="nt">through</span> <span class="nt">Drupal</span><span class="o">.</span>
-    <span class="nt">location</span> <span class="o">~</span> <span class="o">^/</span><span class="nt">system</span><span class="o">/</span><span class="nt">files</span><span class="o">/</span> <span class="p">{</span> <span class="err">#</span> <span class="n">For</span> <span class="n">Drupal</span> <span class="o">&gt;=</span> <span class="m">7</span>
-        <span class="n">try_files</span> <span class="err">$</span><span class="n">uri</span> <span class="o">/</span><span class="n">index</span><span class="o">.</span><span class="n">php</span><span class="o">?</span><span class="err">$</span><span class="n">query_string</span><span class="p">;</span>
+    <span class="c1"># In Drupal 8, we must also match new paths where the '.php' appears in</span>
+    <span class="c1"># the middle, such as update.php/selection. The rule we use is strict,</span>
+    <span class="c1"># and only allows this pattern with the update.php front controller.</span>
+    <span class="c1"># This allows legacy path aliases in the form of</span>
+    <span class="c1"># blog/index.php/legacy-path to continue to route to Drupal nodes. If</span>
+    <span class="c1"># you do not have any paths like that, then you might prefer to use a</span>
+    <span class="c1"># laxer rule, such as:</span>
+    <span class="c1">#   location ~ \.php(/|$) {</span>
+    <span class="c1"># The laxer rule will continue to work if Drupal uses this new URL</span>
+    <span class="c1"># pattern with front controllers other than update.php in a future</span>
+    <span class="c1"># release.</span>
+    <span class="kn">location</span> <span class="p">~</span> <span class="sr">'\.php$|^/update.php'</span> <span class="p">{</span>
+        <span class="kn">fastcgi_split_path_info</span> <span class="s">^(.+?\.php)(|/.*)</span>$<span class="p">;</span>
+        <span class="c1"># Security note: If you're running a version of PHP older than the</span>
+        <span class="c1"># latest 5.3, you should have "cgi.fix_pathinfo = 0;" in php.ini.</span>
+        <span class="c1"># See http://serverfault.com/q/627903/94922 for details.</span>
+        <span class="kn">include</span> <span class="s">fastcgi_params</span><span class="p">;</span>
+        <span class="c1"># Block httpoxy attacks. See https://httpoxy.org/.</span>
+        <span class="kn">fastcgi_param</span> <span class="s">HTTP_PROXY</span> <span class="s">""</span><span class="p">;</span>
+        <span class="kn">fastcgi_param</span> <span class="s">SCRIPT_FILENAME</span> <span class="nv">$document_root$fastcgi_script_name</span><span class="p">;</span>
+        <span class="kn">fastcgi_param</span> <span class="s">PATH_INFO</span> <span class="nv">$fastcgi_path_info</span><span class="p">;</span>
+        <span class="kn">fastcgi_intercept_errors</span> <span class="no">on</span><span class="p">;</span>
+        <span class="c1"># PHP 5 socket location.</span>
+        <span class="c1">#fastcgi_pass unix:/var/run/php5-fpm.sock;</span>
+        <span class="c1"># PHP 7 socket location.</span>
+        <span class="c1"># fastcgi_pass unix:/var/run/php/php7.0-fpm.sock;</span>
+
+        <span class="kn">fastcgi_pass</span> <span class="n">127.0.0.1</span><span class="p">:</span><span class="mi">9000</span><span class="p">;</span>
+        <span class="c1"># fastcgi_pass fpm:9000;</span>
     <span class="p">}</span>
 
-    <span class="nt">location</span> <span class="o">~*</span> <span class="err">\</span><span class="o">.(</span><span class="nt">js</span><span class="o">|</span><span class="nt">css</span><span class="o">|</span><span class="nt">png</span><span class="o">|</span><span class="nt">jpg</span><span class="o">|</span><span class="nt">jpeg</span><span class="o">|</span><span class="nt">gif</span><span class="o">|</span><span class="nt">ico</span><span class="o">)$</span> <span class="p">{</span>
-        <span class="n">expires</span> <span class="n">max</span><span class="p">;</span>
-        <span class="n">log_not_found</span> <span class="n">off</span><span class="p">;</span>
+    <span class="c1"># Fighting with Styles? This little gem is amazing.</span>
+    <span class="c1"># location ~ ^/sites/.*/files/imagecache/ { # For Drupal &lt;= 6</span>
+    <span class="kn">location</span> <span class="p">~</span> <span class="sr">^/sites/.*/files/styles/</span> <span class="p">{</span> <span class="c1"># For Drupal &gt;= 7</span>
+        <span class="kn">try_files</span> <span class="nv">$uri</span> <span class="s">@rewrite</span><span class="p">;</span>
     <span class="p">}</span>
-<span class="err">}</span>
+
+    <span class="c1"># Handle private files through Drupal.</span>
+    <span class="kn">location</span> <span class="p">~</span> <span class="sr">^/system/files/</span> <span class="p">{</span> <span class="c1"># For Drupal &gt;= 7</span>
+        <span class="kn">try_files</span> <span class="nv">$uri</span> <span class="s">/index.php?</span><span class="nv">$query_string</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="kn">location</span> <span class="p">~</span><span class="sr">*</span> <span class="s">\.(js|css|png|jpg|jpeg|gif|ico)</span>$ <span class="p">{</span>
+        <span class="kn">expires</span> <span class="s">max</span><span class="p">;</span>
+        <span class="kn">log_not_found</span> <span class="no">off</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
 </pre></div>
 <blockquote>
 <p>slightly modified from the wonderful reference provided by nginx, mostly the first 3 lines and later the fastcgi_pass</p>
@@ -497,7 +488,7 @@ http {
 <li><a href="https://www.nginx.com/resources/wiki/start/topics/recipes/drupal/">https://www.nginx.com/resources/wiki/start/topics/recipes/drupal/</a></li>
 </ul>
 <h2 id="post-boot-manual-configuration-ohgodwhy">Post boot manual configuration (ohgodwhy)</h2>
-<p>Post boot of a "fresh from built-by-packer snapshot" there was still the basic steps of configuring Drupal (which I did manually with a browser and install.pho though I'm pretty sure I could have just overridden the settings.php directly).</p>
+<p>Post boot of a "fresh from built-by-packer snapshot" there were still the basic steps of configuring Drupal (which I did manually with a browser and install.php though I'm pretty sure I could have just overridden the settings.php directly).</p>
 <p>And for this migration project a MySQL dump, SCP of the existing extra modules, and of course the already uploaded user images/files.</p>
 <p>I'm sure with more tinkering I can overcome the nginx vs www-data user permissions issue but since I time boxed this project I stuck with this compromise which is still much more improved and automated than my previous setup.</p>
 <p>If migrating data there is of course the prerequisite: <code>mysqldump -uroot -p physicstime &gt; backup.sql</code></p>
@@ -650,7 +641,11 @@ Time per request:       3248.067 [ms] (mean)
 <h3 id="conclusions">Conclusions</h3>
 <p>Adding docker simplifies one kind of complexity (stringing together multiple services that are packaged upstream) but can come at some cost to performance. (Though this might also be due to the cheaper node price)</p>
 <p>The other major advantage of using docker is that different components/services can be upgraded independently (and even just "test upgraded") which allows for a faster adoption of upstream project improvements.</p>
-<p>Obviously if performance were really an issue adding a cache layer like Varnish or Cloudflare or just tweaking the various configurations would help =]</p>
+<p>I personally don't like relying on the OS of the host for all of the global dependencies to play nice (and especially that different packages won't have conflicting dependencies).</p>
+<p>Since all of these processes are running in the same host that I own I expect I'm not worse off security wise.</p>
+<p>I'm curious to see if given enough time I run into the infamous /var/lib/docker issues of orphan containers, running out of disk space, or other issues.</p>
+<p>A next step might be to run this in a PlatormAsAService like OpenShift or better yet break up each container to run via a ContainerAsAService (if it's free ;)</p>
+<p>Obviously if performance and scale of a mostly read-only content distribution system was really an issue adding a cache layer like Varnish or Cloudflare or even just tweaking the various configurations would help =]</p>
             <aside>
             <hr/>
             <nav>
@@ -670,7 +665,7 @@ Time per request:       3248.067 [ms] (mean)
             <time pubdate="pubdate" datetime="2016-07-28T23:59:00-07:00">Jul 28, 2016</time>
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#virtualization-ref">virtualization</a> 
-            <h4>~2264 words</h4>
+            <h4>~2371 words</h4>
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article"> 
                 <li><a href="/tags.html#digitalocean-ref">digitalocean

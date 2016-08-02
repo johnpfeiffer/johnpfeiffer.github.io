@@ -298,15 +298,7 @@ mysql:
 &lt;li&gt;A very nice tool to add is fail2ban (apt-get install fail2ban) but I want to ensure I tweak the configs correctly&lt;/li&gt;
 &lt;/ul&gt;
 &lt;h4 id="install-dockersh"&gt;install-docker.sh&lt;/h4&gt;
-&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1
-2
-3
-4
-5
-6
-7
-8
-9&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="ch"&gt;#!/bin/sh&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="ch"&gt;#!/bin/sh&lt;/span&gt;
 &lt;span class="c1"&gt;# ubuntu 16.04 is xenial , https://blog.john-pfeiffer.com/docker-intro-install-run-and-port-forward/&lt;/span&gt;
 sudo apt-key adv --keyserver hkp://pgp.mit.edu:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
 sudo sh -c &lt;span class="s2"&gt;"echo 'deb https://apt.dockerproject.org/repo ubuntu-xenial main' &amp;gt; /etc/apt/sources.list.d/docker.list"&lt;/span&gt;
@@ -316,27 +308,26 @@ sudo apt-get install -y docker-engine docker-compose &lt;span class="o"&gt;||&lt
 service docker status &lt;span class="o"&gt;||&lt;/span&gt; &lt;span class="nb"&gt;exit&lt;/span&gt; 1
 docker info &lt;span class="o"&gt;||&lt;/span&gt; &lt;span class="nb"&gt;exit&lt;/span&gt; 1
 &lt;/pre&gt;&lt;/div&gt;
-&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;blockquote&gt;
 &lt;p&gt;linux-image-extra is to ensure we have AUFS because docker needs a proper storage driver&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;h4 id="docker-composeyml-with-drupal7-fpm-and-mariadb55"&gt;docker-compose.yml with drupal:7-fpm and mariadb:5.5&lt;/h4&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;# https://hub.docker.com/_/drupal/
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="c"&gt;# https://hub.docker.com/_/drupal/&lt;/span&gt;
 fpm:
   image: drupal:7-fpm
   ports:
-    - "127.0.0.1:9000:9000"
-#    - "9000:9000"
+    - &lt;span class="s2"&gt;"127.0.0.1:9000:9000"&lt;/span&gt;
+&lt;span class="c"&gt;#    - "9000:9000"&lt;/span&gt;
   volumes:
     - /var/www/html:/var/www/html/
   links:
     - mysql
 
-# https://hub.docker.com/_/mariadb/
+&lt;span class="c"&gt;# https://hub.docker.com/_/mariadb/&lt;/span&gt;
 mysql:
   image: mariadb:5.5
   ports:
-    - "3306:3306"
+    - &lt;span class="s2"&gt;"3306:3306"&lt;/span&gt;
   environment:
     - MYSQL_ROOT_PASSWORD
     - MYSQL_USER
@@ -347,146 +338,146 @@ mysql:
 &lt;p&gt;2 out of 3 ain't bad&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;h4 id="nginxconf"&gt;nginx.conf&lt;/h4&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;# slightly modified /etc/nginx/nginx.conf from "apt-get install nginx"
-# https://www.nginx.com/resources/wiki/start/topics/examples/full/
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="c1"&gt;# slightly modified /etc/nginx/nginx.conf from "apt-get install nginx"&lt;/span&gt;
+&lt;span class="c1"&gt;# https://www.nginx.com/resources/wiki/start/topics/examples/full/&lt;/span&gt;
 
-user www-data;
-worker_processes auto;
-pid /run/nginx.pid;
+&lt;span class="k"&gt;user&lt;/span&gt; &lt;span class="s"&gt;www-data&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="k"&gt;worker_processes&lt;/span&gt; &lt;span class="s"&gt;auto&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="k"&gt;pid&lt;/span&gt; &lt;span class="s"&gt;/run/nginx.pid&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
 
-events {
-        worker_connections 768;
-        # multi_accept on;
-}
+&lt;span class="k"&gt;events&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="kn"&gt;worker_connections&lt;/span&gt; &lt;span class="mi"&gt;768&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+        &lt;span class="c1"&gt;# multi_accept on;&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
 
-http {
+&lt;span class="k"&gt;http&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
 
-        sendfile on;
-        tcp_nopush on;
-        tcp_nodelay on;
-        keepalive_timeout 65;
-        types_hash_max_size 2048;
-        server_tokens off;
+        &lt;span class="kn"&gt;sendfile&lt;/span&gt; &lt;span class="no"&gt;on&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+        &lt;span class="kn"&gt;tcp_nopush&lt;/span&gt; &lt;span class="no"&gt;on&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+        &lt;span class="kn"&gt;tcp_nodelay&lt;/span&gt; &lt;span class="no"&gt;on&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+        &lt;span class="kn"&gt;keepalive_timeout&lt;/span&gt; &lt;span class="mi"&gt;65&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+        &lt;span class="kn"&gt;types_hash_max_size&lt;/span&gt; &lt;span class="mi"&gt;2048&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+        &lt;span class="kn"&gt;server_tokens&lt;/span&gt; &lt;span class="no"&gt;off&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
 
-        include /etc/nginx/mime.types;
-        default_type application/octet-stream;
+        &lt;span class="kn"&gt;include&lt;/span&gt; &lt;span class="s"&gt;/etc/nginx/mime.types&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+        &lt;span class="kn"&gt;default_type&lt;/span&gt; &lt;span class="s"&gt;application/octet-stream&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
 
-        access_log /var/log/nginx/access.log;
-        error_log /var/log/nginx/error.log;
+        &lt;span class="kn"&gt;access_log&lt;/span&gt; &lt;span class="s"&gt;/var/log/nginx/access.log&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+        &lt;span class="kn"&gt;error_log&lt;/span&gt; &lt;span class="s"&gt;/var/log/nginx/error.log&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
 
-        gzip on;
-        gzip_disable "msie6";
+        &lt;span class="kn"&gt;gzip&lt;/span&gt; &lt;span class="no"&gt;on&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+        &lt;span class="kn"&gt;gzip_disable&lt;/span&gt; &lt;span class="s"&gt;"msie6"&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
 
-        gzip_types text/plain text/css application/json application/javascript text/xml application/xml application/xml+rss text/javascript;
+        &lt;span class="kn"&gt;gzip_types&lt;/span&gt; &lt;span class="s"&gt;text/plain&lt;/span&gt; &lt;span class="s"&gt;text/css&lt;/span&gt; &lt;span class="s"&gt;application/json&lt;/span&gt; &lt;span class="s"&gt;application/javascript&lt;/span&gt; &lt;span class="s"&gt;text/xml&lt;/span&gt; &lt;span class="s"&gt;application/xml&lt;/span&gt; &lt;span class="s"&gt;application/xml+rss&lt;/span&gt; &lt;span class="s"&gt;text/javascript&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
 
-        include /etc/nginx/conf.d/*.conf;
+        &lt;span class="kn"&gt;include&lt;/span&gt; &lt;span class="s"&gt;/etc/nginx/conf.d/*.conf&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
 
-}
+&lt;span class="p"&gt;}&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 &lt;h4 id="defaultconf"&gt;default.conf&lt;/h4&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nt"&gt;server&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
-    &lt;span class="n"&gt;listen&lt;/span&gt;      &lt;span class="m"&gt;80&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
-    &lt;span class="n"&gt;server_name&lt;/span&gt; &lt;span class="n"&gt;physicstime&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;com&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
-    &lt;span class="n"&gt;root&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;var&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;www&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;html&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt; &lt;span class="err"&gt;##&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;--&lt;/span&gt; &lt;span class="n"&gt;Your&lt;/span&gt; &lt;span class="n"&gt;only&lt;/span&gt; &lt;span class="n"&gt;path&lt;/span&gt; &lt;span class="n"&gt;reference&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;server&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="kn"&gt;listen&lt;/span&gt;      &lt;span class="mi"&gt;80&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="kn"&gt;server_name&lt;/span&gt; &lt;span class="s"&gt;physicstime.com&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="kn"&gt;root&lt;/span&gt; &lt;span class="s"&gt;/var/www/html&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt; &lt;span class="c1"&gt;## &amp;lt;-- Your only path reference.&lt;/span&gt;
 
-    &lt;span class="n"&gt;location&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;favicon&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;ico&lt;/span&gt; &lt;span class="err"&gt;{&lt;/span&gt;
-        &lt;span class="n"&gt;log_not_found&lt;/span&gt; &lt;span class="n"&gt;off&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
-        &lt;span class="n"&gt;access_log&lt;/span&gt; &lt;span class="n"&gt;off&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="kn"&gt;location&lt;/span&gt; &lt;span class="p"&gt;=&lt;/span&gt; &lt;span class="s"&gt;/favicon.ico&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="kn"&gt;log_not_found&lt;/span&gt; &lt;span class="no"&gt;off&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+        &lt;span class="kn"&gt;access_log&lt;/span&gt; &lt;span class="no"&gt;off&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
     &lt;span class="p"&gt;}&lt;/span&gt;
 
-    &lt;span class="nt"&gt;location&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nt"&gt;robots&lt;/span&gt;&lt;span class="nc"&gt;.txt&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
-        &lt;span class="n"&gt;allow&lt;/span&gt; &lt;span class="n"&gt;all&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
-        &lt;span class="n"&gt;log_not_found&lt;/span&gt; &lt;span class="n"&gt;off&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
-        &lt;span class="n"&gt;access_log&lt;/span&gt; &lt;span class="n"&gt;off&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="kn"&gt;location&lt;/span&gt; &lt;span class="p"&gt;=&lt;/span&gt; &lt;span class="s"&gt;/robots.txt&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="kn"&gt;allow&lt;/span&gt; &lt;span class="s"&gt;all&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+        &lt;span class="kn"&gt;log_not_found&lt;/span&gt; &lt;span class="no"&gt;off&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+        &lt;span class="kn"&gt;access_log&lt;/span&gt; &lt;span class="no"&gt;off&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
     &lt;span class="p"&gt;}&lt;/span&gt;
 
-    &lt;span class="err"&gt;#&lt;/span&gt; &lt;span class="nt"&gt;Very&lt;/span&gt; &lt;span class="nt"&gt;rarely&lt;/span&gt; &lt;span class="nt"&gt;should&lt;/span&gt; &lt;span class="nt"&gt;these&lt;/span&gt; &lt;span class="nt"&gt;ever&lt;/span&gt; &lt;span class="nt"&gt;be&lt;/span&gt; &lt;span class="nt"&gt;accessed&lt;/span&gt; &lt;span class="nt"&gt;outside&lt;/span&gt; &lt;span class="nt"&gt;of&lt;/span&gt; &lt;span class="nt"&gt;your&lt;/span&gt; &lt;span class="nt"&gt;lan&lt;/span&gt;
-    &lt;span class="nt"&gt;location&lt;/span&gt; &lt;span class="o"&gt;~*&lt;/span&gt; &lt;span class="err"&gt;\&lt;/span&gt;&lt;span class="o"&gt;.(&lt;/span&gt;&lt;span class="nt"&gt;txt&lt;/span&gt;&lt;span class="o"&gt;|&lt;/span&gt;&lt;span class="nt"&gt;log&lt;/span&gt;&lt;span class="o"&gt;)$&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
-        &lt;span class="n"&gt;deny&lt;/span&gt; &lt;span class="n"&gt;all&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="c1"&gt;# Very rarely should these ever be accessed outside of your lan&lt;/span&gt;
+    &lt;span class="kn"&gt;location&lt;/span&gt; &lt;span class="p"&gt;~&lt;/span&gt;&lt;span class="sr"&gt;*&lt;/span&gt; &lt;span class="s"&gt;\.(txt|log)&lt;/span&gt;$ &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="kn"&gt;deny&lt;/span&gt; &lt;span class="s"&gt;all&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
     &lt;span class="p"&gt;}&lt;/span&gt;
 
-    &lt;span class="nt"&gt;location&lt;/span&gt; &lt;span class="o"&gt;~&lt;/span&gt; &lt;span class="err"&gt;\&lt;/span&gt;&lt;span class="o"&gt;..*/.*&lt;/span&gt;&lt;span class="err"&gt;\&lt;/span&gt;&lt;span class="nc"&gt;.php&lt;/span&gt;&lt;span class="o"&gt;$&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
-        &lt;span class="n"&gt;return&lt;/span&gt; &lt;span class="m"&gt;403&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="kn"&gt;location&lt;/span&gt; &lt;span class="p"&gt;~&lt;/span&gt; &lt;span class="sr"&gt;\..*/.*\.php$&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="kn"&gt;return&lt;/span&gt; &lt;span class="mi"&gt;403&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
     &lt;span class="p"&gt;}&lt;/span&gt;
 
-    &lt;span class="nt"&gt;location&lt;/span&gt; &lt;span class="o"&gt;~&lt;/span&gt; &lt;span class="o"&gt;^/&lt;/span&gt;&lt;span class="nt"&gt;sites&lt;/span&gt;&lt;span class="o"&gt;/.*/&lt;/span&gt;&lt;span class="nt"&gt;private&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
-        &lt;span class="n"&gt;return&lt;/span&gt; &lt;span class="m"&gt;403&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="kn"&gt;location&lt;/span&gt; &lt;span class="p"&gt;~&lt;/span&gt; &lt;span class="sr"&gt;^/sites/.*/private/&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="kn"&gt;return&lt;/span&gt; &lt;span class="mi"&gt;403&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
     &lt;span class="p"&gt;}&lt;/span&gt;
 
-    &lt;span class="err"&gt;#&lt;/span&gt; &lt;span class="nt"&gt;Allow&lt;/span&gt; &lt;span class="s2"&gt;"Well-Known URIs"&lt;/span&gt; &lt;span class="nt"&gt;as&lt;/span&gt; &lt;span class="nt"&gt;per&lt;/span&gt; &lt;span class="nt"&gt;RFC&lt;/span&gt; &lt;span class="nt"&gt;5785&lt;/span&gt;
-    &lt;span class="nt"&gt;location&lt;/span&gt; &lt;span class="o"&gt;~*&lt;/span&gt; &lt;span class="o"&gt;^/&lt;/span&gt;&lt;span class="nc"&gt;.well-known&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
-        &lt;span class="n"&gt;allow&lt;/span&gt; &lt;span class="n"&gt;all&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="c1"&gt;# Allow "Well-Known URIs" as per RFC 5785&lt;/span&gt;
+    &lt;span class="kn"&gt;location&lt;/span&gt; &lt;span class="p"&gt;~&lt;/span&gt;&lt;span class="sr"&gt;*&lt;/span&gt; &lt;span class="s"&gt;^/.well-known/&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="kn"&gt;allow&lt;/span&gt; &lt;span class="s"&gt;all&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
     &lt;span class="p"&gt;}&lt;/span&gt;
 
-    &lt;span class="err"&gt;#&lt;/span&gt; &lt;span class="nt"&gt;Block&lt;/span&gt; &lt;span class="nt"&gt;access&lt;/span&gt; &lt;span class="nt"&gt;to&lt;/span&gt; &lt;span class="s2"&gt;"hidden"&lt;/span&gt; &lt;span class="nt"&gt;files&lt;/span&gt; &lt;span class="nt"&gt;and&lt;/span&gt; &lt;span class="nt"&gt;directories&lt;/span&gt; &lt;span class="nt"&gt;whose&lt;/span&gt; &lt;span class="nt"&gt;names&lt;/span&gt; &lt;span class="nt"&gt;begin&lt;/span&gt; &lt;span class="nt"&gt;with&lt;/span&gt; &lt;span class="nt"&gt;a&lt;/span&gt;
-    &lt;span class="err"&gt;#&lt;/span&gt; &lt;span class="nt"&gt;period&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt; &lt;span class="nt"&gt;This&lt;/span&gt; &lt;span class="nt"&gt;includes&lt;/span&gt; &lt;span class="nt"&gt;directories&lt;/span&gt; &lt;span class="nt"&gt;used&lt;/span&gt; &lt;span class="nt"&gt;by&lt;/span&gt; &lt;span class="nt"&gt;version&lt;/span&gt; &lt;span class="nt"&gt;control&lt;/span&gt; &lt;span class="nt"&gt;systems&lt;/span&gt; &lt;span class="nt"&gt;such&lt;/span&gt;
-    &lt;span class="err"&gt;#&lt;/span&gt; &lt;span class="nt"&gt;as&lt;/span&gt; &lt;span class="nt"&gt;Subversion&lt;/span&gt; &lt;span class="nt"&gt;or&lt;/span&gt; &lt;span class="nt"&gt;Git&lt;/span&gt; &lt;span class="nt"&gt;to&lt;/span&gt; &lt;span class="nt"&gt;store&lt;/span&gt; &lt;span class="nt"&gt;control&lt;/span&gt; &lt;span class="nt"&gt;files&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;
-    &lt;span class="nt"&gt;location&lt;/span&gt; &lt;span class="o"&gt;~&lt;/span&gt; &lt;span class="o"&gt;(^|/)&lt;/span&gt;&lt;span class="err"&gt;\&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
-        &lt;span class="n"&gt;return&lt;/span&gt; &lt;span class="m"&gt;403&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="c1"&gt;# Block access to "hidden" files and directories whose names begin with a&lt;/span&gt;
+    &lt;span class="c1"&gt;# period. This includes directories used by version control systems such&lt;/span&gt;
+    &lt;span class="c1"&gt;# as Subversion or Git to store control files.&lt;/span&gt;
+    &lt;span class="kn"&gt;location&lt;/span&gt; &lt;span class="p"&gt;~&lt;/span&gt; &lt;span class="sr"&gt;(^|/)\.&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="kn"&gt;return&lt;/span&gt; &lt;span class="mi"&gt;403&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
     &lt;span class="p"&gt;}&lt;/span&gt;
 
-    &lt;span class="nt"&gt;location&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
-        &lt;span class="err"&gt;#&lt;/span&gt; &lt;span class="n"&gt;try_files&lt;/span&gt; &lt;span class="err"&gt;$&lt;/span&gt;&lt;span class="n"&gt;uri&lt;/span&gt; &lt;span class="o"&gt;@&lt;/span&gt;&lt;span class="n"&gt;rewrite&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt; &lt;span class="err"&gt;#&lt;/span&gt; &lt;span class="n"&gt;For&lt;/span&gt; &lt;span class="n"&gt;Drupal&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;=&lt;/span&gt; &lt;span class="m"&gt;6&lt;/span&gt;
-        &lt;span class="n"&gt;try_files&lt;/span&gt; &lt;span class="err"&gt;$&lt;/span&gt;&lt;span class="n"&gt;uri&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;index&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;php&lt;/span&gt;&lt;span class="o"&gt;?&lt;/span&gt;&lt;span class="err"&gt;$&lt;/span&gt;&lt;span class="n"&gt;query_string&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt; &lt;span class="err"&gt;#&lt;/span&gt; &lt;span class="n"&gt;For&lt;/span&gt; &lt;span class="n"&gt;Drupal&lt;/span&gt; &lt;span class="o"&gt;&amp;gt;=&lt;/span&gt; &lt;span class="m"&gt;7&lt;/span&gt;
+    &lt;span class="kn"&gt;location&lt;/span&gt; &lt;span class="s"&gt;/&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="c1"&gt;# try_files $uri @rewrite; # For Drupal &amp;lt;= 6&lt;/span&gt;
+        &lt;span class="kn"&gt;try_files&lt;/span&gt; &lt;span class="nv"&gt;$uri&lt;/span&gt; &lt;span class="s"&gt;/index.php?&lt;/span&gt;&lt;span class="nv"&gt;$query_string&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt; &lt;span class="c1"&gt;# For Drupal &amp;gt;= 7&lt;/span&gt;
     &lt;span class="p"&gt;}&lt;/span&gt;
 
-    &lt;span class="nt"&gt;location&lt;/span&gt; &lt;span class="k"&gt;@rewrite&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
-        &lt;span class="nt"&gt;rewrite&lt;/span&gt; &lt;span class="o"&gt;^/(.*)$&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nt"&gt;index&lt;/span&gt;&lt;span class="nc"&gt;.php&lt;/span&gt;&lt;span class="o"&gt;?&lt;/span&gt;&lt;span class="nt"&gt;q&lt;/span&gt;&lt;span class="o"&gt;=$&lt;/span&gt;&lt;span class="nt"&gt;1&lt;/span&gt;&lt;span class="o"&gt;;&lt;/span&gt;
+    &lt;span class="kn"&gt;location&lt;/span&gt; &lt;span class="s"&gt;@rewrite&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="kn"&gt;rewrite&lt;/span&gt; &lt;span class="s"&gt;^/(.*)&lt;/span&gt;$ &lt;span class="s"&gt;/index.php?q=&lt;/span&gt;&lt;span class="nv"&gt;$1&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
     &lt;span class="p"&gt;}&lt;/span&gt;
 
-    &lt;span class="err"&gt;#&lt;/span&gt; &lt;span class="nt"&gt;Don&lt;/span&gt;&lt;span class="s1"&gt;'t allow direct access to PHP files in the vendor directory.&lt;/span&gt;
-&lt;span class="s1"&gt;    location ~ /vendor/.*\.php$ {&lt;/span&gt;
-&lt;span class="s1"&gt;        deny all;&lt;/span&gt;
-&lt;span class="s1"&gt;        return 404;&lt;/span&gt;
-&lt;span class="s1"&gt;    }&lt;/span&gt;
-
-&lt;span class="s1"&gt;    # In Drupal 8, we must also match new paths where the '&lt;/span&gt;&lt;span class="nc"&gt;.php&lt;/span&gt;&lt;span class="s1"&gt;' appears in&lt;/span&gt;
-&lt;span class="s1"&gt;    # the middle, such as update.php/selection. The rule we use is strict,&lt;/span&gt;
-&lt;span class="s1"&gt;    # and only allows this pattern with the update.php front controller.&lt;/span&gt;
-&lt;span class="s1"&gt;    # This allows legacy path aliases in the form of&lt;/span&gt;
-&lt;span class="s1"&gt;    # blog/index.php/legacy-path to continue to route to Drupal nodes. If&lt;/span&gt;
-&lt;span class="s1"&gt;    # you do not have any paths like that, then you might prefer to use a&lt;/span&gt;
-&lt;span class="s1"&gt;    # laxer rule, such as:&lt;/span&gt;
-&lt;span class="s1"&gt;    #   location ~ \.php(/|$) {&lt;/span&gt;
-&lt;span class="s1"&gt;    # The laxer rule will continue to work if Drupal uses this new URL&lt;/span&gt;
-&lt;span class="s1"&gt;    # pattern with front controllers other than update.php in a future&lt;/span&gt;
-&lt;span class="s1"&gt;    # release.&lt;/span&gt;
-&lt;span class="s1"&gt;    location ~ '&lt;/span&gt;&lt;span class="err"&gt;\&lt;/span&gt;&lt;span class="nc"&gt;.php&lt;/span&gt;&lt;span class="o"&gt;$|^/&lt;/span&gt;&lt;span class="nt"&gt;update&lt;/span&gt;&lt;span class="nc"&gt;.php&lt;/span&gt;&lt;span class="s1"&gt;' {&lt;/span&gt;
-&lt;span class="s1"&gt;        fastcgi_split_path_info ^(.+?\.php)(|/.*)$;&lt;/span&gt;
-&lt;span class="s1"&gt;        # Security note: If you'&lt;/span&gt;&lt;span class="nt"&gt;re&lt;/span&gt; &lt;span class="nt"&gt;running&lt;/span&gt; &lt;span class="nt"&gt;a&lt;/span&gt; &lt;span class="nt"&gt;version&lt;/span&gt; &lt;span class="nt"&gt;of&lt;/span&gt; &lt;span class="nt"&gt;PHP&lt;/span&gt; &lt;span class="nt"&gt;older&lt;/span&gt; &lt;span class="nt"&gt;than&lt;/span&gt; &lt;span class="nt"&gt;the&lt;/span&gt;
-        &lt;span class="err"&gt;#&lt;/span&gt; &lt;span class="nt"&gt;latest&lt;/span&gt; &lt;span class="nt"&gt;5&lt;/span&gt;&lt;span class="nc"&gt;.3&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="nt"&gt;you&lt;/span&gt; &lt;span class="nt"&gt;should&lt;/span&gt; &lt;span class="nt"&gt;have&lt;/span&gt; &lt;span class="s2"&gt;"cgi.fix_pathinfo = 0;"&lt;/span&gt; &lt;span class="nt"&gt;in&lt;/span&gt; &lt;span class="nt"&gt;php&lt;/span&gt;&lt;span class="nc"&gt;.ini&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;
-        &lt;span class="err"&gt;#&lt;/span&gt; &lt;span class="nt"&gt;See&lt;/span&gt; &lt;span class="nt"&gt;http&lt;/span&gt;&lt;span class="o"&gt;://&lt;/span&gt;&lt;span class="nt"&gt;serverfault&lt;/span&gt;&lt;span class="nc"&gt;.com&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nt"&gt;q&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nt"&gt;627903&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nt"&gt;94922&lt;/span&gt; &lt;span class="nt"&gt;for&lt;/span&gt; &lt;span class="nt"&gt;details&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;
-        &lt;span class="nt"&gt;include&lt;/span&gt; &lt;span class="nt"&gt;fastcgi_params&lt;/span&gt;&lt;span class="o"&gt;;&lt;/span&gt;
-        &lt;span class="err"&gt;#&lt;/span&gt; &lt;span class="nt"&gt;Block&lt;/span&gt; &lt;span class="nt"&gt;httpoxy&lt;/span&gt; &lt;span class="nt"&gt;attacks&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt; &lt;span class="nt"&gt;See&lt;/span&gt; &lt;span class="nt"&gt;https&lt;/span&gt;&lt;span class="o"&gt;://&lt;/span&gt;&lt;span class="nt"&gt;httpoxy&lt;/span&gt;&lt;span class="nc"&gt;.org&lt;/span&gt;&lt;span class="o"&gt;/.&lt;/span&gt;
-        &lt;span class="nt"&gt;fastcgi_param&lt;/span&gt; &lt;span class="nt"&gt;HTTP_PROXY&lt;/span&gt; &lt;span class="s2"&gt;""&lt;/span&gt;&lt;span class="o"&gt;;&lt;/span&gt;
-        &lt;span class="nt"&gt;fastcgi_param&lt;/span&gt; &lt;span class="nt"&gt;SCRIPT_FILENAME&lt;/span&gt; &lt;span class="o"&gt;$&lt;/span&gt;&lt;span class="nt"&gt;document_root&lt;/span&gt;&lt;span class="o"&gt;$&lt;/span&gt;&lt;span class="nt"&gt;fastcgi_script_name&lt;/span&gt;&lt;span class="o"&gt;;&lt;/span&gt;
-        &lt;span class="nt"&gt;fastcgi_param&lt;/span&gt; &lt;span class="nt"&gt;PATH_INFO&lt;/span&gt; &lt;span class="o"&gt;$&lt;/span&gt;&lt;span class="nt"&gt;fastcgi_path_info&lt;/span&gt;&lt;span class="o"&gt;;&lt;/span&gt;
-        &lt;span class="nt"&gt;fastcgi_intercept_errors&lt;/span&gt; &lt;span class="nt"&gt;on&lt;/span&gt;&lt;span class="o"&gt;;&lt;/span&gt;
-        &lt;span class="err"&gt;#&lt;/span&gt; &lt;span class="nt"&gt;PHP&lt;/span&gt; &lt;span class="nt"&gt;5&lt;/span&gt; &lt;span class="nt"&gt;socket&lt;/span&gt; &lt;span class="nt"&gt;location&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;
-        &lt;span class="nn"&gt;#fastcgi_pass&lt;/span&gt; &lt;span class="nt"&gt;unix&lt;/span&gt;&lt;span class="o"&gt;:/&lt;/span&gt;&lt;span class="nt"&gt;var&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nt"&gt;run&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nt"&gt;php5-fpm&lt;/span&gt;&lt;span class="nc"&gt;.sock&lt;/span&gt;&lt;span class="o"&gt;;&lt;/span&gt;
-        &lt;span class="err"&gt;#&lt;/span&gt; &lt;span class="nt"&gt;PHP&lt;/span&gt; &lt;span class="nt"&gt;7&lt;/span&gt; &lt;span class="nt"&gt;socket&lt;/span&gt; &lt;span class="nt"&gt;location&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;
-        &lt;span class="err"&gt;#&lt;/span&gt; &lt;span class="nt"&gt;fastcgi_pass&lt;/span&gt; &lt;span class="nt"&gt;unix&lt;/span&gt;&lt;span class="o"&gt;:/&lt;/span&gt;&lt;span class="nt"&gt;var&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nt"&gt;run&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nt"&gt;php&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nt"&gt;php7&lt;/span&gt;&lt;span class="nc"&gt;.0-fpm.sock&lt;/span&gt;&lt;span class="o"&gt;;&lt;/span&gt;
-
-        &lt;span class="nt"&gt;fastcgi_pass&lt;/span&gt; &lt;span class="nt"&gt;127&lt;/span&gt;&lt;span class="nc"&gt;.0.0.1&lt;/span&gt;&lt;span class="nd"&gt;:9000&lt;/span&gt;&lt;span class="o"&gt;;&lt;/span&gt;
-        &lt;span class="err"&gt;#&lt;/span&gt; &lt;span class="nt"&gt;fastcgi_pass&lt;/span&gt; &lt;span class="nt"&gt;fpm&lt;/span&gt;&lt;span class="nd"&gt;:9000&lt;/span&gt;&lt;span class="o"&gt;;&lt;/span&gt;
-    &lt;span class="err"&gt;}&lt;/span&gt;
-
-    &lt;span class="err"&gt;#&lt;/span&gt; &lt;span class="nt"&gt;Fighting&lt;/span&gt; &lt;span class="nt"&gt;with&lt;/span&gt; &lt;span class="nt"&gt;Styles&lt;/span&gt;&lt;span class="o"&gt;?&lt;/span&gt; &lt;span class="nt"&gt;This&lt;/span&gt; &lt;span class="nt"&gt;little&lt;/span&gt; &lt;span class="nt"&gt;gem&lt;/span&gt; &lt;span class="nt"&gt;is&lt;/span&gt; &lt;span class="nt"&gt;amazing&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;
-    &lt;span class="err"&gt;#&lt;/span&gt; &lt;span class="nt"&gt;location&lt;/span&gt; &lt;span class="o"&gt;~&lt;/span&gt; &lt;span class="o"&gt;^/&lt;/span&gt;&lt;span class="nt"&gt;sites&lt;/span&gt;&lt;span class="o"&gt;/.*/&lt;/span&gt;&lt;span class="nt"&gt;files&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nt"&gt;imagecache&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt; &lt;span class="err"&gt;#&lt;/span&gt; &lt;span class="n"&gt;For&lt;/span&gt; &lt;span class="n"&gt;Drupal&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;=&lt;/span&gt; &lt;span class="m"&gt;6&lt;/span&gt;
-    &lt;span class="n"&gt;location&lt;/span&gt; &lt;span class="o"&gt;~&lt;/span&gt; &lt;span class="o"&gt;^/&lt;/span&gt;&lt;span class="n"&gt;sites&lt;/span&gt;&lt;span class="o"&gt;/.*/&lt;/span&gt;&lt;span class="n"&gt;files&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;styles&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt; &lt;span class="err"&gt;{&lt;/span&gt; &lt;span class="err"&gt;#&lt;/span&gt; &lt;span class="n"&gt;For&lt;/span&gt; &lt;span class="n"&gt;Drupal&lt;/span&gt; &lt;span class="o"&gt;&amp;gt;=&lt;/span&gt; &lt;span class="m"&gt;7&lt;/span&gt;
-        &lt;span class="n"&gt;try_files&lt;/span&gt; &lt;span class="err"&gt;$&lt;/span&gt;&lt;span class="n"&gt;uri&lt;/span&gt; &lt;span class="o"&gt;@&lt;/span&gt;&lt;span class="n"&gt;rewrite&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="c1"&gt;# Don't allow direct access to PHP files in the vendor directory.&lt;/span&gt;
+    &lt;span class="kn"&gt;location&lt;/span&gt; &lt;span class="p"&gt;~&lt;/span&gt; &lt;span class="sr"&gt;/vendor/.*\.php$&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="kn"&gt;deny&lt;/span&gt; &lt;span class="s"&gt;all&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+        &lt;span class="kn"&gt;return&lt;/span&gt; &lt;span class="mi"&gt;404&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
     &lt;span class="p"&gt;}&lt;/span&gt;
 
-    &lt;span class="err"&gt;#&lt;/span&gt; &lt;span class="nt"&gt;Handle&lt;/span&gt; &lt;span class="nt"&gt;private&lt;/span&gt; &lt;span class="nt"&gt;files&lt;/span&gt; &lt;span class="nt"&gt;through&lt;/span&gt; &lt;span class="nt"&gt;Drupal&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;
-    &lt;span class="nt"&gt;location&lt;/span&gt; &lt;span class="o"&gt;~&lt;/span&gt; &lt;span class="o"&gt;^/&lt;/span&gt;&lt;span class="nt"&gt;system&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nt"&gt;files&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt; &lt;span class="err"&gt;#&lt;/span&gt; &lt;span class="n"&gt;For&lt;/span&gt; &lt;span class="n"&gt;Drupal&lt;/span&gt; &lt;span class="o"&gt;&amp;gt;=&lt;/span&gt; &lt;span class="m"&gt;7&lt;/span&gt;
-        &lt;span class="n"&gt;try_files&lt;/span&gt; &lt;span class="err"&gt;$&lt;/span&gt;&lt;span class="n"&gt;uri&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;index&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;php&lt;/span&gt;&lt;span class="o"&gt;?&lt;/span&gt;&lt;span class="err"&gt;$&lt;/span&gt;&lt;span class="n"&gt;query_string&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="c1"&gt;# In Drupal 8, we must also match new paths where the '.php' appears in&lt;/span&gt;
+    &lt;span class="c1"&gt;# the middle, such as update.php/selection. The rule we use is strict,&lt;/span&gt;
+    &lt;span class="c1"&gt;# and only allows this pattern with the update.php front controller.&lt;/span&gt;
+    &lt;span class="c1"&gt;# This allows legacy path aliases in the form of&lt;/span&gt;
+    &lt;span class="c1"&gt;# blog/index.php/legacy-path to continue to route to Drupal nodes. If&lt;/span&gt;
+    &lt;span class="c1"&gt;# you do not have any paths like that, then you might prefer to use a&lt;/span&gt;
+    &lt;span class="c1"&gt;# laxer rule, such as:&lt;/span&gt;
+    &lt;span class="c1"&gt;#   location ~ \.php(/|$) {&lt;/span&gt;
+    &lt;span class="c1"&gt;# The laxer rule will continue to work if Drupal uses this new URL&lt;/span&gt;
+    &lt;span class="c1"&gt;# pattern with front controllers other than update.php in a future&lt;/span&gt;
+    &lt;span class="c1"&gt;# release.&lt;/span&gt;
+    &lt;span class="kn"&gt;location&lt;/span&gt; &lt;span class="p"&gt;~&lt;/span&gt; &lt;span class="sr"&gt;'\.php$|^/update.php'&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="kn"&gt;fastcgi_split_path_info&lt;/span&gt; &lt;span class="s"&gt;^(.+?\.php)(|/.*)&lt;/span&gt;$&lt;span class="p"&gt;;&lt;/span&gt;
+        &lt;span class="c1"&gt;# Security note: If you're running a version of PHP older than the&lt;/span&gt;
+        &lt;span class="c1"&gt;# latest 5.3, you should have "cgi.fix_pathinfo = 0;" in php.ini.&lt;/span&gt;
+        &lt;span class="c1"&gt;# See http://serverfault.com/q/627903/94922 for details.&lt;/span&gt;
+        &lt;span class="kn"&gt;include&lt;/span&gt; &lt;span class="s"&gt;fastcgi_params&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+        &lt;span class="c1"&gt;# Block httpoxy attacks. See https://httpoxy.org/.&lt;/span&gt;
+        &lt;span class="kn"&gt;fastcgi_param&lt;/span&gt; &lt;span class="s"&gt;HTTP_PROXY&lt;/span&gt; &lt;span class="s"&gt;""&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+        &lt;span class="kn"&gt;fastcgi_param&lt;/span&gt; &lt;span class="s"&gt;SCRIPT_FILENAME&lt;/span&gt; &lt;span class="nv"&gt;$document_root$fastcgi_script_name&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+        &lt;span class="kn"&gt;fastcgi_param&lt;/span&gt; &lt;span class="s"&gt;PATH_INFO&lt;/span&gt; &lt;span class="nv"&gt;$fastcgi_path_info&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+        &lt;span class="kn"&gt;fastcgi_intercept_errors&lt;/span&gt; &lt;span class="no"&gt;on&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+        &lt;span class="c1"&gt;# PHP 5 socket location.&lt;/span&gt;
+        &lt;span class="c1"&gt;#fastcgi_pass unix:/var/run/php5-fpm.sock;&lt;/span&gt;
+        &lt;span class="c1"&gt;# PHP 7 socket location.&lt;/span&gt;
+        &lt;span class="c1"&gt;# fastcgi_pass unix:/var/run/php/php7.0-fpm.sock;&lt;/span&gt;
+
+        &lt;span class="kn"&gt;fastcgi_pass&lt;/span&gt; &lt;span class="n"&gt;127.0.0.1&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="mi"&gt;9000&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+        &lt;span class="c1"&gt;# fastcgi_pass fpm:9000;&lt;/span&gt;
     &lt;span class="p"&gt;}&lt;/span&gt;
 
-    &lt;span class="nt"&gt;location&lt;/span&gt; &lt;span class="o"&gt;~*&lt;/span&gt; &lt;span class="err"&gt;\&lt;/span&gt;&lt;span class="o"&gt;.(&lt;/span&gt;&lt;span class="nt"&gt;js&lt;/span&gt;&lt;span class="o"&gt;|&lt;/span&gt;&lt;span class="nt"&gt;css&lt;/span&gt;&lt;span class="o"&gt;|&lt;/span&gt;&lt;span class="nt"&gt;png&lt;/span&gt;&lt;span class="o"&gt;|&lt;/span&gt;&lt;span class="nt"&gt;jpg&lt;/span&gt;&lt;span class="o"&gt;|&lt;/span&gt;&lt;span class="nt"&gt;jpeg&lt;/span&gt;&lt;span class="o"&gt;|&lt;/span&gt;&lt;span class="nt"&gt;gif&lt;/span&gt;&lt;span class="o"&gt;|&lt;/span&gt;&lt;span class="nt"&gt;ico&lt;/span&gt;&lt;span class="o"&gt;)$&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
-        &lt;span class="n"&gt;expires&lt;/span&gt; &lt;span class="n"&gt;max&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
-        &lt;span class="n"&gt;log_not_found&lt;/span&gt; &lt;span class="n"&gt;off&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="c1"&gt;# Fighting with Styles? This little gem is amazing.&lt;/span&gt;
+    &lt;span class="c1"&gt;# location ~ ^/sites/.*/files/imagecache/ { # For Drupal &amp;lt;= 6&lt;/span&gt;
+    &lt;span class="kn"&gt;location&lt;/span&gt; &lt;span class="p"&gt;~&lt;/span&gt; &lt;span class="sr"&gt;^/sites/.*/files/styles/&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt; &lt;span class="c1"&gt;# For Drupal &amp;gt;= 7&lt;/span&gt;
+        &lt;span class="kn"&gt;try_files&lt;/span&gt; &lt;span class="nv"&gt;$uri&lt;/span&gt; &lt;span class="s"&gt;@rewrite&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
     &lt;span class="p"&gt;}&lt;/span&gt;
-&lt;span class="err"&gt;}&lt;/span&gt;
+
+    &lt;span class="c1"&gt;# Handle private files through Drupal.&lt;/span&gt;
+    &lt;span class="kn"&gt;location&lt;/span&gt; &lt;span class="p"&gt;~&lt;/span&gt; &lt;span class="sr"&gt;^/system/files/&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt; &lt;span class="c1"&gt;# For Drupal &amp;gt;= 7&lt;/span&gt;
+        &lt;span class="kn"&gt;try_files&lt;/span&gt; &lt;span class="nv"&gt;$uri&lt;/span&gt; &lt;span class="s"&gt;/index.php?&lt;/span&gt;&lt;span class="nv"&gt;$query_string&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt;
+
+    &lt;span class="kn"&gt;location&lt;/span&gt; &lt;span class="p"&gt;~&lt;/span&gt;&lt;span class="sr"&gt;*&lt;/span&gt; &lt;span class="s"&gt;\.(js|css|png|jpg|jpeg|gif|ico)&lt;/span&gt;$ &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="kn"&gt;expires&lt;/span&gt; &lt;span class="s"&gt;max&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+        &lt;span class="kn"&gt;log_not_found&lt;/span&gt; &lt;span class="no"&gt;off&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 &lt;blockquote&gt;
 &lt;p&gt;slightly modified from the wonderful reference provided by nginx, mostly the first 3 lines and later the fastcgi_pass&lt;/p&gt;
@@ -495,7 +486,7 @@ http {
 &lt;li&gt;&lt;a href="https://www.nginx.com/resources/wiki/start/topics/recipes/drupal/"&gt;https://www.nginx.com/resources/wiki/start/topics/recipes/drupal/&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 &lt;h2 id="post-boot-manual-configuration-ohgodwhy"&gt;Post boot manual configuration (ohgodwhy)&lt;/h2&gt;
-&lt;p&gt;Post boot of a "fresh from built-by-packer snapshot" there was still the basic steps of configuring Drupal (which I did manually with a browser and install.pho though I'm pretty sure I could have just overridden the settings.php directly).&lt;/p&gt;
+&lt;p&gt;Post boot of a "fresh from built-by-packer snapshot" there were still the basic steps of configuring Drupal (which I did manually with a browser and install.php though I'm pretty sure I could have just overridden the settings.php directly).&lt;/p&gt;
 &lt;p&gt;And for this migration project a MySQL dump, SCP of the existing extra modules, and of course the already uploaded user images/files.&lt;/p&gt;
 &lt;p&gt;I'm sure with more tinkering I can overcome the nginx vs www-data user permissions issue but since I time boxed this project I stuck with this compromise which is still much more improved and automated than my previous setup.&lt;/p&gt;
 &lt;p&gt;If migrating data there is of course the prerequisite: &lt;code&gt;mysqldump -uroot -p physicstime &amp;gt; backup.sql&lt;/code&gt;&lt;/p&gt;
@@ -648,7 +639,11 @@ Time per request:       3248.067 [ms] (mean)
 &lt;h3 id="conclusions"&gt;Conclusions&lt;/h3&gt;
 &lt;p&gt;Adding docker simplifies one kind of complexity (stringing together multiple services that are packaged upstream) but can come at some cost to performance. (Though this might also be due to the cheaper node price)&lt;/p&gt;
 &lt;p&gt;The other major advantage of using docker is that different components/services can be upgraded independently (and even just "test upgraded") which allows for a faster adoption of upstream project improvements.&lt;/p&gt;
-&lt;p&gt;Obviously if performance were really an issue adding a cache layer like Varnish or Cloudflare or just tweaking the various configurations would help =]&lt;/p&gt;</summary><category term="docker"></category><category term="docker-compose"></category><category term="digitalocean"></category><category term="packer"></category><category term="drupal"></category><category term="php"></category><category term="nginx"></category></entry><entry><title>Alpine Linux Introduction Tutorial</title><link href="https://blog.john-pfeiffer.com/alpine-linux-introduction-tutorial/" rel="alternate"></link><published>2016-02-28T21:19:00-08:00</published><author><name>john pfeiffer</name></author><id>tag:blog.john-pfeiffer.com,2016-02-28:alpine-linux-introduction-tutorial/</id><summary type="html">
+&lt;p&gt;I personally don't like relying on the OS of the host for all of the global dependencies to play nice (and especially that different packages won't have conflicting dependencies).&lt;/p&gt;
+&lt;p&gt;Since all of these processes are running in the same host that I own I expect I'm not worse off security wise.&lt;/p&gt;
+&lt;p&gt;I'm curious to see if given enough time I run into the infamous /var/lib/docker issues of orphan containers, running out of disk space, or other issues.&lt;/p&gt;
+&lt;p&gt;A next step might be to run this in a PlatormAsAService like OpenShift or better yet break up each container to run via a ContainerAsAService (if it's free ;)&lt;/p&gt;
+&lt;p&gt;Obviously if performance and scale of a mostly read-only content distribution system was really an issue adding a cache layer like Varnish or Cloudflare or even just tweaking the various configurations would help =]&lt;/p&gt;</summary><category term="docker"></category><category term="docker-compose"></category><category term="digitalocean"></category><category term="packer"></category><category term="drupal"></category><category term="php"></category><category term="nginx"></category></entry><entry><title>Alpine Linux Introduction Tutorial</title><link href="https://blog.john-pfeiffer.com/alpine-linux-introduction-tutorial/" rel="alternate"></link><published>2016-02-28T21:19:00-08:00</published><author><name>john pfeiffer</name></author><id>tag:blog.john-pfeiffer.com,2016-02-28:alpine-linux-introduction-tutorial/</id><summary type="html">
 &lt;p&gt;Alpine Linux is a minimalist secure linux distro.&lt;/p&gt;
 &lt;blockquote&gt;
 &lt;p&gt;In security terms less "footprint" often means less vectors of attack and less complexity to analyze for vulnerabilities&lt;/p&gt;
