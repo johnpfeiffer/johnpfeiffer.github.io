@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en-US">
+    <head>
+        <meta charset="utf-8"> 
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="author" content="john pfeiffer" />
+        <meta name="copyright" content="john pfeiffer" />
+
+<meta name="keywords" content="docker, docker-compose, digitalocean, packer, drupal, php, nginx, virtualization, " />
+        <title>Drupal with Docker Compose and nginx and php-fpm and mariadb  · johnpfeiffer
+</title>
+        <link href="https://cdn-images.mailchimp.com/embedcode/slim-081711.css" rel="stylesheet" type="text/css">
+        <link href="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="https://blog.john-pfeiffer.com/theme/css/style.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="https://blog.john-pfeiffer.com/theme/css/solarizedlight.css" media="screen">
+        <link rel="shortcut icon" href="https://blog.john-pfeiffer.com/theme/images/favicon.ico" type="image/x-icon" />
+        <link rel="apple-touch-icon" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon.png" />
+        <link rel="apple-touch-icon" sizes="57x57" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-57x57.png" />
+        <link rel="apple-touch-icon" sizes="72x72" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-72x72.png" />
+        <link rel="apple-touch-icon" sizes="114x114" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-114x114.png" />
+        <link rel="apple-touch-icon" sizes="144x144" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-144x144.png" />
+        <link rel="icon" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-144x144.png" />
+    <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-3758734-9']);
+    _gaq.push(['_trackPageview']);
+    (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+    </script>
+    </head>
+    <body>
+	<div id="content-sans-footer">
+        <div class="dropdown-backdrop">
+
+			<div class="navbar navbar-static-top">
+				<div class="navbar-inner">
+					<div class="container">
+						<a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+							<span class="icon-bar"></span>
+							<span class="icon-bar"></span>
+							<span class="icon-bar"></span>
+						</a>
+						<a class="brand" href="https://blog.john-pfeiffer.com/"><span class=site-name>johnpfeiffer</span></a>
+						<div class="nav-collapse collapse">
+							<ul class="nav pull-right top-menu">
+								<li ><a href="https://blog.john-pfeiffer.com">Home</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/john-likes/">John Likes</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/categories.html">Categories</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/tags.html">Tags</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/archives.html">Archives</a></li>
+								<li><form class="navbar-search" action="https://blog.john-pfeiffer.com/search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="container-fluid">
+			<div class="row-fluid">
+				<div class="span1"></div>
+				<div class="span10">
+<article>
+<div class="row-fluid">
+    <header class="page_header span10 offset2">
+    <h1><a href="https://blog.john-pfeiffer.com/drupal-with-docker-compose-and-nginx-and-php-fpm-and-mariadb/"> Drupal with Docker Compose and nginx and php-fpm and mariadb  </a></h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+    <div class="span2 table-of-content">
+        <nav>
+        <h4>Contents</h4>
+        <div class="toc">
+<ul>
+<li><a href="#replacing-cherokee-webserver-php-cgi-mysql">Replacing: cherokee webserver, php-cgi, MySQL</a></li>
+<li><a href="#almost-able-to-leverage-everything-right-out-of-the-box">Almost able to leverage everything right out of the box</a><ul>
+<li><a href="#docker-composeyml-for-nginx-and-drupal7-fpm-and-mariadb55">docker-compose.yml for nginx and drupal:7-fpm and mariadb:5.5</a></li>
+<li><a href="#and-the-bugs">And the bugs</a></li>
+<li><a href="#do-not-add-complexity">Do not add complexity</a></li>
+<li><a href="#cache-your-upstream-dependencies">Cache your upstream dependencies</a></li>
+</ul>
+</li>
+<li><a href="#the-pragmatic-solution">The pragmatic solution</a><ul>
+<li><a href="#packerjson">packer.json</a><ul>
+<li><a href="#install-dockersh">install-docker.sh</a></li>
+<li><a href="#docker-composeyml-with-drupal7-fpm-and-mariadb55">docker-compose.yml with drupal:7-fpm and mariadb:5.5</a></li>
+<li><a href="#nginxconf">nginx.conf</a></li>
+<li><a href="#defaultconf">default.conf</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#post-boot-manual-configuration-ohgodwhy">Post boot manual configuration (ohgodwhy)</a></li>
+<li><a href="#adhoc-performance-and-latency-testing">Adhoc Performance and Latency Testing</a><ul>
+<li><a href="#linode-and-cherokee-and-php-cgi-53-and-mysql-55">Linode and Cherokee and php-cgi 5.3 and MySQL 5.5</a></li>
+<li><a href="#digitalocean-and-nginx-and-docker-php-fpm-and-mariadb-55">DigitalOcean and nginx and Docker php-fpm and MariaDB 5.5</a><ul>
+<li><a href="#latency-testing">Latency testing</a></li>
+</ul>
+</li>
+<li><a href="#conclusions">Conclusions</a></li>
+</ul>
+</li>
+</ul>
+</div>
+        </nav>
+    </div>
+    <div class="span8 article-content">
+
+            
+<h2 id="replacing-cherokee-webserver-php-cgi-mysql">Replacing: cherokee webserver, php-cgi, MySQL</h2>
+<p>In my professional life I've seen the webserver front end default choice shift from Apache to NGINX occur for production services.</p>
+<p>Nginx is compelling due to simpler configuration and improved performance so I suspect the existing preponderance of Apache deployments are because "if it ain't broke don't fix it" (which makes lots of sense in Operations) along with the large number of Ops/SysAdmins who already know how to configure and integrate Apache (which makes a lot of sense to Management).</p>
+<p><a href="https://www.nginx.com/blog/nginx-vs-apache-our-view/">https://www.nginx.com/blog/nginx-vs-apache-our-view/</a></p>
+<p>For a personal project I experimented with and chose Cherokee web server (<a href="http://cherokee-project.com/">http://cherokee-project.com/</a>) because it offered good performance and a simpler setup (Web UI even!)</p>
+<p>Unfortunately as the project Dev and adoption slowed it seemed to make a lot of sense to finally convert my personal project to nginx. <a href="https://github.com/cherokee/webserver/commits/master">https://github.com/cherokee/webserver/commits/master</a></p>
+<p>I also wanted to experiment with a Docker based infrastructure (with docker-compose and a single YAML config file, ideally leveraging as much as possible the many official upstream docker images (<a href="https://hub.docker.com/explore/">https://hub.docker.com/explore/</a>)</p>
+<p>Benefits:</p>
+<ul>
+<li>this would isolate my app from the Host OS (increased portability)</li>
+<li>allow for simpler component swapping or upgrades (with testing and rollback and even local Dev)</li>
+<li>leave room for adding other isolated components</li>
+</ul>
+<h2 id="almost-able-to-leverage-everything-right-out-of-the-box">Almost able to leverage everything right out of the box</h2>
+<p>I spent time researching nginx and php-fpm and created a minimal config that worked (two docker commands) based on the slimmer alpine linux docker images. <a href="https://blog.john-pfeiffer.com/nginx-with-docker/">https://blog.john-pfeiffer.com/nginx-with-docker/</a></p>
+<p>This wasn't quite far off from the official Drupal Dockerfile except there are some more OS dependencies like GD and XML so I instead opted to use the official Drupal Docker image. (Non alpine linux so larger size but they've done the work of packaging the complexity and by not customizing it will be easier to update in the future - and avoid a Docker Build entirely!)</p>
+<h3 id="docker-composeyml-for-nginx-and-drupal7-fpm-and-mariadb55">docker-compose.yml for nginx and drupal:7-fpm and mariadb:5.5</h3>
+<div class="highlight"><pre><span></span># https://docs.docker.com/compose/compose-file/
+# https://docs.docker.com/compose/environment-variables/
+# https://www.nginx.com/resources/wiki/start/topics/recipes/drupal
+
+nginx:
+  image: nginx:alpine
+  ports:
+    - "80:80"
+  volumes:
+    - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    - ./default.conf:/etc/nginx/conf.d/default.conf:ro
+    - /var/www/html:/var/www/html/
+  links:
+    - fpm
+
+# https://hub.docker.com/_/drupal/
+fpm:
+  image: drupal:7-fpm
+  ports:
+    - "9000:9000"
+  volumes:
+    - /var/www/html:/var/www/html/
+  links:
+    - mysql
+
+# https://hub.docker.com/_/mariadb/
+mysql:
+  image: mariadb:5.5
+  ports:
+    - "3306:3306"
+  environment:
+    - MYSQL_ROOT_PASSWORD
+    - MYSQL_USER
+    - MYSQL_PASSWORD
+    - MYSQL_DATABASE
+</pre></div>
+<p>Adding the MariaDB (compatible with MySQL) image/container was fairly straightforward (just reading the docs on how to override and setup the default user and DB via Environment Variables)</p>
+<blockquote>
+<p>I am ok with the Database files being kept completely inside of a persistent container.  I expect to do regular backups (mysqldump and scp) and may also spend the money to just use DigitalOcean's backup service (no poweroff required!)</p>
+</blockquote>
+<h3 id="and-the-bugs">And the bugs</h3>
+<p>I discovered a bug where the css/themes didn't render correctly.  As part of the troubleshooting I installed nginx, php, and MySQL locally on the host with my override configs (no bug exhibited).  I then replaced each "native host installed service" with the Docker one, working from the backend DB forward I was able to identify the issue.</p>
+<p>Unfortunately the nginx image uses a default user of "nginx" whereas the drupal:php image uses "www-data" which caused issues when accessing the Drupal source files (which I was sharing via --volume on the host, preferring to eschew a "data container").</p>
+<p>My personal Linux maxim still holds true: "If there's a problem with something running in Linux it's probably a Permissions issue". ;)</p>
+<h3 id="do-not-add-complexity">Do not add complexity</h3>
+<p>I avoided creating my own docker image build FROM drupal:php with nginx included because:</p>
+<ul>
+<li>simplest with as few build steps possible</li>
+<li>contrary to the "do one thing well" principle</li>
+<li>contrary to the "one container one app" Docker principle</li>
+<li>tight coupling of nginx and php would make it harder to update one or the other independently</li>
+</ul>
+<h3 id="cache-your-upstream-dependencies">Cache your upstream dependencies</h3>
+<p>Ironically I also ended up providing my own drupal.tar.gz downloaded from Drupal.org but cached in Bitbucket as the upstream ftp.drupal.org proved unreliable.</p>
+<h2 id="the-pragmatic-solution">The pragmatic solution</h2>
+<p>Instead, as I was already using packer on DigitalOcean to automate building the Host and uploading the custom configs, docker-compose.yaml, and Drupal source, I added a few steps to install nginx directly to the Host OS.</p>
+<h3 id="packerjson">packer.json</h3>
+<div class="highlight"><pre><span></span>NEWUSER_NAME=username NEWUSER_PASSWORD=yourpassword DIGITALOCEAN_API_TOKEN=yourapitoken /opt/packer build packer.json
+</pre></div>
+<blockquote>
+<p>A few files and a single command (packer is just a single binary downloaded from hashicorp) I can have another Docker based Drupal host ready (awyeah)</p>
+</blockquote>
+<div class="highlight"><pre><span></span><span class="x">{</span>
+<span class="x">  "_comment": "https://www.packer.io/docs/builders/digitalocean.html",</span>
+<span class="x">  "variables": {</span>
+<span class="x">    "digitalocean_api_token": "</span><span class="cp">{{</span><span class="nv">env</span> <span class="err">`</span><span class="nv">DIGITALOCEAN_API_TOKEN</span><span class="err">`</span><span class="cp">}}</span><span class="x">",</span>
+<span class="x">    "newuser_name": "</span><span class="cp">{{</span><span class="nv">env</span> <span class="err">`</span><span class="nv">NEWUSER_NAME</span><span class="err">`</span><span class="cp">}}</span><span class="x">",</span>
+<span class="x">    "newuser_password": "</span><span class="cp">{{</span><span class="nv">env</span> <span class="err">`</span><span class="nv">NEWUSER_PASSWORD</span><span class="err">`</span><span class="cp">}}</span><span class="x">"</span>
+<span class="x">  },</span>
+
+<span class="x">  "builders": [{</span>
+<span class="x">    "type": "digitalocean",</span>
+<span class="x">    "api_token": "</span><span class="cp">{{</span><span class="nv">user</span> <span class="err">`</span><span class="nv">digitalocean_api_token</span><span class="err">`</span><span class="cp">}}</span><span class="x">",</span>
+<span class="x">    "size": "512mb",</span>
+<span class="x">    "region": "lon1",</span>
+<span class="x">    "image": "ubuntu-16-04-x64",</span>
+<span class="x">    "droplet_name": "drupal-from-packer-</span><span class="cp">{{</span><span class="nv">timestamp</span><span class="cp">}}</span><span class="x">",</span>
+<span class="x">    "snapshot_name": "drupal-from-packer-</span><span class="cp">{{</span><span class="nv">isotime</span> <span class="err">\</span><span class="s2">"2006.01.02.030405\"}}"</span>
+  <span class="o">}],</span>
+
+  <span class="s2">"provisioners"</span><span class="o">:</span> <span class="o">[</span>
+    <span class="o">{</span>
+      <span class="s2">"type"</span><span class="o">:</span> <span class="s2">"shell"</span><span class="o">,</span>
+      <span class="s2">"inline"</span><span class="o">:</span> <span class="o">[</span>
+        <span class="s2">"ip a"</span><span class="o">,</span>
+        <span class="s2">"curl -s http://checkip.amazonaws.com"</span><span class="o">,</span>
+        <span class="s2">"apt-get update"</span><span class="o">,</span>
+        <span class="s2">"sudo apt-get install -y vim curl wget byobu ntp tar gzip"</span><span class="o">,</span>
+        <span class="s2">"timedatectl set-timezone Etc/UTC"</span><span class="o">,</span>
+        <span class="s2">"cat /etc/timezone"</span><span class="o">,</span>
+        <span class="s2">"date"</span><span class="o">,</span>
+        <span class="s2">"useradd -s /bin/bash -m {{user `newuser_name`}}"</span><span class="o">,</span>
+        <span class="s2">"usermod -a -G admin {{user `newuser_name`}}"</span><span class="o">,</span>
+        <span class="s2">"echo '{{user `newuser_name`}}:{{user `newuser_password`}}'|chpasswd"</span><span class="o">,</span>
+        <span class="s2">"cat /etc/passwd"</span><span class="o">,</span>
+        <span class="s2">"sed -i 's/Port 22/Port 2222/g' /etc/ssh/sshd_config"</span><span class="o">,</span>
+        <span class="s2">"sed -i 's/PermitRootLogin yes/PermitRootLogin no/g' /etc/ssh/sshd_config"</span><span class="o">,</span>
+        <span class="s2">"echo 'PasswordAuthentication no' &gt;&gt; /etc/ssh/sshd_config"</span><span class="o">,</span>
+        <span class="s2">"cat /etc/ssh/sshd_config"</span><span class="o">,</span>
+        <span class="s2">"mkdir -p /home/{{user `newuser_name`}}/.ssh"</span><span class="o">,</span>
+        <span class="s2">"fallocate -l 1G /swapfile"</span><span class="o">,</span>
+        <span class="s2">"chmod 600 /swapfile"</span><span class="o">,</span>
+        <span class="s2">"mkswap /swapfile"</span><span class="o">,</span>
+        <span class="s2">"swapon /swapfile"</span><span class="o">,</span>
+        <span class="s2">"swapon --show"</span><span class="o">,</span>
+        <span class="s2">"free -h"</span><span class="o">,</span>
+        <span class="s2">"echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab"</span><span class="o">,</span>
+        <span class="s2">"echo 'vm.swappiness=10' | sudo tee -a /etc/sysctl.conf"</span><span class="o">,</span>
+        <span class="s2">"echo 'vm.vfs_cache_pressure=50' | sudo tee -a /etc/sysctl.conf"</span>
+      <span class="o">]</span>
+    <span class="o">},</span>
+    <span class="o">{</span>
+      <span class="s2">"type"</span><span class="o">:</span> <span class="s2">"file"</span><span class="o">,</span>
+      <span class="s2">"source"</span><span class="o">:</span> <span class="s2">"authorized_keys"</span><span class="o">,</span>
+      <span class="s2">"destination"</span><span class="o">:</span> <span class="s2">"/home/{{user `newuser_name`}}/.ssh/authorized_keys"</span>
+    <span class="o">},</span>
+    <span class="o">{</span>
+      <span class="s2">"type"</span><span class="o">:</span> <span class="s2">"shell"</span><span class="o">,</span>
+      <span class="s2">"script"</span><span class="o">:</span> <span class="s2">"install-docker.sh"</span>
+    <span class="o">},</span>
+    <span class="o">{</span>
+      <span class="s2">"type"</span><span class="o">:</span> <span class="s2">"file"</span><span class="o">,</span>
+      <span class="s2">"source"</span><span class="o">:</span> <span class="s2">"docker-compose.yml"</span><span class="o">,</span>
+      <span class="s2">"destination"</span><span class="o">:</span> <span class="s2">"/home/{{user `newuser_name`}}/docker-compose.yml"</span>
+    <span class="o">},</span>
+    <span class="o">{</span>
+      <span class="s2">"type"</span><span class="o">:</span> <span class="s2">"shell"</span><span class="o">,</span>
+      <span class="s2">"inline"</span><span class="o">:</span> <span class="o">[</span>
+        <span class="s2">"mkdir -p /var/www/html"</span><span class="o">,</span>
+        <span class="s2">"wget https://bitbucket.org/yourusername/yourrepository/raw/97360be2edd53b93149d750db24f749aebc27988/binaries/drupal-7.50.tar.gz"</span><span class="o">,</span>
+        <span class="s2">"tar xf drupal-7.50.tar.gz --strip-components=1 -C /var/www/html"</span><span class="o">,</span>
+        <span class="s2">"ls -ahl /var/www/html"</span><span class="o">,</span>
+        <span class="s2">"mkdir -p /var/www/html/sites/default/files"</span><span class="o">,</span>
+        <span class="s2">"chmod 777 /var/www/html/sites/default/files"</span><span class="o">,</span>
+        <span class="s2">"cp -a /var/www/html/sites/default/default.settings.php /var/www/html/sites/default/settings.php"</span><span class="o">,</span>
+        <span class="s2">"chmod 777 /var/www/html/sites/default/settings.php"</span>
+      <span class="o">]</span>
+    <span class="o">},</span>
+    <span class="o">{</span>
+      <span class="s2">"type"</span><span class="o">:</span> <span class="s2">"shell"</span><span class="o">,</span>
+      <span class="s2">"inline"</span><span class="o">:</span> <span class="o">[</span>
+        <span class="s2">"apt-get install -y nginx"</span>
+      <span class="o">]</span>
+    <span class="o">},</span>
+    <span class="o">{</span>
+      <span class="s2">"type"</span><span class="o">:</span> <span class="s2">"file"</span><span class="o">,</span>
+      <span class="s2">"source"</span><span class="o">:</span> <span class="s2">"nginx.conf"</span><span class="o">,</span>
+      <span class="s2">"destination"</span><span class="o">:</span> <span class="s2">"/etc/nginx/nginx.conf"</span>
+    <span class="o">},</span>
+    <span class="o">{</span>
+      <span class="s2">"type"</span><span class="o">:</span> <span class="s2">"file"</span><span class="o">,</span>
+      <span class="s2">"source"</span><span class="o">:</span> <span class="s2">"default.conf"</span><span class="o">,</span>
+      <span class="s2">"destination"</span><span class="o">:</span> <span class="s2">"/etc/nginx/conf.d/default.conf"</span>
+    <span class="o">}</span>
+
+  <span class="o">]</span>
+
+<span class="o">}</span>
+</pre></div>
+<blockquote>
+<p>HINT: A DigitalOcean 512MB droplet needs swap enabled due to the MySQL/MariaDB memory defaults, otherwise you get strange errors about inode unavailable while starting the MariaDB container</p>
+</blockquote>
+<ul>
+<li><a href="https://www.suse.com/documentation/opensuse114/book_tuning/data/cha_tuning_memory_vm.html">https://www.suse.com/documentation/opensuse114/book_tuning/data/cha_tuning_memory_vm.html</a></li>
+<li>
+<p><a href="https://www.kernel.org/pub/linux/kernel/people/akpm/patches/2.6/2.6.7/2.6.7-mm1/broken-out/vfs-shrinkage-tuning.patch">https://www.kernel.org/pub/linux/kernel/people/akpm/patches/2.6/2.6.7/2.6.7-mm1/broken-out/vfs-shrinkage-tuning.patch</a></p>
+</li>
+<li>
+<p>One thing that is annoying is as a single partition it is potentially vulnerable to a /var/log DenialOfService</p>
+</li>
+<li>A very nice tool to add is fail2ban (apt-get install fail2ban) but I want to ensure I tweak the configs correctly</li>
+</ul>
+<h4 id="install-dockersh">install-docker.sh</h4>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="ch">#!/bin/sh</span>
+<span class="c1"># ubuntu 16.04 is xenial , https://blog.john-pfeiffer.com/docker-intro-install-run-and-port-forward/</span>
+sudo apt-key adv --keyserver hkp://pgp.mit.edu:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
+sudo sh -c <span class="s2">"echo 'deb https://apt.dockerproject.org/repo ubuntu-xenial main' &gt; /etc/apt/sources.list.d/docker.list"</span>
+sudo apt-get update <span class="o">||</span> <span class="nb">exit</span> 1
+sudo apt-get install -y linux-image-extra-<span class="k">$(</span>uname -r<span class="k">)</span> <span class="o">||</span> <span class="nb">exit</span> 1
+sudo apt-get install -y docker-engine docker-compose <span class="o">||</span> <span class="nb">exit</span> 1
+service docker status <span class="o">||</span> <span class="nb">exit</span> 1
+docker info <span class="o">||</span> <span class="nb">exit</span> 1
+</pre></div>
+</td></tr></table>
+<blockquote>
+<p>linux-image-extra is to ensure we have AUFS because docker needs a proper storage driver</p>
+</blockquote>
+<h4 id="docker-composeyml-with-drupal7-fpm-and-mariadb55">docker-compose.yml with drupal:7-fpm and mariadb:5.5</h4>
+<div class="highlight"><pre><span></span># https://hub.docker.com/_/drupal/
+fpm:
+  image: drupal:7-fpm
+  ports:
+    - "127.0.0.1:9000:9000"
+#    - "9000:9000"
+  volumes:
+    - /var/www/html:/var/www/html/
+  links:
+    - mysql
+
+# https://hub.docker.com/_/mariadb/
+mysql:
+  image: mariadb:5.5
+  ports:
+    - "3306:3306"
+  environment:
+    - MYSQL_ROOT_PASSWORD
+    - MYSQL_USER
+    - MYSQL_PASSWORD
+    - MYSQL_DATABASE
+</pre></div>
+<blockquote>
+<p>2 out of 3 ain't bad</p>
+</blockquote>
+<h4 id="nginxconf">nginx.conf</h4>
+<div class="highlight"><pre><span></span># slightly modified /etc/nginx/nginx.conf from "apt-get install nginx"
+# https://www.nginx.com/resources/wiki/start/topics/examples/full/
+
+user www-data;
+worker_processes auto;
+pid /run/nginx.pid;
+
+events {
+        worker_connections 768;
+        # multi_accept on;
+}
+
+http {
+
+        sendfile on;
+        tcp_nopush on;
+        tcp_nodelay on;
+        keepalive_timeout 65;
+        types_hash_max_size 2048;
+        server_tokens off;
+
+        include /etc/nginx/mime.types;
+        default_type application/octet-stream;
+
+        access_log /var/log/nginx/access.log;
+        error_log /var/log/nginx/error.log;
+
+        gzip on;
+        gzip_disable "msie6";
+
+        gzip_types text/plain text/css application/json application/javascript text/xml application/xml application/xml+rss text/javascript;
+
+        include /etc/nginx/conf.d/*.conf;
+
+}
+</pre></div>
+<h4 id="defaultconf">default.conf</h4>
+<div class="highlight"><pre><span></span><span class="nt">server</span> <span class="p">{</span>
+    <span class="n">listen</span>      <span class="m">80</span><span class="p">;</span>
+    <span class="n">server_name</span> <span class="n">physicstime</span><span class="o">.</span><span class="n">com</span><span class="p">;</span>
+    <span class="n">root</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">html</span><span class="p">;</span> <span class="err">##</span> <span class="o">&lt;--</span> <span class="n">Your</span> <span class="n">only</span> <span class="n">path</span> <span class="n">reference</span><span class="o">.</span>
+
+    <span class="n">location</span> <span class="o">=</span> <span class="o">/</span><span class="n">favicon</span><span class="o">.</span><span class="n">ico</span> <span class="err">{</span>
+        <span class="n">log_not_found</span> <span class="n">off</span><span class="p">;</span>
+        <span class="n">access_log</span> <span class="n">off</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="nt">location</span> <span class="o">=</span> <span class="o">/</span><span class="nt">robots</span><span class="nc">.txt</span> <span class="p">{</span>
+        <span class="n">allow</span> <span class="n">all</span><span class="p">;</span>
+        <span class="n">log_not_found</span> <span class="n">off</span><span class="p">;</span>
+        <span class="n">access_log</span> <span class="n">off</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="err">#</span> <span class="nt">Very</span> <span class="nt">rarely</span> <span class="nt">should</span> <span class="nt">these</span> <span class="nt">ever</span> <span class="nt">be</span> <span class="nt">accessed</span> <span class="nt">outside</span> <span class="nt">of</span> <span class="nt">your</span> <span class="nt">lan</span>
+    <span class="nt">location</span> <span class="o">~*</span> <span class="err">\</span><span class="o">.(</span><span class="nt">txt</span><span class="o">|</span><span class="nt">log</span><span class="o">)$</span> <span class="p">{</span>
+        <span class="n">deny</span> <span class="n">all</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="nt">location</span> <span class="o">~</span> <span class="err">\</span><span class="o">..*/.*</span><span class="err">\</span><span class="nc">.php</span><span class="o">$</span> <span class="p">{</span>
+        <span class="n">return</span> <span class="m">403</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="nt">location</span> <span class="o">~</span> <span class="o">^/</span><span class="nt">sites</span><span class="o">/.*/</span><span class="nt">private</span><span class="o">/</span> <span class="p">{</span>
+        <span class="n">return</span> <span class="m">403</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="err">#</span> <span class="nt">Allow</span> <span class="s2">"Well-Known URIs"</span> <span class="nt">as</span> <span class="nt">per</span> <span class="nt">RFC</span> <span class="nt">5785</span>
+    <span class="nt">location</span> <span class="o">~*</span> <span class="o">^/</span><span class="nc">.well-known</span><span class="o">/</span> <span class="p">{</span>
+        <span class="n">allow</span> <span class="n">all</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="err">#</span> <span class="nt">Block</span> <span class="nt">access</span> <span class="nt">to</span> <span class="s2">"hidden"</span> <span class="nt">files</span> <span class="nt">and</span> <span class="nt">directories</span> <span class="nt">whose</span> <span class="nt">names</span> <span class="nt">begin</span> <span class="nt">with</span> <span class="nt">a</span>
+    <span class="err">#</span> <span class="nt">period</span><span class="o">.</span> <span class="nt">This</span> <span class="nt">includes</span> <span class="nt">directories</span> <span class="nt">used</span> <span class="nt">by</span> <span class="nt">version</span> <span class="nt">control</span> <span class="nt">systems</span> <span class="nt">such</span>
+    <span class="err">#</span> <span class="nt">as</span> <span class="nt">Subversion</span> <span class="nt">or</span> <span class="nt">Git</span> <span class="nt">to</span> <span class="nt">store</span> <span class="nt">control</span> <span class="nt">files</span><span class="o">.</span>
+    <span class="nt">location</span> <span class="o">~</span> <span class="o">(^|/)</span><span class="err">\</span><span class="o">.</span> <span class="p">{</span>
+        <span class="n">return</span> <span class="m">403</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="nt">location</span> <span class="o">/</span> <span class="p">{</span>
+        <span class="err">#</span> <span class="n">try_files</span> <span class="err">$</span><span class="n">uri</span> <span class="o">@</span><span class="n">rewrite</span><span class="p">;</span> <span class="err">#</span> <span class="n">For</span> <span class="n">Drupal</span> <span class="o">&lt;=</span> <span class="m">6</span>
+        <span class="n">try_files</span> <span class="err">$</span><span class="n">uri</span> <span class="o">/</span><span class="n">index</span><span class="o">.</span><span class="n">php</span><span class="o">?</span><span class="err">$</span><span class="n">query_string</span><span class="p">;</span> <span class="err">#</span> <span class="n">For</span> <span class="n">Drupal</span> <span class="o">&gt;=</span> <span class="m">7</span>
+    <span class="p">}</span>
+
+    <span class="nt">location</span> <span class="k">@rewrite</span> <span class="p">{</span>
+        <span class="nt">rewrite</span> <span class="o">^/(.*)$</span> <span class="o">/</span><span class="nt">index</span><span class="nc">.php</span><span class="o">?</span><span class="nt">q</span><span class="o">=$</span><span class="nt">1</span><span class="o">;</span>
+    <span class="p">}</span>
+
+    <span class="err">#</span> <span class="nt">Don</span><span class="s1">'t allow direct access to PHP files in the vendor directory.</span>
+<span class="s1">    location ~ /vendor/.*\.php$ {</span>
+<span class="s1">        deny all;</span>
+<span class="s1">        return 404;</span>
+<span class="s1">    }</span>
+
+<span class="s1">    # In Drupal 8, we must also match new paths where the '</span><span class="nc">.php</span><span class="s1">' appears in</span>
+<span class="s1">    # the middle, such as update.php/selection. The rule we use is strict,</span>
+<span class="s1">    # and only allows this pattern with the update.php front controller.</span>
+<span class="s1">    # This allows legacy path aliases in the form of</span>
+<span class="s1">    # blog/index.php/legacy-path to continue to route to Drupal nodes. If</span>
+<span class="s1">    # you do not have any paths like that, then you might prefer to use a</span>
+<span class="s1">    # laxer rule, such as:</span>
+<span class="s1">    #   location ~ \.php(/|$) {</span>
+<span class="s1">    # The laxer rule will continue to work if Drupal uses this new URL</span>
+<span class="s1">    # pattern with front controllers other than update.php in a future</span>
+<span class="s1">    # release.</span>
+<span class="s1">    location ~ '</span><span class="err">\</span><span class="nc">.php</span><span class="o">$|^/</span><span class="nt">update</span><span class="nc">.php</span><span class="s1">' {</span>
+<span class="s1">        fastcgi_split_path_info ^(.+?\.php)(|/.*)$;</span>
+<span class="s1">        # Security note: If you'</span><span class="nt">re</span> <span class="nt">running</span> <span class="nt">a</span> <span class="nt">version</span> <span class="nt">of</span> <span class="nt">PHP</span> <span class="nt">older</span> <span class="nt">than</span> <span class="nt">the</span>
+        <span class="err">#</span> <span class="nt">latest</span> <span class="nt">5</span><span class="nc">.3</span><span class="o">,</span> <span class="nt">you</span> <span class="nt">should</span> <span class="nt">have</span> <span class="s2">"cgi.fix_pathinfo = 0;"</span> <span class="nt">in</span> <span class="nt">php</span><span class="nc">.ini</span><span class="o">.</span>
+        <span class="err">#</span> <span class="nt">See</span> <span class="nt">http</span><span class="o">://</span><span class="nt">serverfault</span><span class="nc">.com</span><span class="o">/</span><span class="nt">q</span><span class="o">/</span><span class="nt">627903</span><span class="o">/</span><span class="nt">94922</span> <span class="nt">for</span> <span class="nt">details</span><span class="o">.</span>
+        <span class="nt">include</span> <span class="nt">fastcgi_params</span><span class="o">;</span>
+        <span class="err">#</span> <span class="nt">Block</span> <span class="nt">httpoxy</span> <span class="nt">attacks</span><span class="o">.</span> <span class="nt">See</span> <span class="nt">https</span><span class="o">://</span><span class="nt">httpoxy</span><span class="nc">.org</span><span class="o">/.</span>
+        <span class="nt">fastcgi_param</span> <span class="nt">HTTP_PROXY</span> <span class="s2">""</span><span class="o">;</span>
+        <span class="nt">fastcgi_param</span> <span class="nt">SCRIPT_FILENAME</span> <span class="o">$</span><span class="nt">document_root</span><span class="o">$</span><span class="nt">fastcgi_script_name</span><span class="o">;</span>
+        <span class="nt">fastcgi_param</span> <span class="nt">PATH_INFO</span> <span class="o">$</span><span class="nt">fastcgi_path_info</span><span class="o">;</span>
+        <span class="nt">fastcgi_intercept_errors</span> <span class="nt">on</span><span class="o">;</span>
+        <span class="err">#</span> <span class="nt">PHP</span> <span class="nt">5</span> <span class="nt">socket</span> <span class="nt">location</span><span class="o">.</span>
+        <span class="nn">#fastcgi_pass</span> <span class="nt">unix</span><span class="o">:/</span><span class="nt">var</span><span class="o">/</span><span class="nt">run</span><span class="o">/</span><span class="nt">php5-fpm</span><span class="nc">.sock</span><span class="o">;</span>
+        <span class="err">#</span> <span class="nt">PHP</span> <span class="nt">7</span> <span class="nt">socket</span> <span class="nt">location</span><span class="o">.</span>
+        <span class="err">#</span> <span class="nt">fastcgi_pass</span> <span class="nt">unix</span><span class="o">:/</span><span class="nt">var</span><span class="o">/</span><span class="nt">run</span><span class="o">/</span><span class="nt">php</span><span class="o">/</span><span class="nt">php7</span><span class="nc">.0-fpm.sock</span><span class="o">;</span>
+
+        <span class="nt">fastcgi_pass</span> <span class="nt">127</span><span class="nc">.0.0.1</span><span class="nd">:9000</span><span class="o">;</span>
+        <span class="err">#</span> <span class="nt">fastcgi_pass</span> <span class="nt">fpm</span><span class="nd">:9000</span><span class="o">;</span>
+    <span class="err">}</span>
+
+    <span class="err">#</span> <span class="nt">Fighting</span> <span class="nt">with</span> <span class="nt">Styles</span><span class="o">?</span> <span class="nt">This</span> <span class="nt">little</span> <span class="nt">gem</span> <span class="nt">is</span> <span class="nt">amazing</span><span class="o">.</span>
+    <span class="err">#</span> <span class="nt">location</span> <span class="o">~</span> <span class="o">^/</span><span class="nt">sites</span><span class="o">/.*/</span><span class="nt">files</span><span class="o">/</span><span class="nt">imagecache</span><span class="o">/</span> <span class="p">{</span> <span class="err">#</span> <span class="n">For</span> <span class="n">Drupal</span> <span class="o">&lt;=</span> <span class="m">6</span>
+    <span class="n">location</span> <span class="o">~</span> <span class="o">^/</span><span class="n">sites</span><span class="o">/.*/</span><span class="n">files</span><span class="o">/</span><span class="n">styles</span><span class="o">/</span> <span class="err">{</span> <span class="err">#</span> <span class="n">For</span> <span class="n">Drupal</span> <span class="o">&gt;=</span> <span class="m">7</span>
+        <span class="n">try_files</span> <span class="err">$</span><span class="n">uri</span> <span class="o">@</span><span class="n">rewrite</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="err">#</span> <span class="nt">Handle</span> <span class="nt">private</span> <span class="nt">files</span> <span class="nt">through</span> <span class="nt">Drupal</span><span class="o">.</span>
+    <span class="nt">location</span> <span class="o">~</span> <span class="o">^/</span><span class="nt">system</span><span class="o">/</span><span class="nt">files</span><span class="o">/</span> <span class="p">{</span> <span class="err">#</span> <span class="n">For</span> <span class="n">Drupal</span> <span class="o">&gt;=</span> <span class="m">7</span>
+        <span class="n">try_files</span> <span class="err">$</span><span class="n">uri</span> <span class="o">/</span><span class="n">index</span><span class="o">.</span><span class="n">php</span><span class="o">?</span><span class="err">$</span><span class="n">query_string</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="nt">location</span> <span class="o">~*</span> <span class="err">\</span><span class="o">.(</span><span class="nt">js</span><span class="o">|</span><span class="nt">css</span><span class="o">|</span><span class="nt">png</span><span class="o">|</span><span class="nt">jpg</span><span class="o">|</span><span class="nt">jpeg</span><span class="o">|</span><span class="nt">gif</span><span class="o">|</span><span class="nt">ico</span><span class="o">)$</span> <span class="p">{</span>
+        <span class="n">expires</span> <span class="n">max</span><span class="p">;</span>
+        <span class="n">log_not_found</span> <span class="n">off</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="err">}</span>
+</pre></div>
+<blockquote>
+<p>slightly modified from the wonderful reference provided by nginx, mostly the first 3 lines and later the fastcgi_pass</p>
+</blockquote>
+<ul>
+<li><a href="https://www.nginx.com/resources/wiki/start/topics/recipes/drupal/">https://www.nginx.com/resources/wiki/start/topics/recipes/drupal/</a></li>
+</ul>
+<h2 id="post-boot-manual-configuration-ohgodwhy">Post boot manual configuration (ohgodwhy)</h2>
+<p>Post boot of a "fresh from built-by-packer snapshot" there was still the basic steps of configuring Drupal (which I did manually with a browser and install.pho though I'm pretty sure I could have just overridden the settings.php directly).</p>
+<p>And for this migration project a MySQL dump, SCP of the existing extra modules, and of course the already uploaded user images/files.</p>
+<p>I'm sure with more tinkering I can overcome the nginx vs www-data user permissions issue but since I time boxed this project I stuck with this compromise which is still much more improved and automated than my previous setup.</p>
+<p>If migrating data there is of course the prerequisite: <code>mysqldump -uroot -p physicstime &gt; backup.sql</code></p>
+<div class="highlight"><pre><span></span><span class="nt">vi</span> <span class="o">/</span><span class="nt">var</span><span class="o">/</span><span class="nt">www</span><span class="o">/</span><span class="nt">html</span><span class="o">/</span><span class="nt">themes</span><span class="o">/</span><span class="nt">bartik</span><span class="o">/</span><span class="nt">css</span><span class="o">/</span><span class="nt">style</span><span class="nc">.css</span>
+    <span class="nt">font-size</span><span class="o">:</span> <span class="nt">2</span><span class="nc">.929em</span><span class="o">;</span>
+</pre></div>
+<blockquote>
+<p>customize increased visibility of the #site-slogan { , occasionally needs cache cleared in admin/config/development/performance</p>
+</blockquote>
+<div class="highlight"><pre><span></span>hostnamectl set-hostname physicstime.com
+docker-compose up &amp;
+</pre></div>
+<blockquote>
+<p>Hint: <code>/etc/hosts</code> locally and use a browser to do initial install.php config before a DNS cutover</p>
+<p>DB connection string requires 172.17.0.1 (the default docker private IP network bridge)</p>
+</blockquote>
+<div class="highlight"><pre><span></span>root@physicstime:/home/USER/physicstime.com# mv files/ /var/www/html/sites/physicstime.com/
+mv all /var/www/html/sites/
+
+ifconfig | grep Bc
+    172.17.0.1
+
+docker run -it --rm --volume /opt:/opt mariadb:5.5 /bin/bash
+    mysql -h172.17.0.1 -uYOURUSER -p physicstime
+        show tables;
+        exit
+    mysql -h172.17.0.1 -uroot -p physicstime &lt; backup.sql
+
+chown root:root -R /var/www/html/sites/
+chmod 400 /var/www/html/sites/default/settings.php
+</pre></div>
+<blockquote>
+<p>ensure /var/www/html/sites/default/files has the correct permissions, otherwise no CSS for you!</p>
+</blockquote>
+<div class="highlight"><pre><span></span>docker-compose stop
+docker ps --all
+docker-compose up &amp;
+docker-compose logs |&amp; tee /var/log/physicstime.log
+tail -f /var/log/physicstime.log /var/log/nginx/access.log
+</pre></div>
+<blockquote>
+<p>This starts it manually and displays any traffic</p>
+</blockquote>
+<div class="highlight"><pre><span></span>cd /etc/init.d; touch physicstime.sh; chmod +x physicstime.sh; vi physicstime.sh
+
+    #!/bin/bash
+    echo "starting physicstime after boot" &gt;&gt; /var/log/physicstime.log
+    cd /home/YOURUSER; docker-compose up &amp;
+
+update-rc.d physicstime.sh defaults
+</pre></div>
+<blockquote>
+<p>this starts the docker based services automatically on boot (not including extra logging)</p>
+</blockquote>
+<hr/>
+<h2 id="adhoc-performance-and-latency-testing">Adhoc Performance and Latency Testing</h2>
+<p>Data driven decisions is a big deal, but let's be honest, engineers love numbers :)</p>
+<div class="highlight"><pre><span></span>ab -l -r -n 500 -c 100 -k -H "Accept-Encoding: gzip, deflate" http://physicstime.com/node?page=1
+</pre></div>
+<blockquote>
+<p>The unscientific "watching top": 80% for about 5 seconds vs 78% for about 5 seconds</p>
+</blockquote>
+<p><a href="https://httpd.apache.org/docs/2.4/programs/ab.html">https://httpd.apache.org/docs/2.4/programs/ab.html</a></p>
+<h3 id="linode-and-cherokee-and-php-cgi-53-and-mysql-55">Linode and Cherokee and php-cgi 5.3 and MySQL 5.5</h3>
+<div class="highlight"><pre><span></span>Concurrency Level:      100
+Time taken for tests:   7.255 seconds
+Complete requests:      500
+Failed requests:        0
+Keep-Alive requests:    0
+Total transferred:      5321000 bytes
+HTML transferred:       5089500 bytes
+Requests per second:    68.92 [#/sec] (mean)
+Time per request:       1451.029 [ms] (mean)
+Time per request:       14.510 [ms] (mean, across all concurrent requests)
+Transfer rate:          716.22 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        2    2   0.4      2       6
+Processing:   102 1313 320.0   1437    1525
+Waiting:       89 1308 320.2   1431    1521
+Total:        104 1315 319.8   1439    1526
+
+Percentage of the requests served within a certain time (ms)
+  50%   1439
+  66%   1456
+  75%   1466
+  80%   1473
+  90%   1488
+  95%   1505
+  98%   1516
+  99%   1519
+ 100%   1526 (longest request)
+</pre></div>
+<h3 id="digitalocean-and-nginx-and-docker-php-fpm-and-mariadb-55">DigitalOcean and nginx and Docker php-fpm and MariaDB 5.5</h3>
+<div class="highlight"><pre><span></span>Concurrency Level:      100
+Time taken for tests:   7.791 seconds
+Complete requests:      500
+Failed requests:        0
+Keep-Alive requests:    0
+Total transferred:      5320068 bytes
+HTML transferred:       5082000 bytes
+Requests per second:    64.18 [#/sec] (mean)
+Time per request:       1558.145 [ms] (mean)
+Time per request:       15.581 [ms] (mean, across all concurrent requests)
+Transfer rate:          666.87 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    1   1.1      0       4
+Processing:   542 1421 201.6   1453    2020
+Waiting:      531 1417 201.2   1447    2017
+Total:        545 1422 201.0   1453    2022
+
+Percentage of the requests served within a certain time (ms)
+  50%   1453
+  66%   1470
+  75%   1485
+  80%   1494
+  90%   1510
+  95%   1674
+  98%   1877
+  99%   1930
+ 100%   2022 (longest request)
+</pre></div>
+<blockquote>
+<p>So it seems there's a slight edge in either cherokee over nginx OR not running dockerized applications OR linode vs digitalocean BUT...</p>
+</blockquote>
+<p>When I tweaked it for higher concurrency <code>ab -l -r -n 500 -c 200 -k -H "Accept-Encoding: gzip, deflate" http://physicstime.com/node?page=8</code></p>
+<p>Linode + Cherokee + php-cgi</p>
+<div class="highlight"><pre><span></span>Time taken for tests:   9.933 seconds
+Requests per second:    50.34 [#/sec] (mean)
+Time per request:       3973.367 [ms] (mean)
+</pre></div>
+<p>DigitalOcean + Nginx + Docker + php-fpm</p>
+<div class="highlight"><pre><span></span>Time taken for tests:   8.120 seconds
+Requests per second:    61.58 [#/sec] (mean)
+Time per request:       3248.067 [ms] (mean)
+</pre></div>
+<p>I can see the trend reverse (shrug)</p>
+<h4 id="latency-testing">Latency testing</h4>
+<p><a href="https://tools.pingdom.com/">https://tools.pingdom.com/</a></p>
+<ul>
+<li>website speed test (NY) for cherokee and php-cgi had a load time of 1.17s</li>
+<li>website speed test (NY) for nginx and Docker had a load time of 1.46s</li>
+</ul>
+<blockquote>
+<p>meh</p>
+</blockquote>
+<h3 id="conclusions">Conclusions</h3>
+<p>Adding docker simplifies one kind of complexity (stringing together multiple services that are packaged upstream) but can come at some cost to performance. (Though this might also be due to the cheaper node price)</p>
+<p>The other major advantage of using docker is that different components/services can be upgraded independently (and even just "test upgraded") which allows for a faster adoption of upstream project improvements.</p>
+<p>Obviously if performance were really an issue adding a cache layer like Varnish or Cloudflare or just tweaking the various configurations would help =]</p>
+            <aside>
+            <hr/>
+            <nav>
+            <ul class="articles_timeline">
+ 
+                <li class="previous_article">« <a href="https://blog.john-pfeiffer.com/alpine-linux-introduction-tutorial/" title="Previous: Alpine Linux Introduction Tutorial">Alpine Linux Introduction Tutorial</a></li>
+ 
+                <li class="next_article"><a href="https://blog.john-pfeiffer.com/a-micro-story-about-migrating-a-personal-monolith-into-microservices/" title="Next: A micro story about migrating a personal monolith into microservices">A micro story about migrating a personal monolith into microservices</a> »</li>
+            </ul>
+            </nav>
+            </aside>
+        </div>
+        <section>
+        <div class="span2" style="float:right;font-size:0.9em;">
+ 
+            <h4>Published</h4>
+            <time pubdate="pubdate" datetime="2016-07-28T23:59:00-07:00">Jul 28, 2016</time>
+            <h4>Category</h4>
+            <a class="category-link" href="/categories.html#virtualization-ref">virtualization</a> 
+            <h4>~2264 words</h4>
+            <h4>Tags</h4>
+            <ul class="list-of-tags tags-in-article"> 
+                <li><a href="/tags.html#digitalocean-ref">digitalocean
+                    <span>2</span>
+</a></li>
+                <li><a href="/tags.html#docker-ref">docker
+                    <span>5</span>
+</a></li>
+                <li><a href="/tags.html#docker-compose-ref">docker-compose
+                    <span>1</span>
+</a></li>
+                <li><a href="/tags.html#drupal-ref">drupal
+                    <span>12</span>
+</a></li>
+                <li><a href="/tags.html#nginx-ref">nginx
+                    <span>4</span>
+</a></li>
+                <li><a href="/tags.html#packer-ref">packer
+                    <span>3</span>
+</a></li>
+                <li><a href="/tags.html#php-ref">php
+                    <span>5</span>
+</a></li>
+            </ul>
+
+        </div>
+        </section>
+</div>
+</article>
+				</div>
+				<div class="span1"></div>
+			</div>
+		</div>
+    </div>
+<footer>
+<div id="footer">
+    <ul class="footer-content">
+    </ul>
+</div>
+</footer>            <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+    </body>
+</html>

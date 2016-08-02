@@ -107,7 +107,548 @@
 write content.&lt;/p&gt;
 &lt;p&gt;I still have to eventually find a platform that allows my father-in-law to publish content (and upload files) where I'm not responsible for security patches or backups ;)&lt;/p&gt;
 &lt;p&gt;My experimenting is now done via a PaaS like Google AppEngine, Heroku, Openshift etc. or using Docker containers.  That means more admin and cognitive sprawl but PaaS and CaaS are more predisposed to version control and elastic/disposable architecture so in all a lot less maintenance.&lt;/p&gt;
-&lt;p&gt;The biggest new cost is managing the increased number of services but this at least makes explicit what I am working on and is mostly mitigated by automation.&lt;/p&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">john pfeiffer</dc:creator><pubDate>Fri, 29 Jul 2016 20:59:00 -0700</pubDate><guid isPermaLink="false">tag:blog.john-pfeiffer.com,2016-07-29:a-micro-story-about-migrating-a-personal-monolith-into-microservices/</guid><category>microservices</category><category>monolith</category><category>linode</category><category>digitalocean</category><category>packer</category><category>drupal</category><category>php</category><category>python</category><category>go</category><category>cherokee</category><category>nginx</category></item><item><title>Alpine Linux Introduction Tutorial</title><link>https://blog.john-pfeiffer.com/alpine-linux-introduction-tutorial/</link><description>
+&lt;p&gt;The biggest new cost is managing the increased number of services but this at least makes explicit what I am working on and is mostly mitigated by automation.&lt;/p&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">john pfeiffer</dc:creator><pubDate>Fri, 29 Jul 2016 20:59:00 -0700</pubDate><guid isPermaLink="false">tag:blog.john-pfeiffer.com,2016-07-29:a-micro-story-about-migrating-a-personal-monolith-into-microservices/</guid><category>microservices</category><category>monolith</category><category>linode</category><category>digitalocean</category><category>packer</category><category>drupal</category><category>php</category><category>python</category><category>go</category><category>cherokee</category><category>nginx</category></item><item><title>Drupal with Docker Compose and nginx and php-fpm and mariadb</title><link>https://blog.john-pfeiffer.com/drupal-with-docker-compose-and-nginx-and-php-fpm-and-mariadb/</link><description>
+&lt;h2 id="replacing-cherokee-webserver-php-cgi-mysql"&gt;Replacing: cherokee webserver, php-cgi, MySQL&lt;/h2&gt;
+&lt;p&gt;In my professional life I've seen the webserver front end default choice shift from Apache to NGINX occur for production services.&lt;/p&gt;
+&lt;p&gt;Nginx is compelling due to simpler configuration and improved performance so I suspect the existing preponderance of Apache deployments are because "if it ain't broke don't fix it" (which makes lots of sense in Operations) along with the large number of Ops/SysAdmins who already know how to configure and integrate Apache (which makes a lot of sense to Management).&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://www.nginx.com/blog/nginx-vs-apache-our-view/"&gt;https://www.nginx.com/blog/nginx-vs-apache-our-view/&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;For a personal project I experimented with and chose Cherokee web server (&lt;a href="http://cherokee-project.com/"&gt;http://cherokee-project.com/&lt;/a&gt;) because it offered good performance and a simpler setup (Web UI even!)&lt;/p&gt;
+&lt;p&gt;Unfortunately as the project Dev and adoption slowed it seemed to make a lot of sense to finally convert my personal project to nginx. &lt;a href="https://github.com/cherokee/webserver/commits/master"&gt;https://github.com/cherokee/webserver/commits/master&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;I also wanted to experiment with a Docker based infrastructure (with docker-compose and a single YAML config file, ideally leveraging as much as possible the many official upstream docker images (&lt;a href="https://hub.docker.com/explore/"&gt;https://hub.docker.com/explore/&lt;/a&gt;)&lt;/p&gt;
+&lt;p&gt;Benefits:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;this would isolate my app from the Host OS (increased portability)&lt;/li&gt;
+&lt;li&gt;allow for simpler component swapping or upgrades (with testing and rollback and even local Dev)&lt;/li&gt;
+&lt;li&gt;leave room for adding other isolated components&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="almost-able-to-leverage-everything-right-out-of-the-box"&gt;Almost able to leverage everything right out of the box&lt;/h2&gt;
+&lt;p&gt;I spent time researching nginx and php-fpm and created a minimal config that worked (two docker commands) based on the slimmer alpine linux docker images. &lt;a href="https://blog.john-pfeiffer.com/nginx-with-docker/"&gt;https://blog.john-pfeiffer.com/nginx-with-docker/&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;This wasn't quite far off from the official Drupal Dockerfile except there are some more OS dependencies like GD and XML so I instead opted to use the official Drupal Docker image. (Non alpine linux so larger size but they've done the work of packaging the complexity and by not customizing it will be easier to update in the future - and avoid a Docker Build entirely!)&lt;/p&gt;
+&lt;h3 id="docker-composeyml-for-nginx-and-drupal7-fpm-and-mariadb55"&gt;docker-compose.yml for nginx and drupal:7-fpm and mariadb:5.5&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;# https://docs.docker.com/compose/compose-file/
+# https://docs.docker.com/compose/environment-variables/
+# https://www.nginx.com/resources/wiki/start/topics/recipes/drupal
+
+nginx:
+  image: nginx:alpine
+  ports:
+    - "80:80"
+  volumes:
+    - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    - ./default.conf:/etc/nginx/conf.d/default.conf:ro
+    - /var/www/html:/var/www/html/
+  links:
+    - fpm
+
+# https://hub.docker.com/_/drupal/
+fpm:
+  image: drupal:7-fpm
+  ports:
+    - "9000:9000"
+  volumes:
+    - /var/www/html:/var/www/html/
+  links:
+    - mysql
+
+# https://hub.docker.com/_/mariadb/
+mysql:
+  image: mariadb:5.5
+  ports:
+    - "3306:3306"
+  environment:
+    - MYSQL_ROOT_PASSWORD
+    - MYSQL_USER
+    - MYSQL_PASSWORD
+    - MYSQL_DATABASE
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Adding the MariaDB (compatible with MySQL) image/container was fairly straightforward (just reading the docs on how to override and setup the default user and DB via Environment Variables)&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;I am ok with the Database files being kept completely inside of a persistent container.  I expect to do regular backups (mysqldump and scp) and may also spend the money to just use DigitalOcean's backup service (no poweroff required!)&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id="and-the-bugs"&gt;And the bugs&lt;/h3&gt;
+&lt;p&gt;I discovered a bug where the css/themes didn't render correctly.  As part of the troubleshooting I installed nginx, php, and MySQL locally on the host with my override configs (no bug exhibited).  I then replaced each "native host installed service" with the Docker one, working from the backend DB forward I was able to identify the issue.&lt;/p&gt;
+&lt;p&gt;Unfortunately the nginx image uses a default user of "nginx" whereas the drupal:php image uses "www-data" which caused issues when accessing the Drupal source files (which I was sharing via --volume on the host, preferring to eschew a "data container").&lt;/p&gt;
+&lt;p&gt;My personal Linux maxim still holds true: "If there's a problem with something running in Linux it's probably a Permissions issue". ;)&lt;/p&gt;
+&lt;h3 id="do-not-add-complexity"&gt;Do not add complexity&lt;/h3&gt;
+&lt;p&gt;I avoided creating my own docker image build FROM drupal:php with nginx included because:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;simplest with as few build steps possible&lt;/li&gt;
+&lt;li&gt;contrary to the "do one thing well" principle&lt;/li&gt;
+&lt;li&gt;contrary to the "one container one app" Docker principle&lt;/li&gt;
+&lt;li&gt;tight coupling of nginx and php would make it harder to update one or the other independently&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="cache-your-upstream-dependencies"&gt;Cache your upstream dependencies&lt;/h3&gt;
+&lt;p&gt;Ironically I also ended up providing my own drupal.tar.gz downloaded from Drupal.org but cached in Bitbucket as the upstream ftp.drupal.org proved unreliable.&lt;/p&gt;
+&lt;h2 id="the-pragmatic-solution"&gt;The pragmatic solution&lt;/h2&gt;
+&lt;p&gt;Instead, as I was already using packer on DigitalOcean to automate building the Host and uploading the custom configs, docker-compose.yaml, and Drupal source, I added a few steps to install nginx directly to the Host OS.&lt;/p&gt;
+&lt;h3 id="packerjson"&gt;packer.json&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;NEWUSER_NAME=username NEWUSER_PASSWORD=yourpassword DIGITALOCEAN_API_TOKEN=yourapitoken /opt/packer build packer.json
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;A few files and a single command (packer is just a single binary downloaded from hashicorp) I can have another Docker based Drupal host ready (awyeah)&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="x"&gt;{&lt;/span&gt;
+&lt;span class="x"&gt;  "_comment": "https://www.packer.io/docs/builders/digitalocean.html",&lt;/span&gt;
+&lt;span class="x"&gt;  "variables": {&lt;/span&gt;
+&lt;span class="x"&gt;    "digitalocean_api_token": "&lt;/span&gt;&lt;span class="cp"&gt;{{&lt;/span&gt;&lt;span class="nv"&gt;env&lt;/span&gt; &lt;span class="err"&gt;`&lt;/span&gt;&lt;span class="nv"&gt;DIGITALOCEAN_API_TOKEN&lt;/span&gt;&lt;span class="err"&gt;`&lt;/span&gt;&lt;span class="cp"&gt;}}&lt;/span&gt;&lt;span class="x"&gt;",&lt;/span&gt;
+&lt;span class="x"&gt;    "newuser_name": "&lt;/span&gt;&lt;span class="cp"&gt;{{&lt;/span&gt;&lt;span class="nv"&gt;env&lt;/span&gt; &lt;span class="err"&gt;`&lt;/span&gt;&lt;span class="nv"&gt;NEWUSER_NAME&lt;/span&gt;&lt;span class="err"&gt;`&lt;/span&gt;&lt;span class="cp"&gt;}}&lt;/span&gt;&lt;span class="x"&gt;",&lt;/span&gt;
+&lt;span class="x"&gt;    "newuser_password": "&lt;/span&gt;&lt;span class="cp"&gt;{{&lt;/span&gt;&lt;span class="nv"&gt;env&lt;/span&gt; &lt;span class="err"&gt;`&lt;/span&gt;&lt;span class="nv"&gt;NEWUSER_PASSWORD&lt;/span&gt;&lt;span class="err"&gt;`&lt;/span&gt;&lt;span class="cp"&gt;}}&lt;/span&gt;&lt;span class="x"&gt;"&lt;/span&gt;
+&lt;span class="x"&gt;  },&lt;/span&gt;
+
+&lt;span class="x"&gt;  "builders": [{&lt;/span&gt;
+&lt;span class="x"&gt;    "type": "digitalocean",&lt;/span&gt;
+&lt;span class="x"&gt;    "api_token": "&lt;/span&gt;&lt;span class="cp"&gt;{{&lt;/span&gt;&lt;span class="nv"&gt;user&lt;/span&gt; &lt;span class="err"&gt;`&lt;/span&gt;&lt;span class="nv"&gt;digitalocean_api_token&lt;/span&gt;&lt;span class="err"&gt;`&lt;/span&gt;&lt;span class="cp"&gt;}}&lt;/span&gt;&lt;span class="x"&gt;",&lt;/span&gt;
+&lt;span class="x"&gt;    "size": "512mb",&lt;/span&gt;
+&lt;span class="x"&gt;    "region": "lon1",&lt;/span&gt;
+&lt;span class="x"&gt;    "image": "ubuntu-16-04-x64",&lt;/span&gt;
+&lt;span class="x"&gt;    "droplet_name": "drupal-from-packer-&lt;/span&gt;&lt;span class="cp"&gt;{{&lt;/span&gt;&lt;span class="nv"&gt;timestamp&lt;/span&gt;&lt;span class="cp"&gt;}}&lt;/span&gt;&lt;span class="x"&gt;",&lt;/span&gt;
+&lt;span class="x"&gt;    "snapshot_name": "drupal-from-packer-&lt;/span&gt;&lt;span class="cp"&gt;{{&lt;/span&gt;&lt;span class="nv"&gt;isotime&lt;/span&gt; &lt;span class="err"&gt;\&lt;/span&gt;&lt;span class="s2"&gt;"2006.01.02.030405\"}}"&lt;/span&gt;
+  &lt;span class="o"&gt;}],&lt;/span&gt;
+
+  &lt;span class="s2"&gt;"provisioners"&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="o"&gt;[&lt;/span&gt;
+    &lt;span class="o"&gt;{&lt;/span&gt;
+      &lt;span class="s2"&gt;"type"&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;"shell"&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;
+      &lt;span class="s2"&gt;"inline"&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="o"&gt;[&lt;/span&gt;
+        &lt;span class="s2"&gt;"ip a"&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;
+        &lt;span class="s2"&gt;"curl -s http://checkip.amazonaws.com"&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;
+        &lt;span class="s2"&gt;"apt-get update"&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;
+        &lt;span class="s2"&gt;"sudo apt-get install -y vim curl wget byobu ntp tar gzip"&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;
+        &lt;span class="s2"&gt;"timedatectl set-timezone Etc/UTC"&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;
+        &lt;span class="s2"&gt;"cat /etc/timezone"&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;
+        &lt;span class="s2"&gt;"date"&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;
+        &lt;span class="s2"&gt;"useradd -s /bin/bash -m {{user `newuser_name`}}"&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;
+        &lt;span class="s2"&gt;"usermod -a -G admin {{user `newuser_name`}}"&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;
+        &lt;span class="s2"&gt;"echo '{{user `newuser_name`}}:{{user `newuser_password`}}'|chpasswd"&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;
+        &lt;span class="s2"&gt;"cat /etc/passwd"&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;
+        &lt;span class="s2"&gt;"sed -i 's/Port 22/Port 2222/g' /etc/ssh/sshd_config"&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;
+        &lt;span class="s2"&gt;"sed -i 's/PermitRootLogin yes/PermitRootLogin no/g' /etc/ssh/sshd_config"&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;
+        &lt;span class="s2"&gt;"echo 'PasswordAuthentication no' &amp;gt;&amp;gt; /etc/ssh/sshd_config"&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;
+        &lt;span class="s2"&gt;"cat /etc/ssh/sshd_config"&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;
+        &lt;span class="s2"&gt;"mkdir -p /home/{{user `newuser_name`}}/.ssh"&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;
+        &lt;span class="s2"&gt;"fallocate -l 1G /swapfile"&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;
+        &lt;span class="s2"&gt;"chmod 600 /swapfile"&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;
+        &lt;span class="s2"&gt;"mkswap /swapfile"&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;
+        &lt;span class="s2"&gt;"swapon /swapfile"&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;
+        &lt;span class="s2"&gt;"swapon --show"&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;
+        &lt;span class="s2"&gt;"free -h"&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;
+        &lt;span class="s2"&gt;"echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab"&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;
+        &lt;span class="s2"&gt;"echo 'vm.swappiness=10' | sudo tee -a /etc/sysctl.conf"&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;
+        &lt;span class="s2"&gt;"echo 'vm.vfs_cache_pressure=50' | sudo tee -a /etc/sysctl.conf"&lt;/span&gt;
+      &lt;span class="o"&gt;]&lt;/span&gt;
+    &lt;span class="o"&gt;},&lt;/span&gt;
+    &lt;span class="o"&gt;{&lt;/span&gt;
+      &lt;span class="s2"&gt;"type"&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;"file"&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;
+      &lt;span class="s2"&gt;"source"&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;"authorized_keys"&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;
+      &lt;span class="s2"&gt;"destination"&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;"/home/{{user `newuser_name`}}/.ssh/authorized_keys"&lt;/span&gt;
+    &lt;span class="o"&gt;},&lt;/span&gt;
+    &lt;span class="o"&gt;{&lt;/span&gt;
+      &lt;span class="s2"&gt;"type"&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;"shell"&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;
+      &lt;span class="s2"&gt;"script"&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;"install-docker.sh"&lt;/span&gt;
+    &lt;span class="o"&gt;},&lt;/span&gt;
+    &lt;span class="o"&gt;{&lt;/span&gt;
+      &lt;span class="s2"&gt;"type"&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;"file"&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;
+      &lt;span class="s2"&gt;"source"&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;"docker-compose.yml"&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;
+      &lt;span class="s2"&gt;"destination"&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;"/home/{{user `newuser_name`}}/docker-compose.yml"&lt;/span&gt;
+    &lt;span class="o"&gt;},&lt;/span&gt;
+    &lt;span class="o"&gt;{&lt;/span&gt;
+      &lt;span class="s2"&gt;"type"&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;"shell"&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;
+      &lt;span class="s2"&gt;"inline"&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="o"&gt;[&lt;/span&gt;
+        &lt;span class="s2"&gt;"mkdir -p /var/www/html"&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;
+        &lt;span class="s2"&gt;"wget https://bitbucket.org/yourusername/yourrepository/raw/97360be2edd53b93149d750db24f749aebc27988/binaries/drupal-7.50.tar.gz"&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;
+        &lt;span class="s2"&gt;"tar xf drupal-7.50.tar.gz --strip-components=1 -C /var/www/html"&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;
+        &lt;span class="s2"&gt;"ls -ahl /var/www/html"&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;
+        &lt;span class="s2"&gt;"mkdir -p /var/www/html/sites/default/files"&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;
+        &lt;span class="s2"&gt;"chmod 777 /var/www/html/sites/default/files"&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;
+        &lt;span class="s2"&gt;"cp -a /var/www/html/sites/default/default.settings.php /var/www/html/sites/default/settings.php"&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;
+        &lt;span class="s2"&gt;"chmod 777 /var/www/html/sites/default/settings.php"&lt;/span&gt;
+      &lt;span class="o"&gt;]&lt;/span&gt;
+    &lt;span class="o"&gt;},&lt;/span&gt;
+    &lt;span class="o"&gt;{&lt;/span&gt;
+      &lt;span class="s2"&gt;"type"&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;"shell"&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;
+      &lt;span class="s2"&gt;"inline"&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="o"&gt;[&lt;/span&gt;
+        &lt;span class="s2"&gt;"apt-get install -y nginx"&lt;/span&gt;
+      &lt;span class="o"&gt;]&lt;/span&gt;
+    &lt;span class="o"&gt;},&lt;/span&gt;
+    &lt;span class="o"&gt;{&lt;/span&gt;
+      &lt;span class="s2"&gt;"type"&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;"file"&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;
+      &lt;span class="s2"&gt;"source"&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;"nginx.conf"&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;
+      &lt;span class="s2"&gt;"destination"&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;"/etc/nginx/nginx.conf"&lt;/span&gt;
+    &lt;span class="o"&gt;},&lt;/span&gt;
+    &lt;span class="o"&gt;{&lt;/span&gt;
+      &lt;span class="s2"&gt;"type"&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;"file"&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;
+      &lt;span class="s2"&gt;"source"&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;"default.conf"&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;
+      &lt;span class="s2"&gt;"destination"&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;"/etc/nginx/conf.d/default.conf"&lt;/span&gt;
+    &lt;span class="o"&gt;}&lt;/span&gt;
+
+  &lt;span class="o"&gt;]&lt;/span&gt;
+
+&lt;span class="o"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;HINT: A DigitalOcean 512MB droplet needs swap enabled due to the MySQL/MariaDB memory defaults, otherwise you get strange errors about inode unavailable while starting the MariaDB container&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://www.suse.com/documentation/opensuse114/book_tuning/data/cha_tuning_memory_vm.html"&gt;https://www.suse.com/documentation/opensuse114/book_tuning/data/cha_tuning_memory_vm.html&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href="https://www.kernel.org/pub/linux/kernel/people/akpm/patches/2.6/2.6.7/2.6.7-mm1/broken-out/vfs-shrinkage-tuning.patch"&gt;https://www.kernel.org/pub/linux/kernel/people/akpm/patches/2.6/2.6.7/2.6.7-mm1/broken-out/vfs-shrinkage-tuning.patch&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;One thing that is annoying is as a single partition it is potentially vulnerable to a /var/log DenialOfService&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;A very nice tool to add is fail2ban (apt-get install fail2ban) but I want to ensure I tweak the configs correctly&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id="install-dockersh"&gt;install-docker.sh&lt;/h4&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1
+2
+3
+4
+5
+6
+7
+8
+9&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="ch"&gt;#!/bin/sh&lt;/span&gt;
+&lt;span class="c1"&gt;# ubuntu 16.04 is xenial , https://blog.john-pfeiffer.com/docker-intro-install-run-and-port-forward/&lt;/span&gt;
+sudo apt-key adv --keyserver hkp://pgp.mit.edu:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
+sudo sh -c &lt;span class="s2"&gt;"echo 'deb https://apt.dockerproject.org/repo ubuntu-xenial main' &amp;gt; /etc/apt/sources.list.d/docker.list"&lt;/span&gt;
+sudo apt-get update &lt;span class="o"&gt;||&lt;/span&gt; &lt;span class="nb"&gt;exit&lt;/span&gt; 1
+sudo apt-get install -y linux-image-extra-&lt;span class="k"&gt;$(&lt;/span&gt;uname -r&lt;span class="k"&gt;)&lt;/span&gt; &lt;span class="o"&gt;||&lt;/span&gt; &lt;span class="nb"&gt;exit&lt;/span&gt; 1
+sudo apt-get install -y docker-engine docker-compose &lt;span class="o"&gt;||&lt;/span&gt; &lt;span class="nb"&gt;exit&lt;/span&gt; 1
+service docker status &lt;span class="o"&gt;||&lt;/span&gt; &lt;span class="nb"&gt;exit&lt;/span&gt; 1
+docker info &lt;span class="o"&gt;||&lt;/span&gt; &lt;span class="nb"&gt;exit&lt;/span&gt; 1
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;blockquote&gt;
+&lt;p&gt;linux-image-extra is to ensure we have AUFS because docker needs a proper storage driver&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h4 id="docker-composeyml-with-drupal7-fpm-and-mariadb55"&gt;docker-compose.yml with drupal:7-fpm and mariadb:5.5&lt;/h4&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;# https://hub.docker.com/_/drupal/
+fpm:
+  image: drupal:7-fpm
+  ports:
+    - "127.0.0.1:9000:9000"
+#    - "9000:9000"
+  volumes:
+    - /var/www/html:/var/www/html/
+  links:
+    - mysql
+
+# https://hub.docker.com/_/mariadb/
+mysql:
+  image: mariadb:5.5
+  ports:
+    - "3306:3306"
+  environment:
+    - MYSQL_ROOT_PASSWORD
+    - MYSQL_USER
+    - MYSQL_PASSWORD
+    - MYSQL_DATABASE
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;2 out of 3 ain't bad&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h4 id="nginxconf"&gt;nginx.conf&lt;/h4&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;# slightly modified /etc/nginx/nginx.conf from "apt-get install nginx"
+# https://www.nginx.com/resources/wiki/start/topics/examples/full/
+
+user www-data;
+worker_processes auto;
+pid /run/nginx.pid;
+
+events {
+        worker_connections 768;
+        # multi_accept on;
+}
+
+http {
+
+        sendfile on;
+        tcp_nopush on;
+        tcp_nodelay on;
+        keepalive_timeout 65;
+        types_hash_max_size 2048;
+        server_tokens off;
+
+        include /etc/nginx/mime.types;
+        default_type application/octet-stream;
+
+        access_log /var/log/nginx/access.log;
+        error_log /var/log/nginx/error.log;
+
+        gzip on;
+        gzip_disable "msie6";
+
+        gzip_types text/plain text/css application/json application/javascript text/xml application/xml application/xml+rss text/javascript;
+
+        include /etc/nginx/conf.d/*.conf;
+
+}
+&lt;/pre&gt;&lt;/div&gt;
+&lt;h4 id="defaultconf"&gt;default.conf&lt;/h4&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nt"&gt;server&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="n"&gt;listen&lt;/span&gt;      &lt;span class="m"&gt;80&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="n"&gt;server_name&lt;/span&gt; &lt;span class="n"&gt;physicstime&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;com&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="n"&gt;root&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;var&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;www&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;html&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt; &lt;span class="err"&gt;##&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;--&lt;/span&gt; &lt;span class="n"&gt;Your&lt;/span&gt; &lt;span class="n"&gt;only&lt;/span&gt; &lt;span class="n"&gt;path&lt;/span&gt; &lt;span class="n"&gt;reference&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;
+
+    &lt;span class="n"&gt;location&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;favicon&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;ico&lt;/span&gt; &lt;span class="err"&gt;{&lt;/span&gt;
+        &lt;span class="n"&gt;log_not_found&lt;/span&gt; &lt;span class="n"&gt;off&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+        &lt;span class="n"&gt;access_log&lt;/span&gt; &lt;span class="n"&gt;off&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt;
+
+    &lt;span class="nt"&gt;location&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nt"&gt;robots&lt;/span&gt;&lt;span class="nc"&gt;.txt&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="n"&gt;allow&lt;/span&gt; &lt;span class="n"&gt;all&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+        &lt;span class="n"&gt;log_not_found&lt;/span&gt; &lt;span class="n"&gt;off&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+        &lt;span class="n"&gt;access_log&lt;/span&gt; &lt;span class="n"&gt;off&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt;
+
+    &lt;span class="err"&gt;#&lt;/span&gt; &lt;span class="nt"&gt;Very&lt;/span&gt; &lt;span class="nt"&gt;rarely&lt;/span&gt; &lt;span class="nt"&gt;should&lt;/span&gt; &lt;span class="nt"&gt;these&lt;/span&gt; &lt;span class="nt"&gt;ever&lt;/span&gt; &lt;span class="nt"&gt;be&lt;/span&gt; &lt;span class="nt"&gt;accessed&lt;/span&gt; &lt;span class="nt"&gt;outside&lt;/span&gt; &lt;span class="nt"&gt;of&lt;/span&gt; &lt;span class="nt"&gt;your&lt;/span&gt; &lt;span class="nt"&gt;lan&lt;/span&gt;
+    &lt;span class="nt"&gt;location&lt;/span&gt; &lt;span class="o"&gt;~*&lt;/span&gt; &lt;span class="err"&gt;\&lt;/span&gt;&lt;span class="o"&gt;.(&lt;/span&gt;&lt;span class="nt"&gt;txt&lt;/span&gt;&lt;span class="o"&gt;|&lt;/span&gt;&lt;span class="nt"&gt;log&lt;/span&gt;&lt;span class="o"&gt;)$&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="n"&gt;deny&lt;/span&gt; &lt;span class="n"&gt;all&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt;
+
+    &lt;span class="nt"&gt;location&lt;/span&gt; &lt;span class="o"&gt;~&lt;/span&gt; &lt;span class="err"&gt;\&lt;/span&gt;&lt;span class="o"&gt;..*/.*&lt;/span&gt;&lt;span class="err"&gt;\&lt;/span&gt;&lt;span class="nc"&gt;.php&lt;/span&gt;&lt;span class="o"&gt;$&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="n"&gt;return&lt;/span&gt; &lt;span class="m"&gt;403&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt;
+
+    &lt;span class="nt"&gt;location&lt;/span&gt; &lt;span class="o"&gt;~&lt;/span&gt; &lt;span class="o"&gt;^/&lt;/span&gt;&lt;span class="nt"&gt;sites&lt;/span&gt;&lt;span class="o"&gt;/.*/&lt;/span&gt;&lt;span class="nt"&gt;private&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="n"&gt;return&lt;/span&gt; &lt;span class="m"&gt;403&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt;
+
+    &lt;span class="err"&gt;#&lt;/span&gt; &lt;span class="nt"&gt;Allow&lt;/span&gt; &lt;span class="s2"&gt;"Well-Known URIs"&lt;/span&gt; &lt;span class="nt"&gt;as&lt;/span&gt; &lt;span class="nt"&gt;per&lt;/span&gt; &lt;span class="nt"&gt;RFC&lt;/span&gt; &lt;span class="nt"&gt;5785&lt;/span&gt;
+    &lt;span class="nt"&gt;location&lt;/span&gt; &lt;span class="o"&gt;~*&lt;/span&gt; &lt;span class="o"&gt;^/&lt;/span&gt;&lt;span class="nc"&gt;.well-known&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="n"&gt;allow&lt;/span&gt; &lt;span class="n"&gt;all&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt;
+
+    &lt;span class="err"&gt;#&lt;/span&gt; &lt;span class="nt"&gt;Block&lt;/span&gt; &lt;span class="nt"&gt;access&lt;/span&gt; &lt;span class="nt"&gt;to&lt;/span&gt; &lt;span class="s2"&gt;"hidden"&lt;/span&gt; &lt;span class="nt"&gt;files&lt;/span&gt; &lt;span class="nt"&gt;and&lt;/span&gt; &lt;span class="nt"&gt;directories&lt;/span&gt; &lt;span class="nt"&gt;whose&lt;/span&gt; &lt;span class="nt"&gt;names&lt;/span&gt; &lt;span class="nt"&gt;begin&lt;/span&gt; &lt;span class="nt"&gt;with&lt;/span&gt; &lt;span class="nt"&gt;a&lt;/span&gt;
+    &lt;span class="err"&gt;#&lt;/span&gt; &lt;span class="nt"&gt;period&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt; &lt;span class="nt"&gt;This&lt;/span&gt; &lt;span class="nt"&gt;includes&lt;/span&gt; &lt;span class="nt"&gt;directories&lt;/span&gt; &lt;span class="nt"&gt;used&lt;/span&gt; &lt;span class="nt"&gt;by&lt;/span&gt; &lt;span class="nt"&gt;version&lt;/span&gt; &lt;span class="nt"&gt;control&lt;/span&gt; &lt;span class="nt"&gt;systems&lt;/span&gt; &lt;span class="nt"&gt;such&lt;/span&gt;
+    &lt;span class="err"&gt;#&lt;/span&gt; &lt;span class="nt"&gt;as&lt;/span&gt; &lt;span class="nt"&gt;Subversion&lt;/span&gt; &lt;span class="nt"&gt;or&lt;/span&gt; &lt;span class="nt"&gt;Git&lt;/span&gt; &lt;span class="nt"&gt;to&lt;/span&gt; &lt;span class="nt"&gt;store&lt;/span&gt; &lt;span class="nt"&gt;control&lt;/span&gt; &lt;span class="nt"&gt;files&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;
+    &lt;span class="nt"&gt;location&lt;/span&gt; &lt;span class="o"&gt;~&lt;/span&gt; &lt;span class="o"&gt;(^|/)&lt;/span&gt;&lt;span class="err"&gt;\&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="n"&gt;return&lt;/span&gt; &lt;span class="m"&gt;403&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt;
+
+    &lt;span class="nt"&gt;location&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="err"&gt;#&lt;/span&gt; &lt;span class="n"&gt;try_files&lt;/span&gt; &lt;span class="err"&gt;$&lt;/span&gt;&lt;span class="n"&gt;uri&lt;/span&gt; &lt;span class="o"&gt;@&lt;/span&gt;&lt;span class="n"&gt;rewrite&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt; &lt;span class="err"&gt;#&lt;/span&gt; &lt;span class="n"&gt;For&lt;/span&gt; &lt;span class="n"&gt;Drupal&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;=&lt;/span&gt; &lt;span class="m"&gt;6&lt;/span&gt;
+        &lt;span class="n"&gt;try_files&lt;/span&gt; &lt;span class="err"&gt;$&lt;/span&gt;&lt;span class="n"&gt;uri&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;index&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;php&lt;/span&gt;&lt;span class="o"&gt;?&lt;/span&gt;&lt;span class="err"&gt;$&lt;/span&gt;&lt;span class="n"&gt;query_string&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt; &lt;span class="err"&gt;#&lt;/span&gt; &lt;span class="n"&gt;For&lt;/span&gt; &lt;span class="n"&gt;Drupal&lt;/span&gt; &lt;span class="o"&gt;&amp;gt;=&lt;/span&gt; &lt;span class="m"&gt;7&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt;
+
+    &lt;span class="nt"&gt;location&lt;/span&gt; &lt;span class="k"&gt;@rewrite&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="nt"&gt;rewrite&lt;/span&gt; &lt;span class="o"&gt;^/(.*)$&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nt"&gt;index&lt;/span&gt;&lt;span class="nc"&gt;.php&lt;/span&gt;&lt;span class="o"&gt;?&lt;/span&gt;&lt;span class="nt"&gt;q&lt;/span&gt;&lt;span class="o"&gt;=$&lt;/span&gt;&lt;span class="nt"&gt;1&lt;/span&gt;&lt;span class="o"&gt;;&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt;
+
+    &lt;span class="err"&gt;#&lt;/span&gt; &lt;span class="nt"&gt;Don&lt;/span&gt;&lt;span class="s1"&gt;'t allow direct access to PHP files in the vendor directory.&lt;/span&gt;
+&lt;span class="s1"&gt;    location ~ /vendor/.*\.php$ {&lt;/span&gt;
+&lt;span class="s1"&gt;        deny all;&lt;/span&gt;
+&lt;span class="s1"&gt;        return 404;&lt;/span&gt;
+&lt;span class="s1"&gt;    }&lt;/span&gt;
+
+&lt;span class="s1"&gt;    # In Drupal 8, we must also match new paths where the '&lt;/span&gt;&lt;span class="nc"&gt;.php&lt;/span&gt;&lt;span class="s1"&gt;' appears in&lt;/span&gt;
+&lt;span class="s1"&gt;    # the middle, such as update.php/selection. The rule we use is strict,&lt;/span&gt;
+&lt;span class="s1"&gt;    # and only allows this pattern with the update.php front controller.&lt;/span&gt;
+&lt;span class="s1"&gt;    # This allows legacy path aliases in the form of&lt;/span&gt;
+&lt;span class="s1"&gt;    # blog/index.php/legacy-path to continue to route to Drupal nodes. If&lt;/span&gt;
+&lt;span class="s1"&gt;    # you do not have any paths like that, then you might prefer to use a&lt;/span&gt;
+&lt;span class="s1"&gt;    # laxer rule, such as:&lt;/span&gt;
+&lt;span class="s1"&gt;    #   location ~ \.php(/|$) {&lt;/span&gt;
+&lt;span class="s1"&gt;    # The laxer rule will continue to work if Drupal uses this new URL&lt;/span&gt;
+&lt;span class="s1"&gt;    # pattern with front controllers other than update.php in a future&lt;/span&gt;
+&lt;span class="s1"&gt;    # release.&lt;/span&gt;
+&lt;span class="s1"&gt;    location ~ '&lt;/span&gt;&lt;span class="err"&gt;\&lt;/span&gt;&lt;span class="nc"&gt;.php&lt;/span&gt;&lt;span class="o"&gt;$|^/&lt;/span&gt;&lt;span class="nt"&gt;update&lt;/span&gt;&lt;span class="nc"&gt;.php&lt;/span&gt;&lt;span class="s1"&gt;' {&lt;/span&gt;
+&lt;span class="s1"&gt;        fastcgi_split_path_info ^(.+?\.php)(|/.*)$;&lt;/span&gt;
+&lt;span class="s1"&gt;        # Security note: If you'&lt;/span&gt;&lt;span class="nt"&gt;re&lt;/span&gt; &lt;span class="nt"&gt;running&lt;/span&gt; &lt;span class="nt"&gt;a&lt;/span&gt; &lt;span class="nt"&gt;version&lt;/span&gt; &lt;span class="nt"&gt;of&lt;/span&gt; &lt;span class="nt"&gt;PHP&lt;/span&gt; &lt;span class="nt"&gt;older&lt;/span&gt; &lt;span class="nt"&gt;than&lt;/span&gt; &lt;span class="nt"&gt;the&lt;/span&gt;
+        &lt;span class="err"&gt;#&lt;/span&gt; &lt;span class="nt"&gt;latest&lt;/span&gt; &lt;span class="nt"&gt;5&lt;/span&gt;&lt;span class="nc"&gt;.3&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="nt"&gt;you&lt;/span&gt; &lt;span class="nt"&gt;should&lt;/span&gt; &lt;span class="nt"&gt;have&lt;/span&gt; &lt;span class="s2"&gt;"cgi.fix_pathinfo = 0;"&lt;/span&gt; &lt;span class="nt"&gt;in&lt;/span&gt; &lt;span class="nt"&gt;php&lt;/span&gt;&lt;span class="nc"&gt;.ini&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;
+        &lt;span class="err"&gt;#&lt;/span&gt; &lt;span class="nt"&gt;See&lt;/span&gt; &lt;span class="nt"&gt;http&lt;/span&gt;&lt;span class="o"&gt;://&lt;/span&gt;&lt;span class="nt"&gt;serverfault&lt;/span&gt;&lt;span class="nc"&gt;.com&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nt"&gt;q&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nt"&gt;627903&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nt"&gt;94922&lt;/span&gt; &lt;span class="nt"&gt;for&lt;/span&gt; &lt;span class="nt"&gt;details&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;
+        &lt;span class="nt"&gt;include&lt;/span&gt; &lt;span class="nt"&gt;fastcgi_params&lt;/span&gt;&lt;span class="o"&gt;;&lt;/span&gt;
+        &lt;span class="err"&gt;#&lt;/span&gt; &lt;span class="nt"&gt;Block&lt;/span&gt; &lt;span class="nt"&gt;httpoxy&lt;/span&gt; &lt;span class="nt"&gt;attacks&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt; &lt;span class="nt"&gt;See&lt;/span&gt; &lt;span class="nt"&gt;https&lt;/span&gt;&lt;span class="o"&gt;://&lt;/span&gt;&lt;span class="nt"&gt;httpoxy&lt;/span&gt;&lt;span class="nc"&gt;.org&lt;/span&gt;&lt;span class="o"&gt;/.&lt;/span&gt;
+        &lt;span class="nt"&gt;fastcgi_param&lt;/span&gt; &lt;span class="nt"&gt;HTTP_PROXY&lt;/span&gt; &lt;span class="s2"&gt;""&lt;/span&gt;&lt;span class="o"&gt;;&lt;/span&gt;
+        &lt;span class="nt"&gt;fastcgi_param&lt;/span&gt; &lt;span class="nt"&gt;SCRIPT_FILENAME&lt;/span&gt; &lt;span class="o"&gt;$&lt;/span&gt;&lt;span class="nt"&gt;document_root&lt;/span&gt;&lt;span class="o"&gt;$&lt;/span&gt;&lt;span class="nt"&gt;fastcgi_script_name&lt;/span&gt;&lt;span class="o"&gt;;&lt;/span&gt;
+        &lt;span class="nt"&gt;fastcgi_param&lt;/span&gt; &lt;span class="nt"&gt;PATH_INFO&lt;/span&gt; &lt;span class="o"&gt;$&lt;/span&gt;&lt;span class="nt"&gt;fastcgi_path_info&lt;/span&gt;&lt;span class="o"&gt;;&lt;/span&gt;
+        &lt;span class="nt"&gt;fastcgi_intercept_errors&lt;/span&gt; &lt;span class="nt"&gt;on&lt;/span&gt;&lt;span class="o"&gt;;&lt;/span&gt;
+        &lt;span class="err"&gt;#&lt;/span&gt; &lt;span class="nt"&gt;PHP&lt;/span&gt; &lt;span class="nt"&gt;5&lt;/span&gt; &lt;span class="nt"&gt;socket&lt;/span&gt; &lt;span class="nt"&gt;location&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;
+        &lt;span class="nn"&gt;#fastcgi_pass&lt;/span&gt; &lt;span class="nt"&gt;unix&lt;/span&gt;&lt;span class="o"&gt;:/&lt;/span&gt;&lt;span class="nt"&gt;var&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nt"&gt;run&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nt"&gt;php5-fpm&lt;/span&gt;&lt;span class="nc"&gt;.sock&lt;/span&gt;&lt;span class="o"&gt;;&lt;/span&gt;
+        &lt;span class="err"&gt;#&lt;/span&gt; &lt;span class="nt"&gt;PHP&lt;/span&gt; &lt;span class="nt"&gt;7&lt;/span&gt; &lt;span class="nt"&gt;socket&lt;/span&gt; &lt;span class="nt"&gt;location&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;
+        &lt;span class="err"&gt;#&lt;/span&gt; &lt;span class="nt"&gt;fastcgi_pass&lt;/span&gt; &lt;span class="nt"&gt;unix&lt;/span&gt;&lt;span class="o"&gt;:/&lt;/span&gt;&lt;span class="nt"&gt;var&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nt"&gt;run&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nt"&gt;php&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nt"&gt;php7&lt;/span&gt;&lt;span class="nc"&gt;.0-fpm.sock&lt;/span&gt;&lt;span class="o"&gt;;&lt;/span&gt;
+
+        &lt;span class="nt"&gt;fastcgi_pass&lt;/span&gt; &lt;span class="nt"&gt;127&lt;/span&gt;&lt;span class="nc"&gt;.0.0.1&lt;/span&gt;&lt;span class="nd"&gt;:9000&lt;/span&gt;&lt;span class="o"&gt;;&lt;/span&gt;
+        &lt;span class="err"&gt;#&lt;/span&gt; &lt;span class="nt"&gt;fastcgi_pass&lt;/span&gt; &lt;span class="nt"&gt;fpm&lt;/span&gt;&lt;span class="nd"&gt;:9000&lt;/span&gt;&lt;span class="o"&gt;;&lt;/span&gt;
+    &lt;span class="err"&gt;}&lt;/span&gt;
+
+    &lt;span class="err"&gt;#&lt;/span&gt; &lt;span class="nt"&gt;Fighting&lt;/span&gt; &lt;span class="nt"&gt;with&lt;/span&gt; &lt;span class="nt"&gt;Styles&lt;/span&gt;&lt;span class="o"&gt;?&lt;/span&gt; &lt;span class="nt"&gt;This&lt;/span&gt; &lt;span class="nt"&gt;little&lt;/span&gt; &lt;span class="nt"&gt;gem&lt;/span&gt; &lt;span class="nt"&gt;is&lt;/span&gt; &lt;span class="nt"&gt;amazing&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;
+    &lt;span class="err"&gt;#&lt;/span&gt; &lt;span class="nt"&gt;location&lt;/span&gt; &lt;span class="o"&gt;~&lt;/span&gt; &lt;span class="o"&gt;^/&lt;/span&gt;&lt;span class="nt"&gt;sites&lt;/span&gt;&lt;span class="o"&gt;/.*/&lt;/span&gt;&lt;span class="nt"&gt;files&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nt"&gt;imagecache&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt; &lt;span class="err"&gt;#&lt;/span&gt; &lt;span class="n"&gt;For&lt;/span&gt; &lt;span class="n"&gt;Drupal&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;=&lt;/span&gt; &lt;span class="m"&gt;6&lt;/span&gt;
+    &lt;span class="n"&gt;location&lt;/span&gt; &lt;span class="o"&gt;~&lt;/span&gt; &lt;span class="o"&gt;^/&lt;/span&gt;&lt;span class="n"&gt;sites&lt;/span&gt;&lt;span class="o"&gt;/.*/&lt;/span&gt;&lt;span class="n"&gt;files&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;styles&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt; &lt;span class="err"&gt;{&lt;/span&gt; &lt;span class="err"&gt;#&lt;/span&gt; &lt;span class="n"&gt;For&lt;/span&gt; &lt;span class="n"&gt;Drupal&lt;/span&gt; &lt;span class="o"&gt;&amp;gt;=&lt;/span&gt; &lt;span class="m"&gt;7&lt;/span&gt;
+        &lt;span class="n"&gt;try_files&lt;/span&gt; &lt;span class="err"&gt;$&lt;/span&gt;&lt;span class="n"&gt;uri&lt;/span&gt; &lt;span class="o"&gt;@&lt;/span&gt;&lt;span class="n"&gt;rewrite&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt;
+
+    &lt;span class="err"&gt;#&lt;/span&gt; &lt;span class="nt"&gt;Handle&lt;/span&gt; &lt;span class="nt"&gt;private&lt;/span&gt; &lt;span class="nt"&gt;files&lt;/span&gt; &lt;span class="nt"&gt;through&lt;/span&gt; &lt;span class="nt"&gt;Drupal&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;
+    &lt;span class="nt"&gt;location&lt;/span&gt; &lt;span class="o"&gt;~&lt;/span&gt; &lt;span class="o"&gt;^/&lt;/span&gt;&lt;span class="nt"&gt;system&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nt"&gt;files&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt; &lt;span class="err"&gt;#&lt;/span&gt; &lt;span class="n"&gt;For&lt;/span&gt; &lt;span class="n"&gt;Drupal&lt;/span&gt; &lt;span class="o"&gt;&amp;gt;=&lt;/span&gt; &lt;span class="m"&gt;7&lt;/span&gt;
+        &lt;span class="n"&gt;try_files&lt;/span&gt; &lt;span class="err"&gt;$&lt;/span&gt;&lt;span class="n"&gt;uri&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;index&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;php&lt;/span&gt;&lt;span class="o"&gt;?&lt;/span&gt;&lt;span class="err"&gt;$&lt;/span&gt;&lt;span class="n"&gt;query_string&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt;
+
+    &lt;span class="nt"&gt;location&lt;/span&gt; &lt;span class="o"&gt;~*&lt;/span&gt; &lt;span class="err"&gt;\&lt;/span&gt;&lt;span class="o"&gt;.(&lt;/span&gt;&lt;span class="nt"&gt;js&lt;/span&gt;&lt;span class="o"&gt;|&lt;/span&gt;&lt;span class="nt"&gt;css&lt;/span&gt;&lt;span class="o"&gt;|&lt;/span&gt;&lt;span class="nt"&gt;png&lt;/span&gt;&lt;span class="o"&gt;|&lt;/span&gt;&lt;span class="nt"&gt;jpg&lt;/span&gt;&lt;span class="o"&gt;|&lt;/span&gt;&lt;span class="nt"&gt;jpeg&lt;/span&gt;&lt;span class="o"&gt;|&lt;/span&gt;&lt;span class="nt"&gt;gif&lt;/span&gt;&lt;span class="o"&gt;|&lt;/span&gt;&lt;span class="nt"&gt;ico&lt;/span&gt;&lt;span class="o"&gt;)$&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="n"&gt;expires&lt;/span&gt; &lt;span class="n"&gt;max&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+        &lt;span class="n"&gt;log_not_found&lt;/span&gt; &lt;span class="n"&gt;off&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt;
+&lt;span class="err"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;slightly modified from the wonderful reference provided by nginx, mostly the first 3 lines and later the fastcgi_pass&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://www.nginx.com/resources/wiki/start/topics/recipes/drupal/"&gt;https://www.nginx.com/resources/wiki/start/topics/recipes/drupal/&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="post-boot-manual-configuration-ohgodwhy"&gt;Post boot manual configuration (ohgodwhy)&lt;/h2&gt;
+&lt;p&gt;Post boot of a "fresh from built-by-packer snapshot" there was still the basic steps of configuring Drupal (which I did manually with a browser and install.pho though I'm pretty sure I could have just overridden the settings.php directly).&lt;/p&gt;
+&lt;p&gt;And for this migration project a MySQL dump, SCP of the existing extra modules, and of course the already uploaded user images/files.&lt;/p&gt;
+&lt;p&gt;I'm sure with more tinkering I can overcome the nginx vs www-data user permissions issue but since I time boxed this project I stuck with this compromise which is still much more improved and automated than my previous setup.&lt;/p&gt;
+&lt;p&gt;If migrating data there is of course the prerequisite: &lt;code&gt;mysqldump -uroot -p physicstime &amp;gt; backup.sql&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nt"&gt;vi&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nt"&gt;var&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nt"&gt;www&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nt"&gt;html&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nt"&gt;themes&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nt"&gt;bartik&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nt"&gt;css&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nt"&gt;style&lt;/span&gt;&lt;span class="nc"&gt;.css&lt;/span&gt;
+    &lt;span class="nt"&gt;font-size&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="nt"&gt;2&lt;/span&gt;&lt;span class="nc"&gt;.929em&lt;/span&gt;&lt;span class="o"&gt;;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;customize increased visibility of the #site-slogan { , occasionally needs cache cleared in admin/config/development/performance&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;hostnamectl set-hostname physicstime.com
+docker-compose up &amp;amp;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Hint: &lt;code&gt;/etc/hosts&lt;/code&gt; locally and use a browser to do initial install.php config before a DNS cutover&lt;/p&gt;
+&lt;p&gt;DB connection string requires 172.17.0.1 (the default docker private IP network bridge)&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;root@physicstime:/home/USER/physicstime.com# mv files/ /var/www/html/sites/physicstime.com/
+mv all /var/www/html/sites/
+
+ifconfig | grep Bc
+    172.17.0.1
+
+docker run -it --rm --volume /opt:/opt mariadb:5.5 /bin/bash
+    mysql -h172.17.0.1 -uYOURUSER -p physicstime
+        show tables;
+        exit
+    mysql -h172.17.0.1 -uroot -p physicstime &amp;lt; backup.sql
+
+chown root:root -R /var/www/html/sites/
+chmod 400 /var/www/html/sites/default/settings.php
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;ensure /var/www/html/sites/default/files has the correct permissions, otherwise no CSS for you!&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;docker-compose stop
+docker ps --all
+docker-compose up &amp;amp;
+docker-compose logs |&amp;amp; tee /var/log/physicstime.log
+tail -f /var/log/physicstime.log /var/log/nginx/access.log
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;This starts it manually and displays any traffic&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;cd /etc/init.d; touch physicstime.sh; chmod +x physicstime.sh; vi physicstime.sh
+
+    #!/bin/bash
+    echo "starting physicstime after boot" &amp;gt;&amp;gt; /var/log/physicstime.log
+    cd /home/YOURUSER; docker-compose up &amp;amp;
+
+update-rc.d physicstime.sh defaults
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;this starts the docker based services automatically on boot (not including extra logging)&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr/&gt;
+&lt;h2 id="adhoc-performance-and-latency-testing"&gt;Adhoc Performance and Latency Testing&lt;/h2&gt;
+&lt;p&gt;Data driven decisions is a big deal, but let's be honest, engineers love numbers :)&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;ab -l -r -n 500 -c 100 -k -H "Accept-Encoding: gzip, deflate" http://physicstime.com/node?page=1
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;The unscientific "watching top": 80% for about 5 seconds vs 78% for about 5 seconds&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;a href="https://httpd.apache.org/docs/2.4/programs/ab.html"&gt;https://httpd.apache.org/docs/2.4/programs/ab.html&lt;/a&gt;&lt;/p&gt;
+&lt;h3 id="linode-and-cherokee-and-php-cgi-53-and-mysql-55"&gt;Linode and Cherokee and php-cgi 5.3 and MySQL 5.5&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;Concurrency Level:      100
+Time taken for tests:   7.255 seconds
+Complete requests:      500
+Failed requests:        0
+Keep-Alive requests:    0
+Total transferred:      5321000 bytes
+HTML transferred:       5089500 bytes
+Requests per second:    68.92 [#/sec] (mean)
+Time per request:       1451.029 [ms] (mean)
+Time per request:       14.510 [ms] (mean, across all concurrent requests)
+Transfer rate:          716.22 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        2    2   0.4      2       6
+Processing:   102 1313 320.0   1437    1525
+Waiting:       89 1308 320.2   1431    1521
+Total:        104 1315 319.8   1439    1526
+
+Percentage of the requests served within a certain time (ms)
+  50%   1439
+  66%   1456
+  75%   1466
+  80%   1473
+  90%   1488
+  95%   1505
+  98%   1516
+  99%   1519
+ 100%   1526 (longest request)
+&lt;/pre&gt;&lt;/div&gt;
+&lt;h3 id="digitalocean-and-nginx-and-docker-php-fpm-and-mariadb-55"&gt;DigitalOcean and nginx and Docker php-fpm and MariaDB 5.5&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;Concurrency Level:      100
+Time taken for tests:   7.791 seconds
+Complete requests:      500
+Failed requests:        0
+Keep-Alive requests:    0
+Total transferred:      5320068 bytes
+HTML transferred:       5082000 bytes
+Requests per second:    64.18 [#/sec] (mean)
+Time per request:       1558.145 [ms] (mean)
+Time per request:       15.581 [ms] (mean, across all concurrent requests)
+Transfer rate:          666.87 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    1   1.1      0       4
+Processing:   542 1421 201.6   1453    2020
+Waiting:      531 1417 201.2   1447    2017
+Total:        545 1422 201.0   1453    2022
+
+Percentage of the requests served within a certain time (ms)
+  50%   1453
+  66%   1470
+  75%   1485
+  80%   1494
+  90%   1510
+  95%   1674
+  98%   1877
+  99%   1930
+ 100%   2022 (longest request)
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;So it seems there's a slight edge in either cherokee over nginx OR not running dockerized applications OR linode vs digitalocean BUT...&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;When I tweaked it for higher concurrency &lt;code&gt;ab -l -r -n 500 -c 200 -k -H "Accept-Encoding: gzip, deflate" http://physicstime.com/node?page=8&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;Linode + Cherokee + php-cgi&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;Time taken for tests:   9.933 seconds
+Requests per second:    50.34 [#/sec] (mean)
+Time per request:       3973.367 [ms] (mean)
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;DigitalOcean + Nginx + Docker + php-fpm&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;Time taken for tests:   8.120 seconds
+Requests per second:    61.58 [#/sec] (mean)
+Time per request:       3248.067 [ms] (mean)
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;I can see the trend reverse (shrug)&lt;/p&gt;
+&lt;h4 id="latency-testing"&gt;Latency testing&lt;/h4&gt;
+&lt;p&gt;&lt;a href="https://tools.pingdom.com/"&gt;https://tools.pingdom.com/&lt;/a&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;website speed test (NY) for cherokee and php-cgi had a load time of 1.17s&lt;/li&gt;
+&lt;li&gt;website speed test (NY) for nginx and Docker had a load time of 1.46s&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;p&gt;meh&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id="conclusions"&gt;Conclusions&lt;/h3&gt;
+&lt;p&gt;Adding docker simplifies one kind of complexity (stringing together multiple services that are packaged upstream) but can come at some cost to performance. (Though this might also be due to the cheaper node price)&lt;/p&gt;
+&lt;p&gt;The other major advantage of using docker is that different components/services can be upgraded independently (and even just "test upgraded") which allows for a faster adoption of upstream project improvements.&lt;/p&gt;
+&lt;p&gt;Obviously if performance were really an issue adding a cache layer like Varnish or Cloudflare or just tweaking the various configurations would help =]&lt;/p&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">john pfeiffer</dc:creator><pubDate>Thu, 28 Jul 2016 23:59:00 -0700</pubDate><guid isPermaLink="false">tag:blog.john-pfeiffer.com,2016-07-28:drupal-with-docker-compose-and-nginx-and-php-fpm-and-mariadb/</guid><category>docker</category><category>docker-compose</category><category>digitalocean</category><category>packer</category><category>drupal</category><category>php</category><category>nginx</category></item><item><title>Alpine Linux Introduction Tutorial</title><link>https://blog.john-pfeiffer.com/alpine-linux-introduction-tutorial/</link><description>
 &lt;p&gt;Alpine Linux is a minimalist secure linux distro.&lt;/p&gt;
 &lt;blockquote&gt;
 &lt;p&gt;In security terms less "footprint" often means less vectors of attack and less complexity to analyze for vulnerabilities&lt;/p&gt;
