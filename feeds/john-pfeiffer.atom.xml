@@ -1,5 +1,128 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>johnpfeiffer</title><link href="https://blog.john-pfeiffer.com/" rel="alternate"></link><link href="https://blog.john-pfeiffer.com/feeds/john-pfeiffer.atom.xml" rel="self"></link><id>https://blog.john-pfeiffer.com/</id><updated>2016-07-29T20:59:00-07:00</updated><entry><title>A micro story about migrating a personal monolith into microservices</title><link href="https://blog.john-pfeiffer.com/a-micro-story-about-migrating-a-personal-monolith-into-microservices/" rel="alternate"></link><published>2016-07-29T20:59:00-07:00</published><author><name>john pfeiffer</name></author><id>tag:blog.john-pfeiffer.com,2016-07-29:a-micro-story-about-migrating-a-personal-monolith-into-microservices/</id><summary type="html">
+<feed xmlns="http://www.w3.org/2005/Atom"><title>johnpfeiffer</title><link href="https://blog.john-pfeiffer.com/" rel="alternate"></link><link href="https://blog.john-pfeiffer.com/feeds/john-pfeiffer.atom.xml" rel="self"></link><id>https://blog.john-pfeiffer.com/</id><updated>2016-08-27T21:01:00-07:00</updated><entry><title>Consul Service Discovery and Cluster Configuration</title><link href="https://blog.john-pfeiffer.com/consul-service-discovery-and-cluster-configuration/" rel="alternate"></link><published>2016-08-27T21:01:00-07:00</published><author><name>john pfeiffer</name></author><id>tag:blog.john-pfeiffer.com,2016-08-27:consul-service-discovery-and-cluster-configuration/</id><summary type="html">
+&lt;h2 id="overview"&gt;Overview&lt;/h2&gt;
+&lt;p&gt;Basically consul is an out-of-the-box service discovery system intended for clustered and highly available applications.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;https://www.consul.io/intro/&lt;/li&gt;
+&lt;li&gt;https://www.consul.io/docs/internals/jepsen.html&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;This kind of infrastructure simplifies the programming of distributed systems so that it is easier to deliver value quickly on the actual domain problems.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;I have certainly done my fair share of hardcoded config files to "discover" dependency services and even used chef for "config management"...
+But with the evolution of devops, web scale, microservices, containers, etc. it is great to leverage an existing battle tested solution&lt;/strong&gt;&lt;/p&gt;
+&lt;h2 id="consul-cluster-using-docker"&gt;Consul Cluster using Docker&lt;/h2&gt;
+&lt;p&gt;Following the straightforward work from this Docker Image we can run a cluster on a single machine:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;https://hub.docker.com/r/progrium/consul/&lt;/p&gt;
+&lt;p&gt;sudo su
+docker run -d --name node1 -h node1 progrium/consul -server -bootstrap-expect 3
+JOIN_IP="$(docker inspect -f '{{.NetworkSettings.IPAddress}}' node1)"
+docker run -d --name node2 -h node2 progrium/consul -server -join $JOIN_IP
+docker run -d --name node3 -h node3 progrium/consul -server -join $JOIN_IP
+docker run -d -p 8400:8400 -p 8500:8500 -p 8600:53/udp --name node4 -h node4 progrium/consul -join $JOIN_IP&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;The second 2 nodes join the first one in the cluster by using the inspected IP Address,
+the last container is a consul agent (not in the quorum) but has public ports for interactivity&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;curl localhost:8500/v1/catalog/nodes
+    [{"Node":"node1","Address":"172.17.0.2"},{"Node":"node2","Address":"172.17.0.3"},
+    {"Node":"node3","Address":"172.17.0.4"},{"Node":"node4","Address":"172.17.0.5"}]
+dig @0.0.0.0 -p 8600 node1.node.consul
+    ;; QUESTION SECTION:
+    ;node1.node.consul.     IN  ANY&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;;; ANSWER SECTION:
+node1.node.consul.  0   IN  A   172.17.0.2
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;p&gt;REST API call to the list of nodes, then DNS client to get the Record for the first node&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;curl http://localhost:8500/v1/status/leader
+    "172.17.0.2:8300"
+curl http://localhost:8500/v1/status/peers
+    ["172.17.0.2:8300","172.17.0.3:8300","172.17.0.4:8300"]
+
+curl http://localhost:8500/v1/health/node/node1
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;some more REST calls about the basic nodes, RAFT leadership and peers, and node health&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;ul&gt;
+&lt;li&gt;https://www.consul.io/docs/agent/http.html&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;https://www.consul.io/docs/agent/dns.html&lt;/p&gt;
+&lt;p&gt;curl http://localhost:8500/v1/catalog/services
+    {"consul":[]}
+curl http://localhost:8500/v1/catalog/service/web
+    []&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Listing of the services available, no web service yet =)&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="registering-a-service"&gt;Registering a Service&lt;/h2&gt;
+&lt;p&gt;Creating and running a very simplistic golang web server (assuming you have go installed ;) , &lt;code&gt;go run web.go&lt;/code&gt;
+&lt;a href="https://blog.john-pfeiffer.com/go-programming-intro-with-vs-code-and-arrays-slices-functions-and-testing/"&gt;https://blog.john-pfeiffer.com/go-programming-intro-with-vs-code-and-arrays-slices-functions-and-testing/&lt;/a&gt;
+(though you could also use nginx in docker)&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;
+    &lt;span class="s"&gt;"fmt"&lt;/span&gt;
+    &lt;span class="s"&gt;"net/http"&lt;/span&gt;
+&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="kd"&gt;func&lt;/span&gt; &lt;span class="nx"&gt;myHandler&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;w&lt;/span&gt; &lt;span class="nx"&gt;http&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;ResponseWriter&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;r&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="nx"&gt;http&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;Request&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="nx"&gt;fmt&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;Fprintf&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;w&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s"&gt;"hi\n"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+
+&lt;span class="kd"&gt;func&lt;/span&gt; &lt;span class="nx"&gt;main&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="nx"&gt;http&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;HandleFunc&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;"/"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;myHandler&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="nx"&gt;http&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;ListenAndServe&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;":8080"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kc"&gt;nil&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;From the previous steps we should have an Agent where we can register the new web service...&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="ch"&gt;#!/bin/bash&lt;/span&gt;
+
+curl --header &lt;span class="s2"&gt;"content-type: application/json"&lt;/span&gt; -X PUT -d&lt;span class="s1"&gt;'{&lt;/span&gt;
+&lt;span class="s1"&gt;  "ID": "web1",&lt;/span&gt;
+&lt;span class="s1"&gt;  "Name": "web",&lt;/span&gt;
+&lt;span class="s1"&gt;  "Tags": [&lt;/span&gt;
+&lt;span class="s1"&gt;    "master",&lt;/span&gt;
+&lt;span class="s1"&gt;    "v1"&lt;/span&gt;
+&lt;span class="s1"&gt;  ],&lt;/span&gt;
+&lt;span class="s1"&gt;  "Address": "127.0.0.1",&lt;/span&gt;
+&lt;span class="s1"&gt;  "Port": 8080,&lt;/span&gt;
+&lt;span class="s1"&gt;  "EnableTagOverride": false,&lt;/span&gt;
+&lt;span class="s1"&gt;  "Check": {&lt;/span&gt;
+&lt;span class="s1"&gt;    "HTTP": "http://localhost:8080/health",&lt;/span&gt;
+&lt;span class="s1"&gt;    "Interval": "10s",&lt;/span&gt;
+&lt;span class="s1"&gt;    "TTL": "15s"&lt;/span&gt;
+&lt;span class="s1"&gt;  }&lt;/span&gt;
+&lt;span class="s1"&gt;}'&lt;/span&gt; http://localhost:8500/v1/agent/service/register
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;In order to verify the new service is registered (besides the 200 response code)&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;curl http://localhost:8500/v1/catalog/services
+    {"consul":[],"web":["master","v1"]}
+curl http://localhost:8500/v1/health/service/web
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Our new service is created and doing well&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;So many more things can be done with &lt;a href="https://www.consul.io/docs/agent/http/agent.html#agent_service_register"&gt;https://www.consul.io/docs/agent/http/agent.html#agent_service_register&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Stopping the web server (control + C) and checking that Consul has noticed Status is critical \O/&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;curl http://localhost:8500/v1/health/checks/web
+    [{"Node":"node4","CheckID":"service:web1","Name":"Service 'web' check","Status":"critical","Notes":"","Output":"TTL expired","ServiceID":"web1","ServiceName":"web"}]
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Starting the web server again and check&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;curl http://localhost:8500/v1/health/service/web
+    [{"Node":{"Node":"node4","Address":"172.17.0.5"},
+    "Service":{"ID":"web1","Service":"web","Tags":["master","v1"],"Address":"127.0.0.1","Port":8080},
+    "Checks":[{"Node":"node4","CheckID":"service:web1","Name":"Service 'web'check","Status":"critical",
+        "Notes":"","Output":"TTL expired","ServiceID":"web1","ServiceName":"web"},
+    {"Node":"node4","CheckID":"serfHealth","Name":"Serf Health Status","Status":"passing",
+        "Notes":"","Output":"Agent alive and reachable","ServiceID":"","ServiceName":""}]}]r
+&lt;/pre&gt;&lt;/div&gt;
+&lt;h2 id="distributed-configuration"&gt;Distributed Configuration&lt;/h2&gt;
+&lt;p&gt;A simple use case is to use the key value store to distribute other information besides services that need to be discovered, &lt;a href="https://www.consul.io/docs/agent/http/kv.html"&gt;https://www.consul.io/docs/agent/http/kv.html&lt;/a&gt;&lt;/p&gt;</summary><category term="service discovery"></category><category term="consul"></category><category term="cluster"></category><category term="clustering"></category><category term="config"></category></entry><entry><title>A micro story about migrating a personal monolith into microservices</title><link href="https://blog.john-pfeiffer.com/a-micro-story-about-migrating-a-personal-monolith-into-microservices/" rel="alternate"></link><published>2016-07-29T20:59:00-07:00</published><author><name>john pfeiffer</name></author><id>tag:blog.john-pfeiffer.com,2016-07-29:a-micro-story-about-migrating-a-personal-monolith-into-microservices/</id><summary type="html">
 &lt;p&gt;I'm a fan of best practices (who isn't?) and as complexity increases one of the modern paradigms is to use microservices to more transparently manage complexity, reduce tight coupling, and decrease maintenance overhead.&lt;/p&gt;
 &lt;p&gt;Taking a different approach to my "less than webscale" personal web services has still made great improvements to the services and my quality of life.&lt;/p&gt;
 &lt;p&gt;This article is categorized as Build and CI/CD and DevOps because while microservices is transformative for larger organizations to avoid the negative consequences of Conway's Law and provides a better architecture for really complex systems, in my case it was simply about decoupling deployments and not having all of my eggs in one basket. (e.g. the Drupal migration below actually did not affect the User Experience in any visible way).&lt;/p&gt;
