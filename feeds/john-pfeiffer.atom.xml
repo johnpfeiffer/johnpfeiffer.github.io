@@ -3,18 +3,19 @@
 &lt;h2 id="overview"&gt;Overview&lt;/h2&gt;
 &lt;p&gt;Basically consul is an out-of-the-box service discovery system intended for clustered and highly available applications.&lt;/p&gt;
 &lt;ul&gt;
-&lt;li&gt;https://www.consul.io/intro/&lt;/li&gt;
-&lt;li&gt;https://www.consul.io/docs/internals/jepsen.html&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://www.consul.io/intro/"&gt;https://www.consul.io/intro/&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://www.consul.io/docs/internals/jepsen.html"&gt;https://www.consul.io/docs/internals/jepsen.html&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;This kind of infrastructure simplifies the programming of distributed systems so that it is easier to deliver value quickly on the actual domain problems.&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;I have certainly done my fair share of hardcoded config files to "discover" dependency services and even used chef for "config management"...
-But with the evolution of devops, web scale, microservices, containers, etc. it is great to leverage an existing battle tested solution&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;I have certainly done my fair share of hardcoded config files to "discover" dependency services and even used chef for "config management"...
+But with the evolution of devops, web scale, microservices, containers, etc. it is great to leverage an existing battle tested solution&lt;/em&gt;&lt;/p&gt;
 &lt;h2 id="consul-cluster-using-docker"&gt;Consul Cluster using Docker&lt;/h2&gt;
 &lt;p&gt;Following the straightforward work from this Docker Image we can run a cluster on a single machine:&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;
 &lt;p&gt;https://hub.docker.com/r/progrium/consul/&lt;/p&gt;
-&lt;p&gt;sudo su
+&lt;p&gt;:::bash
+sudo su
 docker run -d --name node1 -h node1 progrium/consul -server -bootstrap-expect 3
 JOIN_IP="$(docker inspect -f '{{.NetworkSettings.IPAddress}}' node1)"
 docker run -d --name node2 -h node2 progrium/consul -server -join $JOIN_IP
@@ -24,7 +25,8 @@ docker run -d -p 8400:8400 -p 8500:8500 -p 8600:53/udp --name node4 -h node4 pro
 &lt;p&gt;The second 2 nodes join the first one in the cluster by using the inspected IP Address,
 the last container is a consul agent (not in the quorum) but has public ports for interactivity&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;p&gt;curl localhost:8500/v1/catalog/nodes
+&lt;p&gt;:::bash
+curl localhost:8500/v1/catalog/nodes
     [{"Node":"node1","Address":"172.17.0.2"},{"Node":"node2","Address":"172.17.0.3"},
     {"Node":"node3","Address":"172.17.0.4"},{"Node":"node4","Address":"172.17.0.5"}]
 dig @0.0.0.0 -p 8600 node1.node.consul
@@ -39,9 +41,9 @@ node1.node.consul.  0   IN  A   172.17.0.2
 &lt;p&gt;REST API call to the list of nodes, then DNS client to get the Record for the first node&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;curl http://localhost:8500/v1/status/leader
-    "172.17.0.2:8300"
+    &lt;span class="s2"&gt;"172.17.0.2:8300"&lt;/span&gt;
 curl http://localhost:8500/v1/status/peers
-    ["172.17.0.2:8300","172.17.0.3:8300","172.17.0.4:8300"]
+    &lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="s2"&gt;"172.17.0.2:8300"&lt;/span&gt;,&lt;span class="s2"&gt;"172.17.0.3:8300"&lt;/span&gt;,&lt;span class="s2"&gt;"172.17.0.4:8300"&lt;/span&gt;&lt;span class="o"&gt;]&lt;/span&gt;
 
 curl http://localhost:8500/v1/health/node/node1
 &lt;/pre&gt;&lt;/div&gt;
@@ -49,12 +51,12 @@ curl http://localhost:8500/v1/health/node/node1
 &lt;p&gt;some more REST calls about the basic nodes, RAFT leadership and peers, and node health&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;ul&gt;
-&lt;li&gt;https://www.consul.io/docs/agent/http.html&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://www.consul.io/docs/agent/http.html"&gt;https://www.consul.io/docs/agent/http.html&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;
-&lt;p&gt;https://www.consul.io/docs/agent/dns.html&lt;/p&gt;
-&lt;p&gt;curl http://localhost:8500/v1/catalog/services
-    {"consul":[]}
-curl http://localhost:8500/v1/catalog/service/web
+&lt;p&gt;&lt;a href="https://www.consul.io/docs/agent/dns.html"&gt;https://www.consul.io/docs/agent/dns.html&lt;/a&gt;&lt;/p&gt;
+&lt;p _consul_:_='"consul":[]'&gt;:::bash
+curl http://localhost:8500/v1/catalog/services&lt;/p&gt;
+&lt;p&gt;curl http://localhost:8500/v1/catalog/service/web
     []&lt;/p&gt;
 &lt;blockquote&gt;
 &lt;p&gt;Listing of the services available, no web service yet =)&lt;/p&gt;
@@ -108,18 +110,18 @@ curl http://localhost:8500/v1/health/service/web
 &lt;p&gt;Our new service is created and doing well&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;p&gt;So many more things can be done with &lt;a href="https://www.consul.io/docs/agent/http/agent.html#agent_service_register"&gt;https://www.consul.io/docs/agent/http/agent.html#agent_service_register&lt;/a&gt;&lt;/p&gt;
-&lt;p&gt;Stopping the web server (control + C) and checking that Consul has noticed Status is critical \O/&lt;/p&gt;
+&lt;p&gt;Stopping the web server (control + C) and checking that Consul has noticed Status is critical |o/&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;curl http://localhost:8500/v1/health/checks/web
-    [{"Node":"node4","CheckID":"service:web1","Name":"Service 'web' check","Status":"critical","Notes":"","Output":"TTL expired","ServiceID":"web1","ServiceName":"web"}]
+    &lt;span class="o"&gt;[{&lt;/span&gt;&lt;span class="s2"&gt;"Node"&lt;/span&gt;:&lt;span class="s2"&gt;"node4"&lt;/span&gt;,&lt;span class="s2"&gt;"CheckID"&lt;/span&gt;:&lt;span class="s2"&gt;"service:web1"&lt;/span&gt;,&lt;span class="s2"&gt;"Name"&lt;/span&gt;:&lt;span class="s2"&gt;"Service 'web' check"&lt;/span&gt;,&lt;span class="s2"&gt;"Status"&lt;/span&gt;:&lt;span class="s2"&gt;"critical"&lt;/span&gt;,&lt;span class="s2"&gt;"Notes"&lt;/span&gt;:&lt;span class="s2"&gt;""&lt;/span&gt;,&lt;span class="s2"&gt;"Output"&lt;/span&gt;:&lt;span class="s2"&gt;"TTL expired"&lt;/span&gt;,&lt;span class="s2"&gt;"ServiceID"&lt;/span&gt;:&lt;span class="s2"&gt;"web1"&lt;/span&gt;,&lt;span class="s2"&gt;"ServiceName"&lt;/span&gt;:&lt;span class="s2"&gt;"web"&lt;/span&gt;&lt;span class="o"&gt;}]&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;Starting the web server again and check&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;curl http://localhost:8500/v1/health/service/web
-    [{"Node":{"Node":"node4","Address":"172.17.0.5"},
-    "Service":{"ID":"web1","Service":"web","Tags":["master","v1"],"Address":"127.0.0.1","Port":8080},
-    "Checks":[{"Node":"node4","CheckID":"service:web1","Name":"Service 'web'check","Status":"critical",
-        "Notes":"","Output":"TTL expired","ServiceID":"web1","ServiceName":"web"},
-    {"Node":"node4","CheckID":"serfHealth","Name":"Serf Health Status","Status":"passing",
-        "Notes":"","Output":"Agent alive and reachable","ServiceID":"","ServiceName":""}]}]r
+    &lt;span class="o"&gt;[{&lt;/span&gt;&lt;span class="s2"&gt;"Node"&lt;/span&gt;:&lt;span class="o"&gt;{&lt;/span&gt;&lt;span class="s2"&gt;"Node"&lt;/span&gt;:&lt;span class="s2"&gt;"node4"&lt;/span&gt;,&lt;span class="s2"&gt;"Address"&lt;/span&gt;:&lt;span class="s2"&gt;"172.17.0.5"&lt;/span&gt;&lt;span class="o"&gt;}&lt;/span&gt;,
+    &lt;span class="s2"&gt;"Service"&lt;/span&gt;:&lt;span class="o"&gt;{&lt;/span&gt;&lt;span class="s2"&gt;"ID"&lt;/span&gt;:&lt;span class="s2"&gt;"web1"&lt;/span&gt;,&lt;span class="s2"&gt;"Service"&lt;/span&gt;:&lt;span class="s2"&gt;"web"&lt;/span&gt;,&lt;span class="s2"&gt;"Tags"&lt;/span&gt;:&lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="s2"&gt;"master"&lt;/span&gt;,&lt;span class="s2"&gt;"v1"&lt;/span&gt;&lt;span class="o"&gt;]&lt;/span&gt;,&lt;span class="s2"&gt;"Address"&lt;/span&gt;:&lt;span class="s2"&gt;"127.0.0.1"&lt;/span&gt;,&lt;span class="s2"&gt;"Port"&lt;/span&gt;:8080&lt;span class="o"&gt;}&lt;/span&gt;,
+    &lt;span class="s2"&gt;"Checks"&lt;/span&gt;:&lt;span class="o"&gt;[{&lt;/span&gt;&lt;span class="s2"&gt;"Node"&lt;/span&gt;:&lt;span class="s2"&gt;"node4"&lt;/span&gt;,&lt;span class="s2"&gt;"CheckID"&lt;/span&gt;:&lt;span class="s2"&gt;"service:web1"&lt;/span&gt;,&lt;span class="s2"&gt;"Name"&lt;/span&gt;:&lt;span class="s2"&gt;"Service 'web'check"&lt;/span&gt;,&lt;span class="s2"&gt;"Status"&lt;/span&gt;:&lt;span class="s2"&gt;"critical"&lt;/span&gt;,
+        &lt;span class="s2"&gt;"Notes"&lt;/span&gt;:&lt;span class="s2"&gt;""&lt;/span&gt;,&lt;span class="s2"&gt;"Output"&lt;/span&gt;:&lt;span class="s2"&gt;"TTL expired"&lt;/span&gt;,&lt;span class="s2"&gt;"ServiceID"&lt;/span&gt;:&lt;span class="s2"&gt;"web1"&lt;/span&gt;,&lt;span class="s2"&gt;"ServiceName"&lt;/span&gt;:&lt;span class="s2"&gt;"web"&lt;/span&gt;&lt;span class="o"&gt;}&lt;/span&gt;,
+    &lt;span class="o"&gt;{&lt;/span&gt;&lt;span class="s2"&gt;"Node"&lt;/span&gt;:&lt;span class="s2"&gt;"node4"&lt;/span&gt;,&lt;span class="s2"&gt;"CheckID"&lt;/span&gt;:&lt;span class="s2"&gt;"serfHealth"&lt;/span&gt;,&lt;span class="s2"&gt;"Name"&lt;/span&gt;:&lt;span class="s2"&gt;"Serf Health Status"&lt;/span&gt;,&lt;span class="s2"&gt;"Status"&lt;/span&gt;:&lt;span class="s2"&gt;"passing"&lt;/span&gt;,
+        &lt;span class="s2"&gt;"Notes"&lt;/span&gt;:&lt;span class="s2"&gt;""&lt;/span&gt;,&lt;span class="s2"&gt;"Output"&lt;/span&gt;:&lt;span class="s2"&gt;"Agent alive and reachable"&lt;/span&gt;,&lt;span class="s2"&gt;"ServiceID"&lt;/span&gt;:&lt;span class="s2"&gt;""&lt;/span&gt;,&lt;span class="s2"&gt;"ServiceName"&lt;/span&gt;:&lt;span class="s2"&gt;""&lt;/span&gt;&lt;span class="o"&gt;}]}]&lt;/span&gt;r
 &lt;/pre&gt;&lt;/div&gt;
 &lt;h2 id="distributed-configuration"&gt;Distributed Configuration&lt;/h2&gt;
 &lt;p&gt;A simple use case is to use the key value store to distribute other information besides services that need to be discovered, &lt;a href="https://www.consul.io/docs/agent/http/kv.html"&gt;https://www.consul.io/docs/agent/http/kv.html&lt;/a&gt;&lt;/p&gt;</summary><category term="service discovery"></category><category term="consul"></category><category term="cluster"></category><category term="clustering"></category><category term="config"></category></entry><entry><title>A micro story about migrating a personal monolith into microservices</title><link href="https://blog.john-pfeiffer.com/a-micro-story-about-migrating-a-personal-monolith-into-microservices/" rel="alternate"></link><published>2016-07-29T20:59:00-07:00</published><author><name>john pfeiffer</name></author><id>tag:blog.john-pfeiffer.com,2016-07-29:a-micro-story-about-migrating-a-personal-monolith-into-microservices/</id><summary type="html">

@@ -89,18 +89,19 @@
 <h2 id="overview">Overview</h2>
 <p>Basically consul is an out-of-the-box service discovery system intended for clustered and highly available applications.</p>
 <ul>
-<li>https://www.consul.io/intro/</li>
-<li>https://www.consul.io/docs/internals/jepsen.html</li>
+<li><a href="https://www.consul.io/intro/">https://www.consul.io/intro/</a></li>
+<li><a href="https://www.consul.io/docs/internals/jepsen.html">https://www.consul.io/docs/internals/jepsen.html</a></li>
 </ul>
 <p>This kind of infrastructure simplifies the programming of distributed systems so that it is easier to deliver value quickly on the actual domain problems.</p>
-<p><strong>I have certainly done my fair share of hardcoded config files to "discover" dependency services and even used chef for "config management"...
-But with the evolution of devops, web scale, microservices, containers, etc. it is great to leverage an existing battle tested solution</strong></p>
+<p><em>I have certainly done my fair share of hardcoded config files to "discover" dependency services and even used chef for "config management"...
+But with the evolution of devops, web scale, microservices, containers, etc. it is great to leverage an existing battle tested solution</em></p>
 <h2 id="consul-cluster-using-docker">Consul Cluster using Docker</h2>
 <p>Following the straightforward work from this Docker Image we can run a cluster on a single machine:</p>
 <ul>
 <li>
 <p>https://hub.docker.com/r/progrium/consul/</p>
-<p>sudo su
+<p>:::bash
+sudo su
 docker run -d --name node1 -h node1 progrium/consul -server -bootstrap-expect 3
 JOIN_IP="$(docker inspect -f '{{.NetworkSettings.IPAddress}}' node1)"
 docker run -d --name node2 -h node2 progrium/consul -server -join $JOIN_IP
@@ -110,7 +111,8 @@ docker run -d -p 8400:8400 -p 8500:8500 -p 8600:53/udp --name node4 -h node4 pro
 <p>The second 2 nodes join the first one in the cluster by using the inspected IP Address,
 the last container is a consul agent (not in the quorum) but has public ports for interactivity</p>
 </blockquote>
-<p>curl localhost:8500/v1/catalog/nodes
+<p>:::bash
+curl localhost:8500/v1/catalog/nodes
     [{"Node":"node1","Address":"172.17.0.2"},{"Node":"node2","Address":"172.17.0.3"},
     {"Node":"node3","Address":"172.17.0.4"},{"Node":"node4","Address":"172.17.0.5"}]
 dig @0.0.0.0 -p 8600 node1.node.consul
@@ -125,9 +127,9 @@ node1.node.consul.  0   IN  A   172.17.0.2
 <p>REST API call to the list of nodes, then DNS client to get the Record for the first node</p>
 </blockquote>
 <div class="highlight"><pre><span></span>curl http://localhost:8500/v1/status/leader
-    "172.17.0.2:8300"
+    <span class="s2">"172.17.0.2:8300"</span>
 curl http://localhost:8500/v1/status/peers
-    ["172.17.0.2:8300","172.17.0.3:8300","172.17.0.4:8300"]
+    <span class="o">[</span><span class="s2">"172.17.0.2:8300"</span>,<span class="s2">"172.17.0.3:8300"</span>,<span class="s2">"172.17.0.4:8300"</span><span class="o">]</span>
 
 curl http://localhost:8500/v1/health/node/node1
 </pre></div>
@@ -135,12 +137,12 @@ curl http://localhost:8500/v1/health/node/node1
 <p>some more REST calls about the basic nodes, RAFT leadership and peers, and node health</p>
 </blockquote>
 <ul>
-<li>https://www.consul.io/docs/agent/http.html</li>
+<li><a href="https://www.consul.io/docs/agent/http.html">https://www.consul.io/docs/agent/http.html</a></li>
 <li>
-<p>https://www.consul.io/docs/agent/dns.html</p>
-<p>curl http://localhost:8500/v1/catalog/services
-    {"consul":[]}
-curl http://localhost:8500/v1/catalog/service/web
+<p><a href="https://www.consul.io/docs/agent/dns.html">https://www.consul.io/docs/agent/dns.html</a></p>
+<p _consul_:_='"consul":[]'>:::bash
+curl http://localhost:8500/v1/catalog/services</p>
+<p>curl http://localhost:8500/v1/catalog/service/web
     []</p>
 <blockquote>
 <p>Listing of the services available, no web service yet =)</p>
@@ -194,18 +196,18 @@ curl http://localhost:8500/v1/health/service/web
 <p>Our new service is created and doing well</p>
 </blockquote>
 <p>So many more things can be done with <a href="https://www.consul.io/docs/agent/http/agent.html#agent_service_register">https://www.consul.io/docs/agent/http/agent.html#agent_service_register</a></p>
-<p>Stopping the web server (control + C) and checking that Consul has noticed Status is critical \O/</p>
+<p>Stopping the web server (control + C) and checking that Consul has noticed Status is critical |o/</p>
 <div class="highlight"><pre><span></span>curl http://localhost:8500/v1/health/checks/web
-    [{"Node":"node4","CheckID":"service:web1","Name":"Service 'web' check","Status":"critical","Notes":"","Output":"TTL expired","ServiceID":"web1","ServiceName":"web"}]
+    <span class="o">[{</span><span class="s2">"Node"</span>:<span class="s2">"node4"</span>,<span class="s2">"CheckID"</span>:<span class="s2">"service:web1"</span>,<span class="s2">"Name"</span>:<span class="s2">"Service 'web' check"</span>,<span class="s2">"Status"</span>:<span class="s2">"critical"</span>,<span class="s2">"Notes"</span>:<span class="s2">""</span>,<span class="s2">"Output"</span>:<span class="s2">"TTL expired"</span>,<span class="s2">"ServiceID"</span>:<span class="s2">"web1"</span>,<span class="s2">"ServiceName"</span>:<span class="s2">"web"</span><span class="o">}]</span>
 </pre></div>
 <p>Starting the web server again and check</p>
 <div class="highlight"><pre><span></span>curl http://localhost:8500/v1/health/service/web
-    [{"Node":{"Node":"node4","Address":"172.17.0.5"},
-    "Service":{"ID":"web1","Service":"web","Tags":["master","v1"],"Address":"127.0.0.1","Port":8080},
-    "Checks":[{"Node":"node4","CheckID":"service:web1","Name":"Service 'web'check","Status":"critical",
-        "Notes":"","Output":"TTL expired","ServiceID":"web1","ServiceName":"web"},
-    {"Node":"node4","CheckID":"serfHealth","Name":"Serf Health Status","Status":"passing",
-        "Notes":"","Output":"Agent alive and reachable","ServiceID":"","ServiceName":""}]}]r
+    <span class="o">[{</span><span class="s2">"Node"</span>:<span class="o">{</span><span class="s2">"Node"</span>:<span class="s2">"node4"</span>,<span class="s2">"Address"</span>:<span class="s2">"172.17.0.5"</span><span class="o">}</span>,
+    <span class="s2">"Service"</span>:<span class="o">{</span><span class="s2">"ID"</span>:<span class="s2">"web1"</span>,<span class="s2">"Service"</span>:<span class="s2">"web"</span>,<span class="s2">"Tags"</span>:<span class="o">[</span><span class="s2">"master"</span>,<span class="s2">"v1"</span><span class="o">]</span>,<span class="s2">"Address"</span>:<span class="s2">"127.0.0.1"</span>,<span class="s2">"Port"</span>:8080<span class="o">}</span>,
+    <span class="s2">"Checks"</span>:<span class="o">[{</span><span class="s2">"Node"</span>:<span class="s2">"node4"</span>,<span class="s2">"CheckID"</span>:<span class="s2">"service:web1"</span>,<span class="s2">"Name"</span>:<span class="s2">"Service 'web'check"</span>,<span class="s2">"Status"</span>:<span class="s2">"critical"</span>,
+        <span class="s2">"Notes"</span>:<span class="s2">""</span>,<span class="s2">"Output"</span>:<span class="s2">"TTL expired"</span>,<span class="s2">"ServiceID"</span>:<span class="s2">"web1"</span>,<span class="s2">"ServiceName"</span>:<span class="s2">"web"</span><span class="o">}</span>,
+    <span class="o">{</span><span class="s2">"Node"</span>:<span class="s2">"node4"</span>,<span class="s2">"CheckID"</span>:<span class="s2">"serfHealth"</span>,<span class="s2">"Name"</span>:<span class="s2">"Serf Health Status"</span>,<span class="s2">"Status"</span>:<span class="s2">"passing"</span>,
+        <span class="s2">"Notes"</span>:<span class="s2">""</span>,<span class="s2">"Output"</span>:<span class="s2">"Agent alive and reachable"</span>,<span class="s2">"ServiceID"</span>:<span class="s2">""</span>,<span class="s2">"ServiceName"</span>:<span class="s2">""</span><span class="o">}]}]</span>r
 </pre></div>
 <h2 id="distributed-configuration">Distributed Configuration</h2>
 <p>A simple use case is to use the key value store to distribute other information besides services that need to be discovered, <a href="https://www.consul.io/docs/agent/http/kv.html">https://www.consul.io/docs/agent/http/kv.html</a></p>
@@ -226,7 +228,7 @@ curl http://localhost:8500/v1/health/service/web
             <time pubdate="pubdate" datetime="2016-08-27T21:01:00-07:00">Aug 27, 2016</time>
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#build-CI-CD-devops-ref">build-CI-CD-devops</a> 
-            <h4>~472 words</h4>
+            <h4>~474 words</h4>
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article"> 
                 <li><a href="/tags.html#cluster-ref">cluster
