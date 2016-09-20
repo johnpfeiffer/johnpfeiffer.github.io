@@ -7545,8 +7545,9 @@ You do not have write permission on that file.
 &lt;p&gt;Man in the middle attacks (NSA anyone?) can snatch credentials from secure channels.&lt;/p&gt;
 &lt;p&gt;There is an even higher likelihood that the remote services you are using will be compromised (database or password hashes leak).&lt;/p&gt;
 &lt;p&gt;Given time hackers can use rainbow tables and GPU based brute force attacks they will crack your password.&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;Every time you change your password you reset the clock on every type of attack&lt;/strong&gt;&lt;/p&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">john pfeiffer</dc:creator><pubDate>Tue, 27 Dec 2011 17:10:00 -0800</pubDate><guid isPermaLink="false">tag:blog.john-pfeiffer.com,2011-12-27:yes-change-your-password-regularly/</guid><category>security</category><category>password</category></item><item><title>Using find grep cut awk sort dd with files and text</title><link>https://blog.john-pfeiffer.com/using-find-grep-cut-awk-sort-dd-with-files-and-text/</link><description>
+&lt;p&gt;&lt;strong&gt;Every time you change your password you reset the clock on every type of attack&lt;/strong&gt;&lt;/p&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">john pfeiffer</dc:creator><pubDate>Tue, 27 Dec 2011 17:10:00 -0800</pubDate><guid isPermaLink="false">tag:blog.john-pfeiffer.com,2011-12-27:yes-change-your-password-regularly/</guid><category>security</category><category>password</category></item><item><title>Using find grep cut awk sort dd with files and text and listing files with ls</title><link>https://blog.john-pfeiffer.com/using-find-grep-cut-awk-sort-dd-with-files-and-text-and-listing-files-with-ls/</link><description>
 &lt;p&gt;There are amazing linux command line utilities that make finding and manpiulating files very easy&lt;/p&gt;
+&lt;h2 id="create-copy-truncate"&gt;create copy truncate&lt;/h2&gt;
 &lt;p&gt;Assuming you understand the basics like:&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;touch example.txt
 &lt;/pre&gt;&lt;/div&gt;
@@ -7561,7 +7562,10 @@ You do not have write permission on that file.
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;cat example.txt | tee -a example2.txt
 &lt;/pre&gt;&lt;/div&gt;
 &lt;blockquote&gt;
-&lt;p&gt;display the contents of the file to the output console and also pipe the result to the &lt;strong&gt;tee&lt;/strong&gt; utility which appends it to another file - tee is better than &amp;gt;&amp;gt; &lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;display the contents of the file to the output console and also pipe the result to the &lt;strong&gt;tee&lt;/strong&gt; utility which appends it to another file - tee is better than &amp;gt;&amp;gt; &lt;/li&gt;
+&lt;li&gt;except that tee always returns 0 so if you have set -e then prefer &amp;gt;&lt;/li&gt;
+&lt;/ul&gt;
 &lt;/blockquote&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;:&amp;gt; example.txt
 &lt;/pre&gt;&lt;/div&gt;
@@ -7573,7 +7577,151 @@ You do not have write permission on that file.
 &lt;blockquote&gt;
 &lt;p&gt;copy archive which preserves timestamp (but will also overwrite the target - in this example probably zero bytes)&lt;/p&gt;
 &lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;rm example.txt
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;remove a file, -f forces removal without a prompt, -rf to recursively force remove a file or directory &lt;strong&gt;be careful&lt;/strong&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id="ls-lists-files-in-a-directory"&gt;ls lists files in a directory&lt;/h2&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;ls /etc
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;list the files and directories in the /etc directory&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;ls -1
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;lists just the names (not including hidden .dot files or directories) in the current directory&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;ls -1a
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;lists just the names including hidden .dot files&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;ls -ahl | grep -v IGNORETHIS
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;exclude lines that match IGNORETHIS&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;ls -f
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;unsorted list of files which is the only way to work with directories with a very large number of files&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id="list-directories"&gt;list directories&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;ls -d */
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;list names of directories in the current directory&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;ls -1 -d */
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;using a "numeral one" parameter lists one directory name per line&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;ls -l -d */
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;using a "lowercase letter L" parameter lists the extended information (permissions, owner, timestamps)&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;ls -d ./*/
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;list names of directories in the current directory&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;echo */
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;lists the names of directories in the current directory&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;find -type d
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;find recursively starting from the current directory and display the relative path all objects of type directory&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;find /tmp -maxdepth 1 -type d
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;find all directories in /tmp up to 1 level deep (/tmp/foo)&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;find /tmp -maxdepth 2 -type d
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;find all directories in /tmp up to 2 levels deep (/tmp/foo/bar)&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id="counting-the-listings"&gt;counting the listings&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;ls -1 | wc
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;lists just the names of non hidden files piped to word count, number one looks a lot like lowercase L (sadindeed)&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;ls -1 | wc -l
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;list just names and count only the lines (number one, then lowercase L)&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;ls -ahl | wc -l
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;counting hidden files BUT directories too&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="x"&gt;for file in /PATH/foo*; do cp "&lt;/span&gt;&lt;span class="p"&gt;$&lt;/span&gt;&lt;span class="nv"&gt;file&lt;/span&gt;&lt;span class="x"&gt;" /mnt/BAR/; done&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;when there are too many files in a directory: "/bin/cp: Argument list too long"
+a one liner for copying each file as a parameter&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id="sorting-by-size-or-timestamp"&gt;sorting by size or timestamp&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;ls -Sla
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;sort by size (largest to smallest with full details displayed, show . hidden files too)&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;ls -Slar
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;sort by size (reversed, so smallest to largest with full details displayed, show . hidden files too)&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;ls -Slarh
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;sort by size (reversed, so smallest to largest with full details displayed, show . hidden files too, human sizes like MB)&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;ls -ahtlr
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;sort by timestamp (reversed so oldest first, show . hidden files too, human sizes like MB)&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;ls -ahtlr | head -n3
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;only the 3 oldest lines&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;ls -la --time-style=full-iso foobar.txt
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;list the full modified timestamp
+&lt;a href="https://www.gnu.org/software/coreutils/manual/html_node/Formatting-file-timestamps.html"&gt;https://www.gnu.org/software/coreutils/manual/html_node/Formatting-file-timestamps.html&lt;/a&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
 &lt;h2 id="find"&gt;find&lt;/h2&gt;
+&lt;p&gt;find is better than locate because locate depends on a cron job to index the file system and so may miss recent results&lt;/p&gt;
+&lt;h3 id="find-to-list-files"&gt;find to list files&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;find -type f
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;find and display the relative path all objects of type file&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;find /tmp -maxdepth 1 -type f -print | wc -l
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;wc = count lines = files in the /tmp directory&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;find -type f -print | wc -l
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;to get all subdirs too&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id="find-a-specific-file-or-types-of-files"&gt;find a specific file or types of files&lt;/h3&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;find -name "MyCProgram.c"
 &lt;/pre&gt;&lt;/div&gt;
 &lt;blockquote&gt;
@@ -7656,18 +7804,37 @@ which would return txt's as well as txv?'s&lt;/p&gt;
 &lt;blockquote&gt;
 &lt;p&gt;a lot of extra work to achieve a recursive rename from .py to .py.txt&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nt"&gt;find&lt;/span&gt; &lt;span class="o"&gt;.&lt;/span&gt; &lt;span class="nt"&gt;-type&lt;/span&gt; &lt;span class="nt"&gt;f&lt;/span&gt; &lt;span class="nt"&gt;-iname&lt;/span&gt; &lt;span class="s2"&gt;".java"&lt;/span&gt; &lt;span class="nt"&gt;-exec&lt;/span&gt; &lt;span class="nt"&gt;grep&lt;/span&gt; &lt;span class="nt"&gt;-Hn&lt;/span&gt; &lt;span class="s2"&gt;"fileSizeInMB &amp;lt; 100"&lt;/span&gt; &lt;span class="p"&gt;{}&lt;/span&gt; &lt;span class="err"&gt;\&lt;/span&gt;&lt;span class="o"&gt;;&lt;/span&gt;
-
-&lt;span class="nt"&gt;find&lt;/span&gt; &lt;span class="o"&gt;.&lt;/span&gt; &lt;span class="nt"&gt;-type&lt;/span&gt; &lt;span class="nt"&gt;f&lt;/span&gt; &lt;span class="nt"&gt;-iname&lt;/span&gt; &lt;span class="s2"&gt;".java"&lt;/span&gt; &lt;span class="nt"&gt;-exec&lt;/span&gt; &lt;span class="nt"&gt;grep&lt;/span&gt; &lt;span class="nt"&gt;-Hni&lt;/span&gt; &lt;span class="s2"&gt;"case-insensitive-text"&lt;/span&gt; &lt;span class="p"&gt;{}&lt;/span&gt; &lt;span class="err"&gt;\&lt;/span&gt;&lt;span class="o"&gt;;&lt;/span&gt;
-
-
-&lt;span class="nt"&gt;find&lt;/span&gt; &lt;span class="o"&gt;.&lt;/span&gt; &lt;span class="nt"&gt;-type&lt;/span&gt; &lt;span class="nt"&gt;d&lt;/span&gt; &lt;span class="nt"&gt;-name&lt;/span&gt; &lt;span class="nt"&gt;directoryname&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="nt"&gt;-exec&lt;/span&gt; &lt;span class="nt"&gt;ls&lt;/span&gt; &lt;span class="nt"&gt;-ahl&lt;/span&gt; &lt;span class="p"&gt;{}&lt;/span&gt; &lt;span class="err"&gt;\&lt;/span&gt;&lt;span class="o"&gt;;&lt;/span&gt;
-
-&lt;span class="nt"&gt;sudo&lt;/span&gt; &lt;span class="nt"&gt;find&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nt"&gt;var&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nt"&gt;www&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nt"&gt;java&lt;/span&gt; &lt;span class="nt"&gt;-type&lt;/span&gt; &lt;span class="nt"&gt;f&lt;/span&gt; &lt;span class="nt"&gt;-iname&lt;/span&gt; &lt;span class="s2"&gt;".txt"&lt;/span&gt; &lt;span class="nt"&gt;-exec&lt;/span&gt; &lt;span class="nt"&gt;chown&lt;/span&gt; &lt;span class="nt"&gt;root&lt;/span&gt;&lt;span class="nd"&gt;:www-data&lt;/span&gt; &lt;span class="p"&gt;{}&lt;/span&gt; &lt;span class="err"&gt;\&lt;/span&gt;&lt;span class="o"&gt;;&lt;/span&gt;
-&lt;span class="nt"&gt;sudo&lt;/span&gt; &lt;span class="nt"&gt;find&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nt"&gt;var&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nt"&gt;www&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nt"&gt;java&lt;/span&gt; &lt;span class="nt"&gt;-type&lt;/span&gt; &lt;span class="nt"&gt;f&lt;/span&gt; &lt;span class="nt"&gt;-iname&lt;/span&gt; &lt;span class="s2"&gt;".txt"&lt;/span&gt; &lt;span class="nt"&gt;-exec&lt;/span&gt; &lt;span class="nt"&gt;chmod&lt;/span&gt; &lt;span class="nt"&gt;640&lt;/span&gt; &lt;span class="p"&gt;{}&lt;/span&gt; &lt;span class="err"&gt;\&lt;/span&gt;&lt;span class="o"&gt;;&lt;/span&gt; 
-&lt;span class="nt"&gt;sudo&lt;/span&gt; &lt;span class="nt"&gt;find&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nt"&gt;var&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nt"&gt;www&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nt"&gt;d&lt;/span&gt; &lt;span class="nt"&gt;-type&lt;/span&gt; &lt;span class="nt"&gt;d&lt;/span&gt; &lt;span class="nt"&gt;-iname&lt;/span&gt; &lt;span class="s2"&gt;"web*"&lt;/span&gt; &lt;span class="nt"&gt;-exec&lt;/span&gt; &lt;span class="nt"&gt;chmod&lt;/span&gt; &lt;span class="nt"&gt;750&lt;/span&gt; &lt;span class="p"&gt;{}&lt;/span&gt; &lt;span class="err"&gt;\&lt;/span&gt;&lt;span class="o"&gt;;&lt;/span&gt;
-
-&lt;span class="nt"&gt;find&lt;/span&gt; &lt;span class="o"&gt;.&lt;/span&gt; &lt;span class="nt"&gt;-type&lt;/span&gt; &lt;span class="nt"&gt;f&lt;/span&gt; &lt;span class="nt"&gt;-iname&lt;/span&gt; &lt;span class="s2"&gt;"*.sh"&lt;/span&gt; &lt;span class="nt"&gt;-exec&lt;/span&gt; &lt;span class="nt"&gt;mv&lt;/span&gt; &lt;span class="p"&gt;{}&lt;/span&gt; &lt;span class="o"&gt;.&lt;/span&gt; &lt;span class="s2"&gt;";"&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;find . -type f -iname "*.java" -exec grep -Hni "case-insensitive-text" {} \;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;find java files and return if they contain some text&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;find . -type f -iname "*.java" -exec grep -Hn "fileSizeInMB &amp;lt; 100" {} \;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;find java files and return if they contain some case sensitive text&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;find . -type d -name directoryname* -exec ls -ahl {} \;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;find case insensitive directories beginning with "directoryname" and list their contents&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nt"&gt;sudo&lt;/span&gt; &lt;span class="nt"&gt;find&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nt"&gt;var&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nt"&gt;www&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nt"&gt;java&lt;/span&gt; &lt;span class="nt"&gt;-type&lt;/span&gt; &lt;span class="nt"&gt;f&lt;/span&gt; &lt;span class="nt"&gt;-iname&lt;/span&gt; &lt;span class="s2"&gt;".txt"&lt;/span&gt; &lt;span class="nt"&gt;-exec&lt;/span&gt; &lt;span class="nt"&gt;chown&lt;/span&gt; &lt;span class="nt"&gt;root&lt;/span&gt;&lt;span class="nd"&gt;:www-data&lt;/span&gt; &lt;span class="p"&gt;{}&lt;/span&gt; &lt;span class="err"&gt;\&lt;/span&gt;&lt;span class="o"&gt;;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;find case insensitive files ending with ".txt" and change their owner to root and group to  www-data&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;sudo find /var/www/java -type f -iname "*.txt" -exec chmod 640 {} \;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;find case insensitive files ending with ".txt" and change their permissions to 640&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;sudo find /var/www/d -type d -iname "web*" -exec chmod 750 {} \;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;find case insensitive directories beginning with "web" and change their permissions to 750&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;find . -type f -iname "*.sh" -exec mv {} . ";"
 &lt;/pre&gt;&lt;/div&gt;
 &lt;blockquote&gt;
 &lt;p&gt;find files ending in .sh and move them into the current directory&lt;/p&gt;
@@ -7841,6 +8008,11 @@ pipe to grep and ignore matches of DONOTLIKE, then append output to the newest.m
 &lt;blockquote&gt;
 &lt;p&gt;--files-without-match , display filenames that do not contain the string foobar&lt;/p&gt;
 &lt;/blockquote&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://en.wikipedia.org/wiki/Grep"&gt;https://en.wikipedia.org/wiki/Grep&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="http://www.gnu.org/software/grep/manual/grep.html"&gt;http://www.gnu.org/software/grep/manual/grep.html&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="http://tldp.org/LDP/Bash-Beginners-Guide/html/sect_04_02.html"&gt;http://tldp.org/LDP/Bash-Beginners-Guide/html/sect_04_02.html&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
 &lt;h2 id="cut"&gt;cut&lt;/h2&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;ps auxwwww | grep someappname | tr -s [:space:] | cut -d\  -f11-
 &lt;/pre&gt;&lt;/div&gt;
@@ -7852,7 +8024,10 @@ pipe to grep and ignore matches of DONOTLIKE, then append output to the newest.m
 &lt;blockquote&gt;
 &lt;p&gt;delimiter of square bracket , only take after the first "field" token, so essentially print everything after the first occurence of a left square bracket&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;p&gt;&lt;a href="http://ss64.com/bash/cut.html"&gt;http://ss64.com/bash/cut.html&lt;/a&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="http://ss64.com/bash/cut.html"&gt;http://ss64.com/bash/cut.html&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="http://linux.die.net/man/1/cut"&gt;http://linux.die.net/man/1/cut&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
 &lt;h3 id="cut-to-only-display-a-part-of-a-path"&gt;cut to only display a part of a path&lt;/h3&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="ch"&gt;#!/bin/bash&lt;/span&gt;
 &lt;span class="c1"&gt;# iterate through the list of subdirectories&lt;/span&gt;
@@ -7921,6 +8096,10 @@ awk '/2009/ {print $5,$6,$7,$8}' ls_output.txt
 &lt;p&gt;Note that Awk recognizes the field variable $0 as representing the entire line, so this could also be written as:
     awk '/gold/ {print $0}'&lt;/p&gt;
 &lt;/blockquote&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="http://www.grymoire.com/Unix/Awk.html"&gt;http://www.grymoire.com/Unix/Awk.html&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://www.gnu.org/software/gawk/manual/gawk.html"&gt;https://www.gnu.org/software/gawk/manual/gawk.html&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
 &lt;h2 id="sed"&gt;sed&lt;/h2&gt;
 &lt;p&gt;sed does string substitution&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;sed regular expression 's=start/olditem/newitem/g=end' filename
@@ -7935,6 +8114,11 @@ sed -e 's/ /\t /g' email-backup.txt
 &lt;blockquote&gt;
 &lt;p&gt;replace a UTF-8 character (in this case the single character horizontal ellipsis) with three dots&lt;/p&gt;
 &lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;cat /var/www/html/themes/bartik/css/style.css | tr '\n' '\r' | sed -e 's/#site-slogan {\r  font-size: 0.929em/#site-slogan {\r  font-size: 2.929em/' | tr '\r' '\n' &amp;gt; /var/www/html/themes/bartik/css/style.css.updated
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;replace multiline with a newline using tr to translate \n to \r&lt;/p&gt;
+&lt;/blockquote&gt;
 &lt;p&gt;REMEMBER&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;\t = tab
 \n = newline
@@ -7946,6 +8130,10 @@ perl -pe 's/\r\n|\n|\r/\r\n/g' inputfile &amp;gt; outputfile  # Convert to DOS
 perl -pe 's/\r\n|\n|\r/\n/g'   inputfile &amp;gt; outputfile  # Convert to UNIX
 perl -pe 's/\r\n|\n|\r/\r/g'   inputfile &amp;gt; outputfile  # Convert to old Mac
 &lt;/pre&gt;&lt;/div&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="http://www.grymoire.com/Unix/Sed.html"&gt;http://www.grymoire.com/Unix/Sed.html&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://www.gnu.org/software/sed/manual/sed.txt"&gt;https://www.gnu.org/software/sed/manual/sed.txt&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
 &lt;h2 id="dd"&gt;dd&lt;/h2&gt;
 &lt;p&gt;dd can delete things very quickly (dangerous!)&lt;/p&gt;
 &lt;p&gt;But a useful tool for testing upload limits or compression or any other miscellaneous file tasks is to generate a file of a specified length:&lt;/p&gt;
@@ -7979,18 +8167,15 @@ cat /dev/random &amp;gt; /dev/null
 &lt;blockquote&gt;
 &lt;p&gt;Look for RDRAND &lt;a href="http://en.wikipedia.org/wiki/RdRand"&gt;http://en.wikipedia.org/wiki/RdRand&lt;/a&gt;&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;cat /dev/urandom | rngtest -c 1000`
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;cat /dev/urandom | rngtest -c 1000
 &lt;/pre&gt;&lt;/div&gt;
 &lt;blockquote&gt;
 &lt;p&gt;how good is your non blocking urandom?&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;h2 id="more-info"&gt;more info&lt;/h2&gt;
 &lt;ul&gt;
-&lt;li&gt;&lt;a href="https://en.wikipedia.org/wiki/Grep"&gt;https://en.wikipedia.org/wiki/Grep&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href="http://www.gnu.org/software/grep/manual/grep.html"&gt;http://www.gnu.org/software/grep/manual/grep.html&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href="http://tldp.org/LDP/Bash-Beginners-Guide/html/sect_04_02.html"&gt;http://tldp.org/LDP/Bash-Beginners-Guide/html/sect_04_02.html&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href="http://linux.die.net/man/1/cut"&gt;http://linux.die.net/man/1/cut&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">john pfeiffer</dc:creator><pubDate>Sat, 12 Nov 2011 02:37:00 -0800</pubDate><guid isPermaLink="false">tag:blog.john-pfeiffer.com,2011-11-12:using-find-grep-cut-awk-sort-dd-with-files-and-text/</guid><category>grep</category><category>linux</category><category>bash</category><category>cut</category><category>awk</category><category>sort</category><category>dd</category><category>files</category><category>text</category></item><item><title>A concise summary of amazing and great ideas</title><link>https://blog.john-pfeiffer.com/a-concise-summary-of-amazing-and-great-ideas/</link><description>
+&lt;li&gt;&lt;a href="https://en.wikipedia.org/wiki//dev/random"&gt;https://en.wikipedia.org/wiki//dev/random&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="http://linuxcommand.org/man_pages/rngtest1.html"&gt;http://linuxcommand.org/man_pages/rngtest1.html&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">john pfeiffer</dc:creator><pubDate>Sat, 12 Nov 2011 02:37:00 -0800</pubDate><guid isPermaLink="false">tag:blog.john-pfeiffer.com,2011-11-12:using-find-grep-cut-awk-sort-dd-with-files-and-text-and-listing-files-with-ls/</guid><category>grep</category><category>linux</category><category>bash</category><category>cut</category><category>awk</category><category>sort</category><category>dd</category><category>files</category><category>text</category><category>ls</category><category>sort by size</category><category>sort by date</category><category>exec</category></item><item><title>A concise summary of amazing and great ideas</title><link>https://blog.john-pfeiffer.com/a-concise-summary-of-amazing-and-great-ideas/</link><description>
 &lt;h3 id="test-driven-development-tdd"&gt;Test Driven Development (TDD)&lt;/h3&gt;
 &lt;p&gt;Test, Code, Refactor &lt;a href="http://en.wikipedia.org/wiki/Test-driven_development"&gt;http://en.wikipedia.org/wiki/Test-driven_development&lt;/a&gt;&lt;/p&gt;
 &lt;h3 id="lean"&gt;Lean&lt;/h3&gt;
