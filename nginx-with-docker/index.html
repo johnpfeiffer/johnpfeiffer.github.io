@@ -210,13 +210,13 @@ nginx: configuration file /etc/nginx/nginx.conf test is successful</p>
 <p>e.g. <a href="https://hub.docker.com/r/jwilder/nginx-proxy/~/dockerfile/">https://hub.docker.com/r/jwilder/nginx-proxy/~/dockerfile/</a> which also has "Foreman in Go lang" and makes use of expecting the Host to provide the SSL certificates</p>
 <ul>
 <li><a href="https://www.nginx.com/resources/admin-guide/nginx-web-server/">https://www.nginx.com/resources/admin-guide/nginx-web-server/</a></li>
-<li>
-<p><a href="https://www.nginx.com/resources/wiki/start/topics/examples/full/">https://www.nginx.com/resources/wiki/start/topics/examples/full/</a></p>
-<p>docker run --rm --publish 127.0.0.1:80:80 nginx /bin/bash -c "nginx -t -c /etc/nginx/nginx.conf"
-    nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
-    nginx: configuration file /etc/nginx/nginx.conf test is successful</p>
-</li>
+<li><a href="https://www.nginx.com/resources/wiki/start/topics/examples/full/">https://www.nginx.com/resources/wiki/start/topics/examples/full/</a></li>
 </ul>
+<p>Quickly testing the nginx configuration file using an ephemeral docker container:</p>
+<div class="highlight"><pre><span></span>docker run --rm --publish 127.0.0.1:80:80 nginx /bin/bash -c <span class="s2">"nginx -t -c /etc/nginx/nginx.conf"</span>
+    nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
+    nginx: configuration file /etc/nginx/nginx.conf <span class="nb">test</span> is successful
+</pre></div>
 <h2 id="build-your-own-nginx-dockerfile">Build your own nginx Dockerfile</h2>
 <p>If you require 3rd party modules then you will have to build nginx from source, e.g.
 <a href="https://github.com/openresty/headers-more-nginx-module#installation">https://github.com/openresty/headers-more-nginx-module#installation</a></p>
@@ -255,11 +255,13 @@ http {
 }
 </pre></div>
 <blockquote>
-<p>Run the service as the www-data user and define 4 worker processes
-define an HTTP server that listens on port 80 by default
-the root location will return the contents of /var/www
-a best practice is to use multiple configuration files in the conf.d directory (as a really long complex configuration in a single is difficult to maintain)
-BUT we must comment it out as in the installation there can be a default.conf that overrides our nginx.conf</p>
+<ul>
+<li>Run the service as the www-data user and define 4 worker processes</li>
+<li>define an HTTP server that listens on port 80 by default</li>
+<li>the root location will return the contents of /var/www</li>
+<li>a best practice is to use multiple configuration files in the conf.d directory (as a really long complex configuration in a single is difficult to maintain)</li>
+<li>BUT we must comment it out as in the installation there can be a default.conf that overrides our nginx.conf</li>
+</ul>
 </blockquote>
 <div class="highlight"><pre><span></span>sudo docker run -it --rm --publish 0.0.0.0:80:80 --volume /tmp/nginx.conf:/etc/nginx/nginx.conf:ro  nginx:alpine /bin/sh
 </pre></div>
@@ -276,8 +278,7 @@ BUT we must comment it out as in the installation there can be a default.conf th
 <blockquote>
 <p>assumes you have a config file and some index file defined</p>
 </blockquote>
-<div class="highlight"><pre><span></span>/var/www/index.html
-<span class="nt">&lt;html&gt;&lt;body&gt;</span>hi<span class="nt">&lt;/body&gt;&lt;/html&gt;</span>
+<div class="highlight"><pre><span></span>echo "<span class="nt">&lt;html&gt;&lt;body&gt;</span>hi<span class="nt">&lt;/body&gt;&lt;/html&gt;</span>" &gt; /var/www/index.html
 </pre></div>
 <p>That's it, now you have nginx serving static files! (curl localhost OR use a browser and visit localhost or http://hostfqdn)</p>
 <blockquote>
@@ -410,26 +411,23 @@ Protocols advertised by server: h2, http/1.1
 <h2 id="nginx-with-php-fpm">nginx with php-fpm</h2>
 <h3 id="investigate-php-fpm-in-docker">Investigate php-fpm in Docker</h3>
 <p>This hack is fun but proves unnecessary when using Docker Compose later...</p>
-<div class="highlight"><pre><span></span>docker pull php:5.5-fpm-alpine
-</pre></div>
-<ul>
-<li>
-<p><a href="https://hub.docker.com/_/php/">https://hub.docker.com/_/php/</a></p>
 <p>:::bash
-ifconfig | grep Bc
-docker run -it --rm --publish 0.0.0.0:9000:9000 php:5.5-fpm-alpine /bin/sh
-route -n
-php-fpm --version
-sed -i 's/listen = 127.0.0.1:9000/listen = 0.0.0.0:9000/g' /usr/local/etc/php-fpm.d/www.conf
-php-fpm --fpm-config /usr/local/etc/php-fpm.conf</p>
-</li>
-</ul>
+    docker pull php:5.5-fpm-alpine
+    ifconfig | grep Bc
+    docker run -it --rm --publish 0.0.0.0:9000:9000 php:5.5-fpm-alpine /bin/sh
+    route -n
+    php-fpm --version
+    sed -i 's/listen = 127.0.0.1:9000/listen = 0.0.0.0:9000/g' /usr/local/etc/php-fpm.d/www.conf
+    php-fpm --fpm-config /usr/local/etc/php-fpm.conf</p>
 <blockquote>
-<p>ifconfig and route -n are to discover the docker host IP Address via the default gateway 172.17.0.1
-contains include=etc/php-fpm.d/*.conf
-/usr/local/etc/php-fpm.d/www.conf</p>
+<ul>
+<li>ifconfig and route -n are to discover the docker host IP Address via the default gateway 172.17.0.1</li>
+<li>contains include=etc/php-fpm.d/*.conf</li>
+<li>/usr/local/etc/php-fpm.d/www.conf</li>
+</ul>
 </blockquote>
 <ul>
+<li><a href="https://hub.docker.com/_/php/">https://hub.docker.com/_/php/</a></li>
 <li><a href="http://php.net/manual/en/install.fpm.configuration.php">http://php.net/manual/en/install.fpm.configuration.php</a></li>
 </ul>
 <h3 id="configure-nginx">Configure nginx</h3>
@@ -539,7 +537,7 @@ curl localhost:80/index.php
             <time pubdate="pubdate" datetime="2015-06-13T08:00:00-07:00">Jun 13, 2015</time>
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#virtualization-ref">virtualization</a> 
-            <h4>~1726 words</h4>
+            <h4>~1739 words</h4>
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article"> 
                 <li><a href="/tags.html#docker-ref">docker

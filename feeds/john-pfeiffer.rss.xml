@@ -11,32 +11,28 @@
 But with the evolution of devops, web scale, microservices, containers, etc. it is great to leverage an existing battle tested solution&lt;/em&gt;&lt;/p&gt;
 &lt;h2 id="consul-cluster-using-docker"&gt;Consul Cluster using Docker&lt;/h2&gt;
 &lt;p&gt;Following the straightforward work from this Docker Image we can run a cluster on a single machine:&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;
-&lt;p&gt;https://hub.docker.com/r/progrium/consul/&lt;/p&gt;
-&lt;p&gt;:::bash
-sudo su
+&lt;p&gt;&lt;a href="https://hub.docker.com/r/progrium/consul/"&gt;https://hub.docker.com/r/progrium/consul/&lt;/a&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;sudo su
 docker run -d --name node1 -h node1 progrium/consul -server -bootstrap-expect 3
-JOIN_IP="$(docker inspect -f '{{.NetworkSettings.IPAddress}}' node1)"
-docker run -d --name node2 -h node2 progrium/consul -server -join $JOIN_IP
-docker run -d --name node3 -h node3 progrium/consul -server -join $JOIN_IP
-docker run -d -p 8400:8400 -p 8500:8500 -p 8600:53/udp --name node4 -h node4 progrium/consul -join $JOIN_IP&lt;/p&gt;
+&lt;span class="nv"&gt;JOIN_IP&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;"&lt;/span&gt;&lt;span class="k"&gt;$(&lt;/span&gt;docker inspect -f &lt;span class="s1"&gt;'{{.NetworkSettings.IPAddress}}'&lt;/span&gt; node1&lt;span class="k"&gt;)&lt;/span&gt;&lt;span class="s2"&gt;"&lt;/span&gt;
+docker run -d --name node2 -h node2 progrium/consul -server -join &lt;span class="nv"&gt;$JOIN_IP&lt;/span&gt;
+docker run -d --name node3 -h node3 progrium/consul -server -join &lt;span class="nv"&gt;$JOIN_IP&lt;/span&gt;
+docker run -d -p 8400:8400 -p 8500:8500 -p 8600:53/udp --name node4 -h node4 progrium/consul -join &lt;span class="nv"&gt;$JOIN_IP&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
 &lt;blockquote&gt;
 &lt;p&gt;The second 2 nodes join the first one in the cluster by using the inspected IP Address,
 the last container is a consul agent (not in the quorum) but has public ports for interactivity&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;p&gt;:::bash
-curl localhost:8500/v1/catalog/nodes
-    [{"Node":"node1","Address":"172.17.0.2"},{"Node":"node2","Address":"172.17.0.3"},
-    {"Node":"node3","Address":"172.17.0.4"},{"Node":"node4","Address":"172.17.0.5"}]
-dig @0.0.0.0 -p 8600 node1.node.consul
-    ;; QUESTION SECTION:
-    ;node1.node.consul.     IN  ANY&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;;; ANSWER SECTION:
-node1.node.consul.  0   IN  A   172.17.0.2
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;curl localhost:8500/v1/catalog/nodes
+    &lt;span class="o"&gt;[{&lt;/span&gt;&lt;span class="s2"&gt;"Node"&lt;/span&gt;:&lt;span class="s2"&gt;"node1"&lt;/span&gt;,&lt;span class="s2"&gt;"Address"&lt;/span&gt;:&lt;span class="s2"&gt;"172.17.0.2"&lt;/span&gt;&lt;span class="o"&gt;}&lt;/span&gt;,&lt;span class="o"&gt;{&lt;/span&gt;&lt;span class="s2"&gt;"Node"&lt;/span&gt;:&lt;span class="s2"&gt;"node2"&lt;/span&gt;,&lt;span class="s2"&gt;"Address"&lt;/span&gt;:&lt;span class="s2"&gt;"172.17.0.3"&lt;/span&gt;&lt;span class="o"&gt;}&lt;/span&gt;,
+    &lt;span class="o"&gt;{&lt;/span&gt;&lt;span class="s2"&gt;"Node"&lt;/span&gt;:&lt;span class="s2"&gt;"node3"&lt;/span&gt;,&lt;span class="s2"&gt;"Address"&lt;/span&gt;:&lt;span class="s2"&gt;"172.17.0.4"&lt;/span&gt;&lt;span class="o"&gt;}&lt;/span&gt;,&lt;span class="o"&gt;{&lt;/span&gt;&lt;span class="s2"&gt;"Node"&lt;/span&gt;:&lt;span class="s2"&gt;"node4"&lt;/span&gt;,&lt;span class="s2"&gt;"Address"&lt;/span&gt;:&lt;span class="s2"&gt;"172.17.0.5"&lt;/span&gt;&lt;span class="o"&gt;}]&lt;/span&gt;
+dig @0.0.0.0 -p &lt;span class="m"&gt;8600&lt;/span&gt; node1.node.consul
+    &lt;span class="p"&gt;;;&lt;/span&gt; QUESTION SECTION:
+    &lt;span class="p"&gt;;&lt;/span&gt;node1.node.consul.     IN  ANY
+
+    &lt;span class="p"&gt;;;&lt;/span&gt; ANSWER SECTION:
+    node1.node.consul.  &lt;span class="m"&gt;0&lt;/span&gt;   IN  A   172.17.0.2
 &lt;/pre&gt;&lt;/div&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
 &lt;blockquote&gt;
 &lt;p&gt;REST API call to the list of nodes, then DNS client to get the Record for the first node&lt;/p&gt;
 &lt;/blockquote&gt;
@@ -120,8 +116,7 @@ curl http://localhost:8500/v1/health/service/web
     &lt;span class="s2"&gt;"Service"&lt;/span&gt;:&lt;span class="o"&gt;{&lt;/span&gt;&lt;span class="s2"&gt;"ID"&lt;/span&gt;:&lt;span class="s2"&gt;"web1"&lt;/span&gt;,&lt;span class="s2"&gt;"Service"&lt;/span&gt;:&lt;span class="s2"&gt;"web"&lt;/span&gt;,&lt;span class="s2"&gt;"Tags"&lt;/span&gt;:&lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="s2"&gt;"master"&lt;/span&gt;,&lt;span class="s2"&gt;"v1"&lt;/span&gt;&lt;span class="o"&gt;]&lt;/span&gt;,&lt;span class="s2"&gt;"Address"&lt;/span&gt;:&lt;span class="s2"&gt;"127.0.0.1"&lt;/span&gt;,&lt;span class="s2"&gt;"Port"&lt;/span&gt;:8080&lt;span class="o"&gt;}&lt;/span&gt;,
     &lt;span class="s2"&gt;"Checks"&lt;/span&gt;:&lt;span class="o"&gt;[{&lt;/span&gt;&lt;span class="s2"&gt;"Node"&lt;/span&gt;:&lt;span class="s2"&gt;"node4"&lt;/span&gt;,&lt;span class="s2"&gt;"CheckID"&lt;/span&gt;:&lt;span class="s2"&gt;"service:web1"&lt;/span&gt;,&lt;span class="s2"&gt;"Name"&lt;/span&gt;:&lt;span class="s2"&gt;"Service 'web'check"&lt;/span&gt;,&lt;span class="s2"&gt;"Status"&lt;/span&gt;:&lt;span class="s2"&gt;"critical"&lt;/span&gt;,
         &lt;span class="s2"&gt;"Notes"&lt;/span&gt;:&lt;span class="s2"&gt;""&lt;/span&gt;,&lt;span class="s2"&gt;"Output"&lt;/span&gt;:&lt;span class="s2"&gt;"TTL expired"&lt;/span&gt;,&lt;span class="s2"&gt;"ServiceID"&lt;/span&gt;:&lt;span class="s2"&gt;"web1"&lt;/span&gt;,&lt;span class="s2"&gt;"ServiceName"&lt;/span&gt;:&lt;span class="s2"&gt;"web"&lt;/span&gt;&lt;span class="o"&gt;}&lt;/span&gt;,
-    &lt;span class="o"&gt;{&lt;/span&gt;&lt;span class="s2"&gt;"Node"&lt;/span&gt;:&lt;span class="s2"&gt;"node4"&lt;/span&gt;,&lt;span class="s2"&gt;"CheckID"&lt;/span&gt;:&lt;span class="s2"&gt;"serfHealth"&lt;/span&gt;,&lt;span class="s2"&gt;"Name"&lt;/span&gt;:&lt;span class="s2"&gt;"Serf Health Status"&lt;/span&gt;,&lt;span class="s2"&gt;"Status"&lt;/span&gt;:&lt;span class="s2"&gt;"passing"&lt;/span&gt;,
-        &lt;span class="s2"&gt;"Notes"&lt;/span&gt;:&lt;span class="s2"&gt;""&lt;/span&gt;,&lt;span class="s2"&gt;"Output"&lt;/span&gt;:&lt;span class="s2"&gt;"Agent alive and reachable"&lt;/span&gt;,&lt;span class="s2"&gt;"ServiceID"&lt;/span&gt;:&lt;span class="s2"&gt;""&lt;/span&gt;,&lt;span class="s2"&gt;"ServiceName"&lt;/span&gt;:&lt;span class="s2"&gt;""&lt;/span&gt;&lt;span class="o"&gt;}]}]&lt;/span&gt;r
+    &lt;span class="o"&gt;{&lt;/span&gt;&lt;span class="s2"&gt;"Node"&lt;/span&gt;:&lt;span class="s2"&gt;"node4"&lt;/span&gt;,&lt;span class="s2"&gt;"CheckID"&lt;/span&gt;:&lt;span class="s2"&gt;"serfHealth"&lt;/span&gt;,&lt;span class="s2"&gt;"Name"&lt;/span&gt;:&lt;span class="s2"&gt;"Serf Health Status"&lt;/span&gt;,&lt;span class="s2"&gt;"Status"&lt;/span&gt;:&lt;span class="s2"&gt;"passing"&lt;/span&gt;,&lt;span class="s2"&gt;"Notes"&lt;/span&gt;:&lt;span class="s2"&gt;""&lt;/span&gt;,&lt;span class="s2"&gt;"Output"&lt;/span&gt;:&lt;span class="s2"&gt;"Agent alive and reachable"&lt;/span&gt;,&lt;span class="s2"&gt;"ServiceID"&lt;/span&gt;:&lt;span class="s2"&gt;""&lt;/span&gt;,&lt;span class="s2"&gt;"ServiceName"&lt;/span&gt;:&lt;span class="s2"&gt;""&lt;/span&gt;&lt;span class="o"&gt;}]}]&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 &lt;h2 id="distributed-configuration"&gt;Distributed Configuration&lt;/h2&gt;
 &lt;p&gt;A simple use case is to use the key value store to distribute other information besides services that need to be discovered, &lt;a href="https://www.consul.io/docs/agent/http/kv.html"&gt;https://www.consul.io/docs/agent/http/kv.html&lt;/a&gt;&lt;/p&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">john pfeiffer</dc:creator><pubDate>Sat, 27 Aug 2016 21:01:00 -0700</pubDate><guid isPermaLink="false">tag:blog.john-pfeiffer.com,2016-08-27:consul-service-discovery-and-cluster-configuration/</guid><category>service discovery</category><category>consul</category><category>cluster</category><category>clustering</category><category>config</category></item><item><title>A micro story about migrating a personal monolith into microservices</title><link>https://blog.john-pfeiffer.com/a-micro-story-about-migrating-a-personal-monolith-into-microservices/</link><description>
@@ -142,8 +137,8 @@ curl http://localhost:8500/v1/health/service/web
 &lt;p&gt;Oh and then there's the times the logs (web or auth due to anonymous attackers scanning) or backups filled the disk... (facepalm)&lt;/p&gt;
 &lt;p&gt;Unavailability Due To:&lt;/p&gt;
 &lt;ul&gt;
-&lt;li&gt;any infrastructure vendor maintenance &lt;/li&gt;
-&lt;li&gt;any OS maintenance/upgrade &lt;/li&gt;
+&lt;li&gt;any infrastructure vendor maintenance&lt;/li&gt;
+&lt;li&gt;any OS maintenance/upgrade&lt;/li&gt;
 &lt;li&gt;incorrectly configured/rogue application&lt;/li&gt;
 &lt;li&gt;a security issue in one affects them all&lt;/li&gt;
 &lt;li&gt;they all contend for the same resources&lt;/li&gt;
@@ -153,7 +148,7 @@ curl http://localhost:8500/v1/health/service/web
 &lt;p&gt;Firstly let me say I picked a great vendor (Linode) who was very solid (they limit bad actor customers which tends to make resources predictable) and that Ubuntu OS and Cherokee webserver are very easy to setup and maintain which is one reason why I've put this off for so long.&lt;/p&gt;
 &lt;p&gt;Drupal does an ok job of separating the tech stack from the content publishing so it was possible to ignore the tech side for awhile.&lt;/p&gt;
 &lt;p&gt;Another factor is that iPhones/Android, Dropbox, Bitbucket/GitHub, PaaS, and a whole generation of technologies were not around when I set this up.&lt;/p&gt;
-&lt;p&gt;Finally, maybe it's a corollary to Moore's law and the prevalence of the cloud but there's quite a bit of free compute around than there used to be ;)&lt;/p&gt;
+&lt;p&gt;Finally, maybe it's a corollary to Moore's law and the prevalence of the cloud but there's quite a bit of free compute around than there used to be =]&lt;/p&gt;
 &lt;h2 id="thinking-microservices"&gt;Thinking Microservices&lt;/h2&gt;
 &lt;p&gt;Thinking about microservices is like TDD (Test Driven Design): it exposes assumptions, unmanaged organic evolution, and accidental complexity.&lt;/p&gt;
 &lt;h3 id="discovering-the-real-problem-domain"&gt;Discovering the real problem domain&lt;/h3&gt;
@@ -163,11 +158,11 @@ curl http://localhost:8500/v1/health/service/web
 &lt;p&gt;It becomes too easy to just use an interesting or popular technology for everything regardless of the true problem.&lt;/p&gt;
 &lt;p&gt;Analyzing what I actually did with the various services I realized there were actually two distinct phases: creation and distribution.&lt;/p&gt;
 &lt;p&gt;I did not have a "realtime" or "high volume dynamic data" use case, nor even a large number of content publishers that needed extra tooling.  (The plugins/additions I used weren't even that exotic.)&lt;/p&gt;
-&lt;p&gt;In contrast the overhead was my irreplaceable time spent for the maintenance of Ubuntu patching/upgrades, including the underlying PHP, Drupal upgrades, backups, and of course the inestimable risk of running something on the Internet. ;)&lt;/p&gt;
+&lt;p&gt;In contrast the overhead was my irreplaceable time spent for the maintenance of Ubuntu patching/upgrades, including the underlying PHP, Drupal upgrades, backups, and of course the inestimable risk of running something on the Internet. =p&lt;/p&gt;
 &lt;h2 id="how-i-converted-to-microservices-big-bang-vs-kanban"&gt;How I Converted to Microservices: Big Bang vs Kanban&lt;/h2&gt;
 &lt;p&gt;A common question is "how", and since "it depends" ;) in this case I had limited free hours to accomplish change and a strong desire to not break existing service.&lt;/p&gt;
-&lt;p&gt;Rather than "Big Bang" I went Kanban https://en.m.wikipedia.org/wiki/Kanban_(development) (a much better analogy than Martin Fowler's "strangler pattern" analogy http://www.martinfowler.com/bliki/StranglerApplication.html).  This allowed gradual migration with the least disruption and the most flexibility in when changes would occur.  As a not-to-be-underestimated bonus it was also the least stressful.&lt;/p&gt;
-&lt;p&gt;Since I publish a post maybe once a month my blog was the simplest start .&lt;/p&gt;
+&lt;p&gt;Rather than "Big Bang" I went Kanban &lt;a href="https://en.m.wikipedia.org/wiki/Kanban_(development)"&gt;https://en.m.wikipedia.org/wiki/Kanban_(development)&lt;/a&gt; (a much better analogy than Martin Fowler's "strangler pattern" analogy &lt;a href="http://www.martinfowler.com/bliki/StranglerApplication.html"&gt;http://www.martinfowler.com/bliki/StranglerApplication.html&lt;/a&gt;).  This allowed gradual migration with the least disruption and the most flexibility in when changes would occur.  As a not-to-be-underestimated bonus it was also the least stressful.&lt;/p&gt;
+&lt;p&gt;Since I publish a post maybe once a month my blog was the simplest place to start.&lt;/p&gt;
 &lt;p&gt;Feature parity requirements:&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;publish read-only pages to the world&lt;/li&gt;
@@ -195,7 +190,7 @@ curl http://localhost:8500/v1/health/service/web
 &lt;p&gt;While Markdown violates the principle of separating data and presentation I found it to be a pragmatic compromise as it IS a standard and it's machine readable. (I could theoretically use a script to convert it back to plaintext ;)&lt;/p&gt;
 &lt;p&gt;Oh right, so Go, aka Golang?&lt;/p&gt;
 &lt;p&gt;I leveraged Google AppEngine and for fun got to use the relatively new programming language Go to write a custom 301 redirector to prevent links on the Internet from breaking and allow search engines link from all of the previous URLs to the new locations.&lt;/p&gt;
-&lt;p&gt;While Python is very easy to pickup I found Go to be similar enough (especially to C) to be also not so hard to pickup (lots of documentation!) and better able to do what I needed simply within the language (though Python pretty much has a library for everything it also has C dependencies that don't always play nice with a PlatformAsAService).&lt;/p&gt;
+&lt;p&gt;While Python is very easy to pickup I found Go to be similar enough (especially to C) to be also not so hard to learn (lots of documentation!) and better able to do what I needed simply within the language (though Python pretty much has a library for everything it also has C dependencies that don't always play nice with a PlatformAsAService).&lt;/p&gt;
 &lt;h3 id="drupal-to-drupal"&gt;Drupal to Drupal&lt;/h3&gt;
 &lt;blockquote&gt;
 &lt;p&gt;The more things change the more they stay the same.&lt;/p&gt;
@@ -213,23 +208,27 @@ curl http://localhost:8500/v1/health/service/web
 &lt;h4 id="drupal-website-context-and-domain-problems"&gt;Drupal website context and domain problems&lt;/h4&gt;
 &lt;p&gt;Besides the basic components (Docker will simplify this): nginx, php, MySQL&lt;/p&gt;
 &lt;p&gt;The ongoing issues:&lt;/p&gt;
-&lt;p&gt;-Backups of the MySQL and uploaded files
--Upgrades of the OS and components (security)
--Upgrades (security) of Drupal and modules&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Backups of the MySQL and uploaded files&lt;/li&gt;
+&lt;li&gt;Upgrades of the OS and components (security)&lt;/li&gt;
+&lt;li&gt;Upgrades (security) of Drupal and modules&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Hint: DigitalOcean offer full disk image backups as a paid service so if I ever stop being cheap this resolves pretty quickly&lt;/p&gt;
+&lt;/blockquote&gt;
 &lt;p&gt;The full details are in a separate post but I'm pretty happy that setting up the box from scratch again, upgrading the various subcomponents, or even migrating to a different vendor will be a lot easier in the future (and won't affect any of the other projects I have going on).&lt;/p&gt;
 &lt;h2 id="why-not-just-automate-the-monolith"&gt;Why not just automate the monolith&lt;/h2&gt;
 &lt;p&gt;The "easy" answer may have been to automate more of my "ball of mud" to address the effort/efficiency of applying security updates.&lt;/p&gt;
 &lt;p&gt;Yet the "better monolith" would mean I still owned the maintenance and uptime for a large percent of my services.&lt;/p&gt;
-&lt;p&gt;I appreciate the microservices approach resilience that different providers means it is nearly impossible for them to all go down simultaneously or be affected by one another.&lt;/p&gt;
+&lt;p&gt;The microservices approach of diversity means that with different providers (GitHub, Bitbucket, Google AppEngine, DigitalOcean, etc.) it is nearly impossible for them to all go down simultaneously or be affected by one another.&lt;/p&gt;
 &lt;p&gt;Leveraging other platforms that better fit my use case means I benefit from their expertise and by reducing the moving parts I have a reduced security risk.&lt;/p&gt;
 &lt;p&gt;My experiments in other frameworks and programming languages were never a good match for my "production" web services.&lt;/p&gt;
 &lt;blockquote&gt;
-&lt;p&gt;"because it's there" or "because I can" are very often the reason things continue to be done in a suboptimal way ;) &lt;/p&gt;
+&lt;p&gt;"because it's there" or "because I can" are very often the reason things continue to be done in a suboptimal way ;)&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;p&gt;Now I will focus more on the "top" of the tech stack and less on the "how to automate and deploy" portion.&lt;/p&gt;
+&lt;p&gt;Now I will focus more on the "top" of the tech stack and high value content (like this blog post), less on the "how to automate and deploy" portion.&lt;/p&gt;
 &lt;h2 id="ongoing-and-future-work"&gt;Ongoing and Future Work&lt;/h2&gt;
-&lt;p&gt;I still have to purchase/renew domains, update DNS, and 
-write content.&lt;/p&gt;
+&lt;p&gt;I still have to purchase/renew domains, update DNS, and write content.&lt;/p&gt;
 &lt;p&gt;I still have to eventually find a platform that allows my father-in-law to publish content (and upload files) where I'm not responsible for security patches or backups ;)&lt;/p&gt;
 &lt;p&gt;My experimenting is now done via a PaaS like Google AppEngine, Heroku, Openshift etc. or using Docker containers.  That means more admin and cognitive sprawl but PaaS and CaaS are more predisposed to version control and elastic/disposable architecture so in all a lot less maintenance.&lt;/p&gt;
 &lt;p&gt;The biggest new cost is managing the increased number of services but this at least makes explicit what I am working on and is mostly mitigated by automation.&lt;/p&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">john pfeiffer</dc:creator><pubDate>Fri, 29 Jul 2016 20:59:00 -0700</pubDate><guid isPermaLink="false">tag:blog.john-pfeiffer.com,2016-07-29:a-micro-story-about-migrating-a-personal-monolith-into-microservices/</guid><category>microservices</category><category>monolith</category><category>linode</category><category>digitalocean</category><category>packer</category><category>drupal</category><category>php</category><category>python</category><category>go</category><category>cherokee</category><category>nginx</category></item><item><title>Drupal with Docker Compose and nginx and php-fpm and mariadb</title><link>https://blog.john-pfeiffer.com/drupal-with-docker-compose-and-nginx-and-php-fpm-and-mariadb/</link><description>
@@ -239,7 +238,7 @@ write content.&lt;/p&gt;
 &lt;p&gt;&lt;a href="https://www.nginx.com/blog/nginx-vs-apache-our-view/"&gt;https://www.nginx.com/blog/nginx-vs-apache-our-view/&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;For a personal project I experimented with and chose Cherokee web server (&lt;a href="http://cherokee-project.com/"&gt;http://cherokee-project.com/&lt;/a&gt;) because it offered good performance and a simpler setup (Web UI even!)&lt;/p&gt;
 &lt;p&gt;Unfortunately as the project Dev and adoption slowed it seemed to make a lot of sense to finally convert my personal project to nginx. &lt;a href="https://github.com/cherokee/webserver/commits/master"&gt;https://github.com/cherokee/webserver/commits/master&lt;/a&gt;&lt;/p&gt;
-&lt;p&gt;I also wanted to experiment with a Docker based infrastructure (with docker-compose and a single YAML config file, ideally leveraging as much as possible the many official upstream docker images (&lt;a href="https://hub.docker.com/explore/"&gt;https://hub.docker.com/explore/&lt;/a&gt;)&lt;/p&gt;
+&lt;p&gt;I also wanted to experiment with a Docker based infrastructure (with docker-compose and a single YAML config file, ideally leveraging as much as possible the many official upstream docker images (&lt;a href="https://hub.docker.com/explore/"&gt;https://hub.docker.com/explore/&lt;/a&gt;))&lt;/p&gt;
 &lt;p&gt;Benefits:&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;this would isolate my app from the Host OS (increased portability)&lt;/li&gt;
@@ -628,12 +627,20 @@ mysql:
 &lt;p&gt;Post boot of a "fresh from built-by-packer snapshot" there were still the basic steps of configuring Drupal (which I did manually with a browser and install.php though I'm pretty sure I could have just overridden the settings.php directly).&lt;/p&gt;
 &lt;p&gt;And for this migration project a MySQL dump, SCP of the existing extra modules, and of course the already uploaded user images/files.&lt;/p&gt;
 &lt;p&gt;I'm sure with more tinkering I can overcome the nginx vs www-data user permissions issue but since I time boxed this project I stuck with this compromise which is still much more improved and automated than my previous setup.&lt;/p&gt;
-&lt;p&gt;If migrating data there is of course the prerequisite: &lt;code&gt;mysqldump -uroot -p physicstime &amp;gt; backup.sql&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;For migrating data there is of course the prerequisite: &lt;code&gt;mysqldump -uroot -p physicstime &amp;gt; backup.sql&lt;/code&gt;&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nt"&gt;vi&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nt"&gt;var&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nt"&gt;www&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nt"&gt;html&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nt"&gt;themes&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nt"&gt;bartik&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nt"&gt;css&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nt"&gt;style&lt;/span&gt;&lt;span class="nc"&gt;.css&lt;/span&gt;
     &lt;span class="nt"&gt;font-size&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="nt"&gt;2&lt;/span&gt;&lt;span class="nc"&gt;.929em&lt;/span&gt;&lt;span class="o"&gt;;&lt;/span&gt;
+
+&lt;span class="nt"&gt;cat&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nt"&gt;var&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nt"&gt;www&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nt"&gt;html&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nt"&gt;themes&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nt"&gt;bartik&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nt"&gt;css&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nt"&gt;style&lt;/span&gt;&lt;span class="nc"&gt;.css&lt;/span&gt; &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="nt"&gt;tr&lt;/span&gt; &lt;span class="s1"&gt;'\n'&lt;/span&gt; &lt;span class="s1"&gt;'\r'&lt;/span&gt; &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="nt"&gt;sed&lt;/span&gt; &lt;span class="nt"&gt;-e&lt;/span&gt; &lt;span class="s1"&gt;'s/#site-slogan {\r  font-size: 0.929em/#site-slogan {\r  font-size: 2.929em/'&lt;/span&gt; &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="nt"&gt;tr&lt;/span&gt; &lt;span class="s1"&gt;'\r'&lt;/span&gt; &lt;span class="s1"&gt;'\n'&lt;/span&gt; &lt;span class="o"&gt;&amp;gt;&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nt"&gt;var&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nt"&gt;www&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nt"&gt;html&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nt"&gt;themes&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nt"&gt;bartik&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nt"&gt;css&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nt"&gt;style&lt;/span&gt;&lt;span class="nc"&gt;.css.updated&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 &lt;blockquote&gt;
-&lt;p&gt;customize increased visibility of the #site-slogan { , occasionally needs cache cleared in admin/config/development/performance&lt;/p&gt;
+&lt;p&gt;customize increased visibility of the #site-slogan { , occasionally needs cache cleared in admin/config/development/performance
+The oneliner is a complicated way of sed replacing two lines at once (tr replaces newlines with \r temporarily)&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;sed -i 's/font-size: 87.5/font-size: 120/' /var/www/html/themes/bartik/css/style.css
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Because the world does not need yet another 10pt font website&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;hostnamectl set-hostname physicstime.com
 docker-compose up &amp;amp;
@@ -917,29 +924,32 @@ go build intro.go
 ls -l
 ./intro
 &lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;&lt;code&gt;hi&lt;/code&gt;&lt;/p&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">john pfeiffer</dc:creator><pubDate>Sun, 28 Feb 2016 21:19:00 -0800</pubDate><guid isPermaLink="false">tag:blog.john-pfeiffer.com,2016-02-28:alpine-linux-introduction-tutorial/</guid><category>alpine</category><category>linux</category><category>security</category></item><item><title>Debian Packages for Deployment</title><link>https://blog.john-pfeiffer.com/debian-packages-for-deployment/</link><description>
+&lt;p&gt;&lt;code&gt;hi&lt;/code&gt;&lt;/p&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">john pfeiffer</dc:creator><pubDate>Sun, 28 Feb 2016 21:19:00 -0800</pubDate><guid isPermaLink="false">tag:blog.john-pfeiffer.com,2016-02-28:alpine-linux-introduction-tutorial/</guid><category>alpine</category><category>linux</category><category>security</category></item><item><title>Debian Packages for Deployment and Reprepro for a local apt repository</title><link>https://blog.john-pfeiffer.com/debian-packages-for-deployment-and-reprepro-for-a-local-apt-repository/</link><description>
 &lt;h3 id="what-is-a-debian-package"&gt;What is a Debian Package?&lt;/h3&gt;
 &lt;p&gt;A debian package is a way to distribute and install a collection of files (aka software) onto a system (i.e. Debian or Ubuntu).&lt;/p&gt;
 &lt;p&gt;While a piece of software might depend on other debian packages (e.g. libraries) usually a single .deb file represents some sort of module that serves a single purpose.&lt;/p&gt;
 &lt;p&gt;Once a debian package is built any client (dpkg or apt which also uses dpkg ;) can use it to install the software.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://www.debian.org/doc/manuals/debian-faq/ch-pkg_basics.en.html"&gt;https://www.debian.org/doc/manuals/debian-faq/ch-pkg_basics.en.html&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
 &lt;h3 id="why-use-a-debian-package"&gt;Why use a Debian Package?&lt;/h3&gt;
 &lt;blockquote&gt;
 &lt;p&gt;When you're developing on your own box you can pretty much get away with anything&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;p&gt;A complex and large scale production environment typically has a lot of costs (both operationally and in not becoming a bottleneck to dev velocity). Any opportunity to increase determinism and reduce risk is welcome.&lt;/p&gt;
-&lt;p&gt;Deploying source code directly from git version control doesn't always scale well (streaming tons of small files, dedicated read only service user direct to production, etc.) nor does it create enough determinism with dependency management.&lt;/p&gt;
-&lt;p&gt;As deployments become more frequent and the Continuous Integration becomes more complex it is really important to embrace the "build once" principle so that a single artifact (hopefully with all of its dependencies) can pass through the guantlet of integration testing and canary/incremental rollout.  &lt;/p&gt;
+&lt;p&gt;Deploying source code directly from version control does not always scale well (streaming tons of small files, dedicated read only service user direct to production, etc.) nor does it create enough determinism with regards to dependency management.&lt;/p&gt;
+&lt;p&gt;As deployments become more frequent and Continuous Integration becomes more complex it is really important to embrace the "build once" principle so that a single artifact (hopefully with all of its dependencies) can pass through the gauntlet of integration testing and canary/incremental rollout.&lt;/p&gt;
 &lt;p&gt;So now that you're convinced "Artifacts" are the way to go lets just skip .exe, .msi, .jar, .etc and go straight to...&lt;/p&gt;
 &lt;p&gt;The Debian Package is a "battle tested" format with lots of features (dependency requirements, preinst scripts, postinst scripts, etc.) but if there is a bug in a specific .deb file it is not always practical to get the full source code and rebuild the whole thing (especially considering static bindings and specific compilation environment/parameters).&lt;/p&gt;
 &lt;p&gt;One example people give is an erroneous pre install or post install script that is preventing either installation or removal.&lt;/p&gt;
 &lt;p&gt;The example below is more on just simply changing the control file "Description:"&lt;/p&gt;
-&lt;h3 id="how-to-unpack-a-debian-package-modify-the-control-file-and-repack-it"&gt;How to unpack a debian package, modify the control file, and repack it&lt;/h3&gt;
+&lt;h4 id="how-to-unpack-a-debian-package-modify-the-control-file-and-repack-it"&gt;How to unpack a debian package, modify the control file, and repack it&lt;/h4&gt;
 &lt;p&gt;To unpack, modify, and repack a debian package:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;wget https://example.com/example.deb --output-document /tmp/example.deb
-docker run --rm --it --volume /tmp:/tmp ubuntu:14.04 /bin/bash
-apt-get update
-apt-get install vim
-cd /tmp
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;docker run --rm --it --volume /tmp:/tmp ubuntu:14.04 /bin/bash
+sudo apt-get update
+apt-get install --yes vim wget
+wget https://example.com/example.deb --output-document /tmp/example.deb
+&lt;span class="nb"&gt;cd&lt;/span&gt; /tmp
 mkdir emptydir
 dpkg-deb -R example.deb /tmp/emptydir
 ls -ahl /tmp/emptydir
@@ -948,12 +958,161 @@ vi /tmp/emptydir/DEBIAN/control
 dpkg-deb -b emptydir /tmp/example-fixed.deb
 &lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;On your host /tmp should now contain example.deb and example-fixed.deb&lt;/p&gt;
-&lt;h3 id="more-info"&gt;more info&lt;/h3&gt;
 &lt;ul&gt;
-&lt;li&gt;&lt;a href="https://www.debian.org/doc/manuals/debian-faq/ch-pkg_basics.en.html"&gt;https://www.debian.org/doc/manuals/debian-faq/ch-pkg_basics.en.html&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href="http://unix.stackexchange.com/questions/138188/easily-unpack-deb-edit-postinst-and-repack-deb"&gt;http://unix.stackexchange.com/questions/138188/easily-unpack-deb-edit-postinst-and-repack-deb&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href="http://manpages.ubuntu.com/manpages/hardy/man1/dpkg-deb.1.html"&gt;http://manpages.ubuntu.com/manpages/hardy/man1/dpkg-deb.1.html&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">john pfeiffer</dc:creator><pubDate>Wed, 24 Feb 2016 20:40:00 -0800</pubDate><guid isPermaLink="false">tag:blog.john-pfeiffer.com,2016-02-24:debian-packages-for-deployment/</guid><category>debian</category><category>deb</category><category>build</category><category>packaging</category><category>deployment</category><category>scale</category></item><item><title>Python packaging pip wheels</title><link>https://blog.john-pfeiffer.com/python-packaging-pip-wheels/</link><description>
+&lt;li&gt;&lt;a href="https://unix.stackexchange.com/questions/138188/easily-unpack-deb-edit-postinst-and-repack-deb"&gt;https://unix.stackexchange.com/questions/138188/easily-unpack-deb-edit-postinst-and-repack-deb&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="http://manpages.ubuntu.com/manpages/xenial/en/man1/dpkg-deb.1.html"&gt;http://manpages.ubuntu.com/manpages/xenial/en/man1/dpkg-deb.1.html&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="reprepro-for-a-local-apt-repository"&gt;reprepro for a local apt repository&lt;/h3&gt;
+&lt;p&gt;Just as a debian provides more control over packaging and dependency management, you can also have your apt repository where you store debian packages.&lt;/p&gt;
+&lt;p&gt;By hosting your own apt repository you can:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Create your own distribution server (e.g. in an s3 bucket)&lt;/li&gt;
+&lt;li&gt;Create your own intermediate mirror or cache of an upstream repository (e.g. in a local area network shared drive)&lt;/li&gt;
+&lt;li&gt;Create a local apt repository on local disk for a non internet connected device&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;The tool &lt;code&gt;reprepro&lt;/code&gt; creates and manages the apt database and filesystem.&lt;/p&gt;
+&lt;h4 id="setup-ubuntu-1404-to-install-reprepro"&gt;Setup Ubuntu 14.04 to install reprepro&lt;/h4&gt;
+&lt;p&gt;It might be as simple as a single command to install reprepro but here is the full example in the case where you have broken or corrupted your sources.list:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;cat &lt;span class="s"&gt;&amp;lt;&amp;lt; EOF &amp;gt; /etc/apt/sources.list&lt;/span&gt;
+&lt;span class="s"&gt;    deb http://archive.ubuntu.com/ubuntu/ trusty main&lt;/span&gt;
+&lt;span class="s"&gt;    deb http://archive.ubuntu.com/ubuntu/ trusty universe&lt;/span&gt;
+&lt;span class="s"&gt;    deb http://archive.ubuntu.com/ubuntu/ trusty multiverse&lt;/span&gt;
+&lt;span class="s"&gt;    deb http://security.ubuntu.com/ubuntu trusty-security main restricted&lt;/span&gt;
+&lt;span class="s"&gt;EOF&lt;/span&gt;
+
+rm -rf /var/lib/apt/lists
+apt-get clean&lt;span class="p"&gt;;&lt;/span&gt; apt-get update
+apt-get install reprepro
+&lt;/pre&gt;&lt;/div&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="http://manpages.ubuntu.com/manpages/trusty/en/man1/reprepro.1.html"&gt;http://manpages.ubuntu.com/manpages/trusty/en/man1/reprepro.1.html&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id="setup-the-gpg-key"&gt;Setup the GPG key&lt;/h4&gt;
+&lt;p&gt;A gpg key is an important part of apt for providing a digital signature of authenticity&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;gpg&lt;/span&gt; &lt;span class="o"&gt;--&lt;/span&gt;&lt;span class="nb"&gt;list&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;keys&lt;/span&gt;
+&lt;span class="n"&gt;gpg&lt;/span&gt; &lt;span class="o"&gt;--&lt;/span&gt;&lt;span class="nb"&gt;list&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;keys&lt;/span&gt; &lt;span class="o"&gt;--&lt;/span&gt;&lt;span class="k"&gt;with&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;fingerprint&lt;/span&gt;
+&lt;span class="n"&gt;gpg&lt;/span&gt; &lt;span class="o"&gt;--&lt;/span&gt;&lt;span class="nb"&gt;list&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;secret&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;keys&lt;/span&gt; &lt;span class="o"&gt;--&lt;/span&gt;&lt;span class="k"&gt;with&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;fingerprint&lt;/span&gt;
+&lt;span class="n"&gt;gpg&lt;/span&gt; &lt;span class="o"&gt;--&lt;/span&gt;&lt;span class="n"&gt;allow&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;secret&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;key&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="o"&gt;--&lt;/span&gt;&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;YOURKEY.gpg&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;This allows for importing an existing gpg key into the local keyring (otherwise reprepro actions will not persist)&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;gpg --yes --batch --delete-secret-keys "21E29B5B3F6D550EF4E2C2C9E9991E312341234"
+gpg --yes --batch --delete-keys "21E29B5B3F6D550EF4E2C2C9E9991E312341234"
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Removing or deleting a key seems to only work when you delete a key exactly by fingerprint&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;echo ENCPASSWORD | gpg --yes --no-tty --batch --passphrase-fd 0 --output 8F13E123.key --decrypt 8F13E123.key.gpg
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Decrypt a password encrypted gpg key (that was encrypted with gpg - so meta!)&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://wiki.debian.org/SettingUpSignedAptRepositoryWithReprepro"&gt;https://wiki.debian.org/SettingUpSignedAptRepositoryWithReprepro&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id="setup-a-simple-reprepro"&gt;Setup a simple reprepro&lt;/h4&gt;
+&lt;p&gt;Here we will setup a local apt mirror that is a filtered subset of the upstream mariadb repository&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;mkdir -p /home/admin/apt/conf
+mkdir -p /home/admin/apt/logs
+mkdir -p /home/admin/apt/archive
+
+cat &lt;span class="s"&gt;&amp;lt;&amp;lt; EOF &amp;gt; /home/admin/apt/conf/distributions&lt;/span&gt;
+&lt;span class="s"&gt;Origin: digitalocean-mariadb-10-trusty&lt;/span&gt;
+&lt;span class="s"&gt;Codename: digitalocean-mariadb-10-trusty&lt;/span&gt;
+&lt;span class="s"&gt;Description: local mirror of mariadb 10 trusty from the digital ocean sf mirror&lt;/span&gt;
+&lt;span class="s"&gt;Architectures: amd64&lt;/span&gt;
+&lt;span class="s"&gt;Components: main&lt;/span&gt;
+&lt;span class="s"&gt;SignWith: 8F13E123&lt;/span&gt;
+&lt;span class="s"&gt;Update: - digitalocean-mariadb-10-trusty&lt;/span&gt;
+&lt;span class="s"&gt;Log: /home/admin/apt/logs/bintray-mirror.log&lt;/span&gt;
+&lt;span class="s"&gt;EOF&lt;/span&gt;
+
+cat &lt;span class="s"&gt;&amp;lt;&amp;lt; EOF &amp;gt; /home/admin/apt/conf/options&lt;/span&gt;
+&lt;span class="s"&gt;    outdir /home/admin/apt/archive&lt;/span&gt;
+&lt;span class="s"&gt;    ask-passphrase&lt;/span&gt;
+&lt;span class="s"&gt;EOF&lt;/span&gt;
+
+cat &lt;span class="s"&gt;&amp;lt;&amp;lt; EOF &amp;gt; /home/admin/apt/conf/updates&lt;/span&gt;
+&lt;span class="s"&gt;Name: digitalocean-mariadb-10-trusty&lt;/span&gt;
+&lt;span class="s"&gt;Suite: trusty&lt;/span&gt;
+&lt;span class="s"&gt;Method: http://sfo1.mirrors.digitalocean.com/mariadb/repo/10.0/ubuntu/&lt;/span&gt;
+&lt;span class="s"&gt;Components: main&lt;/span&gt;
+&lt;span class="s"&gt;Architectures: amd64&lt;/span&gt;
+&lt;span class="s"&gt;FilterList: deinstall /home/admin/apt/conf/mariadb-partial.list&lt;/span&gt;
+&lt;span class="s"&gt;VerifyRelease: blindtrust&lt;/span&gt;
+&lt;span class="s"&gt;EOF&lt;/span&gt;
+
+cat &lt;span class="s"&gt;&amp;lt;&amp;lt; EOF &amp;gt; /home/admin/apt/conf/mariadb-partial.list&lt;/span&gt;
+&lt;span class="s"&gt;mariadb-partial.list&lt;/span&gt;
+&lt;span class="s"&gt;libmariadbclient-dev install&lt;/span&gt;
+&lt;span class="s"&gt;libmariadbclient18 install&lt;/span&gt;
+&lt;span class="s"&gt;libmariadbd-dev install&lt;/span&gt;
+&lt;span class="s"&gt;libmysqlclient18 install&lt;/span&gt;
+&lt;span class="s"&gt;mariadb-client install&lt;/span&gt;
+&lt;span class="s"&gt;mariadb-client-10.0 install&lt;/span&gt;
+&lt;span class="s"&gt;mariadb-client-core-10.0 install&lt;/span&gt;
+&lt;span class="s"&gt;mariadb-common install&lt;/span&gt;
+&lt;span class="s"&gt;mariadb-connect-engine-10.0 install&lt;/span&gt;
+&lt;span class="s"&gt;mariadb-server install&lt;/span&gt;
+&lt;span class="s"&gt;mariadb-server-10.0 install&lt;/span&gt;
+&lt;span class="s"&gt;mariadb-server-core-10.0 install&lt;/span&gt;
+&lt;span class="s"&gt;mysql-common install&lt;/span&gt;
+&lt;span class="s"&gt;EOF&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;The configuration created
+- defines the Distribution
+- the option of output directory
+- how the Distribution becomes updated (blindtrust (lol))
+- explicitly what to download or blacklist from the upstream (exclude everything else)&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://mirrorer.alioth.debian.org/reprepro.1.html#CONFIG FILES"&gt;https://mirrorer.alioth.debian.org/reprepro.1.html#CONFIG FILES&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id="updating-a-remote-source"&gt;Updating a remote source&lt;/h4&gt;
+&lt;p&gt;Assuming the installation of reprepro and correct configuration of conf/options, conf/distributions, conf/updates, and conf/NAME-partial.list&lt;/p&gt;
+&lt;p&gt;Update a local repository from an upstream:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;reprepro --verbose --basedir /home/admin/apt check digitalocean-mariadb-10-trusty
+
+reprepro --verbose --basedir /home/admin/apt update digitalocean-mariadb-10-trusty
+    aptmethod got &lt;span class="s1"&gt;'http://sfo1.mirrors.digitalocean.com/mariadb/repo/10.0/ubuntu/dists/trusty/InRelease'&lt;/span&gt;
+    aptmethod got &lt;span class="s1"&gt;'http://sfo1.mirrors.digitalocean.com/mariadb/repo/10.0/ubuntu/dists/trusty/main/binary-amd64/Packages.gz'&lt;/span&gt;
+    Calculating packages to get...
+    Getting packages...
+    aptmethod got &lt;span class="s1"&gt;'http://sfo1.mirrors.digitalocean.com/mariadb/repo/10.0/ubuntu/pool/main/m/mariadb-10.0/libmariadbclient-dev_10.0.26+maria-1~trusty_amd64.deb'&lt;/span&gt;
+
+ls -ahl /home/admin/apt/archive
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;should contain two directories: dists and pool&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;reprepro --verbose --basedir /home/admin/apt check
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;This will check all Distributions that have been configured for upstream changes&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h4 id="listing-or-adding-or-removing-a-debian-package-with-reprepro"&gt;Listing or Adding or Removing a debian package with reprepro&lt;/h4&gt;
+&lt;p&gt;Assuming you have setup your gpg signing key and config files correctly you can also just add a single package ad-hoc to your local apt repository&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;reprepro dumpreferences
+reprepro --verbose --basedir . remove digitalocean-mariadb-10-trusty SOMEPACKAGENAME
+reprepro --verbose --basedir . includedeb digitalocean-mariadb-10-trusty SOMEFILENAME.deb
+reprepro &lt;span class="nb"&gt;export&lt;/span&gt; digitalocean-mariadb-10-trusty
+&lt;/pre&gt;&lt;/div&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://mirrorer.alioth.debian.org/reprepro.1.html"&gt;https://mirrorer.alioth.debian.org/reprepro.1.html&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://wikitech.wikimedia.org/wiki/Reprepro"&gt;https://wikitech.wikimedia.org/wiki/Reprepro&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id="configuring-a-client"&gt;Configuring a client&lt;/h4&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="err"&gt;cat&lt;/span&gt; &lt;span class="err"&gt;/etc/apt/sources.list.d/mariadb.list&lt;/span&gt;
+    &lt;span class="err"&gt;deb&lt;/span&gt;     &lt;span class="err"&gt;file:///home/admin/apt/archive&lt;/span&gt; &lt;span class="err"&gt;trusty&lt;/span&gt; &lt;span class="err"&gt;main&lt;/span&gt;
+&lt;span class="err"&gt;apt-get&lt;/span&gt; &lt;span class="err"&gt;clean&lt;/span&gt;
+&lt;span class="err"&gt;apt-get&lt;/span&gt; &lt;span class="err"&gt;update&lt;/span&gt;
+&lt;span class="err"&gt;apt-get&lt;/span&gt; &lt;span class="err"&gt;search&lt;/span&gt; &lt;span class="err"&gt;mariadb&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Now you can install mariadb from your local apt repository, or host it on s3 and change mariadb.list to have the bucket FQDN (&lt;code&gt;aws s3 --delete --exact-timestamps sync ./archive s3://mybucket&lt;/code&gt;)&lt;/p&gt;
+&lt;/blockquote&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">john pfeiffer</dc:creator><pubDate>Wed, 24 Feb 2016 20:40:00 -0800</pubDate><guid isPermaLink="false">tag:blog.john-pfeiffer.com,2016-02-24:debian-packages-for-deployment-and-reprepro-for-a-local-apt-repository/</guid><category>debian</category><category>deb</category><category>build</category><category>packaging</category><category>deployment</category><category>scale</category><category>reprepro</category><category>apt</category></item><item><title>Python packaging pip wheels</title><link>https://blog.john-pfeiffer.com/python-packaging-pip-wheels/</link><description>
 &lt;h3 id="installing-packages-with-python"&gt;Installing packages with python&lt;/h3&gt;
 &lt;p&gt;Pip is the standard way to install python packages&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;sudo pip install packagename
@@ -985,13 +1144,17 @@ dpkg-deb -b emptydir /tmp/example-fixed.deb
 &lt;p&gt;Wheels are (awesome), it's the beginning of trying to make python installations more deterministic and pip less dynamic at install time. &lt;a href="http://wheel.readthedocs.org/en/latest/"&gt;http://wheel.readthedocs.org/en/latest/&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;An output directory of the wheels of a project are known by convention as a "wheelhouse".&lt;/p&gt;
 &lt;p&gt;As a side effect the wheel directory, “/tmp/wheelhouse” in the example, contains installable copies of the exact versions of your application’s dependencies. By installing from those cached wheels you can recreate that environment quickly and with no surprises.&lt;/p&gt;
-&lt;p&gt;When you install using pip it looks for a “wheel file” (*.whl which is the newer zip compressed format, goodbye .egg) of the correct name for your (virtual) environment (e.g. py2 or py3 or x86 linux).  This wheel file saves time and bugs from installing a package/.egg  from source (usually that time is spent compiling C code for the python library). &lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;sudo pip install wheel; cd projectsource; python setup.py bdist_wheel; ls -l ./dist
-
-pip wheel  --find-links /root/wheelhouse --wheel-dir=/root/wheelhouse -r requirements.txt
+&lt;p&gt;When you install using pip it looks for a “wheel file” (*.whl which is the newer zip compressed format, goodbye .egg) of the correct name for your (virtual) environment (e.g. py2 or py3 or x86 linux).  This wheel file saves time and bugs from installing a package/.egg  from source (usually that time is spent compiling C code for the python library).&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;sudo pip install wheel
+&lt;span class="nb"&gt;cd&lt;/span&gt; projectsource
+python setup.py bdist_wheel
+ls -l ./dist
+pip wheel  --find-links /root/wheelhouse --wheel-dir&lt;span class="o"&gt;=&lt;/span&gt;/root/wheelhouse -r requirements.txt
 &lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;&lt;a href="https://pip.pypa.io/en/stable/reference/pip_wheel/"&gt;https://pip.pypa.io/en/stable/reference/pip_wheel/&lt;/a&gt;
-&lt;a href="http://pip-python3.readthedocs.org/en/latest/reference/pip_wheel.html#build-system-interface"&gt;http://pip-python3.readthedocs.org/en/latest/reference/pip_wheel.html#build-system-interface&lt;/a&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://pip.pypa.io/en/stable/reference/pip_wheel/"&gt;https://pip.pypa.io/en/stable/reference/pip_wheel/&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="http://pip-python3.readthedocs.org/en/latest/reference/pip_wheel.html#build-system-interface"&gt;http://pip-python3.readthedocs.org/en/latest/reference/pip_wheel.html#build-system-interface&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
 &lt;h4 id="installing-using-a-wheel-file"&gt;installing using a wheel file&lt;/h4&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;pip install somepackage-version-py2.py3.whl
 pip freeze
@@ -1002,24 +1165,24 @@ pip freeze
     error: invalid command 'bdist_wheel'&lt;/p&gt;
 &lt;p&gt;Reading the internet provided no comprehensible answers (lots of "setuptools does not match your version of pip or wheel or whatever")&lt;/p&gt;
 &lt;p&gt;The following hacking seems to have provided a solution:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;python --version
-pip --version
-cd /tmp
-wget https://pypi.python.org/packages/source/d/docutils/docutils-0.12.tar.gz#md5=4622263b62c5c771c03502afa3157768
-tar xf docutils-0.12.tar.gz
-cd docutils-0.12
-virtualenv venv
-source venv/bin/activate
-python --version
-pip --version
-pip install wheel
-pip freeze
-python setup.py install
-pip freeze
-pip wheel .
-ls /tmp/docutils-0.12/wheelhouse
-    docutils-0.12-py2-none-any.whl
-&lt;/pre&gt;&lt;/div&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">john pfeiffer</dc:creator><pubDate>Tue, 05 Jan 2016 20:00:00 -0800</pubDate><guid isPermaLink="false">tag:blog.john-pfeiffer.com,2016-01-05:python-packaging-pip-wheels/</guid><category>python</category><category>packaging</category><category>pip</category><category>wheels</category></item><item><title>Static site with Bitbucket and Shippable and Pelican</title><link>https://blog.john-pfeiffer.com/static-site-with-bitbucket-and-shippable-and-pelican/</link><description>
+&lt;p&gt;:::bash
+    python --version
+    pip --version
+    cd /tmp
+    wget https://pypi.python.org/packages/source/d/docutils/docutils-0.12.tar.gz#md5=4622263b62c5c771c03502afa3157768
+    tar xf docutils-0.12.tar.gz
+    cd docutils-0.12
+    virtualenv venv
+    source venv/bin/activate
+    python --version
+    pip --version
+    pip install wheel
+    pip freeze
+    python setup.py install
+    pip freeze
+    pip wheel .
+    ls /tmp/docutils-0.12/wheelhouse
+        docutils-0.12-py2-none-any.whl&lt;/p&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">john pfeiffer</dc:creator><pubDate>Tue, 05 Jan 2016 20:00:00 -0800</pubDate><guid isPermaLink="false">tag:blog.john-pfeiffer.com,2016-01-05:python-packaging-pip-wheels/</guid><category>python</category><category>packaging</category><category>pip</category><category>wheels</category></item><item><title>Static site with Bitbucket and Shippable and Pelican</title><link>https://blog.john-pfeiffer.com/static-site-with-bitbucket-and-shippable-and-pelican/</link><description>
 &lt;h2 id="running-software-costs-money"&gt;Running Software Costs Money&lt;/h2&gt;
 &lt;p&gt;One of the most overlooked costs in running a service is operations.  While Research and Development (aka coding) is often cited as the largest expense (software developer salaries! &lt;a href="https://www.quora.com/What-are-the-average-operating-costs-of-SaaS-companies"&gt;https://www.quora.com/What-are-the-average-operating-costs-of-SaaS-companies&lt;/a&gt;), and 80% (or more) of (successful) software's life is maintenance (&lt;a href="http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3610582/"&gt;http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3610582/&lt;/a&gt;), you have to run the darn thing all the time.&lt;/p&gt;
 &lt;h2 id="a-free-and-efficient-static-web-site"&gt;A Free and Efficient Static Web Site&lt;/h2&gt;
@@ -1855,13 +2018,13 @@ nginx: configuration file /etc/nginx/nginx.conf test is successful&lt;/p&gt;
 &lt;p&gt;e.g. &lt;a href="https://hub.docker.com/r/jwilder/nginx-proxy/~/dockerfile/"&gt;https://hub.docker.com/r/jwilder/nginx-proxy/~/dockerfile/&lt;/a&gt; which also has "Foreman in Go lang" and makes use of expecting the Host to provide the SSL certificates&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;a href="https://www.nginx.com/resources/admin-guide/nginx-web-server/"&gt;https://www.nginx.com/resources/admin-guide/nginx-web-server/&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;a href="https://www.nginx.com/resources/wiki/start/topics/examples/full/"&gt;https://www.nginx.com/resources/wiki/start/topics/examples/full/&lt;/a&gt;&lt;/p&gt;
-&lt;p&gt;docker run --rm --publish 127.0.0.1:80:80 nginx /bin/bash -c "nginx -t -c /etc/nginx/nginx.conf"
-    nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
-    nginx: configuration file /etc/nginx/nginx.conf test is successful&lt;/p&gt;
-&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://www.nginx.com/resources/wiki/start/topics/examples/full/"&gt;https://www.nginx.com/resources/wiki/start/topics/examples/full/&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
+&lt;p&gt;Quickly testing the nginx configuration file using an ephemeral docker container:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;docker run --rm --publish 127.0.0.1:80:80 nginx /bin/bash -c &lt;span class="s2"&gt;"nginx -t -c /etc/nginx/nginx.conf"&lt;/span&gt;
+    nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
+    nginx: configuration file /etc/nginx/nginx.conf &lt;span class="nb"&gt;test&lt;/span&gt; is successful
+&lt;/pre&gt;&lt;/div&gt;
 &lt;h2 id="build-your-own-nginx-dockerfile"&gt;Build your own nginx Dockerfile&lt;/h2&gt;
 &lt;p&gt;If you require 3rd party modules then you will have to build nginx from source, e.g.
 &lt;a href="https://github.com/openresty/headers-more-nginx-module#installation"&gt;https://github.com/openresty/headers-more-nginx-module#installation&lt;/a&gt;&lt;/p&gt;
@@ -1900,11 +2063,13 @@ http {
 }
 &lt;/pre&gt;&lt;/div&gt;
 &lt;blockquote&gt;
-&lt;p&gt;Run the service as the www-data user and define 4 worker processes
-define an HTTP server that listens on port 80 by default
-the root location will return the contents of /var/www
-a best practice is to use multiple configuration files in the conf.d directory (as a really long complex configuration in a single is difficult to maintain)
-BUT we must comment it out as in the installation there can be a default.conf that overrides our nginx.conf&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Run the service as the www-data user and define 4 worker processes&lt;/li&gt;
+&lt;li&gt;define an HTTP server that listens on port 80 by default&lt;/li&gt;
+&lt;li&gt;the root location will return the contents of /var/www&lt;/li&gt;
+&lt;li&gt;a best practice is to use multiple configuration files in the conf.d directory (as a really long complex configuration in a single is difficult to maintain)&lt;/li&gt;
+&lt;li&gt;BUT we must comment it out as in the installation there can be a default.conf that overrides our nginx.conf&lt;/li&gt;
+&lt;/ul&gt;
 &lt;/blockquote&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;sudo docker run -it --rm --publish 0.0.0.0:80:80 --volume /tmp/nginx.conf:/etc/nginx/nginx.conf:ro  nginx:alpine /bin/sh
 &lt;/pre&gt;&lt;/div&gt;
@@ -1921,8 +2086,7 @@ BUT we must comment it out as in the installation there can be a default.conf th
 &lt;blockquote&gt;
 &lt;p&gt;assumes you have a config file and some index file defined&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;/var/www/index.html
-&lt;span class="nt"&gt;&amp;lt;html&amp;gt;&amp;lt;body&amp;gt;&lt;/span&gt;hi&lt;span class="nt"&gt;&amp;lt;/body&amp;gt;&amp;lt;/html&amp;gt;&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;echo "&lt;span class="nt"&gt;&amp;lt;html&amp;gt;&amp;lt;body&amp;gt;&lt;/span&gt;hi&lt;span class="nt"&gt;&amp;lt;/body&amp;gt;&amp;lt;/html&amp;gt;&lt;/span&gt;" &amp;gt; /var/www/index.html
 &lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;That's it, now you have nginx serving static files! (curl localhost OR use a browser and visit localhost or http://hostfqdn)&lt;/p&gt;
 &lt;blockquote&gt;
@@ -2055,26 +2219,23 @@ Protocols advertised by server: h2, http/1.1
 &lt;h2 id="nginx-with-php-fpm"&gt;nginx with php-fpm&lt;/h2&gt;
 &lt;h3 id="investigate-php-fpm-in-docker"&gt;Investigate php-fpm in Docker&lt;/h3&gt;
 &lt;p&gt;This hack is fun but proves unnecessary when using Docker Compose later...&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;docker pull php:5.5-fpm-alpine
-&lt;/pre&gt;&lt;/div&gt;
-&lt;ul&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;a href="https://hub.docker.com/_/php/"&gt;https://hub.docker.com/_/php/&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;:::bash
-ifconfig | grep Bc
-docker run -it --rm --publish 0.0.0.0:9000:9000 php:5.5-fpm-alpine /bin/sh
-route -n
-php-fpm --version
-sed -i 's/listen = 127.0.0.1:9000/listen = 0.0.0.0:9000/g' /usr/local/etc/php-fpm.d/www.conf
-php-fpm --fpm-config /usr/local/etc/php-fpm.conf&lt;/p&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
+    docker pull php:5.5-fpm-alpine
+    ifconfig | grep Bc
+    docker run -it --rm --publish 0.0.0.0:9000:9000 php:5.5-fpm-alpine /bin/sh
+    route -n
+    php-fpm --version
+    sed -i 's/listen = 127.0.0.1:9000/listen = 0.0.0.0:9000/g' /usr/local/etc/php-fpm.d/www.conf
+    php-fpm --fpm-config /usr/local/etc/php-fpm.conf&lt;/p&gt;
 &lt;blockquote&gt;
-&lt;p&gt;ifconfig and route -n are to discover the docker host IP Address via the default gateway 172.17.0.1
-contains include=etc/php-fpm.d/*.conf
-/usr/local/etc/php-fpm.d/www.conf&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;ifconfig and route -n are to discover the docker host IP Address via the default gateway 172.17.0.1&lt;/li&gt;
+&lt;li&gt;contains include=etc/php-fpm.d/*.conf&lt;/li&gt;
+&lt;li&gt;/usr/local/etc/php-fpm.d/www.conf&lt;/li&gt;
+&lt;/ul&gt;
 &lt;/blockquote&gt;
 &lt;ul&gt;
+&lt;li&gt;&lt;a href="https://hub.docker.com/_/php/"&gt;https://hub.docker.com/_/php/&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href="http://php.net/manual/en/install.fpm.configuration.php"&gt;http://php.net/manual/en/install.fpm.configuration.php&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 &lt;h3 id="configure-nginx"&gt;Configure nginx&lt;/h3&gt;
