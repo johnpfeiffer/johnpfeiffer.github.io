@@ -8,7 +8,7 @@
 &lt;/ul&gt;
 &lt;p&gt;This kind of infrastructure simplifies the programming of distributed systems so that it is easier to deliver value quickly on the actual domain problems.&lt;/p&gt;
 &lt;p&gt;&lt;em&gt;I have certainly done my fair share of hardcoded config files to "discover" dependency services and even used chef for "config management"...
-But with the evolution of devops, web scale, microservices, containers, etc. it is great to leverage an existing battle tested solution&lt;/em&gt;&lt;/p&gt;
+But with the evolution of dev-ops, web scale, microservices, containers, etc. it is great to leverage an existing battle tested solution&lt;/em&gt;&lt;/p&gt;
 &lt;h2 id="consul-cluster-using-docker"&gt;Consul Cluster using Docker&lt;/h2&gt;
 &lt;p&gt;Following the straightforward work from this Docker Image we can run a cluster on a single machine:&lt;/p&gt;
 &lt;p&gt;&lt;a href="https://hub.docker.com/r/progrium/consul/"&gt;https://hub.docker.com/r/progrium/consul/&lt;/a&gt;&lt;/p&gt;
@@ -50,14 +50,28 @@ curl http://localhost:8500/v1/health/node/node1
 &lt;li&gt;&lt;a href="https://www.consul.io/docs/agent/http.html"&gt;https://www.consul.io/docs/agent/http.html&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;
 &lt;p&gt;&lt;a href="https://www.consul.io/docs/agent/dns.html"&gt;https://www.consul.io/docs/agent/dns.html&lt;/a&gt;&lt;/p&gt;
-&lt;p _consul_:_='"consul":[]'&gt;:::bash
-curl http://localhost:8500/v1/catalog/services&lt;/p&gt;
-&lt;p&gt;curl http://localhost:8500/v1/catalog/service/web
+&lt;p&gt;:::bash&lt;/p&gt;
+&lt;p&gt;curl http://localhost:8500/v1/catalog/services
+    {"consul":[]}
+curl http://localhost:8500/v1/catalog/service/web
     []&lt;/p&gt;
 &lt;blockquote&gt;
 &lt;p&gt;Listing of the services available, no web service yet =)&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="alternative-install-from-zip"&gt;Alternative Install from Zip&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="x"&gt;apt-­get install unzip&lt;/span&gt;
+&lt;span class="x"&gt;wget https://releases.hashicorp.com/consul/0.7.0/consul_0.7.0_linux_amd64.zip&lt;/span&gt;
+&lt;span class="x"&gt;unzip consul_0.7.0_linux_amd64.zip&lt;/span&gt;
+&lt;span class="x"&gt;BINDIP=&lt;/span&gt;&lt;span class="p"&gt;$(&lt;/span&gt;&lt;span class="err"&gt;ifconfig&lt;/span&gt; &lt;span class="err"&gt;eth0&lt;/span&gt; &lt;span class="err"&gt;|&lt;/span&gt; &lt;span class="err"&gt;grep&lt;/span&gt; &lt;span class="s2"&gt;"inet addr"&lt;/span&gt; &lt;span class="err"&gt;|&lt;/span&gt; &lt;span class="err"&gt;cut&lt;/span&gt; &lt;span class="err"&gt;­d&lt;/span&gt; &lt;span class="s1"&gt;':'&lt;/span&gt; &lt;span class="err"&gt;­f&lt;/span&gt; &lt;span class="m"&gt;2&lt;/span&gt; &lt;span class="err"&gt;|&lt;/span&gt; &lt;span class="err"&gt;cut&lt;/span&gt; &lt;span class="err"&gt;­d&lt;/span&gt; &lt;span class="s1"&gt;' '&lt;/span&gt; &lt;span class="err"&gt;­f&lt;/span&gt; &lt;span class="m"&gt;1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="x"&gt;    &lt;/span&gt;
+&lt;span class="x"&gt;./consul agent ­bootstrap ­server ­bind=&lt;/span&gt;&lt;span class="p"&gt;$&lt;/span&gt;&lt;span class="nv"&gt;BINDIP&lt;/span&gt;&lt;span class="x"&gt; ­data­dir /tmp/consul&lt;/span&gt;
+
+&lt;span class="x"&gt;netstat ­antp  | grep consul&lt;/span&gt;
+&lt;span class="x"&gt;curl http://localhost:8500/v1/status/peers&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://www.consul.io/docs/agent/options.html"&gt;https://www.consul.io/docs/agent/options.html&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 &lt;h2 id="registering-a-service"&gt;Registering a Service&lt;/h2&gt;
 &lt;p&gt;Creating and running a very simplistic golang web server (assuming you have go installed ;) , &lt;code&gt;go run web.go&lt;/code&gt;
@@ -118,8 +132,46 @@ curl http://localhost:8500/v1/health/service/web
         &lt;span class="s2"&gt;"Notes"&lt;/span&gt;:&lt;span class="s2"&gt;""&lt;/span&gt;,&lt;span class="s2"&gt;"Output"&lt;/span&gt;:&lt;span class="s2"&gt;"TTL expired"&lt;/span&gt;,&lt;span class="s2"&gt;"ServiceID"&lt;/span&gt;:&lt;span class="s2"&gt;"web1"&lt;/span&gt;,&lt;span class="s2"&gt;"ServiceName"&lt;/span&gt;:&lt;span class="s2"&gt;"web"&lt;/span&gt;&lt;span class="o"&gt;}&lt;/span&gt;,
     &lt;span class="o"&gt;{&lt;/span&gt;&lt;span class="s2"&gt;"Node"&lt;/span&gt;:&lt;span class="s2"&gt;"node4"&lt;/span&gt;,&lt;span class="s2"&gt;"CheckID"&lt;/span&gt;:&lt;span class="s2"&gt;"serfHealth"&lt;/span&gt;,&lt;span class="s2"&gt;"Name"&lt;/span&gt;:&lt;span class="s2"&gt;"Serf Health Status"&lt;/span&gt;,&lt;span class="s2"&gt;"Status"&lt;/span&gt;:&lt;span class="s2"&gt;"passing"&lt;/span&gt;,&lt;span class="s2"&gt;"Notes"&lt;/span&gt;:&lt;span class="s2"&gt;""&lt;/span&gt;,&lt;span class="s2"&gt;"Output"&lt;/span&gt;:&lt;span class="s2"&gt;"Agent alive and reachable"&lt;/span&gt;,&lt;span class="s2"&gt;"ServiceID"&lt;/span&gt;:&lt;span class="s2"&gt;""&lt;/span&gt;,&lt;span class="s2"&gt;"ServiceName"&lt;/span&gt;:&lt;span class="s2"&gt;""&lt;/span&gt;&lt;span class="o"&gt;}]}]&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
-&lt;h2 id="distributed-configuration"&gt;Distributed Configuration&lt;/h2&gt;
-&lt;p&gt;A simple use case is to use the key value store to distribute other information besides services that need to be discovered, &lt;a href="https://www.consul.io/docs/agent/http/kv.html"&gt;https://www.consul.io/docs/agent/http/kv.html&lt;/a&gt;&lt;/p&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">john pfeiffer</dc:creator><pubDate>Sat, 27 Aug 2016 21:01:00 -0700</pubDate><guid isPermaLink="false">tag:blog.john-pfeiffer.com,2016-08-27:consul-service-discovery-and-cluster-configuration/</guid><category>service discovery</category><category>consul</category><category>cluster</category><category>clustering</category><category>config</category></item><item><title>A micro story about migrating a personal monolith into microservices</title><link>https://blog.john-pfeiffer.com/a-micro-story-about-migrating-a-personal-monolith-into-microservices/</link><description>
+&lt;h3 id="redis-in-containers-as-another-service"&gt;Redis in Containers as another Service&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;docker run --rm -it -p 0.0.0.0:6379:6379 --name redis redis:alpine
+
+docker run --rm -it --link redis:redis redis:alpine redis-cli -h redis -p 6379 help keys
+docker run --rm -it --entrypoint=/bin/sh --link redis:redis redis:alpine
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;By running a local redis service we can modify our simple Go web service to query consul and dynamically discover how to reach the correct dependency, "look mom, no config files!"&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://hub.docker.com/_/redis/"&gt;https://hub.docker.com/_/redis/&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="distributed-configuration-and-the-go-client-library"&gt;Distributed Configuration and the Go Client Library&lt;/h2&gt;
+&lt;p&gt;A simple use case is to use the key value store to distribute other information besides services that need to be discovered.&lt;/p&gt;
+&lt;p&gt;Obviously interacting directly with Consul as a client from inside the application is beneficial to "keeping it all in the code" and not relying on config files or shell scripts.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://www.consul.io/docs/agent/http/kv.html"&gt;https://www.consul.io/docs/agent/http/kv.html&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://github.com/hashicorp/consul/tree/master/api"&gt;https://github.com/hashicorp/consul/tree/master/api&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://godoc.org/github.com/hashicorp/consul/api"&gt;https://godoc.org/github.com/hashicorp/consul/api&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Documentation on the Key Value store and the official Go client library&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id="python-client"&gt;Python Client&lt;/h3&gt;
+&lt;p&gt;Using an open source client can help avoid "do not repeat yourself" of writing the REST API wrapper (and benefiting from crowd source at work)&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="http://consulate.readthedocs.io/en/stable/"&gt;http://consulate.readthedocs.io/en/stable/&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href="https://github.com/gmr/consulate"&gt;https://github.com/gmr/consulate&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;sudo pip3 install consulate&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Like all open source projects this has some bugs and outstanding PRs but it is better than another one I tried which was still in alpha (aka not really fully implemented) , &lt;a href="https://www.consul.io/downloads_tools.html"&gt;https://www.consul.io/downloads_tools.html&lt;/a&gt;&lt;/p&gt;
+&lt;h2 id="some-gotchas"&gt;Some Gotchas&lt;/h2&gt;
+&lt;p&gt;Consul has a few edge cases that you may need to address specifically:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;If a node reboots and changes ip address it will not go well: &lt;a href="https://github.com/hashicorp/consul/issues/457"&gt;https://github.com/hashicorp/consul/issues/457&lt;/a&gt; , the simplest case might be to just remove it's data directory and force it to rejoin without any data&lt;/li&gt;
+&lt;li&gt;If a new node attempts to join a cluster it needs to know the ip address of an existing node, there is no "auto discovery-join" mechanism except to delegate to Atlas, the paid SaaS product from HashiCorp, or of course to write your own workaround &lt;a href="https://www.consul.io/docs/guides/bootstrapping.html"&gt;https://www.consul.io/docs/guides/bootstrapping.html&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;If all of the server nodes in the cluster go down then there is no auto-recovery (which is not surprising I suppose...) &lt;a href="https://www.consul.io/docs/guides/outage.html"&gt;https://www.consul.io/docs/guides/outage.html&lt;/a&gt; , &lt;a href="https://github.com/hashicorp/consul/issues/454"&gt;https://github.com/hashicorp/consul/issues/454&lt;/a&gt; , &lt;a href="https://github.com/hashicorp/consul/issues/526"&gt;https://github.com/hashicorp/consul/issues/526&lt;/a&gt;, again, if you write your own wrapper to detect this scenario as the nodes reboot (or in an immutable world are re-added assuming you have solved #1 and #2 ;) they "should" be able to recover and reload from raft/peers.json&lt;/li&gt;
+&lt;/ol&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">john pfeiffer</dc:creator><pubDate>Sat, 27 Aug 2016 21:01:00 -0700</pubDate><guid isPermaLink="false">tag:blog.john-pfeiffer.com,2016-08-27:consul-service-discovery-and-cluster-configuration/</guid><category>service discovery</category><category>consul</category><category>cluster</category><category>clustering</category><category>config</category></item><item><title>A micro story about migrating a personal monolith into microservices</title><link>https://blog.john-pfeiffer.com/a-micro-story-about-migrating-a-personal-monolith-into-microservices/</link><description>
 &lt;p&gt;I'm a fan of best practices (who isn't?) and as complexity increases one of the modern paradigms is to use microservices to more transparently manage complexity, reduce tight coupling, and decrease maintenance overhead.&lt;/p&gt;
 &lt;p&gt;Taking a different approach to my "less than webscale" personal web services has still made great improvements to the services and my quality of life.&lt;/p&gt;
 &lt;p&gt;This article is categorized as Build and CI/CD and DevOps because while microservices is transformative for larger organizations to avoid the negative consequences of Conway's Law and provides a better architecture for really complex systems, in my case it was simply about decoupling deployments and not having all of my eggs in one basket. (e.g. the Drupal migration below actually did not affect the User Experience in any visible way).&lt;/p&gt;
