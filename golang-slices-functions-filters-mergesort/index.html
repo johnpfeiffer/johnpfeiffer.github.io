@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en-US">
+    <head>
+        <meta charset="utf-8"> 
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="author" content="john pfeiffer" />
+        <meta name="copyright" content="john pfeiffer" />
+
+<meta name="keywords" content="go, golang, testing, arrays, slices, functions, filter, algorithms, merge, mergesort, strategy pattern, programming, " />
+        <title>Golang Slices Functions Filters Mergesort  · johnpfeiffer
+</title>
+        <link href="https://cdn-images.mailchimp.com/embedcode/slim-081711.css" rel="stylesheet" type="text/css">
+        <link href="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="https://blog.john-pfeiffer.com/theme/css/style.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="https://blog.john-pfeiffer.com/theme/css/solarizedlight.css" media="screen">
+        <link rel="shortcut icon" href="https://blog.john-pfeiffer.com/theme/images/favicon.ico" type="image/x-icon" />
+        <link rel="apple-touch-icon" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon.png" />
+        <link rel="apple-touch-icon" sizes="57x57" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-57x57.png" />
+        <link rel="apple-touch-icon" sizes="72x72" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-72x72.png" />
+        <link rel="apple-touch-icon" sizes="114x114" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-114x114.png" />
+        <link rel="apple-touch-icon" sizes="144x144" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-144x144.png" />
+        <link rel="icon" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-144x144.png" />
+    <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-3758734-9']);
+    _gaq.push(['_trackPageview']);
+    (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+    </script>
+    </head>
+    <body>
+	<div id="content-sans-footer">
+        <div class="dropdown-backdrop">
+
+			<div class="navbar navbar-static-top">
+				<div class="navbar-inner">
+					<div class="container">
+						<a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+							<span class="icon-bar"></span>
+							<span class="icon-bar"></span>
+							<span class="icon-bar"></span>
+						</a>
+						<a class="brand" href="https://blog.john-pfeiffer.com/"><span class=site-name>johnpfeiffer</span></a>
+						<div class="nav-collapse collapse">
+							<ul class="nav pull-right top-menu">
+								<li ><a href="https://blog.john-pfeiffer.com">Home</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/john-likes/">John Likes</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/categories.html">Categories</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/tags.html">Tags</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/archives.html">Archives</a></li>
+								<li><form class="navbar-search" action="https://blog.john-pfeiffer.com/search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="container-fluid">
+			<div class="row-fluid">
+				<div class="span1"></div>
+				<div class="span10">
+<article>
+<div class="row-fluid">
+    <header class="page_header span10 offset2">
+    <h1><a href="https://blog.john-pfeiffer.com/golang-slices-functions-filters-mergesort/"> Golang Slices Functions Filters Mergesort  </a></h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+    <div class="span2 table-of-content">
+        <nav>
+        <h4>Contents</h4>
+        <div class="toc">
+<ul>
+<li><a href="#tips-on-learning-a-new-programming-language">Tips on learning a new programming language</a></li>
+<li><a href="#arrays-underlying-slices-with-memory-addresses-and-unsafe-pointers">Arrays underlying slices with memory addresses and unsafe pointers</a></li>
+<li><a href="#functions-anonymous-functions-functions-as-parameters-and-filters">Functions, Anonymous Functions, Functions as Parameters, and Filters</a></li>
+<li><a href="#mergesort">MergeSort</a></li>
+</ul>
+</div>
+        </nav>
+    </div>
+    <div class="span8 article-content">
+
+            
+<h2 id="tips-on-learning-a-new-programming-language">Tips on learning a new programming language</h2>
+<p>Learning a new programming language takes a lot of effort.  Here are some tips I've found to make it easier:</p>
+<ol>
+<li>Layering: read through the material and just accept things without trying to understand every piece, small pieces are easier to digest and absorb</li>
+<li>Repetition: it is natural to read and re-read before comprehension occurs, learning right before sleep is scientifically proven to better enter long term memory</li>
+<li>Immersion: surround yourself with reminders of the material like books, web sites, on your phone, flash cards, online and real life discussions, videos</li>
+<li>Variety: sometimes it sticks better with a book, other times a video or podcast.  Different teachers will emphasize or convey certain topics better.  Do not give up because it's confusing from one source, there are many many sources to learn from</li>
+<li>Practice: apply yourself as programming is far better internalized "in action" rather than just theory</li>
+<li>Engage: using provided exercises will get you to the solution the instructor expects, creating your own coding projects will force you to use the tools in ways that make sense to you (and discover why certain things are "best practice")</li>
+<li>Go Deep: once comfortable moving around, real fluency and understanding requires digging into exactly how something is architected and implemented, what are the corner cases, and why things are done one way over another</li>
+</ol>
+<h2 id="arrays-underlying-slices-with-memory-addresses-and-unsafe-pointers">Arrays underlying slices with memory addresses and unsafe pointers</h2>
+<p>Arrays are a mainstay of programming (mechanical sympathy for memory addresses and our very serial brains).
+Here is a major digression into Go slices which is a pointer structure that holds an array and manages the dynamic resizing.
+<em>Hint: the whole point of Go is to not need to use low level unsafe pointer arithmetic</em></p>
+<div class="highlight"><pre><span></span><span class="kd">func</span> <span class="nx">capacityDoubles</span><span class="p">()</span> <span class="p">{</span>
+    <span class="c1">// slice of zero length and zero capacity, basically just a "slice header"</span>
+    <span class="c1">// NOTE this is different from a "nil slice" which is a nil pointer</span>
+    <span class="kd">var</span> <span class="nx">nilPointer</span> <span class="p">[]</span><span class="kt">int</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">"example nil pointer: %#v \n"</span><span class="p">,</span> <span class="nx">nilPointer</span><span class="p">)</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">"has memory adddress: %p \n"</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">nilPointer</span><span class="p">)</span>
+
+    <span class="nx">s</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">([]</span><span class="kt">int</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">"example empty slice: %#v \n"</span><span class="p">,</span> <span class="nx">s</span><span class="p">)</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">"has memory adddress: %p \n"</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">s</span><span class="p">)</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">"both have the same length:"</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="nx">nilPointer</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="nx">s</span><span class="p">),</span> <span class="s">"but does each equal nil? "</span><span class="p">,</span> <span class="nx">nilPointer</span> <span class="o">==</span> <span class="kc">nil</span><span class="p">,</span> <span class="nx">s</span> <span class="o">==</span> <span class="kc">nil</span><span class="p">)</span>
+
+    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">s</span><span class="p">)</span>
+    <span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="p">&lt;</span> <span class="mi">3</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">{</span>
+        <span class="c1">// capacity doubles so a new underlying array, if we checked with reflect the memory address would change</span>
+        <span class="nx">s</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">s</span><span class="p">,</span> <span class="nx">i</span><span class="p">)</span>
+        <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">"len=%d cap=%d %v\n"</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="nx">s</span><span class="p">),</span> <span class="nb">cap</span><span class="p">(</span><span class="nx">s</span><span class="p">),</span> <span class="nx">s</span><span class="p">)</span>
+    <span class="p">}</span>
+
+    <span class="c1">// https://golang.org/pkg/reflect/#SliceHeader</span>
+    <span class="c1">// since a slice is a struct containing an underlying array of memory addresses...</span>
+    <span class="c1">// https://golang.org/pkg/builtin/#byte</span>
+    <span class="nx">h</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">([]</span><span class="kt">byte</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="nx">h</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="p">=</span> <span class="mi">5</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">"Slice of byte memory addresses: %p "</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">h</span><span class="p">)</span>
+    <span class="c1">// 0xc42006e200 example address of the slice</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">"%p "</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">h</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">"%p "</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">h</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="c1">// 0xc420074458 0xc420074459 , the two elements are exactly 1 byte apart in address locations</span>
+    <span class="c1">// Getting the value from the memory location using a piont</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">"\nThe byte value in the second element is binary five: %b"</span><span class="p">,</span> <span class="o">*</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">h</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+
+    <span class="c1">// https://golang.org/pkg/unsafe/</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">"\nUnsafe pointer of the first memory location: %p"</span><span class="p">,</span> <span class="nx">unsafe</span><span class="p">.</span><span class="nx">Pointer</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">h</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+    <span class="c1">// unsafe pointer arithmetic</span>
+    <span class="nx">lastAddress</span> <span class="o">:=</span> <span class="nb">uintptr</span><span class="p">(</span><span class="nx">unsafe</span><span class="p">.</span><span class="nx">Pointer</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">h</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span> <span class="o">+</span> <span class="nx">unsafe</span><span class="p">.</span><span class="nx">Sizeof</span><span class="p">(</span><span class="nx">h</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="c1">// convert back into a usable pointer type</span>
+    <span class="nx">lastAddressPtr</span> <span class="o">:=</span> <span class="p">(</span><span class="o">*</span><span class="kt">byte</span><span class="p">)(</span><span class="nx">unsafe</span><span class="p">.</span><span class="nx">Pointer</span><span class="p">(</span><span class="nx">lastAddress</span><span class="p">))</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">"\nAfter pointer arithmetic and unsafe re-typed: %p, value: %b"</span><span class="p">,</span> <span class="nx">lastAddressPtr</span><span class="p">,</span> <span class="o">*</span><span class="nx">lastAddressPtr</span><span class="p">)</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">"\nSafe examination of the second location in the slice: %#v"</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">h</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">()</span>
+<span class="p">}</span>
+
+
+<span class="nx">example</span> <span class="kc">nil</span> <span class="nx">pointer</span><span class="p">:</span> <span class="p">[]</span><span class="nb">int</span><span class="p">(</span><span class="kc">nil</span><span class="p">)</span>
+<span class="nx">has</span> <span class="nx">memory</span> <span class="nx">adddress</span><span class="p">:</span> <span class="mh">0xc42000e440</span>
+<span class="nx">example</span> <span class="nx">empty</span> <span class="nx">slice</span><span class="p">:</span> <span class="p">[]</span><span class="kt">int</span><span class="p">{}</span>
+<span class="nx">has</span> <span class="nx">memory</span> <span class="nx">adddress</span><span class="p">:</span> <span class="mh">0xc42000e4a0</span>
+<span class="nx">both</span> <span class="nx">have</span> <span class="nx">the</span> <span class="nx">same</span> <span class="nx">length</span><span class="p">:</span> <span class="mi">0</span> <span class="mi">0</span> <span class="nx">but</span> <span class="nx">does</span> <span class="nx">each</span> <span class="nx">equal</span> <span class="kc">nil</span><span class="err">?</span>  <span class="kc">true</span> <span class="kc">false</span>
+<span class="p">[]</span>
+<span class="nx">len</span><span class="p">=</span><span class="mi">1</span> <span class="nx">cap</span><span class="p">=</span><span class="mi">1</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="nx">len</span><span class="p">=</span><span class="mi">2</span> <span class="nx">cap</span><span class="p">=</span><span class="mi">2</span> <span class="p">[</span><span class="mi">0</span> <span class="mi">1</span><span class="p">]</span>
+<span class="nx">len</span><span class="p">=</span><span class="mi">3</span> <span class="nx">cap</span><span class="p">=</span><span class="mi">4</span> <span class="p">[</span><span class="mi">0</span> <span class="mi">1</span> <span class="mi">2</span><span class="p">]</span>
+<span class="nx">Slice</span> <span class="nx">of</span> <span class="kt">byte</span> <span class="nx">memory</span> <span class="nx">addresses</span><span class="p">:</span> <span class="mh">0xc42000e580</span> <span class="mh">0xc42000a618</span> <span class="mh">0xc42000a619</span> 
+<span class="nx">The</span> <span class="kt">byte</span> <span class="nx">value</span> <span class="nx">in</span> <span class="nx">the</span> <span class="nx">second</span> <span class="nx">element</span> <span class="nx">is</span> <span class="nx">binary</span> <span class="nx">five</span><span class="p">:</span> <span class="mi">101</span>
+<span class="nx">Unsafe</span> <span class="nx">pointer</span> <span class="nx">of</span> <span class="nx">the</span> <span class="nx">first</span> <span class="nx">memory</span> <span class="nx">location</span><span class="p">:</span> <span class="mh">0xc42000a618</span>
+<span class="nx">after</span> <span class="nx">pointer</span> <span class="nx">arithmetic</span> <span class="nx">and</span> <span class="nx">unsafe</span> <span class="nx">re</span><span class="o">-</span><span class="kd">type</span><span class="p">:</span> <span class="mh">0xc42000a619</span><span class="p">,</span> <span class="nx">value</span><span class="p">:</span> <span class="mi">101</span>
+<span class="nx">Safe</span> <span class="nx">examination</span> <span class="nx">of</span> <span class="nx">the</span> <span class="nx">second</span> <span class="nx">location</span> <span class="nx">in</span> <span class="nx">the</span> <span class="nx">slice</span><span class="p">:</span> <span class="p">(</span><span class="o">*</span><span class="kt">uint8</span><span class="p">)(</span><span class="mh">0xc42000a619</span><span class="p">)</span>
+</pre></div>
+<blockquote>
+<p>Reminder, just because we can does not mean we should =p</p>
+</blockquote>
+<ul>
+<li><a href="https://play.golang.org/p/QaGtbfPwkS">https://play.golang.org/p/QaGtbfPwkS</a> <em>(you can try it yourself!)</em></li>
+<li><a href="https://blog.golang.org/go-slices-usage-and-internals">https://blog.golang.org/go-slices-usage-and-internals</a></li>
+<li><a href="https://golang.org/pkg/reflect/#SliceHeader">https://golang.org/pkg/reflect/#SliceHeader</a></li>
+<li><a href="https://golang.org/pkg/unsafe/">https://golang.org/pkg/unsafe/</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Dereference_operator">https://en.wikipedia.org/wiki/Dereference_operator</a></li>
+</ul>
+<h2 id="functions-anonymous-functions-functions-as-parameters-and-filters">Functions, Anonymous Functions, Functions as Parameters, and Filters</h2>
+<p>Go has functions as first class citizens.  Just assign a function to a variable or define a type that is a function signature.
+Since go starts from simple blocks we build, as needed, more complex tools like filtering from a slice of integers.</p>
+<div class="highlight"><pre><span></span><span class="kn">package</span> <span class="nx">main</span>
+
+<span class="kn">import</span><span class="p">(</span> <span class="s">"fmt"</span>
+<span class="p">)</span>
+
+<span class="c1">// https://golang.org/doc/codewalk/functions/</span>
+<span class="c1">// filter is a type that allows us to apply a test to the provided integer parameter</span>
+<span class="kd">type</span> <span class="nx">filter</span> <span class="kd">func</span><span class="p">(</span><span class="nx">x</span> <span class="kt">int</span><span class="p">)</span> <span class="kt">bool</span>
+
+<span class="c1">// applyFilter is a trivial examply of using a filter as a parameter</span>
+<span class="kd">func</span> <span class="nx">applyFilter</span><span class="p">(</span><span class="nx">fn</span> <span class="nx">filter</span><span class="p">,</span> <span class="nx">x</span> <span class="kt">int</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nx">fn</span><span class="p">(</span><span class="nx">x</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="c1">// SliceFilter returns a new slice filtered using the filter function parameter</span>
+<span class="kd">func</span> <span class="nx">SliceFilter</span><span class="p">(</span><span class="nx">fn</span> <span class="nx">filter</span><span class="p">,</span> <span class="nx">n</span> <span class="p">[]</span><span class="kt">int</span><span class="p">)</span> <span class="p">[]</span><span class="kt">int</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">result</span> <span class="p">[]</span><span class="kt">int</span>
+    <span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">x</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">n</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="nx">fn</span><span class="p">(</span><span class="nx">x</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">result</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">result</span><span class="p">,</span> <span class="nx">x</span><span class="p">)</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="nx">result</span>
+<span class="p">}</span>
+
+<span class="c1">// isEven returns a filter (the anonymous function inside)</span>
+<span class="kd">func</span> <span class="nx">isEven</span><span class="p">()</span> <span class="nx">filter</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="kd">func</span><span class="p">(</span><span class="nx">x</span> <span class="kt">int</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="nx">x</span><span class="o">%</span><span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="kc">true</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="kc">false</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+    <span class="nx">a</span> <span class="o">:=</span> <span class="p">[]</span><span class="kt">int</span><span class="p">{</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">6</span><span class="p">}</span>
+    <span class="nx">b</span> <span class="o">:=</span> <span class="p">[]</span><span class="kt">int</span><span class="p">{</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">9</span><span class="p">}</span>
+    <span class="nx">c</span> <span class="o">:=</span> <span class="p">[]</span><span class="kt">int</span><span class="p">{</span><span class="mi">5</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">12</span><span class="p">}</span>
+
+    <span class="kd">var</span> <span class="nx">iseven</span> <span class="p">=</span> <span class="kd">func</span><span class="p">(</span><span class="nx">x</span> <span class="kt">int</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="nx">x</span><span class="o">%</span><span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="kc">true</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="kc">false</span>
+    <span class="p">}</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">"2 is even: "</span><span class="p">,</span> <span class="nx">iseven</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">"4 is even: "</span><span class="p">,</span> <span class="nx">applyFilter</span><span class="p">(</span><span class="nx">iseven</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">a</span><span class="p">,</span> <span class="s">"is even: "</span><span class="p">,</span> <span class="nx">SliceFilter</span><span class="p">(</span><span class="nx">iseven</span><span class="p">,</span> <span class="nx">a</span><span class="p">))</span>  <span class="c1">// [2 4 6] is even:  [2 4 6]</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">b</span><span class="p">,</span> <span class="s">"is not even: "</span><span class="p">,</span> <span class="nx">SliceFilter</span><span class="p">(</span><span class="nx">iseven</span><span class="p">,</span> <span class="nx">b</span><span class="p">))</span>  <span class="c1">// [1 3 7 9] is not even:  []</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">c</span><span class="p">,</span> <span class="s">"filtered for evens becomes: "</span><span class="p">,</span> <span class="nx">SliceFilter</span><span class="p">(</span><span class="nx">isEven</span><span class="p">(),</span> <span class="nx">c</span><span class="p">))</span>  <span class="c1">// [5 3 -1 12] filtered for evens becomes:  [12]</span>
+<span class="p">}</span>
+</pre></div>
+<blockquote>
+<p>With a function that returns a function, and a function that requires a parameter that is of the type "function signature", we can apply the Strategy Pattern
+- <a href="https://play.golang.org/p/Uxm7HZzS-V">https://play.golang.org/p/Uxm7HZzS-V</a> <em>(yes you can mess with functions too)</em>
+- <a href="https://en.wikipedia.org/wiki/Anonymous_function">https://en.wikipedia.org/wiki/Anonymous_function</a>
+- <a href="https://en.wikipedia.org/wiki/Strategy_pattern">https://en.wikipedia.org/wiki/Strategy_pattern</a></p>
+</blockquote>
+<h2 id="mergesort">MergeSort</h2>
+<p>And because I like source code in blogs, a highly imperfect mergesort.</p>
+<div class="highlight"><pre><span></span><span class="kn">package</span> <span class="nx">main</span>
+
+<span class="kn">import</span> <span class="p">(</span> <span class="s">"fmt"</span>
+<span class="p">)</span>
+
+<span class="c1">// SliceSplit is a function to split a slice into roughly even partitions</span>
+<span class="c1">// https://golang.org/doc/effective_go.html#two_dimensional_slices</span>
+<span class="cm">/* A more specific implementation than SliceSplit with the special case partitionSize = 1 could have been</span>
+<span class="cm">result := make([][]int, len(n), len(n))</span>
+<span class="cm">for i := 0; i &lt; len(n); i++ {</span>
+<span class="cm">    element := make([]int, 1, 1)</span>
+<span class="cm">    element[0] = n[i]</span>
+<span class="cm">    result[i] = element</span>
+<span class="cm">}</span>
+<span class="cm">return result</span>
+<span class="cm">*/</span>
+<span class="kd">func</span> <span class="nx">SliceSplit</span><span class="p">(</span><span class="nx">n</span> <span class="p">[]</span><span class="kt">int</span><span class="p">,</span> <span class="nx">count</span> <span class="kt">int</span><span class="p">)</span> <span class="p">([][]</span><span class="kt">int</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">result</span> <span class="o">:=</span> <span class="p">[][]</span><span class="kt">int</span><span class="p">{}</span>
+    <span class="c1">// TODO: is there a better way of handling split into 0 pieces?</span>
+    <span class="k">if</span> <span class="nx">count</span> <span class="o">==</span> <span class="mi">0</span> <span class="o">||</span> <span class="nx">count</span> <span class="p">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="nx">n</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="nx">result</span><span class="p">,</span> <span class="nx">fmt</span><span class="p">.</span><span class="nx">Errorf</span><span class="p">(</span><span class="s">"Cannot split length %d into %d pieces"</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="nx">n</span><span class="p">),</span> <span class="nx">count</span><span class="p">)</span>
+    <span class="p">}</span>
+
+    <span class="nx">partitionSize</span> <span class="o">:=</span> <span class="nb">len</span><span class="p">(</span><span class="nx">n</span><span class="p">)</span> <span class="o">/</span> <span class="nx">count</span>
+    <span class="k">for</span> <span class="nx">i</span><span class="p">,</span> <span class="nx">k</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="p">&lt;</span> <span class="nx">count</span><span class="p">;</span> <span class="nx">i</span><span class="p">,</span> <span class="nx">k</span> <span class="p">=</span> <span class="nx">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="nx">k</span><span class="o">+</span><span class="nx">partitionSize</span> <span class="p">{</span>
+        <span class="nx">a</span> <span class="o">:=</span> <span class="nx">n</span><span class="p">[</span><span class="nx">k</span> <span class="p">:</span> <span class="nx">k</span><span class="o">+</span><span class="nx">partitionSize</span><span class="p">]</span>
+        <span class="c1">// special case to pad the last partition with all elements</span>
+        <span class="k">if</span> <span class="nx">i</span> <span class="o">==</span> <span class="nx">count</span><span class="o">-</span><span class="mi">1</span> <span class="p">{</span>
+            <span class="nx">a</span> <span class="p">=</span> <span class="nx">n</span><span class="p">[</span><span class="nx">k</span><span class="p">:]</span>
+        <span class="p">}</span>
+        <span class="nx">result</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">result</span><span class="p">,</span> <span class="nx">a</span><span class="p">)</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="nx">result</span><span class="p">,</span> <span class="kc">nil</span>
+<span class="p">}</span>
+
+<span class="c1">// SlicesMerge takes two sorted slices of integers and merges them into a single sorted slice of integers</span>
+<span class="kd">func</span> <span class="nx">SlicesMerge</span><span class="p">(</span><span class="nx">a</span> <span class="p">[]</span><span class="kt">int</span><span class="p">,</span> <span class="nx">b</span> <span class="p">[]</span><span class="kt">int</span><span class="p">)</span> <span class="p">[]</span><span class="kt">int</span> <span class="p">{</span>
+    <span class="nx">s</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">([]</span><span class="kt">int</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="nx">a</span><span class="p">)</span><span class="o">+</span><span class="nb">len</span><span class="p">(</span><span class="nx">b</span><span class="p">))</span>
+    <span class="k">for</span> <span class="nx">ai</span><span class="p">,</span> <span class="nx">bi</span><span class="p">,</span> <span class="nx">si</span> <span class="o">:=</span> <span class="nb">len</span><span class="p">(</span><span class="nx">a</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="nx">b</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="nx">a</span><span class="p">)</span><span class="o">+</span><span class="nb">len</span><span class="p">(</span><span class="nx">b</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">;</span> <span class="nx">si</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">si</span><span class="o">--</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="nx">ai</span> <span class="p">&lt;</span> <span class="mi">0</span> <span class="p">{</span>
+            <span class="nx">s</span><span class="p">[</span><span class="nx">si</span><span class="p">]</span> <span class="p">=</span> <span class="nx">b</span><span class="p">[</span><span class="nx">bi</span><span class="p">]</span>
+            <span class="nx">bi</span><span class="o">--</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="nx">bi</span> <span class="p">&lt;</span> <span class="mi">0</span> <span class="p">{</span>
+            <span class="nx">s</span><span class="p">[</span><span class="nx">si</span><span class="p">]</span> <span class="p">=</span> <span class="nx">a</span><span class="p">[</span><span class="nx">ai</span><span class="p">]</span>
+            <span class="nx">ai</span><span class="o">--</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="nx">a</span><span class="p">[</span><span class="nx">ai</span><span class="p">]</span> <span class="p">&gt;</span> <span class="nx">b</span><span class="p">[</span><span class="nx">bi</span><span class="p">]</span> <span class="p">{</span>
+            <span class="nx">s</span><span class="p">[</span><span class="nx">si</span><span class="p">]</span> <span class="p">=</span> <span class="nx">a</span><span class="p">[</span><span class="nx">ai</span><span class="p">]</span>
+            <span class="nx">ai</span><span class="o">--</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="nx">s</span><span class="p">[</span><span class="nx">si</span><span class="p">]</span> <span class="p">=</span> <span class="nx">b</span><span class="p">[</span><span class="nx">bi</span><span class="p">]</span>
+            <span class="nx">bi</span><span class="o">--</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="nx">s</span>
+<span class="p">}</span>
+
+<span class="c1">//MergeConsecutiveElements joins two consecutive slice elements together</span>
+<span class="kd">func</span> <span class="nx">MergeConsecutiveElements</span><span class="p">(</span><span class="nx">a</span> <span class="p">[][]</span><span class="kt">int</span><span class="p">)</span> <span class="p">[][]</span><span class="kt">int</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">result</span> <span class="p">[][]</span><span class="kt">int</span>
+    <span class="k">for</span> <span class="nx">i</span><span class="p">,</span> <span class="nx">k</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="p">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="nx">a</span><span class="p">);</span> <span class="nx">i</span><span class="o">++</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="nx">i</span><span class="o">+</span><span class="mi">1</span> <span class="p">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="nx">a</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">result</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">result</span><span class="p">,</span> <span class="nx">SlicesMerge</span><span class="p">(</span><span class="nx">a</span><span class="p">[</span><span class="nx">i</span><span class="p">],</span> <span class="nx">a</span><span class="p">[</span><span class="nx">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]))</span>
+            <span class="nx">k</span><span class="o">++</span>
+            <span class="nx">i</span><span class="o">++</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="nx">result</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">result</span><span class="p">,</span> <span class="nx">a</span><span class="p">[</span><span class="nx">i</span><span class="p">])</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="nx">result</span>
+<span class="p">}</span>
+
+<span class="c1">// MergeSort uses the merge sort algorithm to return a sorted a slice of integers</span>
+<span class="kd">func</span> <span class="nx">MergeSort</span><span class="p">(</span><span class="nx">n</span> <span class="p">[]</span><span class="kt">int</span><span class="p">)</span> <span class="p">[]</span><span class="kt">int</span> <span class="p">{</span>
+    <span class="nx">parts</span><span class="p">,</span> <span class="nx">_</span> <span class="o">:=</span> <span class="nx">SliceSplit</span><span class="p">(</span><span class="nx">n</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="nx">n</span><span class="p">))</span>
+    <span class="nx">result</span> <span class="o">:=</span> <span class="nx">MergeConsecutiveElements</span><span class="p">(</span><span class="nx">parts</span><span class="p">)</span>
+    <span class="k">for</span> <span class="nb">len</span><span class="p">(</span><span class="nx">result</span><span class="p">)</span> <span class="p">&gt;</span> <span class="mi">1</span> <span class="p">{</span>
+        <span class="nx">result</span> <span class="p">=</span> <span class="nx">MergeConsecutiveElements</span><span class="p">(</span><span class="nx">result</span><span class="p">)</span>
+    <span class="p">}</span>
+
+    <span class="k">return</span> <span class="nx">result</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+
+    <span class="nx">n</span> <span class="o">:=</span> <span class="p">[]</span><span class="kt">int</span><span class="p">{</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">}</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">"unsorted start:"</span><span class="p">,</span> <span class="nx">n</span><span class="p">)</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">"sorted:"</span><span class="p">,</span> <span class="nx">MergeSort</span><span class="p">(</span><span class="nx">n</span><span class="p">))</span>
+
+    <span class="nx">n</span> <span class="p">=</span> <span class="p">[]</span><span class="kt">int</span><span class="p">{</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">}</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">"unsorted start:"</span><span class="p">,</span> <span class="nx">n</span><span class="p">)</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">"sorted:"</span><span class="p">,</span> <span class="nx">MergeSort</span><span class="p">(</span><span class="nx">n</span><span class="p">))</span>
+
+    <span class="nx">n</span> <span class="p">=</span> <span class="p">[]</span><span class="kt">int</span><span class="p">{</span><span class="mi">9</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">3</span><span class="p">}</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">"unsorted start:"</span><span class="p">,</span> <span class="nx">n</span><span class="p">)</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">"sorted:"</span><span class="p">,</span> <span class="nx">MergeSort</span><span class="p">(</span><span class="nx">n</span><span class="p">))</span>
+
+    <span class="nx">n</span> <span class="p">=</span> <span class="p">[]</span><span class="kt">int</span><span class="p">{</span><span class="mi">9</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">}</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">"unsorted start:"</span><span class="p">,</span> <span class="nx">n</span><span class="p">)</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">"sorted:"</span><span class="p">,</span> <span class="nx">MergeSort</span><span class="p">(</span><span class="nx">n</span><span class="p">))</span>
+
+    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">"done"</span><span class="p">)</span>
+<span class="p">}</span>
+</pre></div>
+<blockquote>
+<p>TODO: main_test.go with all of the functional coverage and merge test cases ;)
+- <a href="https://en.wikipedia.org/wiki/Merge_sort">https://en.wikipedia.org/wiki/Merge_sort</a>
+- <a href="https://play.golang.org/p/nAHF50zk7m">https://play.golang.org/p/nAHF50zk7m</a> <em>(modify the merge online)</em></p>
+</blockquote>
+            <aside>
+            <hr/>
+            <nav>
+            <ul class="articles_timeline">
+ 
+                <li class="previous_article">« <a href="https://blog.john-pfeiffer.com/build-automation-using-packer-to-build-an-ami-use-immutable-not-chef/" title="Previous: Build Automation using packer to build an AMI use immutable not chef">Build Automation using packer to build an AMI use immutable not chef</a></li>
+ 
+                <li class="next_article"><a href="https://blog.john-pfeiffer.com/go-programming-intro-with-vs-code-and-arrays-slices-functions-and-testing/" title="Next: Go Programming Intro with VS Code and Arrays Slices Functions and Testing">Go Programming Intro with VS Code and Arrays Slices Functions and Testing</a> »</li>
+            </ul>
+            </nav>
+            </aside>
+        </div>
+        <section>
+        <div class="span2" style="float:right;font-size:0.9em;">
+ 
+            <h4>Published</h4>
+            <time pubdate="pubdate" datetime="2015-10-02T23:45:00-07:00">Oct 2, 2015</time>
+            <h4>Category</h4>
+            <a class="category-link" href="/categories.html#programming-ref">programming</a> 
+            <h4>~1236 words</h4>
+            <h4>Tags</h4>
+            <ul class="list-of-tags tags-in-article"> 
+                <li><a href="/tags.html#algorithms-ref">algorithms
+                    <span>1</span>
+</a></li>
+                <li><a href="/tags.html#arrays-ref">arrays
+                    <span>2</span>
+</a></li>
+                <li><a href="/tags.html#filter-ref">filter
+                    <span>1</span>
+</a></li>
+                <li><a href="/tags.html#functions-ref">functions
+                    <span>1</span>
+</a></li>
+                <li><a href="/tags.html#go-ref">go
+                    <span>3</span>
+</a></li>
+                <li><a href="/tags.html#golang-ref">golang
+                    <span>2</span>
+</a></li>
+                <li><a href="/tags.html#merge-ref">merge
+                    <span>1</span>
+</a></li>
+                <li><a href="/tags.html#mergesort-ref">mergesort
+                    <span>1</span>
+</a></li>
+                <li><a href="/tags.html#slices-ref">slices
+                    <span>2</span>
+</a></li>
+                <li><a href="/tags.html#strategy-pattern-ref">strategy pattern
+                    <span>1</span>
+</a></li>
+                <li><a href="/tags.html#testing-ref">testing
+                    <span>4</span>
+</a></li>
+            </ul>
+
+        </div>
+        </section>
+</div>
+</article>
+				</div>
+				<div class="span1"></div>
+			</div>
+		</div>
+    </div>
+<footer>
+<div id="footer">
+    <ul class="footer-content">
+    </ul>
+</div>
+</footer>            <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+    </body>
+</html>
