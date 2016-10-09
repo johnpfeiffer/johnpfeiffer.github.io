@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en-US">
+    <head>
+        <meta charset="utf-8"> 
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="author" content="john pfeiffer" />
+        <meta name="copyright" content="john pfeiffer" />
+
+<meta name="keywords" content="go, golang, interfaces, stack, linked list, queue, map, set, strategy pattern, programming, " />
+        <title>Golang Interfaces Stack Linked List Queue Map Set  · johnpfeiffer
+</title>
+        <link href="https://cdn-images.mailchimp.com/embedcode/slim-081711.css" rel="stylesheet" type="text/css">
+        <link href="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="https://blog.john-pfeiffer.com/theme/css/style.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="https://blog.john-pfeiffer.com/theme/css/solarizedlight.css" media="screen">
+        <link rel="shortcut icon" href="https://blog.john-pfeiffer.com/theme/images/favicon.ico" type="image/x-icon" />
+        <link rel="apple-touch-icon" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon.png" />
+        <link rel="apple-touch-icon" sizes="57x57" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-57x57.png" />
+        <link rel="apple-touch-icon" sizes="72x72" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-72x72.png" />
+        <link rel="apple-touch-icon" sizes="114x114" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-114x114.png" />
+        <link rel="apple-touch-icon" sizes="144x144" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-144x144.png" />
+        <link rel="icon" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-144x144.png" />
+    <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-3758734-9']);
+    _gaq.push(['_trackPageview']);
+    (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+    </script>
+    </head>
+    <body>
+	<div id="content-sans-footer">
+        <div class="dropdown-backdrop">
+
+			<div class="navbar navbar-static-top">
+				<div class="navbar-inner">
+					<div class="container">
+						<a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+							<span class="icon-bar"></span>
+							<span class="icon-bar"></span>
+							<span class="icon-bar"></span>
+						</a>
+						<a class="brand" href="https://blog.john-pfeiffer.com/"><span class=site-name>johnpfeiffer</span></a>
+						<div class="nav-collapse collapse">
+							<ul class="nav pull-right top-menu">
+								<li ><a href="https://blog.john-pfeiffer.com">Home</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/john-likes/">John Likes</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/categories.html">Categories</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/tags.html">Tags</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/archives.html">Archives</a></li>
+								<li><form class="navbar-search" action="https://blog.john-pfeiffer.com/search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="container-fluid">
+			<div class="row-fluid">
+				<div class="span1"></div>
+				<div class="span10">
+<article>
+<div class="row-fluid">
+    <header class="page_header span10 offset2">
+    <h1><a href="https://blog.john-pfeiffer.com/golang-interfaces-stack-linked-list-queue-map-set/"> Golang Interfaces Stack Linked List Queue Map Set  </a></h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+    <div class="span2 table-of-content">
+        <nav>
+        <h4>Contents</h4>
+        <div class="toc">
+<ul>
+<li><a href="#maps-aka-hash-tables-in-go">Maps aka Hash Tables in Go</a><ul>
+<li><a href="#using-a-map-in-go">Using a map in go</a></li>
+<li><a href="#sets">Sets</a></li>
+</ul>
+</li>
+<li><a href="#polymorphism-with-go-interfaces">Polymorphism with Go Interfaces</a><ul>
+<li><a href="#bonus-first-in-first-out-queue">Bonus First In First Out Queue</a></li>
+</ul>
+</li>
+</ul>
+</div>
+        </nav>
+    </div>
+    <div class="span8 article-content">
+
+            
+<p>Two of the most useful tools in daily professional programming are hash maps and frameworks for modular abstractions.  It's the blend of performance and composability that makes Go an attractive language for getting things done.</p>
+<h2 id="maps-aka-hash-tables-in-go">Maps aka Hash Tables in Go</h2>
+<p>For hash tables basic operations like insert, lookup, delete are basically "constant time" in big O notation which makes it the "go to" default data structure for a lot of basic coding.  That helps avoid having to write and maintain all the complexity and operations of an in-memory sorted data structure.</p>
+<p>It is also often the desired data structure answer in a programming interview problem =]</p>
+<p>Here's the basics of using a map since someone else has already done all of the hard work of figuring out the correct math of the hash function to avoid collisions and the engineering behind implementing it in a performant fashion.</p>
+<h3 id="using-a-map-in-go">Using a map in go</h3>
+<div class="highlight"><pre><span></span><span class="kn">package</span> <span class="nx">main</span>
+
+<span class="kn">import</span> <span class="p">(</span>
+    <span class="s">"fmt"</span>
+<span class="p">)</span>
+
+<span class="kd">func</span> <span class="nx">inSet</span><span class="p">(</span><span class="nx">s</span> <span class="kt">string</span><span class="p">,</span> <span class="nx">m</span> <span class="kd">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">bool</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
+    <span class="c1">// gotcha: do not depend on just the return value but use a the second value which returns in map or not</span>
+    <span class="nx">value</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">m</span><span class="p">[</span><span class="nx">s</span><span class="p">]</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">s</span><span class="p">,</span> <span class="s">"has value"</span><span class="p">,</span> <span class="nx">value</span><span class="p">,</span> <span class="s">"and is in?"</span><span class="p">,</span> <span class="nx">ok</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nx">ok</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="kc">true</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="kc">false</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+    <span class="nx">m</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">bool</span><span class="p">)</span>
+    <span class="c1">// never use var m map[string]bool because m is nil and assign causes a panic</span>
+    <span class="nx">m</span><span class="p">[</span><span class="s">"foo"</span><span class="p">]</span> <span class="p">=</span> <span class="kc">true</span>
+    <span class="nx">m</span><span class="p">[</span><span class="s">"bar"</span><span class="p">]</span> <span class="p">=</span> <span class="kc">false</span>
+
+    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">inSet</span><span class="p">(</span><span class="s">"foo"</span><span class="p">,</span> <span class="nx">m</span><span class="p">))</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">inSet</span><span class="p">(</span><span class="s">"bar"</span><span class="p">,</span> <span class="nx">m</span><span class="p">))</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">inSet</span><span class="p">(</span><span class="s">"foobar"</span><span class="p">,</span> <span class="nx">m</span><span class="p">))</span>
+
+    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nx">m</span><span class="p">),</span> <span class="s">" elements in map"</span><span class="p">,</span> <span class="nx">m</span><span class="p">)</span>
+    <span class="nb">delete</span><span class="p">(</span><span class="nx">m</span><span class="p">,</span> <span class="s">"bar"</span><span class="p">)</span>
+
+    <span class="nx">m2</span> <span class="o">:=</span> <span class="kd">map</span><span class="p">[</span><span class="kt">rune</span><span class="p">]</span><span class="kt">int</span><span class="p">{</span><span class="sc">'a'</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="sc">'b'</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="sc">'c'</span><span class="p">:</span> <span class="mi">3</span><span class="p">}</span>
+    <span class="k">for</span> <span class="nx">k</span><span class="p">,</span> <span class="nx">v</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">m2</span> <span class="p">{</span>
+        <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nb">string</span><span class="p">(</span><span class="nx">k</span><span class="p">),</span> <span class="nx">v</span><span class="p">)</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+<blockquote>
+<p>the two main gotchas for maps in go are to not accidentally assume that the value coming back from a map means that the key was in the map since if the key is not in the map it will return the default "empty" value which will be 0 or false, and to not start with a nil pointer since later assignment will cause a panic</p>
+</blockquote>
+<ul>
+<li><a href="https://play.golang.org/p/fqvNrELy1S">https://play.golang.org/p/fqvNrELy1S</a> <em>play with maps yourself</em></li>
+<li><a href="https://en.m.wikipedia.org/wiki/Hash_table">https://en.m.wikipedia.org/wiki/Hash_table</a></li>
+<li><a href="https://blog.golang.org/go-maps-in-action">https://blog.golang.org/go-maps-in-action</a></li>
+<li><a href="https://golang.org/src/runtime/hashmap.go#L9">https://golang.org/src/runtime/hashmap.go#L9</a></li>
+</ul>
+<h3 id="sets">Sets</h3>
+<p>A common question in coding is whether a certain key or object has already been seen before.  The lookup cost in a set is  cheaper than a full search through a more complex data structure like a binary tree.</p>
+<p>Golang currently does not have a "set" built into the language but given the code example you can see how to quickly achieve the same functionality with a map.  This is a common pattern: they keep the language simple and focus on low level components that perform and compose well while we code exactly what we need for a given usage.  (i.e. a huge meta "YouAren'tGoingToNeedIt")</p>
+<ul>
+<li><a href="https://en.wikipedia.org/wiki/Set_(abstract_data_type)">https://en.wikipedia.org/wiki/Set_(abstract_data_type)</a></li>
+<li><a href="https://xlinux.nist.gov/dads/HTML/set.html">https://xlinux.nist.gov/dads/HTML/set.html</a></li>
+<li><a href="https://github.com/golang/go/wiki/MethodSets">https://github.com/golang/go/wiki/MethodSets</a></li>
+</ul>
+<h2 id="polymorphism-with-go-interfaces">Polymorphism with Go Interfaces</h2>
+<p>While definitely a distinctly different approach on objects and polymorphism than Object Oriented languages like Java and Python, the critical capabilities of Interfaces allows flexibility and re-usability in functionality enabling things like the Strategy Pattern.</p>
+<p>Starting with the fundamentals of Types and Structs, Interfaces are a natural extension to separating "What" behavior is desired versus "How" it is implemented.</p>
+<p>Using Interfaces can feel tricky at first but really the main challenge is the distinction between pointer receiver methods vs the default that Go has of pass by value (considering a pointer to be an integer value of an address ;)</p>
+<p>Also, testing in Go relies heavily on the developer paying that up front cost of creating Interfaces (which is a much better longer term modular abstraction) rather than using Mocks.</p>
+<p>This example uses a trivial Stack data structure but implements it 3 different ways to illustrate how the interface can have a variety of implementations and the caller can decide which one they prefer.</p>
+<div class="highlight"><pre><span></span><span class="kn">package</span> <span class="nx">main</span>
+
+<span class="kn">import</span> <span class="p">(</span>
+    <span class="s">"fmt"</span>
+<span class="p">)</span>
+
+<span class="c1">// Stacker is a data structure that has specific data access and storage properties</span>
+<span class="c1">// also known as a Last In First Out queue, and not fully implemented for this example =]</span>
+<span class="c1">// This interfaces only requires two methods to implement</span>
+<span class="kd">type</span> <span class="nx">Stacker</span> <span class="kd">interface</span> <span class="p">{</span>
+    <span class="nx">Push</span><span class="p">(</span><span class="nx">n</span> <span class="kt">int</span><span class="p">)</span>
+    <span class="nx">Show</span><span class="p">()</span> <span class="p">[]</span><span class="kt">int</span>
+<span class="p">}</span>
+
+<span class="c1">// DemoStack shows a demo example of different implementations of the interface</span>
+<span class="kd">func</span> <span class="nx">DemoStack</span><span class="p">(</span><span class="nx">s</span> <span class="nx">Stacker</span><span class="p">,</span> <span class="nx">name</span> <span class="kt">string</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">"Pushing 2, 1, 0, onto"</span><span class="p">,</span> <span class="nx">name</span><span class="p">)</span>
+    <span class="nx">s</span><span class="p">.</span><span class="nx">Push</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+    <span class="nx">s</span><span class="p">.</span><span class="nx">Push</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="nx">s</span><span class="p">.</span><span class="nx">Push</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">name</span><span class="p">,</span> <span class="s">"contains: "</span><span class="p">,</span> <span class="nx">s</span><span class="p">.</span><span class="nx">Show</span><span class="p">())</span>
+<span class="p">}</span>
+
+<span class="c1">// FakeStack implements the interface using only value receivers</span>
+<span class="kd">type</span> <span class="nx">FakeStack</span> <span class="kd">struct</span> <span class="p">{</span>
+<span class="p">}</span>
+
+<span class="kd">var</span> <span class="nx">fakeStackCheater</span> <span class="p">[]</span><span class="kt">int</span>
+
+<span class="c1">// Show returns the global slice</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">s</span> <span class="nx">FakeStack</span><span class="p">)</span> <span class="nx">Show</span><span class="p">()</span> <span class="p">[]</span><span class="kt">int</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nx">fakeStackCheater</span>
+<span class="p">}</span>
+
+<span class="c1">// Push uses a global variable (evil) so it can get away with a value method receiver</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">s</span> <span class="nx">FakeStack</span><span class="p">)</span> <span class="nx">Push</span><span class="p">(</span><span class="nx">n</span> <span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">fakeStackCheater</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">fakeStackCheater</span><span class="p">,</span> <span class="nx">n</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="c1">// SliceStack is an integer stack data structure built using a slice</span>
+<span class="kd">type</span> <span class="nx">SliceStack</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">s</span> <span class="p">[]</span><span class="kt">int</span>
+<span class="p">}</span>
+
+<span class="c1">// Show displays the contents of the stack, pass a copy as no modification needed</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">s</span> <span class="nx">SliceStack</span><span class="p">)</span> <span class="nx">Show</span><span class="p">()</span> <span class="p">[]</span><span class="kt">int</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nx">s</span><span class="p">.</span><span class="nx">s</span>
+<span class="p">}</span>
+
+<span class="c1">// Push an integer onto the stack, pass a reference so the receiver method can directly modify</span>
+<span class="c1">// https://github.com/golang/go/wiki/CodeReviewComments#receiver-type</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">s</span> <span class="o">*</span><span class="nx">SliceStack</span><span class="p">)</span> <span class="nx">Push</span><span class="p">(</span><span class="nx">n</span> <span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">s</span><span class="p">.</span><span class="nx">s</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">s</span><span class="p">.</span><span class="nx">s</span><span class="p">,</span> <span class="nx">n</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="cm">/* A real stack based upon a linked list */</span>
+
+<span class="c1">// IntNode is a pointer data structure for holding an integer</span>
+<span class="kd">type</span> <span class="nx">IntNode</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">value</span> <span class="kt">int</span>
+    <span class="nx">left</span>  <span class="o">*</span><span class="nx">IntNode</span>
+    <span class="nx">right</span> <span class="o">*</span><span class="nx">IntNode</span>
+<span class="p">}</span>
+
+<span class="c1">// LinkedListStack is an integer stack data structure built using a slice</span>
+<span class="kd">type</span> <span class="nx">LinkedListStack</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">head</span> <span class="o">*</span><span class="nx">IntNode</span>
+<span class="p">}</span>
+
+<span class="c1">// Show returns the total number of elements currently stored in the LinkedListStack</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">s</span> <span class="nx">LinkedListStack</span><span class="p">)</span> <span class="nx">Show</span><span class="p">()</span> <span class="p">[]</span><span class="kt">int</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">result</span> <span class="p">[]</span><span class="kt">int</span>
+    <span class="k">for</span> <span class="nx">current</span> <span class="o">:=</span> <span class="nx">s</span><span class="p">.</span><span class="nx">head</span><span class="p">;</span> <span class="nx">current</span> <span class="o">!=</span> <span class="kc">nil</span><span class="p">;</span> <span class="nx">current</span> <span class="p">=</span> <span class="nx">current</span><span class="p">.</span><span class="nx">right</span> <span class="p">{</span>
+        <span class="nx">result</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">result</span><span class="p">,</span> <span class="nx">current</span><span class="p">.</span><span class="nx">value</span><span class="p">)</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="nx">result</span>
+<span class="p">}</span>
+
+<span class="c1">// Push an integer onto the stack, pass a reference so the receiver method can directly modify</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">s</span> <span class="o">*</span><span class="nx">LinkedListStack</span><span class="p">)</span> <span class="nx">Push</span><span class="p">(</span><span class="nx">n</span> <span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">new</span> <span class="o">:=</span> <span class="nx">IntNode</span><span class="p">{</span><span class="nx">value</span><span class="p">:</span> <span class="nx">n</span><span class="p">}</span>
+    <span class="k">if</span> <span class="nx">s</span><span class="p">.</span><span class="nx">head</span> <span class="o">==</span> <span class="kc">nil</span> <span class="p">{</span>
+        <span class="nx">s</span><span class="p">.</span><span class="nx">head</span> <span class="p">=</span> <span class="o">&amp;</span><span class="nx">new</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="nx">new</span><span class="p">.</span><span class="nx">right</span> <span class="p">=</span> <span class="nx">s</span><span class="p">.</span><span class="nx">head</span>
+        <span class="nx">s</span><span class="p">.</span><span class="nx">head</span> <span class="p">=</span> <span class="o">&amp;</span><span class="nx">new</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+    <span class="c1">// a fake stack does not use pointer method receivers and must modify the data structure some other way</span>
+    <span class="kd">var</span> <span class="nx">f</span> <span class="nx">FakeStack</span>
+    <span class="nx">DemoStack</span><span class="p">(</span><span class="nx">f</span><span class="p">,</span> <span class="s">"FakeStack"</span><span class="p">)</span>
+
+    <span class="c1">// stacks that modify their underlying data structure must pass a reference</span>
+    <span class="kd">var</span> <span class="nx">s</span> <span class="nx">SliceStack</span>
+    <span class="nx">DemoStack</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">s</span><span class="p">,</span> <span class="s">"SliceStack"</span><span class="p">)</span>
+    <span class="kd">var</span> <span class="nx">k</span> <span class="nx">LinkedListStack</span>
+    <span class="nx">DemoStack</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">k</span><span class="p">,</span> <span class="s">"LinkedListStack"</span><span class="p">)</span>
+<span class="p">}</span>
+</pre></div>
+<ul>
+<li><a href="https://play.golang.org/p/U1l2Ni89L4">https://play.golang.org/p/U1l2Ni89L4</a> <em>play along with the source code snippet</em></li>
+<li><a href="https://bitbucket.org/johnpfeiffer/go-interfaces-stack-linkedlist">https://bitbucket.org/johnpfeiffer/go-interfaces-stack-linkedlist</a> <em>the more complete source code</em></li>
+<li><a href="https://en.wikipedia.org/wiki/Stack_(abstract_data_type)">https://en.wikipedia.org/wiki/Stack_(abstract_data_type)</a></li>
+<li><a href="https://golang.org/doc/effective_go.html#interfaces">https://golang.org/doc/effective_go.html#interfaces</a></li>
+<li><a href="https://github.com/golang/go/wiki/CodeReviewComments#receiver-type">https://github.com/golang/go/wiki/CodeReviewComments#receiver-type</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Polymorphism_(computer_science)">https://en.wikipedia.org/wiki/Polymorphism_(computer_science)</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Strategy_pattern">https://en.wikipedia.org/wiki/Strategy_pattern</a></li>
+<li><a href="https://nathanleclaire.com/blog/2015/10/10/interfaces-and-composition-for-effective-unit-testing-in-golang/">https://nathanleclaire.com/blog/2015/10/10/interfaces-and-composition-for-effective-unit-testing-in-golang/</a></li>
+<li><a href="https://blog.cloudflare.com/go-interfaces-make-test-stubbing-easy/">https://blog.cloudflare.com/go-interfaces-make-test-stubbing-easy/</a></li>
+</ul>
+<h3 id="bonus-first-in-first-out-queue">Bonus First In First Out Queue</h3>
+<p>With some small additions the linked list can be enhanced to provide the functionality of a Queue.
+It is not too expensive to add the extra previous pointer to each node and a tail pointer and this makes the FIFO capabilities fairly straightforward.
+Thankfully with a garbage collected language like Go we do not have to worry about manually allocating or deallocating memory.</p>
+<div class="highlight"><pre><span></span><span class="kn">package</span> <span class="nx">main</span>
+
+<span class="kn">import</span> <span class="p">(</span>
+    <span class="s">"fmt"</span>
+<span class="p">)</span>
+
+<span class="c1">// IntNode is a pointer data structure for holding an integer</span>
+<span class="kd">type</span> <span class="nx">IntNode</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">value</span>    <span class="kt">int</span>
+    <span class="nx">previous</span> <span class="o">*</span><span class="nx">IntNode</span>
+    <span class="nx">next</span>     <span class="o">*</span><span class="nx">IntNode</span>
+<span class="p">}</span>
+
+<span class="c1">// MyList is a linked list of pointers</span>
+<span class="kd">type</span> <span class="nx">MyList</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">head</span> <span class="o">*</span><span class="nx">IntNode</span>
+    <span class="nx">tail</span> <span class="o">*</span><span class="nx">IntNode</span>
+<span class="p">}</span>
+
+<span class="c1">// Enqueue puts an integer onto the front of the list</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">q</span> <span class="o">*</span><span class="nx">MyList</span><span class="p">)</span> <span class="nx">Enqueue</span><span class="p">(</span><span class="nx">n</span> <span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">new</span> <span class="o">:=</span> <span class="nx">IntNode</span><span class="p">{</span><span class="nx">value</span><span class="p">:</span> <span class="nx">n</span><span class="p">}</span>
+    <span class="k">if</span> <span class="nx">q</span><span class="p">.</span><span class="nx">head</span> <span class="o">==</span> <span class="kc">nil</span> <span class="p">{</span>
+        <span class="nx">q</span><span class="p">.</span><span class="nx">head</span> <span class="p">=</span> <span class="o">&amp;</span><span class="nx">new</span>
+        <span class="nx">q</span><span class="p">.</span><span class="nx">tail</span> <span class="p">=</span> <span class="o">&amp;</span><span class="nx">new</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="nx">q</span><span class="p">.</span><span class="nx">head</span><span class="p">.</span><span class="nx">previous</span> <span class="p">=</span> <span class="o">&amp;</span><span class="nx">new</span>
+        <span class="nx">new</span><span class="p">.</span><span class="nx">next</span> <span class="p">=</span> <span class="nx">q</span><span class="p">.</span><span class="nx">head</span>
+        <span class="nx">q</span><span class="p">.</span><span class="nx">head</span> <span class="p">=</span> <span class="o">&amp;</span><span class="nx">new</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1">// Dequeue removes the oldest integer from the list</span>
+<span class="kd">func</span> <span class="p">(</span><span class="nx">q</span> <span class="o">*</span><span class="nx">MyList</span><span class="p">)</span> <span class="nx">Dequeue</span><span class="p">()</span> <span class="kt">int</span> <span class="p">{</span>
+    <span class="c1">// TODO: error handling for dequeuing when the list is empty</span>
+    <span class="nx">result</span> <span class="o">:=</span> <span class="nx">q</span><span class="p">.</span><span class="nx">tail</span>
+    <span class="nx">q</span><span class="p">.</span><span class="nx">tail</span> <span class="p">=</span> <span class="nx">result</span><span class="p">.</span><span class="nx">previous</span>
+    <span class="k">return</span> <span class="nx">result</span><span class="p">.</span><span class="nx">value</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">q</span> <span class="nx">MyList</span>
+    <span class="nx">q</span><span class="p">.</span><span class="nx">Enqueue</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+    <span class="nx">q</span><span class="p">.</span><span class="nx">Enqueue</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">"FirstInFirstOut head: %v at memory address %p \n"</span><span class="p">,</span> <span class="nx">q</span><span class="p">.</span><span class="nx">head</span><span class="p">.</span><span class="nx">value</span><span class="p">,</span> <span class="nx">q</span><span class="p">.</span><span class="nx">head</span><span class="p">)</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">"FirstInFirstOut tail: %v at memory address %p \n"</span><span class="p">,</span> <span class="nx">q</span><span class="p">.</span><span class="nx">tail</span><span class="p">.</span><span class="nx">value</span><span class="p">,</span> <span class="nx">q</span><span class="p">.</span><span class="nx">tail</span><span class="p">)</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">"dequeuing a value: "</span><span class="p">,</span> <span class="nx">q</span><span class="p">.</span><span class="nx">Dequeue</span><span class="p">())</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">"FirstInFirstOut head: %v at memory address %p \n"</span><span class="p">,</span> <span class="nx">q</span><span class="p">.</span><span class="nx">head</span><span class="p">.</span><span class="nx">value</span><span class="p">,</span> <span class="nx">q</span><span class="p">.</span><span class="nx">head</span><span class="p">)</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">"FirstInFirstOut tail: %v at memory address %p \n"</span><span class="p">,</span> <span class="nx">q</span><span class="p">.</span><span class="nx">tail</span><span class="p">.</span><span class="nx">value</span><span class="p">,</span> <span class="nx">q</span><span class="p">.</span><span class="nx">tail</span><span class="p">)</span>
+
+<span class="p">}</span>
+</pre></div>
+<blockquote>
+<p>The terminology changed a little bit from Push to Enqueue but now we can have a simple "fair buffer"</p>
+</blockquote>
+<ul>
+<li><a href="https://play.golang.org/p/aGMnou1jf7">https://play.golang.org/p/aGMnou1jf7</a> <em>your queue in play</em></li>
+<li><a href="https://en.wikipedia.org/wiki/Queue_(abstract_data_type)">https://en.wikipedia.org/wiki/Queue_(abstract_data_type)</a></li>
+<li><a href="https://www.cs.cmu.edu/~adamchik/15-121/lectures/Stacks%20and%20Queues/Stacks%20and%20Queues.html">https://www.cs.cmu.edu/~adamchik/15-121/lectures/Stacks%20and%20Queues/Stacks%20and%20Queues.html</a></li>
+</ul>
+            <aside>
+            <hr/>
+            <nav>
+            <ul class="articles_timeline">
+ 
+                <li class="previous_article">« <a href="https://blog.john-pfeiffer.com/golang-slices-functions-filters-mergesort/" title="Previous: Golang Slices Functions Filters Mergesort">Golang Slices Functions Filters Mergesort</a></li>
+            </ul>
+            </nav>
+            </aside>
+        </div>
+        <section>
+        <div class="span2" style="float:right;font-size:0.9em;">
+ 
+            <h4>Published</h4>
+            <time pubdate="pubdate" datetime="2016-10-05T20:34:00-07:00">Oct 5, 2016</time>
+            <h4>Category</h4>
+            <a class="category-link" href="/categories.html#programming-ref">programming</a> 
+            <h4>~1208 words</h4>
+            <h4>Tags</h4>
+            <ul class="list-of-tags tags-in-article"> 
+                <li><a href="/tags.html#go-ref">go
+                    <span>4</span>
+</a></li>
+                <li><a href="/tags.html#golang-ref">golang
+                    <span>3</span>
+</a></li>
+                <li><a href="/tags.html#interfaces-ref">interfaces
+                    <span>1</span>
+</a></li>
+                <li><a href="/tags.html#linked-list-ref">linked list
+                    <span>1</span>
+</a></li>
+                <li><a href="/tags.html#map-ref">map
+                    <span>1</span>
+</a></li>
+                <li><a href="/tags.html#queue-ref">queue
+                    <span>1</span>
+</a></li>
+                <li><a href="/tags.html#set-ref">set
+                    <span>1</span>
+</a></li>
+                <li><a href="/tags.html#stack-ref">stack
+                    <span>1</span>
+</a></li>
+                <li><a href="/tags.html#strategy-pattern-ref">strategy pattern
+                    <span>2</span>
+</a></li>
+            </ul>
+
+        </div>
+        </section>
+</div>
+</article>
+				</div>
+				<div class="span1"></div>
+			</div>
+		</div>
+    </div>
+<footer>
+<div id="footer">
+    <ul class="footer-content">
+    </ul>
+</div>
+</footer>            <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+    </body>
+</html>
