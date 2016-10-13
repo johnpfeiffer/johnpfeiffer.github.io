@@ -112,7 +112,7 @@
 <li><a href="#python-and-pelican-static-site-generator-on-docker-ubuntu1404">Python and Pelican static site generator on docker ubuntu:14.04</a></li>
 </ul>
 </li>
-<li><a href="#advanced-docker-pre-built-images">Advanced Docker pre built images</a><ul>
+<li><a href="#docker-pre-built-images-from-the-registry">Docker pre built Images from the Registry</a><ul>
 <li><a href="#redis">Redis</a></li>
 </ul>
 </li>
@@ -416,7 +416,7 @@ e4b436320442 ubuntu:14.04 -uname -a  3 minutes ago              elegant_engelbar
 <h3 id="copying-a-file-out-of-a-container">Copying a file out of a container</h3>
 <div class="highlight"><pre><span></span>docker cp &lt;containerId&gt;:/file/path/within/container /host/path/target
 </pre></div>
-<p><a href="https://docs.docker.com/reference/commandline/cli/#cp">https://docs.docker.com/reference/commandline/cli/#cp</a></p>
+<p><a href="https://docs.docker.com/engine/reference/commandline/cp/">https://docs.docker.com/engine/reference/commandline/cp/</a></p>
 <h3 id="deleting-aka-removing-a-container">Deleting aka removing a container</h3>
 <div class="highlight"><pre><span></span>docker rm e4b436320442
 </pre></div>
@@ -653,23 +653,24 @@ ubuntu                   14.04               e54ca5efa2e9        3 weeks ago    
 <li><code>http://127.0.0.1:8000</code></li>
 </ol>
 <hr/>
-<h2 id="advanced-docker-pre-built-images">Advanced Docker pre built images</h2>
-<p><code>docker search stackbrew/ubuntu</code></p>
-<blockquote>
-<p>FYI stackbrew/ubuntu is the same as ubuntu , <a href="https://registry.hub.docker.com/u/stackbrew/ubuntu">stackbrew is the curated Docker registry</a></p>
-</blockquote>
-<p><strong><a href="https://registry.hub.docker.com">https://registry.hub.docker.com</a></strong></p>
+<h2 id="docker-pre-built-images-from-the-registry">Docker pre built Images from the Registry</h2>
 <h3 id="redis">Redis</h3>
-<p><strong><a href="https://registry.hub.docker.com/_/redis/">https://registry.hub.docker.com/_/redis/</a></strong></p>
-<p><code>docker run --detach --publish 127.0.0.1:6379:6379 --name redis redis</code></p>
+<p><code>docker search redis</code></p>
 <blockquote>
-<p>detached container based on the redis latest bound to the host on port 6379
-the image already includes by default the expose port command: EXPOSE 6379...
-<code>apt-get install redis-tools; redis-cli</code>
-connect from the host to the redis container to the redis interactive cli</p>
+<p>search from the CLI but NAME, DESCRIPTION, STARS, OFFICIAL will only help you if you sort of already know what you are looking for</p>
 </blockquote>
-<p><code>docker run -i -t --link redis:db  johnssh /bin/bash</code></p>
-<div class="highlight"><pre><span></span><span class="x">root@d95a758eaa6b:/</span><span class="err">#</span><span class="x"></span>
+<p><strong><a href="https://registry.hub.docker.com/_/redis/">https://registry.hub.docker.com/_/redis/</a></strong></p>
+<div class="highlight"><pre><span></span>docker run --detach --publish 127.0.0.1:6379:6379 --name redis redis
+</pre></div>
+<blockquote>
+<p>detached container based on the redis latest bound to the host on port 6379</p>
+<p>the image already includes by default the expose port command: EXPOSE 6379...
+<code>apt-get install redis-tools; redis-cli</code></p>
+<p>connect from the host to the redis container to the redis interactive cli</p>
+</blockquote>
+<div class="highlight"><pre><span></span><span class="x">docker run -i -t --link redis:db  johnssh /bin/bash</span>
+
+<span class="x">root@d95a758eaa6b:/</span><span class="err">#</span><span class="x"></span>
 <span class="x">apt-get install redis-tools</span>
 <span class="x">env</span>
 <span class="x">redis-cli -h </span><span class="p">$</span><span class="nv">DB_PORT_6379_TCP_ADDR</span><span class="x"></span>
@@ -678,7 +679,8 @@ connect from the host to the redis container to the redis interactive cli</p>
 <blockquote>
 <p>PONG</p>
 </blockquote>
-<p><code>get mykey</code></p>
+<div class="highlight"><pre><span></span>get mykey
+</pre></div>
 <blockquote>
 <p>"somevalue"</p>
 </blockquote>
@@ -701,7 +703,6 @@ redis-cli -h 172.17.0.72 keys *
 1) mykey
 </pre></div>
 <p><strong> Add a route to the Host From inside a Container/Guest </strong></p>
-<p><a href="http://docs.docker.com/reference/commandline/cli/#adding-entries-to-a-container-hosts-file">http://docs.docker.com/reference/commandline/cli/#adding-entries-to-a-container-hosts-file</a></p>
 <p>HOST:</p>
 <div class="highlight"><pre><span></span>ip addr show
 ip addr show | grep docker0
@@ -726,12 +727,14 @@ HOSTIP=$(ip addr show | grep docker0 | grep global | awk '{print $2}' | cut -d /
 <span class="n">PING</span> <span class="n">docker</span> <span class="p">(</span><span class="mf">172.17.42.1</span><span class="p">)</span><span class="o">:</span> <span class="mi">56</span> <span class="n">data</span> <span class="n">bytes</span>
 <span class="mi">64</span> <span class="n">bytes</span> <span class="n">from</span> <span class="mf">172.17.42.1</span><span class="o">:</span> <span class="n">icmp_seq</span><span class="o">=</span><span class="mi">0</span> <span class="n">ttl</span><span class="o">=</span><span class="mi">64</span> <span class="n">time</span><span class="o">=</span><span class="mf">0.158</span> <span class="n">ms</span>
 </pre></div>
+<p><a href="https://docs.docker.com/engine/reference/commandline/run/">https://docs.docker.com/engine/reference/commandline/run/</a></p>
 <hr/>
 <h2 id="docker-compose">Docker Compose</h2>
 <p>Complex real systems have multiple dependencies and following the recommended Docker pattern of "do one thing per container" means needing a way to start/orchestrate a bunch of things at once.</p>
-<p>While there are some amazing open source projects (<a href="http://kubernetes.io/">http://kubernetes.io/</a> , <a href="http://mesos.apache.org/documentation/latest/docker-containerizer/">http://mesos.apache.org/documentation/latest/docker-containerizer/</a>) it is instructive to start with the simplest model provided directly from Docker, <a href="https://docs.docker.com/compose/">https://docs.docker.com/compose/</a></p>
-<p><code>sudo pip install --upgrade docker-compose</code>
-<code>docker-compose --version</code></p>
+<p>While there are some amazing open source projects (<a href="http://kubernetes.io/">http://kubernetes.io/</a> , <a href="https://mesos.apache.org/documentation/latest/docker-containerizer/">https://mesos.apache.org/documentation/latest/docker-containerizer/</a>) it is instructive to start with the simplest model provided directly from Docker, <strong><a href="https://docs.docker.com/compose/">https://docs.docker.com/compose/</a></strong></p>
+<div class="highlight"><pre><span></span>sudo pip install --upgrade docker-compose
+docker-compose --version
+</pre></div>
 <h3 id="apppy">app.py</h3>
 <div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">Flask</span>
 <span class="kn">from</span> <span class="nn">redis</span> <span class="kn">import</span> <span class="n">Redis</span>
@@ -811,15 +814,8 @@ look closely at error messages, i.e. make: not found and ensure that an early RU
 <hr/>
 <h2 id="more-info">More Info</h2>
 <ul>
-<li><a href="https://docs.docker.com/reference/commandline/cli/#run">https://docs.docker.com/reference/commandline/cli/#run</a></li>
 <li>Real World example of using Docker for behind the firewall delivery: <a href="https://bitbucket.org/atlassianlabs/ac-koa-hipchat-sassy/pull-request/6/readmemd-contains-instructions-on-how-to/diff">https://bitbucket.org/atlassianlabs/ac-koa-hipchat-sassy/pull-request/6/readmemd-contains-instructions-on-how-to/diff</a></li>
-<li><a href="https://docs.docker.com/articles/basics">https://docs.docker.com/articles/basics</a></li>
-<li>
-<p><a href="https://github.com/wsargent/docker-cheat-sheet">https://github.com/wsargent/docker-cheat-sheet</a></p>
-</li>
-<li>
-<p><a href="http://blog.oddbit.com/2014/08/11/four-ways-to-connect-a-docker">http://blog.oddbit.com/2014/08/11/four-ways-to-connect-a-docker</a></p>
-</li>
+<li><a href="https://github.com/wsargent/docker-cheat-sheet">https://github.com/wsargent/docker-cheat-sheet</a></li>
 <li><a href="http://jpetazzo.github.io/2014/06/23/docker-ssh-considered-evil">http://jpetazzo.github.io/2014/06/23/docker-ssh-considered-evil</a></li>
 </ul>
 <h3 id="docker-api-and-the-docker-hub-public-registry">Docker API and the Docker Hub Public Registry</h3>
@@ -950,7 +946,7 @@ https://docker.example.com/version
             <time pubdate="pubdate" datetime="2014-07-10T17:00:00-07:00">Jul 10, 2014</time>
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#virtualization-ref">virtualization</a> 
-            <h4>~3673 words</h4>
+            <h4>~3682 words</h4>
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article"> 
                 <li><a href="/tags.html#containers-ref">containers
