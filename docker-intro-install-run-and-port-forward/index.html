@@ -77,6 +77,7 @@
 <ul>
 <li><a href="#install-docker">Install Docker</a><ul>
 <li><a href="#installing-on-mac-or-windows">Installing on Mac or Windows</a></li>
+<li><a href="#custom-docker0-ip-range">Custom docker0 ip range</a></li>
 </ul>
 </li>
 <li><a href="#quick-start-summary">Quick Start Summary</a></li>
@@ -153,17 +154,17 @@
 
 <ul>
 <li><strong>Images</strong> are the initial templates, each image has a unique ID <a href="https://docs.docker.com/engine/userguide/storagedriver/imagesandcontainers/#content-addressable-storage">https://docs.docker.com/engine/userguide/storagedriver/imagesandcontainers/#content-addressable-storage</a></li>
-<li><strong>Containers</strong> are the running virtual machines, each container has a unique ID  <a href="http://docs.docker.com/terms/container">http://docs.docker.com/terms/container</a></li>
+<li><strong>Containers</strong> are the running virtual machines, each container has a unique ID  <a href="https://en.wikipedia.org/wiki/Operating-system-level_virtualization">https://en.wikipedia.org/wiki/Operating-system-level_virtualization</a></li>
 <li><em>From now on it is assumed you use <strong>sudo</strong> before any docker command!</em></li>
 </ul>
 <hr/>
 <h2 id="install-docker">Install Docker</h2>
-<p><a href="https://docs.docker.com/installation/ubuntulinux/">https://docs.docker.com/installation/ubuntulinux/</a></p>
+<p><a href="https://docs.docker.com/engine/installation/linux/ubuntulinux/">https://docs.docker.com/engine/installation/linux/ubuntulinux/</a></p>
 <ol>
 <li><code>apt-key adv --keyserver hkp://pgp.mit.edu:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D</code></li>
 <li><code>sudo sh -c "echo 'deb https://apt.dockerproject.org/repo ubuntu-trusty main' &gt; /etc/apt/sources.list.d/docker.list"</code></li>
 <li><code>sudo apt-get update</code></li>
-<li><code>sudo apt-get install linux-image-extra-$(uname -r)</code></li>
+<li><code>apt-get install linux-image-extra-$(uname -r)</code></li>
 <li><code>apt-get install docker-engine</code></li>
 <li><code>service docker status</code></li>
 <li><code>docker info</code></li>
@@ -175,6 +176,41 @@
 </blockquote>
 <h3 id="installing-on-mac-or-windows">Installing on Mac or Windows</h3>
 <p><a href="https://www.docker.com/docker-toolbox">https://www.docker.com/docker-toolbox</a></p>
+<h3 id="custom-docker0-ip-range">Custom docker0 ip range</h3>
+<blockquote>
+<p>Fixing the Docker Bridge docker0 taking a huge 172.17.0.1/16 address space...</p>
+</blockquote>
+<p>Private IP address space is not normally a thing to worry about, unless someone does something silly and grabs 65,534 addresses (stare) (docker)</p>
+<p>Because the default docker0 bridge seems to cater to organizations that want to run thousands of containers simultaneously local developers need to do the following fix:</p>
+<ol>
+<li><code>apt-get install bridge-utils</code></li>
+<li><code>service docker stop</code></li>
+<li><code>ip link set docker0 down</code></li>
+<li><code>brctl delbr docker0</code></li>
+<li><code>docker daemon --bip=192.168.239.1/24</code></li>
+<li><code>ifconfig</code></li>
+</ol>
+<blockquote>
+<p>Docker will be running interactively so you can see all the fun log messages</p>
+<p>You should see docker0 "inet addr:192.168.239.1  Bcast:0.0.0.0  Mask:255.255.255.0"</p>
+</blockquote>
+<p><em>Assuming you do not have some other purpose for the 192.168.239 range in which case you can change it to something else</em></p>
+<p>To permanently have this custom ip range configuration for docker (assuming you have done the steps above):</p>
+<ol>
+<li>Control + C to quit the previously interactive docker daemon</li>
+<li><code>vi /etc/default/docker</code></li>
+<li><code>DOCKER_OPTS="--bip=192.168.239.1/24"</code></li>
+<li><code>service docker start</code></li>
+<li><code>ifconfig</code></li>
+</ol>
+<blockquote>
+<p>You should see docker0 "inet addr:192.168.239.1  Bcast:0.0.0.0  Mask:255.255.255.0"</p>
+</blockquote>
+<p>More docs to further troubleshoot the docker0 bridge...</p>
+<ul>
+<li><a href="https://docs.docker.com/engine/userguide/networking/default_network/custom-docker0/">https://docs.docker.com/engine/userguide/networking/default_network/custom-docker0/</a></li>
+<li><a href="https://docs.docker.com/engine/admin/systemd/">https://docs.docker.com/engine/admin/systemd/</a></li>
+</ul>
 <hr/>
 <h2 id="quick-start-summary">Quick Start Summary</h2>
 <div class="highlight"><pre><span></span>docker run --rm busybox /bin/sh -c "echo 'hi'"
@@ -190,7 +226,7 @@ docker run -it --rm -e MYVAR=123 busybox env
 <ul>
 <li>run the docker container (from the latest public python image) and start the shell prompt instead of the python interpreter</li>
 <li>the entrypoint parameter overrides the Docker Image (in case they do not provide a helpfully overridable CMD)</li>
-<li><a href="http://docs.docker.com/engine/reference/builder/#entrypoint">http://docs.docker.com/engine/reference/builder/#entrypoint</a></li>
+<li><a href="https://docs.docker.com/engine/reference/builder/#entrypoint">https://docs.docker.com/engine/reference/builder/#entrypoint</a></li>
 </ul>
 <hr/>
 <h2 id="download-a-docker-image">Download a docker image</h2>
@@ -464,7 +500,7 @@ c4c77a6165f9        7 weeks ago         /bin/sh -c #(nop) ADD file:24ed1895f2e50
 </pre></div>
 <blockquote>
 <p>experimental:
-docker save 49b5a7a88d5 | sudo docker-squash -t ubuntu-utopic-pelican:squash | docker load</p>
+<code>docker save 49b5a7a88d5 | sudo docker-squash -t ubuntu-utopic-pelican:squash | docker load</code></p>
 </blockquote>
 <hr/>
 <h2 id="add-a-port-to-a-container">Add a port to a container</h2>
@@ -546,7 +582,8 @@ docker save 49b5a7a88d5 | sudo docker-squash -t ubuntu-utopic-pelican:squash | d
 <hr/>
 <h2 id="managing-or-limiting-the-resources-available-to-a-container">Managing or limiting the resources available to a Container</h2>
 <p><a href="https://docs.docker.com/engine/reference/run/#runtime-constraints-on-resources">https://docs.docker.com/engine/reference/run/#runtime-constraints-on-resources</a></p>
-<p>docker run -i -t --rm --cpuset-cpu 0 --memory 512m ubuntu:14.04 /bin/bash</p>
+<div class="highlight"><pre><span></span>docker run -i -t --rm --cpuset-cpu 0 --memory 512m ubuntu:14.04 /bin/bash
+</pre></div>
 <blockquote>
 <p>the usual ubuntu trusty bash prompt but anything we run will be
 pinned to cpu 0 (i.e. 25% of a 4 core system) and have
@@ -665,11 +702,12 @@ redis-cli -h 172.17.0.72 keys *
 </pre></div>
 <p><strong> Add a route to the Host From inside a Container/Guest </strong></p>
 <p><a href="http://docs.docker.com/reference/commandline/cli/#adding-entries-to-a-container-hosts-file">http://docs.docker.com/reference/commandline/cli/#adding-entries-to-a-container-hosts-file</a></p>
-<p>HOST: 
-    ip addr show
-    ip addr show | grep docker0
-    ip addr show | grep docker0 | grep global | awk '{print $2}' | cut -d / -f1
-    HOSTIP=$(ip addr show | grep docker0 | grep global | awk '{print $2}' | cut -d / -f1)</p>
+<p>HOST:</p>
+<div class="highlight"><pre><span></span>ip addr show
+ip addr show | grep docker0
+ip addr show | grep docker0 | grep global | awk '{print $2}' | cut -d / -f1
+HOSTIP=$(ip addr show | grep docker0 | grep global | awk '{print $2}' | cut -d / -f1)
+</pre></div>
 <p><code>sudo docker run -i -t --rm --add-host=docker:${HOSTIP} python:2 /bin/bash</code></p>
 <div class="highlight"><pre><span></span><span class="n">root</span><span class="mi">@1</span><span class="nl">bbe25092f19</span><span class="p">:</span><span class="o">/</span><span class="err">#</span> <span class="n">cat</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">hosts</span>
 
@@ -912,7 +950,7 @@ https://docker.example.com/version
             <time pubdate="pubdate" datetime="2014-07-10T17:00:00-07:00">Jul 10, 2014</time>
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#virtualization-ref">virtualization</a> 
-            <h4>~3497 words</h4>
+            <h4>~3673 words</h4>
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article"> 
                 <li><a href="/tags.html#containers-ref">containers

@@ -5067,17 +5067,17 @@ rm -rf /home/ubuntu/.vagrant.d
 
 &lt;ul&gt;
 &lt;li&gt;&lt;strong&gt;Images&lt;/strong&gt; are the initial templates, each image has a unique ID &lt;a href="https://docs.docker.com/engine/userguide/storagedriver/imagesandcontainers/#content-addressable-storage"&gt;https://docs.docker.com/engine/userguide/storagedriver/imagesandcontainers/#content-addressable-storage&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Containers&lt;/strong&gt; are the running virtual machines, each container has a unique ID  &lt;a href="http://docs.docker.com/terms/container"&gt;http://docs.docker.com/terms/container&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Containers&lt;/strong&gt; are the running virtual machines, each container has a unique ID  &lt;a href="https://en.wikipedia.org/wiki/Operating-system-level_virtualization"&gt;https://en.wikipedia.org/wiki/Operating-system-level_virtualization&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;em&gt;From now on it is assumed you use &lt;strong&gt;sudo&lt;/strong&gt; before any docker command!&lt;/em&gt;&lt;/li&gt;
 &lt;/ul&gt;
 &lt;hr/&gt;
 &lt;h2 id="install-docker"&gt;Install Docker&lt;/h2&gt;
-&lt;p&gt;&lt;a href="https://docs.docker.com/installation/ubuntulinux/"&gt;https://docs.docker.com/installation/ubuntulinux/&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://docs.docker.com/engine/installation/linux/ubuntulinux/"&gt;https://docs.docker.com/engine/installation/linux/ubuntulinux/&lt;/a&gt;&lt;/p&gt;
 &lt;ol&gt;
 &lt;li&gt;&lt;code&gt;apt-key adv --keyserver hkp://pgp.mit.edu:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D&lt;/code&gt;&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;sudo sh -c "echo 'deb https://apt.dockerproject.org/repo ubuntu-trusty main' &amp;gt; /etc/apt/sources.list.d/docker.list"&lt;/code&gt;&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;sudo apt-get update&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;sudo apt-get install linux-image-extra-$(uname -r)&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;apt-get install linux-image-extra-$(uname -r)&lt;/code&gt;&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;apt-get install docker-engine&lt;/code&gt;&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;service docker status&lt;/code&gt;&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;docker info&lt;/code&gt;&lt;/li&gt;
@@ -5089,6 +5089,41 @@ rm -rf /home/ubuntu/.vagrant.d
 &lt;/blockquote&gt;
 &lt;h3 id="installing-on-mac-or-windows"&gt;Installing on Mac or Windows&lt;/h3&gt;
 &lt;p&gt;&lt;a href="https://www.docker.com/docker-toolbox"&gt;https://www.docker.com/docker-toolbox&lt;/a&gt;&lt;/p&gt;
+&lt;h3 id="custom-docker0-ip-range"&gt;Custom docker0 ip range&lt;/h3&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Fixing the Docker Bridge docker0 taking a huge 172.17.0.1/16 address space...&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Private IP address space is not normally a thing to worry about, unless someone does something silly and grabs 65,534 addresses (stare) (docker)&lt;/p&gt;
+&lt;p&gt;Because the default docker0 bridge seems to cater to organizations that want to run thousands of containers simultaneously local developers need to do the following fix:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;code&gt;apt-get install bridge-utils&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;service docker stop&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;ip link set docker0 down&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;brctl delbr docker0&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;docker daemon --bip=192.168.239.1/24&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;ifconfig&lt;/code&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Docker will be running interactively so you can see all the fun log messages&lt;/p&gt;
+&lt;p&gt;You should see docker0 "inet addr:192.168.239.1  Bcast:0.0.0.0  Mask:255.255.255.0"&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;em&gt;Assuming you do not have some other purpose for the 192.168.239 range in which case you can change it to something else&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;To permanently have this custom ip range configuration for docker (assuming you have done the steps above):&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Control + C to quit the previously interactive docker daemon&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;vi /etc/default/docker&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;DOCKER_OPTS="--bip=192.168.239.1/24"&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;service docker start&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;ifconfig&lt;/code&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;blockquote&gt;
+&lt;p&gt;You should see docker0 "inet addr:192.168.239.1  Bcast:0.0.0.0  Mask:255.255.255.0"&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;More docs to further troubleshoot the docker0 bridge...&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://docs.docker.com/engine/userguide/networking/default_network/custom-docker0/"&gt;https://docs.docker.com/engine/userguide/networking/default_network/custom-docker0/&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://docs.docker.com/engine/admin/systemd/"&gt;https://docs.docker.com/engine/admin/systemd/&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
 &lt;hr/&gt;
 &lt;h2 id="quick-start-summary"&gt;Quick Start Summary&lt;/h2&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;docker run --rm busybox /bin/sh -c "echo 'hi'"
@@ -5104,7 +5139,7 @@ docker run -it --rm -e MYVAR=123 busybox env
 &lt;ul&gt;
 &lt;li&gt;run the docker container (from the latest public python image) and start the shell prompt instead of the python interpreter&lt;/li&gt;
 &lt;li&gt;the entrypoint parameter overrides the Docker Image (in case they do not provide a helpfully overridable CMD)&lt;/li&gt;
-&lt;li&gt;&lt;a href="http://docs.docker.com/engine/reference/builder/#entrypoint"&gt;http://docs.docker.com/engine/reference/builder/#entrypoint&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://docs.docker.com/engine/reference/builder/#entrypoint"&gt;https://docs.docker.com/engine/reference/builder/#entrypoint&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 &lt;hr/&gt;
 &lt;h2 id="download-a-docker-image"&gt;Download a docker image&lt;/h2&gt;
@@ -5378,7 +5413,7 @@ c4c77a6165f9        7 weeks ago         /bin/sh -c #(nop) ADD file:24ed1895f2e50
 &lt;/pre&gt;&lt;/div&gt;
 &lt;blockquote&gt;
 &lt;p&gt;experimental:
-docker save 49b5a7a88d5 | sudo docker-squash -t ubuntu-utopic-pelican:squash | docker load&lt;/p&gt;
+&lt;code&gt;docker save 49b5a7a88d5 | sudo docker-squash -t ubuntu-utopic-pelican:squash | docker load&lt;/code&gt;&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;hr/&gt;
 &lt;h2 id="add-a-port-to-a-container"&gt;Add a port to a container&lt;/h2&gt;
@@ -5460,7 +5495,8 @@ docker save 49b5a7a88d5 | sudo docker-squash -t ubuntu-utopic-pelican:squash | d
 &lt;hr/&gt;
 &lt;h2 id="managing-or-limiting-the-resources-available-to-a-container"&gt;Managing or limiting the resources available to a Container&lt;/h2&gt;
 &lt;p&gt;&lt;a href="https://docs.docker.com/engine/reference/run/#runtime-constraints-on-resources"&gt;https://docs.docker.com/engine/reference/run/#runtime-constraints-on-resources&lt;/a&gt;&lt;/p&gt;
-&lt;p&gt;docker run -i -t --rm --cpuset-cpu 0 --memory 512m ubuntu:14.04 /bin/bash&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;docker run -i -t --rm --cpuset-cpu 0 --memory 512m ubuntu:14.04 /bin/bash
+&lt;/pre&gt;&lt;/div&gt;
 &lt;blockquote&gt;
 &lt;p&gt;the usual ubuntu trusty bash prompt but anything we run will be
 pinned to cpu 0 (i.e. 25% of a 4 core system) and have
@@ -5579,11 +5615,12 @@ redis-cli -h 172.17.0.72 keys *
 &lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;&lt;strong&gt; Add a route to the Host From inside a Container/Guest &lt;/strong&gt;&lt;/p&gt;
 &lt;p&gt;&lt;a href="http://docs.docker.com/reference/commandline/cli/#adding-entries-to-a-container-hosts-file"&gt;http://docs.docker.com/reference/commandline/cli/#adding-entries-to-a-container-hosts-file&lt;/a&gt;&lt;/p&gt;
-&lt;p&gt;HOST: 
-    ip addr show
-    ip addr show | grep docker0
-    ip addr show | grep docker0 | grep global | awk '{print $2}' | cut -d / -f1
-    HOSTIP=$(ip addr show | grep docker0 | grep global | awk '{print $2}' | cut -d / -f1)&lt;/p&gt;
+&lt;p&gt;HOST:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;ip addr show
+ip addr show | grep docker0
+ip addr show | grep docker0 | grep global | awk '{print $2}' | cut -d / -f1
+HOSTIP=$(ip addr show | grep docker0 | grep global | awk '{print $2}' | cut -d / -f1)
+&lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;&lt;code&gt;sudo docker run -i -t --rm --add-host=docker:${HOSTIP} python:2 /bin/bash&lt;/code&gt;&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;root&lt;/span&gt;&lt;span class="mi"&gt;@1&lt;/span&gt;&lt;span class="nl"&gt;bbe25092f19&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="err"&gt;#&lt;/span&gt; &lt;span class="n"&gt;cat&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;etc&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;hosts&lt;/span&gt;
 
