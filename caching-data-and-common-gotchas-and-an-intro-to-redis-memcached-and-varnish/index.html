@@ -77,6 +77,8 @@
 <ul>
 <li><a href="#why-cache">Why Cache?</a><ul>
 <li><a href="#questions-to-ask-when-caching">Questions to ask when caching</a></li>
+<li><a href="#cache-latency-times-in-perspective">Cache Latency Times in Perspective</a></li>
+<li><a href="#caches-are-another-operational-component-with-overhead">Caches are another Operational component with Overhead</a></li>
 </ul>
 </li>
 <li><a href="#how-to-cache">How to Cache</a><ul>
@@ -133,15 +135,63 @@
 <li>to reduce contention (i.e. reads and writes)</li>
 <li>for a client-server architecture, caching on the client reduces the number of required connections to a server</li>
 <li>server side caching can protect backend resources and improve throughput and performance</li>
-<li>comp</li>
+<li>computation is expensive (in terms of cpu, time, or money)</li>
 </ul>
 <h3 id="questions-to-ask-when-caching">Questions to ask when caching</h3>
-<p>Is the complexity of caching worth the performance gain? (simpler is often better)</p>
-<p>Does my cache need to be consistent? (meaning the cache and data source return identical results)</p>
-<p>Can my cache be "eventually consistent"? (meaning a wrong answer for some specified period of time is ok)</p>
-<p>Am I caching at a high level? (meaning aggregating a lot of work/responses from lower level systems)</p>
-<p>Am I caching at a low level? (meaning inside of my Data Access Object pattern I'm protecting a single simple resource, i.e. a MySQL table, from being accessed too often)</p>
-<p>How unique are my Keys in my cache (i.e. if multiple users can have the same identifier it would be very bad to return the wrong session to the wrong user)</p>
+<ul>
+<li>Is the complexity of caching worth the performance gain? (simpler is often better)</li>
+<li>Does my cache need to be consistent? (meaning the cache and data source return identical results)</li>
+<li>Can my cache be "eventually consistent"? (meaning a wrong answer for some specified period of time is ok)</li>
+<li>Am I caching at a high level? (meaning aggregating a lot of work/responses from lower level systems)</li>
+<li>Am I caching at a low level? (meaning inside of my Data Access Object pattern I'm protecting a single simple resource, i.e. a MySQL table, from being accessed too often)</li>
+<li>How unique are my Keys in my cache (i.e. if multiple users can have the same identifier it would be very bad to return the wrong session to the wrong user)</li>
+</ul>
+<h3 id="cache-latency-times-in-perspective">Cache Latency Times in Perspective</h3>
+<p>Taking "why cache" to another level, the relative speeds of different cache levels highlight why some applications or algorithms will fail if they do not leverage cache.</p>
+<ul>
+<li>If your application is a very large amount of data the network may actually be better than disk; optimization would probably not be focused on "loop unrolling"</li>
+<li>
+<p>If your application depends on data across the internet then network caching, routing algorithms, and data modeling (eventual consistency!) may be more important than "tail recursion vs iterative"</p>
+<p>A typical cpu instruction                    1   ns                              1 second basis (approximations)
+L1 cache fetch                               0.5 ns                            <br/>
+Branch mispredict                            4   ns
+L2 cache fetch                               7   ns                              7 seconds
+Mutex lock/unlock                           25   ns
+RAM "main memory" fetch                    100   ns        0.1 us               2 minutes
+Read 4K randomly from SSD              100,000   ns      100 us                 28 hours
+Read 1 MB sequentially from memory     250,000   ns      250 us                 3 days
+Send 1000 bytes over 1 Gbps network    500,000   ns      500 us     0.5 ms      6 days
+Read 1 MB sequentially from SSD      1,000,000   ns    1,000 us     1 ms        12 days
+Spinning Hard Disk seek              8,000,000   ns    8,000 us     8 ms        3 months
+Read 1 MB sequentially from disk    20,000,000   ns   20,000 us    20 ms        7.6 months
+Roundtrip SF to NY                  70,000,000   ns   70,000 us    70 ms        2 years
+Roundtrip SF to Vienna             150,000,000   ns  150,000 us   150 ms        5 years</p>
+</li>
+</ul>
+<blockquote>
+<p>The L1 cache is the memory cache integrated into the CPU that is closest</p>
+<p>Light travels 30 cm or about 1 foot in 1 nanosecond </p>
+<p>ns = nanoseconds, us = microseconds, ms = milliseconds</p>
+</blockquote>
+<ul>
+<li><a href="http://norvig.com/21-days.html#answers">http://norvig.com/21-days.html#answers</a> Peter Norvig</li>
+<li><a href="https://en.wikipedia.org/wiki/CPU_cache">https://en.wikipedia.org/wiki/CPU_cache</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Solid-state_drive#Controller">https://en.wikipedia.org/wiki/Solid-state_drive#Controller</a></li>
+<li><a href="http://www.codingblocks.net/podcast/episode-45-caching-overview-and-hardware/">http://www.codingblocks.net/podcast/episode-45-caching-overview-and-hardware/</a></li>
+<li><a href="https://wondernetwork.com/pings">https://wondernetwork.com/pings</a></li>
+<li><a href="https://twitter.com/rzezeski/status/398306728263315456/photo/1">https://twitter.com/rzezeski/status/398306728263315456/photo/1</a> Brendan Gregg</li>
+</ul>
+<h3 id="caches-are-another-operational-component-with-overhead">Caches are another Operational component with Overhead</h3>
+<p>The best advice is to definitely avoiding caching until the last possible moment ("premature optimization" and "defer architecture decisions")</p>
+<p>Not only do you have to write code complexity for using a cache, there's the nitty gritty of running a cache (which can be a completely different expertise than programming)</p>
+<ul>
+<li>Install</li>
+<li>Upgrades</li>
+<li>Security</li>
+<li>Monitoring</li>
+<li>Metrics</li>
+</ul>
+<p>None of this operational cost is free, and there are plenty of issues when just implementing caching in code...</p>
 <h2 id="how-to-cache">How to Cache</h2>
 <h3 id="cache-on-write">Cache on Write</h3>
 <p>Also known as "cache on write through"</p>
@@ -178,6 +228,9 @@
 <h2 id="tools-for-caching">Tools for caching</h2>
 <p>Much like encryption it is probably a good idea to use a time tested product over writing your own implementation.</p>
 <h3 id="redis-examples">Redis Examples</h3>
+<p>One thing to think about is that local redis might be far more effective than remote over the network redis.</p>
+<p>If your application can depend less shared state this is good because sharing is a nightmare for cache semantics and distributed computing.</p>
+<p>Regardless of securing your remote cache you will always want to measure cache effectiveness.</p>
 <ul>
 <li><a href="http://redis.io/commands">http://redis.io/commands</a></li>
 </ul>
@@ -259,7 +312,7 @@ redis-cli del   session:1:web-48679
             <time pubdate="pubdate" datetime="2015-03-26T00:00:00-07:00">Mar 26, 2015</time>
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#programming-ref">programming</a> 
-            <h4>~1112 words</h4>
+            <h4>~1527 words</h4>
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article"> 
                 <li><a href="/tags.html#cache-ref">cache
