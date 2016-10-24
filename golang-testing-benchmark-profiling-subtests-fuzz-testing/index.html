@@ -82,6 +82,7 @@
 <li><a href="#example-function-with-go-unit-tests">Example function with go unit tests</a><ul>
 <li><a href="#main_testgo">main_test.go</a><ul>
 <li><a href="#running-a-specific-test">Running a specific test</a></li>
+<li><a href="#test-coverage">Test Coverage</a></li>
 </ul>
 </li>
 <li><a href="#subtests">Subtests</a><ul>
@@ -90,7 +91,10 @@
 </li>
 </ul>
 </li>
-<li><a href="#benchmarking">Benchmarking</a></li>
+<li><a href="#benchmarking">Benchmarking</a><ul>
+<li><a href="#running-specific-benchmarks">Running specific benchmarks</a></li>
+</ul>
+</li>
 <li><a href="#profiling">Profiling</a></li>
 <li><a href="#go-fuzz-testing">Go Fuzz Testing</a></li>
 </ul>
@@ -227,6 +231,12 @@
 <blockquote>
 <p>Getting verbose output and specifying tests is quite helpful when fixing a piece of code or test.  <strong>Note</strong> the run parameter takes a regular expression</p>
 </blockquote>
+<h4 id="test-coverage">Test Coverage</h4>
+<p>Sometimes people talk about "test coverage" and while it's clear that 100% coverage is rarely possible (nor entirely desirable from the idea of diminishing returns and exponential growth in integration combinations outside of the simplest function) , it's still a useful metric/tool to discover if there's a chunk of code that's whistling in the wind.</p>
+<p><code>go test -cover</code></p>
+<blockquote>
+<p>"coverage: 75.0% of statements"</p>
+</blockquote>
 <h3 id="subtests">Subtests</h3>
 <p>Using the pattern of table driven tests improves the readability and extensibility of the "merge empty test" by applying "Don't Repeat Yourself" and removing the copy pasting of the driver function call.</p>
 <div class="highlight"><pre><span></span><span class="kn">package</span> <span class="nx">main</span>
@@ -313,12 +323,95 @@ PASS
 <li><a href="http://dave.cheney.net/2013/06/09/writing-table-driven-tests-in-go">http://dave.cheney.net/2013/06/09/writing-table-driven-tests-in-go</a></li>
 </ul>
 <h2 id="benchmarking">Benchmarking</h2>
-<p>TODO:</p>
+<p>Benchmarking is most useful if you're attempting to answer a question of two variations on how to implement something.</p>
+<p>I suppose if you recorded every result and ran against exactly the same hardware you might be able to detect performance regressions, though I'd be worried about overly inconsistent/flaky results taking up way too much valuable time.</p>
+<p>Inside of a _test.go file you can also write benchmark test functions, here is one of the classic questions of "concatenating strings in Go"</p>
+<p>Here we compare the simplest concatenation of two strings and also the continued concatenation of many strings with either + or buffer.WriteString()</p>
+<p>Create myconcat_test.go and execute the following with <code>go test -v -bench=.</code></p>
+<div class="highlight"><pre><span></span><span class="kn">package</span> <span class="nx">main</span>
+
+<span class="kn">import</span> <span class="p">(</span>
+    <span class="s">"bytes"</span>
+    <span class="s">"testing"</span>
+<span class="p">)</span>
+
+<span class="kd">func</span> <span class="nx">MyConcatSimple</span><span class="p">(</span><span class="nx">a</span> <span class="kt">string</span><span class="p">,</span> <span class="nx">b</span> <span class="kt">string</span><span class="p">)</span> <span class="kt">string</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nx">a</span> <span class="o">+</span> <span class="nx">b</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nx">MyConcatSimpleLooped</span><span class="p">(</span><span class="nx">a</span> <span class="kt">string</span><span class="p">,</span> <span class="nx">b</span> <span class="kt">string</span><span class="p">)</span> <span class="kt">string</span> <span class="p">{</span>
+    <span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="p">&lt;</span> <span class="mi">101</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">{</span>
+        <span class="nx">a</span> <span class="o">+=</span> <span class="nx">b</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="nx">a</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nx">MyConcatBytesBuffer</span><span class="p">(</span><span class="nx">a</span> <span class="kt">string</span><span class="p">,</span> <span class="nx">b</span> <span class="kt">string</span><span class="p">)</span> <span class="kt">string</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">buffer</span> <span class="nx">bytes</span><span class="p">.</span><span class="nx">Buffer</span>
+    <span class="nx">buffer</span><span class="p">.</span><span class="nx">WriteString</span><span class="p">(</span><span class="nx">a</span><span class="p">)</span>
+    <span class="nx">buffer</span><span class="p">.</span><span class="nx">WriteString</span><span class="p">(</span><span class="nx">b</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nx">buffer</span><span class="p">.</span><span class="nx">String</span><span class="p">()</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nx">MyConcatBytesBufferLooped</span><span class="p">(</span><span class="nx">a</span> <span class="kt">string</span><span class="p">,</span> <span class="nx">b</span> <span class="kt">string</span><span class="p">)</span> <span class="kt">string</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">buffer</span> <span class="nx">bytes</span><span class="p">.</span><span class="nx">Buffer</span>
+    <span class="nx">buffer</span><span class="p">.</span><span class="nx">WriteString</span><span class="p">(</span><span class="nx">a</span><span class="p">)</span>
+    <span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="p">&lt;</span> <span class="mi">101</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">{</span>
+        <span class="nx">buffer</span><span class="p">.</span><span class="nx">WriteString</span><span class="p">(</span><span class="nx">b</span><span class="p">)</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="nx">buffer</span><span class="p">.</span><span class="nx">String</span><span class="p">()</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nx">BenchmarkConcatSimple</span><span class="p">(</span><span class="nx">b</span> <span class="o">*</span><span class="nx">testing</span><span class="p">.</span><span class="nx">B</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">for</span> <span class="nx">n</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">n</span> <span class="p">&lt;</span> <span class="nx">b</span><span class="p">.</span><span class="nx">N</span><span class="p">;</span> <span class="nx">n</span><span class="o">++</span> <span class="p">{</span>
+        <span class="nx">MyConcatSimple</span><span class="p">(</span><span class="s">"foo"</span><span class="p">,</span> <span class="s">"bar"</span><span class="p">)</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nx">BenchmarkConcatSimpleLooped</span><span class="p">(</span><span class="nx">b</span> <span class="o">*</span><span class="nx">testing</span><span class="p">.</span><span class="nx">B</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">for</span> <span class="nx">n</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">n</span> <span class="p">&lt;</span> <span class="nx">b</span><span class="p">.</span><span class="nx">N</span><span class="p">;</span> <span class="nx">n</span><span class="o">++</span> <span class="p">{</span>
+        <span class="nx">MyConcatSimpleLooped</span><span class="p">(</span><span class="s">"foo"</span><span class="p">,</span> <span class="s">"bar"</span><span class="p">)</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nx">BenchmarkConcatBytesBuffer</span><span class="p">(</span><span class="nx">b</span> <span class="o">*</span><span class="nx">testing</span><span class="p">.</span><span class="nx">B</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">for</span> <span class="nx">n</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">n</span> <span class="p">&lt;</span> <span class="nx">b</span><span class="p">.</span><span class="nx">N</span><span class="p">;</span> <span class="nx">n</span><span class="o">++</span> <span class="p">{</span>
+        <span class="nx">MyConcatBytesBuffer</span><span class="p">(</span><span class="s">"foo"</span><span class="p">,</span> <span class="s">"bar"</span><span class="p">)</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nx">BenchmarkConcatBytesBufferLooped</span><span class="p">(</span><span class="nx">b</span> <span class="o">*</span><span class="nx">testing</span><span class="p">.</span><span class="nx">B</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">for</span> <span class="nx">n</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">n</span> <span class="p">&lt;</span> <span class="nx">b</span><span class="p">.</span><span class="nx">N</span><span class="p">;</span> <span class="nx">n</span><span class="o">++</span> <span class="p">{</span>
+        <span class="nx">MyConcatBytesBufferLooped</span><span class="p">(</span><span class="s">"foo"</span><span class="p">,</span> <span class="s">"bar"</span><span class="p">)</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+<blockquote>
+<p>The b.N is automatically filled in by Go until the benchmark runner is "satisfied with stability" though you can create a wrapper function for the code under test if you wish to attempt more control over iterations</p>
+<p>Remember that every benchmark is only valid against a specific set of hardware, operating system, libraries, etc. and with any changes (i.e. upgrade from Go 1.6 to 1.7) you may need to retest... unless you're just proving O(N) is better than O(N^2) ;)</p>
+</blockquote>
+<p>Oh right, the results...</p>
+<div class="highlight"><pre><span></span>BenchmarkConcatSimple-4                 30000000                40.1 ns/op
+BenchmarkConcatSimpleLooped-4             100000             20728 ns/op
+BenchmarkConcatBytesBuffer-4             5000000               373 ns/op
+BenchmarkConcatBytesBufferLooped-4        300000              7227 ns/op
+</pre></div>
+<blockquote>
+<p>the iterations show that the simplest naive concatentation with + is very fast for a couple of small arguments (40 nanoseconds)</p>
+<p>BUT if appending many (100+) items together buffer.Write() is better</p>
+</blockquote>
+<p>This example ignored all sorts of real world questions around how the strings are provided (i.e. a slice of strings might be better served by Join()) (or examine it's source code to see how they implement string concatenation!) , or memory consumption, etc.</p>
 <ul>
 <li><a href="http://dave.cheney.net/2013/06/30/how-to-write-benchmarks-in-go">http://dave.cheney.net/2013/06/30/how-to-write-benchmarks-in-go</a></li>
-<li><a href="http://www.soroushjp.com/2015/01/27/beautifully-simple-benchmarking-with-go/">http://www.soroushjp.com/2015/01/27/beautifully-simple-benchmarking-with-go/</a></li>
 <li><a href="https://medium.com/hackintoshrao/daily-code-optimization-using-benchmarks-and-profiling-in-golang-gophercon-india-2016-talk-874c8b4dc3c5">https://medium.com/hackintoshrao/daily-code-optimization-using-benchmarks-and-profiling-in-golang-gophercon-india-2016-talk-874c8b4dc3c5</a></li>
+<li><a href="https://golang.org/pkg/strings/#Join">https://golang.org/pkg/strings/#Join</a></li>
 </ul>
+<h4 id="running-specific-benchmarks">Running specific benchmarks</h4>
+<p><code>go test -v -run=NOMATCH -bench=BenchmarkConcatSimple</code></p>
+<blockquote>
+<p>Since it is using the test runner the -run= regexp not matching allows you to skip any unit tests</p>
+<p>-bench= can take a regexp to match only a subset of benchmark tests</p>
+</blockquote>
 <h2 id="profiling">Profiling</h2>
 <p>TODO:</p>
 <ul>
@@ -399,7 +492,7 @@ PASS
             <time pubdate="pubdate" datetime="2016-10-22T20:44:00-07:00">Oct 22, 2016</time>
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#programming-ref">programming</a> 
-            <h4>~1271 words</h4>
+            <h4>~1768 words</h4>
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article"> 
                 <li><a href="/tags.html#benchmark-ref">benchmark
