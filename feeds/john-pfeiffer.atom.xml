@@ -2258,6 +2258,85 @@ Fill it in with something like OAUTH_USER=yourkeyhere:yoursecrethere&lt;/p&gt;
 &lt;p&gt;The last step gets you going without needing to reload your shell, full docs at &lt;a href="https://golang.org/doc/install"&gt;https://golang.org/doc/install&lt;/a&gt;&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;p&gt;&lt;strong&gt;WARNING&lt;/strong&gt; be careful how you name your executables as the $GOPATH/bin will contain the names of the projects as binaries (so don't create a project or binary named bash!)&lt;/p&gt;
+&lt;h3 id="manual-cli-compilation-and-installation-and-execution"&gt;Manual CLI compilation and installation and execution&lt;/h3&gt;
+&lt;p&gt;The traditional command line method is:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="x"&gt;cd &lt;/span&gt;&lt;span class="p"&gt;$&lt;/span&gt;&lt;span class="nv"&gt;GOPATH&lt;/span&gt;&lt;span class="x"&gt;/path-to-your-project/PROJECTNAME&lt;/span&gt;
+&lt;span class="x"&gt;go install&lt;/span&gt;
+&lt;span class="p"&gt;$&lt;/span&gt;&lt;span class="nv"&gt;GOPATH&lt;/span&gt;&lt;span class="x"&gt;/bin/PROJECTNAME&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://golang.org/doc/code.html#Command"&gt;https://golang.org/doc/code.html#Command&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="http://dave.cheney.net/2014/01/21/using-go-test-build-and-install"&gt;http://dave.cheney.net/2014/01/21/using-go-test-build-and-install&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;A concrete example:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Compile with: &lt;code&gt;cd /opt/goprojects/src/github.com/johnpfeiffer/intro/ ; go install&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;Execute with: &lt;code&gt;/opt/goprojects/bin/intro&lt;/code&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;a href="https://golang.org/doc/code.html"&gt;https://golang.org/doc/code.html&lt;/a&gt; is a very complete tutorial, notes for myself: &lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;cat ~/.profile
+&lt;span class="nb"&gt;export&lt;/span&gt; &lt;span class="nv"&gt;GOPATH&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nv"&gt;$HOME&lt;/span&gt;/Desktop/repos/goprojects
+&lt;span class="nb"&gt;export&lt;/span&gt; &lt;span class="nv"&gt;PATH&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nv"&gt;$PATH&lt;/span&gt;:&lt;span class="nv"&gt;$GOPATH&lt;/span&gt;/bin
+
+&lt;span class="nb"&gt;source&lt;/span&gt; ~/.profile
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;an example of setting up the environment in Mac OSX&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;If your files are laid out like this...&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;/Users/johnpfeiffer/Desktop/repos/goprojects
+  - bin
+  - pkg
+  - src
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;&lt;code&gt;mkdir -p $GOPATH/src/bitbucket.org/johnpfeiffer/myproject/mystrings&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;a wrinkle on the official go tutorial where both packages are in the same remote git repository&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;strong&gt;mystrings/mystrings.go&lt;/strong&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kn"&gt;package&lt;/span&gt; &lt;span class="nx"&gt;mystrings&lt;/span&gt;
+
+&lt;span class="kd"&gt;func&lt;/span&gt; &lt;span class="nx"&gt;StringLength&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;s&lt;/span&gt; &lt;span class="kt"&gt;string&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="nb"&gt;len&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;s&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;A simple "library" package that can be re-used&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;code&gt;cd /tmp; go install bitbucket.org/johnpfeiffer/myproject/mystrings&lt;/code&gt;
+ALTERNATIVELY: &lt;code&gt;cd $GOPATH/src/bitbucket.org/johnpfeiffer/myproject/mystrings; go install&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Installing the package builds the .a binary which can be used by other builds/programs&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;code&gt;mkdir -p $GOPATH/src/bitbucket.org/johnpfeiffer/myproject/hello&lt;/code&gt;
+&lt;strong&gt;hello/hello.go&lt;/strong&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kn"&gt;package&lt;/span&gt; &lt;span class="nx"&gt;main&lt;/span&gt;
+
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;
+    &lt;span class="s"&gt;"fmt"&lt;/span&gt;
+    &lt;span class="s"&gt;"bitbucket.org/johnpfeiffer/myproject/mystrings"&lt;/span&gt;
+ &lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="kd"&gt;func&lt;/span&gt; &lt;span class="nx"&gt;main&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="nx"&gt;fmt&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;Println&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;"hello"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;mystrings&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;StringLength&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;"hello"&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;a simple main package that can be called from the CommandLineInterface&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;code&gt;cd $GOPATH/src/bitbucket.org/johnpfeiffer/myproject/hello; go install&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;Execute your new program with: &lt;code&gt;$GOPATH/bin/hello&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;(or since $GOPATH/bin is in $PATH, just type: &lt;code&gt;hello&lt;/code&gt;)&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;strong&gt;An ASCII diagram of the file system&lt;/strong&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="p"&gt;$&lt;/span&gt;&lt;span class="nv"&gt;GOPATH&lt;/span&gt;&lt;span class="x"&gt;/src/bitbucket.org/johnpfeiffer/myproject&lt;/span&gt;
+&lt;span class="x"&gt;|&lt;/span&gt;
+&lt;span class="x"&gt; - hello&lt;/span&gt;
+&lt;span class="x"&gt;     | - hello.go&lt;/span&gt;
+&lt;span class="x"&gt; - mystrings&lt;/span&gt;
+&lt;span class="x"&gt;     | - mystrings.go&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
 &lt;h3 id="download-and-install-an-ide"&gt;Download and install an IDE&lt;/h3&gt;
 &lt;p&gt;If you are used to larger projects then an IDE is quite helpful for colorization, auto completion, (right click or f12) goto definition, rename, build on save, auto formatting, etc.&lt;/p&gt;
 &lt;p&gt;Suprisingly one of the most popular and effective golang IDE combinations is: &lt;a href="https://code.visualstudio.com/Docs/?dv=linux64_deb"&gt;https://code.visualstudio.com/Docs/?dv=linux64_deb&lt;/a&gt;&lt;/p&gt;
@@ -2296,21 +2375,6 @@ Fill it in with something like OAUTH_USER=yourkeyhere:yoursecrethere&lt;/p&gt;
 &lt;p&gt;Unfortunately it is not quite simple to execute the code directly in VSCode &lt;a href="https://github.com/Microsoft/vscode-go/issues/21"&gt;https://github.com/Microsoft/vscode-go/issues/21&lt;/a&gt;&lt;/p&gt;
 &lt;h3 id="install-or-build-or-run"&gt;Install or Build or Run&lt;/h3&gt;
 &lt;p&gt;Because Go is a static language there is a compilation (and linking) phase where the source code is transformed into a binary.&lt;/p&gt;
-&lt;h4 id="manual-cli-compilation-and-installation-and-execution"&gt;Manual CLI compilation and installation and execution&lt;/h4&gt;
-&lt;p&gt;The traditional command line method is:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="x"&gt;cd &lt;/span&gt;&lt;span class="p"&gt;$&lt;/span&gt;&lt;span class="nv"&gt;GOPATH&lt;/span&gt;&lt;span class="x"&gt;/path-to-your-project/PROJECTNAME&lt;/span&gt;
-&lt;span class="x"&gt;go install&lt;/span&gt;
-&lt;span class="p"&gt;$&lt;/span&gt;&lt;span class="nv"&gt;GOPATH&lt;/span&gt;&lt;span class="x"&gt;/bin/PROJECTNAME&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;a href="https://golang.org/doc/code.html#Command"&gt;https://golang.org/doc/code.html#Command&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href="http://dave.cheney.net/2014/01/21/using-go-test-build-and-install"&gt;http://dave.cheney.net/2014/01/21/using-go-test-build-and-install&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;A concrete example:&lt;/p&gt;
-&lt;ol&gt;
-&lt;li&gt;Compile with: &lt;code&gt;cd /opt/goprojects/src/github.com/johnpfeiffer/intro/ ; go install&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;Execute with: &lt;code&gt;/opt/goprojects/bin/intro&lt;/code&gt;&lt;/li&gt;
-&lt;/ol&gt;
 &lt;h3 id="debugging-with-delve"&gt;Debugging with Delve&lt;/h3&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;go get github.com/derekparker/delve/cmd/dlv
 cd /opt/goprojects/src
