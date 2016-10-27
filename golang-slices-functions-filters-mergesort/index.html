@@ -76,7 +76,10 @@
         <div class="toc">
 <ul>
 <li><a href="#tips-on-learning-a-new-programming-language">Tips on learning a new programming language</a></li>
-<li><a href="#arrays-underlying-slices-with-memory-addresses-and-unsafe-pointers">Arrays underlying slices with memory addresses and unsafe pointers</a></li>
+<li><a href="#arrays-underlying-slices-with-memory-addresses-and-unsafe-pointers">Arrays underlying slices with memory addresses and unsafe pointers</a><ul>
+<li><a href="#examples-of-go-slice-operations-and-tricks">Examples of Go Slice operations and tricks</a></li>
+</ul>
+</li>
 <li><a href="#functions-anonymous-functions-functions-as-parameters-and-filters">Functions, Anonymous Functions, Functions as Parameters, and Filters</a></li>
 <li><a href="#mergesort">MergeSort</a></li>
 </ul>
@@ -170,6 +173,76 @@ Here is a major digression into Go slices which is a pointer structure that hold
 <li><a href="https://golang.org/pkg/unsafe/">https://golang.org/pkg/unsafe/</a></li>
 <li><a href="https://en.wikipedia.org/wiki/Dereference_operator">https://en.wikipedia.org/wiki/Dereference_operator</a></li>
 </ul>
+<h3 id="examples-of-go-slice-operations-and-tricks">Examples of Go Slice operations and tricks</h3>
+<div class="highlight"><pre><span></span><span class="kn">package</span> <span class="nx">main</span>
+
+<span class="kn">import</span> <span class="p">(</span>
+    <span class="s">"fmt"</span>
+<span class="p">)</span>
+
+<span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+    <span class="c1">// pre-allocating might be premature optimization and lead to bugs</span>
+    <span class="nx">premature</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">([]</span><span class="kt">string</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+    <span class="nx">premature</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="p">=</span> <span class="s">"foo"</span>
+    <span class="nx">premature</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">premature</span><span class="p">,</span> <span class="s">"bar"</span><span class="p">)</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nx">premature</span><span class="p">),</span> <span class="nx">premature</span><span class="p">)</span> <span class="c1">// "11 [foo          bar]"</span>
+
+    <span class="kd">var</span> <span class="nx">s</span> <span class="p">[]</span><span class="kt">string</span>
+    <span class="nx">s</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">s</span><span class="p">,</span> <span class="s">"add"</span><span class="p">,</span> <span class="s">"multiple"</span><span class="p">,</span> <span class="s">"items"</span><span class="p">,</span> <span class="s">"at"</span><span class="p">,</span> <span class="s">"once"</span><span class="p">)</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nx">s</span><span class="p">),</span> <span class="nx">s</span><span class="p">)</span> <span class="c1">// "5 [add multiple items at once]"</span>
+
+    <span class="c1">// COPY also known as ADD to a slice (in this case add to a nil slice)</span>
+    <span class="nx">b</span> <span class="o">:=</span> <span class="nb">append</span><span class="p">([]</span><span class="nb">string</span><span class="p">(</span><span class="kc">nil</span><span class="p">),</span> <span class="nx">s</span><span class="o">...</span><span class="p">)</span> <span class="c1">// the triple dots (ellipsis in english) indicates a variadic parameter</span>
+    <span class="c1">// https://golang.org/ref/spec#Passing_arguments_to_..._parameters , https://golang.org/src/builtin/builtin.go?s=4716:4763#L124</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nx">b</span><span class="p">),</span> <span class="nx">b</span><span class="p">)</span> <span class="c1">// "5 [add multiple items at once]"</span>
+
+    <span class="nx">c</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">([]</span><span class="kt">string</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="nx">s</span><span class="p">))</span> <span class="c1">// perhaps more readable</span>
+    <span class="nb">copy</span><span class="p">(</span><span class="nx">c</span><span class="p">,</span> <span class="nx">s</span><span class="p">)</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nx">c</span><span class="p">),</span> <span class="nx">c</span><span class="p">)</span> <span class="c1">// "5 [add multiple items at once]"</span>
+
+    <span class="c1">// CUT - but warning, this only removes it from the slice, NOT the underlying array so a possible memory leak</span>
+    <span class="nx">s</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">s</span><span class="p">[:</span><span class="mi">1</span><span class="p">],</span> <span class="nx">s</span><span class="p">[</span><span class="mi">4</span><span class="p">:]</span><span class="o">...</span><span class="p">)</span> <span class="c1">// up to but not including index 1, start at index 4 to the end</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nx">s</span><span class="p">),</span> <span class="nx">s</span><span class="p">)</span>      <span class="c1">// "2 [add once]"</span>
+
+    <span class="c1">// DELETE index 2 (same ordering), no memory leak by correctly setting it to the zero value (usually nil for objects)</span>
+    <span class="nb">copy</span><span class="p">(</span><span class="nx">b</span><span class="p">[</span><span class="mi">2</span><span class="p">:],</span> <span class="nx">b</span><span class="p">[</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">:])</span>
+    <span class="nx">b</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="nx">b</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="p">=</span> <span class="s">""</span>
+    <span class="nx">b</span> <span class="p">=</span> <span class="nx">b</span><span class="p">[:</span><span class="nb">len</span><span class="p">(</span><span class="nx">b</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nx">b</span><span class="p">),</span> <span class="nx">b</span><span class="p">)</span> <span class="c1">// "4 [add multiple at once]"</span>
+
+    <span class="c1">// INSERT into index 2 a new value</span>
+    <span class="c1">// b = append(b[:2], append([]string{"foobar"}, b[2:]...)...)</span>
+    <span class="c1">// Preferred more readable and avoid the extra slice creation with copy sleight of hand</span>
+    <span class="nx">b</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">b</span><span class="p">,</span> <span class="s">""</span><span class="p">)</span>
+    <span class="nb">copy</span><span class="p">(</span><span class="nx">b</span><span class="p">[</span><span class="mi">3</span><span class="p">:],</span> <span class="nx">b</span><span class="p">[</span><span class="mi">2</span><span class="p">:])</span>
+    <span class="nx">b</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="p">=</span> <span class="s">"foobar"</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nx">b</span><span class="p">),</span> <span class="nx">b</span><span class="p">)</span> <span class="c1">// "5 [add multiple foobar at once]"</span>
+
+    <span class="c1">// SWAP two values</span>
+    <span class="nx">b</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nx">b</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="p">=</span> <span class="nx">b</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="nx">b</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nx">b</span><span class="p">),</span> <span class="nx">b</span><span class="p">)</span> <span class="c1">// "5 [multiple add foobar at once]"</span>
+
+    <span class="c1">// REVERSE by using the mirror image effect and multiple assignments</span>
+    <span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="nb">len</span><span class="p">(</span><span class="nx">b</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span> <span class="o">-</span> <span class="mi">1</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span><span class="o">--</span> <span class="p">{</span>
+        <span class="nx">opp</span> <span class="o">:=</span> <span class="nb">len</span><span class="p">(</span><span class="nx">b</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">-</span> <span class="nx">i</span>
+        <span class="nx">b</span><span class="p">[</span><span class="nx">i</span><span class="p">],</span> <span class="nx">b</span><span class="p">[</span><span class="nx">opp</span><span class="p">]</span> <span class="p">=</span> <span class="nx">b</span><span class="p">[</span><span class="nx">opp</span><span class="p">],</span> <span class="nx">b</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span>
+    <span class="p">}</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nx">b</span><span class="p">),</span> <span class="nx">b</span><span class="p">)</span> <span class="c1">// "5 [once at foobar add multiple]"</span>
+<span class="p">}</span>
+</pre></div>
+<blockquote>
+<p>Slices are fairly fundamental and while most things are easy there are definitely some gotchas</p>
+<p>A critical thing to remember when reasoning is that slices are references to underlying arrays, so small subslice from a very large slice will prevent that larger object/array from being garbage collected</p>
+</blockquote>
+<ul>
+<li><a href="https://play.golang.org/p/uMtgU3xFic">https://play.golang.org/p/uMtgU3xFic</a></li>
+<li><a href="https://github.com/golang/go/wiki/SliceTricks">https://github.com/golang/go/wiki/SliceTricks</a></li>
+<li><a href="https://golang.org/ref/spec#Passing_arguments_to_..._parameters">https://golang.org/ref/spec#Passing_arguments_to_..._parameters</a></li>
+<li><a href="https://golang.org/src/builtin/builtin.go?s=4716:4763#L124">https://golang.org/src/builtin/builtin.go?s=4716:4763#L124</a></li>
+</ul>
+<blockquote>
+<p>Of course, read the docs and test it for your requirements, situation, and circumstances!</p>
+</blockquote>
 <h2 id="functions-anonymous-functions-functions-as-parameters-and-filters">Functions, Anonymous Functions, Functions as Parameters, and Filters</h2>
 <p>Go has functions as first class citizens.  Just assign a function to a variable or define a type that is a function signature.
 Since go starts from simple blocks we build, as needed, more complex tools like filtering from a slice of integers.</p>
@@ -340,9 +413,6 @@ Since go starts from simple blocks we build, as needed, more complex tools like 
     <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">"done"</span><span class="p">)</span>
 <span class="p">}</span>
 </pre></div>
-<blockquote>
-<p>TODO: main_test.go with all of the functional coverage and merge test cases ;)</p>
-</blockquote>
 <ul>
 <li><a href="https://en.wikipedia.org/wiki/Merge_sort">https://en.wikipedia.org/wiki/Merge_sort</a></li>
 <li><a href="https://play.golang.org/p/nAHF50zk7m">https://play.golang.org/p/nAHF50zk7m</a> <em>(modify the merge online)</em></li>
@@ -367,7 +437,7 @@ Since go starts from simple blocks we build, as needed, more complex tools like 
             <time pubdate="pubdate" datetime="2016-10-02T23:45:00-07:00">Oct 2, 2016</time>
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#programming-ref">programming</a> 
-            <h4>~1245 words</h4>
+            <h4>~1568 words</h4>
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article"> 
                 <li><a href="/tags.html#algorithms-ref">algorithms
