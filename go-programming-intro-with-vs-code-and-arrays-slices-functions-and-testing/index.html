@@ -81,7 +81,10 @@
 </ul>
 </li>
 <li><a href="#installing-and-the-environment">Installing and the Environment</a></li>
-<li><a href="#manual-cli-compilation-and-installation-and-execution">Manual CLI compilation and installation and execution</a></li>
+<li><a href="#manual-go-cli-execution-and-compilation">Manual Go CLI execution and compilation</a><ul>
+<li><a href="#cross-compiling-with-go">Cross Compiling with Go</a></li>
+</ul>
+</li>
 <li><a href="#download-and-install-an-ide">Download and install an IDE</a></li>
 <li><a href="#install-or-build-or-run">Install or Build or Run</a></li>
 <li><a href="#debugging-with-delve">Debugging with Delve</a><ul>
@@ -145,12 +148,30 @@
 <p>The last step gets you going without needing to reload your shell, full docs at <a href="https://golang.org/doc/install">https://golang.org/doc/install</a></p>
 </blockquote>
 <p><strong>WARNING</strong> be careful how you name your executables as the $GOPATH/bin will contain the names of the projects as binaries (so don't create a project or binary named bash!)</p>
-<h3 id="manual-cli-compilation-and-installation-and-execution">Manual CLI compilation and installation and execution</h3>
+<h3 id="manual-go-cli-execution-and-compilation">Manual Go CLI execution and compilation</h3>
 <p>The traditional command line method is:</p>
+<div class="highlight"><pre><span></span><span class="x">cd </span><span class="p">$</span><span class="nv">GOPATH</span><span class="x">/path-to-your-project/PROJECTNAME</span>
+<span class="x">go run PROJECTNAME</span>
+</pre></div>
+<blockquote>
+<p>This will run go in a "dev mode" where it pulls in dependencies and executes immediately (no artifacts are created)</p>
+</blockquote>
+<p>To compile and install the binary into the local path:</p>
 <div class="highlight"><pre><span></span><span class="x">cd </span><span class="p">$</span><span class="nv">GOPATH</span><span class="x">/path-to-your-project/PROJECTNAME</span>
 <span class="x">go install</span>
 <span class="p">$</span><span class="nv">GOPATH</span><span class="x">/bin/PROJECTNAME</span>
 </pre></div>
+<blockquote>
+<p>This compiles and builds and installs the binary into the $GOPATH</p>
+</blockquote>
+<p>To build a binary in the current directory:</p>
+<div class="highlight"><pre><span></span><span class="x">cd </span><span class="p">$</span><span class="nv">GOPATH</span><span class="x">/path-to-your-project/PROJECTNAME</span>
+<span class="x">go build</span>
+</pre></div>
+<blockquote>
+<p>This will just build the binary locally (i.e. name.go becomes "name") in the current directory, not in the $GOPATH</p>
+<p>Be aware that sometimes you may forget and commit this new binary to version control (badpokerface)</p>
+</blockquote>
 <ul>
 <li><a href="https://golang.org/doc/code.html#Command">https://golang.org/doc/code.html#Command</a></li>
 <li><a href="http://dave.cheney.net/2014/01/21/using-go-test-build-and-install">http://dave.cheney.net/2014/01/21/using-go-test-build-and-install</a></li>
@@ -160,7 +181,7 @@
 <li>Compile with: <code>cd /opt/goprojects/src/github.com/johnpfeiffer/intro/ ; go install</code></li>
 <li>Execute with: <code>/opt/goprojects/bin/intro</code></li>
 </ol>
-<p><a href="https://golang.org/doc/code.html">https://golang.org/doc/code.html</a> is a very complete tutorial, notes for myself: </p>
+<p><a href="https://golang.org/doc/code.html">https://golang.org/doc/code.html</a> is a very complete tutorial, notes for myself:</p>
 <div class="highlight"><pre><span></span>cat ~/.profile
 <span class="nb">export</span> <span class="nv">GOPATH</span><span class="o">=</span><span class="nv">$HOME</span>/Desktop/repos/goprojects
 <span class="nb">export</span> <span class="nv">PATH</span><span class="o">=</span><span class="nv">$PATH</span>:<span class="nv">$GOPATH</span>/bin
@@ -183,7 +204,7 @@
 <p><strong>mystrings/mystrings.go</strong></p>
 <div class="highlight"><pre><span></span><span class="kn">package</span> <span class="nx">mystrings</span>
 
-<span class="kd">func</span> <span class="nx">StringLength</span><span class="p">(</span><span class="nx">s</span> <span class="kt">string</span><span class="p">)</span> <span class="p">{</span>
+<span class="kd">func</span> <span class="nx">StringLength</span><span class="p">(</span><span class="nx">s</span> <span class="kt">string</span><span class="p">)</span> <span class="kt">int</span> <span class="p">{</span>
     <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="nx">s</span><span class="p">)</span>
 <span class="p">}</span>
 </pre></div>
@@ -224,10 +245,34 @@ ALTERNATIVELY: <code>cd $GOPATH/src/bitbucket.org/johnpfeiffer/myproject/mystrin
 <span class="x"> - mystrings</span>
 <span class="x">     | - mystrings.go</span>
 </pre></div>
+<h4 id="cross-compiling-with-go">Cross Compiling with Go</h4>
+<p>If developing on Mac OSX and wanted to compile/build a 64bit linux binary</p>
+<div class="highlight"><pre><span></span><span class="x">cd </span><span class="p">$</span><span class="nv">GOPATH</span><span class="x">/src/bitbucket.org/johnpfeiffer/myproject/hello</span>
+<span class="x">GOOS=linux GOARCH=amd64 go build -v</span>
+<span class="x">    runtime/internal/sys</span>
+<span class="x">    runtime/internal/atomic</span>
+<span class="x">    runtime</span>
+<span class="x">    bitbucket.org/johnpfeiffer/myproject/mystrings</span>
+<span class="x">    bitbucket.org/johnpfeiffer/myrpoject/hello</span>
+</pre></div>
+<blockquote>
+<p>the "go build -v" extra flag outputs verbosely the intermediate steps</p>
+</blockquote>
+<div class="highlight"><pre><span></span>file hello
+     ./hello: ELF 64-bit LSB executable, x86-64, version 1 (SYSV), statically linked, not stripped
+</pre></div>
+<blockquote>
+<p>using the "file" command we can inspect it really has been built correctly in the current directory</p>
+</blockquote>
+<p>Dave Cheney's suggestion about "build vs install" is a good one since the cached intermediate .a files in the directory pkg/ may complicate things, especially for a cross compilation.</p>
+<ul>
+<li><a href="https://golang.org/doc/install/source#environment">https://golang.org/doc/install/source#environment</a></li>
+<li><a href="http://dave.cheney.net/2015/08/22/cross-compilation-with-go-1-5">http://dave.cheney.net/2015/08/22/cross-compilation-with-go-1-5</a></li>
+</ul>
 <h3 id="download-and-install-an-ide">Download and install an IDE</h3>
 <p>If you are used to larger projects then an IDE is quite helpful for colorization, auto completion, (right click or f12) goto definition, rename, build on save, auto formatting, etc.</p>
-<p>Suprisingly one of the most popular and effective golang IDE combinations is: <a href="https://code.visualstudio.com/Docs/?dv=linux64_deb">https://code.visualstudio.com/Docs/?dv=linux64_deb</a></p>
-<div class="highlight"><pre><span></span>dpkg -i vscode-amd64.deb
+<p>Suprisingly one of the most popular and effective Go IDE combinations is: <a href="https://code.visualstudio.com/Docs/?dv=linux64_deb">https://code.visualstudio.com/Docs/?dv=linux64_deb</a></p>
+<div class="highlight"><pre><span></span>dpkg -i code_...amd64.deb
 </pre></div>
 <p>To install <a href="https://marketplace.visualstudio.com/items?itemName=lukehoban.Go">https://marketplace.visualstudio.com/items?itemName=lukehoban.Go</a> aka <a href="https://github.com/Microsoft/vscode-go">https://github.com/Microsoft/vscode-go</a> you actually:</p>
 <ol>
@@ -654,7 +699,7 @@ cd /opt/goprojects/src/github.com/johnpfeiffer/YOURPROJECT
             <time pubdate="pubdate" datetime="2015-11-15T21:19:00-08:00">Nov 15, 2015</time>
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#programming-ref">programming</a> 
-            <h4>~1690 words</h4>
+            <h4>~1886 words</h4>
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article"> 
                 <li><a href="/tags.html#arrays-ref">arrays
