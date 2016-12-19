@@ -70,32 +70,14 @@
 </div>
 
 <div class="row-fluid">
-    <div class="span2 table-of-content">
-        <nav>
-        <h4>Contents</h4>
-        <div class="toc">
-<ul>
-<li><a href="#mission-hourly-poll-of-a-website">Mission: hourly poll of a website</a></li>
-<li><a href="#amazon-free-services-tier">Amazon Free services tier</a></li>
-<li><a href="#amazon-ec2-missing-some-perl">Amazon EC2 Missing some perl</a></li>
-<li><a href="#verify-an-ses-linked-email-address-by-running-the-perl-script">Verify an SES linked email address by running the perl script</a></li>
-<li><a href="#searchsh">Search.sh</a></li>
-<li><a href="#trigger-the-search-with-cron">Trigger the search with cron</a></li>
-<li><a href="#troubleshooting-cannot-locate-sespm">Troubleshooting "Cannot locate SES.pm"</a></li>
-<li><a href="#ses-message-limit">SES Message Limit</a></li>
-<li><a href="#more-info">More info</a></li>
-</ul>
-</div>
-        </nav>
-    </div>
-    <div class="span8 article-content">
+        <div class="span8 offset2 article-content">
 
-            
-<h3 id="mission-hourly-poll-of-a-website">Mission: hourly poll of a website</h3>
+            <p>[TOC]</p>
+<h3>Mission: hourly poll of a website</h3>
 <p>...to find out if the Kitteh is available for adoption and immediate email notification if Kitteh is found.</p>
 <p>Estimated time to complete: between 15 minutes and hours (depending on setting up your EC2 instance, SES service, etc.)</p>
 <p>Skills: Amazon EC2 setup, SSH, centos yum, bash, wget, cronjob</p>
-<h3 id="amazon-free-services-tier">Amazon Free services tier</h3>
+<h3>Amazon Free services tier</h3>
 <p>If you have an Amazon EC2 instance running (e.g. EC2 Linux Micro Instance in Free Tier = centos!)</p>
 <p>(And you're not running over the GET/POST upload/download free tier bandwidths)</p>
 <p>(If you don't know how to setup a quick Amazon Linux Micro Instance in the free tier search this blog for more info)</p>
@@ -107,6 +89,8 @@
 <div class="highlight"><pre><span></span>AWSAccessKeyId=022QF06E7MXBSH9DHM
 AWSSecretKey=kWcrlUX5JEDGM/LtmEENI/aVmYvHNif5zB+d9+
 </pre></div>
+
+
 </li>
 <li>
 <p>Download the example perl scripts via: <a href="http://aws.amazon.com/code/Amazon-SES">http://aws.amazon.com/code/Amazon-SES</a></p>
@@ -115,10 +99,12 @@ unzip AmazonSES-2011-02-02.zip
 chmod +x /home/ec2-user/*.pl
 /home/ec2-user/bin/ses-verify-email-address.pl -k aws-credentials -v youreemail@example.com
 </pre></div>
+
+
 </li>
 </ol>
-<h3 id="amazon-ec2-missing-some-perl">Amazon EC2 Missing some perl</h3>
-<div class="highlight"><pre><span></span>"Can't locate XML/LibXML.pm in @INC (@INC contains:
+<h3>Amazon EC2 Missing some perl</h3>
+<div class="highlight"><pre><span></span>&quot;Can&#39;t locate XML/LibXML.pm in @INC (@INC contains:
 
 /usr/local/lib64/perl5
 /usr/local/share/perl5       
@@ -135,8 +121,10 @@ chmod +x /home/ec2-user/*.pl
 /usr/lib/perl5/vendor_perl
 /usr/lib/perl5/site_perl .) at ./ses-verify-email-address.pl line 26.
 
-BEGIN failed--compilation aborted at ./ses-verify-email-address.pl line 26."
+BEGIN failed--compilation aborted at ./ses-verify-email-address.pl line 26.&quot;
 </pre></div>
+
+
 <p>THANKS AMAZON! Using their preconfigured Instance means they don't have all of the Perl packages installed...</p>
 <ol>
 <li><code>sudo yum install perl-XML-LibXML perl-digest-SHA</code></li>
@@ -153,50 +141,58 @@ BEGIN failed--compilation aborted at ./ses-verify-email-address.pl line 26."
 <li>Debian: <code>sudo apt-get install libio-socket-ssl-perl libxml-libxml-perl</code></li>
 <li><code>tail /var/log/maillog</code> for troubleshooting sendmail...</li>
 </ol>
-<h3 id="verify-an-ses-linked-email-address-by-running-the-perl-script">Verify an SES linked email address by running the perl script</h3>
+<h3>Verify an SES linked email address by running the perl script</h3>
 <p><code>/home/ec2-user/bin/ses-verify-email-address.pl -k aws-credentials -v youreemail@example.com</code></p>
 <p>Use the email account you gave above for verification and click on the link...  </p>
 <blockquote>
 <p>You have successfully verified an email address with Amazon Simple Email Service.</p>
 </blockquote>
-<hr/>
-<div class="highlight"><pre><span></span>~/amazonses/bin/ses-send-email.pl -k ~/amazonses/bin/aws-credentials -s "Test AWS" -f youremail@example.com youremail@example.com,secondemail@example.com &lt; ~/kittysearch/result.txt
+<hr>
+<div class="highlight"><pre><span></span>~/amazonses/bin/ses-send-email.pl -k ~/amazonses/bin/aws-credentials -s &quot;Test AWS&quot; -f youremail@example.com youremail@example.com,secondemail@example.com &lt; ~/kittysearch/result.txt
 </pre></div>
-<h3 id="searchsh">Search.sh</h3>
+
+
+<h3>Search.sh</h3>
 <div class="highlight"><pre><span></span><span class="c1">#/bin/bash</span>
-wget -O ~/kittysearch/page1.htm <span class="s1">'http://adopt.hssv.org/search/searchResults.asp?task=search&amp;searchid=&amp;advanced=&amp;s=adoption&amp;animalType=2%2C15&amp;statusID=3&amp;state=&amp;regionID=&amp;submitbtn=Find+Animals'</span>
-wget -O ~/kittysearch/page2.htm <span class="s1">'http://adopt.hssv.org/search/searchResults.asp?tpage=2&amp;task=search&amp;searchid=&amp;advanced=&amp;s=&amp;animalType=2,15&amp;statusID=3&amp;state=&amp;regionID=&amp;submitbtn=Find+Animals'</span>
-wget -O ~/kittysearch/page3.htm <span class="s1">'http://adopt.hssv.org/search/searchResults.asp?tpage=3&amp;task=search&amp;searchid=&amp;advanced=&amp;s=&amp;animalType=2,15&amp;statusID=3&amp;state=&amp;regionID=&amp;submitbtn=Find+Animals'</span>
-grep -i <span class="s2">"bandit"</span> ~/kittysearch/page1.htm ~/kittysearch/page2.htm ~/kittysearch/page3.htm &gt; ~/kittysearch/result.txt
+wget -O ~/kittysearch/page1.htm <span class="s1">&#39;http://adopt.hssv.org/search/searchResults.asp?task=search&amp;searchid=&amp;advanced=&amp;s=adoption&amp;animalType=2%2C15&amp;statusID=3&amp;state=&amp;regionID=&amp;submitbtn=Find+Animals&#39;</span>
+wget -O ~/kittysearch/page2.htm <span class="s1">&#39;http://adopt.hssv.org/search/searchResults.asp?tpage=2&amp;task=search&amp;searchid=&amp;advanced=&amp;s=&amp;animalType=2,15&amp;statusID=3&amp;state=&amp;regionID=&amp;submitbtn=Find+Animals&#39;</span>
+wget -O ~/kittysearch/page3.htm <span class="s1">&#39;http://adopt.hssv.org/search/searchResults.asp?tpage=3&amp;task=search&amp;searchid=&amp;advanced=&amp;s=&amp;animalType=2,15&amp;statusID=3&amp;state=&amp;regionID=&amp;submitbtn=Find+Animals&#39;</span>
+grep -i <span class="s2">&quot;bandit&quot;</span> ~/kittysearch/page1.htm ~/kittysearch/page2.htm ~/kittysearch/page3.htm &gt; ~/kittysearch/result.txt
 
 <span class="k">if</span> <span class="o">[</span> -s ~/kittysearch/result.txt <span class="o">]</span><span class="p">;</span> <span class="k">then</span>
     <span class="c1"># must move to the directory to use the SES.pm</span>
     <span class="nb">cd</span> ~/amazonses/bin
-    ./ses-send-email.pl -k ~/amazonses/bin/aws-credentials -s <span class="s2">"Test AWS"</span> -f myemail@domain.com myemail@domain.com,secondrecipient@domain.com &lt; ~/kittysearch/result.txt
+    ./ses-send-email.pl -k ~/amazonses/bin/aws-credentials -s <span class="s2">&quot;Test AWS&quot;</span> -f myemail@domain.com myemail@domain.com,secondrecipient@domain.com &lt; ~/kittysearch/result.txt
 <span class="k">fi</span>
 <span class="c1"># http://docs.amazonwebservices.com/ses/latest/DeveloperGuide/ for full details about email.pl</span>
 </pre></div>
-<h3 id="trigger-the-search-with-cron">Trigger the search with cron</h3>
+
+
+<h3>Trigger the search with cron</h3>
 <p><code>crontab -e</code></p>
 <blockquote>
 <p>i key to enter input in vi</p>
 </blockquote>
 <div class="highlight"><pre><span></span>55 * * * * /home/ec2-user/kittysearch/kittysearch.sh
 </pre></div>
+
+
 <blockquote>
 <p>escape key gets : then x to save and quit</p>
 </blockquote>
-<h3 id="troubleshooting-cannot-locate-sespm">Troubleshooting "Cannot locate SES.pm"</h3>
+<h3>Troubleshooting "Cannot locate SES.pm"</h3>
 <p>Running the script from a different directory or CRON gets the error: "Can't locate SES.pm in @INC"</p>
 <div class="highlight"><pre><span></span>cp /home/ec2-user/amazonses/bin/SES.pm /home/ec2-user/kittysearch
 </pre></div>
+
+
 <blockquote>
 <p>FIXED! must move to the directory in the script using cd first to have access to SES.pm</p>
 </blockquote>
-<h3 id="ses-message-limit">SES Message Limit</h3>
+<h3>SES Message Limit</h3>
 <p>Yyou can send 2,000 messages for free each day when you call Amazon SES from an Amazon EC2
 instance directly or through AWS Elastic Beanstalk. (Note bandwidth charges may still apply)</p>
-<h3 id="more-info">More info</h3>
+<h3>More info</h3>
 <p>Apparently since 2011 there has come along infrastructure like page2rss and ifttt that makes these kind of custom solutions less helpful (unless you need customization!)</p>
             <aside>
             <hr/>
@@ -217,7 +213,7 @@ instance directly or through AWS Elastic Beanstalk. (Note bandwidth charges may 
             <time pubdate="pubdate" datetime="2011-02-28T00:07:00-08:00">Feb 28, 2011</time>
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#linux-ref">linux</a> 
-            <h4>~500 words</h4>
+            <h4>~501 words</h4>
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article"> 
                 <li><a href="/tags.html#AWS-ref">AWS

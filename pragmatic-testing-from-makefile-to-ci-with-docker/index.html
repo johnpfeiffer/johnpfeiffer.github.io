@@ -70,47 +70,28 @@
 </div>
 
 <div class="row-fluid">
-    <div class="span2 table-of-content">
-        <nav>
-        <h4>Contents</h4>
-        <div class="toc">
-<ul>
-<li><a href="#humble-beginnings-with-makefile">Humble beginnings with Makefile</a></li>
-<li><a href="#adding-some-tests-but-where">Adding some tests, but where?</a></li>
-<li><a href="#bamboo-continuous-integration-for-visibility-and-the-team">Bamboo Continuous Integration for visibility and the team</a></li>
-<li><a href="#migrating-to-a-managed-service">Migrating to a managed service</a></li>
-<li><a href="#adopting-docker-and-refactoring">Adopting Docker and refactoring</a><ul>
-<li><a href="#why-docker">Why Docker?</a></li>
-</ul>
-</li>
-<li><a href="#dogfooding-the-whole-way">Dogfooding the whole way</a></li>
-<li><a href="#what-does-this-all-mean">What does this all mean?</a></li>
-</ul>
-</div>
-        </nav>
-    </div>
-    <div class="span8 article-content">
+        <div class="span8 offset2 article-content">
 
-            
+            <p>[TOC]</p>
 <p>A colleague recently suggested "Hey, why don't you run those tests from outside of the target server under test?"</p>
 <p>And I thought to myself, "Hmm.... why are we doing it that way?  Was I just dumb when I did this the first time?</p>
 <p>The answer is the journey of successfully testing a successful product and the pragmatic choices made along the way.  I believe that engineering requires compromises because without achieving short term progress we would have never reached our bigger, long term goals.</p>
-<h3 id="humble-beginnings-with-makefile">Humble beginnings with Makefile</h3>
+<h3>Humble beginnings with Makefile</h3>
 <p>Our initial project was to deliver an OVA (open virtualization archive) that packaged all of the services (and dependencies) into an easy to deploy and maintain virtual appliance.</p>
 <p>Will, as the project lead, had already spent some time setting up the build environment using vStudio and an Ubuntu ISO but one of our first issues after generating an OVA was to try and determine if it was "good".  Could it even be deployed?  Did it have the services installed correctly?</p>
 <p>I leveraged the Makefile that we were already using for the build to create a "test": deploy the latest OVA artifact and check that it was basically sound.</p>
 <p>This was a good start as, at the very least, we could quickly determine and bisect where we were producing bad builds.</p>
-<h3 id="adding-some-tests-but-where">Adding some tests, but where?</h3>
+<h3>Adding some tests, but where?</h3>
 <p>Once the initial spike ("tracer bullet") was done I began adding in selenium python based tests to verify the Web UI interface.</p>
 <p>Since our Continuous Integration system was basically bash and Makefile (which was also our build system) I opted to run the tests from inside of each deployed Virtual Machine.</p>
 <p>This allowed for isolation of the test execution from the build process and for each test run.  </p>
 <p>While not ideal for product acceptance testing it provided a basic safety net that allowed us to know if a breaking change occurred upstream and was the first automated verification (followed by lots of manual testing) of the exact OVA we were shipping to Customers in the Beta.</p>
-<h3 id="bamboo-continuous-integration-for-visibility-and-the-team">Bamboo Continuous Integration for visibility and the team</h3>
+<h3>Bamboo Continuous Integration for visibility and the team</h3>
 <p>A further improvement was to improve visibility of the test results.  In parallel, after the team discussion during "HipCon" and with motivation from Don and Sam, I setup a private Bamboo installation in our VM area and helped get Integration tests setup for our upstream backend code.</p>
 <p>Once again I stuck with the tried and true "tests inside of the target virtual machine" pattern as the Bamboo server was only using "local agents" and I was concerned about trying to maintain a clean environment and the resources required as the number of test plans scaled.</p>
 <p>Additionally I migrated all of the previous test plans from the "build factory" into Bamboo which really helped with failed test visibility and tracking over time.</p>
 <p>The unit tests continued to run in a different SaaS version of Bamboo so I avoided scope creep and left things that were working alone.</p>
-<h3 id="migrating-to-a-managed-service">Migrating to a managed service</h3>
+<h3>Migrating to a managed service</h3>
 <p>One of the most asked questions whenever a new person joined was "Why are the tests spread across so many different servers/services"?  I had to answer that question so many times!  The answer basically boiled down to "the testing grew organically as different people in the team solved the problem they faced".  Unsatisfactory? "Be the change you seek" didn't seem to get anyone else to solve the problem for me ;)</p>
 <p>Using the opportunity presented by a service outage issue I pushed forward a plan I had to migrate all of the test plans into a newly provisioned Bamboo server run by Build Engineering. (awthanks)</p>
 <p>There was an awesome team effort by a lot of people to make that happen (made even more challenging by doing it when the source service was out). (awesome)</p>
@@ -128,22 +109,22 @@
 <li>A successful spike of using Docker for unit testing</li>
 </ol>
 <p>With so much going on during the migration I avoided changing the testing paradigm, so tests continued to execute inside of each VM/EC2 Instance deployed. (shrug)</p>
-<h3 id="adopting-docker-and-refactoring">Adopting Docker and refactoring</h3>
+<h3>Adopting Docker and refactoring</h3>
 <p>Remember that question at the beginning?  When something goes wrong, while it makes sense to separate "fixing it" from "improving it" I'm a big fan of taking advantage of having the hood open to go the extra mile and leave the campground cleaner =)</p>
 <p>So some of the selenium based tests were failing and it occurred to me that some of how we were changing our dependency infrastructure at the operating system level could be the cause.  After some unproductive poking around I tried to reproduce and isolate the issue by running the tests from outside of the VM.</p>
 <p>Aha! In that moment I realized that this was actually the desired (original intention, honest!) way to run the blackbox product acceptance tests.</p>
 <p>So I pulled up my sleeves and tried out the "hot fancy new silver bullet technology that solves every problem".</p>
-<h4 id="why-docker">Why Docker?</h4>
+<h4>Why Docker?</h4>
 <p>Docker encourages design of modular, deterministic and defined, single purpose components that are easy to reuse and compose into larger services. </p>
 <p>Not only are (Docker) Containers fast, one of the biggest advantages of Containers is the ability to reduce complexity. Docker can turn an application/service, it's dependencies, and even the OS level requirements into a single blackbox package (that you can still inspect inside if you really want to).</p>
 <p>So I built a Docker Image containing python selenium and <a href="http://phantomjs.org/">http://phantomjs.org/</a> (a headless javascript based browser) and other dependencies.</p>
 <p>Sure enough I the tests passed when leveraging the previous Docker spike to run my new docker container. (success)</p>
 <p>Refactoring the bamboo plan (since it was leveraging Plan Templates and the Groovy DSL macros) didn't take too long and with other stakeholders PR/approval we're moving full speed ahead towards the "ideal" solution. (It only took about 2 years).</p>
-<h3 id="dogfooding-the-whole-way">Dogfooding the whole way</h3>
+<h3>Dogfooding the whole way</h3>
 <p>Something I should mention that has been an invaluable companion throughout the course of building the product: a dogfooding server.</p>
 <p>"Eating our own dog food" is a wonderful way to experience the exact pain you are inflicting on your users.  From the very begininng Will setup and we maintained a dogfood server which received every beta upgrade (and a few upgrades that never reached the customers), amazingly it's still alive and full of data!</p>
 <p>Not only did I learn about bugs that would affect our oldest and most loyal users (who kept with us and kept upgrading), I also felt the User Experience pain of how long upgrades took, mysterious incomprehensible errors messages, and "partial upgrades".  All of these learnings, along with being Developer on Support and assisting on support tickets, kept me honest and humble and allowed me to improve the product just as much as any fancy testing automation framework.</p>
-<h3 id="what-does-this-all-mean">What does this all mean?</h3>
+<h3>What does this all mean?</h3>
 <p>It's easy to draw up how things should work according to best practice.  It's even easier if it's work that someone else has to do and there aren't any deadlines.</p>
 <p>Success comes in stages.  Overengineering and premature optimization cost way more in opportunity cost and thrown away work than doing things the "wrong way".</p>
 <p>This story could be massaged to fit a parable of "Lean and Agile" but it's really just common sense about transparently understanding the cost/value tradeof of the work, solving the current needs, and moving forward onto something better (by keeping informed of new solutions) when the opportunity shows up.</p>
@@ -166,7 +147,7 @@
             <time pubdate="pubdate" datetime="2015-05-25T10:00:00-07:00">May 25, 2015</time>
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#build-CI-CD-devops-ref">build-CI-CD-devops</a> 
-            <h4>~1367 words</h4>
+            <h4>~1368 words</h4>
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article"> 
                 <li><a href="/tags.html#docker-ref">docker

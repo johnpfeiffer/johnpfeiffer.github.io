@@ -70,38 +70,9 @@
 </div>
 
 <div class="row-fluid">
-    <div class="span2 table-of-content">
-        <nav>
-        <h4>Contents</h4>
-        <div class="toc">
-<ul>
-<li><a href="#prerequisites">Prerequisites</a><ul>
-<li><a href="#some-backend-web-servers">Some backend web servers</a></li>
-</ul>
-</li>
-<li><a href="#optmydatahaproxycfg">/opt/mydata/haproxy.cfg</a></li>
-<li><a href="#start-haproxysh">start haproxy.sh</a></li>
-<li><a href="#haproxy-stats">HAProxy Stats</a><ul>
-<li><a href="#optmydatahaproxycfg_1">/opt/mydata/haproxy.cfg</a></li>
-</ul>
-</li>
-<li><a href="#nginx-forward-proxy">nginx forward proxy</a><ul>
-<li><a href="#nginxconf">nginx.conf</a></li>
-</ul>
-</li>
-<li><a href="#haproxy-as-a-limited-outbound-proxy">HAProxy as a limited outbound proxy</a><ul>
-<li><a href="#optmydatahaproxycfg_2">/opt/mydata/haproxy.cfg</a></li>
-<li><a href="#starting-the-haproxy-docker-container">starting the haproxy docker container</a></li>
-</ul>
-</li>
-<li><a href="#more-info">more info</a></li>
-</ul>
-</div>
-        </nav>
-    </div>
-    <div class="span8 article-content">
+        <div class="span8 offset2 article-content">
 
-            
+            <p>[TOC]</p>
 <p>Not only are Containers fast, one of the biggest advantages of Containers is the ability to reduce complexity.</p>
 <p>Docker can turn an application/service, it's dependencies, and even the OS level requirements into a single blackbox package (that you can still inspect inside if you really want to).</p>
 <p>One thing I really like is less code.  Seriously.  Configuration over coding (whenever I don't need customization) means far less maintenance and bugs.</p>
@@ -112,27 +83,33 @@ reverse proxy (haproxy)
   /         \
 BackendA  BackendB
 </pre></div>
+
+
 <blockquote>
 <p>There are new problems that go along with the benefits of any new technology, see the complicated networking/port coordination</p>
 </blockquote>
-<h3 id="prerequisites">Prerequisites</h3>
+<h3>Prerequisites</h3>
 <div class="highlight"><pre><span></span>sudo docker pull haproxy:1.5
 </pre></div>
-<h4 id="some-backend-web-servers">Some backend web servers</h4>
+
+
+<h4>Some backend web servers</h4>
 <div class="highlight"><pre><span></span>mkdir -p /tmp/BackendA
-echo "foo" &gt; /tmp/BackendA/foo.txt
+echo &quot;foo&quot; &gt; /tmp/BackendA/foo.txt
 cd /tmp/BackendA
 python -m SimpleHTTPServer 8000 &amp;
 
 mkdir -p /tmp/BackendB
-echo "bar" &gt; /tmp/BackendB/bar.txt
+echo &quot;bar&quot; &gt; /tmp/BackendB/bar.txt
 cd /tmp/BackendB
 python -m SimpleHTTPServer 8001 &amp;
 </pre></div>
+
+
 <blockquote>
 <p>Clearly a trivial example (more likely two remote hosts in logical/geographic disparate areas if aiming for High Availability, or at least on different hosts to scale with more resources)</p>
 </blockquote>
-<h3 id="optmydatahaproxycfg">/opt/mydata/haproxy.cfg</h3>
+<h3>/opt/mydata/haproxy.cfg</h3>
 <div class="highlight"><pre><span></span>global
         debug
 
@@ -149,12 +126,16 @@ listen http_proxy :8443
         server srv1 docker:8000 check
         server srv2 docker:8001 check
 </pre></div>
-<h3 id="start-haproxysh">start haproxy.sh</h3>
+
+
+<h3>start haproxy.sh</h3>
 <div class="highlight"><pre><span></span><span class="ch">#!/bin/bash</span>
-<span class="nv">HOSTIP</span><span class="o">=</span><span class="sb">`</span>ip addr show <span class="p">|</span> grep docker0 <span class="p">|</span> grep global <span class="p">|</span> awk <span class="s1">'{print $2}'</span> <span class="p">|</span> cut -d / -f1<span class="sb">`</span>
+<span class="nv">HOSTIP</span><span class="o">=</span><span class="sb">`</span>ip addr show <span class="p">|</span> grep docker0 <span class="p">|</span> grep global <span class="p">|</span> awk <span class="s1">&#39;{print $2}&#39;</span> <span class="p">|</span> cut -d / -f1<span class="sb">`</span>
 
 sudo docker run -p 8443:8443 --add-host<span class="o">=</span>docker:<span class="si">${</span><span class="nv">HOSTIP</span><span class="si">}</span> --rm -it -v /opt/mydata/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro --name myhaproxy haproxy:1.5
 </pre></div>
+
+
 <blockquote>
 <p>Now that the docker container's /etc/hosts file has the Host IP Address injected (with the name "docker") the haproxy config file probably makes more sense</p>
 </blockquote>
@@ -179,9 +160,9 @@ sudo docker run -p 8443:8443 --add-host<span class="o">=</span>docker:<span clas
 <hr>
 <ul>
 <li><a href="bar.txt">bar.txt</a>
-</li></ul>
+</ul>
 <hr>
-</hr></hr></body>
+</body>
 </html></p>
 <p>curl localhost:8443</p>
 <p>:::html
@@ -192,16 +173,18 @@ sudo docker run -p 8443:8443 --add-host<span class="o">=</span>docker:<span clas
 <hr>
 <ul>
 <li><a href="foo.txt">foo.txt</a>
-</li></ul>
+</ul>
 <hr>
-</hr></hr></body>
+</body>
 </html></p>
 </li>
 </ul>
-<h3 id="haproxy-stats">HAProxy Stats</h3>
+<h3>HAProxy Stats</h3>
 <div class="highlight"><pre><span></span>sudo docker rm -f myhaproxy
 </pre></div>
-<h4 id="optmydatahaproxycfg_1">/opt/mydata/haproxy.cfg</h4>
+
+
+<h4>/opt/mydata/haproxy.cfg</h4>
 <div class="highlight"><pre><span></span>global
     debug
 
@@ -228,11 +211,15 @@ listen stats :1936
 
 ./start-haproxy.sh
 </pre></div>
-<h3 id="nginx-forward-proxy">nginx forward proxy</h3>
+
+
+<h3>nginx forward proxy</h3>
 <p>client -&gt; forward proxy (nginx) -&gt; all other sites</p>
 <div class="highlight"><pre><span></span>docker pull nginx:alpine
 </pre></div>
-<h4 id="nginxconf">nginx.conf</h4>
+
+
+<h4>nginx.conf</h4>
 <div class="highlight"><pre><span></span><span class="nt">worker_processes</span>  <span class="nt">1</span><span class="o">;</span>
 
 <span class="nt">events</span> <span class="p">{</span>
@@ -267,11 +254,15 @@ listen stats :1936
 
 <span class="nt">docker</span> <span class="nt">run</span> <span class="nt">-it</span> <span class="nt">--rm</span> <span class="nt">-p</span> <span class="nt">8080</span><span class="nd">:8080</span> <span class="nt">-v</span> <span class="o">/</span><span class="nt">tmp</span><span class="o">/</span><span class="nt">nginx</span><span class="nc">.conf</span><span class="o">:/</span><span class="nt">etc</span><span class="o">/</span><span class="nt">nginx</span><span class="o">/</span><span class="nt">nginx</span><span class="nc">.conf</span><span class="nd">:ro</span> <span class="nt">--name</span> <span class="nt">mynginx</span> <span class="nt">nginx</span><span class="nd">:alpine</span>
 </pre></div>
+
+
 <blockquote>
 <p>bind to port 8080 on the host and run an ephemeral container based on the alpine linux with nginx image that uses the /tmp/nginx config</p>
 </blockquote>
 <div class="highlight"><pre><span></span>http_proxy=127.0.0.1:8080 curl example.com
 </pre></div>
+
+
 <blockquote>
 <p>set the linux operating system proxy environment just for this one curl command and see the dockerized nginx forward proxy log show: 172.17.0.1 - - [06/May/2016:22:37:22 +0000] "GET HTTP://example.org/ HTTP/1.1" 200 1270 "-" "curl/7.35.0"</p>
 </blockquote>
@@ -282,9 +273,11 @@ listen stats :1936
 </blockquote>
 <p><strong> Warning </strong> do not use <em>http_proxy=http://127.0.0.1:8080</em> as that will fail =[</p>
 <p>You can permanently set the environment proxy with export http_proxy=127.0.0.1:8080</p>
-<h3 id="haproxy-as-a-limited-outbound-proxy">HAProxy as a limited outbound proxy</h3>
+<h3>HAProxy as a limited outbound proxy</h3>
 <div class="highlight"><pre><span></span>sudo docker pull haproxy:1.6-alpine
 </pre></div>
+
+
 <p>Now that you have the 10MB haproxy image...</p>
 <blockquote>
 <p>Note there is a limitation to haproxy in that it always assumes a syslog facility (no direct logging to stdout or files)</p>
@@ -293,7 +286,7 @@ listen stats :1936
 <li><a href="https://github.com/dockerfile/haproxy/issues/3">https://github.com/dockerfile/haproxy/issues/3</a></li>
 <li><a href="http://www.gnu.org/software/libc/manual/html_node/Overview-of-Syslog.html">http://www.gnu.org/software/libc/manual/html_node/Overview-of-Syslog.html</a></li>
 </ul>
-<h4 id="optmydatahaproxycfg_2">/opt/mydata/haproxy.cfg</h4>
+<h4>/opt/mydata/haproxy.cfg</h4>
 <p>This is the more readable config style which separates the frontend from backend and this is haproxy 1.6</p>
 <blockquote>
 <p>The logging probably does not work =(</p>
@@ -315,13 +308,17 @@ frontend myfrontend
 backend mybackend
         server s1 example.com:443 ssl verify none
 </pre></div>
-<h4 id="starting-the-haproxy-docker-container">starting the haproxy docker container</h4>
+
+
+<h4>starting the haproxy docker container</h4>
 <div class="highlight"><pre><span></span>docker run -p 8443:8443 --rm -it -v /home/admin/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro -v /dev/log:/dev/log --name myhaproxy haproxy:1.6-alpine
 </pre></div>
+
+
 <blockquote>
 <p>Control + C to quit</p>
 </blockquote>
-<h3 id="more-info">more info</h3>
+<h3>more info</h3>
 <ul>
 <li><a href="https://registry.hub.docker.com/_/haproxy/">https://registry.hub.docker.com/_/haproxy/</a></li>
 <li><a href="https://cbonte.github.io/haproxy-dconv/configuration-1.5.html">https://cbonte.github.io/haproxy-dconv/configuration-1.5.html</a></li>
@@ -348,7 +345,7 @@ backend mybackend
             <time pubdate="pubdate" datetime="2015-05-21T20:00:00-07:00">May 21, 2015</time>
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#virtualization-ref">virtualization</a> 
-            <h4>~756 words</h4>
+            <h4>~757 words</h4>
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article"> 
                 <li><a href="/tags.html#docker-ref">docker

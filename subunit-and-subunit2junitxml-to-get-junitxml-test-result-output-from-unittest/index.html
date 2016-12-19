@@ -70,30 +70,9 @@
 </div>
 
 <div class="row-fluid">
-    <div class="span2 table-of-content">
-        <nav>
-        <h4>Contents</h4>
-        <div class="toc">
-<ul>
-<li><a href="#setup">Setup</a><ul>
-<li><a href="#example-unittest-class">Example UnitTest Class</a></li>
-</ul>
-</li>
-<li><a href="#example-usage">Example Usage</a><ul>
-<li><a href="#one-liner">One Liner</a></li>
-<li><a href="#intermediate-subunit-results-file">Intermediate Subunit Results File</a></li>
-<li><a href="#twisted-unittesting">Twisted UnitTesting</a></li>
-</ul>
-</li>
-<li><a href="#troubleshooting">Troubleshooting</a></li>
-<li><a href="#more-info">More Info</a></li>
-</ul>
-</div>
-        </nav>
-    </div>
-    <div class="span8 article-content">
+        <div class="span8 offset2 article-content">
 
-            
+            <p>[TOC]</p>
 <p>Test results from differing systems or multiple test runs need a common format.</p>
 <p>JUnit XML is almost a de facto standard for test results given almost all major Continuous Integration products support it.</p>
 <ul>
@@ -101,13 +80,13 @@
 <li><a href="http://www.fossology.org/projects/fossology/wiki/Junit_xml_format">http://www.fossology.org/projects/fossology/wiki/Junit_xml_format</a></li>
 <li><a href="http://pytest.org/latest/usage.html">http://pytest.org/latest/usage.html</a></li>
 </ul>
-<h2 id="setup">Setup</h2>
+<h2>Setup</h2>
 <p><code>pip install python-subunit junitxml</code></p>
 <blockquote>
 <p>assuming virtuelnv and myenv/bin/activate , junitxml is a hidden dependency :(</p>
 </blockquote>
 <p><strong>Do not use <code>apt-get install subunit</code> as even with 14.04 Ubuntu it has an older version does not contain timings and subunit2junitxml creates "skip" instead of "skipped"</strong></p>
-<h3 id="example-unittest-class">Example UnitTest Class</h3>
+<h3>Example UnitTest Class</h3>
 <div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">unittest</span>
 
 <span class="k">class</span> <span class="nc">john</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
@@ -118,17 +97,19 @@
     <span class="k">def</span> <span class="nf">test_fail</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
 
-    <span class="nd">@unittest.skipIf</span><span class="p">(</span><span class="bp">True</span><span class="p">,</span> <span class="s1">'always skip'</span><span class="p">)</span>
+    <span class="nd">@unittest.skipIf</span><span class="p">(</span><span class="bp">True</span><span class="p">,</span> <span class="s1">&#39;always skip&#39;</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">test_skip</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
 </pre></div>
-<h2 id="example-usage">Example Usage</h2>
-<h3 id="one-liner">One Liner</h3>
+
+
+<h2>Example Usage</h2>
+<h3>One Liner</h3>
 <p><code>python -m subunit.run foo | subunit2junitxml --no-passthrough --output-to test-results</code></p>
 <blockquote>
 <p>forward = non-subunit output will be encapsulated in subunit </p>
 </blockquote>
-<h3 id="intermediate-subunit-results-file">Intermediate Subunit Results File</h3>
+<h3>Intermediate Subunit Results File</h3>
 <p><code>python -m subunit.run test_some_filename_with_py_truncated &gt; test-results.subunit</code></p>
 <blockquote>
 <p>Do not use python -m subunit.run test_some_filename_with_py_truncated to stdout as it expects to have binary delimiters which screw up the console command line</p>
@@ -136,6 +117,8 @@
 <div class="highlight"><pre><span></span>subunit-ls &lt; test-results.subunit
 subunit-stats &lt; test-results.subunit
 </pre></div>
+
+
 <p><code>python -m subunit.run foo &gt;&gt; test-results.subunit</code></p>
 <blockquote>
 <p>append some more test results
@@ -145,26 +128,28 @@ subunit-stats &lt; test-results.subunit
 <blockquote>
 <p>no passthrough does not pass/convert any extraneous non subunit data/lines to the junit xml</p>
 </blockquote>
-<div class="highlight"><pre><span></span><span class="nt">&lt;testsuite</span> <span class="na">errors=</span><span class="s">"0"</span> <span class="na">failures=</span><span class="s">"1"</span> <span class="na">name=</span><span class="s">""</span> <span class="na">tests=</span><span class="s">"3"</span> <span class="na">time=</span><span class="s">"0.001"</span><span class="nt">&gt;</span>
-    <span class="nt">&lt;testcase</span> <span class="na">classname=</span><span class="s">"john.john"</span> <span class="na">name=</span><span class="s">"test_fail"</span> <span class="na">time=</span><span class="s">"0.000"</span><span class="nt">&gt;</span>
-        <span class="nt">&lt;failure</span> <span class="na">type=</span><span class="s">"testtools.testresult.real._StringException"</span><span class="nt">&gt;</span>_StringException: Traceback (most recent call last):
-  File "john.py", line 9, in test_fail
+<div class="highlight"><pre><span></span><span class="nt">&lt;testsuite</span> <span class="na">errors=</span><span class="s">&quot;0&quot;</span> <span class="na">failures=</span><span class="s">&quot;1&quot;</span> <span class="na">name=</span><span class="s">&quot;&quot;</span> <span class="na">tests=</span><span class="s">&quot;3&quot;</span> <span class="na">time=</span><span class="s">&quot;0.001&quot;</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;testcase</span> <span class="na">classname=</span><span class="s">&quot;john.john&quot;</span> <span class="na">name=</span><span class="s">&quot;test_fail&quot;</span> <span class="na">time=</span><span class="s">&quot;0.000&quot;</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;failure</span> <span class="na">type=</span><span class="s">&quot;testtools.testresult.real._StringException&quot;</span><span class="nt">&gt;</span>_StringException: Traceback (most recent call last):
+  File &quot;john.py&quot;, line 9, in test_fail
     self.assertTrue(False)
-  File "/usr/lib/python2.7/unittest/case.py", line 424, in assertTrue
+  File &quot;/usr/lib/python2.7/unittest/case.py&quot;, line 424, in assertTrue
     raise self.failureException(msg)
 AssertionError: False is not true
 
         <span class="nt">&lt;/failure&gt;</span>
     <span class="nt">&lt;/testcase&gt;</span>
-    <span class="nt">&lt;testcase</span> <span class="na">classname=</span><span class="s">"john.john"</span> <span class="na">name=</span><span class="s">"test_skip"</span> <span class="na">time=</span><span class="s">"0.000"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;testcase</span> <span class="na">classname=</span><span class="s">&quot;john.john&quot;</span> <span class="na">name=</span><span class="s">&quot;test_skip&quot;</span> <span class="na">time=</span><span class="s">&quot;0.000&quot;</span><span class="nt">&gt;</span>
         <span class="nt">&lt;skipped&gt;</span>always skip<span class="nt">&lt;/skipped&gt;</span>
     <span class="nt">&lt;/testcase&gt;</span>
-    <span class="nt">&lt;testcase</span> <span class="na">classname=</span><span class="s">"john.john"</span> <span class="na">name=</span><span class="s">"test_success"</span> <span class="na">time=</span><span class="s">"0.000"</span><span class="nt">/&gt;</span>
+    <span class="nt">&lt;testcase</span> <span class="na">classname=</span><span class="s">&quot;john.john&quot;</span> <span class="na">name=</span><span class="s">&quot;test_success&quot;</span> <span class="na">time=</span><span class="s">&quot;0.000&quot;</span><span class="nt">/&gt;</span>
 <span class="nt">&lt;/testsuite&gt;</span>
 </pre></div>
-<h3 id="twisted-unittesting">Twisted UnitTesting</h3>
+
+
+<h3>Twisted UnitTesting</h3>
 <p>`trial --reporter=subunit foo | subunit2junitxml --forward --output-to=junitxml-result.xml</p>
-<h2 id="troubleshooting">Troubleshooting</h2>
+<h2>Troubleshooting</h2>
 <ul>
 <li>
 <p>ImportError: No module named 'junitxml'</p>
@@ -210,7 +195,7 @@ AssertionError: False is not true
 </ul>
 </li>
 </ul>
-<h2 id="more-info">More Info</h2>
+<h2>More Info</h2>
 <ul>
 <li><a href="http://www.tech-foo.net/making-the-most-of-subunit.html">http://www.tech-foo.net/making-the-most-of-subunit.html</a></li>
 <li><a href="https://pypi.python.org/pypi/python-subunit">https://pypi.python.org/pypi/python-subunit</a></li>
@@ -240,7 +225,7 @@ AssertionError: False is not true
             <time pubdate="pubdate" datetime="2014-11-01T00:00:00-07:00">Nov 1, 2014</time>
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#programming-ref">programming</a> 
-            <h4>~380 words</h4>
+            <h4>~381 words</h4>
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article"> 
                 <li><a href="/tags.html#python-ref">python

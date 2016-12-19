@@ -70,49 +70,9 @@
 </div>
 
 <div class="row-fluid">
-    <div class="span2 table-of-content">
-        <nav>
-        <h4>Contents</h4>
-        <div class="toc">
-<ul>
-<li><a href="#why-cache">Why Cache?</a><ul>
-<li><a href="#questions-to-ask-when-caching">Questions to ask when caching</a></li>
-<li><a href="#cache-latency-times-in-perspective">Cache Latency Times in Perspective</a></li>
-<li><a href="#caches-are-another-operational-component-with-overhead">Caches are another Operational component with Overhead</a></li>
-</ul>
-</li>
-<li><a href="#how-to-cache">How to Cache</a><ul>
-<li><a href="#cache-on-write">Cache on Write</a></li>
-<li><a href="#cache-on-read">Cache on Read</a></li>
-</ul>
-</li>
-<li><a href="#common-gotchas">Common Gotchas</a><ul>
-<li><a href="#cache-on-write-gotchas">Cache on write gotchas</a></li>
-<li><a href="#expiration-cache-full-of-stale-junk">Expiration: cache full of stale junk</a></li>
-<li><a href="#cold-cache-and-the-thundering-herd">Cold Cache and the Thundering Herd</a></li>
-</ul>
-</li>
-<li><a href="#tools-for-caching">Tools for caching</a><ul>
-<li><a href="#redis-examples">Redis Examples</a><ul>
-<li><a href="#interactive-redis-prompt">Interactive Redis Prompt</a></li>
-<li><a href="#non-interactive-redis-commands">Non Interactive Redis Commands</a></li>
-</ul>
-</li>
-<li><a href="#installing-redis">Installing Redis</a><ul>
-<li><a href="#redis-clients">Redis Clients</a></li>
-</ul>
-</li>
-<li><a href="#memcached">Memcached</a></li>
-<li><a href="#varnish">Varnish</a></li>
-</ul>
-</li>
-</ul>
-</div>
-        </nav>
-    </div>
-    <div class="span8 article-content">
+        <div class="span8 offset2 article-content">
 
-            
+            <p>[TOC]</p>
 <p><strong>Caching is when you use a copy of a data set rather than using the source.</strong></p>
 <p>Caching often involves a "Key Value Lookup":</p>
 <ol>
@@ -126,7 +86,7 @@
 </ol>
 <p>A more concrete example would be to cache a User object by Email, so that whenever a request came in for a particular Users details the cache would contain their Name, Address, and Phone Number.</p>
 <p><a href="https://en.wikipedia.org/wiki/Associative_array">https://en.wikipedia.org/wiki/Associative_array</a></p>
-<h2 id="why-cache">Why Cache?</h2>
+<h2>Why Cache?</h2>
 <p>A tradeoff of memory for cpu (or latency or some other business cost).</p>
 <ul>
 <li>accessing the data from source is too slow</li>
@@ -137,7 +97,7 @@
 <li>server side caching can protect backend resources and improve throughput and performance</li>
 <li>computation is expensive (in terms of cpu, time, or money)</li>
 </ul>
-<h3 id="questions-to-ask-when-caching">Questions to ask when caching</h3>
+<h3>Questions to ask when caching</h3>
 <ul>
 <li>Is the complexity of caching worth the performance gain? (simpler is often better)</li>
 <li>Does my cache need to be consistent? (meaning the cache and data source return identical results)</li>
@@ -146,7 +106,7 @@
 <li>Am I caching at a low level? (meaning inside of my Data Access Object pattern I'm protecting a single simple resource, i.e. a MySQL table, from being accessed too often)</li>
 <li>How unique are my Keys in my cache (i.e. if multiple users can have the same identifier it would be very bad to return the wrong session to the wrong user)</li>
 </ul>
-<h3 id="cache-latency-times-in-perspective">Cache Latency Times in Perspective</h3>
+<h3>Cache Latency Times in Perspective</h3>
 <p>Taking "why cache" to another level, the relative speeds of different cache levels highlight why some applications or algorithms will fail if they do not leverage cache.</p>
 <ul>
 <li>If your application is a very large amount of data the network may actually be better than disk; optimization would probably not be focused on "loop unrolling"</li>
@@ -276,7 +236,7 @@
 <li><a href="https://wondernetwork.com/pings">https://wondernetwork.com/pings</a></li>
 <li><a href="https://twitter.com/rzezeski/status/398306728263315456/photo/1">https://twitter.com/rzezeski/status/398306728263315456/photo/1</a> Brendan Gregg</li>
 </ul>
-<h3 id="caches-are-another-operational-component-with-overhead">Caches are another Operational component with Overhead</h3>
+<h3>Caches are another Operational component with Overhead</h3>
 <p>The best advice is to definitely avoiding caching until the last possible moment ("premature optimization" and "defer architecture decisions")</p>
 <p>Not only do you have to write code complexity for using a cache, there's the nitty gritty of running a cache (which can be a completely different expertise than programming)</p>
 <ul>
@@ -287,24 +247,24 @@
 <li>Metrics</li>
 </ul>
 <p>None of this operational cost is free, and there are plenty of issues when just implementing caching in code...</p>
-<h2 id="how-to-cache">How to Cache</h2>
-<h3 id="cache-on-write">Cache on Write</h3>
+<h2>How to Cache</h2>
+<h3>Cache on Write</h3>
 <p>Also known as "cache on write through"</p>
 <p>Whenever new data is written a cache must also be updated.</p>
-<h3 id="cache-on-read">Cache on Read</h3>
+<h3>Cache on Read</h3>
 <p>Also known as "cache on read through"</p>
 <p>Whenever a query is made first the cache is checked.  If there is a "cache miss" then the data source is queried and the cache is updated and the result is returned.  If there is a "cache hit" and the data is in the cache then it is returned (and potentially a cache key expiration updated as this cache hit improved the cache efficiency).</p>
-<h2 id="common-gotchas">Common Gotchas</h2>
+<h2>Common Gotchas</h2>
 <p>Caching is challenging because of the need for data consistency, parallel requests, and race conditions.</p>
 <p>One good way to think about it is a banking system with money: if two people both try and empty an account at an ATM at the same time how will your caching system handle it?</p>
-<h3 id="cache-on-write-gotchas">Cache on write gotchas</h3>
+<h3>Cache on write gotchas</h3>
 <p>One implementation flaw is to update the cache first; if the update to the data source fails then some requests may have been given incorrect data.</p>
 <p>Another flaw would be to not have a "transaction" defined around both the update of the data and then the update of the cache since if either fails future requests will receive inconsistent results.</p>
 <p>There may be a design mismatch as since data is only cached on write, if reads are occurring mostly on data written a long time ago they will be expired/pushed out and you will have poor cache efficiency.</p>
 <p>While "cache on write" is a sometimes band-aid for NoSQL "eventual consistency" when it fails (i.e. all applications should expect that a cache will not exist or have a cache miss) the result may be data inconsistency.</p>
 <p>One workaround is "check and set" (or "compare and set") where the cache will auto-invalidate if two conflicting entries are attempted.</p>
 <p><a href="http://neopythonic.blogspot.com/2011/08/compare-and-set-in-memcache.html">http://neopythonic.blogspot.com/2011/08/compare-and-set-in-memcache.html</a></p>
-<h3 id="expiration-cache-full-of-stale-junk">Expiration: cache full of stale junk</h3>
+<h3>Expiration: cache full of stale junk</h3>
 <p>A naive implementation of caching will store every result in the cache forever.  </p>
 <p>While this seems like a good idea ("The cache application/service will just evict unused items based some algorithm") it is essentially forcing your cache to be full of potentially low value information on the hope that someone else will solve the problem.</p>
 <p>Since some caching tools/framework do not set a default <strong>Time To Live</strong> or <strong>Expiration</strong> and in that case all of your data may quickly fill up the cache (not a bad thing per se), but then it will use whatever default or global "eviction policy" that is defined.</p>
@@ -314,32 +274,34 @@
 </blockquote>
 <p>Set a TTL or Expiration whenever possible that matches your domain (i.e. for a session 1 day or 1 week).</p>
 <p>If the Time to Live is too short then the cache may have very poor efficiency (items expire before they can generate even one cache hit)</p>
-<h3 id="cold-cache-and-the-thundering-herd">Cold Cache and the Thundering Herd</h3>
+<h3>Cold Cache and the Thundering Herd</h3>
 <ol>
 <li>If the cache is "cold", i.e. has not been populated, then all queries will go directly to the source</li>
 <li>If the source is not prepared for the "thundering herd" of requests (that were usually handled by the cache) then the source may become overloaded and bad things will happen</li>
 <li>It is therefore best practice to "warm the cache" by seeding data from the source into the cache before significant load events</li>
 </ol>
-<h2 id="tools-for-caching">Tools for caching</h2>
+<h2>Tools for caching</h2>
 <p>Much like encryption it is probably a good idea to use a time tested product over writing your own implementation.</p>
-<h3 id="redis-examples">Redis Examples</h3>
+<h3>Redis Examples</h3>
 <p>One thing to think about is that local redis might be far more effective than remote over the network redis.</p>
 <p>If your application can depend less shared state this is good because sharing is a nightmare for cache semantics and distributed computing.</p>
 <p>Regardless of securing your remote cache you will always want to measure cache effectiveness.</p>
 <ul>
 <li><a href="http://redis.io/commands">http://redis.io/commands</a></li>
 </ul>
-<h4 id="interactive-redis-prompt">Interactive Redis Prompt</h4>
+<h4>Interactive Redis Prompt</h4>
 <div class="highlight"><pre><span></span>redis-cli
 keys *
 </pre></div>
-<h4 id="non-interactive-redis-commands">Non Interactive Redis Commands</h4>
+
+
+<h4>Non Interactive Redis Commands</h4>
 <div class="highlight"><pre><span></span>redis-cli KEYS *:*
 redis-cli KEYS session:1:*
 redis-cli hgetall session:1:web
 redis-cli hgetall session:1:web:presence
 
-redis-cli KEYS "session:3:*" | xargs redis-cli DEL   # then upgrade --restart
+redis-cli KEYS &quot;session:3:*&quot; | xargs redis-cli DEL   # then upgrade --restart
 
 redis-cli KEYS session:1:*  | grep session:1:web-48    # user_session.py , when the hardcoded max of 10 simultaneous sessions is hit no more can be created
   session:1:web-48679:rooms
@@ -348,8 +310,8 @@ redis-cli KEYS session:1:*  | grep session:1:web-48    # user_session.py , when 
   session:1:web-48679
 
 redis-cli zrange sessions:1 0 9
-  1) "1:web"
-  2) "1:web-48679"
+  1) &quot;1:web&quot;
+  2) &quot;1:web-48679&quot;
 
 # remove a session manually?
 redis-cli zrem sessions:1 1:web-48679
@@ -358,8 +320,10 @@ redis-cli del   session:1:web-48679:presence
 redis-cli del   session:1:web-48679:message_ids
 redis-cli del   session:1:web-48679
 </pre></div>
-<hr/>
-<h3 id="installing-redis">Installing Redis</h3>
+
+
+<hr>
+<h3>Installing Redis</h3>
 <ul>
 <li><a href="http://redis.io/topics/quickstart">http://redis.io/topics/quickstart</a></li>
 <li>
@@ -370,21 +334,25 @@ redis-cli del   session:1:web-48679
 </blockquote>
 </li>
 </ul>
-<h4 id="redis-clients">Redis Clients</h4>
+<h4>Redis Clients</h4>
 <p><a href="http://redis.io/clients#python">http://redis.io/clients#python</a></p>
 <div class="highlight"><pre><span></span>pip install redis
 </pre></div>
+
+
 <p><a href="https://pypi.python.org/pypi/redis">https://pypi.python.org/pypi/redis</a></p>
 <div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">redis</span>
-<span class="n">r</span> <span class="o">=</span> <span class="n">redis</span><span class="o">.</span><span class="n">StrictRedis</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="s1">'localhost'</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">6379</span><span class="p">)</span>
+<span class="n">r</span> <span class="o">=</span> <span class="n">redis</span><span class="o">.</span><span class="n">StrictRedis</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="s1">&#39;localhost&#39;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">6379</span><span class="p">)</span>
 <span class="n">r</span><span class="o">.</span><span class="n">flushall</span><span class="p">()</span>
 </pre></div>
-<h3 id="memcached">Memcached</h3>
+
+
+<h3>Memcached</h3>
 <ul>
 <li><a href="http://memcached.org">http://memcached.org</a></li>
 <li><a href="https://en.wikipedia.org/wiki/Memcached">https://en.wikipedia.org/wiki/Memcached</a></li>
 </ul>
-<h3 id="varnish">Varnish</h3>
+<h3>Varnish</h3>
 <ul>
 <li><a href="https://www.varnish-cache.org/about">https://www.varnish-cache.org/about</a> REST web caching</li>
 </ul>
@@ -407,7 +375,7 @@ redis-cli del   session:1:web-48679
             <time pubdate="pubdate" datetime="2015-03-26T00:00:00-07:00">Mar 26, 2015</time>
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#programming-ref">programming</a> 
-            <h4>~1536 words</h4>
+            <h4>~1537 words</h4>
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article"> 
                 <li><a href="/tags.html#cache-ref">cache
