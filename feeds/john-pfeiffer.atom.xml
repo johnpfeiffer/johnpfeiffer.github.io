@@ -1,5 +1,235 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>johnpfeiffer - john pfeiffer</title><link href="https://blog.john-pfeiffer.com/" rel="alternate"></link><link href="https://blog.john-pfeiffer.com/feeds/john-pfeiffer.atom.xml" rel="self"></link><id>https://blog.john-pfeiffer.com/</id><updated>2016-10-22T20:44:00-07:00</updated><entry><title>Golang Testing Benchmark Profiling Subtests Fuzz Testing</title><link href="https://blog.john-pfeiffer.com/golang-testing-benchmark-profiling-subtests-fuzz-testing/" rel="alternate"></link><published>2016-10-22T20:44:00-07:00</published><updated>2016-10-22T20:44:00-07:00</updated><author><name>john pfeiffer</name></author><id>tag:blog.john-pfeiffer.com,2016-10-22:/golang-testing-benchmark-profiling-subtests-fuzz-testing/</id><summary type="html">&lt;p&gt;[TOC]&lt;/p&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>johnpfeiffer - john pfeiffer</title><link href="https://blog.john-pfeiffer.com/" rel="alternate"></link><link href="https://blog.john-pfeiffer.com/feeds/john-pfeiffer.atom.xml" rel="self"></link><id>https://blog.john-pfeiffer.com/</id><updated>2016-12-30T20:34:00-08:00</updated><entry><title>Golang JSON is challenging</title><link href="https://blog.john-pfeiffer.com/golang-json-is-challenging/" rel="alternate"></link><published>2016-12-30T20:34:00-08:00</published><updated>2016-12-30T20:34:00-08:00</updated><author><name>john pfeiffer</name></author><id>tag:blog.john-pfeiffer.com,2016-12-30:/golang-json-is-challenging/</id><summary type="html">&lt;p&gt;[TOC]&lt;/p&gt;
+&lt;p&gt;Parsing JSON can be a relatively simple subject covered early in other programming languages (i.e. JavaScript ;)&lt;/p&gt;
+&lt;p&gt;JSON is a really popular way to persist or transmit data, especially for APIs.  So it is really common to need to use it and yet...&lt;/p&gt;
+&lt;p&gt;JSON can be surprisingly difficult in …&lt;/p&gt;</summary><content type="html">&lt;p&gt;[TOC]&lt;/p&gt;
+&lt;p&gt;Parsing JSON can be a relatively simple subject covered early in other programming languages (i.e. JavaScript ;)&lt;/p&gt;
+&lt;p&gt;JSON is a really popular way to persist or transmit data, especially for APIs.  So it is really common to need to use it and yet...&lt;/p&gt;
+&lt;p&gt;JSON can be surprisingly difficult in Go because even though it is built into the language it depends already understanding a few other somewhat advanced topics.  And the challenge can be compounded by the Go philosophy of "We Did Not Put It In the Language Do It Yourself".&lt;/p&gt;
+&lt;h2&gt;A quick overview of JSON&lt;/h2&gt;
+&lt;p&gt;JSON (I never hear humans actually say the full thing: JavaScript Object Notation , though "Jason" does get annoyed) is a way to format data structures as text and it is the modern alternative to XML.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://en.wikipedia.org/wiki/JSON"&gt;https://en.wikipedia.org/wiki/JSON&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="http://json.org/"&gt;http://json.org/&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;There is some fuzziness about Numbers and other definitions but its beauty is definitely simplicity.&lt;/p&gt;
+&lt;h2&gt;Why does Go in JSON seem (unnecessarily) advanced or challenging?&lt;/h2&gt;
+&lt;ol&gt;
+&lt;li&gt;Go with JSON requires defining/using structs for objects.  This upfront cost certainly fits the "statically compiled" model ;)  But Javascript or Python magically "just make an object" (or dictionary) which has fields/values that are very accessible.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;It is actually pretty common that we might not know or want to define the full (nested?) object structures we've received (as if the JSON format was for portability of data from a service outside of your control), but we're forced to figure something out...&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;To generically parse an object from JSON (i.e. you do not know the full structure) you must use the "empty interface" (the most generic object), and Interfaces are more advanced than simply defining structs.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Inferring or attempting to lazily load JSON (i.e. a mixed list of different objects - since there isn't a slice of mixed types in Go!) requires Reflection which is a relatively advanced topic for a beginning programmer.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Static typing is great, except for when you're reading from JSON and you're not sure which type you should really use and you probably just want it to work simply. This impedance mismatch is natural when moving from a portable data format to a specific language and application, but it doesn't reduce the cursing.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;To really have the Go compiler figure out the translation between JSON to object requires "hinting" which helps with compiling Reflection magic, but starts to complicate your structs (and interfaces!)&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Nested Structs (fields) are the answer to Nested JSON, but then you have to really figure out how many (and lists with multiple types of objects!) and how deep you expect any nesting you'll receive. (Or just give in to your recursive desires.)&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Pointers.  They are efficient.  Since JSON parsing can be memory intensive you will end up using them... in Nested Structs... with Interfaces... and Reflection Hints... (and since Pointers are messy and confusing there will be bugs).&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;code&gt;associative array &amp;lt; struct/object &amp;lt; interface &amp;lt; pointers &amp;lt; reflection&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;a completely made up ordering of complexity, arrays being the least hard to grok&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="http://research.swtch.com/interfaces"&gt;http://research.swtch.com/interfaces&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://blog.golang.org/laws-of-reflection"&gt;https://blog.golang.org/laws-of-reflection&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;To summarize, it is really common to get some json from somewhere from someone else and want to just peek at one field, update another field, add a key and value, and save the json.&lt;/p&gt;
+&lt;p&gt;And that kind of dynamic behavior isn't inherently easy in Go. =[&lt;/p&gt;
+&lt;h2&gt;Example code of Marshalling and Unmarshalling JSON with Go&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href="https://blog.golang.org/json-and-go"&gt;https://blog.golang.org/json-and-go&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;:::go
+package main&lt;/p&gt;
+&lt;p&gt;import (
+        "encoding/json"
+        "fmt"
+        "io"
+        "io/ioutil"
+        "log"
+        "os"
+)&lt;/p&gt;
+&lt;p&gt;func logIfError(err error) {
+        if err != nil {
+                log.Fatal(err)
+        }
+}&lt;/p&gt;
+&lt;p&gt;// readFile is a convenience function to read a whole file at once, LOL similar to ioutil.ReadFile()
+func readFile(f *os.File) {
+        var data = make([]byte, 1024)
+        totalBytes := 0
+        for {
+                count, err := f.Read(data)
+                // https://golang.org/pkg/io/ , EOF is an expected error condition
+                if err != io.EOF {
+                        logIfError(err)
+                }
+                // TODO: 0 bytes could be returned when not an EOF
+                if count == 0 {
+                        break
+                }
+                totalBytes += count
+                fmt.Printf("Read %d bytes: \n%s\n", count, string(data))
+        }
+        fmt.Printf("Read %d total bytes from the file\n", totalBytes)
+}&lt;/p&gt;
+&lt;p&gt;// genericParsing is an example of the empty interface https://blog.golang.org/json-and-go
+// https://en.wikipedia.org/wiki/JSON
+func genericParsing(data []byte) {
+        var f interface{}
+        err := json.Unmarshal(data, &amp;amp;f)
+        logIfError(err)&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;    // https://golang.org/doc/effective_go.html#interface_conversions
+    m := f.(map[string]interface{})
+    fmt.Println(&amp;quot;\ngeneric json parsing&amp;quot;)
+    for k, v := range m {
+            switch vv := v.(type) {
+            case string:
+                    fmt.Println(&amp;quot;  &amp;quot;, k, &amp;quot;is string:&amp;quot;, vv)
+            case int:
+                    fmt.Println(&amp;quot;  &amp;quot;, k, &amp;quot;is int:&amp;quot;, vv)
+            case bool:
+                    fmt.Println(&amp;quot;  &amp;quot;, k, &amp;quot;is bool:&amp;quot;, vv)
+            case []interface{}:
+                    fmt.Println(&amp;quot;  &amp;quot;, k, &amp;quot;is an array:&amp;quot;)
+                    for _, u := range vv {
+                            fmt.Println(&amp;quot;    &amp;quot;, u)
+                    }
+            default:
+                    fmt.Println(&amp;quot;  &amp;quot;, k, &amp;quot;is of a type I don&amp;#39;t know how to handle&amp;quot;)
+                    fmt.Printf(&amp;quot;  but I could have checked another way and found %v is a %T\n&amp;quot;, v, v)
+                    // JSONNumber https://golang.org/pkg/encoding/json/#Decoder.UseNumber
+                    // http://json.org/ no floats so hinting is appreciated
+            }
+    }
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;}&lt;/p&gt;
+&lt;p&gt;// Assuming top level keys are strings, i.e. NOT [] , https://gobyexample.com/json
+func rootStringsOnlyParsing(data []byte) map[string]interface{} {
+        // A map of string to any type https://blog.golang.org/laws-of-reflection , http://research.swtch.com/interfaces
+        var datmap map[string]interface{}
+        e := json.Unmarshal(data, &amp;amp;datmap)
+        logIfError(e)
+        fmt.Println("\nKeys are Strings in a Map:", datmap)
+        return datmap
+}&lt;/p&gt;
+&lt;p&gt;// ExampleSimpleObject must be exported to parse correctly , the fields order here is used by json.Marshal output
+type ExampleSimpleObject struct {
+        Age  int    &lt;code&gt;json:"age"&lt;/code&gt;
+        Name string &lt;code&gt;json:"name"&lt;/code&gt;
+}&lt;/p&gt;
+&lt;p&gt;// ExampleComplexObject is the magic of auto parsing, if your data never gets corrupted...
+// helpful understanding of Go and JSON nesting https://eager.io/blog/go-and-json/
+// hints are very powerful leveraging of Reflection that Go core libraries use for JSON
+type ExampleComplexObject struct {
+        ArrayOfObjects []ExampleSimpleObject &lt;code&gt;json:"jsonArrayOfObjects,omitempty"&lt;/code&gt;
+        ArrayOfStrings []string              &lt;code&gt;json:"jsonArrayOfStrings"&lt;/code&gt;
+        JSONBoolean    bool                  &lt;code&gt;json:"jsonBoolean"&lt;/code&gt;
+        JSONNumber     int                   &lt;code&gt;json:"jsonNumber"&lt;/code&gt;
+        JSONString     string                &lt;code&gt;json:"jsonString, omitempty"&lt;/code&gt;
+        // jsonArrayOfNumbers is not defined and so is not included in the parsed object
+}&lt;/p&gt;
+&lt;p&gt;// autoUnmarshal shows Go structs making parsing JSON look easy https://golang.org/pkg/encoding/json/#example_Unmarshal
+func autoUnmarshal(data []byte) ExampleComplexObject {
+        var ex ExampleComplexObject
+        err := json.Unmarshal(data, &amp;amp;ex)
+        logIfError(err)
+        fmt.Printf("Auto Unmarshal: %+v \n", ex)
+        return ex
+}&lt;/p&gt;
+&lt;p&gt;// writeJSONFile demonstrates the power of interfaces for shared functionality
+func writeJSONFile(name string, thing interface{}) {
+        theJSON, err := json.MarshalIndent(thing, "", "  ")
+        logIfError(err)
+        err = ioutil.WriteFile(name, theJSON, 0644)
+        logIfError(err)
+        // See the omitted fields with: diff --ignore-all-space types.json output.json
+}&lt;/p&gt;
+&lt;p&gt;func main() {
+        // https://golang.org/pkg/os/
+        myFile, ferr := os.Open("types.json")
+        logIfError(ferr)
+        readFile(myFile)&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;    // hint: read a file and return a slice of bytes: https://golang.org/pkg/io/ioutil/#ReadFile
+    data, _ := ioutil.ReadFile(&amp;quot;types.json&amp;quot;)
+
+    genericParsing(data)
+    datamap := rootStringsOnlyParsing(data)
+    // modifying or adding to a JSON file can be tricky
+    datamap[&amp;quot;injectedKey&amp;quot;] = &amp;quot;injected value&amp;quot;
+    writeJSONFile(&amp;quot;dataMapModified.json&amp;quot;, datamap)
+
+    auto := autoUnmarshal(data)
+    writeJSONFile(&amp;quot;autoUnmarshalOmits.json&amp;quot;, auto)
+    fmt.Println(&amp;quot;done&amp;quot;)
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;}&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href="https://gobyexample.com/json"&gt;https://gobyexample.com/json&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://eager.io/blog/go-and-json/"&gt;https://eager.io/blog/go-and-json/&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://golang.org/doc/effective_go.html#interface_conversions"&gt;https://golang.org/doc/effective_go.html#interface_conversions&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="http://attilaolah.eu/2014/09/10/json-and-struct-composition-in-go/"&gt;http://attilaolah.eu/2014/09/10/json-and-struct-composition-in-go/&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://blog.gopheracademy.com/advent-2016/advanced-encoding-decoding/"&gt;https://blog.gopheracademy.com/advent-2016/advanced-encoding-decoding/&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2&gt;Common JSON gotchas with Go&lt;/h2&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;The data structures need to be exported, otherwise you'll only end up with an empty JSON object&lt;/p&gt;
+&lt;p&gt;:::go
+type Oops struct {
+    Name string &lt;code&gt;json:"name"&lt;/code&gt;
+    i int    &lt;code&gt;json:"timestamp"&lt;/code&gt;
+}&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;The i int field will not be Marshaled and will therefore not exist in the JSON object&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href="https://play.golang.org/p/ukkjLQnSSq"&gt;https://play.golang.org/p/ukkjLQnSSq&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href="https://golang.org/pkg/encoding/json/#example_Unmarshal"&gt;https://golang.org/pkg/encoding/json/#example_Unmarshal&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Types are strict in Go.  JSON is unclear about "Number".  Golang will assume float64 without any hints.  Use hints, or reflection and type assertions and a magic wand...&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href="https://golang.org/pkg/encoding/json/#Decoder.UseNumber"&gt;https://golang.org/pkg/encoding/json/#Decoder.UseNumber&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Marshal() returns a slice of bytes which is not a string.  so string()&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href="https://golang.org/pkg/encoding/json/#Marshal"&gt;https://golang.org/pkg/encoding/json/#Marshal&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;"The argument to Unmarshal must be a non-nil pointer", &lt;a href="https://golang.org/pkg/encoding/json/#InvalidUnmarshalError"&gt;https://golang.org/pkg/encoding/json/#InvalidUnmarshalError&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2&gt;A more "real world" code example of parsing JSON with Go&lt;/h2&gt;
+&lt;p&gt;I wanted to import the bookmarks from Chrome but I hadn't exported them.  I wrote this utility to parse the default chrome bookmarks json file that I did have:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://bitbucket.org/johnpfeiffer/bookmarks/src"&gt;https://bitbucket.org/johnpfeiffer/bookmarks/src&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</content><category term="go"></category><category term="golang"></category><category term="json"></category><category term="interfaces"></category></entry><entry><title>Golang Testing Benchmark Profiling Subtests Fuzz Testing</title><link href="https://blog.john-pfeiffer.com/golang-testing-benchmark-profiling-subtests-fuzz-testing/" rel="alternate"></link><published>2016-10-22T20:44:00-07:00</published><updated>2016-10-22T20:44:00-07:00</updated><author><name>john pfeiffer</name></author><id>tag:blog.john-pfeiffer.com,2016-10-22:/golang-testing-benchmark-profiling-subtests-fuzz-testing/</id><summary type="html">&lt;p&gt;[TOC]&lt;/p&gt;
 &lt;p&gt;Go makes it very easy to unit test with the packagename_test.go file right next to the package source code file(s).&lt;/p&gt;
 &lt;p&gt;As a pragmatic language designed for developers who ship to production the amount of built in tooling (testing, benchmarks, etc.) is impressive.&lt;/p&gt;
 &lt;p&gt;Taking an earlier example I …&lt;/p&gt;</summary><content type="html">&lt;p&gt;[TOC]&lt;/p&gt;
