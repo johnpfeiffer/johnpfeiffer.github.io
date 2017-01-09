@@ -70,17 +70,40 @@
 </div>
 
 <div class="row-fluid">
-        <div class="span8 offset2 article-content">
+    <div class="span2 table-of-content">
+        <nav>
+        <h4>Contents</h4>
+        <div class="toc">
+<ul>
+<li><a href="#what-is-a-debian-package">What is a Debian Package?</a></li>
+<li><a href="#why-use-a-debian-package">Why use a Debian Package?</a><ul>
+<li><a href="#how-to-unpack-a-debian-package-modify-the-control-file-and-repack-it">How to unpack a debian package, modify the control file, and repack it</a></li>
+</ul>
+</li>
+<li><a href="#reprepro-for-a-local-apt-repository">reprepro for a local apt repository</a><ul>
+<li><a href="#setup-ubuntu-1404-to-install-reprepro">Setup Ubuntu 14.04 to install reprepro</a></li>
+<li><a href="#setup-the-gpg-key">Setup the GPG key</a></li>
+<li><a href="#setup-a-simple-reprepro">Setup a simple reprepro</a></li>
+<li><a href="#updating-a-remote-source">Updating a remote source</a></li>
+<li><a href="#listing-or-adding-or-removing-a-debian-package-with-reprepro">Listing or Adding or Removing a debian package with reprepro</a></li>
+<li><a href="#configuring-a-client">Configuring a client</a></li>
+</ul>
+</li>
+</ul>
+</div>
+        </nav>
+    </div>
+    <div class="span8 article-content">
 
-            <p>[TOC]</p>
-<h3>What is a Debian Package?</h3>
+            
+<h3 id="what-is-a-debian-package">What is a Debian Package?</h3>
 <p>A debian package is a way to distribute and install a collection of files (aka software) onto a system (i.e. Debian or Ubuntu).</p>
 <p>While a piece of software might depend on other debian packages (e.g. libraries) usually a single .deb file represents some sort of module that serves a single purpose.</p>
 <p>Once a debian package is built any client (dpkg or apt which also uses dpkg ;) can use it to install the software.</p>
 <ul>
 <li><a href="https://www.debian.org/doc/manuals/debian-faq/ch-pkg_basics.en.html">https://www.debian.org/doc/manuals/debian-faq/ch-pkg_basics.en.html</a></li>
 </ul>
-<h3>Why use a Debian Package?</h3>
+<h3 id="why-use-a-debian-package">Why use a Debian Package?</h3>
 <blockquote>
 <p>When you're developing on your own box you can pretty much get away with anything</p>
 </blockquote>
@@ -91,7 +114,7 @@
 <p>The Debian Package is a "battle tested" format with lots of features (dependency requirements, preinst scripts, postinst scripts, etc.) but if there is a bug in a specific .deb file it is not always practical to get the full source code and rebuild the whole thing (especially considering static bindings and specific compilation environment/parameters).</p>
 <p>One example people give is an erroneous pre install or post install script that is preventing either installation or removal.</p>
 <p>The example below is more on just simply changing the control file "Description:"</p>
-<h4>How to unpack a debian package, modify the control file, and repack it</h4>
+<h4 id="how-to-unpack-a-debian-package-modify-the-control-file-and-repack-it">How to unpack a debian package, modify the control file, and repack it</h4>
 <p>To unpack, modify, and repack a debian package:</p>
 <div class="highlight"><pre><span></span>docker run --rm --it --volume /tmp:/tmp ubuntu:14.04 /bin/bash
 sudo apt-get update
@@ -105,14 +128,12 @@ ls -ahl /tmp/emptydir/DEBIAN
 vi /tmp/emptydir/DEBIAN/control
 dpkg-deb -b emptydir /tmp/example-fixed.deb
 </pre></div>
-
-
 <p>On your host /tmp should now contain example.deb and example-fixed.deb</p>
 <ul>
 <li><a href="https://unix.stackexchange.com/questions/138188/easily-unpack-deb-edit-postinst-and-repack-deb">https://unix.stackexchange.com/questions/138188/easily-unpack-deb-edit-postinst-and-repack-deb</a></li>
 <li><a href="http://manpages.ubuntu.com/manpages/xenial/en/man1/dpkg-deb.1.html">http://manpages.ubuntu.com/manpages/xenial/en/man1/dpkg-deb.1.html</a></li>
 </ul>
-<h3>reprepro for a local apt repository</h3>
+<h3 id="reprepro-for-a-local-apt-repository">reprepro for a local apt repository</h3>
 <p>Just as a debian provides more control over packaging and dependency management, you can also have your apt repository where you store debian packages.</p>
 <p>By hosting your own apt repository you can:</p>
 <ul>
@@ -121,7 +142,7 @@ dpkg-deb -b emptydir /tmp/example-fixed.deb
 <li>Create a local apt repository on local disk for a non internet connected device</li>
 </ul>
 <p>The tool <code>reprepro</code> creates and manages the apt database and filesystem.</p>
-<h4>Setup Ubuntu 14.04 to install reprepro</h4>
+<h4 id="setup-ubuntu-1404-to-install-reprepro">Setup Ubuntu 14.04 to install reprepro</h4>
 <p>It might be as simple as a single command to install reprepro but here is the full example in the case where you have broken or corrupted your sources.list:</p>
 <div class="highlight"><pre><span></span>cat <span class="s">&lt;&lt; EOF &gt; /etc/apt/sources.list</span>
 <span class="s">    deb http://archive.ubuntu.com/ubuntu/ trusty main</span>
@@ -134,42 +155,34 @@ rm -rf /var/lib/apt/lists
 apt-get clean<span class="p">;</span> apt-get update
 apt-get install reprepro
 </pre></div>
-
-
 <ul>
 <li><a href="http://manpages.ubuntu.com/manpages/trusty/en/man1/reprepro.1.html">http://manpages.ubuntu.com/manpages/trusty/en/man1/reprepro.1.html</a></li>
 </ul>
-<h4>Setup the GPG key</h4>
+<h4 id="setup-the-gpg-key">Setup the GPG key</h4>
 <p>A gpg key is an important part of apt for providing a digital signature of authenticity</p>
 <div class="highlight"><pre><span></span><span class="n">gpg</span> <span class="o">--</span><span class="nb">list</span><span class="o">-</span><span class="n">keys</span>
 <span class="n">gpg</span> <span class="o">--</span><span class="nb">list</span><span class="o">-</span><span class="n">keys</span> <span class="o">--</span><span class="k">with</span><span class="o">-</span><span class="n">fingerprint</span>
 <span class="n">gpg</span> <span class="o">--</span><span class="nb">list</span><span class="o">-</span><span class="n">secret</span><span class="o">-</span><span class="n">keys</span> <span class="o">--</span><span class="k">with</span><span class="o">-</span><span class="n">fingerprint</span>
 <span class="n">gpg</span> <span class="o">--</span><span class="n">allow</span><span class="o">-</span><span class="n">secret</span><span class="o">-</span><span class="n">key</span><span class="o">-</span><span class="kn">import</span> <span class="o">--</span><span class="kn">import</span> <span class="nn">YOURKEY.gpg</span>
 </pre></div>
-
-
 <blockquote>
 <p>This allows for importing an existing gpg key into the local keyring (otherwise reprepro actions will not persist)</p>
 </blockquote>
-<div class="highlight"><pre><span></span>gpg --yes --batch --delete-secret-keys &quot;21E29B5B3F6D550EF4E2C2C9E9991E312341234&quot;
-gpg --yes --batch --delete-keys &quot;21E29B5B3F6D550EF4E2C2C9E9991E312341234&quot;
+<div class="highlight"><pre><span></span>gpg --yes --batch --delete-secret-keys "21E29B5B3F6D550EF4E2C2C9E9991E312341234"
+gpg --yes --batch --delete-keys "21E29B5B3F6D550EF4E2C2C9E9991E312341234"
 </pre></div>
-
-
 <blockquote>
 <p>Removing or deleting a key seems to only work when you delete a key exactly by fingerprint</p>
 </blockquote>
 <div class="highlight"><pre><span></span>echo ENCPASSWORD | gpg --yes --no-tty --batch --passphrase-fd 0 --output 8F13E123.key --decrypt 8F13E123.key.gpg
 </pre></div>
-
-
 <blockquote>
 <p>Decrypt a password encrypted gpg key (that was encrypted with gpg - so meta!)</p>
 </blockquote>
 <ul>
 <li><a href="https://wiki.debian.org/SettingUpSignedAptRepositoryWithReprepro">https://wiki.debian.org/SettingUpSignedAptRepositoryWithReprepro</a></li>
 </ul>
-<h4>Setup a simple reprepro</h4>
+<h4 id="setup-a-simple-reprepro">Setup a simple reprepro</h4>
 <p>Here we will setup a local apt mirror that is a filtered subset of the upstream mariadb repository</p>
 <div class="highlight"><pre><span></span>mkdir -p /home/admin/apt/conf
 mkdir -p /home/admin/apt/logs
@@ -218,8 +231,6 @@ cat <span class="s">&lt;&lt; EOF &gt; /home/admin/apt/conf/mariadb-partial.list<
 <span class="s">mysql-common install</span>
 <span class="s">EOF</span>
 </pre></div>
-
-
 <blockquote>
 <p>The configuration created
 - defines the Distribution
@@ -230,54 +241,46 @@ cat <span class="s">&lt;&lt; EOF &gt; /home/admin/apt/conf/mariadb-partial.list<
 <ul>
 <li><a href="https://mirrorer.alioth.debian.org/reprepro.1.html#CONFIG FILES">https://mirrorer.alioth.debian.org/reprepro.1.html#CONFIG FILES</a></li>
 </ul>
-<h4>Updating a remote source</h4>
+<h4 id="updating-a-remote-source">Updating a remote source</h4>
 <p>Assuming the installation of reprepro and correct configuration of conf/options, conf/distributions, conf/updates, and conf/NAME-partial.list</p>
 <p>Update a local repository from an upstream:</p>
 <div class="highlight"><pre><span></span>reprepro --verbose --basedir /home/admin/apt check digitalocean-mariadb-10-trusty
 
 reprepro --verbose --basedir /home/admin/apt update digitalocean-mariadb-10-trusty
-    aptmethod got <span class="s1">&#39;http://sfo1.mirrors.digitalocean.com/mariadb/repo/10.0/ubuntu/dists/trusty/InRelease&#39;</span>
-    aptmethod got <span class="s1">&#39;http://sfo1.mirrors.digitalocean.com/mariadb/repo/10.0/ubuntu/dists/trusty/main/binary-amd64/Packages.gz&#39;</span>
+    aptmethod got <span class="s1">'http://sfo1.mirrors.digitalocean.com/mariadb/repo/10.0/ubuntu/dists/trusty/InRelease'</span>
+    aptmethod got <span class="s1">'http://sfo1.mirrors.digitalocean.com/mariadb/repo/10.0/ubuntu/dists/trusty/main/binary-amd64/Packages.gz'</span>
     Calculating packages to get...
     Getting packages...
-    aptmethod got <span class="s1">&#39;http://sfo1.mirrors.digitalocean.com/mariadb/repo/10.0/ubuntu/pool/main/m/mariadb-10.0/libmariadbclient-dev_10.0.26+maria-1~trusty_amd64.deb&#39;</span>
+    aptmethod got <span class="s1">'http://sfo1.mirrors.digitalocean.com/mariadb/repo/10.0/ubuntu/pool/main/m/mariadb-10.0/libmariadbclient-dev_10.0.26+maria-1~trusty_amd64.deb'</span>
 
 ls -ahl /home/admin/apt/archive
 </pre></div>
-
-
 <blockquote>
 <p>should contain two directories: dists and pool</p>
 </blockquote>
 <div class="highlight"><pre><span></span>reprepro --verbose --basedir /home/admin/apt check
 </pre></div>
-
-
 <blockquote>
 <p>This will check all Distributions that have been configured for upstream changes</p>
 </blockquote>
-<h4>Listing or Adding or Removing a debian package with reprepro</h4>
+<h4 id="listing-or-adding-or-removing-a-debian-package-with-reprepro">Listing or Adding or Removing a debian package with reprepro</h4>
 <p>Assuming you have setup your gpg signing key and config files correctly you can also just add a single package ad-hoc to your local apt repository</p>
 <div class="highlight"><pre><span></span>reprepro dumpreferences
 reprepro --verbose --basedir . remove digitalocean-mariadb-10-trusty SOMEPACKAGENAME
 reprepro --verbose --basedir . includedeb digitalocean-mariadb-10-trusty SOMEFILENAME.deb
 reprepro <span class="nb">export</span> digitalocean-mariadb-10-trusty
 </pre></div>
-
-
 <ul>
 <li><a href="https://mirrorer.alioth.debian.org/reprepro.1.html">https://mirrorer.alioth.debian.org/reprepro.1.html</a></li>
 <li><a href="https://wikitech.wikimedia.org/wiki/Reprepro">https://wikitech.wikimedia.org/wiki/Reprepro</a></li>
 </ul>
-<h4>Configuring a client</h4>
+<h4 id="configuring-a-client">Configuring a client</h4>
 <div class="highlight"><pre><span></span><span class="err">cat</span> <span class="err">/etc/apt/sources.list.d/mariadb.list</span>
     <span class="err">deb</span>     <span class="err">file:///home/admin/apt/archive</span> <span class="err">trusty</span> <span class="err">main</span>
 <span class="err">apt-get</span> <span class="err">clean</span>
 <span class="err">apt-get</span> <span class="err">update</span>
 <span class="err">apt-get</span> <span class="err">search</span> <span class="err">mariadb</span>
 </pre></div>
-
-
 <blockquote>
 <p>Now you can install mariadb from your local apt repository, or host it on s3 and change mariadb.list to have the bucket FQDN (<code>aws s3 --delete --exact-timestamps sync ./archive s3://mybucket</code>)</p>
 </blockquote>
@@ -300,7 +303,7 @@ reprepro <span class="nb">export</span> digitalocean-mariadb-10-trusty
             <time pubdate="pubdate" datetime="2016-02-24T20:40:00-08:00">Feb 24, 2016</time>
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#build-CI-CD-devops-ref">build-CI-CD-devops</a> 
-            <h4>~999 words</h4>
+            <h4>~998 words</h4>
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article"> 
                 <li><a href="/tags.html#apt-ref">apt

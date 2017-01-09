@@ -70,16 +70,47 @@
 </div>
 
 <div class="row-fluid">
-        <div class="span8 offset2 article-content">
+    <div class="span2 table-of-content">
+        <nav>
+        <h4>Contents</h4>
+        <div class="toc">
+<ul>
+<li><a href="#small-functions-make-for-good-tests">Small functions make for good tests</a><ul>
+<li><a href="#some-reasons-to-not-use-mega-objects">Some reasons to not use MEGA-OBJECTS</a></li>
+</ul>
+</li>
+<li><a href="#example-function-with-go-unit-tests">Example function with go unit tests</a><ul>
+<li><a href="#main_testgo">main_test.go</a><ul>
+<li><a href="#running-a-specific-test">Running a specific test</a></li>
+<li><a href="#test-coverage">Test Coverage</a></li>
+</ul>
+</li>
+<li><a href="#subtests">Subtests</a><ul>
+<li><a href="#running-a-specific-subtest">Running a specific subtest</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#benchmarking">Benchmarking</a><ul>
+<li><a href="#running-specific-benchmarks">Running specific benchmarks</a></li>
+</ul>
+</li>
+<li><a href="#profiling">Profiling</a></li>
+<li><a href="#go-fuzz-testing">Go Fuzz Testing</a></li>
+</ul>
+</div>
+        </nav>
+    </div>
+    <div class="span8 article-content">
 
-            <p>[TOC]</p>
+            
 <p>Go makes it very easy to unit test with the packagename_test.go file right next to the package source code file(s).</p>
 <p>As a pragmatic language designed for developers who ship to production the amount of built in tooling (testing, benchmarks, etc.) is impressive.</p>
 <p>Taking an earlier example I gave of MergeSort let's examine how TestDrivenDevelopment (or Design) was used to implement it.</p>
-<h2>Small functions make for good tests</h2>
+<h2 id="small-functions-make-for-good-tests">Small functions make for good tests</h2>
 <p>Small functions are easier to read and code is read 1000 times more often than it is written. <em>(completely made up but believable fact).</em></p>
 <p>Less lines of very-readable-code is usually an ok approximation for complexity, and less complexity means your program is easier to reason about (and easier to validate with tests!).</p>
-<h3>Some reasons to not use MEGA-OBJECTS</h3>
+<h3 id="some-reasons-to-not-use-mega-objects">Some reasons to not use MEGA-OBJECTS</h3>
 <p>One of the things that TDD helps focus on is modularity and requirements.  Two tensions to balance are the needs of the caller versus the needs of the function.</p>
 <p>What I mean is that the function caller wants to understand what they have to provide and what they'll get back.  If the function asks for a MEGA-OBJECT then somehow the caller has to find or create a MEGA-OBJECT (which sounds very expensive).  And if the function didn't really need the MEGA-OBJECT then the function will extract the one value it actually needs and throw all that work away.</p>
 <p>If instead the function asks for the integer primitive that is the value of the MEGA-OBJECT's this should be very easy to fulfill.  (Which is how tests help discover this MEGA-OBJECT anti-pattern, because even MEGA-OBJECT mocks are difficult).</p>
@@ -89,12 +120,12 @@
 <li><a href="http://martinfowler.com/bliki/TestPyramid.html">http://martinfowler.com/bliki/TestPyramid.html</a></li>
 <li><a href="https://testing.googleblog.com/2015/04/just-say-no-to-more-end-to-end-tests.html">https://testing.googleblog.com/2015/04/just-say-no-to-more-end-to-end-tests.html</a></li>
 </ul>
-<h2>Example function with go unit tests</h2>
+<h2 id="example-function-with-go-unit-tests">Example function with go unit tests</h2>
 <p>This example function requires two slices of integers.</p>
 <div class="highlight"><pre><span></span><span class="kn">package</span> <span class="nx">main</span>
 
 <span class="kn">import</span> <span class="p">(</span>
-    <span class="s">&quot;fmt&quot;</span>
+    <span class="s">"fmt"</span>
 <span class="p">)</span>
 
 <span class="c1">// SlicesMerge takes two sorted slices of integers and merges them into a single sorted slice of integers</span>
@@ -121,23 +152,21 @@
 <span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
     <span class="nx">a</span> <span class="o">:=</span> <span class="p">[]</span><span class="kt">int</span><span class="p">{</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">}</span>
     <span class="nx">b</span> <span class="o">:=</span> <span class="p">[]</span><span class="kt">int</span><span class="p">{</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">6</span><span class="p">}</span>
-    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;merged:&quot;</span><span class="p">,</span> <span class="nx">SlicesMerge</span><span class="p">(</span><span class="nx">a</span><span class="p">,</span> <span class="nx">b</span><span class="p">))</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">"merged:"</span><span class="p">,</span> <span class="nx">SlicesMerge</span><span class="p">(</span><span class="nx">a</span><span class="p">,</span> <span class="nx">b</span><span class="p">))</span>
 <span class="p">}</span>
 </pre></div>
-
-
 <blockquote>
 <p>a main function with print statements is the tried and true way of manual testing , <code>go run main.go</code></p>
 </blockquote>
-<h3>main_test.go</h3>
+<h3 id="main_testgo">main_test.go</h3>
 <blockquote>
 <p>Automated units tests means another developer can fix a bug and ensure it does not regress, read and learn expected behavior, and of course have automated continuous integration catch problems as early as possible, <code>go test</code></p>
 </blockquote>
 <div class="highlight"><pre><span></span><span class="kn">package</span> <span class="nx">main</span>
 
 <span class="kn">import</span> <span class="p">(</span>
-    <span class="s">&quot;reflect&quot;</span>
-    <span class="s">&quot;testing&quot;</span>
+    <span class="s">"reflect"</span>
+    <span class="s">"testing"</span>
 <span class="p">)</span>
 
 
@@ -165,8 +194,8 @@
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="nx">TestSlicesMergeNegative</span><span class="p">(</span><span class="nx">t</span> <span class="o">*</span><span class="nx">testing</span><span class="p">.</span><span class="nx">T</span><span class="p">)</span> <span class="p">{</span>
-    <span class="c1">// if os.Getenv(&quot;MY_ENVIRONMENT_VARIABLE&quot;) == &quot;&quot; {</span>
-    <span class="nx">t</span><span class="p">.</span><span class="nx">Skip</span><span class="p">(</span><span class="s">&quot;skipping test: $MY_ENVIRONMENT_VARIABLE is not set&quot;</span><span class="p">)</span>
+    <span class="c1">// if os.Getenv("MY_ENVIRONMENT_VARIABLE") == "" {</span>
+    <span class="nx">t</span><span class="p">.</span><span class="nx">Skip</span><span class="p">(</span><span class="s">"skipping test: $MY_ENVIRONMENT_VARIABLE is not set"</span><span class="p">)</span>
 
     <span class="nx">t</span><span class="p">.</span><span class="nx">Parallel</span><span class="p">()</span>
     <span class="nx">a</span> <span class="o">:=</span> <span class="p">[]</span><span class="kt">int</span><span class="p">{</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">}</span>
@@ -179,12 +208,10 @@
 
 <span class="kd">func</span> <span class="nx">assertSlicesEqual</span><span class="p">(</span><span class="nx">t</span> <span class="o">*</span><span class="nx">testing</span><span class="p">.</span><span class="nx">T</span><span class="p">,</span> <span class="nx">expected</span> <span class="p">[]</span><span class="kt">int</span><span class="p">,</span> <span class="nx">result</span> <span class="p">[]</span><span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
     <span class="k">if</span> <span class="p">!</span><span class="nx">reflect</span><span class="p">.</span><span class="nx">DeepEqual</span><span class="p">(</span><span class="nx">expected</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
-        <span class="nx">t</span><span class="p">.</span><span class="nx">Error</span><span class="p">(</span><span class="s">&quot;\nExpected:&quot;</span><span class="p">,</span> <span class="nx">expected</span><span class="p">,</span> <span class="s">&quot;\nReceived: &quot;</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span>
+        <span class="nx">t</span><span class="p">.</span><span class="nx">Error</span><span class="p">(</span><span class="s">"\nExpected:"</span><span class="p">,</span> <span class="nx">expected</span><span class="p">,</span> <span class="s">"\nReceived: "</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span>
     <span class="p">}</span>
 <span class="p">}</span>
 </pre></div>
-
-
 <blockquote>
 <p>The idea is to have code that is testable, and just use Go code to write the tests (not another DomainSpecificLanguage to learn)</p>
 </blockquote>
@@ -199,31 +226,31 @@
 <ul>
 <li><a href="https://golang.org/pkg/reflect/#DeepEqual">https://golang.org/pkg/reflect/#DeepEqual</a></li>
 </ul>
-<h4>Running a specific test</h4>
+<h4 id="running-a-specific-test">Running a specific test</h4>
 <p><code>go test -v -run TestSlicesMergeHalf</code></p>
 <blockquote>
 <p>Getting verbose output and specifying tests is quite helpful when fixing a piece of code or test.  <strong>Note</strong> the run parameter takes a regular expression</p>
 </blockquote>
-<h4>Test Coverage</h4>
+<h4 id="test-coverage">Test Coverage</h4>
 <p>Sometimes people talk about "test coverage" and while it's clear that 100% coverage is rarely possible (nor entirely desirable from the idea of diminishing returns and exponential growth in integration combinations outside of the simplest function) , it's still a useful metric/tool to discover if there's a chunk of code that's whistling in the wind.</p>
 <p><code>go test -cover</code></p>
 <blockquote>
 <p>"coverage: 75.0% of statements"</p>
 </blockquote>
-<h3>Subtests</h3>
+<h3 id="subtests">Subtests</h3>
 <p>Using the pattern of table driven tests improves the readability and extensibility of the "merge empty test" by applying "Don't Repeat Yourself" and removing the copy pasting of the driver function call.</p>
 <div class="highlight"><pre><span></span><span class="kn">package</span> <span class="nx">main</span>
 
 <span class="kn">import</span> <span class="p">(</span>
-    <span class="s">&quot;reflect&quot;</span>
-    <span class="s">&quot;testing&quot;</span>
+    <span class="s">"reflect"</span>
+    <span class="s">"testing"</span>
 <span class="p">)</span>
 
 <span class="kd">var</span> <span class="nx">empty</span> <span class="p">=</span> <span class="p">[]</span><span class="kt">int</span><span class="p">{}</span>
 
 <span class="kd">func</span> <span class="nx">assertSlicesEqual</span><span class="p">(</span><span class="nx">t</span> <span class="o">*</span><span class="nx">testing</span><span class="p">.</span><span class="nx">T</span><span class="p">,</span> <span class="nx">expected</span> <span class="p">[]</span><span class="kt">int</span><span class="p">,</span> <span class="nx">result</span> <span class="p">[]</span><span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
     <span class="k">if</span> <span class="p">!</span><span class="nx">reflect</span><span class="p">.</span><span class="nx">DeepEqual</span><span class="p">(</span><span class="nx">expected</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
-        <span class="nx">t</span><span class="p">.</span><span class="nx">Error</span><span class="p">(</span><span class="s">&quot;\nExpected:&quot;</span><span class="p">,</span> <span class="nx">expected</span><span class="p">,</span> <span class="s">&quot;\nReceived: &quot;</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span>
+        <span class="nx">t</span><span class="p">.</span><span class="nx">Error</span><span class="p">(</span><span class="s">"\nExpected:"</span><span class="p">,</span> <span class="nx">expected</span><span class="p">,</span> <span class="s">"\nReceived: "</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span>
     <span class="p">}</span>
 <span class="p">}</span>
 
@@ -249,15 +276,13 @@
     <span class="c1">// }</span>
 
     <span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">tc</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">testCases</span> <span class="p">{</span>
-        <span class="nx">t</span><span class="p">.</span><span class="nx">Run</span><span class="p">(</span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Sprintf</span><span class="p">(</span><span class="s">&quot;%#v merged with %#v&quot;</span><span class="p">,</span> <span class="nx">tc</span><span class="p">.</span><span class="nx">a</span><span class="p">,</span> <span class="nx">tc</span><span class="p">.</span><span class="nx">b</span><span class="p">),</span> <span class="kd">func</span><span class="p">(</span><span class="nx">t</span> <span class="o">*</span><span class="nx">testing</span><span class="p">.</span><span class="nx">T</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">t</span><span class="p">.</span><span class="nx">Run</span><span class="p">(</span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Sprintf</span><span class="p">(</span><span class="s">"%#v merged with %#v"</span><span class="p">,</span> <span class="nx">tc</span><span class="p">.</span><span class="nx">a</span><span class="p">,</span> <span class="nx">tc</span><span class="p">.</span><span class="nx">b</span><span class="p">),</span> <span class="kd">func</span><span class="p">(</span><span class="nx">t</span> <span class="o">*</span><span class="nx">testing</span><span class="p">.</span><span class="nx">T</span><span class="p">)</span> <span class="p">{</span>
             <span class="nx">actual</span> <span class="o">:=</span> <span class="nx">SlicesMerge</span><span class="p">(</span><span class="nx">tc</span><span class="p">.</span><span class="nx">a</span><span class="p">,</span> <span class="nx">tc</span><span class="p">.</span><span class="nx">b</span><span class="p">)</span>
             <span class="nx">assertSlicesEqual</span><span class="p">(</span><span class="nx">t</span><span class="p">,</span> <span class="nx">tc</span><span class="p">.</span><span class="nx">expected</span><span class="p">,</span> <span class="nx">actual</span><span class="p">)</span>
         <span class="p">})</span>
     <span class="p">}</span>
 <span class="p">}</span>
 </pre></div>
-
-
 <blockquote>
 <p>One variation with the "subtest" feature (which may apply more to benchmarks than straightforward unit tests) is not only that a fatal will not skip subsequent tests but that the output is more verbose</p>
 </blockquote>
@@ -265,8 +290,6 @@
 --- PASS: TestSlicesMergeEmpty (0.00s)
 PASS
 </pre></div>
-
-
 <blockquote>
 <p>With subtests...</p>
 </blockquote>
@@ -282,20 +305,16 @@ PASS
     --- PASS: TestSlicesMergeEmpty/[]int(nil)_merged_with_[]int(nil) (0.00s)
 PASS
 </pre></div>
-
-
 <blockquote>
 <p>Making the "table" of inputs and outputs more obvious AND the output verbosity clearer seems like a small refinement but goes a long way to making production quality testing easier</p>
 </blockquote>
-<h4>Running a specific subtest</h4>
+<h4 id="running-a-specific-subtest">Running a specific subtest</h4>
 <p><code>go test -v -run=TestSlicesMergeEmpty/"nil"</code></p>
 <div class="highlight"><pre><span></span><span class="gd">--- PASS: TestSlicesMergeEmpty (0.00s)</span>
     --- PASS: TestSlicesMergeEmpty/[]int{}_merged_with_[]int(nil) (0.00s)
     --- PASS: TestSlicesMergeEmpty/[]int(nil)_merged_with_[]int{} (0.00s)
     --- PASS: TestSlicesMergeEmpty/[]int(nil)_merged_with_[]int(nil) (0.00s)
 </pre></div>
-
-
 <blockquote>
 <p>Yes! You can pattern match on the string from the subtest table and only run a subset of subtests (mindblown)</p>
 </blockquote>
@@ -303,7 +322,7 @@ PASS
 <li><a href="https://blog.golang.org/subtests">https://blog.golang.org/subtests</a></li>
 <li><a href="http://dave.cheney.net/2013/06/09/writing-table-driven-tests-in-go">http://dave.cheney.net/2013/06/09/writing-table-driven-tests-in-go</a></li>
 </ul>
-<h2>Benchmarking</h2>
+<h2 id="benchmarking">Benchmarking</h2>
 <p>Benchmarking is most useful if you're attempting to answer a question of two variations on how to implement something.</p>
 <p>I suppose if you recorded every result and ran against exactly the same hardware you might be able to detect performance regressions, though I'd be worried about overly inconsistent/flaky results taking up way too much valuable time.</p>
 <p>Inside of a _test.go file you can also write benchmark test functions, here is one of the classic questions of "concatenating strings in Go"</p>
@@ -312,8 +331,8 @@ PASS
 <div class="highlight"><pre><span></span><span class="kn">package</span> <span class="nx">main</span>
 
 <span class="kn">import</span> <span class="p">(</span>
-    <span class="s">&quot;bytes&quot;</span>
-    <span class="s">&quot;testing&quot;</span>
+    <span class="s">"bytes"</span>
+    <span class="s">"testing"</span>
 <span class="p">)</span>
 
 <span class="kd">func</span> <span class="nx">MyConcatSimple</span><span class="p">(</span><span class="nx">a</span> <span class="kt">string</span><span class="p">,</span> <span class="nx">b</span> <span class="kt">string</span><span class="p">)</span> <span class="kt">string</span> <span class="p">{</span>
@@ -345,30 +364,28 @@ PASS
 
 <span class="kd">func</span> <span class="nx">BenchmarkConcatSimple</span><span class="p">(</span><span class="nx">b</span> <span class="o">*</span><span class="nx">testing</span><span class="p">.</span><span class="nx">B</span><span class="p">)</span> <span class="p">{</span>
     <span class="k">for</span> <span class="nx">n</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">n</span> <span class="p">&lt;</span> <span class="nx">b</span><span class="p">.</span><span class="nx">N</span><span class="p">;</span> <span class="nx">n</span><span class="o">++</span> <span class="p">{</span>
-        <span class="nx">MyConcatSimple</span><span class="p">(</span><span class="s">&quot;foo&quot;</span><span class="p">,</span> <span class="s">&quot;bar&quot;</span><span class="p">)</span>
+        <span class="nx">MyConcatSimple</span><span class="p">(</span><span class="s">"foo"</span><span class="p">,</span> <span class="s">"bar"</span><span class="p">)</span>
     <span class="p">}</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="nx">BenchmarkConcatSimpleLooped</span><span class="p">(</span><span class="nx">b</span> <span class="o">*</span><span class="nx">testing</span><span class="p">.</span><span class="nx">B</span><span class="p">)</span> <span class="p">{</span>
     <span class="k">for</span> <span class="nx">n</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">n</span> <span class="p">&lt;</span> <span class="nx">b</span><span class="p">.</span><span class="nx">N</span><span class="p">;</span> <span class="nx">n</span><span class="o">++</span> <span class="p">{</span>
-        <span class="nx">MyConcatSimpleLooped</span><span class="p">(</span><span class="s">&quot;foo&quot;</span><span class="p">,</span> <span class="s">&quot;bar&quot;</span><span class="p">)</span>
+        <span class="nx">MyConcatSimpleLooped</span><span class="p">(</span><span class="s">"foo"</span><span class="p">,</span> <span class="s">"bar"</span><span class="p">)</span>
     <span class="p">}</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="nx">BenchmarkConcatBytesBuffer</span><span class="p">(</span><span class="nx">b</span> <span class="o">*</span><span class="nx">testing</span><span class="p">.</span><span class="nx">B</span><span class="p">)</span> <span class="p">{</span>
     <span class="k">for</span> <span class="nx">n</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">n</span> <span class="p">&lt;</span> <span class="nx">b</span><span class="p">.</span><span class="nx">N</span><span class="p">;</span> <span class="nx">n</span><span class="o">++</span> <span class="p">{</span>
-        <span class="nx">MyConcatBytesBuffer</span><span class="p">(</span><span class="s">&quot;foo&quot;</span><span class="p">,</span> <span class="s">&quot;bar&quot;</span><span class="p">)</span>
+        <span class="nx">MyConcatBytesBuffer</span><span class="p">(</span><span class="s">"foo"</span><span class="p">,</span> <span class="s">"bar"</span><span class="p">)</span>
     <span class="p">}</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="nx">BenchmarkConcatBytesBufferLooped</span><span class="p">(</span><span class="nx">b</span> <span class="o">*</span><span class="nx">testing</span><span class="p">.</span><span class="nx">B</span><span class="p">)</span> <span class="p">{</span>
     <span class="k">for</span> <span class="nx">n</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">n</span> <span class="p">&lt;</span> <span class="nx">b</span><span class="p">.</span><span class="nx">N</span><span class="p">;</span> <span class="nx">n</span><span class="o">++</span> <span class="p">{</span>
-        <span class="nx">MyConcatBytesBufferLooped</span><span class="p">(</span><span class="s">&quot;foo&quot;</span><span class="p">,</span> <span class="s">&quot;bar&quot;</span><span class="p">)</span>
+        <span class="nx">MyConcatBytesBufferLooped</span><span class="p">(</span><span class="s">"foo"</span><span class="p">,</span> <span class="s">"bar"</span><span class="p">)</span>
     <span class="p">}</span>
 <span class="p">}</span>
 </pre></div>
-
-
 <blockquote>
 <p>The b.N is automatically filled in by Go until the benchmark runner is "satisfied with stability" though you can create a wrapper function for the code under test if you wish to attempt more control over iterations</p>
 <p>Remember that every benchmark is only valid against a specific set of hardware, operating system, libraries, etc. and with any changes (i.e. upgrade from Go 1.6 to 1.7) you may need to retest... unless you're just proving O(N) is better than O(N^2) ;)</p>
@@ -379,8 +396,6 @@ BenchmarkConcatSimpleLooped-4             100000             20728 ns/op
 BenchmarkConcatBytesBuffer-4             5000000               373 ns/op
 BenchmarkConcatBytesBufferLooped-4        300000              7227 ns/op
 </pre></div>
-
-
 <blockquote>
 <p>the iterations show that the simplest naive concatentation with + is very fast for a couple of small arguments (40 nanoseconds)</p>
 <p>BUT if appending many (100+) items together buffer.Write() is better</p>
@@ -391,13 +406,13 @@ BenchmarkConcatBytesBufferLooped-4        300000              7227 ns/op
 <li><a href="https://medium.com/hackintoshrao/daily-code-optimization-using-benchmarks-and-profiling-in-golang-gophercon-india-2016-talk-874c8b4dc3c5">https://medium.com/hackintoshrao/daily-code-optimization-using-benchmarks-and-profiling-in-golang-gophercon-india-2016-talk-874c8b4dc3c5</a></li>
 <li><a href="https://golang.org/pkg/strings/#Join">https://golang.org/pkg/strings/#Join</a></li>
 </ul>
-<h4>Running specific benchmarks</h4>
+<h4 id="running-specific-benchmarks">Running specific benchmarks</h4>
 <p><code>go test -v -run=NOMATCH -bench=BenchmarkConcatSimple</code></p>
 <blockquote>
 <p>Since it is using the test runner the -run= regexp not matching allows you to skip any unit tests</p>
 <p>-bench= can take a regexp to match only a subset of benchmark tests</p>
 </blockquote>
-<h2>Profiling</h2>
+<h2 id="profiling">Profiling</h2>
 <p>TODO:</p>
 <ul>
 <li><a href="https://medium.com/tjholowaychuk/profiling-golang-851db2d9ae24">https://medium.com/tjholowaychuk/profiling-golang-851db2d9ae24</a></li>
@@ -407,7 +422,7 @@ BenchmarkConcatBytesBufferLooped-4        300000              7227 ns/op
 <li><a href="https://golang.org/pkg/net/http/pprof/">https://golang.org/pkg/net/http/pprof/</a></li>
 <li><a href="https://golang.org/pkg/runtime/pprof/">https://golang.org/pkg/runtime/pprof/</a></li>
 </ul>
-<h2>Go Fuzz Testing</h2>
+<h2 id="go-fuzz-testing">Go Fuzz Testing</h2>
 <p>Fuzz testing is furthering the principle of automation (and that computers are inherently better at some things than humans) to  have software discover edge cases for tests.</p>
 <p>Basically the idea is to have software run over an extreme range or with randomness and then the edge cases that are discovered can be added into the test suite.  It has been used to enormously good effect on the Go standard library by Dmitry Vyukov.</p>
 <p>One thing you start to see when attempting to apply it is that it really a tool for helping validate handling of a specific input.  It is not a magic wand to discover bugs. ;)</p>
@@ -416,7 +431,7 @@ BenchmarkConcatBytesBufferLooped-4        300000              7227 ns/op
     <span class="nx">f</span> <span class="o">:=</span> <span class="nx">fuzz</span><span class="p">.</span><span class="nx">New</span><span class="p">()</span>
     <span class="kd">var</span> <span class="nx">randomSeed</span> <span class="kt">int</span>
     <span class="nx">f</span><span class="p">.</span><span class="nx">Fuzz</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">randomSeed</span><span class="p">)</span>
-    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;random seed:&quot;</span><span class="p">,</span> <span class="nx">randomSeed</span><span class="p">)</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">"random seed:"</span><span class="p">,</span> <span class="nx">randomSeed</span><span class="p">)</span>
     <span class="nx">r</span> <span class="o">:=</span> <span class="nx">rand</span><span class="p">.</span><span class="nx">New</span><span class="p">(</span><span class="nx">rand</span><span class="p">.</span><span class="nx">NewSource</span><span class="p">(</span><span class="nb">int64</span><span class="p">(</span><span class="nx">randomSeed</span><span class="p">)))</span>
 
     <span class="nx">xLength</span> <span class="o">:=</span> <span class="nx">r</span><span class="p">.</span><span class="nx">Int</span><span class="p">()</span> <span class="o">%</span> <span class="mi">5</span>
@@ -441,12 +456,10 @@ BenchmarkConcatBytesBufferLooped-4        300000              7227 ns/op
     <span class="nx">expected</span> <span class="o">:=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="o">...</span><span class="p">)</span>
     <span class="nx">sort</span><span class="p">.</span><span class="nx">Ints</span><span class="p">(</span><span class="nx">expected</span><span class="p">)</span>
     <span class="k">if</span> <span class="p">!</span><span class="nx">reflect</span><span class="p">.</span><span class="nx">DeepEqual</span><span class="p">(</span><span class="nx">expected</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
-        <span class="nx">t</span><span class="p">.</span><span class="nx">Error</span><span class="p">(</span><span class="s">&quot;\nExpected:&quot;</span><span class="p">,</span> <span class="nx">expected</span><span class="p">,</span> <span class="s">&quot;\nReceived: &quot;</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span>
+        <span class="nx">t</span><span class="p">.</span><span class="nx">Error</span><span class="p">(</span><span class="s">"\nExpected:"</span><span class="p">,</span> <span class="nx">expected</span><span class="p">,</span> <span class="s">"\nReceived: "</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span>
     <span class="p">}</span>
 <span class="p">}</span>
 </pre></div>
-
-
 <blockquote>
 <p>Seeding randomness is part of how this gofuzz library is used; the Vyukov version actually produces output that must be parsed separately.</p>
 </blockquote>
@@ -481,7 +494,7 @@ BenchmarkConcatBytesBufferLooped-4        300000              7227 ns/op
             <time pubdate="pubdate" datetime="2016-10-22T20:44:00-07:00">Oct 22, 2016</time>
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#programming-ref">programming</a> 
-            <h4>~1769 words</h4>
+            <h4>~1768 words</h4>
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article"> 
                 <li><a href="/tags.html#benchmark-ref">benchmark

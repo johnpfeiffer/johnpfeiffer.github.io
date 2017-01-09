@@ -70,9 +70,28 @@
 </div>
 
 <div class="row-fluid">
-        <div class="span8 offset2 article-content">
+    <div class="span2 table-of-content">
+        <nav>
+        <h4>Contents</h4>
+        <div class="toc">
+<ul>
+<li><a href="#basics">Basics</a></li>
+<li><a href="#package-management">Package Management</a></li>
+<li><a href="#networking">Networking</a></li>
+<li><a href="#compiling">Compiling</a><ul>
+<li><a href="#prepare-musl-compiler-on-alpine-linux">prepare musl compiler on alpine linux</a></li>
+<li><a href="#hic">hi.c</a></li>
+<li><a href="#compiling_1">compiling</a></li>
+<li><a href="#compile-go-on-alpine-linux">compile go on alpine linux</a></li>
+</ul>
+</li>
+</ul>
+</div>
+        </nav>
+    </div>
+    <div class="span8 article-content">
 
-            <p>[TOC]</p>
+            
 <p>Alpine Linux is a minimalist secure linux distro.</p>
 <blockquote>
 <p>In security terms less "footprint" often means less vectors of attack and less complexity to analyze for vulnerabilities</p>
@@ -84,12 +103,10 @@
 <li><a href="https://news.ycombinator.com/item?id=10998667">https://news.ycombinator.com/item?id=10998667</a></li>
 <li><a href="https://en.wikipedia.org/wiki/Alpine_Linux">https://en.wikipedia.org/wiki/Alpine_Linux</a></li>
 </ul>
-<h3>Basics</h3>
+<h3 id="basics">Basics</h3>
 <p>Most of the very basic commands are similar to other linux distros like Debian/Ubuntu/Redhat, but of course there are differences ;)</p>
 <div class="highlight"><pre><span></span>/bin/sh
 </pre></div>
-
-
 <blockquote>
 <p>busybox</p>
 </blockquote>
@@ -97,17 +114,13 @@
 curl 127.0.0.1
 ls -l /usr/bin /usr/sbin | more
 </pre></div>
-
-
 <blockquote>
 <p>more busybox</p>
 </blockquote>
-<h3>Package Management</h3>
+<h3 id="package-management">Package Management</h3>
 <div class="highlight"><pre><span></span>apk --help
 apk update
 </pre></div>
-
-
 <blockquote>
 <p>list the options of the package manager, update the local index for all remote packages</p>
 </blockquote>
@@ -116,15 +129,11 @@ apk search iptables | sort
 apk info iptables
 apk add iptables
 </pre></div>
-
-
 <blockquote>
 <p>search the remote packages for a keyword (unsorted results), get info for a specific package, install a specific package</p>
 </blockquote>
 <div class="highlight"><pre><span></span>apk info
 </pre></div>
-
-
 <blockquote>
 <p>list all of the packages installed locally</p>
 </blockquote>
@@ -132,7 +141,7 @@ apk add iptables
 <li><a href="http://wiki.alpinelinux.org/wiki/Alpine_Linux_package_management">http://wiki.alpinelinux.org/wiki/Alpine_Linux_package_management</a></li>
 <li><a href="https://pkgs.alpinelinux.org/packages">https://pkgs.alpinelinux.org/packages</a></li>
 </ul>
-<h3>Networking</h3>
+<h3 id="networking">Networking</h3>
 <div class="highlight"><pre><span></span>hostname
 cat /etc/resolv.conf
 ifconfig
@@ -141,10 +150,8 @@ netstat -anp
 apk add iptables
 traceroute
 </pre></div>
-
-
-<h3>Compiling</h3>
-<h4>prepare musl compiler on alpine linux</h4>
+<h3 id="compiling">Compiling</h3>
+<h4 id="prepare-musl-compiler-on-alpine-linux">prepare musl compiler on alpine linux</h4>
 <blockquote>
 <p>WARNING: below did not work</p>
 </blockquote>
@@ -161,32 +168,26 @@ cd musl-1.1.15
 make
 make install
 </pre></div>
-
-
 <blockquote>
 <p>Now we've installed the musl compiler?</p>
 </blockquote>
 <p>/usr/local/musl seemed terribly empty of binaries</p>
 <p><a href="http://dominik.honnef.co/posts/2015/06/go-musl/">http://dominik.honnef.co/posts/2015/06/go-musl/</a></p>
-<h4>hi.c</h4>
+<h4 id="hic">hi.c</h4>
 <div class="highlight"><pre><span></span><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp"></span>
 
 <span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
 <span class="p">{</span>
-  <span class="n">printf</span><span class="p">(</span><span class="s">&quot;hi&quot;</span><span class="p">);</span>
+  <span class="n">printf</span><span class="p">(</span><span class="s">"hi"</span><span class="p">);</span>
 <span class="p">}</span>
 </pre></div>
-
-
-<h4>compiling</h4>
+<h4 id="compiling_1">compiling</h4>
 <div class="highlight"><pre><span></span>apk add file
 gcc -static hi.c
 file a.out
 chmod +x a.out
 ./a.out
 </pre></div>
-
-
 <p><code>hi</code></p>
 <blockquote>
 <p>The default is a.out: ELF 64-bit LSB executable, x86-64, version 1 (SYSV), statically linked, not stripped</p>
@@ -197,31 +198,25 @@ chmod +x a.out
 apk update
 apk add alpine-sdk
 </pre></div>
-
-
 <p>But maybe because it's already an alpine linux container the gcc already uses musl instead of libc and does not need the musl-gcc wrapper?</p>
-<h4>compile go on alpine linux</h4>
+<h4 id="compile-go-on-alpine-linux">compile go on alpine linux</h4>
 <p>Just use the golang image based on alpine linux ;)</p>
 <p><a href="https://github.com/docker-library/docs/tree/master/golang">https://github.com/docker-library/docs/tree/master/golang</a></p>
 <div class="highlight"><pre><span></span>docker pull golang:alpine
 docker run -it --rm golang:alpine /bin/sh
 </pre></div>
-
-
 <blockquote>
 <p>Now that we've got the container running we can use the shell</p>
 </blockquote>
 <p><code>vi intro.go</code></p>
 <div class="highlight"><pre><span></span><span class="n">package</span> <span class="n">main</span>
 
-<span class="kn">import</span> <span class="s2">&quot;fmt&quot;</span>
+<span class="kn">import</span> <span class="s2">"fmt"</span>
 
 <span class="n">func</span> <span class="n">main</span><span class="p">()</span> <span class="p">{</span>
-  <span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="s2">&quot;hi&quot;</span><span class="p">)</span>
+  <span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="s2">"hi"</span><span class="p">)</span>
 <span class="p">}</span>
 </pre></div>
-
-
 <blockquote>
 <p>To just run the source code <code>go run intro.go</code></p>
 </blockquote>
@@ -231,8 +226,6 @@ go build intro.go
 ls -l
 ./intro
 </pre></div>
-
-
 <p><code>hi</code></p>
             <aside>
             <hr/>
@@ -253,7 +246,7 @@ ls -l
             <time pubdate="pubdate" datetime="2016-02-28T21:19:00-08:00">Feb 28, 2016</time>
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#linux-ref">linux</a> 
-            <h4>~375 words</h4>
+            <h4>~374 words</h4>
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article"> 
                 <li><a href="/tags.html#alpine-ref">alpine

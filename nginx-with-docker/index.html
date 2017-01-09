@@ -70,23 +70,69 @@
 </div>
 
 <div class="row-fluid">
-        <div class="span8 offset2 article-content">
+    <div class="span2 table-of-content">
+        <nav>
+        <h4>Contents</h4>
+        <div class="toc">
+<ul>
+<li><a href="#nginx-overview">nginx overview</a></li>
+<li><a href="#docker-pull-nginx">docker pull nginx</a></li>
+<li><a href="#docker-nginx-interactive-container">docker nginx interactive container</a></li>
+<li><a href="#running-nginx-manually-in-the-interactive-docker-container">running nginx manually in the interactive docker container</a><ul>
+<li><a href="#nginx-version-and-modules">nginx version and modules</a></li>
+<li><a href="#test-your-config-file">Test your config file</a></li>
+<li><a href="#run-nginx-directly">run nginx directly</a></li>
+</ul>
+</li>
+<li><a href="#nginxconf">nginx.conf</a></li>
+<li><a href="#build-your-own-nginx-dockerfile">Build your own nginx Dockerfile</a><ul>
+<li><a href="#converting-an-existing-nginx-3rd-party-module-to-a-dynamic-module">Converting an existing nginx 3rd party module to a dynamic module</a></li>
+</ul>
+</li>
+<li><a href="#configuring-nginx">Configuring nginx</a><ul>
+<li><a href="#etcnginxnginxconf">/etc/nginx/nginx.conf</a></li>
+<li><a href="#nginx-with-ssl">nginx with ssl</a><ul>
+<li><a href="#etcnginxnginxconf_1">/etc/nginx/nginx.conf</a></li>
+<li><a href="#openssl-self-signed-certificates">openssl self signed certificates</a></li>
+<li><a href="#dockerized-nginx-with-ssl">dockerized nginx with ssl</a></li>
+</ul>
+</li>
+<li><a href="#nginx-with-ssl-and-http2">nginx with ssl and http/2</a><ul>
+<li><a href="#etcnginxnginxconf_2">/etc/nginx/nginx.conf</a></li>
+<li><a href="#verifying-http2">Verifying HTTP/2</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#nginx-with-php-fpm">nginx with php-fpm</a><ul>
+<li><a href="#investigate-php-fpm-in-docker">Investigate php-fpm in Docker</a></li>
+<li><a href="#configure-nginx">Configure nginx</a><ul>
+<li><a href="#some-test-content">Some Test Content</a></li>
+</ul>
+</li>
+<li><a href="#docker-composeyml">docker-compose.yml</a></li>
+<li><a href="#docker-compose-up-to-start-nginx-and-php-fpm">docker-compose up to start nginx and php-fpm</a></li>
+</ul>
+</li>
+</ul>
+</div>
+        </nav>
+    </div>
+    <div class="span8 article-content">
 
-            <p>[TOC]</p>
-<h2>nginx overview</h2>
+            
+<h2 id="nginx-overview">nginx overview</h2>
 <p><a href="http://nginx.org/en/">http://nginx.org/en/</a> is one of the most popular performant web servers in the world (and it's pretty handy as a reverse proxy or load balancer too!). <a href="http://nginx.org/en/docs/http/load_balancing.html">http://nginx.org/en/docs/http/load_balancing.html</a></p>
 <p><a href="https://github.com/nginx/nginx">https://github.com/nginx/nginx</a> is written in c (very performant but often needs to be compiled , especially with any of the extra 3rd party modules <a href="https://www.nginx.com/resources/wiki/modules/">https://www.nginx.com/resources/wiki/modules/</a>).</p>
 <p>A recent update means "...optionally load separate shared object files at runtime as modules" 
 <a href="https://www.nginx.com/blog/dynamic-modules-nginx-1-9-11/">https://www.nginx.com/blog/dynamic-modules-nginx-1-9-11/</a></p>
-<h2>docker pull nginx</h2>
+<h2 id="docker-pull-nginx">docker pull nginx</h2>
 <p>With Docker most of the time is spent in preparation, configuration, and testing.  The advantage is that less time is wasted on compiling, packaging, etc. (for all those still eeking out another 1% in efficiency via esoteric flags and bundling all sorts of custom modules - good luck!)</p>
 <p>One quick way to attempt to leverage nginx as a front end for your projects is using containers with Docker <a href="https://hub.docker.com/_/nginx/">https://hub.docker.com/_/nginx/</a></p>
 <div class="highlight"><pre><span></span>sudo su
 docker pull nginx:alpine
 docker images
 </pre></div>
-
-
 <blockquote>
 <p>This will grab the latest image based on the very small alpine linux <a href="https://en.wikipedia.org/wiki/Alpine_Linux">https://en.wikipedia.org/wiki/Alpine_Linux</a>, around 13 MB vs 191 MB for the traditional nginx:latest which is based on debian jessie <a href="https://en.wikipedia.org/wiki/Debian">https://en.wikipedia.org/wiki/Debian</a></p>
 </blockquote>
@@ -94,17 +140,15 @@ docker images
 <blockquote>
 <p>all future references to docker commands will assume you are root or typing sudo first</p>
 </blockquote>
-<h2>docker nginx interactive container</h2>
+<h2 id="docker-nginx-interactive-container">docker nginx interactive container</h2>
 <div class="highlight"><pre><span></span>docker run --rm --publish 127.0.0.1:80:80 nginx
 </pre></div>
-
-
 <blockquote>
 <p>starts an ephemeral container that binds the container port 80 to the local Host port 80 (binding to 127.0.0.1 prevents any other access except from the Host) , note by not explicitly sharing port 443 it is not connected/available</p>
 </blockquote>
 <div class="highlight"><pre><span></span>docker ps -a
 CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS                 PORTS                           NAMES
-3fccf15a3c24        nginx               &quot;nginx -g &#39;daemon off&quot;   3 seconds ago       Up 2 seconds        127.0.0.1:80-&gt;80/tcp, 443/tcp   pensive_elion
+3fccf15a3c24        nginx               "nginx -g 'daemon off"   3 seconds ago       Up 2 seconds        127.0.0.1:80-&gt;80/tcp, 443/tcp   pensive_elion
 
 netstat -antp
 Proto Recv-Q Send-Q Local Address           Foreign Address         State       PID/Program name
@@ -113,58 +157,44 @@ tcp        0      0 127.0.0.1:80            0.0.0.0:*               LISTEN      
 
 curl 127.0.0.1:80
 </pre></div>
-
-
 <blockquote>
 <p><code>&lt;h1&gt;Welcome to nginx!&lt;/h1&gt;</code> is part of the default nginx home page, (success)</p>
 </blockquote>
 <p>You will notice the access logs are being output to the console (where the docker container is running).</p>
-<div class="highlight"><pre><span></span>192.168.1.100 - - [01/Jan/1970:01:00:59 +0000] &quot;GET / HTTP/1.1&quot; 200 612 &quot;-&quot; &quot;curl/7.38.0&quot; &quot;-&quot;
+<div class="highlight"><pre><span></span>192.168.1.100 - - [01/Jan/1970:01:00:59 +0000] "GET / HTTP/1.1" 200 612 "-" "curl/7.38.0" "-"
 </pre></div>
-
-
 <p><code>Control + C</code> will terminate the container</p>
-<h2>running nginx manually in the interactive docker container</h2>
+<h2 id="running-nginx-manually-in-the-interactive-docker-container">running nginx manually in the interactive docker container</h2>
 <div class="highlight"><pre><span></span>docker run --rm -i -t --publish 127.0.0.1:80:80 nginx /bin/bash
 </pre></div>
-
-
 <blockquote>
 <p>Starting as root inside the container </p>
 </blockquote>
 <div class="highlight"><pre><span></span><span class="n">root</span><span class="mi">@557</span><span class="nl">ac197e2c1</span><span class="p">:</span><span class="o">/</span><span class="err">#</span> <span class="n">which</span> <span class="n">nginx</span>
     <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">sbin</span><span class="o">/</span><span class="n">nginx</span>
 </pre></div>
-
-
-<h3>nginx version and modules</h3>
+<h3 id="nginx-version-and-modules">nginx version and modules</h3>
 <div class="highlight"><pre><span></span><span class="n">root</span><span class="mi">@557</span><span class="nl">ac197e2c1</span><span class="p">:</span><span class="o">/</span><span class="err">#</span> <span class="n">nginx</span> <span class="o">-</span><span class="n">V</span>
     <span class="n">nginx</span> <span class="nl">version</span><span class="p">:</span> <span class="n">nginx</span><span class="o">/</span><span class="mf">1.9.7</span>
     <span class="n">built</span> <span class="n">by</span> <span class="n">gcc</span> <span class="mf">4.9.2</span> <span class="p">(</span><span class="n">Debian</span> <span class="mf">4.9.2</span><span class="o">-</span><span class="mi">10</span><span class="p">)</span> 
     <span class="n">built</span> <span class="n">with</span> <span class="n">OpenSSL</span> <span class="mf">1.0.1</span><span class="n">k</span> <span class="mi">8</span> <span class="n">Jan</span> <span class="mi">2015</span>
     <span class="n">TLS</span> <span class="n">SNI</span> <span class="n">support</span> <span class="n">enabled</span>
-    <span class="n">configure</span> <span class="nl">arguments</span><span class="p">:</span> <span class="o">--</span><span class="n">prefix</span><span class="o">=/</span><span class="n">etc</span><span class="o">/</span><span class="n">nginx</span> <span class="o">--</span><span class="n">sbin</span><span class="o">-</span><span class="n">path</span><span class="o">=/</span><span class="n">usr</span><span class="o">/</span><span class="n">sbin</span><span class="o">/</span><span class="n">nginx</span> <span class="o">--</span><span class="n">conf</span><span class="o">-</span><span class="n">path</span><span class="o">=/</span><span class="n">etc</span><span class="o">/</span><span class="n">nginx</span><span class="o">/</span><span class="n">nginx</span><span class="p">.</span><span class="n">conf</span> <span class="o">--</span><span class="n">error</span><span class="o">-</span><span class="n">log</span><span class="o">-</span><span class="n">path</span><span class="o">=/</span><span class="n">var</span><span class="o">/</span><span class="n">log</span><span class="o">/</span><span class="n">nginx</span><span class="o">/</span><span class="n">error</span><span class="p">.</span><span class="n">log</span> <span class="o">--</span><span class="n">http</span><span class="o">-</span><span class="n">log</span><span class="o">-</span><span class="n">path</span><span class="o">=/</span><span class="n">var</span><span class="o">/</span><span class="n">log</span><span class="o">/</span><span class="n">nginx</span><span class="o">/</span><span class="n">access</span><span class="p">.</span><span class="n">log</span> <span class="o">--</span><span class="n">pid</span><span class="o">-</span><span class="n">path</span><span class="o">=/</span><span class="n">var</span><span class="o">/</span><span class="n">run</span><span class="o">/</span><span class="n">nginx</span><span class="p">.</span><span class="n">pid</span> <span class="o">--</span><span class="n">lock</span><span class="o">-</span><span class="n">path</span><span class="o">=/</span><span class="n">var</span><span class="o">/</span><span class="n">run</span><span class="o">/</span><span class="n">nginx</span><span class="p">.</span><span class="n">lock</span> <span class="o">--</span><span class="n">http</span><span class="o">-</span><span class="n">client</span><span class="o">-</span><span class="n">body</span><span class="o">-</span><span class="n">temp</span><span class="o">-</span><span class="n">path</span><span class="o">=/</span><span class="n">var</span><span class="o">/</span><span class="n">cache</span><span class="o">/</span><span class="n">nginx</span><span class="o">/</span><span class="n">client_temp</span> <span class="o">--</span><span class="n">http</span><span class="o">-</span><span class="n">proxy</span><span class="o">-</span><span class="n">temp</span><span class="o">-</span><span class="n">path</span><span class="o">=/</span><span class="n">var</span><span class="o">/</span><span class="n">cache</span><span class="o">/</span><span class="n">nginx</span><span class="o">/</span><span class="n">proxy_temp</span> <span class="o">--</span><span class="n">http</span><span class="o">-</span><span class="n">fastcgi</span><span class="o">-</span><span class="n">temp</span><span class="o">-</span><span class="n">path</span><span class="o">=/</span><span class="n">var</span><span class="o">/</span><span class="n">cache</span><span class="o">/</span><span class="n">nginx</span><span class="o">/</span><span class="n">fastcgi_temp</span> <span class="o">--</span><span class="n">http</span><span class="o">-</span><span class="n">uwsgi</span><span class="o">-</span><span class="n">temp</span><span class="o">-</span><span class="n">path</span><span class="o">=/</span><span class="n">var</span><span class="o">/</span><span class="n">cache</span><span class="o">/</span><span class="n">nginx</span><span class="o">/</span><span class="n">uwsgi_temp</span> <span class="o">--</span><span class="n">http</span><span class="o">-</span><span class="n">scgi</span><span class="o">-</span><span class="n">temp</span><span class="o">-</span><span class="n">path</span><span class="o">=/</span><span class="n">var</span><span class="o">/</span><span class="n">cache</span><span class="o">/</span><span class="n">nginx</span><span class="o">/</span><span class="n">scgi_temp</span> <span class="o">--</span><span class="n">user</span><span class="o">=</span><span class="n">nginx</span> <span class="o">--</span><span class="n">group</span><span class="o">=</span><span class="n">nginx</span> <span class="o">--</span><span class="n">with</span><span class="o">-</span><span class="n">http_ssl_module</span> <span class="o">--</span><span class="n">with</span><span class="o">-</span><span class="n">http_realip_module</span> <span class="o">--</span><span class="n">with</span><span class="o">-</span><span class="n">http_addition_module</span> <span class="o">--</span><span class="n">with</span><span class="o">-</span><span class="n">http_sub_module</span> <span class="o">--</span><span class="n">with</span><span class="o">-</span><span class="n">http_dav_module</span> <span class="o">--</span><span class="n">with</span><span class="o">-</span><span class="n">http_flv_module</span> <span class="o">--</span><span class="n">with</span><span class="o">-</span><span class="n">http_mp4_module</span> <span class="o">--</span><span class="n">with</span><span class="o">-</span><span class="n">http_gunzip_module</span> <span class="o">--</span><span class="n">with</span><span class="o">-</span><span class="n">http_gzip_static_module</span> <span class="o">--</span><span class="n">with</span><span class="o">-</span><span class="n">http_random_index_module</span> <span class="o">--</span><span class="n">with</span><span class="o">-</span><span class="n">http_secure_link_module</span> <span class="o">--</span><span class="n">with</span><span class="o">-</span><span class="n">http_stub_status_module</span> <span class="o">--</span><span class="n">with</span><span class="o">-</span><span class="n">http_auth_request_module</span> <span class="o">--</span><span class="n">with</span><span class="o">-</span><span class="n">threads</span> <span class="o">--</span><span class="n">with</span><span class="o">-</span><span class="n">stream</span> <span class="o">--</span><span class="n">with</span><span class="o">-</span><span class="n">stream_ssl_module</span> <span class="o">--</span><span class="n">with</span><span class="o">-</span><span class="n">mail</span> <span class="o">--</span><span class="n">with</span><span class="o">-</span><span class="n">mail_ssl_module</span> <span class="o">--</span><span class="n">with</span><span class="o">-</span><span class="n">file</span><span class="o">-</span><span class="n">aio</span> <span class="o">--</span><span class="n">with</span><span class="o">-</span><span class="n">http_v2_module</span> <span class="o">--</span><span class="n">with</span><span class="o">-</span><span class="n">cc</span><span class="o">-</span><span class="n">opt</span><span class="o">=</span><span class="err">&#39;</span><span class="o">-</span><span class="n">g</span> <span class="o">-</span><span class="n">O2</span> <span class="o">-</span><span class="n">fstack</span><span class="o">-</span><span class="n">protector</span><span class="o">-</span><span class="k">strong</span> <span class="o">-</span><span class="n">Wformat</span> <span class="o">-</span><span class="n">Werror</span><span class="o">=</span><span class="n">format</span><span class="o">-</span><span class="n">security</span> <span class="o">-</span><span class="n">Wp</span><span class="p">,</span><span class="o">-</span><span class="n">D_FORTIFY_SOURCE</span><span class="o">=</span><span class="mi">2</span><span class="err">&#39;</span> <span class="o">--</span><span class="n">with</span><span class="o">-</span><span class="n">ld</span><span class="o">-</span><span class="n">opt</span><span class="o">=</span><span class="err">&#39;</span><span class="o">-</span><span class="n">Wl</span><span class="p">,</span><span class="o">-</span><span class="n">z</span><span class="p">,</span><span class="n">relro</span> <span class="o">-</span><span class="n">Wl</span><span class="p">,</span><span class="o">--</span><span class="n">as</span><span class="o">-</span><span class="n">needed</span><span class="err">&#39;</span> <span class="o">--</span><span class="n">with</span><span class="o">-</span><span class="n">ipv6</span>
+    <span class="n">configure</span> <span class="nl">arguments</span><span class="p">:</span> <span class="o">--</span><span class="n">prefix</span><span class="o">=/</span><span class="n">etc</span><span class="o">/</span><span class="n">nginx</span> <span class="o">--</span><span class="n">sbin</span><span class="o">-</span><span class="n">path</span><span class="o">=/</span><span class="n">usr</span><span class="o">/</span><span class="n">sbin</span><span class="o">/</span><span class="n">nginx</span> <span class="o">--</span><span class="n">conf</span><span class="o">-</span><span class="n">path</span><span class="o">=/</span><span class="n">etc</span><span class="o">/</span><span class="n">nginx</span><span class="o">/</span><span class="n">nginx</span><span class="p">.</span><span class="n">conf</span> <span class="o">--</span><span class="n">error</span><span class="o">-</span><span class="n">log</span><span class="o">-</span><span class="n">path</span><span class="o">=/</span><span class="n">var</span><span class="o">/</span><span class="n">log</span><span class="o">/</span><span class="n">nginx</span><span class="o">/</span><span class="n">error</span><span class="p">.</span><span class="n">log</span> <span class="o">--</span><span class="n">http</span><span class="o">-</span><span class="n">log</span><span class="o">-</span><span class="n">path</span><span class="o">=/</span><span class="n">var</span><span class="o">/</span><span class="n">log</span><span class="o">/</span><span class="n">nginx</span><span class="o">/</span><span class="n">access</span><span class="p">.</span><span class="n">log</span> <span class="o">--</span><span class="n">pid</span><span class="o">-</span><span class="n">path</span><span class="o">=/</span><span class="n">var</span><span class="o">/</span><span class="n">run</span><span class="o">/</span><span class="n">nginx</span><span class="p">.</span><span class="n">pid</span> <span class="o">--</span><span class="n">lock</span><span class="o">-</span><span class="n">path</span><span class="o">=/</span><span class="n">var</span><span class="o">/</span><span class="n">run</span><span class="o">/</span><span class="n">nginx</span><span class="p">.</span><span class="n">lock</span> <span class="o">--</span><span class="n">http</span><span class="o">-</span><span class="n">client</span><span class="o">-</span><span class="n">body</span><span class="o">-</span><span class="n">temp</span><span class="o">-</span><span class="n">path</span><span class="o">=/</span><span class="n">var</span><span class="o">/</span><span class="n">cache</span><span class="o">/</span><span class="n">nginx</span><span class="o">/</span><span class="n">client_temp</span> <span class="o">--</span><span class="n">http</span><span class="o">-</span><span class="n">proxy</span><span class="o">-</span><span class="n">temp</span><span class="o">-</span><span class="n">path</span><span class="o">=/</span><span class="n">var</span><span class="o">/</span><span class="n">cache</span><span class="o">/</span><span class="n">nginx</span><span class="o">/</span><span class="n">proxy_temp</span> <span class="o">--</span><span class="n">http</span><span class="o">-</span><span class="n">fastcgi</span><span class="o">-</span><span class="n">temp</span><span class="o">-</span><span class="n">path</span><span class="o">=/</span><span class="n">var</span><span class="o">/</span><span class="n">cache</span><span class="o">/</span><span class="n">nginx</span><span class="o">/</span><span class="n">fastcgi_temp</span> <span class="o">--</span><span class="n">http</span><span class="o">-</span><span class="n">uwsgi</span><span class="o">-</span><span class="n">temp</span><span class="o">-</span><span class="n">path</span><span class="o">=/</span><span class="n">var</span><span class="o">/</span><span class="n">cache</span><span class="o">/</span><span class="n">nginx</span><span class="o">/</span><span class="n">uwsgi_temp</span> <span class="o">--</span><span class="n">http</span><span class="o">-</span><span class="n">scgi</span><span class="o">-</span><span class="n">temp</span><span class="o">-</span><span class="n">path</span><span class="o">=/</span><span class="n">var</span><span class="o">/</span><span class="n">cache</span><span class="o">/</span><span class="n">nginx</span><span class="o">/</span><span class="n">scgi_temp</span> <span class="o">--</span><span class="n">user</span><span class="o">=</span><span class="n">nginx</span> <span class="o">--</span><span class="n">group</span><span class="o">=</span><span class="n">nginx</span> <span class="o">--</span><span class="n">with</span><span class="o">-</span><span class="n">http_ssl_module</span> <span class="o">--</span><span class="n">with</span><span class="o">-</span><span class="n">http_realip_module</span> <span class="o">--</span><span class="n">with</span><span class="o">-</span><span class="n">http_addition_module</span> <span class="o">--</span><span class="n">with</span><span class="o">-</span><span class="n">http_sub_module</span> <span class="o">--</span><span class="n">with</span><span class="o">-</span><span class="n">http_dav_module</span> <span class="o">--</span><span class="n">with</span><span class="o">-</span><span class="n">http_flv_module</span> <span class="o">--</span><span class="n">with</span><span class="o">-</span><span class="n">http_mp4_module</span> <span class="o">--</span><span class="n">with</span><span class="o">-</span><span class="n">http_gunzip_module</span> <span class="o">--</span><span class="n">with</span><span class="o">-</span><span class="n">http_gzip_static_module</span> <span class="o">--</span><span class="n">with</span><span class="o">-</span><span class="n">http_random_index_module</span> <span class="o">--</span><span class="n">with</span><span class="o">-</span><span class="n">http_secure_link_module</span> <span class="o">--</span><span class="n">with</span><span class="o">-</span><span class="n">http_stub_status_module</span> <span class="o">--</span><span class="n">with</span><span class="o">-</span><span class="n">http_auth_request_module</span> <span class="o">--</span><span class="n">with</span><span class="o">-</span><span class="n">threads</span> <span class="o">--</span><span class="n">with</span><span class="o">-</span><span class="n">stream</span> <span class="o">--</span><span class="n">with</span><span class="o">-</span><span class="n">stream_ssl_module</span> <span class="o">--</span><span class="n">with</span><span class="o">-</span><span class="n">mail</span> <span class="o">--</span><span class="n">with</span><span class="o">-</span><span class="n">mail_ssl_module</span> <span class="o">--</span><span class="n">with</span><span class="o">-</span><span class="n">file</span><span class="o">-</span><span class="n">aio</span> <span class="o">--</span><span class="n">with</span><span class="o">-</span><span class="n">http_v2_module</span> <span class="o">--</span><span class="n">with</span><span class="o">-</span><span class="n">cc</span><span class="o">-</span><span class="n">opt</span><span class="o">=</span><span class="err">'</span><span class="o">-</span><span class="n">g</span> <span class="o">-</span><span class="n">O2</span> <span class="o">-</span><span class="n">fstack</span><span class="o">-</span><span class="n">protector</span><span class="o">-</span><span class="k">strong</span> <span class="o">-</span><span class="n">Wformat</span> <span class="o">-</span><span class="n">Werror</span><span class="o">=</span><span class="n">format</span><span class="o">-</span><span class="n">security</span> <span class="o">-</span><span class="n">Wp</span><span class="p">,</span><span class="o">-</span><span class="n">D_FORTIFY_SOURCE</span><span class="o">=</span><span class="mi">2</span><span class="err">'</span> <span class="o">--</span><span class="n">with</span><span class="o">-</span><span class="n">ld</span><span class="o">-</span><span class="n">opt</span><span class="o">=</span><span class="err">'</span><span class="o">-</span><span class="n">Wl</span><span class="p">,</span><span class="o">-</span><span class="n">z</span><span class="p">,</span><span class="n">relro</span> <span class="o">-</span><span class="n">Wl</span><span class="p">,</span><span class="o">--</span><span class="n">as</span><span class="o">-</span><span class="n">needed</span><span class="err">'</span> <span class="o">--</span><span class="n">with</span><span class="o">-</span><span class="n">ipv6</span>
 </pre></div>
-
-
-<h3>Test your config file</h3>
-<div class="highlight"><pre><span></span>nginx -t -c /etc/nginx/nginx.conf -g &quot;daemon off;&quot;
+<h3 id="test-your-config-file">Test your config file</h3>
+<div class="highlight"><pre><span></span>nginx -t -c /etc/nginx/nginx.conf -g "daemon off;"
 </pre></div>
-
-
 <blockquote>
 <p>nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
 nginx: configuration file /etc/nginx/nginx.conf test is successful</p>
 </blockquote>
-<h3>run nginx directly</h3>
+<h3 id="run-nginx-directly">run nginx directly</h3>
 <div class="highlight"><pre><span></span>/usr/sbin/nginx -c /etc/nginx/nginx.conf
 </pre></div>
-
-
 <blockquote>
 <p>-g "pid /var/run/nginx.pid; worker_processes 2;" from <a href="https://www.nginx.com/resources/wiki/start/topics/tutorials/commandline/">https://www.nginx.com/resources/wiki/start/topics/tutorials/commandline/</a></p>
 </blockquote>
-<h2>nginx.conf</h2>
+<h2 id="nginxconf">nginx.conf</h2>
 <p>While there are quite a few ways to configure nginx one choice to make with Docker is to either</p>
 <ol>
 <li>
@@ -183,13 +213,11 @@ nginx: configuration file /etc/nginx/nginx.conf test is successful</p>
 <li><a href="https://www.nginx.com/resources/wiki/start/topics/examples/full/">https://www.nginx.com/resources/wiki/start/topics/examples/full/</a></li>
 </ul>
 <p>Quickly testing the nginx configuration file using an ephemeral docker container:</p>
-<div class="highlight"><pre><span></span>docker run --rm --publish 127.0.0.1:80:80 nginx /bin/bash -c <span class="s2">&quot;nginx -t -c /etc/nginx/nginx.conf&quot;</span>
+<div class="highlight"><pre><span></span>docker run --rm --publish 127.0.0.1:80:80 nginx /bin/bash -c <span class="s2">"nginx -t -c /etc/nginx/nginx.conf"</span>
     nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
     nginx: configuration file /etc/nginx/nginx.conf <span class="nb">test</span> is successful
 </pre></div>
-
-
-<h2>Build your own nginx Dockerfile</h2>
+<h2 id="build-your-own-nginx-dockerfile">Build your own nginx Dockerfile</h2>
 <p>If you require 3rd party modules then you will have to build nginx from source, e.g.
 <a href="https://github.com/openresty/headers-more-nginx-module#installation">https://github.com/openresty/headers-more-nginx-module#installation</a></p>
 <p>That being the case you'll probably want to have a build process with 2 Docker files:</p>
@@ -197,20 +225,18 @@ nginx: configuration file /etc/nginx/nginx.conf test is successful</p>
 <li>the first Dockerfile will contain build-essentials, gcc, make, etc. so that you can build the binary from source (with any 3rd party modules) <a href="http://nginx.org/en/docs/configure.html">http://nginx.org/en/docs/configure.html</a></li>
 <li>The second docker image would be your "production container" where you copy in the custom nginx binary, install the dependencies (i.e. openssl), and setup the default config.</li>
 </ol>
-<h3>Converting an existing nginx 3rd party module to a dynamic module</h3>
+<h3 id="converting-an-existing-nginx-3rd-party-module-to-a-dynamic-module">Converting an existing nginx 3rd party module to a dynamic module</h3>
 <p>Since NGINX 1.9.11 supports dynamic modules and attempts to maintain API compatibility then it is possible to sometimes convert a module into a dynamic module (i.e. build the shared library object)</p>
 <div class="highlight"><pre><span></span>./configure --add-dynamic-module=/opt/source/ngx_my_module/
 make -f objs/Makefile modules
 </pre></div>
-
-
 <blockquote>
 <p>Look for .so files in the objs directory after compilation or the modules subdirectory during installation</p>
 </blockquote>
 <p><a href="https://www.nginx.com/resources/wiki/extending/converting/">https://www.nginx.com/resources/wiki/extending/converting/</a></p>
-<h2>Configuring nginx</h2>
+<h2 id="configuring-nginx">Configuring nginx</h2>
 <p>There are entire books about how to configure nginx so I will just jot down some basics for myself.</p>
-<h3>/etc/nginx/nginx.conf</h3>
+<h3 id="etcnginxnginxconf">/etc/nginx/nginx.conf</h3>
 <div class="highlight"><pre><span></span>user nginx;
 worker_processes 4;
 pid /run/nginx.pid;
@@ -228,8 +254,6 @@ http {
     # include /etc/nginx/conf.d/*.conf;
 }
 </pre></div>
-
-
 <blockquote>
 <ul>
 <li>Run the service as the www-data user and define 4 worker processes</li>
@@ -241,29 +265,21 @@ http {
 </blockquote>
 <div class="highlight"><pre><span></span>sudo docker run -it --rm --publish 0.0.0.0:80:80 --volume /tmp/nginx.conf:/etc/nginx/nginx.conf:ro  nginx:alpine /bin/sh
 </pre></div>
-
-
 <blockquote>
 <p>debug the image interactively by overriding the default CMD with a shell (remember that Alpine is limited so <code>apk update</code> and <code>apk add SOMENAME</code></p>
 </blockquote>
-<div class="highlight"><pre><span></span>sudo docker run --rm --publish 0.0.0.0:80:80 --volume /tmp/nginx.conf:/etc/nginx/nginx.conf:ro  nginx:alpine /bin/sh -c &quot;nginx -t -c /etc/nginx/nginx.conf&quot;
+<div class="highlight"><pre><span></span>sudo docker run --rm --publish 0.0.0.0:80:80 --volume /tmp/nginx.conf:/etc/nginx/nginx.conf:ro  nginx:alpine /bin/sh -c "nginx -t -c /etc/nginx/nginx.conf"
 </pre></div>
-
-
 <blockquote>
 <p>alternative method to just test your configuration file</p>
 </blockquote>
 <div class="highlight"><pre><span></span>sudo docker run --rm --publish 0.0.0.0:80:80 --volume /tmp/nginx.conf:/etc/nginx/nginx.conf:ro --volume /tmp/www:/var/www:ro  nginx:alpine
 </pre></div>
-
-
 <blockquote>
 <p>assumes you have a config file and some index file defined</p>
 </blockquote>
-<div class="highlight"><pre><span></span>echo &quot;<span class="nt">&lt;html&gt;&lt;body&gt;</span>hi<span class="nt">&lt;/body&gt;&lt;/html&gt;</span>&quot; &gt; /var/www/index.html
+<div class="highlight"><pre><span></span>echo "<span class="nt">&lt;html&gt;&lt;body&gt;</span>hi<span class="nt">&lt;/body&gt;&lt;/html&gt;</span>" &gt; /var/www/index.html
 </pre></div>
-
-
 <p>That's it, now you have nginx serving static files! (curl localhost OR use a browser and visit localhost or http://hostfqdn)</p>
 <blockquote>
 <p>of course /tmp is an insecure location so please store production nginx configuration files and web content from a secure directory in the docker host filesystem</p>
@@ -272,9 +288,9 @@ http {
 <li><a href="http://nginx.org/en/docs/beginners_guide.html">http://nginx.org/en/docs/beginners_guide.html</a></li>
 <li><a href="http://nginx.org/en/docs/ngx_core_module.html#worker_processes">http://nginx.org/en/docs/ngx_core_module.html#worker_processes</a></li>
 </ul>
-<h3>nginx with ssl</h3>
+<h3 id="nginx-with-ssl">nginx with ssl</h3>
 <p>It is hard to imagine running a production (or even test or dev server that should mirror production) without SSL since all traffic could be intercepted or hijacked.  It takes a little more work but clearly it is an important step in running a service that others will use.</p>
-<h4>/etc/nginx/nginx.conf</h4>
+<h4 id="etcnginxnginxconf_1">/etc/nginx/nginx.conf</h4>
 <div class="highlight"><pre><span></span>user nobody;
 worker_processes 4;
 pid /run/nginx.pid;
@@ -296,31 +312,25 @@ http {
     }
 }
 </pre></div>
-
-
-<h4>openssl self signed certificates</h4>
-<div class="highlight"><pre><span></span>openssl req -subj &#39;/CN=example.com/O=My Company Name LTD./C=US&#39; -new -newkey rsa:2048 -days 365 -nodes -x509 -keyout /tmp/server.key -out /tmp/server.crt
+<h4 id="openssl-self-signed-certificates">openssl self signed certificates</h4>
+<div class="highlight"><pre><span></span>openssl req -subj '/CN=example.com/O=My Company Name LTD./C=US' -new -newkey rsa:2048 -days 365 -nodes -x509 -keyout /tmp/server.key -out /tmp/server.crt
 
 mkdir -p /tmp/www
 
-echo &quot;<span class="nt">&lt;html&gt;&lt;body&gt;</span>hi<span class="nt">&lt;/body&gt;&lt;/html&gt;</span>&quot; &gt; /tmp/www/index.html
+echo "<span class="nt">&lt;html&gt;&lt;body&gt;</span>hi<span class="nt">&lt;/body&gt;&lt;/html&gt;</span>" &gt; /tmp/www/index.html
 </pre></div>
-
-
-<h4>dockerized nginx with ssl</h4>
+<h4 id="dockerized-nginx-with-ssl">dockerized nginx with ssl</h4>
 <div class="highlight"><pre><span></span>sudo docker run --rm --publish 0.0.0.0:443:443 --volume /tmp/nginx.conf:/etc/nginx/nginx.conf:ro --volume /tmp/server.crt:/etc/nginx/server.crt --volume /tmp/server.key:/etc/nginx/server.key --volume /tmp/www:/var/www:ro  nginx:alpine
 
 curl --insecure https://localhost
 firefox https://localhost
 </pre></div>
-
-
 <ul>
 <li><a href="http://nginx.org/en/docs/http/configuring_https_servers.html">http://nginx.org/en/docs/http/configuring_https_servers.html</a></li>
 </ul>
-<h3>nginx with ssl and http/2</h3>
+<h3 id="nginx-with-ssl-and-http2">nginx with ssl and http/2</h3>
 <p><a href="https://en.wikipedia.org/wiki/HTTP/2">https://en.wikipedia.org/wiki/HTTP/2</a> is a new and more capable and performant standard for the venerable HTTP protocol.  It has widespread vendor support so you can use most modern servers (e.g. nginx) and most modern browsers (e.g. chrome) and get the benefits immediately. (With of course all sorts of fallbacks for legacy clients)</p>
-<h4>/etc/nginx/nginx.conf</h4>
+<h4 id="etcnginxnginxconf_2">/etc/nginx/nginx.conf</h4>
 <div class="highlight"><pre><span></span><span class="nt">user</span> <span class="nt">nobody</span><span class="o">;</span>
 <span class="nt">worker_processes</span> <span class="nt">4</span><span class="o">;</span>
 <span class="nt">pid</span> <span class="o">/</span><span class="nt">run</span><span class="o">/</span><span class="nt">nginx</span><span class="nc">.pid</span><span class="o">;</span>
@@ -348,22 +358,18 @@ firefox https://localhost
     <span class="err">}</span>
 <span class="err">}</span>
 </pre></div>
-
-
 <blockquote>
 <p>Assuming the previous nginx with ssl steps of creating a certificate and content, be aware that <strong>browsers permanently CACHE the 301 redirect</strong> so use Private Browsing mode otherwise you will never see a different result for localhost =[</p>
 </blockquote>
 <div class="highlight"><pre><span></span>sudo docker run --rm --publish 0.0.0.0:80:80 --publish 0.0.0.0:443:443 --volume /tmp/nginx.conf:/etc/nginx/nginx.conf:ro --volume /tmp/server.crt:/etc/nginx/server.crt --volume /tmp/server.key:/etc/nginx/server.key --volume /tmp/www:/var/www:ro  nginx:alpine
 </pre></div>
-
-
-<h4>Verifying HTTP/2</h4>
+<h4 id="verifying-http2">Verifying HTTP/2</h4>
 <p><strong>curl</strong></p>
 <div class="highlight"><pre><span></span>curl localhost
 
 <span class="nt">&lt;html&gt;</span>
 <span class="nt">&lt;head&gt;&lt;title&gt;</span>301 Moved Permanently<span class="nt">&lt;/title&gt;&lt;/head&gt;</span>
-<span class="nt">&lt;body</span> <span class="na">bgcolor=</span><span class="s">&quot;white&quot;</span><span class="nt">&gt;</span>
+<span class="nt">&lt;body</span> <span class="na">bgcolor=</span><span class="s">"white"</span><span class="nt">&gt;</span>
 <span class="nt">&lt;center&gt;&lt;h1&gt;</span>301 Moved Permanently<span class="nt">&lt;/h1&gt;&lt;/center&gt;</span>
 <span class="nt">&lt;hr&gt;&lt;center&gt;</span>nginx/1.9.12<span class="nt">&lt;/center&gt;</span>
 <span class="nt">&lt;/body&gt;</span>
@@ -374,16 +380,12 @@ curl --insecure --location localhost
 
 <span class="nt">&lt;html&gt;&lt;body&gt;</span>hi<span class="nt">&lt;/body&gt;&lt;/html&gt;</span>
 </pre></div>
-
-
 <p><strong>openssl s_client</strong></p>
-<div class="highlight"><pre><span></span>openssl s_client -connect localhost:443 -nextprotoneg &#39;&#39;
+<div class="highlight"><pre><span></span>openssl s_client -connect localhost:443 -nextprotoneg ''
 
 CONNECTED(00000003)
 Protocols advertised by server: h2, http/1.1
 </pre></div>
-
-
 <p><strong>chrome browser</strong></p>
 <p>Browse directly to https://localhost/ with the chrome extension installed: <a href="https://chrome.google.com/webstore/detail/http2-and-spdy-indicator/mpbpobfflnpcgagjijhmgnchggcjblin/related?hl=en">https://chrome.google.com/webstore/detail/http2-and-spdy-indicator/mpbpobfflnpcgagjijhmgnchggcjblin/related?hl=en</a></p>
 <p>The blue lightning symbol on the far far right (next to the "hamburger") indicates HTTP/2 is working.</p>
@@ -406,8 +408,8 @@ Protocols advertised by server: h2, http/1.1
 <li><a href="https://blog.cloudflare.com/tools-for-debugging-testing-and-using-http-2/">https://blog.cloudflare.com/tools-for-debugging-testing-and-using-http-2/</a></li>
 <li><a href="http://tech.finn.no/2015/09/25/setup-nginx-with-http2-for-local-development/">http://tech.finn.no/2015/09/25/setup-nginx-with-http2-for-local-development/</a></li>
 </ol>
-<h2>nginx with php-fpm</h2>
-<h3>Investigate php-fpm in Docker</h3>
+<h2 id="nginx-with-php-fpm">nginx with php-fpm</h2>
+<h3 id="investigate-php-fpm-in-docker">Investigate php-fpm in Docker</h3>
 <p>This hack is fun but proves unnecessary when using Docker Compose later...</p>
 <p>:::bash
     docker pull php:5.5-fpm-alpine
@@ -428,7 +430,7 @@ Protocols advertised by server: h2, http/1.1
 <li><a href="https://hub.docker.com/_/php/">https://hub.docker.com/_/php/</a></li>
 <li><a href="http://php.net/manual/en/install.fpm.configuration.php">http://php.net/manual/en/install.fpm.configuration.php</a></li>
 </ul>
-<h3>Configure nginx</h3>
+<h3 id="configure-nginx">Configure nginx</h3>
 <p><code>vi /etc/nginx/nginx.conf</code></p>
 <div class="highlight"><pre><span></span><span class="nt">worker_processes</span> <span class="nt">4</span><span class="o">;</span>
 <span class="nt">pid</span> <span class="o">/</span><span class="nt">run</span><span class="o">/</span><span class="nt">nginx</span><span class="nc">.pid</span><span class="o">;</span>
@@ -453,7 +455,7 @@ Protocols advertised by server: h2, http/1.1
 
             <span class="n">fastcgi_param</span> <span class="n">SCRIPT_FILENAME</span> <span class="err">$</span><span class="n">document_root</span><span class="err">$</span><span class="n">fastcgi_script_name</span><span class="p">;</span>
             <span class="err">#</span> <span class="n">https</span><span class="o">://</span><span class="n">web</span><span class="o">.</span><span class="n">nvd</span><span class="o">.</span><span class="n">nist</span><span class="o">.</span><span class="n">gov</span><span class="o">/</span><span class="n">view</span><span class="o">/</span><span class="n">vuln</span><span class="o">/</span><span class="n">detail</span><span class="o">?</span><span class="n">vulnId</span><span class="o">=</span><span class="n">CVE</span><span class="m">-2016-5385</span>
-            <span class="n">fastcgi_param</span> <span class="n">HTTP_PROXY</span> <span class="s2">&quot;&quot;</span><span class="p">;</span>
+            <span class="n">fastcgi_param</span> <span class="n">HTTP_PROXY</span> <span class="s2">""</span><span class="p">;</span>
 
             <span class="n">include</span> <span class="n">fastcgi_params</span><span class="p">;</span>
         <span class="p">}</span>
@@ -461,47 +463,37 @@ Protocols advertised by server: h2, http/1.1
 
 <span class="err">}</span>
 </pre></div>
-
-
 <blockquote>
 <p>a basic nginx config that forwards .php requests to fpm on port 9000</p>
 </blockquote>
 <div class="highlight"><pre><span></span>docker run -it --rm --publish 0.0.0.0:80:80 --volume /tmp/nginx.conf:/etc/nginx/nginx.conf:ro --volume /tmp/www/html:/var/www/html:ro  nginx:alpine /bin/sh
 route -n
 </pre></div>
-
-
 <blockquote>
 <p>This manual command proves unnecessary with Docker Compose but can be useful to debug (i.e. run the php-fpm container first, then run this one since it depends on fpm)</p>
 </blockquote>
-<h4>Some Test Content</h4>
+<h4 id="some-test-content">Some Test Content</h4>
 <p>Create the following files to test the various cases...</p>
 <p><code>vi /tmp/www/html/foo.html</code></p>
 <div class="highlight"><pre><span></span><span class="nt">&lt;html&gt;&lt;body&gt;</span>hi<span class="nt">&lt;/body&gt;&lt;/html&gt;</span>
 </pre></div>
-
-
 <p><code>vi /tmp/www/html/index.php</code></p>
 <div class="highlight"><pre><span></span><span class="cp">&lt;?php</span>
-    <span class="k">print</span> <span class="s2">&quot;&lt;html&gt;&lt;body&gt;hello&lt;/body&gt;&lt;/html&gt;&quot;</span><span class="p">;</span>
+    <span class="k">print</span> <span class="s2">"&lt;html&gt;&lt;body&gt;hello&lt;/body&gt;&lt;/html&gt;"</span><span class="p">;</span>
 <span class="cp">?&gt;</span><span class="x"></span>
 </pre></div>
-
-
 <p><code>vi /tmp/www/html/bar.php</code></p>
 <div class="highlight"><pre><span></span><span class="cp">&lt;?php</span>
-    <span class="k">print</span> <span class="s2">&quot;bar&quot;</span><span class="p">;</span>
+    <span class="k">print</span> <span class="s2">"bar"</span><span class="p">;</span>
 <span class="cp">?&gt;</span><span class="x"></span>
 </pre></div>
-
-
-<h3>docker-compose.yml</h3>
+<h3 id="docker-composeyml">docker-compose.yml</h3>
 <div class="highlight"><pre><span></span># https://docs.docker.com/compose/compose-file/
 
 nginx:
   image: nginx:alpine
   ports:
-    - &quot;80:80&quot;
+    - "80:80"
   volumes:
     - /tmp/nginx.conf:/etc/nginx/nginx.conf:ro
     - /tmp/www/html:/var/www/html
@@ -511,24 +503,20 @@ nginx:
 fpm:
   image: php:5.5-fpm-alpine
   ports:
-    - &quot;9000:9000&quot;
+    - "9000:9000"
   volumes:
     - /tmp/www/html:/var/www/html
 
 # http://stackoverflow.com/questions/29905953/how-to-correctly-link-php-fpm-and-nginx-docker-containers-together
 # http://stackoverflow.com/questions/35388590/issue-with-docker-compose-container-command-not-found
 </pre></div>
-
-
-<h3>docker-compose up to start nginx and php-fpm</h3>
+<h3 id="docker-compose-up-to-start-nginx-and-php-fpm">docker-compose up to start nginx and php-fpm</h3>
 <div class="highlight"><pre><span></span>docker-compose up
 docker-compose rm -f
 curl localhost:80/foo.html
 curl localhost:80/bar.php
 curl localhost:80/index.php
 </pre></div>
-
-
 <p>Another tiny step forward in tying together a lot of moving pieces =]</p>
             <aside>
             <hr/>
@@ -549,7 +537,7 @@ curl localhost:80/index.php
             <time pubdate="pubdate" datetime="2015-06-13T08:00:00-07:00">Jun 13, 2015</time>
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#virtualization-ref">virtualization</a> 
-            <h4>~1740 words</h4>
+            <h4>~1739 words</h4>
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article"> 
                 <li><a href="/tags.html#docker-ref">docker

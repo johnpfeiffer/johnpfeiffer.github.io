@@ -70,63 +70,78 @@
 </div>
 
 <div class="row-fluid">
-        <div class="span8 offset2 article-content">
+    <div class="span2 table-of-content">
+        <nav>
+        <h4>Contents</h4>
+        <div class="toc">
+<ul>
+<li><a href="#install-vagrant-and-the-vagrant-aws-plugin">Install Vagrant and the Vagrant AWS plugin</a></li>
+<li><a href="#quickstart-vagrant-and-virtualbox-with-ubuntu-trusty-1404">Quickstart Vagrant and VirtualBox with Ubuntu Trusty 14.04</a></li>
+<li><a href="#vagrant-and-aws-ec2-with-ubuntu-precise-1204">Vagrant and AWS EC2 with Ubuntu Precise 12.04</a></li>
+<li><a href="#vagrant-provisioning">Vagrant provisioning</a></li>
+<li><a href="#advanced-vagrantfile-example">Advanced Vagrantfile example</a></li>
+<li><a href="#vagrant-and-ec2-vpc-ami-that-does-not-haveallow-sudo">Vagrant and EC2 VPC (AMI that does not have/allow sudo)</a></li>
+<li><a href="#virtualbox">VirtualBox</a><ul>
+<li><a href="#vagrantfile">Vagrantfile</a></li>
+</ul>
+</li>
+<li><a href="#more-info">more info</a></li>
+<li><a href="#troubleshooting">Troubleshooting</a></li>
+</ul>
+</div>
+        </nav>
+    </div>
+    <div class="span8 article-content">
 
-            <p>[TOC]</p>
+            
 <p>Vagrant is an infrastructure tool that simplifies deployment, such as virtual machines or in this case Amazon EC2 instances.</p>
-<h3>Install Vagrant and the Vagrant AWS plugin</h3>
+<h3 id="install-vagrant-and-the-vagrant-aws-plugin">Install Vagrant and the Vagrant AWS plugin</h3>
 <p>Download and install vagrant: <strong><a href="https://www.vagrantup.com/downloads">https://www.vagrantup.com/downloads</a></strong></p>
 <div class="highlight"><pre><span></span>wget https://releases.hashicorp.com/vagrant/1.7.4/vagrant_1.7.4_x86_64.deb
 dpkg -i vagrant_1.7.4_x86_64.deb
 vagrant --version
 vagrant plugin install vagrant-aws
 </pre></div>
-
-
-<h3>Quickstart Vagrant and VirtualBox with Ubuntu Trusty 14.04</h3>
+<h3 id="quickstart-vagrant-and-virtualbox-with-ubuntu-trusty-1404">Quickstart Vagrant and VirtualBox with Ubuntu Trusty 14.04</h3>
 <p>The simple local VirtualBox method was:</p>
 <div class="highlight"><pre><span></span>virtualbox --help
 vagrant init ubuntu/trusty64; vagrant up --provider virtualbox
 
-    ==&gt; default: Box &#39;ubuntu/trusty64&#39; could not be found. Attempting to find and install...
+    ==&gt; default: Box 'ubuntu/trusty64' could not be found. Attempting to find and install...
     default: Box Provider: virtualbox
     default: Box Version: &gt;= 0
-    ==&gt; default: Loading metadata for box &#39;ubuntu/trusty64&#39;
+    ==&gt; default: Loading metadata for box 'ubuntu/trusty64'
     default: URL: https://atlas.hashicorp.com/ubuntu/trusty64
 </pre></div>
-
-
 <blockquote>
 <p>this will do all the extra work for you of finding and downloading the "box" and starting it in VirtualBox</p>
 </blockquote>
-<h3>Vagrant and AWS EC2 with Ubuntu Precise 12.04</h3>
+<h3 id="vagrant-and-aws-ec2-with-ubuntu-precise-1204">Vagrant and AWS EC2 with Ubuntu Precise 12.04</h3>
 <p><code>vagrant box add dummy https://github.com/mitchellh/vagrant-aws/raw/master/dummy.box</code></p>
 <blockquote>
 <p><a href="https://atlas.hashicorp.com/boxes/search">https://atlas.hashicorp.com/boxes/search</a></p>
 </blockquote>
 <p><code>vagrant box list</code></p>
 <p><code>vi Vagrantfile</code></p>
-<div class="highlight"><pre><span></span>Vagrant.configure(&quot;2&quot;) do |config|
-    config.vm.box = &quot;dummy&quot;
+<div class="highlight"><pre><span></span>Vagrant.configure("2") do |config|
+    config.vm.box = "dummy"
     config.vm.provider :aws do |aws, override|
-        aws.access_key_id = &quot;YOURACCESSKEY&quot;
-        aws.secret_access_key = &quot;YOURSECRETKEY&quot;
-        aws.keypair_name = &quot;YOURKEYPAIRNAME&quot;
-        aws.ami = &quot;ami-7747d01e&quot;
+        aws.access_key_id = "YOURACCESSKEY"
+        aws.secret_access_key = "YOURSECRETKEY"
+        aws.keypair_name = "YOURKEYPAIRNAME"
+        aws.ami = "ami-7747d01e"
         aws.instance_ready_timeout = 300
-        aws.instance_type = &quot;m4.large&quot;
+        aws.instance_type = "m4.large"
         aws.tags = {
-            &quot;Name&quot; =&gt; &quot;MyCloudInstance&quot;,
+            "Name" =&gt; "MyCloudInstance",
         }
-        override.vm.box = &quot;dummy&quot;
-        override.vm.box_url = &quot;https://github.com/mitchellh/vagrant-aws/raw/master/dummy.box&quot;
-        override.ssh.username = &quot;ubuntu&quot;
-        override.ssh.private_key_path = &quot;./YOURKEYPAIRNAME.pem&quot;
+        override.vm.box = "dummy"
+        override.vm.box_url = "https://github.com/mitchellh/vagrant-aws/raw/master/dummy.box"
+        override.ssh.username = "ubuntu"
+        override.ssh.private_key_path = "./YOURKEYPAIRNAME.pem"
     end
 end
 </pre></div>
-
-
 <blockquote>
 <p>ubuntu/images/ubuntu-precise-12.04-amd64-server-20130204 - ami-7747d01e , no ebs storage - just instance storage , <a href="https://cloud-images.ubuntu.com/releases/">https://cloud-images.ubuntu.com/releases/</a> and <a href="https://atlas.hashicorp.com/boxes/search">https://atlas.hashicorp.com/boxes/search</a></p>
 <p>vagrant will by default upload all folders and files in your "project" folder where the Vagrantfile is located</p>
@@ -136,11 +151,11 @@ end
 <blockquote>
 <p>--debug is interactive mode and requires pressing enter between every step</p>
 </blockquote>
-<div class="highlight"><pre><span></span>Bringing machine &#39;default&#39; up with &#39;aws&#39; provider...
+<div class="highlight"><pre><span></span>Bringing machine 'default' up with 'aws' provider...
 ==&gt; default: HandleBoxUrl middleware is deprecated. Use HandleBox instead.
 ==&gt; default: This is a bug with the provider. Please contact the creator
 ==&gt; default: of the provider you use to fix this.
-==&gt; default: Warning! The AWS provider doesn&#39;t support any of the Vagrant
+==&gt; default: Warning! The AWS provider doesn't support any of the Vagrant
 ==&gt; default: high-level network configurations (`config.vm.network`). They
 ==&gt; default: will be silently ignored.
 ==&gt; default: Launching an instance with the following settings...
@@ -153,13 +168,11 @@ end
 ==&gt; default:  -- Monitoring: false
 ==&gt; default:  -- EBS optimized: false
 ==&gt; default:  -- Assigning a public IP address in a VPC: false
-==&gt; default: Waiting for instance to become &quot;ready&quot;...
+==&gt; default: Waiting for instance to become "ready"...
 ==&gt; default: Waiting for SSH to become available...
 ==&gt; default: Machine is booted and ready for use!
 ==&gt; default: Rsyncing folder: /home/ubuntu/myproject/ =&gt; /vagrant
 </pre></div>
-
-
 <p><code>vagrant ssh</code></p>
 <blockquote>
 <p>the default-easiest-interface way of getting SSH access into the machine</p>
@@ -168,8 +181,6 @@ end
 vagrant ssh-config &gt; vagrant-ssh
 ssh -F vagrant-ssh default
 </pre></div>
-
-
 <blockquote>
 <p>alternative interactive ssh session: Use the HostName or AWS EC2 WebUI or <a href="http://aws.amazon.com/cli">http://aws.amazon.com/cli</a> to discover the remote machine IP address
 using ssh with the vagrant-ssh file output seems the simplest
@@ -187,79 +198,73 @@ ssh -i YOURKEYPAIRHERE.pem ubuntu@1.2.3.4 ls -ahl /vagrant</p>
 <p>UnsupportedOperation =&gt; The instance 'i-1295bf39' does not have an 'ebs' root device type and cannot be stopped. (Fog::Compute::AWS::Error)</p>
 </blockquote>
 <p><code>vagrant destroy</code></p>
-<div class="highlight"><pre><span></span>&gt; default: Are you sure you want to destroy the &#39;default&#39; VM? [y/N] Y
+<div class="highlight"><pre><span></span>&gt; default: Are you sure you want to destroy the 'default' VM? [y/N] Y
 &gt;
 &gt; ==&gt; default: Terminating the instance...
 </pre></div>
-
-
 <p><code>vagrant destroy -f</code></p>
 <blockquote>
 <p>non interactively destroy the instance and avoid the misleading error message: Vagrant is attempting to interface with the UI in a way that requires a TTY</p>
 </blockquote>
-<h3>Vagrant provisioning</h3>
+<h3 id="vagrant-provisioning">Vagrant provisioning</h3>
 <p>Allows for automated installation of software bundled into the <code>vagrant up</code> command</p>
 <p><code>vagrant up --provider=aws --no-provision</code> to prevent any provisioning</p>
-<div class="highlight"><pre><span></span>config.vm.provision &quot;shell&quot;, inline: &quot;echo Hello, World&quot;
+<div class="highlight"><pre><span></span>config.vm.provision "shell", inline: "echo Hello, World"
 
-config.vm.provision &quot;shell&quot;, path: &quot;script.sh&quot;
+config.vm.provision "shell", path: "script.sh"
 
-config.vm.provision &quot;shell&quot;, path: &quot;https://example.com/script.sh&quot;
+config.vm.provision "shell", path: "https://example.com/script.sh"
 </pre></div>
-
-
 <p><a href="http://docs.vagrantup.com/v2/provisioning">http://docs.vagrantup.com/v2/provisioning</a></p>
 <p><a href="http://docs.vagrantup.com/v2/provisioning/shell.html">http://docs.vagrantup.com/v2/provisioning/shell.html</a></p>
-<h3>Advanced Vagrantfile example</h3>
+<h3 id="advanced-vagrantfile-example">Advanced Vagrantfile example</h3>
 <div class="highlight"><pre><span></span><span class="err">#</span><span class="x"> -*- mode: ruby -*-</span>
 <span class="err">#</span><span class="x"> vi: set ft=ruby :</span>
 
-<span class="x">if ENV[&#39;UPDATEFQDN&#39;]</span>
-<span class="x">  updatedfqdn=ENV[&#39;UPDATEFQDN&#39;]</span>
+<span class="x">if ENV['UPDATEFQDN']</span>
+<span class="x">  updatedfqdn=ENV['UPDATEFQDN']</span>
 <span class="x">end</span>
 
 <span class="p">$</span><span class="nv">fqdnscript</span><span class="x"> = &lt;&lt;FQDNSCRIPT</span>
-<span class="x">echo &quot;I am updating fqdn to </span><span class="cp">#{</span><span class="nf">updatedfqdn</span><span class="cp">}</span><span class="x">...&quot;</span>
-<span class="x">cat /etc/hosts | grep &quot;</span><span class="cp">#{</span><span class="nf">updatedfqdn</span><span class="cp">}</span><span class="x">&quot; || sudo sed &#39;s/127.0.0.1/127.0.0.1 </span><span class="cp">#{</span><span class="nf">updatedfqdn</span><span class="cp">}</span><span class="x">/&#39; -i /etc/hosts</span>
-<span class="x">hostname | grep &quot;</span><span class="cp">#{</span><span class="nf">updatedfqdn</span><span class="cp">}</span><span class="x">&quot; || sudo hostname </span><span class="cp">#{</span><span class="nf">updatedfqdn</span><span class="cp">}</span><span class="x"></span>
+<span class="x">echo "I am updating fqdn to </span><span class="cp">#{</span><span class="nf">updatedfqdn</span><span class="cp">}</span><span class="x">..."</span>
+<span class="x">cat /etc/hosts | grep "</span><span class="cp">#{</span><span class="nf">updatedfqdn</span><span class="cp">}</span><span class="x">" || sudo sed 's/127.0.0.1/127.0.0.1 </span><span class="cp">#{</span><span class="nf">updatedfqdn</span><span class="cp">}</span><span class="x">/' -i /etc/hosts</span>
+<span class="x">hostname | grep "</span><span class="cp">#{</span><span class="nf">updatedfqdn</span><span class="cp">}</span><span class="x">" || sudo hostname </span><span class="cp">#{</span><span class="nf">updatedfqdn</span><span class="cp">}</span><span class="x"></span>
 <span class="x">FQDNSCRIPT</span>
 
-<span class="x">Vagrant.configure(&quot;2&quot;) do |config|</span>
-<span class="x">    config.vm.box = &quot;dummy&quot;</span>
+<span class="x">Vagrant.configure("2") do |config|</span>
+<span class="x">    config.vm.box = "dummy"</span>
 <span class="x">    config.vm.provider :aws do |aws, override|</span>
-<span class="x">        aws.access_key_id = &quot;YOURACCESSKEY&quot;</span>
-<span class="x">        aws.secret_access_key = &quot;YOURSECRETKEY&quot;</span>
-<span class="x">        aws.keypair_name = &quot;YOURKEYPAIRNAME&quot;</span>
-<span class="x">        aws.ami = &quot;ami-7747d01e&quot;</span>
+<span class="x">        aws.access_key_id = "YOURACCESSKEY"</span>
+<span class="x">        aws.secret_access_key = "YOURSECRETKEY"</span>
+<span class="x">        aws.keypair_name = "YOURKEYPAIRNAME"</span>
+<span class="x">        aws.ami = "ami-7747d01e"</span>
 <span class="x">        aws.instance_ready_timeout = 300</span>
-<span class="x">        aws.instance_type = &quot;m4.large&quot;</span>
+<span class="x">        aws.instance_type = "m4.large"</span>
 <span class="x">        aws.tags = </span><span class="err">{</span><span class="x"></span>
-<span class="x">            &quot;Name&quot; =&gt; &quot;MyCloudInstance&quot;,</span>
+<span class="x">            "Name" =&gt; "MyCloudInstance",</span>
 <span class="x">        }</span>
-<span class="x">        if ENV[&#39;bamboo_aws_use_iops&#39;]</span>
-<span class="x">          aws.block_device_mapping = [</span><span class="err">{</span><span class="x"> &#39;DeviceName&#39; =&gt; &#39;/dev/sda1&#39;, &#39;Ebs.VolumeSize&#39; =&gt; 100, &#39;Ebs.VolumeType&#39; =&gt; &#39;io1&#39;, &#39;Ebs.Iops&#39; =&gt; 3000 }]</span>
+<span class="x">        if ENV['bamboo_aws_use_iops']</span>
+<span class="x">          aws.block_device_mapping = [</span><span class="err">{</span><span class="x"> 'DeviceName' =&gt; '/dev/sda1', 'Ebs.VolumeSize' =&gt; 100, 'Ebs.VolumeType' =&gt; 'io1', 'Ebs.Iops' =&gt; 3000 }]</span>
 <span class="x">        else</span>
-<span class="x">          aws.block_device_mapping = [</span><span class="err">{</span><span class="x"> &#39;DeviceName&#39; =&gt; &#39;/dev/sda1&#39;, &#39;Ebs.VolumeSize&#39; =&gt; 16, &#39;Ebs.VolumeType&#39; =&gt; &#39;gp2&#39; }]</span>
+<span class="x">          aws.block_device_mapping = [</span><span class="err">{</span><span class="x"> 'DeviceName' =&gt; '/dev/sda1', 'Ebs.VolumeSize' =&gt; 16, 'Ebs.VolumeType' =&gt; 'gp2' }]</span>
 <span class="x">        end</span>
 
-<span class="x">        override.vm.box = &quot;dummy&quot;</span>
-<span class="x">        override.vm.box_url = &quot;https://github.com/mitchellh/vagrant-aws/raw/master/dummy.box&quot;</span>
-<span class="x">        override.ssh.username = &quot;ubuntu&quot;</span>
-<span class="x">        override.ssh.private_key_path = &quot;./YOURKEYPAIRNAME.pem&quot;</span>
-<span class="x">        override.vm.synced_folder &quot;/etc/sslcerts&quot;, &quot;/tmp/sourcecode&quot;, type: &quot;rsync&quot;, create: true, rsync__exclude: &quot;.git/&quot;</span>
+<span class="x">        override.vm.box = "dummy"</span>
+<span class="x">        override.vm.box_url = "https://github.com/mitchellh/vagrant-aws/raw/master/dummy.box"</span>
+<span class="x">        override.ssh.username = "ubuntu"</span>
+<span class="x">        override.ssh.private_key_path = "./YOURKEYPAIRNAME.pem"</span>
+<span class="x">        override.vm.synced_folder "/etc/sslcerts", "/tmp/sourcecode", type: "rsync", create: true, rsync__exclude: ".git/"</span>
 <span class="x">    end</span>
-<span class="x">    config.vm.provision :shell, :inline =&gt; &quot;echo `hostname -f` &gt;&gt; /home/ubuntu/currenthostname.txt&quot;</span>
+<span class="x">    config.vm.provision :shell, :inline =&gt; "echo `hostname -f` &gt;&gt; /home/ubuntu/currenthostname.txt"</span>
 <span class="x">    config.vm.provision :shell, :inline =&gt; </span><span class="p">$</span><span class="nv">fqdnscript</span><span class="x"></span>
 <span class="x">end</span>
 
-<span class="x">Bringing machine &#39;default&#39; up with &#39;aws&#39; provider...</span>
+<span class="x">Bringing machine 'default' up with 'aws' provider...</span>
 <span class="x">==&gt; default: Running provisioner: shell...</span>
 <span class="x">==&gt; default: Running: inline script</span>
 <span class="x">stdin: is not a ttty</span>
 <span class="x">I am provisioning and updating hostname...</span>
 </pre></div>
-
-
 <blockquote>
 <p>synced_folder is to sync other folders in your filesystem besides the folder with the Vagrantfile</p>
 <p>config.vm.hostname does not appear to work on AWS EC2 so the workaround above (|| statements to prevent extra reconfiguration)</p>
@@ -268,54 +273,52 @@ config.vm.provision &quot;shell&quot;, path: &quot;https://example.com/script.sh
 <li><a href="https://github.com/mitchellh/vagrant-aws">https://github.com/mitchellh/vagrant-aws</a></li>
 <li><a href="http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/block-device-mapping-concepts.html">http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/block-device-mapping-concepts.html</a></li>
 </ul>
-<h3>Vagrant and EC2 VPC (AMI that does not have/allow sudo)</h3>
+<h3 id="vagrant-and-ec2-vpc-ami-that-does-not-haveallow-sudo">Vagrant and EC2 VPC (AMI that does not have/allow sudo)</h3>
 <div class="highlight"><pre><span></span># -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-Vagrant.configure(&quot;2&quot;) do |config|
-    config.vm.box = &quot;dummy&quot;
+Vagrant.configure("2") do |config|
+    config.vm.box = "dummy"
 
     config.ssh.pty = true
-    config.vm.synced_folder &quot;.&quot;, &quot;/vagrant&quot;, disabled: true
+    config.vm.synced_folder ".", "/vagrant", disabled: true
 
     config.vm.provider :aws do |aws, override|
 
-        aws.access_key_id = &quot;YOURACCESSKEY&quot;
-        aws.secret_access_key = &quot;YOURSECRETKEY&quot;
-        aws.keypair_name = &quot;YOURKEYPAIRNAME&quot;
-        aws.ami = &quot;ami-7747d01e&quot;
+        aws.access_key_id = "YOURACCESSKEY"
+        aws.secret_access_key = "YOURSECRETKEY"
+        aws.keypair_name = "YOURKEYPAIRNAME"
+        aws.ami = "ami-7747d01e"
         aws.instance_ready_timeout = 300
-        aws.instance_type = &quot;m4.large&quot;
+        aws.instance_type = "m4.large"
         aws.tags = {
-            &quot;Name&quot; =&gt; &quot;MyCloudInstance&quot;,
+            "Name" =&gt; "MyCloudInstance",
         }
-        aws.security_groups = [ &quot;my_aws_security_group_id&quot; ]
-        aws.subnet_id = &quot;my_aws_subnet_id&quot;
+        aws.security_groups = [ "my_aws_security_group_id" ]
+        aws.subnet_id = "my_aws_subnet_id"
         aws.associate_public_ip = true
 
-        aws.user_data = &quot;#cloud-boothook\n#!/bin/bash\ntouch /opt/.license/.eula\n&quot;
+        aws.user_data = "#cloud-boothook\n#!/bin/bash\ntouch /opt/.license/.eula\n"
 
-        override.vm.box = &quot;dummy&quot;
-        override.vm.box_url = &quot;https://github.com/mitchellh/vagrant-aws/raw/master/dummy.box&quot;
+        override.vm.box = "dummy"
+        override.vm.box_url = "https://github.com/mitchellh/vagrant-aws/raw/master/dummy.box"
 
-        override.ssh.username = &quot;ubuntu&quot;
-        override.ssh.private_key_path = &quot;/home/ubuntu/my_aws.pem&quot;
+        override.ssh.username = "ubuntu"
+        override.ssh.private_key_path = "/home/ubuntu/my_aws.pem"
     end
 end
 </pre></div>
-
-
-<hr>
+<hr/>
 <p><strong><code>vagrant up --provider=aws --no-provision --debug</code></strong></p>
-<hr>
-<div class="highlight"><pre><span></span>INFO vagrant: `vagrant` invoked: [&quot;up&quot;, &quot;--provider=aws&quot;, &quot;--no-provision&quot;, &quot;--debug&quot;]
+<hr/>
+<div class="highlight"><pre><span></span>INFO vagrant: `vagrant` invoked: ["up", "--provider=aws", "--no-provision", "--debug"]
 
-Bringing machine &#39;default&#39; up with &#39;aws&#39; provider...
+Bringing machine 'default' up with 'aws' provider...
 ==&gt; default: Launching an instance with the following settings...
 INFO interface: info:  -- Type: m4.large
 INFO interface: info: ==&gt; default:  -- User Data: #cloud-boothook
 INFO interface: info: ==&gt; default:  -- Assigning a public IP address in a VPC: true
-==&gt; default: Waiting for instance to become &quot;ready&quot;...
+==&gt; default: Waiting for instance to become "ready"...
 ==&gt; default: Waiting for SSH to become available...
 
 DEBUG ssh: == Net-SSH connection debug-level log END ==
@@ -337,8 +340,6 @@ DEBUG ssh: stdout: /usr/bin/rsync
 
 INFO interface: info: Machine not provisioning because `--no-provision` is specified.
 </pre></div>
-
-
 <blockquote>
 <p>After all of that it is safe to either have <code>vagrant provision</code> or <code>vagrant ssh -c "ls -ahl"</code></p>
 </blockquote>
@@ -375,45 +376,43 @@ INFO interface: info: Machine not provisioning because `--no-provision` is speci
 </ul>
 </li>
 </ul>
-<h3>VirtualBox</h3>
+<h3 id="virtualbox">VirtualBox</h3>
 <p>A really easy A way to start an Ubuntu 14.04 box locally with VirtualBox, the shell provisioner is less elegant than chef/puppet/ansible but gets the job done (installs Docker and Docker Compose)</p>
 <p><a href="https://www.virtualbox.org/wiki/Linux_Downloads">https://www.virtualbox.org/wiki/Linux_Downloads</a></p>
-<h4>Vagrantfile</h4>
+<h4 id="vagrantfile">Vagrantfile</h4>
 <div class="highlight"><pre><span></span>VERSIONS = {
-  &#39;trusty&#39; =&gt; {
-    &#39;box&#39; =&gt; &quot;canonical-ubuntu-14.04&quot;,
-    &#39;box_url&#39; =&gt; &quot;https://cloud-images.ubuntu.com/vagrant/trusty/current/trusty-server-cloudimg-amd64-vagrant-disk1.box&quot;,
-    &#39;ami&#39; =&gt; &quot;ami-018c9568&quot;,
+  'trusty' =&gt; {
+    'box' =&gt; "canonical-ubuntu-14.04",
+    'box_url' =&gt; "https://cloud-images.ubuntu.com/vagrant/trusty/current/trusty-server-cloudimg-amd64-vagrant-disk1.box",
+    'ami' =&gt; "ami-018c9568",
   },
 }
 
 
-Vagrant.configure(&quot;2&quot;) do |config|
+Vagrant.configure("2") do |config|
     config.ssh.forward_agent = true
 
-    version = VERSIONS[(&quot;trusty&quot;)]
+    version = VERSIONS[("trusty")]
 
-    config.vm.provider &quot;virtualbox&quot; do |v, override|
-      v.customize [&quot;modifyvm&quot;, :id, &quot;--memory&quot;, ENV[&#39;VM_MEMORY&#39;] || 4096]
-      v.customize [&quot;modifyvm&quot;, :id, &quot;--cpus&quot;, ENV[&#39;VM_CPUS&#39;] || 2]
+    config.vm.provider "virtualbox" do |v, override|
+      v.customize ["modifyvm", :id, "--memory", ENV['VM_MEMORY'] || 4096]
+      v.customize ["modifyvm", :id, "--cpus", ENV['VM_CPUS'] || 2]
 
-      override.vm.network :private_network, ip: &quot;192.168.33.10&quot;
-      override.vm.box = version[&#39;box&#39;]
-      override.vm.box_url = version[&#39;box_url&#39;]
+      override.vm.network :private_network, ip: "192.168.33.10"
+      override.vm.box = version['box']
+      override.vm.box_url = version['box_url']
     end
 
-    config.vm.provision :shell, :inline =&gt; &quot;sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 36A1D7869245C8950F966E92D8576A8BA88D21E9&quot;
-    config.vm.provision :shell, :inline =&gt; &quot;sudo sh -c &#39;echo deb https://get.docker.io/ubuntu docker main &gt; /etc/apt/sources.list.d/docker.list&#39;&quot;
-    config.vm.provision :shell, :inline =&gt; &quot;sudo apt-get update&quot;
-    config.vm.provision :shell, :inline =&gt; &quot;sudo apt-get install -y lxc-docker python-pip&quot;
-    config.vm.provision :shell, :inline =&gt; &quot;sudo pip install --upgrade pip&quot;
-    config.vm.provision :shell, :inline =&gt; &quot;sudo pip install --upgrade docker-compose&quot;
+    config.vm.provision :shell, :inline =&gt; "sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 36A1D7869245C8950F966E92D8576A8BA88D21E9"
+    config.vm.provision :shell, :inline =&gt; "sudo sh -c 'echo deb https://get.docker.io/ubuntu docker main &gt; /etc/apt/sources.list.d/docker.list'"
+    config.vm.provision :shell, :inline =&gt; "sudo apt-get update"
+    config.vm.provision :shell, :inline =&gt; "sudo apt-get install -y lxc-docker python-pip"
+    config.vm.provision :shell, :inline =&gt; "sudo pip install --upgrade pip"
+    config.vm.provision :shell, :inline =&gt; "sudo pip install --upgrade docker-compose"
 
 end
 </pre></div>
-
-
-<h3>more info</h3>
+<h3 id="more-info">more info</h3>
 <p><code>ps aux | grep vagrant</code></p>
 <blockquote>
 <p>nothing to see here but there is still state for machines started...</p>
@@ -423,11 +422,9 @@ vagrant global-status --prune
 rm -rf .vagrant
 rm -rf /home/ubuntu/.vagrant.d
 </pre></div>
-
-
 <p><em>If you use vagrant 1.7 don not be surprised if you see errors related to SSL, 1.6.3 FTW</em></p>
 <p><a href="https://github.com/mitchellh/vagrant-aws">https://github.com/mitchellh/vagrant-aws</a></p>
-<h3>Troubleshooting</h3>
+<h3 id="troubleshooting">Troubleshooting</h3>
 <p><code>vagrant up --provider=aws --debug</code></p>
 <blockquote>
 <p>ERROR: The provider 'aws' could not be found, but was requested to back the machine 'default'. Please use a provider that exists.</p>
@@ -458,7 +455,7 @@ rm -rf /home/ubuntu/.vagrant.d
             <time pubdate="pubdate" datetime="2014-07-16T21:12:00-07:00">Jul 16, 2014</time>
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#virtualization-ref">virtualization</a> 
-            <h4>~1487 words</h4>
+            <h4>~1486 words</h4>
 
         </div>
         </section>

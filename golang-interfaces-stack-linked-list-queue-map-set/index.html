@@ -70,25 +70,43 @@
 </div>
 
 <div class="row-fluid">
-        <div class="span8 offset2 article-content">
+    <div class="span2 table-of-content">
+        <nav>
+        <h4>Contents</h4>
+        <div class="toc">
+<ul>
+<li><a href="#maps-aka-hash-tables-in-go">Maps aka Hash Tables in Go</a><ul>
+<li><a href="#using-a-map-in-go">Using a map in go</a></li>
+<li><a href="#sets">Sets</a></li>
+</ul>
+</li>
+<li><a href="#polymorphism-with-go-interfaces">Polymorphism with Go Interfaces</a><ul>
+<li><a href="#bonus-first-in-first-out-queue">Bonus First In First Out Queue</a></li>
+</ul>
+</li>
+</ul>
+</div>
+        </nav>
+    </div>
+    <div class="span8 article-content">
 
-            <p>[TOC]</p>
+            
 <p>Two of the most useful tools in daily professional programming are hash maps and frameworks for modular abstractions.  It's the blend of performance and composability that makes Go an attractive language for getting things done.</p>
-<h2>Maps aka Hash Tables in Go</h2>
+<h2 id="maps-aka-hash-tables-in-go">Maps aka Hash Tables in Go</h2>
 <p>For hash tables basic operations like insert, lookup, delete are basically "constant time" in big O notation which makes it the "go to" default data structure for a lot of basic coding.  That helps avoid having to write and maintain all the complexity and operations of an in-memory sorted data structure.</p>
 <p>It is also often the desired data structure answer in a programming interview problem =]</p>
 <p>Here's the basics of using a map since someone else has already done all of the hard work of figuring out the correct math of the hash function to avoid collisions and the engineering behind implementing it in a performant fashion.</p>
-<h3>Using a map in go</h3>
+<h3 id="using-a-map-in-go">Using a map in go</h3>
 <div class="highlight"><pre><span></span><span class="kn">package</span> <span class="nx">main</span>
 
 <span class="kn">import</span> <span class="p">(</span>
-    <span class="s">&quot;fmt&quot;</span>
+    <span class="s">"fmt"</span>
 <span class="p">)</span>
 
 <span class="kd">func</span> <span class="nx">inSet</span><span class="p">(</span><span class="nx">s</span> <span class="kt">string</span><span class="p">,</span> <span class="nx">m</span> <span class="kd">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">bool</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
     <span class="c1">// gotcha: do not depend on just the return value but use a the second value which returns in map or not</span>
     <span class="nx">value</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">m</span><span class="p">[</span><span class="nx">s</span><span class="p">]</span>
-    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">s</span><span class="p">,</span> <span class="s">&quot;has value&quot;</span><span class="p">,</span> <span class="nx">value</span><span class="p">,</span> <span class="s">&quot;and is in?&quot;</span><span class="p">,</span> <span class="nx">ok</span><span class="p">)</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">s</span><span class="p">,</span> <span class="s">"has value"</span><span class="p">,</span> <span class="nx">value</span><span class="p">,</span> <span class="s">"and is in?"</span><span class="p">,</span> <span class="nx">ok</span><span class="p">)</span>
     <span class="k">if</span> <span class="nx">ok</span> <span class="p">{</span>
         <span class="k">return</span> <span class="kc">true</span>
     <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
@@ -99,24 +117,22 @@
 <span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
     <span class="nx">m</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">bool</span><span class="p">)</span>
     <span class="c1">// never use var m map[string]bool because m is nil and assign causes a panic</span>
-    <span class="nx">m</span><span class="p">[</span><span class="s">&quot;foo&quot;</span><span class="p">]</span> <span class="p">=</span> <span class="kc">true</span>
-    <span class="nx">m</span><span class="p">[</span><span class="s">&quot;bar&quot;</span><span class="p">]</span> <span class="p">=</span> <span class="kc">false</span>
+    <span class="nx">m</span><span class="p">[</span><span class="s">"foo"</span><span class="p">]</span> <span class="p">=</span> <span class="kc">true</span>
+    <span class="nx">m</span><span class="p">[</span><span class="s">"bar"</span><span class="p">]</span> <span class="p">=</span> <span class="kc">false</span>
 
-    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">inSet</span><span class="p">(</span><span class="s">&quot;foo&quot;</span><span class="p">,</span> <span class="nx">m</span><span class="p">))</span>
-    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">inSet</span><span class="p">(</span><span class="s">&quot;bar&quot;</span><span class="p">,</span> <span class="nx">m</span><span class="p">))</span>
-    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">inSet</span><span class="p">(</span><span class="s">&quot;foobar&quot;</span><span class="p">,</span> <span class="nx">m</span><span class="p">))</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">inSet</span><span class="p">(</span><span class="s">"foo"</span><span class="p">,</span> <span class="nx">m</span><span class="p">))</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">inSet</span><span class="p">(</span><span class="s">"bar"</span><span class="p">,</span> <span class="nx">m</span><span class="p">))</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">inSet</span><span class="p">(</span><span class="s">"foobar"</span><span class="p">,</span> <span class="nx">m</span><span class="p">))</span>
 
-    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nx">m</span><span class="p">),</span> <span class="s">&quot; elements in map&quot;</span><span class="p">,</span> <span class="nx">m</span><span class="p">)</span>
-    <span class="nb">delete</span><span class="p">(</span><span class="nx">m</span><span class="p">,</span> <span class="s">&quot;bar&quot;</span><span class="p">)</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nx">m</span><span class="p">),</span> <span class="s">" elements in map"</span><span class="p">,</span> <span class="nx">m</span><span class="p">)</span>
+    <span class="nb">delete</span><span class="p">(</span><span class="nx">m</span><span class="p">,</span> <span class="s">"bar"</span><span class="p">)</span>
 
-    <span class="nx">m2</span> <span class="o">:=</span> <span class="kd">map</span><span class="p">[</span><span class="kt">rune</span><span class="p">]</span><span class="kt">int</span><span class="p">{</span><span class="sc">&#39;a&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="sc">&#39;b&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="sc">&#39;c&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">}</span>
+    <span class="nx">m2</span> <span class="o">:=</span> <span class="kd">map</span><span class="p">[</span><span class="kt">rune</span><span class="p">]</span><span class="kt">int</span><span class="p">{</span><span class="sc">'a'</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="sc">'b'</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="sc">'c'</span><span class="p">:</span> <span class="mi">3</span><span class="p">}</span>
     <span class="k">for</span> <span class="nx">k</span><span class="p">,</span> <span class="nx">v</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">m2</span> <span class="p">{</span>
         <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nb">string</span><span class="p">(</span><span class="nx">k</span><span class="p">),</span> <span class="nx">v</span><span class="p">)</span>
     <span class="p">}</span>
 <span class="p">}</span>
 </pre></div>
-
-
 <blockquote>
 <p>the two main gotchas for maps in go are to not accidentally assume that the value coming back from a map means that the key was in the map since if the key is not in the map it will return the default "empty" value which will be 0 or false, and to not start with a nil pointer since later assignment will cause a panic</p>
 </blockquote>
@@ -126,7 +142,7 @@
 <li><a href="https://blog.golang.org/go-maps-in-action">https://blog.golang.org/go-maps-in-action</a></li>
 <li><a href="https://golang.org/src/runtime/hashmap.go#L9">https://golang.org/src/runtime/hashmap.go#L9</a></li>
 </ul>
-<h3>Sets</h3>
+<h3 id="sets">Sets</h3>
 <p>A common question in coding is whether a certain key or object has already been seen before.  The lookup cost in a set is  cheaper than a full search through a more complex data structure like a binary tree.</p>
 <p>Golang currently does not have a "set" built into the language but given the code example you can see how to quickly achieve the same functionality with a map.  This is a common pattern: they keep the language simple and focus on low level components that perform and compose well while we code exactly what we need for a given usage.  (i.e. a huge meta "YouAren'tGoingToNeedIt")</p>
 <ul>
@@ -134,7 +150,7 @@
 <li><a href="https://xlinux.nist.gov/dads/HTML/set.html">https://xlinux.nist.gov/dads/HTML/set.html</a></li>
 <li><a href="https://github.com/golang/go/wiki/MethodSets">https://github.com/golang/go/wiki/MethodSets</a></li>
 </ul>
-<h2>Polymorphism with Go Interfaces</h2>
+<h2 id="polymorphism-with-go-interfaces">Polymorphism with Go Interfaces</h2>
 <p>While definitely a distinctly different approach on objects and polymorphism than Object Oriented languages like Java and Python, the critical capabilities of Interfaces allows flexibility and re-usability in functionality enabling things like the Strategy Pattern.</p>
 <p>Starting with the fundamentals of Types and Structs, Interfaces are a natural extension to separating "What" behavior is desired versus "How" it is implemented.</p>
 <p>Using Interfaces can feel tricky at first but really the main challenge is the distinction between pointer receiver methods vs the default that Go has of pass by value (considering a pointer to be an integer value of an address ;)</p>
@@ -143,7 +159,7 @@
 <div class="highlight"><pre><span></span><span class="kn">package</span> <span class="nx">main</span>
 
 <span class="kn">import</span> <span class="p">(</span>
-    <span class="s">&quot;fmt&quot;</span>
+    <span class="s">"fmt"</span>
 <span class="p">)</span>
 
 <span class="c1">// Stacker is a data structure that has specific data access and storage properties</span>
@@ -156,11 +172,11 @@
 
 <span class="c1">// DemoStack shows a demo example of different implementations of the interface</span>
 <span class="kd">func</span> <span class="nx">DemoStack</span><span class="p">(</span><span class="nx">s</span> <span class="nx">Stacker</span><span class="p">,</span> <span class="nx">name</span> <span class="kt">string</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;Pushing 2, 1, 0, onto&quot;</span><span class="p">,</span> <span class="nx">name</span><span class="p">)</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">"Pushing 2, 1, 0, onto"</span><span class="p">,</span> <span class="nx">name</span><span class="p">)</span>
     <span class="nx">s</span><span class="p">.</span><span class="nx">Push</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
     <span class="nx">s</span><span class="p">.</span><span class="nx">Push</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
     <span class="nx">s</span><span class="p">.</span><span class="nx">Push</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">name</span><span class="p">,</span> <span class="s">&quot;contains: &quot;</span><span class="p">,</span> <span class="nx">s</span><span class="p">.</span><span class="nx">Show</span><span class="p">())</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">name</span><span class="p">,</span> <span class="s">"contains: "</span><span class="p">,</span> <span class="nx">s</span><span class="p">.</span><span class="nx">Show</span><span class="p">())</span>
 <span class="p">}</span>
 
 <span class="c1">// FakeStack implements the interface using only value receivers</span>
@@ -232,17 +248,15 @@
 <span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
     <span class="c1">// a fake stack does not use pointer method receivers and must modify the data structure some other way</span>
     <span class="kd">var</span> <span class="nx">f</span> <span class="nx">FakeStack</span>
-    <span class="nx">DemoStack</span><span class="p">(</span><span class="nx">f</span><span class="p">,</span> <span class="s">&quot;FakeStack&quot;</span><span class="p">)</span>
+    <span class="nx">DemoStack</span><span class="p">(</span><span class="nx">f</span><span class="p">,</span> <span class="s">"FakeStack"</span><span class="p">)</span>
 
     <span class="c1">// stacks that modify their underlying data structure must pass a reference</span>
     <span class="kd">var</span> <span class="nx">s</span> <span class="nx">SliceStack</span>
-    <span class="nx">DemoStack</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">s</span><span class="p">,</span> <span class="s">&quot;SliceStack&quot;</span><span class="p">)</span>
+    <span class="nx">DemoStack</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">s</span><span class="p">,</span> <span class="s">"SliceStack"</span><span class="p">)</span>
     <span class="kd">var</span> <span class="nx">k</span> <span class="nx">LinkedListStack</span>
-    <span class="nx">DemoStack</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">k</span><span class="p">,</span> <span class="s">&quot;LinkedListStack&quot;</span><span class="p">)</span>
+    <span class="nx">DemoStack</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">k</span><span class="p">,</span> <span class="s">"LinkedListStack"</span><span class="p">)</span>
 <span class="p">}</span>
 </pre></div>
-
-
 <ul>
 <li><a href="https://play.golang.org/p/U1l2Ni89L4">https://play.golang.org/p/U1l2Ni89L4</a> <em>play along with the source code snippet</em></li>
 <li><a href="https://bitbucket.org/johnpfeiffer/go-interfaces-stack-linkedlist">https://bitbucket.org/johnpfeiffer/go-interfaces-stack-linkedlist</a> <em>the more complete source code</em></li>
@@ -254,14 +268,14 @@
 <li><a href="https://nathanleclaire.com/blog/2015/10/10/interfaces-and-composition-for-effective-unit-testing-in-golang/">https://nathanleclaire.com/blog/2015/10/10/interfaces-and-composition-for-effective-unit-testing-in-golang/</a></li>
 <li><a href="https://blog.cloudflare.com/go-interfaces-make-test-stubbing-easy/">https://blog.cloudflare.com/go-interfaces-make-test-stubbing-easy/</a></li>
 </ul>
-<h3>Bonus First In First Out Queue</h3>
+<h3 id="bonus-first-in-first-out-queue">Bonus First In First Out Queue</h3>
 <p>With some small additions the linked list can be enhanced to provide the functionality of a Queue.
 It is not too expensive to add the extra previous pointer to each node and a tail pointer and this makes the FIFO capabilities fairly straightforward.
 Thankfully with a garbage collected language like Go we do not have to worry about manually allocating or deallocating memory.</p>
 <div class="highlight"><pre><span></span><span class="kn">package</span> <span class="nx">main</span>
 
 <span class="kn">import</span> <span class="p">(</span>
-    <span class="s">&quot;fmt&quot;</span>
+    <span class="s">"fmt"</span>
 <span class="p">)</span>
 
 <span class="c1">// IntNode is a pointer data structure for holding an integer</span>
@@ -302,16 +316,14 @@ Thankfully with a garbage collected language like Go we do not have to worry abo
     <span class="kd">var</span> <span class="nx">q</span> <span class="nx">MyList</span>
     <span class="nx">q</span><span class="p">.</span><span class="nx">Enqueue</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
     <span class="nx">q</span><span class="p">.</span><span class="nx">Enqueue</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
-    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;FirstInFirstOut head: %v at memory address %p \n&quot;</span><span class="p">,</span> <span class="nx">q</span><span class="p">.</span><span class="nx">head</span><span class="p">.</span><span class="nx">value</span><span class="p">,</span> <span class="nx">q</span><span class="p">.</span><span class="nx">head</span><span class="p">)</span>
-    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;FirstInFirstOut tail: %v at memory address %p \n&quot;</span><span class="p">,</span> <span class="nx">q</span><span class="p">.</span><span class="nx">tail</span><span class="p">.</span><span class="nx">value</span><span class="p">,</span> <span class="nx">q</span><span class="p">.</span><span class="nx">tail</span><span class="p">)</span>
-    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;dequeuing a value: &quot;</span><span class="p">,</span> <span class="nx">q</span><span class="p">.</span><span class="nx">Dequeue</span><span class="p">())</span>
-    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;FirstInFirstOut head: %v at memory address %p \n&quot;</span><span class="p">,</span> <span class="nx">q</span><span class="p">.</span><span class="nx">head</span><span class="p">.</span><span class="nx">value</span><span class="p">,</span> <span class="nx">q</span><span class="p">.</span><span class="nx">head</span><span class="p">)</span>
-    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;FirstInFirstOut tail: %v at memory address %p \n&quot;</span><span class="p">,</span> <span class="nx">q</span><span class="p">.</span><span class="nx">tail</span><span class="p">.</span><span class="nx">value</span><span class="p">,</span> <span class="nx">q</span><span class="p">.</span><span class="nx">tail</span><span class="p">)</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">"FirstInFirstOut head: %v at memory address %p \n"</span><span class="p">,</span> <span class="nx">q</span><span class="p">.</span><span class="nx">head</span><span class="p">.</span><span class="nx">value</span><span class="p">,</span> <span class="nx">q</span><span class="p">.</span><span class="nx">head</span><span class="p">)</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">"FirstInFirstOut tail: %v at memory address %p \n"</span><span class="p">,</span> <span class="nx">q</span><span class="p">.</span><span class="nx">tail</span><span class="p">.</span><span class="nx">value</span><span class="p">,</span> <span class="nx">q</span><span class="p">.</span><span class="nx">tail</span><span class="p">)</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">"dequeuing a value: "</span><span class="p">,</span> <span class="nx">q</span><span class="p">.</span><span class="nx">Dequeue</span><span class="p">())</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">"FirstInFirstOut head: %v at memory address %p \n"</span><span class="p">,</span> <span class="nx">q</span><span class="p">.</span><span class="nx">head</span><span class="p">.</span><span class="nx">value</span><span class="p">,</span> <span class="nx">q</span><span class="p">.</span><span class="nx">head</span><span class="p">)</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">"FirstInFirstOut tail: %v at memory address %p \n"</span><span class="p">,</span> <span class="nx">q</span><span class="p">.</span><span class="nx">tail</span><span class="p">.</span><span class="nx">value</span><span class="p">,</span> <span class="nx">q</span><span class="p">.</span><span class="nx">tail</span><span class="p">)</span>
 
 <span class="p">}</span>
 </pre></div>
-
-
 <blockquote>
 <p>The terminology changed a little bit from Push to Enqueue but now we can have a simple "fair buffer"</p>
 </blockquote>
@@ -339,7 +351,7 @@ Thankfully with a garbage collected language like Go we do not have to worry abo
             <time pubdate="pubdate" datetime="2016-10-05T20:34:00-07:00">Oct 5, 2016</time>
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#programming-ref">programming</a> 
-            <h4>~1209 words</h4>
+            <h4>~1208 words</h4>
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article"> 
                 <li><a href="/tags.html#go-ref">go
