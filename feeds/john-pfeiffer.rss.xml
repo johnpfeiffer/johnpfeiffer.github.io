@@ -2018,46 +2018,53 @@ Time per request:       3248.067 [ms] (mean)
 &lt;blockquote&gt;
 &lt;p&gt;In security terms less "footprint" often means less vectors of attack and less complexity to analyze for vulnerabilities&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;p&gt;Alpine Linux is becoming a preferred base OS for many foundational official Docker Images (python, php, ruby, nginx, redis, haproxy,) since downloading many large Docker Images (aka Deploying Docker Containers) can saturate the network at scale.&lt;/p&gt;
+&lt;p&gt;Alpine Linux is becoming a preferred base OS for many foundational official Docker Images (python, php, ruby, nginx, redis, haproxy, go) since downloading many large Docker Images (aka Deploying Docker Containers) can saturate the network at scale.&lt;/p&gt;
 &lt;ul&gt;
-&lt;li&gt;&lt;a href="https://hub.docker.com/_/alpine/"&gt;https://hub.docker.com/_/alpine/&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href="http://www.pcworld.com/article/3031765/is-docker-ditching-ubuntu-linux-confusion-reigns.html"&gt;http://www.pcworld.com/article/3031765/is-docker-ditching-ubuntu-linux-confusion-reigns.html&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href="https://news.ycombinator.com/item?id=10998667"&gt;https://news.ycombinator.com/item?id=10998667&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href="https://en.wikipedia.org/wiki/Alpine_Linux"&gt;https://en.wikipedia.org/wiki/Alpine_Linux&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
+&lt;h3 id="getting-started-with-alpine-linux-in-docker"&gt;Getting started with Alpine Linux in Docker&lt;/h3&gt;
+&lt;p&gt;This will pull the latest alpine image (around 4MB) and run it in an ephemeral container.&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;sudo docker run -it --rm alpine /bin/sh&lt;/code&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://hub.docker.com/_/alpine/"&gt;https://hub.docker.com/_/alpine/&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
 &lt;h3 id="basics"&gt;Basics&lt;/h3&gt;
 &lt;p&gt;Most of the very basic commands are similar to other linux distros like Debian/Ubuntu/Redhat, but of course there are differences ;)&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;/bin/sh
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;ls -l /bin/sh
 &lt;/pre&gt;&lt;/div&gt;
 &lt;blockquote&gt;
-&lt;p&gt;busybox&lt;/p&gt;
+&lt;p&gt;/bin/busybox&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;cat /etc/passwd
-curl 127.0.0.1
+less /etc/passwd
+vi /etc/passwd
+grep root /etc/passwd
 ls -l /usr/bin /usr/sbin | more
 &lt;/pre&gt;&lt;/div&gt;
 &lt;blockquote&gt;
 &lt;p&gt;more busybox&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;h3 id="package-management"&gt;Package Management&lt;/h3&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;apk --help
-apk update
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;apk update
+apk --help
 &lt;/pre&gt;&lt;/div&gt;
 &lt;blockquote&gt;
-&lt;p&gt;list the options of the package manager, update the local index for all remote packages&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;apk search iptables
-apk search iptables | sort
-apk info iptables
-apk add iptables
-&lt;/pre&gt;&lt;/div&gt;
-&lt;blockquote&gt;
-&lt;p&gt;search the remote packages for a keyword (unsorted results), get info for a specific package, install a specific package&lt;/p&gt;
+&lt;p&gt;update the local index for all remote packages, list the options of the package manager&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;apk info
 &lt;/pre&gt;&lt;/div&gt;
 &lt;blockquote&gt;
 &lt;p&gt;list all of the packages installed locally&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;apk search curl
+apk search curl | sort
+apk info curl
+apk add curl
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;search the remote packages for a keyword (unsorted results), get info for a specific package, install a specific package&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;a href="http://wiki.alpinelinux.org/wiki/Alpine_Linux_package_management"&gt;http://wiki.alpinelinux.org/wiki/Alpine_Linux_package_management&lt;/a&gt;&lt;/li&gt;
@@ -2069,32 +2076,15 @@ cat /etc/resolv.conf
 ifconfig
 netstat -anp
 
-apk add iptables
 traceroute
+apk add iptables
 &lt;/pre&gt;&lt;/div&gt;
-&lt;h3 id="compiling"&gt;Compiling&lt;/h3&gt;
-&lt;h4 id="prepare-musl-compiler-on-alpine-linux"&gt;prepare musl compiler on alpine linux&lt;/h4&gt;
-&lt;blockquote&gt;
-&lt;p&gt;WARNING: below did not work&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;docker pull alpine
-docker run -it --rm alpine /bin/sh
-
-apk update
-apk add musl-dev wget tar gzip gcc make
-
-wget http://www.musl-libc.org/releases/musl-1.1.15.tar.gz
-tar xf musl-1.1.15.tar.gz
-cd musl-1.1.15
-./configure
-make
-make install
+&lt;h3 id="compiling-c-on-alpine-linux"&gt;Compiling C on Alpine Linux&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;apk add build-base gcc abuild binutils
 &lt;/pre&gt;&lt;/div&gt;
-&lt;blockquote&gt;
-&lt;p&gt;Now we've installed the musl compiler?&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;p&gt;/usr/local/musl seemed terribly empty of binaries&lt;/p&gt;
-&lt;p&gt;&lt;a href="http://dominik.honnef.co/posts/2015/06/go-musl/"&gt;http://dominik.honnef.co/posts/2015/06/go-musl/&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;This should probably be part of a Dockerfile rather than run every time in an ephemeral container&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://wiki.alpinelinux.org/wiki/How_to_get_regular_stuff_working#Compiling_:_a_few_notes_and_a_reminder"&gt;https://wiki.alpinelinux.org/wiki/How_to_get_regular_stuff_working#Compiling_:_a_few_notes_and_a_reminder&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;vi hi.c&lt;/code&gt;&lt;/p&gt;
 &lt;h4 id="hic"&gt;hi.c&lt;/h4&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="cp"&gt;#include&lt;/span&gt; &lt;span class="cpf"&gt;&amp;lt;stdio.h&amp;gt;&lt;/span&gt;&lt;span class="cp"&gt;&lt;/span&gt;
 
@@ -2103,25 +2093,50 @@ make install
   &lt;span class="n"&gt;printf&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;"hi"&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
 &lt;span class="p"&gt;}&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
-&lt;h4 id="compiling_1"&gt;compiling&lt;/h4&gt;
+&lt;h4 id="compiling"&gt;compiling&lt;/h4&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;apk add file
 gcc -static hi.c
-file a.out
 chmod +x a.out
-./a.out
+file a.out
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;The default is a.out: ELF 64-bit LSB executable, x86-64, version 1 (SYSV), statically linked, not stripped&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;./a.out
 &lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;&lt;code&gt;hi&lt;/code&gt;&lt;/p&gt;
 &lt;blockquote&gt;
-&lt;p&gt;The default is a.out: ELF 64-bit LSB executable, x86-64, version 1 (SYSV), statically linked, not stripped&lt;/p&gt;
 &lt;p&gt;Note that this was just gcc not musl-gcc :(&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;p&gt;&lt;a href="http://www.musl-libc.org/how.html"&gt;http://www.musl-libc.org/how.html&lt;/a&gt;&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;docker run -it --rm alpine /bin/sh
-apk update
-apk add alpine-sdk
+&lt;h4 id="incomplete-musl-compiler-on-alpine-linux"&gt;Incomplete musl compiler on alpine linux&lt;/h4&gt;
+&lt;blockquote&gt;
+&lt;p&gt;WARNING: below did not work, TODO: &lt;a href="https://bitbucket.org/GregorR/musl-cross"&gt;https://bitbucket.org/GregorR/musl-cross&lt;/a&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;I suspect that I am overwriting the existing gcc toolchain and I need to specify a different prefix (/usr/local) &lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;apk update
+apk add wget tar gzip gcc make
 &lt;/pre&gt;&lt;/div&gt;
+&lt;h1 id="apk-add-musl-dev-wget-tar-gzip-gcc-make"&gt;apk add musl-dev wget tar gzip gcc make&lt;/h1&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;wget --no-check-certificate http://www.musl-libc.org/releases/musl-1.1.15.tar.gz
+tar xf musl-1.1.15.tar.gz
+cd musl-1.1.15
+./configure
+make install
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Now we've installed the musl compiler?&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;/usr/local/musl seemed terribly empty of binaries (i.e. no /usr/local/musl/bin/)&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://www.musl-libc.org/faq.html"&gt;https://www.musl-libc.org/faq.html&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href="http://www.musl-libc.org/how.html"&gt;http://www.musl-libc.org/how.html&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;apk add alpine-sdk&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
 &lt;p&gt;But maybe because it's already an alpine linux container the gcc already uses musl instead of libc and does not need the musl-gcc wrapper?&lt;/p&gt;
-&lt;h4 id="compile-go-on-alpine-linux"&gt;compile go on alpine linux&lt;/h4&gt;
+&lt;p&gt;&lt;a href="http://www.guidesbyeric.com/statically-link-c-programs-with-musl-gcc"&gt;http://www.guidesbyeric.com/statically-link-c-programs-with-musl-gcc&lt;/a&gt;&lt;/p&gt;
+&lt;h3 id="compile-go-on-alpine-linux"&gt;Compile Go on Alpine Linux&lt;/h3&gt;
 &lt;p&gt;Just use the golang image based on alpine linux ;)&lt;/p&gt;
 &lt;p&gt;&lt;a href="https://github.com/docker-library/docs/tree/master/golang"&gt;https://github.com/docker-library/docs/tree/master/golang&lt;/a&gt;&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;docker pull golang:alpine
@@ -2148,7 +2163,9 @@ go build intro.go
 ls -l
 ./intro
 &lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;&lt;code&gt;hi&lt;/code&gt;&lt;/p&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">john pfeiffer</dc:creator><pubDate>Sun, 28 Feb 2016 21:19:00 -0800</pubDate><guid isPermaLink="false">tag:blog.john-pfeiffer.com,2016-02-28:alpine-linux-introduction-tutorial/</guid><category>alpine</category><category>linux</category><category>security</category></item><item><title>Debian Packages for Deployment and Reprepro for a local apt repository</title><link>https://blog.john-pfeiffer.com/debian-packages-for-deployment-and-reprepro-for-a-local-apt-repository/</link><description>
+&lt;p&gt;&lt;code&gt;hi&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;Maybe &lt;/p&gt;
+&lt;p&gt;&lt;a href="http://dominik.honnef.co/posts/2015/06/go-musl/"&gt;http://dominik.honnef.co/posts/2015/06/go-musl/&lt;/a&gt; ?&lt;/p&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">john pfeiffer</dc:creator><pubDate>Sun, 28 Feb 2016 21:19:00 -0800</pubDate><guid isPermaLink="false">tag:blog.john-pfeiffer.com,2016-02-28:alpine-linux-introduction-tutorial/</guid><category>alpine</category><category>linux</category><category>security</category></item><item><title>Debian Packages for Deployment and Reprepro for a local apt repository</title><link>https://blog.john-pfeiffer.com/debian-packages-for-deployment-and-reprepro-for-a-local-apt-repository/</link><description>
 &lt;h3 id="what-is-a-debian-package"&gt;What is a Debian Package?&lt;/h3&gt;
 &lt;p&gt;A debian package is a way to distribute and install a collection of files (aka software) onto a system (i.e. Debian or Ubuntu).&lt;/p&gt;
 &lt;p&gt;While a piece of software might depend on other debian packages (e.g. libraries) usually a single .deb file represents some sort of module that serves a single purpose.&lt;/p&gt;
