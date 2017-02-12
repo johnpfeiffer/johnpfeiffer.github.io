@@ -6693,6 +6693,13 @@ composeexample_web_1     /bin/sh -c python app.py      Up      0.0.0.0:5000-&amp
 &lt;p&gt;&lt;code&gt;sudo service docker restart&lt;/code&gt;&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;Building images often depends on dependencies&lt;/strong&gt;
 look closely at error messages, i.e. make: not found and ensure that an early RUN statement has apt-get update &amp;amp;&amp;amp; apt-get install -y build-essential&lt;/p&gt;
+&lt;h3 id="discovering-an-image-parent-from-history"&gt;Discovering an Image Parent from History&lt;/h3&gt;
+&lt;p&gt;To see all of the images in detail: &lt;code&gt;docker images --all --digests=true&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;python      2.7-alpine      sha256:834b44717d3928266472066d82208241a2582ce7b3787f32abbfb0def9fb0324   c80455665c57        6 weeks ago         71.49 MB
+alpine      latest          sha256:dfbd4a3a8ebca874ebd2474f044a0b33600d4523d03b0df76e5c5986cb02d7e8   88e169ea8f46        6 weeks ago         3.984 MB
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;And then you can brute force query to see if an image has child dependencies:&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;for i in $(docker images -q); do docker history $i | grep -q 7fb9bd20d612 &amp;amp;&amp;amp; echo $i; done&lt;/code&gt;&lt;/p&gt;
 &lt;hr/&gt;
 &lt;h2 id="more-info"&gt;More Info&lt;/h2&gt;
 &lt;ul&gt;

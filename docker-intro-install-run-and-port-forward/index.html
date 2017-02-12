@@ -126,6 +126,7 @@
 </li>
 <li><a href="#troubleshooting">Troubleshooting</a><ul>
 <li><a href="#building-images-with-dockerfile">Building images with Dockerfile</a></li>
+<li><a href="#discovering-an-image-parent-from-history">Discovering an Image Parent from History</a></li>
 </ul>
 </li>
 <li><a href="#more-info">More Info</a><ul>
@@ -811,6 +812,13 @@ composeexample_web_1     /bin/sh -c python app.py      Up      0.0.0.0:5000-&gt;
 <p><code>sudo service docker restart</code></p>
 <p><strong>Building images often depends on dependencies</strong>
 look closely at error messages, i.e. make: not found and ensure that an early RUN statement has apt-get update &amp;&amp; apt-get install -y build-essential</p>
+<h3 id="discovering-an-image-parent-from-history">Discovering an Image Parent from History</h3>
+<p>To see all of the images in detail: <code>docker images --all --digests=true</code></p>
+<div class="highlight"><pre><span></span>python      2.7-alpine      sha256:834b44717d3928266472066d82208241a2582ce7b3787f32abbfb0def9fb0324   c80455665c57        6 weeks ago         71.49 MB
+alpine      latest          sha256:dfbd4a3a8ebca874ebd2474f044a0b33600d4523d03b0df76e5c5986cb02d7e8   88e169ea8f46        6 weeks ago         3.984 MB
+</pre></div>
+<p>And then you can brute force query to see if an image has child dependencies:</p>
+<p><code>for i in $(docker images -q); do docker history $i | grep -q 7fb9bd20d612 &amp;&amp; echo $i; done</code></p>
 <hr/>
 <h2 id="more-info">More Info</h2>
 <ul>
@@ -946,7 +954,7 @@ https://docker.example.com/version
             <time pubdate="pubdate" datetime="2014-07-10T17:00:00-07:00">Jul 10, 2014</time>
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#virtualization-ref">virtualization</a> 
-            <h4>~3682 words</h4>
+            <h4>~3747 words</h4>
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article"> 
                 <li><a href="/tags.html#containers-ref">containers
