@@ -109,11 +109,11 @@ But with the evolution of dev-ops, web scale, microservices, containers, etc. it
 <p>Following the straightforward work from this Docker Image we can run a cluster on a single machine:</p>
 <p><a href="https://hub.docker.com/r/progrium/consul/">https://hub.docker.com/r/progrium/consul/</a></p>
 <div class="highlight"><pre><span></span>sudo su
-docker run -d --name node1 -h node1 progrium/consul -server -bootstrap-expect 3
+docker run -d --name node1 -h node1 progrium/consul -server -bootstrap-expect <span class="m">3</span>
 <span class="nv">JOIN_IP</span><span class="o">=</span><span class="s2">"</span><span class="k">$(</span>docker inspect -f <span class="s1">'{{.NetworkSettings.IPAddress}}'</span> node1<span class="k">)</span><span class="s2">"</span>
 docker run -d --name node2 -h node2 progrium/consul -server -join <span class="nv">$JOIN_IP</span>
 docker run -d --name node3 -h node3 progrium/consul -server -join <span class="nv">$JOIN_IP</span>
-docker run -d -p 8400:8400 -p 8500:8500 -p 8600:53/udp --name node4 -h node4 progrium/consul -join <span class="nv">$JOIN_IP</span>
+docker run -d -p <span class="m">8400</span>:8400 -p <span class="m">8500</span>:8500 -p <span class="m">8600</span>:53/udp --name node4 -h node4 progrium/consul -join <span class="nv">$JOIN_IP</span>
 </pre></div>
 <blockquote>
 <p>The second 2 nodes join the first one in the cluster by using the inspected IP Address,
@@ -127,7 +127,7 @@ dig @0.0.0.0 -p <span class="m">8600</span> node1.node.consul
     <span class="p">;</span>node1.node.consul.     IN  ANY
 
     <span class="p">;;</span> ANSWER SECTION:
-    node1.node.consul.  <span class="m">0</span>   IN  A   172.17.0.2
+    node1.node.consul.  <span class="m">0</span>   IN  A   <span class="m">172</span>.17.0.2
 </pre></div>
 <blockquote>
 <p>REST API call to the list of nodes, then DNS client to get the Record for the first node</p>
@@ -157,14 +157,14 @@ curl http://localhost:8500/v1/catalog/service/web
 </li>
 </ul>
 <h3 id="alternative-install-from-zip">Alternative Install from Zip</h3>
-<div class="highlight"><pre><span></span><span class="x">apt-­get install unzip</span>
-<span class="x">wget https://releases.hashicorp.com/consul/0.7.0/consul_0.7.0_linux_amd64.zip</span>
-<span class="x">unzip consul_0.7.0_linux_amd64.zip</span>
-<span class="x">BINDIP=</span><span class="p">$(</span><span class="err">ifconfig</span> <span class="err">eth0</span> <span class="err">|</span> <span class="err">grep</span> <span class="s2">"inet addr"</span> <span class="err">|</span> <span class="err">cut</span> <span class="err">-d</span> <span class="s1">':'</span> <span class="err">­-f</span> <span class="m">2</span> <span class="err">|</span> <span class="err">cut</span> <span class="err">­-d</span> <span class="s1">' '</span> <span class="err">­-f</span> <span class="m">1</span><span class="p">)</span><span class="x"></span>
-<span class="x">./consul agent ­bootstrap ­server ­bind=</span><span class="p">$</span><span class="nv">BINDIP</span><span class="x"> ­data­dir /tmp/consul</span>
+<div class="highlight"><pre><span></span>apt-­get install unzip
+wget https://releases.hashicorp.com/consul/0.7.0/consul_0.7.0_linux_amd64.zip
+unzip consul_0.7.0_linux_amd64.zip
+BINDIP=$(ifconfig eth0 | grep "inet addr" | cut -d ':' ­-f 2 | cut ­-d ' ' ­-f 1)
+./consul agent ­bootstrap ­server ­bind=$BINDIP ­data­dir /tmp/consul
 
-<span class="x">netstat ­antp  | grep consul</span>
-<span class="x">curl http://localhost:8500/v1/status/peers</span>
+netstat ­antp  | grep consul
+curl http://localhost:8500/v1/status/peers
 </pre></div>
 <blockquote>
 <p>Note getting the IP Address on ubuntu 16.04 uses enp3s0 or enp25 which can be changed back via grub workaround: GRUB_CMDLINE_LINUX="net.ifnames=0 biosdevname=0"</p>

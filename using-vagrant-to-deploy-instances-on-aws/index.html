@@ -218,52 +218,52 @@ config.vm.provision "shell", path: "https://example.com/script.sh"
 <p><a href="http://docs.vagrantup.com/v2/provisioning">http://docs.vagrantup.com/v2/provisioning</a></p>
 <p><a href="http://docs.vagrantup.com/v2/provisioning/shell.html">http://docs.vagrantup.com/v2/provisioning/shell.html</a></p>
 <h3 id="advanced-vagrantfile-example">Advanced Vagrantfile example</h3>
-<div class="highlight"><pre><span></span><span class="err">#</span><span class="x"> -*- mode: ruby -*-</span>
-<span class="err">#</span><span class="x"> vi: set ft=ruby :</span>
+<div class="highlight"><pre><span></span><span class="c1"># -*- mode: ruby -*-</span>
+<span class="c1"># vi: set ft=ruby :</span>
 
-<span class="x">if ENV['UPDATEFQDN']</span>
-<span class="x">  updatedfqdn=ENV['UPDATEFQDN']</span>
-<span class="x">end</span>
+<span class="k">if</span> <span class="no">ENV</span><span class="o">[</span><span class="s1">'UPDATEFQDN'</span><span class="o">]</span>
+  <span class="n">updatedfqdn</span><span class="o">=</span><span class="no">ENV</span><span class="o">[</span><span class="s1">'UPDATEFQDN'</span><span class="o">]</span>
+<span class="k">end</span>
 
-<span class="p">$</span><span class="nv">fqdnscript</span><span class="x"> = &lt;&lt;FQDNSCRIPT</span>
-<span class="x">echo "I am updating fqdn to </span><span class="cp">#{</span><span class="nf">updatedfqdn</span><span class="cp">}</span><span class="x">..."</span>
-<span class="x">cat /etc/hosts | grep "</span><span class="cp">#{</span><span class="nf">updatedfqdn</span><span class="cp">}</span><span class="x">" || sudo sed 's/127.0.0.1/127.0.0.1 </span><span class="cp">#{</span><span class="nf">updatedfqdn</span><span class="cp">}</span><span class="x">/' -i /etc/hosts</span>
-<span class="x">hostname | grep "</span><span class="cp">#{</span><span class="nf">updatedfqdn</span><span class="cp">}</span><span class="x">" || sudo hostname </span><span class="cp">#{</span><span class="nf">updatedfqdn</span><span class="cp">}</span><span class="x"></span>
-<span class="x">FQDNSCRIPT</span>
+<span class="vg">$fqdnscript</span> <span class="o">=</span> <span class="o">&lt;&lt;</span><span class="dl">FQDNSCRIPT</span>
+<span class="sh">echo "I am updating fqdn to #{updatedfqdn}..."</span>
+<span class="sh">cat /etc/hosts | grep "#{updatedfqdn}" || sudo sed 's/127.0.0.1/127.0.0.1 #{updatedfqdn}/' -i /etc/hosts</span>
+<span class="sh">hostname | grep "#{updatedfqdn}" || sudo hostname #{updatedfqdn}</span>
+<span class="dl">FQDNSCRIPT</span>
 
-<span class="x">Vagrant.configure("2") do |config|</span>
-<span class="x">    config.vm.box = "dummy"</span>
-<span class="x">    config.vm.provider :aws do |aws, override|</span>
-<span class="x">        aws.access_key_id = "YOURACCESSKEY"</span>
-<span class="x">        aws.secret_access_key = "YOURSECRETKEY"</span>
-<span class="x">        aws.keypair_name = "YOURKEYPAIRNAME"</span>
-<span class="x">        aws.ami = "ami-7747d01e"</span>
-<span class="x">        aws.instance_ready_timeout = 300</span>
-<span class="x">        aws.instance_type = "m4.large"</span>
-<span class="x">        aws.tags = </span><span class="err">{</span><span class="x"></span>
-<span class="x">            "Name" =&gt; "MyCloudInstance",</span>
-<span class="x">        }</span>
-<span class="x">        if ENV['bamboo_aws_use_iops']</span>
-<span class="x">          aws.block_device_mapping = [</span><span class="err">{</span><span class="x"> 'DeviceName' =&gt; '/dev/sda1', 'Ebs.VolumeSize' =&gt; 100, 'Ebs.VolumeType' =&gt; 'io1', 'Ebs.Iops' =&gt; 3000 }]</span>
-<span class="x">        else</span>
-<span class="x">          aws.block_device_mapping = [</span><span class="err">{</span><span class="x"> 'DeviceName' =&gt; '/dev/sda1', 'Ebs.VolumeSize' =&gt; 16, 'Ebs.VolumeType' =&gt; 'gp2' }]</span>
-<span class="x">        end</span>
+<span class="no">Vagrant</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span><span class="s2">"2"</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">box</span> <span class="o">=</span> <span class="s2">"dummy"</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">provider</span> <span class="ss">:aws</span> <span class="k">do</span> <span class="o">|</span><span class="n">aws</span><span class="p">,</span> <span class="n">override</span><span class="o">|</span>
+        <span class="n">aws</span><span class="o">.</span><span class="n">access_key_id</span> <span class="o">=</span> <span class="s2">"YOURACCESSKEY"</span>
+        <span class="n">aws</span><span class="o">.</span><span class="n">secret_access_key</span> <span class="o">=</span> <span class="s2">"YOURSECRETKEY"</span>
+        <span class="n">aws</span><span class="o">.</span><span class="n">keypair_name</span> <span class="o">=</span> <span class="s2">"YOURKEYPAIRNAME"</span>
+        <span class="n">aws</span><span class="o">.</span><span class="n">ami</span> <span class="o">=</span> <span class="s2">"ami-7747d01e"</span>
+        <span class="n">aws</span><span class="o">.</span><span class="n">instance_ready_timeout</span> <span class="o">=</span> <span class="mi">300</span>
+        <span class="n">aws</span><span class="o">.</span><span class="n">instance_type</span> <span class="o">=</span> <span class="s2">"m4.large"</span>
+        <span class="n">aws</span><span class="o">.</span><span class="n">tags</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">"Name"</span> <span class="o">=&gt;</span> <span class="s2">"MyCloudInstance"</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="no">ENV</span><span class="o">[</span><span class="s1">'bamboo_aws_use_iops'</span><span class="o">]</span>
+          <span class="n">aws</span><span class="o">.</span><span class="n">block_device_mapping</span> <span class="o">=</span> <span class="o">[</span><span class="p">{</span> <span class="s1">'DeviceName'</span> <span class="o">=&gt;</span> <span class="s1">'/dev/sda1'</span><span class="p">,</span> <span class="s1">'Ebs.VolumeSize'</span> <span class="o">=&gt;</span> <span class="mi">100</span><span class="p">,</span> <span class="s1">'Ebs.VolumeType'</span> <span class="o">=&gt;</span> <span class="s1">'io1'</span><span class="p">,</span> <span class="s1">'Ebs.Iops'</span> <span class="o">=&gt;</span> <span class="mi">3000</span> <span class="p">}</span><span class="o">]</span>
+        <span class="k">else</span>
+          <span class="n">aws</span><span class="o">.</span><span class="n">block_device_mapping</span> <span class="o">=</span> <span class="o">[</span><span class="p">{</span> <span class="s1">'DeviceName'</span> <span class="o">=&gt;</span> <span class="s1">'/dev/sda1'</span><span class="p">,</span> <span class="s1">'Ebs.VolumeSize'</span> <span class="o">=&gt;</span> <span class="mi">16</span><span class="p">,</span> <span class="s1">'Ebs.VolumeType'</span> <span class="o">=&gt;</span> <span class="s1">'gp2'</span> <span class="p">}</span><span class="o">]</span>
+        <span class="k">end</span>
 
-<span class="x">        override.vm.box = "dummy"</span>
-<span class="x">        override.vm.box_url = "https://github.com/mitchellh/vagrant-aws/raw/master/dummy.box"</span>
-<span class="x">        override.ssh.username = "ubuntu"</span>
-<span class="x">        override.ssh.private_key_path = "./YOURKEYPAIRNAME.pem"</span>
-<span class="x">        override.vm.synced_folder "/etc/sslcerts", "/tmp/sourcecode", type: "rsync", create: true, rsync__exclude: ".git/"</span>
-<span class="x">    end</span>
-<span class="x">    config.vm.provision :shell, :inline =&gt; "echo `hostname -f` &gt;&gt; /home/ubuntu/currenthostname.txt"</span>
-<span class="x">    config.vm.provision :shell, :inline =&gt; </span><span class="p">$</span><span class="nv">fqdnscript</span><span class="x"></span>
-<span class="x">end</span>
+        <span class="n">override</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">box</span> <span class="o">=</span> <span class="s2">"dummy"</span>
+        <span class="n">override</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">box_url</span> <span class="o">=</span> <span class="s2">"https://github.com/mitchellh/vagrant-aws/raw/master/dummy.box"</span>
+        <span class="n">override</span><span class="o">.</span><span class="n">ssh</span><span class="o">.</span><span class="n">username</span> <span class="o">=</span> <span class="s2">"ubuntu"</span>
+        <span class="n">override</span><span class="o">.</span><span class="n">ssh</span><span class="o">.</span><span class="n">private_key_path</span> <span class="o">=</span> <span class="s2">"./YOURKEYPAIRNAME.pem"</span>
+        <span class="n">override</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">synced_folder</span> <span class="s2">"/etc/sslcerts"</span><span class="p">,</span> <span class="s2">"/tmp/sourcecode"</span><span class="p">,</span> <span class="ss">type</span><span class="p">:</span> <span class="s2">"rsync"</span><span class="p">,</span> <span class="ss">create</span><span class="p">:</span> <span class="kp">true</span><span class="p">,</span> <span class="ss">rsync__exclude</span><span class="p">:</span> <span class="s2">".git/"</span>
+    <span class="k">end</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">provision</span> <span class="ss">:shell</span><span class="p">,</span> <span class="ss">:inline</span> <span class="o">=&gt;</span> <span class="s2">"echo `hostname -f` &gt;&gt; /home/ubuntu/currenthostname.txt"</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">provision</span> <span class="ss">:shell</span><span class="p">,</span> <span class="ss">:inline</span> <span class="o">=&gt;</span> <span class="vg">$fqdnscript</span>
+<span class="k">end</span>
 
-<span class="x">Bringing machine 'default' up with 'aws' provider...</span>
-<span class="x">==&gt; default: Running provisioner: shell...</span>
-<span class="x">==&gt; default: Running: inline script</span>
-<span class="x">stdin: is not a ttty</span>
-<span class="x">I am provisioning and updating hostname...</span>
+<span class="no">Bringing</span> <span class="n">machine</span> <span class="s1">'default'</span> <span class="n">up</span> <span class="n">with</span> <span class="s1">'aws'</span> <span class="n">provider</span><span class="o">...</span>
+<span class="o">==&gt;</span> <span class="ss">default</span><span class="p">:</span> <span class="no">Running</span> <span class="ss">provisioner</span><span class="p">:</span> <span class="n">shell</span><span class="o">...</span>
+<span class="o">==&gt;</span> <span class="ss">default</span><span class="p">:</span> <span class="ss">Running</span><span class="p">:</span> <span class="n">inline</span> <span class="n">script</span>
+<span class="ss">stdin</span><span class="p">:</span> <span class="n">is</span> <span class="ow">not</span> <span class="n">a</span> <span class="n">ttty</span>
+<span class="n">I</span> <span class="n">am</span> <span class="n">provisioning</span> <span class="ow">and</span> <span class="n">updating</span> <span class="n">hostname</span><span class="o">...</span>
 </pre></div>
 <blockquote>
 <p>synced_folder is to sync other folders in your filesystem besides the folder with the Vagrantfile</p>
@@ -274,39 +274,39 @@ config.vm.provision "shell", path: "https://example.com/script.sh"
 <li><a href="http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/block-device-mapping-concepts.html">http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/block-device-mapping-concepts.html</a></li>
 </ul>
 <h3 id="vagrant-and-ec2-vpc-ami-that-does-not-haveallow-sudo">Vagrant and EC2 VPC (AMI that does not have/allow sudo)</h3>
-<div class="highlight"><pre><span></span># -*- mode: ruby -*-
-# vi: set ft=ruby :
+<div class="highlight"><pre><span></span><span class="c1"># -*- mode: ruby -*-</span>
+<span class="c1"># vi: set ft=ruby :</span>
 
-Vagrant.configure("2") do |config|
-    config.vm.box = "dummy"
+<span class="no">Vagrant</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span><span class="s2">"2"</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">box</span> <span class="o">=</span> <span class="s2">"dummy"</span>
 
-    config.ssh.pty = true
-    config.vm.synced_folder ".", "/vagrant", disabled: true
+    <span class="n">config</span><span class="o">.</span><span class="n">ssh</span><span class="o">.</span><span class="n">pty</span> <span class="o">=</span> <span class="kp">true</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">synced_folder</span> <span class="s2">"."</span><span class="p">,</span> <span class="s2">"/vagrant"</span><span class="p">,</span> <span class="ss">disabled</span><span class="p">:</span> <span class="kp">true</span>
 
-    config.vm.provider :aws do |aws, override|
+    <span class="n">config</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">provider</span> <span class="ss">:aws</span> <span class="k">do</span> <span class="o">|</span><span class="n">aws</span><span class="p">,</span> <span class="n">override</span><span class="o">|</span>
 
-        aws.access_key_id = "YOURACCESSKEY"
-        aws.secret_access_key = "YOURSECRETKEY"
-        aws.keypair_name = "YOURKEYPAIRNAME"
-        aws.ami = "ami-7747d01e"
-        aws.instance_ready_timeout = 300
-        aws.instance_type = "m4.large"
-        aws.tags = {
-            "Name" =&gt; "MyCloudInstance",
-        }
-        aws.security_groups = [ "my_aws_security_group_id" ]
-        aws.subnet_id = "my_aws_subnet_id"
-        aws.associate_public_ip = true
+        <span class="n">aws</span><span class="o">.</span><span class="n">access_key_id</span> <span class="o">=</span> <span class="s2">"YOURACCESSKEY"</span>
+        <span class="n">aws</span><span class="o">.</span><span class="n">secret_access_key</span> <span class="o">=</span> <span class="s2">"YOURSECRETKEY"</span>
+        <span class="n">aws</span><span class="o">.</span><span class="n">keypair_name</span> <span class="o">=</span> <span class="s2">"YOURKEYPAIRNAME"</span>
+        <span class="n">aws</span><span class="o">.</span><span class="n">ami</span> <span class="o">=</span> <span class="s2">"ami-7747d01e"</span>
+        <span class="n">aws</span><span class="o">.</span><span class="n">instance_ready_timeout</span> <span class="o">=</span> <span class="mi">300</span>
+        <span class="n">aws</span><span class="o">.</span><span class="n">instance_type</span> <span class="o">=</span> <span class="s2">"m4.large"</span>
+        <span class="n">aws</span><span class="o">.</span><span class="n">tags</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">"Name"</span> <span class="o">=&gt;</span> <span class="s2">"MyCloudInstance"</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="n">aws</span><span class="o">.</span><span class="n">security_groups</span> <span class="o">=</span> <span class="o">[</span> <span class="s2">"my_aws_security_group_id"</span> <span class="o">]</span>
+        <span class="n">aws</span><span class="o">.</span><span class="n">subnet_id</span> <span class="o">=</span> <span class="s2">"my_aws_subnet_id"</span>
+        <span class="n">aws</span><span class="o">.</span><span class="n">associate_public_ip</span> <span class="o">=</span> <span class="kp">true</span>
 
-        aws.user_data = "#cloud-boothook\n#!/bin/bash\ntouch /opt/.license/.eula\n"
+        <span class="n">aws</span><span class="o">.</span><span class="n">user_data</span> <span class="o">=</span> <span class="s2">"#cloud-boothook</span><span class="se">\n</span><span class="s2">#!/bin/bash</span><span class="se">\n</span><span class="s2">touch /opt/.license/.eula</span><span class="se">\n</span><span class="s2">"</span>
 
-        override.vm.box = "dummy"
-        override.vm.box_url = "https://github.com/mitchellh/vagrant-aws/raw/master/dummy.box"
+        <span class="n">override</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">box</span> <span class="o">=</span> <span class="s2">"dummy"</span>
+        <span class="n">override</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">box_url</span> <span class="o">=</span> <span class="s2">"https://github.com/mitchellh/vagrant-aws/raw/master/dummy.box"</span>
 
-        override.ssh.username = "ubuntu"
-        override.ssh.private_key_path = "/home/ubuntu/my_aws.pem"
-    end
-end
+        <span class="n">override</span><span class="o">.</span><span class="n">ssh</span><span class="o">.</span><span class="n">username</span> <span class="o">=</span> <span class="s2">"ubuntu"</span>
+        <span class="n">override</span><span class="o">.</span><span class="n">ssh</span><span class="o">.</span><span class="n">private_key_path</span> <span class="o">=</span> <span class="s2">"/home/ubuntu/my_aws.pem"</span>
+    <span class="k">end</span>
+<span class="k">end</span>
 </pre></div>
 <hr/>
 <p><strong><code>vagrant up --provider=aws --no-provision --debug</code></strong></p>

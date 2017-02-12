@@ -304,11 +304,11 @@ mysql:
 <span class="c1"># ubuntu 16.04 is xenial , https://blog.john-pfeiffer.com/docker-intro-install-run-and-port-forward/</span>
 sudo apt-key adv --keyserver hkp://pgp.mit.edu:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
 sudo sh -c <span class="s2">"echo 'deb https://apt.dockerproject.org/repo ubuntu-xenial main' &gt; /etc/apt/sources.list.d/docker.list"</span>
-sudo apt-get update <span class="o">||</span> <span class="nb">exit</span> 1
-sudo apt-get install -y linux-image-extra-<span class="k">$(</span>uname -r<span class="k">)</span> <span class="o">||</span> <span class="nb">exit</span> 1
-sudo apt-get install -y docker-engine docker-compose <span class="o">||</span> <span class="nb">exit</span> 1
-service docker status <span class="o">||</span> <span class="nb">exit</span> 1
-docker info <span class="o">||</span> <span class="nb">exit</span> 1
+sudo apt-get update <span class="o">||</span> <span class="nb">exit</span> <span class="m">1</span>
+sudo apt-get install -y linux-image-extra-<span class="k">$(</span>uname -r<span class="k">)</span> <span class="o">||</span> <span class="nb">exit</span> <span class="m">1</span>
+sudo apt-get install -y docker-engine docker-compose <span class="o">||</span> <span class="nb">exit</span> <span class="m">1</span>
+service docker status <span class="o">||</span> <span class="nb">exit</span> <span class="m">1</span>
+docker info <span class="o">||</span> <span class="nb">exit</span> <span class="m">1</span>
 </pre></div>
 <blockquote>
 <p>linux-image-extra is to ensure we have AUFS because docker needs a proper storage driver</p>
@@ -506,10 +506,10 @@ mysql:
 <p>And for this migration project a MySQL dump, SCP of the existing extra modules, and of course the already uploaded user images/files.</p>
 <p>I'm sure with more tinkering I can overcome the nginx vs www-data user permissions issue but since I time boxed this project I stuck with this compromise which is still much more improved and automated than my previous setup.</p>
 <p>For migrating data there is of course the prerequisite: <code>mysqldump -uroot -p physicstime &gt; backup.sql</code></p>
-<div class="highlight"><pre><span></span><span class="nt">vi</span> <span class="o">/</span><span class="nt">var</span><span class="o">/</span><span class="nt">www</span><span class="o">/</span><span class="nt">html</span><span class="o">/</span><span class="nt">themes</span><span class="o">/</span><span class="nt">bartik</span><span class="o">/</span><span class="nt">css</span><span class="o">/</span><span class="nt">style</span><span class="nc">.css</span>
-    <span class="nt">font-size</span><span class="o">:</span> <span class="nt">2</span><span class="nc">.929em</span><span class="o">;</span>
+<div class="highlight"><pre><span></span><span class="nt">vi</span> <span class="o">/</span><span class="nt">var</span><span class="o">/</span><span class="nt">www</span><span class="o">/</span><span class="nt">html</span><span class="o">/</span><span class="nt">themes</span><span class="o">/</span><span class="nt">bartik</span><span class="o">/</span><span class="nt">css</span><span class="o">/</span><span class="nt">style</span><span class="p">.</span><span class="nc">css</span>
+    <span class="nt">font-size</span><span class="o">:</span> <span class="nt">2</span><span class="p">.</span><span class="nc">929em</span><span class="o">;</span>
 
-<span class="nt">cat</span> <span class="o">/</span><span class="nt">var</span><span class="o">/</span><span class="nt">www</span><span class="o">/</span><span class="nt">html</span><span class="o">/</span><span class="nt">themes</span><span class="o">/</span><span class="nt">bartik</span><span class="o">/</span><span class="nt">css</span><span class="o">/</span><span class="nt">style</span><span class="nc">.css</span> <span class="o">|</span> <span class="nt">tr</span> <span class="s1">'\n'</span> <span class="s1">'\r'</span> <span class="o">|</span> <span class="nt">sed</span> <span class="nt">-e</span> <span class="s1">'s/#site-slogan {\r  font-size: 0.929em/#site-slogan {\r  font-size: 2.929em/'</span> <span class="o">|</span> <span class="nt">tr</span> <span class="s1">'\r'</span> <span class="s1">'\n'</span> <span class="o">&gt;</span> <span class="o">/</span><span class="nt">var</span><span class="o">/</span><span class="nt">www</span><span class="o">/</span><span class="nt">html</span><span class="o">/</span><span class="nt">themes</span><span class="o">/</span><span class="nt">bartik</span><span class="o">/</span><span class="nt">css</span><span class="o">/</span><span class="nt">style</span><span class="nc">.css.updated</span>
+<span class="nt">cat</span> <span class="o">/</span><span class="nt">var</span><span class="o">/</span><span class="nt">www</span><span class="o">/</span><span class="nt">html</span><span class="o">/</span><span class="nt">themes</span><span class="o">/</span><span class="nt">bartik</span><span class="o">/</span><span class="nt">css</span><span class="o">/</span><span class="nt">style</span><span class="p">.</span><span class="nc">css</span> <span class="o">|</span> <span class="nt">tr</span> <span class="s1">'\n'</span> <span class="s1">'\r'</span> <span class="o">|</span> <span class="nt">sed</span> <span class="nt">-e</span> <span class="s1">'s/#site-slogan {\r  font-size: 0.929em/#site-slogan {\r  font-size: 2.929em/'</span> <span class="o">|</span> <span class="nt">tr</span> <span class="s1">'\r'</span> <span class="s1">'\n'</span> <span class="o">&gt;</span> <span class="o">/</span><span class="nt">var</span><span class="o">/</span><span class="nt">www</span><span class="o">/</span><span class="nt">html</span><span class="o">/</span><span class="nt">themes</span><span class="o">/</span><span class="nt">bartik</span><span class="o">/</span><span class="nt">css</span><span class="o">/</span><span class="nt">style</span><span class="p">.</span><span class="nc">css</span><span class="p">.</span><span class="nc">updated</span>
 </pre></div>
 <blockquote>
 <p>customize increased visibility of the #site-slogan { , occasionally needs cache cleared in admin/config/development/performance
