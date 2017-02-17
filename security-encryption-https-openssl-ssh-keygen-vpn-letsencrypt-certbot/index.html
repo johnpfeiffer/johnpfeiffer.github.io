@@ -141,7 +141,7 @@
     <div class="span8 article-content">
 
             
-<p>As our lives become increasingly monitored and digital the privacy of being unobserved or having a private conversation that we used to be able to take for granted now requires extra effort.  The more people who choose to use these easy and readily available tools the more privacy and everyone will have.</p>
+<p>As our lives become increasingly monitored and digital the privacy of being unobserved or having a private conversation that we used to be able to take for granted now requires extra effort.  The more people who choose to use these easy and readily available tools the more privacy will become the standard rather than the exception.</p>
 <h1 id="symmetric-and-asymmetric-encryption">Symmetric and Asymmetric Encryption</h1>
 <p>Using a shared secret key is generally the simplest way to encrypt, both parties use the same key to encrypt and decrypt.</p>
 <p>Asymmetric encryption (aka "public and private key") allows for a message to be encrypted without the parties having to meet or exchange a secret.</p>
@@ -192,7 +192,7 @@
 <blockquote>
 <p>non interactively decrypt with symmetric encryption</p>
 </blockquote>
-<p>*Do not pick the password of password ;p *</p>
+<p><em>Do not pick password as your password ;p</em></p>
 <p><a href="https://www.gnupg.org/gph/en/manual/x110.html">https://www.gnupg.org/gph/en/manual/x110.html</a></p>
 <h2 id="aes-256-encryption">AES 256 Encryption</h2>
 <p>AdvancedEncryptionStandard is one of the US and world standards as an encryption algorithm.</p>
@@ -200,21 +200,40 @@
 <p>Perhaps one of the most well known projects (open source and free!) to advance the practice of encryption is <a href="https://www.openssl.org/">https://www.openssl.org/</a></p>
 <p>Here we encrypt and decrypt a text file:</p>
 <div class="highlight"><pre><span></span>openssl aes-256-cbc -in plain.txt -out message.encrypted
-openssl aes-256-cbc -d -in message.encrypted -out plain.txt
-
-openssl aes-256-cbc -a -d -in message.encrypted -out plain.txt
 </pre></div>
 <blockquote>
-<p>if it's base64 encoded do not forget the -a (dumb)</p>
+<p>prompted for a password (symmetric key) to encrypt the file with AES 256</p>
+</blockquote>
+<div class="highlight"><pre><span></span>openssl aes-256-cbc -d -in message.encrypted -out plain.txt
+</pre></div>
+<blockquote>
+<p>prompted for a password to decrypt the message</p>
+</blockquote>
+<div class="highlight"><pre><span></span>openssl aes-256-cbc -in plain.txt -out message.encrypted -pass pass:YOURPASSWORD
+</pre></div>
+<blockquote>
+<p>non-interactively provide the password to encrypt the file with AES 256</p>
+</blockquote>
+<div class="highlight"><pre><span></span>openssl aes-256-cbc -d -in message.encrypted -out plain.txt -pass pass:YOURPASSWORD
+</pre></div>
+<blockquote>
+<p>non-interactively provide the password to decrypt the file with AES 256</p>
+</blockquote>
+<p><em>an incorrect password will create a zero byte file</em></p>
+<div class="highlight"><pre><span></span>openssl aes-256-cbc -a -d -in message.encrypted -out plain.txt
+</pre></div>
+<blockquote>
+<p>if it's base64 encoded do not forget the -a</p>
 </blockquote>
 <ul>
 <li><a href="https://en.wikipedia.org/wiki/Advanced_Encryption_Standard">https://en.wikipedia.org/wiki/Advanced_Encryption_Standard</a></li>
 <li><a href="https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation">https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation</a></li>
+<li><a href="https://www.openssl.org/docs/manmaster/man1/openssl.html">https://www.openssl.org/docs/manmaster/man1/openssl.html</a></li>
 </ul>
 <h1 id="generating-ssl-certificates-and-private-and-public-keys">Generating SSL Certificates and Private and Public Keys</h1>
 <p>Perhaps the most common use of TLS/SSL are the keys used to encrypt communication with a web server, these examples use a "self signed certificate" which most libraries and browsers will not trust.</p>
 <blockquote>
-<p>"Root Certificate Authorities" are the ones you send a Certificate Signing Request" to generate a certificate that can be mathemetically trusted by the existing software libraries and browsers</p>
+<p>"Root Certificate Authorities" are the ones you send a "Certificate Signing Request" to generate a certificate that can be mathemetically trusted by the existing software libraries and browsers</p>
 </blockquote>
 <h2 id="openssl-new-key-and-cert-one-liner">openssl New Key and Cert One Liner</h2>
 <div class="highlight"><pre><span></span>openssl req -subj '/CN=example.com/O=My Company Name LTD./C=US' -new -newkey rsa:2048 -days 365 -nodes -x509 -keyout server.key -out server.crt
@@ -357,21 +376,21 @@ openssl rsa -noout -modulus -in server.key | openssl md5
 </pre></div>
 <h3 id="getting-and-verifying-an-intermediate-certificate">Getting and verifying an Intermediate Certificate</h3>
 <p>Popular web browsers will often have lock symbols or other ways for you to see (and download) a certificate)</p>
-<p>startup vm with webserver (tomcat) + current certificate</p>
-<p>chrome browse to the https://10.10.10.199</p>
-<p>Click on the lock (certificate) symbol =&gt; Certificate information  "Issued to: example.com"</p>
-<p>Click on the Certification Path (tab) ... see the root CA + intermediates + cert.</p>
-<p>click on "GeoTrust" (or the top level Certificate listed in the path) -&gt; View Certificate</p>
-<p>Details (tab) -&gt; Copy to File -&gt; Save Base-64 encoded x.509 (.cer)</p>
-<p>Verify that it is different than your original cert.crt
-Copy paste that file into a place where you have openssl installed (i.e. ubuntu linux)</p>
-<p>Hostfile (/etc/hosts) so that your openssl command can use the DNS name</p>
-<div class="highlight"><pre><span></span>openssl s_client -showcerts -connect example.com:443
-</pre></div>
-<p>Without the intermediate you should receive "Verify return code: 21 (unable to verify the first certificate)"</p>
-<div class="highlight"><pre><span></span>openssl s_client -showcerts -connect example.com:443 -CAfile geotrust-intermediate.crt
-</pre></div>
-<p>With the intermediate in the command above:   "Verify return code: 0 (ok)"</p>
+<ol>
+<li>startup vm with webserver (tomcat) + current certificate</li>
+<li>chrome browse to the https://10.10.10.199</li>
+<li>Click on the lock (certificate) symbol =&gt; Certificate information  "Issued to: example.com"</li>
+<li>Click on the Certification Path (tab) ... see the root CA + intermediates + cert.</li>
+<li>click on "GeoTrust" (or the top level Certificate listed in the path) -&gt; View Certificate</li>
+<li>Details (tab) -&gt; Copy to File -&gt; Save Base-64 encoded x.509 (.cer)</li>
+<li>Verify that it is different than your original cert.crt</li>
+<li>Copy paste that file into a place where you have openssl installed (i.e. ubuntu linux)</li>
+<li>Hostfile (/etc/hosts) so that your openssl command can use the DNS name</li>
+<li><code>openssl s_client -showcerts -connect example.com:443</code></li>
+<li>Without the intermediate you should receive "Verify return code: 21 (unable to verify the first certificate)"</li>
+<li><code>openssl s_client -showcerts -connect example.com:443 -CAfile geotrust-intermediate.crt</code></li>
+<li>With the intermediate in the command above:   "Verify return code: 0 (ok)"</li>
+</ol>
 <p>Finally, if the DNS name is publicly available, you can verify: <a href="https://www.sslshopper.com/ssl-checker.html">https://www.sslshopper.com/ssl-checker.html</a></p>
 <hr/>
 <h1 id="other-certificate-formats">Other certificate formats</h1>
@@ -586,7 +605,7 @@ ssh -L 9090:localhost:9090 -p 22 user@host.com -N
 <p>Using Docker is one of the easiest ways to leverage all of the open source tools (assuming for security you inspect the upstream source code, clone the Dockerfile, build your own docker image/container ;)</p>
 <div class="highlight"><pre><span></span># https://github.com/kylemanna/docker-openvpn
 # https://openvpn.net/index.php/open-source/documentation/howto.html
-export FQDN="physicstime.com"
+export FQDN="example.com"
 export OVPN_DATA="ovpn-data"
 docker volume create --name $OVPN_DATA
 # generate the initial configuration in the volume
@@ -621,19 +640,19 @@ docker run -v $OVPN_DATA:/etc/openvpn --rm kylemanna/openvpn ovpn_getclient $FQD
 <ol>
 <li>Starts a container with a web server that binds to port 443 </li>
 <li>The same web server/tool sends a certificate signing request (from yourdomain.com) to letsencrypt.org</li>
-<li>
-<p>letsencrypt.org then attempts to contact the provided domain (DNS -&gt; IP -&gt; server -&gt; docker container)</p>
-</li>
-<li>
-<p><a href="https://letsencrypt.org/how-it-works/">https://letsencrypt.org/how-it-works/</a></p>
-</li>
-<li><a href="https://certbot.eff.org/docs/using.html#certbot-commands">https://certbot.eff.org/docs/using.html#certbot-commands</a></li>
-<li><a href="https://github.com/certbot/certbot/blob/master/Dockerfile">https://github.com/certbot/certbot/blob/master/Dockerfile</a></li>
+<li>letsencrypt.org then attempts to contact the provided domain (DNS -&gt; IP -&gt; server -&gt; docker container)</li>
 </ol>
 <p>You can keep renewing the certificate (which lasts 90 days) for free and there are a number of other open source tools (which leverage the API/process)</p>
+<ul>
+<li><a href="https://letsencrypt.org/how-it-works/">https://letsencrypt.org/how-it-works/</a></li>
+<li><a href="https://certbot.eff.org/docs/using.html#certbot-commands">https://certbot.eff.org/docs/using.html#certbot-commands</a></li>
+<li><a href="https://github.com/certbot/certbot/blob/master/Dockerfile">https://github.com/certbot/certbot/blob/master/Dockerfile</a></li>
+</ul>
 <h1 id="cryptography-exercises">Cryptography Exercises</h1>
-<p>In order to really understand and enjoy cryptography you can dive deeper via some of these exercise...
-- <a href="https://cryptopals.com/">https://cryptopals.com/</a></p>
+<p>In order to really understand and enjoy cryptography you can dive deeper via some of these exercise...</p>
+<ul>
+<li><a href="https://cryptopals.com/">https://cryptopals.com/</a></li>
+</ul>
             <aside>
             <hr/>
             <nav>
@@ -653,7 +672,7 @@ docker run -v $OVPN_DATA:/etc/openvpn --rm kylemanna/openvpn ovpn_getclient $FQD
             <time pubdate="pubdate" datetime="2010-12-04T20:34:00-08:00">Dec 4, 2010</time>
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#it-ref">it</a> 
-            <h4>~2765 words</h4>
+            <h4>~2838 words</h4>
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article"> 
                 <li><a href="/tags.html#aes-ref">aes
