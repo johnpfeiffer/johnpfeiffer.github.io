@@ -86,8 +86,10 @@
 </ul>
 </li>
 <li><a href="#download-and-install-an-ide">Download and install an IDE</a></li>
-<li><a href="#install-or-build-or-run">Install or Build or Run</a></li>
-<li><a href="#debugging-with-delve">Debugging with Delve</a><ul>
+<li><a href="#install-or-build-or-run">Install or Build or Run</a><ul>
+<li><a href="#using-visual-studio-code-tasks-to-build-go">Using Visual Studio Code Tasks to Build Go</a></li>
+<li><a href="#using-visual-studio-code-tasks-to-run-go">Using Visual Studio Code Tasks to Run Go</a></li>
+<li><a href="#debugging-with-delve">Debugging with Delve</a></li>
 <li><a href="#delve-debugging-and-running-your-application-with-f5-is-automatic-once-installed-correctly">Delve Debugging and running your application with F5 is automatic once installed correctly</a></li>
 </ul>
 </li>
@@ -307,7 +309,88 @@ GOOS=linux GOARCH=amd64 go build -v
 <p>Unfortunately it is not quite simple to execute the code directly in VSCode <a href="https://github.com/Microsoft/vscode-go/issues/21">https://github.com/Microsoft/vscode-go/issues/21</a></p>
 <h3 id="install-or-build-or-run">Install or Build or Run</h3>
 <p>Because Go is a static language there is a compilation (and linking) phase where the source code is transformed into a binary.</p>
-<h3 id="debugging-with-delve">Debugging with Delve</h3>
+<h4 id="using-visual-studio-code-tasks-to-build-go">Using Visual Studio Code Tasks to Build Go</h4>
+<ol>
+<li>With your main.go file open press <code>Control + Shift + B</code></li>
+<li>"No task runner configured" -&gt; click on "Configure Task Runner"</li>
+<li>From the dropdown choose "Others"</li>
+<li>
+<p>fill in tasks.json</p>
+<p>{
+    "version": "0.1.0",
+    "command": "pwd",
+    "isShellCommand": true,
+    "showOutput": "always"
+}</p>
+<blockquote>
+<p>The command will execute in the folder that is opened in "File -&gt; Open Folder"</p>
+</blockquote>
+<p>{
+    "version": "0.1.0",
+    "command": "go",
+    "isShellCommand": true,
+    "args": ["build", "-v"],
+    "showOutput": "always"
+}</p>
+<blockquote>
+<p>This builds verbosely in the current directory, assuming that the IDE has opened the project folder since Go only uses relative path <a href="https://golang.org/ref/spec#ImportPath">https://golang.org/ref/spec#ImportPath</a> (and the GOPATH is set correctly)</p>
+</blockquote>
+</li>
+</ol>
+<p>If you prefer to File -&gt; Open Folder a top level folder that has many subfolders with go projects then...</p>
+<p>The workaround for not having "change working directory" or "command chaining" is to create a shell script, build.sh</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3
+4
+5
+6</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="ch">#!/bin/sh</span>
+<span class="nb">cd</span> <span class="nv">$1</span>
+<span class="nb">pwd</span>
+ls -l
+go build -v
+ls -l
+</pre></div>
+</td></tr></table>
+<blockquote>
+<p>The script could be reduced to "cd $1; go build -v" but having the extra debugging output can help...</p>
+</blockquote>
+<p>The task runner must be defined to take advantage of the new script:</p>
+<div class="highlight"><pre><span></span>{
+    "version": "0.1.0",
+    "taskName": "build",
+    "command": "bash",
+    "args": ["<span class="cp">${</span><span class="n">cwd</span><span class="cp">}</span>/build.sh", "<span class="cp">${</span><span class="n">fileDirname</span><span class="cp">}</span>"],
+    "isShellCommand": true
+}
+</pre></div>
+<blockquote>
+<p>The IDE stores the files in PROJECTFOLDER/.vscode/tasks.json</p>
+</blockquote>
+<p><a href="https://code.visualstudio.com/Docs/editor/tasks#_variable-substitution">https://code.visualstudio.com/Docs/editor/tasks#_variable-substitution</a></p>
+<h4 id="using-visual-studio-code-tasks-to-run-go">Using Visual Studio Code Tasks to Run Go</h4>
+<p>You can continue to create more key bindings (hotkeys) for running Go or running Tests, I will just override the Build (Control + Shift + B) hotkey for now...</p>
+<table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="ch">#!/bin/sh</span>
+<span class="nb">cd</span> <span class="nv">$1</span><span class="p">;</span> go run *.go
+</pre></div>
+</td></tr></table>
+<blockquote>
+<p>This does not build and instead just executes directly</p>
+</blockquote>
+<div class="highlight"><pre><span></span>{
+    "version": "0.1.0",
+    "taskName": "build",
+    "command": "bash",
+    "args": ["<span class="cp">${</span><span class="n">cwd</span><span class="cp">}</span>/run.sh", "<span class="cp">${</span><span class="n">fileDirname</span><span class="cp">}</span>"],
+    "isShellCommand": true
+}
+</pre></div>
+<blockquote>
+<p>this extra indirection of a separate run.sh is only necessary if you prefer having a top level "meta" folder</p>
+</blockquote>
+<p><a href="https://code.visualstudio.com/Docs/customization/keybindings#_tasks">https://code.visualstudio.com/Docs/customization/keybindings#_tasks</a></p>
+<h4 id="debugging-with-delve">Debugging with Delve</h4>
 <div class="highlight"><pre><span></span>go get github.com/derekparker/delve/cmd/dlv
 cd /opt/goprojects/src
 go install /derekparker/delve/cmd/dlv
@@ -699,7 +782,7 @@ cd /opt/goprojects/src/github.com/johnpfeiffer/YOURPROJECT
             <time pubdate="pubdate" datetime="2015-11-15T21:19:00-08:00">Nov 15, 2015</time>
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#programming-ref">programming</a> 
-            <h4>~1886 words</h4>
+            <h4>~2171 words</h4>
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article"> 
                 <li><a href="/tags.html#arrays-ref">arrays

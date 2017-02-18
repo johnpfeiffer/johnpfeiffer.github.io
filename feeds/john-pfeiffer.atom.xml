@@ -3243,7 +3243,88 @@ GOOS=linux GOARCH=amd64 go build -v
 &lt;p&gt;Unfortunately it is not quite simple to execute the code directly in VSCode &lt;a href="https://github.com/Microsoft/vscode-go/issues/21"&gt;https://github.com/Microsoft/vscode-go/issues/21&lt;/a&gt;&lt;/p&gt;
 &lt;h3 id="install-or-build-or-run"&gt;Install or Build or Run&lt;/h3&gt;
 &lt;p&gt;Because Go is a static language there is a compilation (and linking) phase where the source code is transformed into a binary.&lt;/p&gt;
-&lt;h3 id="debugging-with-delve"&gt;Debugging with Delve&lt;/h3&gt;
+&lt;h4 id="using-visual-studio-code-tasks-to-build-go"&gt;Using Visual Studio Code Tasks to Build Go&lt;/h4&gt;
+&lt;ol&gt;
+&lt;li&gt;With your main.go file open press &lt;code&gt;Control + Shift + B&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;"No task runner configured" -&amp;gt; click on "Configure Task Runner"&lt;/li&gt;
+&lt;li&gt;From the dropdown choose "Others"&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;fill in tasks.json&lt;/p&gt;
+&lt;p&gt;{
+    "version": "0.1.0",
+    "command": "pwd",
+    "isShellCommand": true,
+    "showOutput": "always"
+}&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;The command will execute in the folder that is opened in "File -&amp;gt; Open Folder"&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;{
+    "version": "0.1.0",
+    "command": "go",
+    "isShellCommand": true,
+    "args": ["build", "-v"],
+    "showOutput": "always"
+}&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;This builds verbosely in the current directory, assuming that the IDE has opened the project folder since Go only uses relative path &lt;a href="https://golang.org/ref/spec#ImportPath"&gt;https://golang.org/ref/spec#ImportPath&lt;/a&gt; (and the GOPATH is set correctly)&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;If you prefer to File -&amp;gt; Open Folder a top level folder that has many subfolders with go projects then...&lt;/p&gt;
+&lt;p&gt;The workaround for not having "change working directory" or "command chaining" is to create a shell script, build.sh&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1
+2
+3
+4
+5
+6&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="ch"&gt;#!/bin/sh&lt;/span&gt;
+&lt;span class="nb"&gt;cd&lt;/span&gt; &lt;span class="nv"&gt;$1&lt;/span&gt;
+&lt;span class="nb"&gt;pwd&lt;/span&gt;
+ls -l
+go build -v
+ls -l
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;blockquote&gt;
+&lt;p&gt;The script could be reduced to "cd $1; go build -v" but having the extra debugging output can help...&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;The task runner must be defined to take advantage of the new script:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;{
+    "version": "0.1.0",
+    "taskName": "build",
+    "command": "bash",
+    "args": ["&lt;span class="cp"&gt;${&lt;/span&gt;&lt;span class="n"&gt;cwd&lt;/span&gt;&lt;span class="cp"&gt;}&lt;/span&gt;/build.sh", "&lt;span class="cp"&gt;${&lt;/span&gt;&lt;span class="n"&gt;fileDirname&lt;/span&gt;&lt;span class="cp"&gt;}&lt;/span&gt;"],
+    "isShellCommand": true
+}
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;The IDE stores the files in PROJECTFOLDER/.vscode/tasks.json&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;a href="https://code.visualstudio.com/Docs/editor/tasks#_variable-substitution"&gt;https://code.visualstudio.com/Docs/editor/tasks#_variable-substitution&lt;/a&gt;&lt;/p&gt;
+&lt;h4 id="using-visual-studio-code-tasks-to-run-go"&gt;Using Visual Studio Code Tasks to Run Go&lt;/h4&gt;
+&lt;p&gt;You can continue to create more key bindings (hotkeys) for running Go or running Tests, I will just override the Build (Control + Shift + B) hotkey for now...&lt;/p&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1
+2&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="ch"&gt;#!/bin/sh&lt;/span&gt;
+&lt;span class="nb"&gt;cd&lt;/span&gt; &lt;span class="nv"&gt;$1&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt; go run *.go
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;blockquote&gt;
+&lt;p&gt;This does not build and instead just executes directly&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;{
+    "version": "0.1.0",
+    "taskName": "build",
+    "command": "bash",
+    "args": ["&lt;span class="cp"&gt;${&lt;/span&gt;&lt;span class="n"&gt;cwd&lt;/span&gt;&lt;span class="cp"&gt;}&lt;/span&gt;/run.sh", "&lt;span class="cp"&gt;${&lt;/span&gt;&lt;span class="n"&gt;fileDirname&lt;/span&gt;&lt;span class="cp"&gt;}&lt;/span&gt;"],
+    "isShellCommand": true
+}
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;this extra indirection of a separate run.sh is only necessary if you prefer having a top level "meta" folder&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;a href="https://code.visualstudio.com/Docs/customization/keybindings#_tasks"&gt;https://code.visualstudio.com/Docs/customization/keybindings#_tasks&lt;/a&gt;&lt;/p&gt;
+&lt;h4 id="debugging-with-delve"&gt;Debugging with Delve&lt;/h4&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;go get github.com/derekparker/delve/cmd/dlv
 cd /opt/goprojects/src
 go install /derekparker/delve/cmd/dlv
