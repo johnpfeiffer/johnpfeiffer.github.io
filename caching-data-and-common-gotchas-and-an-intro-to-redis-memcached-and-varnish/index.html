@@ -92,19 +92,18 @@
 <li><a href="#cache-on-write-gotchas">Cache on write gotchas</a></li>
 <li><a href="#expiration-a-cache-full-of-stale-junk">Expiration: a cache full of stale junk</a></li>
 <li><a href="#cold-cache-and-the-thundering-herd">Cold Cache and the Thundering Herd</a></li>
+<li><a href="#upgrading-your-application">Upgrading your application</a></li>
 </ul>
 </li>
 <li><a href="#tools-for-caching">Tools for caching</a><ul>
-<li><a href="#redis-examples">Redis Examples</a><ul>
+<li><a href="#memcached">Memcached</a></li>
+<li><a href="#redis-examples">Redis Examples</a></li>
+<li><a href="#installing-redis">Installing Redis</a><ul>
 <li><a href="#interactive-redis-prompt">Interactive Redis Prompt</a></li>
 <li><a href="#non-interactive-redis-commands">Non Interactive Redis Commands</a></li>
-</ul>
-</li>
-<li><a href="#installing-redis">Installing Redis</a><ul>
 <li><a href="#redis-clients">Redis Clients</a></li>
 </ul>
 </li>
-<li><a href="#memcached">Memcached</a></li>
 <li><a href="#varnish">Varnish</a></li>
 </ul>
 </li>
@@ -131,13 +130,13 @@
 <h2 id="why-cache">Why Cache?</h2>
 <p>A tradeoff of memory for cpu (or latency or some other business cost).</p>
 <ul>
+<li>computation is expensive (in terms of cpu, time, or money)</li>
 <li>accessing the data from source is too slow</li>
 <li>the data actually comes from multiple sources (complex and expensive to retrieve)</li>
 <li>to reduce load on the service originating data</li>
-<li>to reduce contention (i.e. reads and writes)</li>
-<li>for a client-server architecture, caching on the client reduces the number of required connections to a server</li>
+<li>to reduce contention (i.e. reads not served from the same persistence that does writes)</li>
 <li>server side caching can protect backend resources and improve throughput and performance</li>
-<li>computation is expensive (in terms of cpu, time, or money)</li>
+<li>for a client-server architecture, caching on the client reduces the number of required connections to a server</li>
 </ul>
 <h3 id="questions-to-ask-when-caching">Questions to ask when caching</h3>
 <ul>
@@ -310,14 +309,17 @@
 <p>Removing some or all data from the cache in order to invalidate a chunk of data (i.e. all users need to reset their passwords) or pre-emptively free up memory/space.</p>
 <h2 id="common-gotchas">Common Gotchas</h2>
 <p>Caching is challenging because of the need for data consistency, parallel requests, and race conditions.</p>
-<p>One good way to think about it is a banking system with money: if two people both try and empty an account at an ATM at the same time how will your caching system handle it?</p>
+<p>One good way to think about it is a banking system with money...</p>
+<blockquote>
+<p>If two people both try to empty a bank account at an ATM at the same time how will your caching system handle it?</p>
+</blockquote>
 <h3 id="cache-on-write-gotchas">Cache on write gotchas</h3>
 <p>One implementation flaw is to update the cache first; if the update to the data source fails then some requests may have been given incorrect data.</p>
 <p>Another flaw would be to not have a "transaction" defined around both the update of the data and then the update of the cache since if either fails future requests will receive inconsistent results.</p>
 <p>There may be a design mismatch as since data is only cached on write, if reads are occurring mostly on data written a long time ago they will be expired/pushed out and you will have poor cache efficiency.</p>
 <p>While "cache on write" is a sometimes band-aid for NoSQL "eventual consistency" when it fails (i.e. all applications should expect that a cache will not exist or have a cache miss) the result may be data inconsistency.</p>
 <p>One workaround is "check and set" (or "compare and set") where the cache will auto-invalidate if two conflicting entries are attempted.</p>
-<p><a href="http://neopythonic.blogspot.com/2011/08/compare-and-set-in-memcache.html">http://neopythonic.blogspot.com/2011/08/compare-and-set-in-memcache.html</a></p>
+<p><a href="https://neopythonic.blogspot.com/2011/08/compare-and-set-in-memcache.html">https://neopythonic.blogspot.com/2011/08/compare-and-set-in-memcache.html</a></p>
 <h3 id="expiration-a-cache-full-of-stale-junk">Expiration: a cache full of stale junk</h3>
 <p>A naive implementation of caching will store every result in the cache forever...</p>
 <p>While this seems like a good idea (<em>"The cache application/service will just evict unused items based some algorithm"</em>) it is essentially forcing your cache to be full of potentially low value information on the hope that someone else will solve the problem.</p>
@@ -345,15 +347,57 @@
 <li>If the source is not prepared for the "thundering herd" of requests (that were usually handled by the cache) then the source may become overloaded and bad things will happen</li>
 <li>It is therefore best practice to "warm the cache" by seeding data from the source into the cache before significant load events</li>
 </ol>
-<p>Cold cache not only can cause problems from the source but as a lot of data is written simultaneously to the cache, if the cache uses underlying disk or some other IO resource, it may temporarily overwhelm the cache (system/framework).</p>
+<p>Cold cache not only can cause problems from the source but when lot of data is written simultaneously to the cache, if the cache uses underlying disk or some other IO resource, it may temporarily overwhelm the cache (system/framework).</p>
+<h3 id="upgrading-your-application">Upgrading your application</h3>
+<p>In a sense the cache layer is an external persistence that has to stay in sync with the application code; they are logically and semantically bound together.</p>
+<p>Modification to your application code, specifically the way it reads and writes to the cache, may return "bad" data.</p>
+<ol>
+<li>Cache key "admins" stored a list of usernames of admin users for the application</li>
+<li>Cache key "ausers" stored a list of usernames that begin with the letter "a"</li>
+<li>An application upgrade occurs</li>
+<li>Now the code has a bug that looks up "ausers" in order to give administrator permssions</li>
+<li>(oops)</li>
+</ol>
 <h2 id="tools-for-caching">Tools for caching</h2>
-<p>Much like encryption it is probably a good idea to use a time tested product over writing your own implementation.</p>
+<p>Much like encryption it is probably a good idea to use a time tested caching component over writing your own implementation.</p>
+<p>A local in memory cache is a tried and true way of speeding up an application but it may not provide the transparency and visibility when there are bugs.</p>
+<p>While it seems trivial to setup it will slow down your dev velocity on your high value focus area and every new feature you realize you need (automatic expiration, authentication, etc.) will create a distraction and eventual maintenance requirement.</p>
+<p>Instead there are quite a few very popular battle tested options...</p>
+<h3 id="memcached">Memcached</h3>
+<ul>
+<li><a href="http://memcached.org">http://memcached.org</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Memcached">https://en.wikipedia.org/wiki/Memcached</a></li>
+</ul>
 <h3 id="redis-examples">Redis Examples</h3>
+<p>Redis has surpassed memcached in terms of speed and functionality and if you need to store more than "just a string" you should experiment with it.</p>
+<p>Besides having a cache to speed up lookups for your application or as a globally shared cache (be careful!) between multiple application serveers there can be a nice convenience as a "meta" persistence such that you can deploy a new version of your application and not lose all of the data in the cache.</p>
 <p>One thing to think about is that local redis might be far more effective than remote over the network redis.</p>
 <p>If your application can depend less shared state this is good because sharing is a nightmare for cache semantics and distributed computing.</p>
+<blockquote>
+<p>When possible avoid a globally shared cache between multiple processes or servers, or invest in learning about atomic operations</p>
+</blockquote>
 <p>Regardless of securing your remote cache you will always want to measure cache effectiveness.</p>
 <ul>
-<li><a href="http://redis.io/commands">http://redis.io/commands</a></li>
+<li><a href="https://redis.io/commands">https://redis.io/commands</a></li>
+</ul>
+<h3 id="installing-redis">Installing Redis</h3>
+<p>The simplest way is to use Docker, <a href="https://hub.docker.com/r/_/redis/">https://hub.docker.com/r/_/redis/</a></p>
+<p><code>docker run --rm -it --publish 6379:6379 --name myredis redis:alpine</code>
+<code>docker run -it --link myredis:redis --rm redis:alpine redis-cli -h redis -p 6379 set message hello</code>
+<code>docker run -it --link myredis:redis --rm redis:alpine redis-cli -h redis -p 6379 get message</code></p>
+<blockquote>
+<p>run an ephemeral docker container and then non-interactively use the same docker image to set and get a string key</p>
+</blockquote>
+<p>If you prefer installing locally to your filesystem or server:</p>
+<ul>
+<li><a href="https://redis.io/topics/quickstart">https://redis.io/topics/quickstart</a> (compiling from source)</li>
+<li>
+<p><a href="https://packages.ubuntu.com/trusty/redis-server">https://packages.ubuntu.com/trusty/redis-server</a> (sudo apt-get install redis-server)</p>
+<p>redis-cli -h localhost:6379 ping</p>
+<blockquote>
+<p>PONG , aka verify a remote server connectivity</p>
+</blockquote>
+</li>
 </ul>
 <h4 id="interactive-redis-prompt">Interactive Redis Prompt</h4>
 <div class="highlight"><pre><span></span>redis-cli
@@ -361,13 +405,20 @@ keys *
 </pre></div>
 <h4 id="non-interactive-redis-commands">Non Interactive Redis Commands</h4>
 <div class="highlight"><pre><span></span>redis-cli KEYS *:*
-redis-cli KEYS session:1:*
+</pre></div>
+<blockquote>
+<p>non-interactively get all of the keys that have subkeys</p>
+</blockquote>
+<div class="highlight"><pre><span></span>redis-cli KEYS "session:3:*" | xargs redis-cli DEL
+</pre></div>
+<blockquote>
+<p>non-interactively delete/remove all of the subkeys under the sub subkey</p>
+</blockquote>
+<div class="highlight"><pre><span></span>redis-cli KEYS session:1:*
 redis-cli hgetall session:1:web
 redis-cli hgetall session:1:web:presence
 
-redis-cli KEYS "session:3:*" | xargs redis-cli DEL   # then upgrade --restart
-
-redis-cli KEYS session:1:*  | grep session:1:web-48    # user_session.py , when the hardcoded max of 10 simultaneous sessions is hit no more can be created
+redis-cli KEYS session:1:*  | grep session:1:web-48
   session:1:web-48679:rooms
   session:1:web-48679:presence
   session:1:web-48679:message_ids
@@ -377,39 +428,42 @@ redis-cli zrange sessions:1 0 9
   1) "1:web"
   2) "1:web-48679"
 
-# remove a session manually?
 redis-cli zrem sessions:1 1:web-48679
 redis-cli del   session:1:web-48679:rooms
 redis-cli del   session:1:web-48679:presence
 redis-cli del   session:1:web-48679:message_ids
 redis-cli del   session:1:web-48679
 </pre></div>
-<hr/>
-<h3 id="installing-redis">Installing Redis</h3>
-<ul>
-<li><a href="http://redis.io/topics/quickstart">http://redis.io/topics/quickstart</a></li>
-<li>
-<p><a href="http://packages.ubuntu.com/trusty/redis-server">http://packages.ubuntu.com/trusty/redis-server</a> (sudo apt-get install redis-server)</p>
-<p>redis-cli -h example.com ping</p>
-<blockquote>
-<p>PONG , aka verify a remote server connectivity</p>
-</blockquote>
-</li>
-</ul>
 <h4 id="redis-clients">Redis Clients</h4>
-<p><a href="http://redis.io/clients#python">http://redis.io/clients#python</a></p>
 <div class="highlight"><pre><span></span>pip install redis
 </pre></div>
-<p><a href="https://pypi.python.org/pypi/redis">https://pypi.python.org/pypi/redis</a></p>
+<blockquote>
+<p><a href="http://redis.io/clients#python">http://redis.io/clients#python</a></p>
+</blockquote>
 <div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">redis</span>
 <span class="n">r</span> <span class="o">=</span> <span class="n">redis</span><span class="o">.</span><span class="n">StrictRedis</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="s1">'localhost'</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">6379</span><span class="p">)</span>
 <span class="n">r</span><span class="o">.</span><span class="n">flushall</span><span class="p">()</span>
 </pre></div>
-<h3 id="memcached">Memcached</h3>
-<ul>
-<li><a href="http://memcached.org">http://memcached.org</a></li>
-<li><a href="https://en.wikipedia.org/wiki/Memcached">https://en.wikipedia.org/wiki/Memcached</a></li>
-</ul>
+<blockquote>
+<p><a href="https://pypi.python.org/pypi/redis">https://pypi.python.org/pypi/redis</a></p>
+</blockquote>
+<p><strong>Go</strong> <code>go get github.com/garyburd/redigo</code></p>
+<div class="highlight"><pre><span></span><span class="n">package</span> <span class="n">main</span>
+
+<span class="kn">import</span> <span class="p">(</span>
+    <span class="s2">"fmt"</span>
+
+    <span class="s2">"github.com/garyburd/redigo/redis"</span>
+<span class="p">)</span>
+
+<span class="n">func</span> <span class="n">main</span><span class="p">()</span> <span class="p">{</span>
+    <span class="n">c</span><span class="p">,</span> <span class="n">_</span> <span class="p">:</span><span class="o">=</span> <span class="n">redis</span><span class="o">.</span><span class="n">Dial</span><span class="p">(</span><span class="s2">"tcp"</span><span class="p">,</span> <span class="s2">":6379"</span><span class="p">)</span>
+    <span class="n">defer</span> <span class="n">c</span><span class="o">.</span><span class="n">Close</span><span class="p">()</span>
+    <span class="n">c</span><span class="o">.</span><span class="n">Do</span><span class="p">(</span><span class="s2">"SET"</span><span class="p">,</span> <span class="s2">"message"</span><span class="p">,</span> <span class="s2">"hi"</span><span class="p">)</span>
+    <span class="n">s</span><span class="p">,</span> <span class="n">_</span> <span class="p">:</span><span class="o">=</span> <span class="n">redis</span><span class="o">.</span><span class="n">String</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">Do</span><span class="p">(</span><span class="s2">"GET"</span><span class="p">,</span> <span class="s2">"message"</span><span class="p">))</span>
+    <span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+<span class="p">}</span>
+</pre></div>
 <h3 id="varnish">Varnish</h3>
 <ul>
 <li><a href="https://www.varnish-cache.org/about">https://www.varnish-cache.org/about</a> REST web caching</li>
@@ -433,7 +487,7 @@ redis-cli del   session:1:web-48679
             <time pubdate="pubdate" datetime="2015-03-26T00:00:00-07:00">Mar 26, 2015</time>
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#programming-ref">programming</a> 
-            <h4>~1773 words</h4>
+            <h4>~2155 words</h4>
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article"> 
                 <li><a href="/tags.html#cache-ref">cache
