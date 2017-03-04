@@ -3499,6 +3499,47 @@ ls -l
 &lt;p&gt;this extra indirection of a separate run.sh is only necessary if you prefer having a top level "meta" folder&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;p&gt;&lt;a href="https://code.visualstudio.com/Docs/customization/keybindings#_tasks"&gt;https://code.visualstudio.com/Docs/customization/keybindings#_tasks&lt;/a&gt;&lt;/p&gt;
+&lt;h4 id="go-test-with-a-visual-studio-code-test-task"&gt;Go Test with a Visual Studio Code Test Task&lt;/h4&gt;
+&lt;p&gt;The "test" task is unassigned (at least for my linux installation) so the first step is to inspect and customize the hotkey keybindings.&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;Control+K Control+S&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Or use File -&amp;gt; Preferences -&amp;gt; Keyboard Shortcuts&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;In the left pane search the "Default Keybindings" file for "build", i.e. on line 502 you should see:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;{ "key": "ctrl+shift+b",          "command": "workbench.action.tasks.build" },
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Add to the empty "keybindings.json" on the right a new hotkey&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;[
+    { "key": "ctrl+shift+t",          "command": "workbench.action.tasks.test" }
+]
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Save the file (the IDE will store your customization in ~/.config/Code/User/keybindings.json)&lt;/p&gt;
+&lt;p&gt;Now when you use &lt;code&gt;Control+Shift+T&lt;/code&gt; you should see "No task configured" and "Configure Task Runner"&lt;/p&gt;
+&lt;p&gt;This example defines multiple tasks, both go build and go test (this will save to .vscode/tasks.json)&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;{
+    "version": "0.1.0",
+    "tasks": [
+        {
+            "taskName": "build",
+            "command": "go",
+            "args": ["build", "-v"],
+            "isShellCommand": true,
+            "showOutput": "always"
+        },
+        {
+            "taskName": "test",
+            "command": "go",
+            "args": ["test", "-v"],
+            "isShellCommand": true,
+            "showOutput": "always"
+        }
+    ]
+}
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Assuming you have opened File -&amp;gt; Open Folder at the top level of your code tree as Go expects relative paths,&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;code&gt;Control+Shift+T&lt;/code&gt; will now open the Tasks output pane and display the results of any tests run&lt;/p&gt;
 &lt;h4 id="debugging-with-delve"&gt;Debugging with Delve&lt;/h4&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;go get github.com/derekparker/delve/cmd/dlv
 cd /opt/goprojects/src

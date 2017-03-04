@@ -89,6 +89,7 @@
 <li><a href="#install-or-build-or-run">Install or Build or Run</a><ul>
 <li><a href="#using-visual-studio-code-tasks-to-build-go">Using Visual Studio Code Tasks to Build Go</a></li>
 <li><a href="#using-visual-studio-code-tasks-to-run-go">Using Visual Studio Code Tasks to Run Go</a></li>
+<li><a href="#go-test-with-a-visual-studio-code-test-task">Go Test with a Visual Studio Code Test Task</a></li>
 <li><a href="#debugging-with-delve">Debugging with Delve</a></li>
 <li><a href="#delve-debugging-and-running-your-application-with-f5-is-automatic-once-installed-correctly">Delve Debugging and running your application with F5 is automatic once installed correctly</a></li>
 </ul>
@@ -390,6 +391,47 @@ ls -l
 <p>this extra indirection of a separate run.sh is only necessary if you prefer having a top level "meta" folder</p>
 </blockquote>
 <p><a href="https://code.visualstudio.com/Docs/customization/keybindings#_tasks">https://code.visualstudio.com/Docs/customization/keybindings#_tasks</a></p>
+<h4 id="go-test-with-a-visual-studio-code-test-task">Go Test with a Visual Studio Code Test Task</h4>
+<p>The "test" task is unassigned (at least for my linux installation) so the first step is to inspect and customize the hotkey keybindings.</p>
+<p><code>Control+K Control+S</code></p>
+<blockquote>
+<p>Or use File -&gt; Preferences -&gt; Keyboard Shortcuts</p>
+</blockquote>
+<p>In the left pane search the "Default Keybindings" file for "build", i.e. on line 502 you should see:</p>
+<div class="highlight"><pre><span></span>{ "key": "ctrl+shift+b",          "command": "workbench.action.tasks.build" },
+</pre></div>
+<p>Add to the empty "keybindings.json" on the right a new hotkey</p>
+<div class="highlight"><pre><span></span>[
+    { "key": "ctrl+shift+t",          "command": "workbench.action.tasks.test" }
+]
+</pre></div>
+<p>Save the file (the IDE will store your customization in ~/.config/Code/User/keybindings.json)</p>
+<p>Now when you use <code>Control+Shift+T</code> you should see "No task configured" and "Configure Task Runner"</p>
+<p>This example defines multiple tasks, both go build and go test (this will save to .vscode/tasks.json)</p>
+<div class="highlight"><pre><span></span>{
+    "version": "0.1.0",
+    "tasks": [
+        {
+            "taskName": "build",
+            "command": "go",
+            "args": ["build", "-v"],
+            "isShellCommand": true,
+            "showOutput": "always"
+        },
+        {
+            "taskName": "test",
+            "command": "go",
+            "args": ["test", "-v"],
+            "isShellCommand": true,
+            "showOutput": "always"
+        }
+    ]
+}
+</pre></div>
+<blockquote>
+<p>Assuming you have opened File -&gt; Open Folder at the top level of your code tree as Go expects relative paths,</p>
+</blockquote>
+<p><code>Control+Shift+T</code> will now open the Tasks output pane and display the results of any tests run</p>
 <h4 id="debugging-with-delve">Debugging with Delve</h4>
 <div class="highlight"><pre><span></span>go get github.com/derekparker/delve/cmd/dlv
 cd /opt/goprojects/src
@@ -782,7 +824,7 @@ cd /opt/goprojects/src/github.com/johnpfeiffer/YOURPROJECT
             <time pubdate="pubdate" datetime="2015-11-15T21:19:00-08:00">Nov 15, 2015</time>
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#programming-ref">programming</a> 
-            <h4>~2171 words</h4>
+            <h4>~2354 words</h4>
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article"> 
                 <li><a href="/tags.html#arrays-ref">arrays
