@@ -81,6 +81,7 @@
 <li><a href="#caches-are-another-operational-component-with-overhead">Caches are another Operational component with Overhead</a></li>
 </ul>
 </li>
+<li><a href="#high-level-caching-for-the-application-versus-low-level-caching-for-the-persistence-layer">"High Level" caching for the application versus "Low Level" caching for the persistence layer</a></li>
 <li><a href="#how-to-cache">How to Cache</a><ul>
 <li><a href="#cache-on-write">Cache on Write</a></li>
 <li><a href="#cache-on-read">Cache on Read</a></li>
@@ -93,6 +94,7 @@
 <li><a href="#expiration-a-cache-full-of-stale-junk">Expiration: a cache full of stale junk</a></li>
 <li><a href="#cold-cache-and-the-thundering-herd">Cold Cache and the Thundering Herd</a></li>
 <li><a href="#upgrading-your-application">Upgrading your application</a></li>
+<li><a href="#spanning-multiple-keys">Spanning Multiple Keys</a></li>
 </ul>
 </li>
 <li><a href="#tools-for-caching">Tools for caching</a><ul>
@@ -132,6 +134,7 @@
 <ul>
 <li>computation is expensive (in terms of cpu, time, or money)</li>
 <li>accessing the data from source is too slow</li>
+<li>access to data across a larger geographic distance</li>
 <li>the data actually comes from multiple sources (complex and expensive to retrieve)</li>
 <li>to reduce load on the service originating data</li>
 <li>to reduce contention (i.e. reads not served from the same persistence that does writes)</li>
@@ -291,14 +294,17 @@
 <li>Metrics</li>
 <li>Testing (i.e. synthetic smoke tests or load)</li>
 </ul>
-<p>None of this operational cost is free, and there are plenty of issues when just implementing caching in code...</p>
+<p>None of this operational cost is free, and there are plenty of issues when just implementing caching in the code...</p>
+<h2 id="high-level-caching-for-the-application-versus-low-level-caching-for-the-persistence-layer">"High Level" caching for the application versus "Low Level" caching for the persistence layer</h2>
+<p>Caching can be the most effective at the "highest" layer where the application is able to trivially service a request.  (e.g. caching the final full web page that was requested)</p>
+<p>This "protects" all of the underlying machinery from having to do work.  It requires a good understanding of how dynamic or personalized the results are, designing the system to have pieces that can be cached, and is brittle to change.</p>
+<p>Caching can be an "easy win" when applied at the "lowest" layer right near the persistence (i.e. redis "in front of" a database - that for example contains the new articles that will be served on a web page) as all of the components in layers above can benefit from improved performance without having to change the business logic (or perhaps even unaware of the caching).</p>
+<p>Both can be used together but to paraphrase: "mo caching mo problems"</p>
 <h2 id="how-to-cache">How to Cache</h2>
 <h3 id="cache-on-write">Cache on Write</h3>
-<p>Also known as "cache on write through"</p>
-<p>Whenever new data is written a cache must also be updated.</p>
+<p>Also known as "cache on write through", whenever new data is written a cache must also be updated.</p>
 <h3 id="cache-on-read">Cache on Read</h3>
-<p>Also known as "cache on read through"</p>
-<p>Whenever a query is made first the cache is checked.</p>
+<p>Also known as "cache on read through", whenever a query is made first the cache is checked.</p>
 <ul>
 <li>If there is a "cache miss" then the data source is queried and the cache is updated and the result is returned.  </li>
 <li>If there is a "cache hit" and the data is in the cache then it is returned (and potentially a cache key expiration updated as this cache hit improved the cache efficiency).</li>
@@ -314,12 +320,50 @@
 <p>If two people both try to empty a bank account at an ATM at the same time how will your caching system handle it?</p>
 </blockquote>
 <h3 id="cache-on-write-gotchas">Cache on write gotchas</h3>
-<p>One implementation flaw is to update the cache first; if the update to the data source fails then some requests may have been given incorrect data.</p>
-<p>Another flaw would be to not have a "transaction" defined around both the update of the data and then the update of the cache since if either fails future requests will receive inconsistent results.</p>
-<p>There may be a design mismatch as since data is only cached on write, if reads are occurring mostly on data written a long time ago they will be expired/pushed out and you will have poor cache efficiency.</p>
-<p>While "cache on write" is a sometimes band-aid for NoSQL "eventual consistency" when it fails (i.e. all applications should expect that a cache will not exist or have a cache miss) the result may be data inconsistency.</p>
-<p>One workaround is "check and set" (or "compare and set") where the cache will auto-invalidate if two conflicting entries are attempted.</p>
-<p><a href="https://neopythonic.blogspot.com/2011/08/compare-and-set-in-memcache.html">https://neopythonic.blogspot.com/2011/08/compare-and-set-in-memcache.html</a></p>
+<ul>
+<li>There may be a design mismatch as since data is only cached on write, if reads are occurring mostly on data written a long time ago they will be expired/pushed out and you will have poor cache efficiency (paradoxically adding caching will have resulted in more complexity and worse performance).</li>
+<li>One implementation flaw is updating the cache first; if the update to the data source fails then some requests may have been given incorrect data.</li>
+<li>The opposite order of updating the canonical source first can have a similar problem if the process fails before the cache can be updated. (Thus leaving the cache with old data).</li>
+<li>
+<ul>
+<li>First invalidating the cache reduces the risk of a failure during a write creating an inconsistent state</li>
+</ul>
+</li>
+<li>
+<ul>
+<li>Next update the data persistence (which should be provided as an atomic operation by your vendor ;)</li>
+</ul>
+</li>
+<li>
+<ul>
+<li>Finally update the cache</li>
+</ul>
+</li>
+<li>
+<ul>
+<li>In the worst case the canonical source will be updated without the benefit of caching</li>
+</ul>
+</li>
+<li>
+<ul>
+<li>One might also have a "transaction" defined around both the update of the origin and cache with retries for failure</li>
+</ul>
+</li>
+<li>While "cache on write" is a sometimes band-aid for NoSQL "eventual consistency" when it fails (i.e. all applications should expect that a cache will not exist or have a cache miss) the result may be data inconsistency.</li>
+<li>
+<ul>
+<li>One workaround is "check and set" (or "compare and set") where the cache will auto-invalidate if two conflicting entries are attempted.</li>
+</ul>
+</li>
+<li>
+<ul>
+<li><a href="https://neopythonic.blogspot.com/2011/08/compare-and-set-in-memcache.html">https://neopythonic.blogspot.com/2011/08/compare-and-set-in-memcache.html</a></li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>This "gotcha" could be summarized as not handling rollback</p>
+</blockquote>
 <h3 id="expiration-a-cache-full-of-stale-junk">Expiration: a cache full of stale junk</h3>
 <p>A naive implementation of caching will store every result in the cache forever...</p>
 <p>While this seems like a good idea (<em>"The cache application/service will just evict unused items based some algorithm"</em>) it is essentially forcing your cache to be full of potentially low value information on the hope that someone else will solve the problem.</p>
@@ -358,6 +402,8 @@
 <li>Now the code has a bug that looks up "ausers" in order to give administrator permssions</li>
 <li>(oops)</li>
 </ol>
+<h3 id="spanning-multiple-keys">Spanning Multiple Keys</h3>
+<p>If you need to retrieve multiple items from a cache in order to fulfill a request you may run the risk of "torn reads" where the first item retrieved from cache is logically inconsistent with the second item.</p>
 <h2 id="tools-for-caching">Tools for caching</h2>
 <p>Much like encryption it is probably a good idea to use a time tested caching component over writing your own implementation.</p>
 <p>A local in memory cache is a tried and true way of speeding up an application but it may not provide the transparency and visibility when there are bugs.</p>
@@ -387,10 +433,7 @@ hello world</p>
 <blockquote>
 <p>When possible avoid a globally shared cache between multiple processes or servers, or invest in learning about atomic operations</p>
 </blockquote>
-<p>Regardless of securing your remote cache you will always want to measure cache effectiveness.</p>
-<ul>
-<li><a href="https://redis.io/commands">https://redis.io/commands</a></li>
-</ul>
+<p>Regardless of whether you securing your remote cache (or just depend on network isolation) you will always want to measure cache effectiveness.</p>
 <h3 id="installing-redis">Installing Redis</h3>
 <p>The simplest way is to use Docker, <a href="https://hub.docker.com/r/_/redis/">https://hub.docker.com/r/_/redis/</a></p>
 <p><code>docker run --rm -it --publish 6379:6379 --name myredis redis:alpine</code>
@@ -445,6 +488,9 @@ redis-cli del   session:1:web-48679:presence
 redis-cli del   session:1:web-48679:message_ids
 redis-cli del   session:1:web-48679
 </pre></div>
+<ul>
+<li><a href="https://redis.io/commands">https://redis.io/commands</a></li>
+</ul>
 <h4 id="redis-clients">Redis Clients</h4>
 <div class="highlight"><pre><span></span>pip install redis
 </pre></div>
@@ -499,7 +545,7 @@ redis-cli del   session:1:web-48679
             <time pubdate="pubdate" datetime="2015-03-26T00:00:00-07:00">Mar 26, 2015</time>
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#programming-ref">programming</a> 
-            <h4>~2193 words</h4>
+            <h4>~2501 words</h4>
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article"> 
                 <li><a href="/tags.html#cache-ref">cache
