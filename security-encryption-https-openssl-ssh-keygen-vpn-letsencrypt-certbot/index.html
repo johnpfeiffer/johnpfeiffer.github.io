@@ -9,8 +9,9 @@
 <meta name="keywords" content="security, encryption, aes, https, openssl, certbot, ssh, keygen, openvpn, vpn, letsencrypt, certbot, it, " />
         <title>Security Encryption HTTPS OpenSSL SSH Keygen VPN Letsencrypt Certbot  · johnpfeiffer
 </title>
-        <link href="https://cdn-images.mailchimp.com/embedcode/slim-081711.css" rel="stylesheet" type="text/css">
-        <link href="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css" rel="stylesheet">
+        <!--link href="https://cdn-images.mailchimp.com/embedcode/slim-081711.css" rel="stylesheet" type="text/css"-->
+        <!--link href="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css" rel="stylesheet"-->
+        <link href="https://blog.john-pfeiffer.com/theme/css/bootstrap-combined.min.css" rel="stylesheet">
         <link rel="stylesheet" type="text/css" href="https://blog.john-pfeiffer.com/theme/css/style.css" media="screen">
         <link rel="stylesheet" type="text/css" href="https://blog.john-pfeiffer.com/theme/css/solarizedlight.css" media="screen">
         <link rel="shortcut icon" href="https://blog.john-pfeiffer.com/theme/images/favicon.ico" type="image/x-icon" />
@@ -131,7 +132,10 @@
 </li>
 </ul>
 </li>
-<li><a href="#virtual-private-networks-and-openvpn">Virtual Private Networks and openVPN</a></li>
+<li><a href="#virtual-private-networks-and-openvpn">Virtual Private Networks and openVPN</a><ul>
+<li><a href="#connect-a-client-to-the-openvpn-server">Connect a client to the OpenVPN server</a></li>
+</ul>
+</li>
 <li><a href="#letsencrypt-and-certbot-for-free-ssl-certificates">Letsencrypt and certbot for free SSL Certificates</a></li>
 <li><a href="#cryptography-exercises">Cryptography Exercises</a></li>
 </ul>
@@ -619,16 +623,26 @@ docker run -v $OVPN_DATA:/etc/openvpn -d -p 1194:1194/udp --cap-add=NET_ADMIN ky
 docker run -v $OVPN_DATA:/etc/openvpn --rm -it kylemanna/openvpn easyrsa build-client-full $FQDN nopass
 # export the client config with embedded certificates
 docker run -v $OVPN_DATA:/etc/openvpn --rm kylemanna/openvpn ovpn_getclient $FQDN &gt; $FQDN.ovpn
-
-# From a client computer SCP to download the $FQDN&gt;ovpn and then connect to the openvpn server
-# sudo apt-get install -y openvpn
-# sudo openvpn --config $FQDN.ovpn
+</pre></div>
+<h2 id="connect-a-client-to-the-openvpn-server">Connect a client to the OpenVPN server</h2>
+<p>From a client computer SCP to download the $FQDN&gt;ovpn and then connect to the openvpn server</p>
+<div class="highlight"><pre><span></span>FQDN=youropenvpn.example.com
+sudo apt-get install -y openvpn
+sudo openvpn --config $FQDN.ovpn
 # verify with the following in the output: "/sbin/ip addr add dev tun0 local 192.168.255.6 peer 192.168.255.5"
 # ifconfig -a  "tun0 ... inet addr:192.168.255.6"  , as you send traffic: RX bytes:4145707 (4.1 MB)  TX bytes:319025 (319.0 KB)
-# curl checkip.amazonaws.com  , should return the IP address of the VPN server (not your local Wifi/ISP)
-# curl https://dnsleaktest.com/
+curl checkip.amazonaws.com  # should return the IP address of the VPN server (not your local Wifi/ISP)
+curl https://dnsleaktest.com/
 # https://whoer.net/#extended
 </pre></div>
+<p>Moreover your DNS server can "leak" or be hijacked, here are some good alternatives to your snooping ISP or "big brother" evil corp.</p>
+<ol>
+<li>84.200.69.80 or 84.200.70.40 (dns.watch free, neutral, privacy)</li>
+<li>216.146.36.36 (Dyn DNS was acquired by Oracle)</li>
+<li>209.244.0.4 (Level3 Communications telco was acquired by CenturyLink)</li>
+<li>208.67.220.220 (OpenDNS was acquired by Cisco)</li>
+<li>8.8.8.8 (Google - so basically giving them even more data - especially when you use Chrome too)</li>
+</ol>
 <hr/>
 <h1 id="letsencrypt-and-certbot-for-free-ssl-certificates">Letsencrypt and certbot for free SSL Certificates</h1>
 <p>A relatively recent development has been a widespread effort to help secure more of everyone's communications by encouraing web sites to install SSL certificates (and automate renewals) for free...</p>
@@ -674,7 +688,7 @@ docker run -v $OVPN_DATA:/etc/openvpn --rm kylemanna/openvpn ovpn_getclient $FQD
             <time pubdate="pubdate" datetime="2017-02-16T23:34:00-08:00">Feb 16, 2017</time>
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#it-ref">it</a> 
-            <h4>~2865 words</h4>
+            <h4>~2939 words</h4>
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article"> 
                 <li><a href="/tags.html#aes-ref">aes
