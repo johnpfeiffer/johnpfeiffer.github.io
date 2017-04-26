@@ -128,8 +128,10 @@
 <li><a href="#connecting-with-ssh-client-to-a-remote-server">Connecting with SSH client to a remote server</a></li>
 <li><a href="#ssh-ignore-strict-hosts-checking">SSH ignore strict hosts checking</a></li>
 <li><a href="#ssh-agent-forwarding">SSH Agent Forwarding</a></li>
-<li><a href="#ssh-for-socks-proxy">SSH for SOCKS proxy</a><ul>
-<li><a href="#use-a-docker-container-to-isolate-the-vpn-software-and-instead-only-allow-an-ssh-tunnel-as-a-web-proxy">use  a docker container to isolate the VPN software and instead only allow an SSH tunnel as a web proxy</a></li>
+<li><a href="#ssh-tcp-tunnel">SSH TCP tunnel</a><ul>
+<li><a href="#use-a-docker-container-to-isolate-the-vpn-software-and-instead-only-allow-an-ssh-tunnel-as-a-web-proxy">Use a docker container to isolate the VPN software and instead only allow an SSH tunnel as a web proxy</a></li>
+<li><a href="#configure-firefox-to-use-the-socks-host">Configure Firefox to use the SOCKS Host</a></li>
+<li><a href="#configure-firefox-to-use-the-socks5-proxy-for-dns">Configure Firefox to use the socks5 proxy for DNS</a></li>
 </ul>
 </li>
 <li><a href="#ssh-tunnel-for-windows-rdp">SSH tunnel for Windows RDP</a></li>
@@ -587,45 +589,48 @@ an optional step to list the keys that ssh-agent has loaded in memory</p>
     IdentityFile ~/.ssh/example.pem
 </pre></div>
 <p><a href="https://linux.die.net/man/1/ssh-add">https://linux.die.net/man/1/ssh-add</a></p>
-<h3 id="ssh-for-socks-proxy">SSH for SOCKS proxy</h3>
-<blockquote>
-<p>firefox sends requests to the server over the ssh encrypted connection</p>
-</blockquote>
+<h3 id="ssh-tcp-tunnel">SSH TCP tunnel</h3>
+<p>In this example the SSH tunnel could be used for a SOCKS proxy for the browser...</p>
 <div class="highlight"><pre><span></span>ssh -ND 9999 user@example.org
 </pre></div>
 <blockquote>
-<p>connect via ssh to a remote server, after password prompt will block</p>
+<p>connect via ssh to a remote server, after the password prompt the process will stay open for connections locally via port 9999</p>
 </blockquote>
-<div class="highlight"><pre><span></span>Firefox -&gt; Edit -&gt; Preferences -&gt; Advanced -&gt; Network -&gt; Connection -&gt; Settings
-</pre></div>
-<p>Manual Proxy configuration: SOCKS Host: localhost, Port 9999</p>
-<h5 id="use-a-docker-container-to-isolate-the-vpn-software-and-instead-only-allow-an-ssh-tunnel-as-a-web-proxy">use  a docker container to isolate the VPN software and instead only allow an SSH tunnel as a web proxy</h5>
-<div class="highlight"><pre><span></span>docker run -it --rm --privileged --publish 2222:2222 --volume /opt/mydata:/opt/mydata ubuntu-xenial-vpn
-vi /etc/ssh/sshd_config
-    Port 2222
-    PermitRootLogin
-# mkdir -p /var/run/sshd
-/etc/init.d/ssh restart
-passwd root
+<h4 id="use-a-docker-container-to-isolate-the-vpn-software-and-instead-only-allow-an-ssh-tunnel-as-a-web-proxy">Use a docker container to isolate the VPN software and instead only allow an SSH tunnel as a web proxy</h4>
+<p>An alternative to a remote machine as the SSH target for the tunnel you can instead target a docker container running locally.
+- This allows you to package everything required (i.e. vpn software) into the container
+- Has a security benefit that only the container (and its filesystem) are directly exposed to the VPN</p>
+<blockquote>
+<p>Note that for an even more limited security profile the container could run as an HTTP proxy as it will only handle HTTP traffic (rather than all TCP)</p>
+</blockquote>
+<div class="highlight"><pre><span></span>docker run --detach --rm --privileged --publish 2222:2222 ubuntu-xenial-vpn
 </pre></div>
 <blockquote>
-<p>this is a way to change the docker container to use a password</p>
+<p>the container is running SSHD</p>
 </blockquote>
-<div class="highlight"><pre><span></span><span class="n">ssh</span> <span class="o">-</span><span class="n">ND</span> <span class="mi">9999</span> <span class="o">-</span><span class="n">p</span> <span class="mi">2222</span> <span class="n">root</span><span class="mf">@127.0.0.1</span>
+<div class="highlight"><pre><span></span>ssh -p 2222 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no root@localhost
+openconnect https://vpn.example.com
 </pre></div>
 <blockquote>
-<p>start a socks5 proxy via SSH, after entering the password (or if key based no password) then it will hold open connection</p>
+<p>SSH into the container and start the openconnect vpn connection and authenticate</p>
 </blockquote>
-<p>Configure the browser to use Socks Host: localhost and Port 9999</p>
-<div class="highlight"><pre><span></span>Firefox -&gt; Edit -&gt; Preferences -&gt; Advanced -&gt; Network -&gt; Connection -&gt; Settings
+<div class="highlight"><pre><span></span>ssh -ND 9999 -p 2222 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no root@localhost
 </pre></div>
-<p>Next configure the browser to use the socks5 proxy for DNS</p>
+<h4 id="configure-firefox-to-use-the-socks-host">Configure Firefox to use the SOCKS Host</h4>
+<div class="highlight"><pre><span></span>Firefox -&gt; Edit -&gt; Preferences -&gt; Advanced -&gt; Network -&gt; Connection -&gt; Settings
+Manual Proxy configuration: SOCKS Host: localhost, Port 9999
+</pre></div>
+<blockquote>
+<p>firefox sends requests to the server over the ssh encrypted connection</p>
+</blockquote>
+<h4 id="configure-firefox-to-use-the-socks5-proxy-for-dns">Configure Firefox to use the socks5 proxy for DNS</h4>
 <div class="highlight"><pre><span></span><span class="n">about</span><span class="o">:</span><span class="n">config</span>
 <span class="n">network</span><span class="o">.</span><span class="na">proxy</span><span class="o">.</span><span class="na">socks_remote_dns</span>
 </pre></div>
 <blockquote>
-<p>Note that for a more limited security profile only use an HTTP proxy as it will only handle HTTP traffic</p>
+<p>use the address bar to access the advanced configuration option and set socks_remote_dns true</p>
 </blockquote>
+<p>This ensures the browser will use the SOCKS proxy domain name server rather than the local machines</p>
 <h3 id="ssh-tunnel-for-windows-rdp">SSH tunnel for Windows RDP</h3>
 <div class="highlight"><pre><span></span>ssh -L 3389:172.24.32.40:3389 172.24.32.100 -l sshusername -N
 </pre></div>
@@ -757,7 +762,7 @@ curl https://dnsleaktest.com/
             <time pubdate="pubdate" datetime="2017-02-16T23:34:00-08:00">Feb 16, 2017</time>
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#it-ref">it</a> 
-            <h4>~3207 words</h4>
+            <h4>~3286 words</h4>
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article"> 
                 <li><a href="/tags.html#aes-ref">aes

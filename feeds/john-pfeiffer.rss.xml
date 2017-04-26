@@ -910,45 +910,48 @@ an optional step to list the keys that ssh-agent has loaded in memory&lt;/p&gt;
     IdentityFile ~/.ssh/example.pem
 &lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;&lt;a href="https://linux.die.net/man/1/ssh-add"&gt;https://linux.die.net/man/1/ssh-add&lt;/a&gt;&lt;/p&gt;
-&lt;h3 id="ssh-for-socks-proxy"&gt;SSH for SOCKS proxy&lt;/h3&gt;
-&lt;blockquote&gt;
-&lt;p&gt;firefox sends requests to the server over the ssh encrypted connection&lt;/p&gt;
-&lt;/blockquote&gt;
+&lt;h3 id="ssh-tcp-tunnel"&gt;SSH TCP tunnel&lt;/h3&gt;
+&lt;p&gt;In this example the SSH tunnel could be used for a SOCKS proxy for the browser...&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;ssh -ND 9999 user@example.org
 &lt;/pre&gt;&lt;/div&gt;
 &lt;blockquote&gt;
-&lt;p&gt;connect via ssh to a remote server, after password prompt will block&lt;/p&gt;
+&lt;p&gt;connect via ssh to a remote server, after the password prompt the process will stay open for connections locally via port 9999&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;Firefox -&amp;gt; Edit -&amp;gt; Preferences -&amp;gt; Advanced -&amp;gt; Network -&amp;gt; Connection -&amp;gt; Settings
-&lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;Manual Proxy configuration: SOCKS Host: localhost, Port 9999&lt;/p&gt;
-&lt;h5 id="use-a-docker-container-to-isolate-the-vpn-software-and-instead-only-allow-an-ssh-tunnel-as-a-web-proxy"&gt;use  a docker container to isolate the VPN software and instead only allow an SSH tunnel as a web proxy&lt;/h5&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;docker run -it --rm --privileged --publish 2222:2222 --volume /opt/mydata:/opt/mydata ubuntu-xenial-vpn
-vi /etc/ssh/sshd_config
-    Port 2222
-    PermitRootLogin
-# mkdir -p /var/run/sshd
-/etc/init.d/ssh restart
-passwd root
+&lt;h4 id="use-a-docker-container-to-isolate-the-vpn-software-and-instead-only-allow-an-ssh-tunnel-as-a-web-proxy"&gt;Use a docker container to isolate the VPN software and instead only allow an SSH tunnel as a web proxy&lt;/h4&gt;
+&lt;p&gt;An alternative to a remote machine as the SSH target for the tunnel you can instead target a docker container running locally.
+- This allows you to package everything required (i.e. vpn software) into the container
+- Has a security benefit that only the container (and its filesystem) are directly exposed to the VPN&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Note that for an even more limited security profile the container could run as an HTTP proxy as it will only handle HTTP traffic (rather than all TCP)&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;docker run --detach --rm --privileged --publish 2222:2222 ubuntu-xenial-vpn
 &lt;/pre&gt;&lt;/div&gt;
 &lt;blockquote&gt;
-&lt;p&gt;this is a way to change the docker container to use a password&lt;/p&gt;
+&lt;p&gt;the container is running SSHD&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;ssh&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;ND&lt;/span&gt; &lt;span class="mi"&gt;9999&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;p&lt;/span&gt; &lt;span class="mi"&gt;2222&lt;/span&gt; &lt;span class="n"&gt;root&lt;/span&gt;&lt;span class="mf"&gt;@127.0.0.1&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;ssh -p 2222 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no root@localhost
+openconnect https://vpn.example.com
 &lt;/pre&gt;&lt;/div&gt;
 &lt;blockquote&gt;
-&lt;p&gt;start a socks5 proxy via SSH, after entering the password (or if key based no password) then it will hold open connection&lt;/p&gt;
+&lt;p&gt;SSH into the container and start the openconnect vpn connection and authenticate&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;p&gt;Configure the browser to use Socks Host: localhost and Port 9999&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;Firefox -&amp;gt; Edit -&amp;gt; Preferences -&amp;gt; Advanced -&amp;gt; Network -&amp;gt; Connection -&amp;gt; Settings
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;ssh -ND 9999 -p 2222 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no root@localhost
 &lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;Next configure the browser to use the socks5 proxy for DNS&lt;/p&gt;
+&lt;h4 id="configure-firefox-to-use-the-socks-host"&gt;Configure Firefox to use the SOCKS Host&lt;/h4&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;Firefox -&amp;gt; Edit -&amp;gt; Preferences -&amp;gt; Advanced -&amp;gt; Network -&amp;gt; Connection -&amp;gt; Settings
+Manual Proxy configuration: SOCKS Host: localhost, Port 9999
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;firefox sends requests to the server over the ssh encrypted connection&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h4 id="configure-firefox-to-use-the-socks5-proxy-for-dns"&gt;Configure Firefox to use the socks5 proxy for DNS&lt;/h4&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;about&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="n"&gt;config&lt;/span&gt;
 &lt;span class="n"&gt;network&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;proxy&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;socks_remote_dns&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 &lt;blockquote&gt;
-&lt;p&gt;Note that for a more limited security profile only use an HTTP proxy as it will only handle HTTP traffic&lt;/p&gt;
+&lt;p&gt;use the address bar to access the advanced configuration option and set socks_remote_dns true&lt;/p&gt;
 &lt;/blockquote&gt;
+&lt;p&gt;This ensures the browser will use the SOCKS proxy domain name server rather than the local machines&lt;/p&gt;
 &lt;h3 id="ssh-tunnel-for-windows-rdp"&gt;SSH tunnel for Windows RDP&lt;/h3&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;ssh -L 3389:172.24.32.40:3389 172.24.32.100 -l sshusername -N
 &lt;/pre&gt;&lt;/div&gt;
