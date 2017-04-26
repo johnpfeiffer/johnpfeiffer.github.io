@@ -571,13 +571,44 @@ This kind of issue occurs in a "pipeline" of producers/consumers (also known as 
 &lt;blockquote&gt;
 &lt;p&gt;"Root Certificate Authorities" are the ones you send a "Certificate Signing Request" to generate a certificate that can be mathemetically trusted by the existing software libraries and browsers&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;h2 id="openssl-new-key-and-cert-one-liner"&gt;openssl New Key and Cert One Liner&lt;/h2&gt;
+&lt;h2 id="more-private-and-public-key-basics-for-ssl-certificates"&gt;More Private and Public Key basics for SSL Certificates&lt;/h2&gt;
+&lt;p&gt;The private key contains a series of numbers. Two of those numbers form the "public key", the others are part of your "private key".&lt;/p&gt;
+&lt;p&gt;The "public key" bits are also embedded in your Certificate (we get them from your CSR - certificate signing request).&lt;/p&gt;
+&lt;h3 id="verify-the-ssl-certificate-and-private-key-match"&gt;Verify the SSL Certificate and Private Key match&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;(openssl x509 -noout -modulus -in server.pem | openssl md5 ; openssl rsa -noout -modulus -in server.key | openssl md5) | uniq
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;outputs a single hash if matching, if two hashes are output then it is not unique and the key and cert do not match&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;To check that the public key in your cert matches the public portion of your private key:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;openssl x509 -noout -text -in server.crt
+openssl rsa -noout -text -in server.key
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;But since the public exponent is usually 65537 and it's challening to compare a long modulus you can use the following approach:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;openssl x509 -noout -modulus -in server.crt | openssl md5
+openssl rsa -noout -modulus -in server.key | openssl md5
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;the "modulus" and the "public exponent" portions of the cert and key ... aka the two md5sum hashes should match&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id="verify-the-cert-and-intermediate-match-and-then-verify"&gt;Verify the Cert and Intermediate match and then Verify&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;openssl verify -purpose sslserver -CAfile intermediate.pem -verbose server.pem
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;ensure the intermediate certificate matches the SSL certificate (if it does not SSL trust will not work correctly)&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id="verify-a-csr-matches-the-key-and-certificate"&gt;Verify a CSR matches the Key and Certificate&lt;/h3&gt;
+&lt;p&gt;To check to which key or certificate a particular CSR belongs you can compute&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;openssl req -noout -modulus -in server.csr | openssl md5
+&lt;/pre&gt;&lt;/div&gt;
+&lt;h2 id="creating-keys-and-certificates-and-certificate-requests"&gt;Creating keys and certificates and certificate requests&lt;/h2&gt;
+&lt;h3 id="openssl-new-key-and-cert-one-liner"&gt;openssl New Key and Cert One Liner&lt;/h3&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;openssl req -subj '/CN=example.com/O=My Company Name LTD./C=US' -new -newkey rsa:2048 -days 365 -nodes -x509 -keyout server.key -out server.crt
 &lt;/pre&gt;&lt;/div&gt;
 &lt;blockquote&gt;
 &lt;p&gt;one liner to generate a self signed SSL key and certificate, since SSL certs are rotated regularly we can use 2048 instead of 4096 bits&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;h2 id="openssl-certificate-commands"&gt;openssl certificate commands&lt;/h2&gt;
+&lt;h3 id="openssl-certificate-commands"&gt;openssl certificate commands&lt;/h3&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;openssl req -out CSR.csr -new -newkey rsa:2048 -nodes -keyout privateKey.key
 &lt;/pre&gt;&lt;/div&gt;
 &lt;blockquote&gt;
@@ -628,7 +659,7 @@ This kind of issue occurs in a "pipeline" of producers/consumers (also known as 
 &lt;blockquote&gt;
 &lt;p&gt;Generate a certificate signing request based on an existing certificate and private key&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;h2 id="creating-an-rsa-certificate-with-a-password"&gt;Creating an RSA certificate with a password&lt;/h2&gt;
+&lt;h3 id="creating-an-rsa-certificate-with-a-password"&gt;Creating an RSA certificate with a password&lt;/h3&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;openssl genrsa -des3 -out domainname.key 2048
 &lt;/pre&gt;&lt;/div&gt;
 &lt;blockquote&gt;
@@ -645,17 +676,13 @@ This kind of issue occurs in a "pipeline" of producers/consumers (also known as 
 &lt;blockquote&gt;
 &lt;p&gt;Generate a self signed cert&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;h2 id="remove-a-passphrase-to-install-a-private-key-on-a-server"&gt;Remove a passphrase to install a private key on a server&lt;/h2&gt;
+&lt;h3 id="remove-a-passphrase-to-install-a-private-key-on-a-server"&gt;Remove a passphrase to install a private key on a server&lt;/h3&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;openssl rsa -in domainname-passphrase.key -out domainname-server.key
 &lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;OR&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;openssl rsa -in privateKey.pem -out newPrivateKey.pem
 &lt;/pre&gt;&lt;/div&gt;
-&lt;h2 id="verify-the-cert-intermediate-then-verify-the-cert-key"&gt;VERIFY THE CERT + INTERMEDIATE, THEN VERIFY THE CERT + KEY&lt;/h2&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;openssl verify -purpose sslserver -CAfile intermediate.pem -verbose server.pem
-(openssl x509 -noout -modulus -in server.pem | openssl md5 ; openssl rsa -noout -modulus -in server.key | openssl md5) | uniq
-&lt;/pre&gt;&lt;/div&gt;
-&lt;h3 id="use-openssls-built-in-webserver"&gt;Use openssl's built in webserver&lt;/h3&gt;
+&lt;h2 id="use-openssls-built-in-webserver"&gt;Use openssl's built in webserver&lt;/h2&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;openssl s_server -cert server.pem -key server-nopass.key
 &lt;/pre&gt;&lt;/div&gt;
 &lt;blockquote&gt;
@@ -688,27 +715,6 @@ This kind of issue occurs in a "pipeline" of producers/consumers (also known as 
 &lt;/blockquote&gt;
 &lt;h3 id="get-a-remote-server-ssl-certificate-using-openssl-and-sed"&gt;Get a remote server ssl certificate using openssl and sed&lt;/h3&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;echo | openssl s_client -connect &lt;span class="cp"&gt;${&lt;/span&gt;&lt;span class="n"&gt;REMOTEHOST&lt;/span&gt;&lt;span class="cp"&gt;}&lt;/span&gt;:&lt;span class="cp"&gt;${&lt;/span&gt;&lt;span class="n"&gt;REMOTEPORT&lt;/span&gt;&lt;span class="cp"&gt;}&lt;/span&gt; 2&amp;gt;&lt;span class="err"&gt;&amp;amp;&lt;/span&gt;1 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p'
-&lt;/pre&gt;&lt;/div&gt;
-&lt;h2 id="more-private-and-public-key-basics-for-ssl-certificates"&gt;More Private and Public Key basics for SSL Certificates&lt;/h2&gt;
-&lt;p&gt;The private key contains a series of numbers. Two of those numbers form the "public key", the others are part of your "private key".&lt;/p&gt;
-&lt;p&gt;The "public key" bits are also embedded in your Certificate (we get them from your CSR - certificate signing request).&lt;/p&gt;
-&lt;p&gt;To check that the public key in your cert matches the public portion of your private key:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;openssl x509 -noout -text -in server.crt
-openssl rsa -noout -text -in server.key
-&lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;The "modulus" and the "public exponent" portions in the key and the Certificate must match.&lt;/p&gt;
-&lt;p&gt;But since the public exponent is usually 65537 and it's bothering comparing long modulus you can use the following approach:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;openssl x509 -noout -modulus -in server.crt | openssl md5
-openssl rsa -noout -modulus -in server.key | openssl md5
-&lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;And then compare these really shorter numbers. With overwhelming probability they will differ if the keys are different. As a one-liner:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;openssl x509 -noout -modulus -in server.pem | openssl md5 ; openssl rsa -noout -modulus -in server.key | openssl md5
-&lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;And with auto-magic comparison (If more than one hash is displayed, they don't match):&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;(openssl x509 -noout -modulus -in server.pem | openssl md5 ; openssl rsa -noout -modulus -in server.key | openssl md5) | uniq
-&lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;To check to which key or certificate a particular CSR belongs you can compute&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;openssl req -noout -modulus -in server.csr | openssl md5
 &lt;/pre&gt;&lt;/div&gt;
 &lt;h3 id="getting-and-verifying-an-intermediate-certificate"&gt;Getting and verifying an Intermediate Certificate&lt;/h3&gt;
 &lt;p&gt;Popular web browsers will often have lock symbols or other ways for you to see (and download) a certificate)&lt;/p&gt;
@@ -796,6 +802,7 @@ Entry type: trustedCertEntry
 &lt;/ul&gt;
 &lt;hr/&gt;
 &lt;h1 id="ssh-encryption"&gt;SSH Encryption&lt;/h1&gt;
+&lt;p&gt;Secure Shell is for network access over an insecure network &lt;a href="https://en.wikipedia.org/wiki/Secure_Shell"&gt;https://en.wikipedia.org/wiki/Secure_Shell&lt;/a&gt;&lt;/p&gt;
 &lt;h2 id="create-a-publicprivate-key-pair-for-ssh"&gt;Create a public/private key pair for SSH&lt;/h2&gt;
 &lt;p&gt;Backup any existing ~/.ssh/id_rsa  (cp -a ~./ssh ~./ssh-bak)
 Backup any existing ~/.ssh/id_rsa.pub&lt;/p&gt;
@@ -878,6 +885,31 @@ Host example.com
         StrictHostKeyChecking no
         UserKnownHostsFile=/dev/null
 &lt;/pre&gt;&lt;/div&gt;
+&lt;h3 id="ssh-agent-forwarding"&gt;SSH Agent Forwarding&lt;/h3&gt;
+&lt;p&gt;It can be insecure to forward your SSH access through a jumpbox to a machine deeper in your network, though it is generally worse to leave SSH keyson a jumpbox.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;ssh-add ~/.ssh/example.pem
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;add a specific key to the ssh agent
+    ssh-add -L
+an optional step to list the keys that ssh-agent has loaded in memory&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;ssh&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;At&lt;/span&gt; &lt;span class="n"&gt;user&lt;/span&gt;&lt;span class="mf"&gt;@1.2.3.4&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;SSH and explicitly forward the key so that the second shell session (ssh-agent) has access to it&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;    &lt;span class="n"&gt;ssh&lt;/span&gt; &lt;span class="n"&gt;user&lt;/span&gt;&lt;span class="mf"&gt;@5.6.7.8&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;the extra indentation is to indicate that from the jumpbox you are able to ssh to the internal machine&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;A more permanent configuration change by using ~/.ssh/config&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;Host 1.2.3.4
+    ForwardAgent yes
+    IdentityFile ~/.ssh/example.pem
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;&lt;a href="https://linux.die.net/man/1/ssh-add"&gt;https://linux.die.net/man/1/ssh-add&lt;/a&gt;&lt;/p&gt;
 &lt;h3 id="ssh-for-socks-proxy"&gt;SSH for SOCKS proxy&lt;/h3&gt;
 &lt;blockquote&gt;
 &lt;p&gt;firefox sends requests to the server over the ssh encrypted connection&lt;/p&gt;
@@ -890,8 +922,36 @@ Host example.com
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;Firefox -&amp;gt; Edit -&amp;gt; Preferences -&amp;gt; Advanced -&amp;gt; Network -&amp;gt; Connection -&amp;gt; Settings
 &lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;Manual Proxy configuration: SOCKS Host: localhost, Port 9999&lt;/p&gt;
+&lt;h5 id="use-a-docker-container-to-isolate-the-vpn-software-and-instead-only-allow-an-ssh-tunnel-as-a-web-proxy"&gt;use  a docker container to isolate the VPN software and instead only allow an SSH tunnel as a web proxy&lt;/h5&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;docker run -it --rm --privileged --publish 2222:2222 --volume /opt/mydata:/opt/mydata ubuntu-xenial-vpn
+vi /etc/ssh/sshd_config
+    Port 2222
+    PermitRootLogin
+# mkdir -p /var/run/sshd
+/etc/init.d/ssh restart
+passwd root
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;this is a way to change the docker container to use a password&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;ssh&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;ND&lt;/span&gt; &lt;span class="mi"&gt;9999&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;p&lt;/span&gt; &lt;span class="mi"&gt;2222&lt;/span&gt; &lt;span class="n"&gt;root&lt;/span&gt;&lt;span class="mf"&gt;@127.0.0.1&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;start a socks5 proxy via SSH, after entering the password (or if key based no password) then it will hold open connection&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Configure the browser to use Socks Host: localhost and Port 9999&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;Firefox -&amp;gt; Edit -&amp;gt; Preferences -&amp;gt; Advanced -&amp;gt; Network -&amp;gt; Connection -&amp;gt; Settings
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Next configure the browser to use the socks5 proxy for DNS&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;about&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="n"&gt;config&lt;/span&gt;
+&lt;span class="n"&gt;network&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;proxy&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;socks_remote_dns&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Note that for a more limited security profile only use an HTTP proxy as it will only handle HTTP traffic&lt;/p&gt;
+&lt;/blockquote&gt;
 &lt;h3 id="ssh-tunnel-for-windows-rdp"&gt;SSH tunnel for Windows RDP&lt;/h3&gt;
-&lt;p&gt;&lt;code&gt;ssh -L 3389:172.24.32.40:3389 172.24.32.100 -l sshusername -N&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;ssh -L 3389:172.24.32.40:3389 172.24.32.100 -l sshusername -N
+&lt;/pre&gt;&lt;/div&gt;
 &lt;ul&gt;
 &lt;li&gt;L = local port is forwarded to the remote host and port&lt;/li&gt;
 &lt;li&gt;l = login_name&lt;/li&gt;
@@ -968,13 +1028,13 @@ curl https://dnsleaktest.com/
 # https://whoer.net/#extended
 &lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;Moreover your DNS server can "leak" or be hijacked, here are some good alternatives to your snooping ISP or "big brother" evil corp.&lt;/p&gt;
-&lt;ol&gt;
+&lt;ul&gt;
 &lt;li&gt;84.200.69.80 or 84.200.70.40 (dns.watch free, neutral, privacy)&lt;/li&gt;
 &lt;li&gt;216.146.36.36 (Dyn DNS was acquired by Oracle)&lt;/li&gt;
 &lt;li&gt;209.244.0.4 (Level3 Communications telco was acquired by CenturyLink)&lt;/li&gt;
 &lt;li&gt;208.67.220.220 (OpenDNS was acquired by Cisco)&lt;/li&gt;
 &lt;li&gt;8.8.8.8 (Google - so basically giving them even more data - especially when you use Chrome too)&lt;/li&gt;
-&lt;/ol&gt;
+&lt;/ul&gt;
 &lt;hr/&gt;
 &lt;h1 id="letsencrypt-and-certbot-for-free-ssl-certificates"&gt;Letsencrypt and certbot for free SSL Certificates&lt;/h1&gt;
 &lt;p&gt;A relatively recent development has been a widespread effort to help secure more of everyone's communications by encouraing web sites to install SSL certificates (and automate renewals) for free...&lt;/p&gt;
