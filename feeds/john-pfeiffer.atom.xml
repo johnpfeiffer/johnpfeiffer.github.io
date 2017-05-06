@@ -9998,7 +9998,206 @@ involving extensive legwork, detective work, and persistence).&lt;/p&gt;
 &lt;li&gt;Add any further subdomain redirects (e.g. www.example1.com) by repeating steps 1 and 2&lt;/li&gt;
 &lt;/ol&gt;
 &lt;h3 id="more-info"&gt;more info&lt;/h3&gt;
-&lt;p&gt;&lt;a href="http://docs.aws.amazon.com/AmazonS3/latest/dev/how-to-page-redirect.html"&gt;http://docs.aws.amazon.com/AmazonS3/latest/dev/how-to-page-redirect.html&lt;/a&gt;&lt;/p&gt;</summary><category term="Amazon"></category><category term="S3"></category><category term="html redirect"></category></entry><entry><title>Self configuration tests for scalability</title><link href="https://blog.john-pfeiffer.com/self-configuration-tests-for-scalability/" rel="alternate"></link><published>2012-03-12T02:42:00-07:00</published><updated>2012-03-12T02:42:00-07:00</updated><author><name>john pfeiffer</name></author><id>tag:blog.john-pfeiffer.com,2012-03-12:self-configuration-tests-for-scalability/</id><summary type="html">
+&lt;p&gt;&lt;a href="http://docs.aws.amazon.com/AmazonS3/latest/dev/how-to-page-redirect.html"&gt;http://docs.aws.amazon.com/AmazonS3/latest/dev/how-to-page-redirect.html&lt;/a&gt;&lt;/p&gt;</summary><category term="Amazon"></category><category term="S3"></category><category term="html redirect"></category></entry><entry><title>LDAP and LDAPS with Apache Directory Studio and the Java Keystore</title><link href="https://blog.john-pfeiffer.com/ldap-and-ldaps-with-apache-directory-studio-and-the-java-keystore/" rel="alternate"></link><published>2012-03-29T21:44:51-07:00</published><updated>2012-03-29T21:44:51-07:00</updated><author><name>john pfeiffer</name></author><id>tag:blog.john-pfeiffer.com,2012-03-29:ldap-and-ldaps-with-apache-directory-studio-and-the-java-keystore/</id><summary type="html">&lt;p&gt;The popularity of LDAP for directory service/lookup means Apache Directory Services + Apache Directory Studio is an excellent combination for getting started with identity and user management.&lt;/p&gt;
+&lt;p&gt;&lt;a href="http://directory.apache.org/apacheds/"&gt;http://directory.apache.org/apacheds/&lt;/a&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;on windows it requires a 32bit JRE =(&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Download then install: &lt;code&gt;dpkg -i  apacheds-1.5.7.deb&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;later on uinstall is possible via: &lt;code&gt;dpkg -r apacheds&lt;/code&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;By default Apache DS listens on &lt;strong&gt;10389&lt;/strong&gt; and &lt;strong&gt;10636&lt;/strong&gt; (SSL)&lt;/p&gt;
+&lt;p&gt;You can connect to it with Apache Dir Studio with "LDAP -&amp;gt; New Connection -&amp;gt; hostname , port = 10389"&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;BindDN or user (click on Check Authentication)
+uid=admin,ou=system
+password= secret
+
+ldapsearch -v -H ldap://ldap.domain.com:10389 -x -D &amp;quot;uid=admin,ou=system&amp;quot; -w &amp;quot;secret&amp;quot; &amp;quot;(objectclass=*)&amp;quot; -b &amp;quot;ou=system&amp;quot;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h3 id="self-signed-java-keystore"&gt;Self Signed Java Keystore&lt;/h3&gt;
+&lt;p&gt;A Java Keystore is different from a normal cert + key combo. Example "self signed" java keystore, key, certificate combo&lt;/p&gt;
+&lt;p&gt;NOTE: CN should really be ldap.domain.com , not Zanzibar!!!!&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;keytool -genkey -keyalg &amp;quot;RSA&amp;quot; -dname &amp;quot;cn=zanzibar, ou=ApacheDS, o=ASF, c=US&amp;quot;  -alias zanzibar -keystore zanzibar.jks -storepass secret -validity 730
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;blockquote&gt;
+&lt;p&gt;Press Enter to use the same password for certificate as we already entered above for the keystore&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;keytool -list -v -keystore zanzibar.jks -storetype jks -storepass secret
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h3 id="apacheds-config-file"&gt;ApacheDS Config File&lt;/h3&gt;
+&lt;p&gt;SSL is enabled by default but needs to be modified to use a separate certificate:&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;sudo vi /var/lib/apacheds-1.5.7/default/conf/server.xml&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt; &lt;span class="nt"&gt;&amp;lt;ldapServer&lt;/span&gt; &lt;span class="na"&gt;id=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;ldapServer&amp;quot;&lt;/span&gt;
+
+            &lt;span class="err"&gt;allowAnonyn&lt;/span&gt; &lt;span class="na"&gt;mousAccess=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;false&amp;quot;&lt;/span&gt;
+            &lt;span class="na"&gt;saslHost=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;ldap.example.com&amp;quot;&lt;/span&gt;
+            &lt;span class="na"&gt;saslPrincipal=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;ldap/ldap.example.com@EXAMPLE.COM&amp;quot;&lt;/span&gt;
+            &lt;span class="na"&gt;searchBaseDn=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;ou=users,ou=system&amp;quot;&lt;/span&gt;
+            &lt;span class="na"&gt;maxTimeLimit=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;15000&amp;quot;&lt;/span&gt;
+            &lt;span class="na"&gt;maxSizeLimit=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;1000&amp;quot;&lt;/span&gt;
+   &lt;span class="na"&gt;keystoreFile=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;/var/lib/ssl/zanzibar.jks&amp;quot;&lt;/span&gt;
+   &lt;span class="na"&gt;certificatePassword=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;secret&amp;quot;&lt;/span&gt;&lt;span class="nt"&gt;&amp;gt;&lt;/span&gt;
+
+    &lt;span class="nt"&gt;&amp;lt;transports&amp;gt;&lt;/span&gt;
+      &lt;span class="nt"&gt;&amp;lt;tcpTransport&lt;/span&gt; &lt;span class="na"&gt;address=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;0.0.0.0&amp;quot;&lt;/span&gt; &lt;span class="na"&gt;port=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;10389&amp;quot;&lt;/span&gt; &lt;span class="na"&gt;nbThreads=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;8&amp;quot;&lt;/span&gt; &lt;span class="na"&gt;backLog=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;50&amp;quot;&lt;/span&gt; &lt;span class="na"&gt;enableSSL=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;false&amp;quot;&lt;/span&gt;&lt;span class="nt"&gt;/&amp;gt;&lt;/span&gt;
+      &lt;span class="nt"&gt;&amp;lt;tcpTransport&lt;/span&gt; &lt;span class="na"&gt;address=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;0.0.0.0&amp;quot;&lt;/span&gt; &lt;span class="na"&gt;port=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;10636&amp;quot;&lt;/span&gt; &lt;span class="na"&gt;nbThreads=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;8&amp;quot;&lt;/span&gt; &lt;span class="na"&gt;backLog=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;50&amp;quot;&lt;/span&gt; &lt;span class="na"&gt;enableSSL=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;true&amp;quot;&lt;/span&gt;&lt;span class="nt"&gt;/&amp;gt;&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;lt;/transports&amp;gt;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;hr /&gt;
+&lt;h3 id="start-and-verify-the-new-config"&gt;Start and verify the new config&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;/etc/init.d/apacheds-1.5.7-default restart
+/etc/init.d/apacheds-1.5.7-default status
+
+netstat -an --inet
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;blockquote&gt;
+&lt;p&gt;start the service and check ports listening, established, time wait (especially 10636)&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;JXplorer or ApacheDirectoryStudio connection "LDAP -&amp;gt; New Connection -&amp;gt; hostname , port = 10636" (SSL or LDAPS)&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;BindDN or user (click on Check Authentication)
+uid=admin,ou=system 
+password= secret
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;SELF SIGNED CERTIFICATE WARNING - you can view the certificate and choose to manually accept...&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;NOTE IF YOU SEE THE ERROR "The connection failed - Connection refused: connect (zanzibar:10636)"&lt;br /&gt;
+    javax.naming.CommunicationException: zanzibar:10636 [Root exception is java.net.ConnectException: Connection refused: connect]&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;ENSURE THAT YOUR TRANSPORT IS NOT ONLY ALLOWING localhost! (below is the locked down setting...)&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&amp;lt;tcpTransport address=&amp;quot;localhost&amp;quot; port=&amp;quot;10636&amp;quot; enableSSL=&amp;quot;true&amp;quot;/&amp;gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h3 id="modify-the-iptables-firewall"&gt;Modify the iptables firewall&lt;/h3&gt;
+&lt;p&gt;Allow well known LDAP (389) and LDAPS (636) ports to work with ApacheDS&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;iptables -A PREROUTING -t nat -i eth0 -p tcp --dport 389 -j REDIRECT --to-port 10389
+iptables -A PREROUTING -t nat -i eth0 -p tcp --dport 636 -j REDIRECT --to-port 10636
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h3 id="test-and-verify-connectivity-from-a-remote-machine"&gt;Test and verify connectivity from a remote machine&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;ldapsearch -H ldap://ldap.domain.com:389 -x -D &amp;quot;uid=example,ou=system&amp;quot; -W -b &amp;quot;ou=system&amp;quot; &amp;quot;(uid=example)&amp;quot;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h3 id="extract-a-certificate-from-the-java-key-store"&gt;Extract a Certificate from the Java Key Store&lt;/h3&gt;
+&lt;p&gt;EXTRACT A CERTIFICATE FROM A JKS INTO A .DER, THEN CONVERT IT INTO A .PEM AND IMPORT INTO THE JVM cacerts
+(this allows a java based app to connect to your self signed cert LDAP server)&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;keytool&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="nb"&gt;list&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;v&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;keystore&lt;/span&gt; &lt;span class="n"&gt;zanzibar&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;jks&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;storetype&lt;/span&gt; &lt;span class="n"&gt;jks&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;storepass&lt;/span&gt; &lt;span class="n"&gt;secret&lt;/span&gt;
+  &lt;span class="n"&gt;Alias&lt;/span&gt; &lt;span class="n"&gt;name&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="n"&gt;zanzibar&lt;/span&gt;
+
+&lt;span class="n"&gt;keytool&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;export&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;alias&lt;/span&gt; &lt;span class="n"&gt;zanzibar&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;keystore&lt;/span&gt; &lt;span class="n"&gt;zanzibar&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;jks&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;storepass&lt;/span&gt; &lt;span class="n"&gt;secret&lt;/span&gt; &lt;span class="o"&gt;&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;zanzibar&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;der&lt;/span&gt;
+&lt;span class="n"&gt;openssl&lt;/span&gt; &lt;span class="n"&gt;x509&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="n"&gt;zanzibar&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;der&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;inform&lt;/span&gt; &lt;span class="n"&gt;DER&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;out&lt;/span&gt; &lt;span class="n"&gt;zanzibar&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;crt&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;outform&lt;/span&gt; &lt;span class="n"&gt;PEM&lt;/span&gt;
+&lt;span class="n"&gt;openssl&lt;/span&gt; &lt;span class="n"&gt;x509&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;text&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="n"&gt;zanzibar&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;crt&lt;/span&gt; &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="n"&gt;head&lt;/span&gt;        &lt;span class="o"&gt;//&lt;/span&gt;&lt;span class="n"&gt;verify&lt;/span&gt; &lt;span class="n"&gt;you&lt;/span&gt; &lt;span class="n"&gt;have&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="n"&gt;valid&lt;/span&gt; &lt;span class="n"&gt;cert&lt;/span&gt;
+
+&lt;span class="n"&gt;openssl&lt;/span&gt; &lt;span class="n"&gt;s_client&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;connect&lt;/span&gt; &lt;span class="n"&gt;localhost&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="mi"&gt;10636&lt;/span&gt;                           &lt;span class="o"&gt;//&lt;/span&gt;&lt;span class="n"&gt;Verify&lt;/span&gt; &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;code&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;18&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt; &lt;span class="n"&gt;signed&lt;/span&gt; &lt;span class="n"&gt;certificate&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="n"&gt;openssl&lt;/span&gt; &lt;span class="n"&gt;s_client&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;connect&lt;/span&gt; &lt;span class="n"&gt;localhost&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="mi"&gt;10636&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;CAfile&lt;/span&gt; &lt;span class="n"&gt;zanzibar&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;crt&lt;/span&gt;      &lt;span class="o"&gt;//&lt;/span&gt;&lt;span class="n"&gt;Verify&lt;/span&gt; &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;code&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;ok&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="n"&gt;keytool&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;trustcacerts&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;alias&lt;/span&gt; &lt;span class="n"&gt;zanzibar&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="nb"&gt;file&lt;/span&gt; &lt;span class="n"&gt;zanzibar&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;crt&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;keystore&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;etc&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;java&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;6&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;sun&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;security&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;cacerts&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;storepass&lt;/span&gt; &lt;span class="n"&gt;changeit&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h3 id="test-and-verify-the-ldaps-connection"&gt;Test and Verify the LDAPS connection&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;openssl s_client -connect ldap.domain.com:636
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;blockquote&gt;
+&lt;p&gt;Verify return code: 18 (self signed certificate)
+    openssl s_client -connect ldap.domain.com:636 -CAfile zanzibar.crt
+Verify return code: 0 (ok)&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr /&gt;
+&lt;hr /&gt;
+&lt;h3 id="use-an-existing-certificate-and-key-and-create-a-java-key-store"&gt;Use an existing certificate and key and create a Java Key Store&lt;/h3&gt;
+&lt;p&gt;EXISTING CERTIFICATE AND KEY AND CREATE A .JKS&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;openssl pkcs12 -export -in cert.crt -inkey cert.key -out keystore.p12 -name serveraliashostname -CAfile intermediatebundle.crt -caname root
+Enter Export Password: secret
+
+keytool -list -v -keystore keystore.p12 -storetype pkcs12
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h4 id="convert-the-pkcs12-to-jks-format"&gt;CONVERT THE PKCS12 TO JKS FORMAT&lt;/h4&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;keytool -importkeystore -srckeystore keystore.p12 -srcstoretype PKCS12 -deststoretype JKS -destkeystore keystore.jks
+
+keytool -list -v -keystore keystore.jks -storetype jks
+
+sudo vi /var/lib/apacheds-1.5.7/default/conf/server.xml 
+      keystoreFile=&amp;quot;/var/lib/ssl/keystore.jks&amp;quot;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;still need to figure out how to include the intermediate CAcert root chain...!&lt;/p&gt;
+&lt;h3 id="importingreplacing-a-jks-keystore"&gt;IMPORTING/REPLACING A JKS KEYSTORE&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;keytool -importkeystore -deststorepass secret -destkeypass secret -destkeystore keystore.jks -srckeystore keystore.p12 -srcstoretype PKCS12 -srcstorepass secret -alias oldaliasname
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;GUI CONVERTER FROM PKCS12 to JKS (requires Java 1.6 or higher)
+&lt;a href="http://portecle.sourceforge.net/"&gt;http://portecle.sourceforge.net/&lt;/a&gt;  (open the .p12 , Tools -&amp;gt; Keystore type to JKS)
+(seems to have a funny message where it needed change the password to "password)")&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;keytool&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;trustcacerts&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;alias&lt;/span&gt; &lt;span class="n"&gt;ldap&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;domain&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;com&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="nb"&gt;file&lt;/span&gt; &lt;span class="n"&gt;cert&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;crt&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;keystore&lt;/span&gt; &lt;span class="n"&gt;zanzibar&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;ks&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;storepass&lt;/span&gt; &lt;span class="n"&gt;secret&lt;/span&gt;
+&lt;span class="n"&gt;keytool&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;trustcacerts&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;alias&lt;/span&gt; &lt;span class="n"&gt;root&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="nb"&gt;file&lt;/span&gt; &lt;span class="n"&gt;GeoTrust&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;crt&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;keystore&lt;/span&gt; &lt;span class="n"&gt;zanzibar&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;ks&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;blockquote&gt;
+&lt;p&gt;Both self signed and third party certificates can be supported with ApacheDS LDAPS.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;LDAP with SSL is a little tricky and it's useful to use openssl and ldapsearch to verify.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt; &lt;span class="nt"&gt;&amp;lt;ldapServer&lt;/span&gt; &lt;span class="na"&gt;id=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;ldapServer&amp;quot;&lt;/span&gt;
+            &lt;span class="na"&gt;allowAnonymousAccess=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;false&amp;quot;&lt;/span&gt;
+            &lt;span class="na"&gt;saslHost=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;ldap.example.com&amp;quot;&lt;/span&gt;
+            &lt;span class="na"&gt;saslPrincipal=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;ldap/ldap.example.com@EXAMPLE.COM&amp;quot;&lt;/span&gt;
+            &lt;span class="na"&gt;searchBaseDn=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;ou=users,ou=system&amp;quot;&lt;/span&gt;
+            &lt;span class="na"&gt;maxTimeLimit=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;15000&amp;quot;&lt;/span&gt;
+            &lt;span class="na"&gt;maxSizeLimit=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;1000&amp;quot;&lt;/span&gt;
+            &lt;span class="na"&gt;keystoreFile=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;/var/lib/ssl/zanzibar.jks&amp;quot;&lt;/span&gt;
+            &lt;span class="na"&gt;certificatePassword=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;secret&amp;quot;&lt;/span&gt;&lt;span class="nt"&gt;&amp;gt;&lt;/span&gt;
+
+    &lt;span class="nt"&gt;&amp;lt;transports&amp;gt;&lt;/span&gt;
+      &lt;span class="nt"&gt;&amp;lt;tcpTransport&lt;/span&gt; &lt;span class="na"&gt;address=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;0.0.0.0&amp;quot;&lt;/span&gt; &lt;span class="na"&gt;port=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;10389&amp;quot;&lt;/span&gt; &lt;span class="na"&gt;nbThreads=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;8&amp;quot;&lt;/span&gt; &lt;span class="na"&gt;backLog=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;50&amp;quot;&lt;/span&gt; &lt;span class="na"&gt;enableSSL=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;false&amp;quot;&lt;/span&gt;&lt;span class="nt"&gt;/&amp;gt;&lt;/span&gt;
+      &lt;span class="nt"&gt;&amp;lt;tcpTransport&lt;/span&gt; &lt;span class="na"&gt;address=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;0.0.0.0&amp;quot;&lt;/span&gt; &lt;span class="na"&gt;port=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;10636&amp;quot;&lt;/span&gt; &lt;span class="na"&gt;nbThreads=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;8&amp;quot;&lt;/span&gt; &lt;span class="na"&gt;backLog=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;50&amp;quot;&lt;/span&gt; &lt;span class="na"&gt;enableSSL=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;true&amp;quot;&lt;/span&gt;&lt;span class="nt"&gt;/&amp;gt;&lt;/span&gt;
+    &lt;span class="nt"&gt;&amp;lt;/transports&amp;gt;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;&lt;code&gt;openssl s_client -connect domain.com:10636 -CAfile intermediate.crt&lt;/code&gt;&lt;/p&gt;
+&lt;hr /&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;ldapsearch -H ldaps://ldap.domain.com:10636 -x -D &amp;quot;uid=example,ou=system&amp;quot; -w PASSWORD -b &amp;quot;ou=system&amp;quot; &amp;quot;(uid=example)&amp;quot;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;blockquote&gt;
+&lt;p&gt;ERROR: ldap_sasl_bind(SIMPLE): Can't contact LDAP server (-1)&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;ON A REMOTE MACHINE IN ORDER TO USE LDAPSEARCH WITH LDAPS 636...&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;sudo nano /etc/ldap/ldap.conf
+
+TLS_CACERT /var/lib/ssl/intermediate.crt
+TLS_CACERTDIR /var/lib/ssl/
+TLS_CERT /var/lib/ssl/cert.crt
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;NOW THE BELOW WILL WORK&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;ldapsearch -H ldaps://ldap.domain.com:10636 -x -D &amp;quot;uid=example,ou=system&amp;quot; -w PASSWORD -b &amp;quot;ou=system&amp;quot; &amp;quot;(uid=example)&amp;quot;
+ldapsearch -H ldaps://ldap.domain.com:636 -x -D &amp;quot;uid=example,ou=system&amp;quot; -w PASSWORD -b &amp;quot;ou=system&amp;quot; &amp;quot;(objectclass=*)&amp;quot;
+&lt;/pre&gt;&lt;/div&gt;</summary><category term="linux"></category><category term="ldap"></category><category term="apache"></category><category term="directory"></category><category term="studio"></category><category term="ldaps"></category><category term="ldapsearch"></category><category term="java keystore"></category><category term="keystore"></category><category term="keytool"></category></entry><entry><title>Self configuration tests for scalability</title><link href="https://blog.john-pfeiffer.com/self-configuration-tests-for-scalability/" rel="alternate"></link><published>2012-03-12T02:42:00-07:00</published><updated>2012-03-12T02:42:00-07:00</updated><author><name>john pfeiffer</name></author><id>tag:blog.john-pfeiffer.com,2012-03-12:self-configuration-tests-for-scalability/</id><summary type="html">
 &lt;p&gt;Goal: Customers (Users = system admins) able to self verify configuration.&lt;/p&gt;
 &lt;p&gt;The more a user can self verify with software, the less support required per customer deployment.&lt;/p&gt;
 &lt;p&gt;I used the Java API to quickly prototype a solution and exported a runnable .jar file...&lt;/p&gt;
