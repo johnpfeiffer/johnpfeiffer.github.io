@@ -90,6 +90,7 @@
 </li>
 <li><a href="#push-a-commit-to-trigger-a-deployment">Push a commit to trigger a deployment</a></li>
 <li><a href="#actually-using-automated-testing">Actually using automated testing</a></li>
+<li><a href="#double-checking-security">Double checking security</a></li>
 <li><a href="#troubleshooting">Troubleshooting</a></li>
 </ul>
 </div>
@@ -159,6 +160,12 @@
 <h3 id="configuring-the-secure-environment-variables-in-bitbucket-pipelines">Configuring the secure environment variables in Bitbucket Pipelines</h3>
 <p>Use the Bitbucket WebUI in order to securely add the three variables (project id, api key, secrets json).</p>
 <p>i.e. <a href="https://bitbucket.org/johnpfeiffer/continuous-deployment-bitbucket/admin/addon/admin/pipelines/repository-variables">https://bitbucket.org/johnpfeiffer/continuous-deployment-bitbucket/admin/addon/admin/pipelines/repository-variables</a></p>
+<p><strong>Ensure the Pipelines Environment variables are "Secured"</strong> so that they are encrypted in log output</p>
+<ul>
+<li>CLOUDSDK_CORE_PROJECT (the app engine project id)</li>
+<li>GOOGLE_API_KEY</li>
+<li>GOOGLE_CLIENT_SECRET (all of the contents of the json file pasted in)</li>
+</ul>
 <p>Full instructions: <a href="https://cloud.google.com/solutions/continuous-delivery-bitbucket-app-engine#setting_up_environment_variables">https://cloud.google.com/solutions/continuous-delivery-bitbucket-app-engine#setting_up_environment_variables</a></p>
 <h3 id="bitbucket-pipelinesyml-file">bitbucket-pipelines.yml file</h3>
 <p>A yaml configuration file describes the work that you instruct Bitbucket Pipelines to do, in this case we are doing the extra work of grabbing the remote google cloud SDK and installing it so that we use it with the credentials to deploy the app.</p>
@@ -407,6 +414,8 @@ git push
 <div class="highlight"><pre><span></span>- python test_main.py
 </pre></div>
 <p>It is also possible to keep extending the work required by installing any requirements.txt dependencies (i.e. only required for testing) or running post deployment end-to-end smoke tests.</p>
+<h2 id="double-checking-security">Double checking security</h2>
+<p>If your repository is public the pipelines log outputs will be public.  Double check that you are not "leaking" your API key, secrets, or hardcoded passwords. =|</p>
 <h2 id="troubleshooting">Troubleshooting</h2>
 <p><strong>"Does not contain a valid app engine project"</strong></p>
 <blockquote>
@@ -422,12 +431,17 @@ git push
 </blockquote>
 <p><strong>"You do not have permission to access app "</strong></p>
 <blockquote>
-<p>Most likely the Role of "App Engine Admin" still needs to be added, this requires creating in GAE a new "New service account" since I haven't found how to modify a service account to add roles</p>
+<p>Most likely the Role of "App Engine Admin" still needs to be added, use the IAM for the project to update the Permissions</p>
 </blockquote>
-<p><a href="https://console.cloud.google.com/apis/credentials?project=bitbucket-pipelines">https://console.cloud.google.com/apis/credentials?project=bitbucket-pipelines</a></p>
+<p>e.g. <a href="https://console.cloud.google.com/iam-admin/iam/project?project=bitbucket-pipelines">https://console.cloud.google.com/iam-admin/iam/project?project=bitbucket-pipelines</a></p>
+<p>Or ensure you have an API key generated and added to the Bitbucket Pipelines environment ... or delete all API keys and service accounts and do them again (because it seems to get stuck if you have encrypted API key or something)</p>
+<ul>
+<li><a href="https://console.cloud.google.com/apis/credentials?project=bitbucket-pipelines">https://console.cloud.google.com/apis/credentials?project=bitbucket-pipelines</a></li>
+<li><a href="https://console.cloud.google.com/iam-admin/serviceaccounts/project?project=bitbucket-pipelines">https://console.cloud.google.com/iam-admin/serviceaccounts/project?project=bitbucket-pipelines</a></li>
+</ul>
 <p><strong>"Caller does not have storage.objects.list access to bucket staging.bitbucket-pipelines.appspot.com."</strong></p>
 <blockquote>
-<p>Ensure the Role "Storage Object Admin" was added to the Roles during creation, sadly I have not found a way to see a service account's current roles nor how to add them once it has been created =(</p>
+<p>Ensure the Role "Storage Object Admin" was added to the Roles during creation, see above</p>
 </blockquote>
 <p>This guy got really close and helped me find the hint about Storage Object Admin: <a href="http://www.deadunicornz.org/blog/2017/01/31/travis-ci-and-deploying-golang-apps-to-gae/">http://www.deadunicornz.org/blog/2017/01/31/travis-ci-and-deploying-golang-apps-to-gae/</a></p>
             <aside>
@@ -447,7 +461,7 @@ git push
             <time pubdate="pubdate" datetime="2017-05-23T22:24:00-07:00">May 23, 2017</time>
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#build-CI-CD-devops-ref">build-CI-CD-devops</a> 
-            <h4>~1263 words</h4>
+            <h4>~1334 words</h4>
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article"> 
                 <li><a href="/tags.html#bitbucket-ref">bitbucket

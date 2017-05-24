@@ -61,6 +61,12 @@
 &lt;h3 id="configuring-the-secure-environment-variables-in-bitbucket-pipelines"&gt;Configuring the secure environment variables in Bitbucket Pipelines&lt;/h3&gt;
 &lt;p&gt;Use the Bitbucket WebUI in order to securely add the three variables (project id, api key, secrets json).&lt;/p&gt;
 &lt;p&gt;i.e. &lt;a href="https://bitbucket.org/johnpfeiffer/continuous-deployment-bitbucket/admin/addon/admin/pipelines/repository-variables"&gt;https://bitbucket.org/johnpfeiffer/continuous-deployment-bitbucket/admin/addon/admin/pipelines/repository-variables&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Ensure the Pipelines Environment variables are "Secured"&lt;/strong&gt; so that they are encrypted in log output&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;CLOUDSDK_CORE_PROJECT (the app engine project id)&lt;/li&gt;
+&lt;li&gt;GOOGLE_API_KEY&lt;/li&gt;
+&lt;li&gt;GOOGLE_CLIENT_SECRET (all of the contents of the json file pasted in)&lt;/li&gt;
+&lt;/ul&gt;
 &lt;p&gt;Full instructions: &lt;a href="https://cloud.google.com/solutions/continuous-delivery-bitbucket-app-engine#setting_up_environment_variables"&gt;https://cloud.google.com/solutions/continuous-delivery-bitbucket-app-engine#setting_up_environment_variables&lt;/a&gt;&lt;/p&gt;
 &lt;h3 id="bitbucket-pipelinesyml-file"&gt;bitbucket-pipelines.yml file&lt;/h3&gt;
 &lt;p&gt;A yaml configuration file describes the work that you instruct Bitbucket Pipelines to do, in this case we are doing the extra work of grabbing the remote google cloud SDK and installing it so that we use it with the credentials to deploy the app.&lt;/p&gt;
@@ -309,6 +315,8 @@ git push
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;- python test_main.py
 &lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;It is also possible to keep extending the work required by installing any requirements.txt dependencies (i.e. only required for testing) or running post deployment end-to-end smoke tests.&lt;/p&gt;
+&lt;h2 id="double-checking-security"&gt;Double checking security&lt;/h2&gt;
+&lt;p&gt;If your repository is public the pipelines log outputs will be public.  Double check that you are not "leaking" your API key, secrets, or hardcoded passwords. =|&lt;/p&gt;
 &lt;h2 id="troubleshooting"&gt;Troubleshooting&lt;/h2&gt;
 &lt;p&gt;&lt;strong&gt;"Does not contain a valid app engine project"&lt;/strong&gt;&lt;/p&gt;
 &lt;blockquote&gt;
@@ -324,12 +332,17 @@ git push
 &lt;/blockquote&gt;
 &lt;p&gt;&lt;strong&gt;"You do not have permission to access app "&lt;/strong&gt;&lt;/p&gt;
 &lt;blockquote&gt;
-&lt;p&gt;Most likely the Role of "App Engine Admin" still needs to be added, this requires creating in GAE a new "New service account" since I haven't found how to modify a service account to add roles&lt;/p&gt;
+&lt;p&gt;Most likely the Role of "App Engine Admin" still needs to be added, use the IAM for the project to update the Permissions&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;p&gt;&lt;a href="https://console.cloud.google.com/apis/credentials?project=bitbucket-pipelines"&gt;https://console.cloud.google.com/apis/credentials?project=bitbucket-pipelines&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;e.g. &lt;a href="https://console.cloud.google.com/iam-admin/iam/project?project=bitbucket-pipelines"&gt;https://console.cloud.google.com/iam-admin/iam/project?project=bitbucket-pipelines&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Or ensure you have an API key generated and added to the Bitbucket Pipelines environment ... or delete all API keys and service accounts and do them again (because it seems to get stuck if you have encrypted API key or something)&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://console.cloud.google.com/apis/credentials?project=bitbucket-pipelines"&gt;https://console.cloud.google.com/apis/credentials?project=bitbucket-pipelines&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://console.cloud.google.com/iam-admin/serviceaccounts/project?project=bitbucket-pipelines"&gt;https://console.cloud.google.com/iam-admin/serviceaccounts/project?project=bitbucket-pipelines&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
 &lt;p&gt;&lt;strong&gt;"Caller does not have storage.objects.list access to bucket staging.bitbucket-pipelines.appspot.com."&lt;/strong&gt;&lt;/p&gt;
 &lt;blockquote&gt;
-&lt;p&gt;Ensure the Role "Storage Object Admin" was added to the Roles during creation, sadly I have not found a way to see a service account's current roles nor how to add them once it has been created =(&lt;/p&gt;
+&lt;p&gt;Ensure the Role "Storage Object Admin" was added to the Roles during creation, see above&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;p&gt;This guy got really close and helped me find the hint about Storage Object Admin: &lt;a href="http://www.deadunicornz.org/blog/2017/01/31/travis-ci-and-deploying-golang-apps-to-gae/"&gt;http://www.deadunicornz.org/blog/2017/01/31/travis-ci-and-deploying-golang-apps-to-gae/&lt;/a&gt;&lt;/p&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">john pfeiffer</dc:creator><pubDate>Tue, 23 May 2017 22:24:00 -0700</pubDate><guid isPermaLink="false">tag:blog.john-pfeiffer.com,2017-05-23:continuous-delivery-with-bitbucket-pipelines-and-google-app-engine-deployment-and-the-storageobjectslist-error/</guid><category>bitbucket</category><category>google app engine</category><category>gae</category><category>bitbucket</category><category>pipelines</category><category>ci</category><category>cd</category><category>deployment</category><category>storage.objects.list</category></item><item><title>Mid 2017 technology and business prediction for 2018 and beyond</title><link>https://blog.john-pfeiffer.com/mid-2017-technology-and-business-prediction-for-2018-and-beyond/</link><description>
 &lt;h1 id="the-future-already-happened"&gt;The future already happened&lt;/h1&gt;
@@ -10102,7 +10115,6 @@ This is independent of and not a replacement for version control!&lt;/p&gt;
 &lt;li&gt;&lt;a href="https://blog.john-pfeiffer.com/jinja2-a-web-html-template-layout-for-everyone/"&gt;https://blog.john-pfeiffer.com/jinja2-a-web-html-template-layout-for-everyone/&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;
 &lt;p&gt;&lt;a href="https://cloud.google.com/appengine/docs/python/ndb/"&gt;https://cloud.google.com/appengine/docs/python/ndb/&lt;/a&gt; has improved and deprecated the DB Datastore library used below&lt;/p&gt;
-&lt;p&gt;:::python&lt;/p&gt;
 &lt;h1 id="usrbinenv-python"&gt;!/usr/bin/env python&lt;/h1&gt;
 &lt;h1 id="2013-01-20-johnpfeiffer"&gt;2013-01-20 johnpfeiffer&lt;/h1&gt;
 &lt;p&gt;import os
