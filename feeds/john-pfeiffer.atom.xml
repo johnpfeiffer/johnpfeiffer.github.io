@@ -1,5 +1,337 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>johnpfeiffer</title><link href="https://blog.john-pfeiffer.com/" rel="alternate"></link><link href="https://blog.john-pfeiffer.com/feeds/john-pfeiffer.atom.xml" rel="self"></link><id>https://blog.john-pfeiffer.com/</id><updated>2017-05-07T20:00:00-07:00</updated><entry><title>Mid 2017 technology and business prediction for 2018 and beyond</title><link href="https://blog.john-pfeiffer.com/mid-2017-technology-and-business-prediction-for-2018-and-beyond/" rel="alternate"></link><published>2017-05-07T20:00:00-07:00</published><updated>2017-05-07T20:00:00-07:00</updated><author><name>john pfeiffer</name></author><id>tag:blog.john-pfeiffer.com,2017-05-07:mid-2017-technology-and-business-prediction-for-2018-and-beyond/</id><summary type="html">
+<feed xmlns="http://www.w3.org/2005/Atom"><title>johnpfeiffer</title><link href="https://blog.john-pfeiffer.com/" rel="alternate"></link><link href="https://blog.john-pfeiffer.com/feeds/john-pfeiffer.atom.xml" rel="self"></link><id>https://blog.john-pfeiffer.com/</id><updated>2017-05-23T22:24:00-07:00</updated><entry><title>Continuous Delivery with Bitbucket Pipelines and Google App Engine Deployment and the storage.objects.list error</title><link href="https://blog.john-pfeiffer.com/continuous-delivery-with-bitbucket-pipelines-and-google-app-engine-deployment-and-the-storageobjectslist-error/" rel="alternate"></link><published>2017-05-23T22:24:00-07:00</published><updated>2017-05-23T22:24:00-07:00</updated><author><name>john pfeiffer</name></author><id>tag:blog.john-pfeiffer.com,2017-05-23:continuous-delivery-with-bitbucket-pipelines-and-google-app-engine-deployment-and-the-storageobjectslist-error/</id><summary type="html">
+&lt;p&gt;One thing that critical to writing software is actually delivering value.  That means shipping the bits, luckily the internet makes the cost of moving 1's and 0's near zero.&lt;/p&gt;
+&lt;p&gt;Like any other chore or drudge work the release process should be automated.&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://en.wikipedia.org/wiki/Continuous_delivery"&gt;https://en.wikipedia.org/wiki/Continuous_delivery&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;I attempted to follow Google App Engine's documentation on how to setup Bitbucket Pipelines (yeah it's crazy how much free compute there is in the world such that I can tie together a free Continuous Integration service with a free Application Hosting service) but ran into a few snags I thought I'd document.&lt;/p&gt;
+&lt;h2 id="google-cloud-setup"&gt;Google Cloud Setup&lt;/h2&gt;
+&lt;p&gt;&lt;a href="https://cloud.google.com/solutions/continuous-delivery-bitbucket-app-engine"&gt;https://cloud.google.com/solutions/continuous-delivery-bitbucket-app-engine&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Besides creating an App Engine Project the credentials to allow the automated deployment must also be generated.&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Create a new project in Google: &lt;a href="https://console.cloud.google.com/appengine/create?lang=python&amp;amp;project=example-john"&gt;https://console.cloud.google.com/appengine/create?lang=python&amp;amp;project=example-john&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Or use the Web UI &lt;a href="https://console.cloud.google.com/iam-admin/iam/project?project=example-john"&gt;https://console.cloud.google.com/iam-admin/iam/project?project=example-john&lt;/a&gt; (Use the "Select a project dropdown" in the middle and in the Select menu use the + symbol on the right to "Create project")&lt;/li&gt;
+&lt;li&gt;Note the ID: &lt;a href="https://console.cloud.google.com/home/dashboard?project=example-john"&gt;https://console.cloud.google.com/home/dashboard?project=example-john&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;BILLING on the left, enable that (and link your credit card I guess, Google are moving everything away from free - and the credit card is another way to track and correlate everything you do)&lt;/li&gt;
+&lt;li&gt;Enable the App Engine Admin API &lt;a href="https://console.cloud.google.com/apis/library?project=example-john"&gt;https://console.cloud.google.com/apis/library?project=example-john&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Navigate to the Google Cloud Platform Console credentials page &lt;a href="https://console.cloud.google.com/apis/credentials?project=example-john"&gt;https://console.cloud.google.com/apis/credentials?project=example-john&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Click Create credentials -&amp;gt; Service account key&lt;/li&gt;
+&lt;li&gt;Select "New service account" from the Service account dropdown&lt;/li&gt;
+&lt;li&gt;Input a name like "Bitbucket authorization" in the Service account name field&lt;/li&gt;
+&lt;li&gt;ENSURE the ROLES contain at least: App Engine -&amp;gt; &lt;strong&gt;App Engine Admin&lt;/strong&gt; and Storage -&amp;gt; &lt;strong&gt;Storage Admin&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;Click the Create button. A copy of the JSON file will automatically download to your computer.   (if necessary on the right three dots choose "create key" -&amp;gt; create private key for "..." JSON&lt;/li&gt;
+&lt;li&gt;Click Create credentials &amp;gt; API key&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2 id="bitbucket-setup"&gt;Bitbucket Setup&lt;/h2&gt;
+&lt;p&gt;Create a new repository in bitbucket that will contain the code deployed to Google App Engine (in my example I'll use the Python native one but I know soon everything will Docker based)&lt;/p&gt;
+&lt;p&gt;The minimum version of the two app engine python app you will need are:&lt;/p&gt;
+&lt;h3 id="appyaml"&gt;app.yaml&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;runtime&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="n"&gt;python27&lt;/span&gt;
+&lt;span class="n"&gt;api_version&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;
+&lt;span class="n"&gt;threadsafe&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="n"&gt;yes&lt;/span&gt;
+
+&lt;span class="n"&gt;handlers&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;
+&lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;url&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="o"&gt;.*&lt;/span&gt;
+  &lt;span class="n"&gt;script&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="n"&gt;main&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;app&lt;/span&gt;
+
+&lt;span class="n"&gt;libraries&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;
+&lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;name&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="n"&gt;webapp2&lt;/span&gt;
+  &lt;span class="n"&gt;version&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;"2.5.2"&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;For more info &lt;a href="https://developers.google.com/appengine/docs/python/config/appconfig"&gt;https://developers.google.com/appengine/docs/python/config/appconfig&lt;/a&gt;&lt;/p&gt;
+&lt;h3 id="mainpy"&gt;main.py&lt;/h3&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt;1
+2
+3
+4
+5
+6
+7
+8&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="ch"&gt;#!/usr/bin/env python&lt;/span&gt;
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;webapp2&lt;/span&gt;
+
+&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;MainHandler&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;webapp2&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;RequestHandler&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+    &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;get&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;response&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;write&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;'hello'&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="n"&gt;app&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;webapp2&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;WSGIApplication&lt;/span&gt;&lt;span class="p"&gt;([(&lt;/span&gt;&lt;span class="s1"&gt;'/'&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;MainHandler&lt;/span&gt;&lt;span class="p"&gt;)],&lt;/span&gt; &lt;span class="n"&gt;debug&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="bp"&gt;True&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;p&gt;A previous example of writing a Python web app with Google App Engine &lt;a href="https://blog.john-pfeiffer.com/google-app-engine-python/"&gt;https://blog.john-pfeiffer.com/google-app-engine-python/&lt;/a&gt;&lt;/p&gt;
+&lt;h2 id="bitbucket-pipelines-configuration"&gt;Bitbucket Pipelines Configuration&lt;/h2&gt;
+&lt;h3 id="configuring-the-secure-environment-variables-in-bitbucket-pipelines"&gt;Configuring the secure environment variables in Bitbucket Pipelines&lt;/h3&gt;
+&lt;p&gt;Use the Bitbucket WebUI in order to securely add the three variables (project id, api key, secrets json).&lt;/p&gt;
+&lt;p&gt;i.e. &lt;a href="https://bitbucket.org/johnpfeiffer/continuous-deployment-bitbucket/admin/addon/admin/pipelines/repository-variables"&gt;https://bitbucket.org/johnpfeiffer/continuous-deployment-bitbucket/admin/addon/admin/pipelines/repository-variables&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Full instructions: &lt;a href="https://cloud.google.com/solutions/continuous-delivery-bitbucket-app-engine#setting_up_environment_variables"&gt;https://cloud.google.com/solutions/continuous-delivery-bitbucket-app-engine#setting_up_environment_variables&lt;/a&gt;&lt;/p&gt;
+&lt;h3 id="bitbucket-pipelinesyml-file"&gt;bitbucket-pipelines.yml file&lt;/h3&gt;
+&lt;p&gt;A yaml configuration file describes the work that you instruct Bitbucket Pipelines to do, in this case we are doing the extra work of grabbing the remote google cloud SDK and installing it so that we use it with the credentials to deploy the app.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;image&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="n"&gt;python&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="mf"&gt;2.7&lt;/span&gt;
+
+&lt;span class="n"&gt;pipelines&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;
+  &lt;span class="k"&gt;default&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;
+    &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;step&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;
+        &lt;span class="n"&gt;script&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;
+          &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;export&lt;/span&gt; &lt;span class="n"&gt;CLOUDSDK_CORE_DISABLE_PROMPTS&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;
+          &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;SDK_VERSION&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mf"&gt;127.0&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;
+          &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;SDK_FILENAME&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;google&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;cloud&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;sdk&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;$&lt;/span&gt;&lt;span class="o"&gt;{&lt;/span&gt;&lt;span class="n"&gt;SDK_VERSION&lt;/span&gt;&lt;span class="o"&gt;}-&lt;/span&gt;&lt;span class="n"&gt;linux&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;x86_64&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;tar&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;gz&lt;/span&gt;
+          &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;curl&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;O&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;J&lt;/span&gt; &lt;span class="n"&gt;https&lt;/span&gt;&lt;span class="o"&gt;://&lt;/span&gt;&lt;span class="n"&gt;dl&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;google&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;com&lt;/span&gt;&lt;span class="sr"&gt;/dl/cloudsdk/channels/rapid/downloads/&lt;/span&gt;&lt;span class="n"&gt;$&lt;/span&gt;&lt;span class="o"&gt;{&lt;/span&gt;&lt;span class="n"&gt;SDK_FILENAME&lt;/span&gt;&lt;span class="o"&gt;}&lt;/span&gt;
+          &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;tar&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;zxvf&lt;/span&gt; &lt;span class="n"&gt;$&lt;/span&gt;&lt;span class="o"&gt;{&lt;/span&gt;&lt;span class="n"&gt;SDK_FILENAME&lt;/span&gt;&lt;span class="o"&gt;}&lt;/span&gt; &lt;span class="o"&gt;--&lt;/span&gt;&lt;span class="n"&gt;directory&lt;/span&gt; &lt;span class="n"&gt;$&lt;/span&gt;&lt;span class="o"&gt;{&lt;/span&gt;&lt;span class="n"&gt;HOME&lt;/span&gt;&lt;span class="o"&gt;}&lt;/span&gt;
+          &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;export&lt;/span&gt; &lt;span class="n"&gt;PATH&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;$&lt;/span&gt;&lt;span class="o"&gt;{&lt;/span&gt;&lt;span class="n"&gt;PATH&lt;/span&gt;&lt;span class="o"&gt;}:&lt;/span&gt;&lt;span class="n"&gt;$&lt;/span&gt;&lt;span class="o"&gt;{&lt;/span&gt;&lt;span class="n"&gt;HOME&lt;/span&gt;&lt;span class="o"&gt;}/&lt;/span&gt;&lt;span class="n"&gt;google&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;cloud&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;sdk&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;bin&lt;/span&gt;
+          &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;GAE_PYTHONPATH&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;$&lt;/span&gt;&lt;span class="o"&gt;{&lt;/span&gt;&lt;span class="n"&gt;HOME&lt;/span&gt;&lt;span class="o"&gt;}/&lt;/span&gt;&lt;span class="n"&gt;google_appengine&lt;/span&gt;
+          &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;export&lt;/span&gt; &lt;span class="n"&gt;PYTHONPATH&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;$&lt;/span&gt;&lt;span class="o"&gt;{&lt;/span&gt;&lt;span class="n"&gt;PYTHONPATH&lt;/span&gt;&lt;span class="o"&gt;}:&lt;/span&gt;&lt;span class="n"&gt;$&lt;/span&gt;&lt;span class="o"&gt;{&lt;/span&gt;&lt;span class="n"&gt;GAE_PYTHONPATH&lt;/span&gt;&lt;span class="o"&gt;}&lt;/span&gt;
+          &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;python&lt;/span&gt; &lt;span class="n"&gt;scripts&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;fetch_gae_sdk&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;py&lt;/span&gt; &lt;span class="n"&gt;$&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;dirname&lt;/span&gt; &lt;span class="s2"&gt;"${GAE_PYTHONPATH}"&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
+          &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;echo&lt;/span&gt; &lt;span class="s2"&gt;"${PYTHONPATH}"&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class="n"&gt;ls&lt;/span&gt; &lt;span class="n"&gt;$&lt;/span&gt;&lt;span class="o"&gt;{&lt;/span&gt;&lt;span class="n"&gt;GAE_PYTHONPATH&lt;/span&gt;&lt;span class="o"&gt;}&lt;/span&gt;
+          &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;echo&lt;/span&gt; &lt;span class="s2"&gt;"key = '${GOOGLE_API_KEY}'"&lt;/span&gt; &lt;span class="o"&gt;&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;api_key&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;py&lt;/span&gt;
+          &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;echo&lt;/span&gt; &lt;span class="n"&gt;$&lt;/span&gt;&lt;span class="o"&gt;{&lt;/span&gt;&lt;span class="n"&gt;GOOGLE_CLIENT_SECRET&lt;/span&gt;&lt;span class="o"&gt;}&lt;/span&gt; &lt;span class="o"&gt;&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;client&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;secret&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;json&lt;/span&gt;
+          &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;gcloud&lt;/span&gt; &lt;span class="n"&gt;auth&lt;/span&gt; &lt;span class="n"&gt;activate&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;service&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;account&lt;/span&gt; &lt;span class="o"&gt;--&lt;/span&gt;&lt;span class="n"&gt;key&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;file&lt;/span&gt; &lt;span class="n"&gt;client&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;secret&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;json&lt;/span&gt;
+          &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;gcloud&lt;/span&gt; &lt;span class="o"&gt;--&lt;/span&gt;&lt;span class="n"&gt;verbosity&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;error&lt;/span&gt; &lt;span class="n"&gt;app&lt;/span&gt; &lt;span class="n"&gt;deploy&lt;/span&gt; &lt;span class="n"&gt;app&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;yaml&lt;/span&gt; &lt;span class="o"&gt;--&lt;/span&gt;&lt;span class="n"&gt;promote&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;A best practice is to pull the dependency from storage you have control over (or simply vendor the SDK in the source code) rather than downloading it every time and risking the upstream pinned version being removed&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id="scriptsfetch_gae_sdkpy"&gt;scripts/fetch_gae_sdk.py&lt;/h3&gt;
+&lt;table class="highlighttable"&gt;&lt;tr&gt;&lt;td class="linenos"&gt;&lt;div class="linenodiv"&gt;&lt;pre&gt; 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96&lt;/pre&gt;&lt;/div&gt;&lt;/td&gt;&lt;td class="code"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="ch"&gt;#!/usr/bin/env python&lt;/span&gt;
+&lt;span class="c1"&gt;# Copyright 2015 Google Inc. All rights reserved.&lt;/span&gt;
+&lt;span class="c1"&gt;#&lt;/span&gt;
+&lt;span class="c1"&gt;# Licensed under the Apache License, Version 2.0 (the "License");&lt;/span&gt;
+&lt;span class="c1"&gt;# you may not use this file except in compliance with the License.&lt;/span&gt;
+&lt;span class="c1"&gt;# You may obtain a copy of the License at&lt;/span&gt;
+&lt;span class="c1"&gt;#&lt;/span&gt;
+&lt;span class="c1"&gt;#     http://www.apache.org/licenses/LICENSE-2.0&lt;/span&gt;
+&lt;span class="c1"&gt;#&lt;/span&gt;
+&lt;span class="c1"&gt;# Unless required by applicable law or agreed to in writing, software&lt;/span&gt;
+&lt;span class="c1"&gt;# distributed under the License is distributed on an "AS IS" BASIS,&lt;/span&gt;
+&lt;span class="c1"&gt;# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.&lt;/span&gt;
+&lt;span class="c1"&gt;# See the License for the specific language governing permissions and&lt;/span&gt;
+&lt;span class="c1"&gt;# limitations under the License.&lt;/span&gt;
+
+&lt;span class="c1"&gt;# Retrieved from https://github.com/Google/oauth2client&lt;/span&gt;
+&lt;span class="sd"&gt;"""Fetch the most recent GAE SDK and decompress it in the current directory.&lt;/span&gt;
+&lt;span class="sd"&gt;Usage:&lt;/span&gt;
+&lt;span class="sd"&gt;    fetch_gae_sdk.py [&amp;lt;dest_dir&amp;gt;]&lt;/span&gt;
+&lt;span class="sd"&gt;Current releases are listed here:&lt;/span&gt;
+&lt;span class="sd"&gt;    https://www.googleapis.com/storage/v1/b/appengine-sdks/o?prefix=featured&lt;/span&gt;
+&lt;span class="sd"&gt;"""&lt;/span&gt;
+
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;json&lt;/span&gt;
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;os&lt;/span&gt;
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;StringIO&lt;/span&gt;
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;sys&lt;/span&gt;
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;urllib2&lt;/span&gt;
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;zipfile&lt;/span&gt;
+
+&lt;span class="n"&gt;_SDK_URL&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;
+    &lt;span class="s1"&gt;'https://www.googleapis.com/storage/v1/b/appengine-sdks/o?prefix=featured'&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+
+&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;get_gae_versions&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
+    &lt;span class="k"&gt;try&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+        &lt;span class="n"&gt;version_info_json&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;urllib2&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;urlopen&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;_SDK_URL&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;read&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+    &lt;span class="k"&gt;except&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+        &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="p"&gt;{}&lt;/span&gt;
+    &lt;span class="k"&gt;try&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+        &lt;span class="n"&gt;version_info&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;json&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;loads&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;version_info_json&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="k"&gt;except&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+        &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="p"&gt;{}&lt;/span&gt;
+    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;version_info&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;get&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;'items'&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="p"&gt;{})&lt;/span&gt;
+
+&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;_version_tuple&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;v&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+    &lt;span class="n"&gt;version_string&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;os&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;path&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;splitext&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;v&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="s1"&gt;'name'&lt;/span&gt;&lt;span class="p"&gt;])[&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;rpartition&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;'_'&lt;/span&gt;&lt;span class="p"&gt;)[&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="nb"&gt;tuple&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;int&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;x&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;x&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="n"&gt;version_string&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;split&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;'.'&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+
+
+&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;get_sdk_urls&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;sdk_versions&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+    &lt;span class="n"&gt;python_releases&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;
+        &lt;span class="n"&gt;v&lt;/span&gt; &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;v&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="n"&gt;sdk_versions&lt;/span&gt;
+        &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="n"&gt;v&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="s1"&gt;'name'&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;startswith&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;'featured/google_appengine'&lt;/span&gt;&lt;span class="p"&gt;)]&lt;/span&gt;
+    &lt;span class="n"&gt;current_releases&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;sorted&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;
+        &lt;span class="n"&gt;python_releases&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;key&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;_version_tuple&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;reverse&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="bp"&gt;True&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;release&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="s1"&gt;'mediaLink'&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;release&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="n"&gt;current_releases&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+
+
+&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;main&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;argv&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+    &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="nb"&gt;len&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;argv&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;&amp;gt;&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+        &lt;span class="k"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;'Usage: {} [&amp;lt;destination_dir&amp;gt;]'&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;format&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;argv&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;]))&lt;/span&gt;
+        &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;
+    &lt;span class="n"&gt;dest_dir&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;argv&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="nb"&gt;len&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;argv&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;&amp;gt;&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt; &lt;span class="k"&gt;else&lt;/span&gt; &lt;span class="s1"&gt;'.'&lt;/span&gt;
+    &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="ow"&gt;not&lt;/span&gt; &lt;span class="n"&gt;os&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;path&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;exists&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;dest_dir&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+        &lt;span class="n"&gt;os&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;makedirs&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;dest_dir&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="n"&gt;os&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;path&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;exists&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;os&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;path&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;join&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;dest_dir&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;'google_appengine'&lt;/span&gt;&lt;span class="p"&gt;)):&lt;/span&gt;
+        &lt;span class="k"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;'GAE SDK already installed at {}, exiting.'&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;format&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;dest_dir&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+        &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;
+
+    &lt;span class="n"&gt;sdk_versions&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;get_gae_versions&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+    &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="ow"&gt;not&lt;/span&gt; &lt;span class="n"&gt;sdk_versions&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+        &lt;span class="k"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;'Error fetching GAE SDK version info'&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;
+    &lt;span class="n"&gt;sdk_urls&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;get_sdk_urls&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;sdk_versions&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;sdk_url&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="n"&gt;sdk_urls&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+        &lt;span class="k"&gt;try&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+            &lt;span class="n"&gt;sdk_contents&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;StringIO&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;StringIO&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;urllib2&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;urlopen&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;sdk_url&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;read&lt;/span&gt;&lt;span class="p"&gt;())&lt;/span&gt;
+            &lt;span class="k"&gt;break&lt;/span&gt;
+        &lt;span class="k"&gt;except&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+            &lt;span class="k"&gt;pass&lt;/span&gt;
+    &lt;span class="k"&gt;else&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+        &lt;span class="k"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;'Could not read SDK from any of {}'&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;format&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;sdk_urls&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+        &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;
+    &lt;span class="n"&gt;sdk_contents&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;seek&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="k"&gt;try&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+        &lt;span class="n"&gt;zip_contents&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;zipfile&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;ZipFile&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;sdk_contents&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="n"&gt;zip_contents&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;extractall&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;dest_dir&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="k"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;'GAE SDK Installed to {}.'&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;format&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;dest_dir&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+    &lt;span class="k"&gt;except&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+        &lt;span class="k"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;'Error extracting SDK contents'&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;
+
+&lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="vm"&gt;__name__&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="s1"&gt;'__main__'&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="n"&gt;sys&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;exit&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;main&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;sys&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;argv&lt;/span&gt;&lt;span class="p"&gt;[:]))&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;blockquote&gt;
+&lt;p&gt;This is google's script to download and extract their App Engine SDK , included here only for completeness&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id="push-a-commit-to-trigger-a-deployment"&gt;Push a commit to trigger a deployment&lt;/h2&gt;
+&lt;p&gt;The whole point of all of that work is to make life easier for every commit that follows.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;git add --all .
+git commit -m 'example google app engine app deployed via bitbucket pipelines'
+git push
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;You can monitor the results of every change in the Addon's output logs:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://bitbucket.org/johnpfeiffer/continuous-deployment-bitbucket/addon/pipelines/home#!/"&gt;https://bitbucket.org/johnpfeiffer/continuous-deployment-bitbucket/addon/pipelines/home#!/&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;You can monitor the deployment history in Google App Engine's console:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://console.cloud.google.com/appengine/versions?project=bitbucket-pipelines&amp;amp;serviceId=default"&gt;https://console.cloud.google.com/appengine/versions?project=bitbucket-pipelines&amp;amp;serviceId=default&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;And of course see the currently deployed application in action:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://bitbucket-pipelines.appspot.com/"&gt;https://bitbucket-pipelines.appspot.com/&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="actually-using-automated-testing"&gt;Actually using automated testing&lt;/h2&gt;
+&lt;p&gt;CI (continuous integration) testing is the ideal next thing to add as this allows you to automatically prevent critical errors from being deployed to production.&lt;/p&gt;
+&lt;p&gt;This means adding unit tests (test_main.py) and then running them by updating bitbucket-pipelines.yml&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;- python test_main.py
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;It is also possible to keep extending the work required by installing any requirements.txt dependencies (i.e. only required for testing) or running post deployment end-to-end smoke tests.&lt;/p&gt;
+&lt;h2 id="troubleshooting"&gt;Troubleshooting&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;"Does not contain a valid app engine project"&lt;/strong&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Most likely the app.yaml has deprecated fields or invalid characters&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;strong&gt;"does not contain an App Engine application."&lt;/strong&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Most likely the app.yaml has deprecated fields or invalid characters, or maybe missing a main.py altogether&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;strong&gt;"ERROR: The [application] field is specified in file [/opt/atlassian/pipelines/agent/build/app.yaml]"&lt;/strong&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;This is because previously app.yaml included "application" and "version" but those lines are now deprecated, delete them&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;strong&gt;"You do not have permission to access app "&lt;/strong&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Most likely the Role of "App Engine Admin" still needs to be added, this requires creating in GAE a new "New service account" since I haven't found how to modify a service account to add roles&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;a href="https://console.cloud.google.com/apis/credentials?project=bitbucket-pipelines"&gt;https://console.cloud.google.com/apis/credentials?project=bitbucket-pipelines&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;"Caller does not have storage.objects.list access to bucket staging.bitbucket-pipelines.appspot.com."&lt;/strong&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Ensure the Role "Storage Object Admin" was added to the Roles during creation, sadly I have not found a way to see a service account's current roles nor how to add them once it has been created =(&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;This guy got really close and helped me find the hint about Storage Object Admin: &lt;a href="http://www.deadunicornz.org/blog/2017/01/31/travis-ci-and-deploying-golang-apps-to-gae/"&gt;http://www.deadunicornz.org/blog/2017/01/31/travis-ci-and-deploying-golang-apps-to-gae/&lt;/a&gt;&lt;/p&gt;</summary><category term="bitbucket"></category><category term="google app engine"></category><category term="gae"></category><category term="bitbucket"></category><category term="pipelines"></category><category term="ci"></category><category term="cd"></category><category term="deployment"></category><category term="storage.objects.list"></category></entry><entry><title>Mid 2017 technology and business prediction for 2018 and beyond</title><link href="https://blog.john-pfeiffer.com/mid-2017-technology-and-business-prediction-for-2018-and-beyond/" rel="alternate"></link><published>2017-05-07T20:00:00-07:00</published><updated>2017-05-07T20:00:00-07:00</updated><author><name>john pfeiffer</name></author><id>tag:blog.john-pfeiffer.com,2017-05-07:mid-2017-technology-and-business-prediction-for-2018-and-beyond/</id><summary type="html">
 &lt;h1 id="the-future-already-happened"&gt;The future already happened&lt;/h1&gt;
 &lt;p&gt;The internet boom has arrived silently and the "everything is online" happened while we were all looking down at our smart phones.&lt;/p&gt;
 &lt;p&gt;New giants have emerged to rule the economic landscape that have eclipsed, at least in virtual specie, their physical-and-brick-and-mortar competitors: Apple, Alphabet (Google), Microsoft, Amazon.com... Facebook...&lt;/p&gt;
