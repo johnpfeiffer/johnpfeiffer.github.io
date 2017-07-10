@@ -78,7 +78,10 @@
 <ul>
 <li><a href="#maps-aka-hash-tables-in-go">Maps aka Hash Tables in Go</a><ul>
 <li><a href="#using-a-map-in-go">Using a map in go</a></li>
-<li><a href="#sets">Sets</a></li>
+<li><a href="#sets">Sets</a><ul>
+<li><a href="#low-memory-footprint-map-as-a-set">Low memory footprint map as a set</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li><a href="#polymorphism-with-go-interfaces">Polymorphism with Go Interfaces</a><ul>
@@ -150,6 +153,39 @@
 <li><a href="https://en.wikipedia.org/wiki/Set_(abstract_data_type)">https://en.wikipedia.org/wiki/Set_(abstract_data_type)</a></li>
 <li><a href="https://xlinux.nist.gov/dads/HTML/set.html">https://xlinux.nist.gov/dads/HTML/set.html</a></li>
 <li><a href="https://github.com/golang/go/wiki/MethodSets">https://github.com/golang/go/wiki/MethodSets</a></li>
+</ul>
+<h4 id="low-memory-footprint-map-as-a-set">Low memory footprint map as a set</h4>
+<p>When implementing a Set, in some cases you can be very parsimonious with memory by using an empty struct.
+This means you will rely on the very explicit _, ok pattern of checking for presence in the set.</p>
+<div class="highlight"><pre><span></span><span class="kn">package</span> <span class="nx">main</span>
+
+<span class="kn">import</span> <span class="p">(</span>
+    <span class="s">"fmt"</span>
+    <span class="s">"unsafe"</span>
+<span class="p">)</span>
+
+<span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+    <span class="nx">m</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">map</span><span class="p">[</span><span class="kt">rune</span><span class="p">]</span><span class="kd">struct</span><span class="p">{})</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">m</span><span class="p">)</span>
+    <span class="nx">m</span><span class="p">[</span><span class="sc">'a'</span><span class="p">]</span> <span class="p">=</span> <span class="kd">struct</span><span class="p">{}{}</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">m</span><span class="p">)</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">"%#v \n"</span><span class="p">,</span> <span class="nx">m</span><span class="p">)</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">unsafe</span><span class="p">.</span><span class="nx">Sizeof</span><span class="p">(</span><span class="nx">m</span><span class="p">[</span><span class="sc">'a'</span><span class="p">]))</span>
+
+    <span class="kd">var</span> <span class="nx">b</span> <span class="kt">bool</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">unsafe</span><span class="p">.</span><span class="nx">Sizeof</span><span class="p">(</span><span class="nx">b</span><span class="p">))</span>
+    <span class="kd">var</span> <span class="nx">n</span> <span class="kt">int8</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">unsafe</span><span class="p">.</span><span class="nx">Sizeof</span><span class="p">(</span><span class="nx">n</span><span class="p">))</span>
+    <span class="kd">var</span> <span class="nx">i</span> <span class="kd">interface</span><span class="p">{}</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">unsafe</span><span class="p">.</span><span class="nx">Sizeof</span><span class="p">(</span><span class="nx">i</span><span class="p">))</span>
+<span class="p">}</span>
+</pre></div>
+<blockquote>
+<p>An empty struct is 0, a boolean and an int8 are size 1 (byte), an interface is size 8</p>
+</blockquote>
+<ul>
+<li><a href="https://play.golang.org/p/9cUE9-wwDY">https://play.golang.org/p/9cUE9-wwDY</a></li>
+<li><a href="https://golang.org/pkg/unsafe/#Sizeof">https://golang.org/pkg/unsafe/#Sizeof</a></li>
 </ul>
 <h2 id="polymorphism-with-go-interfaces">Polymorphism with Go Interfaces</h2>
 <p>While definitely a distinctly different approach on objects and polymorphism than Object Oriented languages like Java and Python, the critical capabilities of Interfaces allows flexibility and re-usability in functionality enabling things like the Strategy Pattern.</p>
@@ -352,7 +388,7 @@ Thankfully with a garbage collected language like Go we do not have to worry abo
             <time pubdate="pubdate" datetime="2016-10-05T20:34:00-07:00">Oct 5, 2016</time>
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#programming-ref">programming</a> 
-            <h4>~1208 words</h4>
+            <h4>~1302 words</h4>
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article"> 
                 <li><a href="/tags.html#go-ref">go
