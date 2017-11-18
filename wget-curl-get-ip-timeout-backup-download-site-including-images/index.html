@@ -77,6 +77,7 @@
         <div class="toc">
 <ul>
 <li><a href="#curl">curl</a></li>
+<li><a href="#spoofing-google-bot-with-curl-and-wget">spoofing google bot with curl and wget</a></li>
 <li><a href="#using-browsers-to-modify-post-requests-or-forms">using browsers to modify post requests or forms</a></li>
 <li><a href="#wget-examples-to-download-a-blog-and-images">wget examples to download a blog and images</a><ul>
 <li><a href="#more-wget-parameters">More wget parameters</a></li>
@@ -100,6 +101,17 @@ wget --timestamping http://example.com/file.tar.gz
 <p>only download if the remote file is newer by timestamp</p>
 </blockquote>
 <h3 id="curl">curl</h3>
+<p>cURL is often installed with Linux/MacOS but depends on a library installed on the operating system.</p>
+<ul>
+<li><a href="https://en.wikipedia.org/wiki/CURL">https://en.wikipedia.org/wiki/CURL</a></li>
+<li><a href="https://curl.haxx.se/docs/libs.html">https://curl.haxx.se/docs/libs.html</a></li>
+</ul>
+<p>Given its ease of use and many programming language library wrappers it is a ubiquitous tool for HTTP operations.</p>
+<div class="highlight"><pre><span></span>sudo apt-get install -y curl
+</pre></div>
+<blockquote>
+<p>install curl on ubuntu</p>
+</blockquote>
 <div class="highlight"><pre><span></span>curl -O https://example.com/folder/file
 </pre></div>
 <blockquote>
@@ -146,9 +158,9 @@ curl --silent --output output_filename http://example.com/filename.html
 <p><a href="http://superuser.com/questions/149329/what-is-the-curl-command-line-syntax-to-do-a-post-request">http://superuser.com/questions/149329/what-is-the-curl-command-line-syntax-to-do-a-post-request</a></p>
 <div class="highlight"><pre><span></span>curl --header "content-type: application/json" --header "Authorization: TOKEN" -X POST \
 -d '{"name":"Room of Requirement","owner":{"id":1234}}' https://example.com/room/55
-
-
-curl -A "Googlebot/2.1 (+http://www.google.com/bot.html)" -O https://support.google.com/webmasters/answer/1061943?hl=en
+</pre></div>
+<h3 id="spoofing-google-bot-with-curl-and-wget">spoofing google bot with curl and wget</h3>
+<div class="highlight"><pre><span></span>curl -A "Googlebot/2.1 (+http://www.google.com/bot.html)" -O https://support.google.com/webmasters/answer/1061943?hl=en
 </pre></div>
 <blockquote>
 <p>spoof googlebot to scrape a page that has nagging javascript</p>
@@ -172,17 +184,28 @@ curl -A "Googlebot/2.1 (+http://www.google.com/bot.html)" -O https://support.goo
 </ol>
 <hr/>
 <h2 id="wget-examples-to-download-a-blog-and-images">wget examples to download a blog and images</h2>
-<div class="highlight"><pre><span></span>wget -r -H -D bpfeiffer.blogspot.com,1.bp.blogspot.com,2.bp.blogspot.com,3.bp.blogspot.com,4.bp.blogspot.com,www.blogger.blogspot.com,lh6.googleusercontent.com,lh5.googleusercontent.com,lh4.googleusercontent.com,lh3.googleusercontent.com, lh2.googleusercontent.com,lh1.googleusercontent.com -k -p -E -nH -erobots=off -U Mozilla http://bpfeiffer.blogspot.com
+<div class="highlight"><pre><span></span>wget "http://johnnypfeiffer.blogspot.com" --mirror --convert-links --warc-file="johnnypfeiffer-blogspot" --warc-cdx=on
 </pre></div>
+<blockquote>
+<p>using wget with the new WARC option to m</p>
+</blockquote>
+<p>Backups "outsourced" via <a href="https://archive.org/">https://archive.org/</a> but you probably want a local copy (preferably burned to blu-ray) by using <a href="https://en.wikipedia.org/wiki/Web_ARChive">https://en.wikipedia.org/wiki/Web_ARChive</a></p>
+<p><em>(you only need to keep the .warc.gz but the optional .cdx index may help you if later you want to list the contents without browsing the whole warc)</em></p>
+<p>To view the web archive (even offline) you can try:</p>
+<ul>
+<li><a href="https://github.com/webrecorder/webrecorderplayer-electron">https://github.com/webrecorder/webrecorderplayer-electron</a></li>
+<li><a href="https://github.com/sbilly/webarchiveplayer">https://github.com/sbilly/webarchiveplayer</a></li>
+<li>
+<p><a href="https://github.com/ukwa/webarchive-explorer/tree/master">https://github.com/ukwa/webarchive-explorer/tree/master</a></p>
+<p>wget -r -H -D bpfeiffer.blogspot.com,1.bp.blogspot.com,2.bp.blogspot.com,3.bp.blogspot.com,4.bp.blogspot.com,www.blogger.blogspot.com,lh6.googleusercontent.com,lh5.googleusercontent.com,lh4.googleusercontent.com,lh3.googleusercontent.com, lh2.googleusercontent.com,lh1.googleusercontent.com -k -p -E -nH -erobots=off -U Mozilla http://bpfeiffer.blogspot.com</p>
 <blockquote>
 <p>annoyingly have to find each google image server until figured out wildcards with the example list</p>
 </blockquote>
-<div class="highlight"><pre><span></span>wget -r -H -D johnnypfeiffer.blogspot.com,1.bp.blogspot.com,2.bp.blogspot.com,3.bp.blogspot.com,4.bp.blogspot.com,www.blogger.blogspot.com -k -p -E -nH -erobots=off -U Mozilla http://johnnypfeiffer.blogspot.com
-</pre></div>
+<p>wget -r -H -D johnnypfeiffer.blogspot.com,1.bp.blogspot.com,2.bp.blogspot.com,3.bp.blogspot.com,4.bp.blogspot.com,www.blogger.blogspot.com -k -p -E -nH -erobots=off -U Mozilla http://johnnypfeiffer.blogspot.com</p>
 <blockquote>
 <p>we cannot use the -nd flag because some images have the same name but different servers 1.bp.blogspot.com/NAME.jpg 2.bp.blogspot.com/NAME.jpg*</p>
 </blockquote>
-<div class="highlight"><pre><span></span>-r = recursive (infinite by default)
+<p>-r = recursive (infinite by default)
 -l 2 = number of levels deep to recurse
 -H = span to other sites (examples, i.e. images.blogspot.com and 2.bp.blogspot.com)
 -D example1.com,example2.com = only span to these specific examples
@@ -191,21 +214,18 @@ curl -A "Googlebot/2.1 (+http://www.google.com/bot.html)" -O https://support.goo
 -p = download the "page requisities" (i.e. css and images)
 -E = if it doesn't originally end in .html it will once downloaded
 -erobots=off
--nH = do not prefix  index.html in the johnnypfeiffer.blogspot.com
-
--nd = don't bother to create directories for everything
+-nH = do not prefix  index.html in the johnnypfeiffer.blogspot.com</p>
+<p>-nd = don't bother to create directories for everything
 -P = --directory-prefix=/usr/local/src    (prepends all filenames downloaded with a string, e.g. a local path), by default this is .
--U = user agent (i.e. Mozilla)
-
--O file = puts all of the content into one file, not a good idea for a large site (and invalidates many flag options)
+-U = user agent (i.e. Mozilla)</p>
+<p>-O file = puts all of the content into one file, not a good idea for a large site (and invalidates many flag options)
 -O - = outputs to standard out (so you can use a pipe, like wget -O http://kittyandbear.net | grep linux
--N = uses timestamps to only download newer remote files (which will be stamped with the remote timestamp), depends on server providing Last-Modified header
-
---no-use-server-timestamps = files will be stamped with download time (default behavior is to stamp the download with the remote file)
---spider = only checks that pages are there, no downloads (checks if the url / files are correct/exist)
-
--b  (backgrounds the job, you can check it via "tail -f wget-log"
-</pre></div>
+-N = uses timestamps to only download newer remote files (which will be stamped with the remote timestamp), depends on server providing Last-Modified header</p>
+<p>--no-use-server-timestamps = files will be stamped with download time (default behavior is to stamp the download with the remote file)
+--spider = only checks that pages are there, no downloads (checks if the url / files are correct/exist)</p>
+<p>-b  (backgrounds the job, you can check it via "tail -f wget-log"</p>
+</li>
+</ul>
 <hr/>
 <h3 id="more-wget-parameters">More wget parameters</h3>
 <div class="highlight"><pre><span></span>wget -r -H -l1 -k -p -E -nd -erobots=off http://bpfeiffer.blogspot.com
@@ -351,7 +371,7 @@ waitretry = 10
             <time pubdate="pubdate" datetime="2009-09-06T21:07:02-07:00">Sep 6, 2009</time>
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#linux-ref">linux</a> 
-            <h4>~1043 words</h4>
+            <h4>~1170 words</h4>
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article"> 
                 <li><a href="/tags.html#backup-ref">backup
