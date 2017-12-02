@@ -1,5 +1,102 @@
 <?xml version="1.0" encoding="utf-8"?>
-<rss version="2.0"><channel><title>johnpfeiffer</title><link>https://blog.john-pfeiffer.com/</link><description></description><lastBuildDate>Thu, 29 Jun 2017 21:00:00 -0700</lastBuildDate><item><title>Productivity is a Myth</title><link>https://blog.john-pfeiffer.com/productivity-is-a-myth/</link><description>
+<rss version="2.0"><channel><title>johnpfeiffer</title><link>https://blog.john-pfeiffer.com/</link><description></description><lastBuildDate>Mon, 06 Nov 2017 20:45:00 -0800</lastBuildDate><item><title>Dynamic Programming and Memoization and the Compute versus Storage Tradeoff</title><link>https://blog.john-pfeiffer.com/dynamic-programming-and-memoization-and-the-compute-versus-storage-tradeoff/</link><description>
+&lt;h1 id="tradeoffs"&gt;Tradeoffs&lt;/h1&gt;
+&lt;p&gt;There is an inevitable tradeoff of storage versus computation speed, or space used versus time to run, in every program.&lt;/p&gt;
+&lt;p&gt;Caching is often viewed as a performance optimization but sometimes it is the only way to achieve a result in a finite amount of time.&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://en.wikipedia.org/wiki/Dynamic_programming"&gt;https://en.wikipedia.org/wiki/Dynamic_programming&lt;/a&gt; is about breaking down a problem into sub-problems where each solution can be stored so that it can be looked up rather than recomputed.&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://en.wikipedia.org/wiki/Memoization"&gt;https://en.wikipedia.org/wiki/Memoization&lt;/a&gt; is related in that it is about storing the output of a function call when specific parameters are provided.
+Thus it is often conceptualized as a special kind of caching.&lt;/p&gt;
+&lt;h1 id="naive-fibonacci-recursion"&gt;Naive Fibonacci Recursion&lt;/h1&gt;
+&lt;p&gt;&lt;a href="https://en.wikipedia.org/wiki/Fibonacci_number"&gt;https://en.wikipedia.org/wiki/Fibonacci_number&lt;/a&gt; is a classic numerical series where each subsequent number is the sum of the previous two numbers.
+An interesting problem is to calculate the series up to a certain point.  The straightforward solution uses recursion:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kn"&gt;package&lt;/span&gt; &lt;span class="nx"&gt;main&lt;/span&gt;
+
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;
+    &lt;span class="s"&gt;"fmt"&lt;/span&gt;
+&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="kd"&gt;func&lt;/span&gt; &lt;span class="nx"&gt;main&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="nx"&gt;fibSeries&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;38&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+
+&lt;span class="kd"&gt;func&lt;/span&gt; &lt;span class="nx"&gt;fibSeries&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;n&lt;/span&gt; &lt;span class="kt"&gt;int&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="nx"&gt;i&lt;/span&gt; &lt;span class="o"&gt;:=&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt; &lt;span class="nx"&gt;i&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;=&lt;/span&gt; &lt;span class="nx"&gt;n&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt; &lt;span class="nx"&gt;i&lt;/span&gt;&lt;span class="o"&gt;++&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="nx"&gt;fmt&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;Println&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;fib&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;i&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+
+&lt;span class="kd"&gt;func&lt;/span&gt; &lt;span class="nx"&gt;fib&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;x&lt;/span&gt; &lt;span class="kt"&gt;int&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="nx"&gt;x&lt;/span&gt; &lt;span class="p"&gt;&amp;lt;&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="nx"&gt;x&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt;
+    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="nx"&gt;fib&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;x&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="nx"&gt;fib&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;x&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;&lt;code&gt;go run main.go&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Each iteration in the series discards the previous results and then re-calculates the intermediate steps for each subsequent iteration&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id="fibonacci-timings-and-golang-playground-time-is-frozen"&gt;Fibonacci timings and golang playground time is frozen&lt;/h2&gt;
+&lt;p&gt;&lt;a href="https://play.golang.org/p/xn94zJHJiB"&gt;https://play.golang.org/p/xn94zJHJiB&lt;/a&gt; is an example with timings but...
+...sorry, the Go Playground does not really use time (and caches all output) so to really see the difference you must run the program locally.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;https://groups.google.com/forum/#!topic/golang-nuts/Dh0P1VzXmq8&lt;/li&gt;
+&lt;li&gt;https://groups.google.com/forum/#!topic/golang-nuts/NLZJahiMk58&lt;/li&gt;
+&lt;li&gt;https://github.com/golang/playground/blob/master/sandbox/play.go&lt;/li&gt;
+&lt;li&gt;http://www.gophercon.in/blog/2015/02/17/andrew/&lt;/li&gt;
+&lt;li&gt;https://talks.golang.org/2014/go4gophers.slide#3&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id="memoization-aka-caching-with-fibonacci"&gt;Memoization aka Caching with Fibonacci&lt;/h1&gt;
+&lt;p&gt;It almost seems common sense that we should not be re-calculating answers we already know for every step.
+This alternative implementation removes the recursion (and helper function) and instead uses a simple for loop.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kd"&gt;func&lt;/span&gt; &lt;span class="nx"&gt;fibCaching&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;n&lt;/span&gt; &lt;span class="kt"&gt;int&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;[]&lt;/span&gt;&lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+&lt;span class="nx"&gt;a&lt;/span&gt; &lt;span class="o"&gt;:=&lt;/span&gt; &lt;span class="p"&gt;[]&lt;/span&gt;&lt;span class="kt"&gt;int&lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="nx"&gt;n&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="nx"&gt;a&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;span class="nx"&gt;a&lt;/span&gt; &lt;span class="p"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;append&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;a&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="nx"&gt;n&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="nx"&gt;a&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="nx"&gt;i&lt;/span&gt; &lt;span class="o"&gt;:=&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt; &lt;span class="nx"&gt;i&lt;/span&gt; &lt;span class="p"&gt;&amp;lt;&lt;/span&gt; &lt;span class="nx"&gt;n&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt; &lt;span class="nx"&gt;i&lt;/span&gt;&lt;span class="o"&gt;++&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="nx"&gt;a&lt;/span&gt; &lt;span class="p"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;append&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;a&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;a&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="nx"&gt;i&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="nx"&gt;a&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="nx"&gt;i&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="nx"&gt;a&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;}&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;this trivial example also benefits from the slice index corresponding well to a key for each fibonacci value in the "lookup table"&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;a href="https://play.golang.org/p/rs6sJXGO8y"&gt;https://play.golang.org/p/rs6sJXGO8y&lt;/a&gt; again provides the full code (despite not really getting time to work in the playground)&lt;/p&gt;
+&lt;h1 id="comparing-with-benchmarks"&gt;Comparing with Benchmarks&lt;/h1&gt;
+&lt;p&gt;Besides the "manual performance testing" with time and print statements you can use Go's more sophisticated tooling with bench.
+Creating &lt;strong&gt;main_test.go&lt;/strong&gt; and running &lt;code&gt;go test -v -run=NOMATCH -bench=BenchmarkFibonacciSeries&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kd"&gt;func&lt;/span&gt; &lt;span class="nx"&gt;BenchmarkFibonacciSeriesRecursive&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;b&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="nx"&gt;testing&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;B&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="nx"&gt;n&lt;/span&gt; &lt;span class="o"&gt;:=&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt; &lt;span class="nx"&gt;n&lt;/span&gt; &lt;span class="p"&gt;&amp;lt;&lt;/span&gt; &lt;span class="nx"&gt;b&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;N&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt; &lt;span class="nx"&gt;n&lt;/span&gt;&lt;span class="o"&gt;++&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="nx"&gt;fibSeriesRecursive&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;20&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+
+&lt;span class="kd"&gt;func&lt;/span&gt; &lt;span class="nx"&gt;BenchmarkFibonacciSeriesCaching&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;b&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="nx"&gt;testing&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;B&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="nx"&gt;n&lt;/span&gt; &lt;span class="o"&gt;:=&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt; &lt;span class="nx"&gt;n&lt;/span&gt; &lt;span class="p"&gt;&amp;lt;&lt;/span&gt; &lt;span class="nx"&gt;b&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;N&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt; &lt;span class="nx"&gt;n&lt;/span&gt;&lt;span class="o"&gt;++&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="nx"&gt;fibCaching&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;20&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;The nanoseconds per operation are dramatically less in the side-by-side comparison&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;a href="https://blog.john-pfeiffer.com/golang-testing-benchmark-profiling-subtests-fuzz-testing/#running-specific-benchmarks"&gt;https://blog.john-pfeiffer.com/golang-testing-benchmark-profiling-subtests-fuzz-testing/#running-specific-benchmarks&lt;/a&gt;&lt;/p&gt;
+&lt;h1 id="insights"&gt;Insights&lt;/h1&gt;
+&lt;p&gt;The hardest part of applying caching is understanding the problem well enough to see where the extra work can be avoided.
+Thus I recommend pen and paper (or whiteboard) for diagramming the tree of (usually recursive) calls in order to see any patterns.&lt;/p&gt;
+&lt;p&gt;The tradeoff of memory for computation (time!) is usually worth it given modern large amounts of cheap memory available (assuming we do not have to worry about cache invalidation ;).&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;&lt;a href="https://blog.john-pfeiffer.com/caching-data-and-common-gotchas-and-an-intro-to-redis-memcached-and-varnish/"&gt;https://blog.john-pfeiffer.com/caching-data-and-common-gotchas-and-an-intro-to-redis-memcached-and-varnish/&lt;/a&gt;&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;Further exercises:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;the coin problem (do not need to calculate the sub problems) , &lt;a href="https://en.wikipedia.org/wiki/Coin_problem"&gt;https://en.wikipedia.org/wiki/Coin_problem&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;towers of hanoi instructions series (rotate previous instructions rather than full recursion) , &lt;a href="https://en.wikipedia.org/wiki/Tower_of_Hanoi"&gt;https://en.wikipedia.org/wiki/Tower_of_Hanoi&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">john pfeiffer</dc:creator><pubDate>Mon, 06 Nov 2017 20:45:00 -0800</pubDate><guid isPermaLink="false">tag:blog.john-pfeiffer.com,2017-11-06:dynamic-programming-and-memoization-and-the-compute-versus-storage-tradeoff/</guid><category>dynamic programming</category><category>memoization</category><category>benchmark</category><category>golang</category></item><item><title>Productivity is a Myth</title><link>https://blog.john-pfeiffer.com/productivity-is-a-myth/</link><description>
 &lt;p&gt;Productivity is dependent on and interwoven with so many things that anytime anyone pushes "more productive" I wonder...&lt;/p&gt;
 &lt;p&gt;If you're "productive" and you get 3 things done in a day, or in a week even...&lt;/p&gt;
 &lt;h2 id="the-many-measures-of-productivity"&gt;The Many Measures of Productivity&lt;/h2&gt;
