@@ -1,5 +1,131 @@
 <?xml version="1.0" encoding="utf-8"?>
-<rss version="2.0"><channel><title>johnpfeiffer</title><link>https://blog.john-pfeiffer.com/</link><description></description><lastBuildDate>Mon, 06 Nov 2017 20:45:00 -0800</lastBuildDate><item><title>Dynamic Programming and Memoization and the Compute versus Storage Tradeoff</title><link>https://blog.john-pfeiffer.com/dynamic-programming-and-memoization-and-the-compute-versus-storage-tradeoff/</link><description>
+<rss version="2.0"><channel><title>johnpfeiffer</title><link>https://blog.john-pfeiffer.com/</link><description></description><lastBuildDate>Sat, 02 Dec 2017 19:44:00 -0800</lastBuildDate><item><title>Golang Buffalo Tutorial To Create A Web Site With Authentication</title><link>https://blog.john-pfeiffer.com/golang-buffalo-tutorial-to-create-a-web-site-with-authentication/</link><description>
+&lt;p&gt;Go's considerable tooling makes it a very productive and performant static language. Besides being ideal for developing APIs (goroutines!) it can then be convenient to also write the Web UI in Go.&lt;/p&gt;
+&lt;p&gt;Although the standard library allows for writing a Go based website with templates and maximum flexibility, what if you want a quick start with "batteries included"?&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Code generation makes it easy to get started but all future customization depends on the developer, this is not a CMS =p&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id="buffalo-installation-and-prerequisites"&gt;Buffalo Installation and Prerequisites&lt;/h2&gt;
+&lt;p&gt;&lt;em&gt;Assuming the Go dev environment is already setup...&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;go get -u -v github.com/gobuffalo/buffalo/buffalo&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;buffalo new example&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;sudo docker run --rm -it --publish 0.0.0.0:5432:5432 --name pg -e POSTGRES_PASSWORD=postgres postgres:alpine&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;this will make the username and password match the default database.yml that buffalo generates...&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;cat database.yml&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;development&lt;/span&gt;&lt;span class="p p-Indicator"&gt;:&lt;/span&gt;
+  &lt;span class="l l-Scalar l-Scalar-Plain"&gt;dialect&lt;/span&gt;&lt;span class="p p-Indicator"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;postgres&lt;/span&gt;
+  &lt;span class="l l-Scalar l-Scalar-Plain"&gt;database&lt;/span&gt;&lt;span class="p p-Indicator"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;example_development&lt;/span&gt;
+  &lt;span class="l l-Scalar l-Scalar-Plain"&gt;user&lt;/span&gt;&lt;span class="p p-Indicator"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;postgres&lt;/span&gt;
+  &lt;span class="l l-Scalar l-Scalar-Plain"&gt;password&lt;/span&gt;&lt;span class="p p-Indicator"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;postgres&lt;/span&gt;
+  &lt;span class="l l-Scalar l-Scalar-Plain"&gt;host&lt;/span&gt;&lt;span class="p p-Indicator"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;127.0.0.1&lt;/span&gt;
+  &lt;span class="l l-Scalar l-Scalar-Plain"&gt;pool&lt;/span&gt;&lt;span class="p p-Indicator"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;5&lt;/span&gt;
+
+&lt;span class="l l-Scalar l-Scalar-Plain"&gt;test&lt;/span&gt;&lt;span class="p p-Indicator"&gt;:&lt;/span&gt;
+  &lt;span class="l l-Scalar l-Scalar-Plain"&gt;url&lt;/span&gt;&lt;span class="p p-Indicator"&gt;:&lt;/span&gt; &lt;span class="p p-Indicator"&gt;{{&lt;/span&gt;&lt;span class="nv"&gt;envOr "TEST_DATABASE_URL" "postgres&lt;/span&gt;&lt;span class="p p-Indicator"&gt;:&lt;/span&gt;&lt;span class="nv"&gt;//postgres&lt;/span&gt;&lt;span class="p p-Indicator"&gt;:&lt;/span&gt;&lt;span class="nv"&gt;postgres@127.0.0.1&lt;/span&gt;&lt;span class="p p-Indicator"&gt;:&lt;/span&gt;&lt;span class="nv"&gt;5432/example_test&lt;/span&gt;&lt;span class="p p-Indicator"&gt;?&lt;/span&gt;&lt;span class="nv"&gt;sslmode=disable"&lt;/span&gt;&lt;span class="p p-Indicator"&gt;}}&lt;/span&gt;
+
+&lt;span class="l l-Scalar l-Scalar-Plain"&gt;production&lt;/span&gt;&lt;span class="p p-Indicator"&gt;:&lt;/span&gt;
+  &lt;span class="l l-Scalar l-Scalar-Plain"&gt;url&lt;/span&gt;&lt;span class="p p-Indicator"&gt;:&lt;/span&gt; &lt;span class="p p-Indicator"&gt;{{&lt;/span&gt;&lt;span class="nv"&gt;envOr "DATABASE_URL" "postgres&lt;/span&gt;&lt;span class="p p-Indicator"&gt;:&lt;/span&gt;&lt;span class="nv"&gt;//postgres&lt;/span&gt;&lt;span class="p p-Indicator"&gt;:&lt;/span&gt;&lt;span class="nv"&gt;postgres@127.0.0.1&lt;/span&gt;&lt;span class="p p-Indicator"&gt;:&lt;/span&gt;&lt;span class="nv"&gt;5432/example_production&lt;/span&gt;&lt;span class="p p-Indicator"&gt;?&lt;/span&gt;&lt;span class="nv"&gt;sslmode=disable"&lt;/span&gt;&lt;span class="p p-Indicator"&gt;}}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;&lt;code&gt;buffalo db create --all&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;the buffalo framework will create all the necessary databases and tables&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;em&gt;(you can also &lt;code&gt;buffalo db drop --all&lt;/code&gt; or &lt;code&gt;buffalo db drop --env test&lt;/code&gt; to remove all or just one db)&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;references:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://hub.docker.com/_/postgres/"&gt;https://hub.docker.com/_/postgres/&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://gobuffalo.io/docs/db"&gt;https://gobuffalo.io/docs/db&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;It is worth reading about the convention of how Buffalo lays out the directories and code &lt;a href="https://gobuffalo.io/docs/directory-structure"&gt;https://gobuffalo.io/docs/directory-structure&lt;/a&gt;&lt;/p&gt;
+&lt;h2 id="start-developing-with-a-resource-generator"&gt;Start Developing with a Resource Generator&lt;/h2&gt;
+&lt;p&gt;&lt;code&gt;buffalo dev&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;(Or use the following syntax for a non default port: &lt;code&gt;PORT=3001 buffalo dev&lt;/code&gt;)&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;curl localhost:3000&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Yup a default web page is routed and served&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;buffalo generate resource users name email title:nulls.Text
+buffalo db migrate
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Resulting output...&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;--&amp;gt; actions/users.go
+--&amp;gt; actions/users_test.go
+--&amp;gt; locales/users.en-us.yaml
+--&amp;gt; templates/users/_form.html
+--&amp;gt; templates/users/edit.html
+--&amp;gt; templates/users/index.html
+--&amp;gt; templates/users/new.html
+--&amp;gt; templates/users/show.html
+--&amp;gt; buffalo db g model user name email title:nulls.Text
+v3.41.1
+
+--&amp;gt; models/user.go
+--&amp;gt; models/user_test.go
+--&amp;gt; goimports -w actions/actions_test.go actions/app.go actions/home.go actions/home_test.go actions/render.go actions/users.go actions/users_test.go grifts/db.go grifts/init.go main.go models/models.go models/models_test.go models/user.go models/user_test.go
+&amp;gt; migrations/20171203042126_create_users.up.fizz
+&amp;gt; migrations/20171203042126_create_users.down.fizz
+--&amp;gt; goimports -w actions/actions_test.go actions/app.go actions/home.go actions/home_test.go actions/render.go actions/users.go actions/users_test.go grifts/db.go grifts/init.go main.go models/models.go models/models_test.go models/user.go models/user_test.go
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;The code generator is very helpful, especially after the database tables are updated with the migrate command&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;code&gt;curl localhost:3000&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;The list of REST resources now includes all the usual HTTP methods&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;code&gt;curl localhost:3000/users&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;The GET endpoint lists all of the existing users (in the database) and has a button to create a new user&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Now you can use a web browser to play with the Web UI&lt;/p&gt;
+&lt;p&gt;You can also query the database&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;sudo docker run -it --rm --link pg:postgres postgres:alpine psql --help
+sudo docker run -it --rm --link pg:postgres postgres:alpine psql --host postgres --username postgres
+    \list
+    \connect example_development
+    \dt+
+    \d+ users
+    select * from users;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;h2 id="avoiding-the-frontend"&gt;Avoiding the Frontend&lt;/h2&gt;
+&lt;p&gt;Because javascript moves so quickly (and breaks things) it is easier to skip these steps and focus on the backend.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;# maybe skip these (and all the accompanying dependencies) to avoid suckiness
+sudo apt-get install -y npm
+sudo npm cache clean -f
+sudo npm install -g n
+npm --version
+node --version
+npm install
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;npm installs the authrecipe dependencies but first use npm in order to install nodejs via the "n" helper&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Without these the javascript assets or other things that were supposed to make the forms look pretty are not available but everything still works.&lt;/p&gt;
+&lt;h2 id="authentication"&gt;Authentication&lt;/h2&gt;
+&lt;p&gt;One of the first building blocks of any decent site is authentication.  Luckily there are a couple of packages that make basic and SSO authentication easier.&lt;/p&gt;
+&lt;h3 id="basic-authentication-with-the-database"&gt;Basic Authentication with the Database&lt;/h3&gt;
+&lt;p&gt;To just use an example (leverage the Buffalo author's in-progress tutorial ;)&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;sudo docker run --rm -it --publish 0.0.0.0:5432:5432 --name pg -e POSTGRES_PASSWORD=postgres postgres:alpine
+git clone https://github.com/gobuffalo/authrecipe
+cd authrecipe
+go get
+buffalo db create --all
+buffalo db migrate
+buffalo dev
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;that is the minimum to get up and runnning...&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;With a browser you can "sign in" or "register" (create a new user with a password)&lt;/p&gt;
+&lt;p&gt;TODO: more work to port over how to create secure endpoints with a "CheckAuth" middleware...&lt;/p&gt;
+&lt;h3 id="authentication-using-an-external-identity-provider"&gt;Authentication using an External Identity Provider&lt;/h3&gt;
+&lt;p&gt;For instructions on how to have users authenticate and secure resources with identity providers like Github, Facebook, Google, etc.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://blog.gobuffalo.io/buffalo-tutorial-create-a-site-with-github-auth-629582e2763e"&gt;https://blog.gobuffalo.io/buffalo-tutorial-create-a-site-with-github-auth-629582e2763e&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://github.com/markbates/goth"&gt;https://github.com/markbates/goth&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">john pfeiffer</dc:creator><pubDate>Sat, 02 Dec 2017 19:44:00 -0800</pubDate><guid isPermaLink="false">tag:blog.john-pfeiffer.com,2017-12-02:golang-buffalo-tutorial-to-create-a-web-site-with-authentication/</guid><category>go</category><category>golang</category><category>web</category><category>buffalo</category><category>authentication</category><category>sso</category><category>saml</category></item><item><title>Dynamic Programming and Memoization and the Compute versus Storage Tradeoff</title><link>https://blog.john-pfeiffer.com/dynamic-programming-and-memoization-and-the-compute-versus-storage-tradeoff/</link><description>
 &lt;h2 id="tradeoffs"&gt;Tradeoffs&lt;/h2&gt;
 &lt;p&gt;There is an inevitable tradeoff of storage versus computation speed, or space used versus time to run, in every program.&lt;/p&gt;
 &lt;p&gt;Caching is often viewed as a performance optimization but sometimes it is the only way to achieve a result in a finite amount of time.&lt;/p&gt;

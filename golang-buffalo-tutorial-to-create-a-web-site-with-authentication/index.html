@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en-US">
+    <head>
+        <meta charset="utf-8"> 
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="author" content="john pfeiffer" />
+        <meta name="copyright" content="john pfeiffer" />
+
+<meta name="keywords" content="go, golang, web, buffalo, authentication, sso, saml, programming, " />
+        <title>Golang Buffalo Tutorial To Create A Web Site With Authentication  · johnpfeiffer
+</title>
+        <!--link href="https://cdn-images.mailchimp.com/embedcode/slim-081711.css" rel="stylesheet" type="text/css"-->
+        <!--link href="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css" rel="stylesheet"-->
+        <link href="https://blog.john-pfeiffer.com/theme/css/bootstrap-combined.min.css" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="https://blog.john-pfeiffer.com/theme/css/style.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="https://blog.john-pfeiffer.com/theme/css/solarizedlight.css" media="screen">
+        <link rel="shortcut icon" href="https://blog.john-pfeiffer.com/theme/images/favicon.ico" type="image/x-icon" />
+        <link rel="apple-touch-icon" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon.png" />
+        <link rel="apple-touch-icon" sizes="57x57" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-57x57.png" />
+        <link rel="apple-touch-icon" sizes="72x72" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-72x72.png" />
+        <link rel="apple-touch-icon" sizes="114x114" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-114x114.png" />
+        <link rel="apple-touch-icon" sizes="144x144" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-144x144.png" />
+        <link rel="icon" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-144x144.png" />
+    </head>
+    <body>
+	<div id="content-sans-footer">
+        <div class="dropdown-backdrop">
+
+			<div class="navbar navbar-static-top">
+				<div class="navbar-inner">
+					<div class="container">
+						<a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+							<span class="icon-bar"></span>
+							<span class="icon-bar"></span>
+							<span class="icon-bar"></span>
+						</a>
+						<a class="brand" href="https://blog.john-pfeiffer.com/"><span class=site-name>johnpfeiffer</span></a>
+						<div class="nav-collapse collapse">
+							<ul class="nav pull-right top-menu">
+								<li ><a href="https://blog.john-pfeiffer.com">Home</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/john-likes/">John Likes</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/categories.html">Categories</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/tags.html">Tags</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/archives.html">Archives</a></li>
+								<li><form class="navbar-search" action="https://blog.john-pfeiffer.com/search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="container-fluid">
+			<div class="row-fluid">
+				<div class="span1"></div>
+				<div class="span10">
+<article>
+<div class="row-fluid">
+    <header class="page_header span10 offset2">
+    <h1><a href="https://blog.john-pfeiffer.com/golang-buffalo-tutorial-to-create-a-web-site-with-authentication/"> Golang Buffalo Tutorial To Create A Web Site With Authentication  </a></h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+    <div class="span2 table-of-content">
+        <nav>
+        <h4>Contents</h4>
+        <div class="toc">
+<ul>
+<li><a href="#buffalo-installation-and-prerequisites">Buffalo Installation and Prerequisites</a></li>
+<li><a href="#start-developing-with-a-resource-generator">Start Developing with a Resource Generator</a></li>
+<li><a href="#avoiding-the-frontend">Avoiding the Frontend</a></li>
+<li><a href="#authentication">Authentication</a><ul>
+<li><a href="#basic-authentication-with-the-database">Basic Authentication with the Database</a></li>
+<li><a href="#authentication-using-an-external-identity-provider">Authentication using an External Identity Provider</a></li>
+</ul>
+</li>
+</ul>
+</div>
+        </nav>
+    </div>
+    <div class="span8 article-content">
+
+            
+<p>Go's considerable tooling makes it a very productive and performant static language. Besides being ideal for developing APIs (goroutines!) it can then be convenient to also write the Web UI in Go.</p>
+<p>Although the standard library allows for writing a Go based website with templates and maximum flexibility, what if you want a quick start with "batteries included"?</p>
+<blockquote>
+<p>Code generation makes it easy to get started but all future customization depends on the developer, this is not a CMS =p</p>
+</blockquote>
+<h2 id="buffalo-installation-and-prerequisites">Buffalo Installation and Prerequisites</h2>
+<p><em>Assuming the Go dev environment is already setup...</em></p>
+<p><code>go get -u -v github.com/gobuffalo/buffalo/buffalo</code></p>
+<p><code>buffalo new example</code></p>
+<p><code>sudo docker run --rm -it --publish 0.0.0.0:5432:5432 --name pg -e POSTGRES_PASSWORD=postgres postgres:alpine</code></p>
+<blockquote>
+<p>this will make the username and password match the default database.yml that buffalo generates...</p>
+</blockquote>
+<p>cat database.yml</p>
+<div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">development</span><span class="p p-Indicator">:</span>
+  <span class="l l-Scalar l-Scalar-Plain">dialect</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">postgres</span>
+  <span class="l l-Scalar l-Scalar-Plain">database</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">example_development</span>
+  <span class="l l-Scalar l-Scalar-Plain">user</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">postgres</span>
+  <span class="l l-Scalar l-Scalar-Plain">password</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">postgres</span>
+  <span class="l l-Scalar l-Scalar-Plain">host</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">127.0.0.1</span>
+  <span class="l l-Scalar l-Scalar-Plain">pool</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">5</span>
+
+<span class="l l-Scalar l-Scalar-Plain">test</span><span class="p p-Indicator">:</span>
+  <span class="l l-Scalar l-Scalar-Plain">url</span><span class="p p-Indicator">:</span> <span class="p p-Indicator">{{</span><span class="nv">envOr "TEST_DATABASE_URL" "postgres</span><span class="p p-Indicator">:</span><span class="nv">//postgres</span><span class="p p-Indicator">:</span><span class="nv">postgres@127.0.0.1</span><span class="p p-Indicator">:</span><span class="nv">5432/example_test</span><span class="p p-Indicator">?</span><span class="nv">sslmode=disable"</span><span class="p p-Indicator">}}</span>
+
+<span class="l l-Scalar l-Scalar-Plain">production</span><span class="p p-Indicator">:</span>
+  <span class="l l-Scalar l-Scalar-Plain">url</span><span class="p p-Indicator">:</span> <span class="p p-Indicator">{{</span><span class="nv">envOr "DATABASE_URL" "postgres</span><span class="p p-Indicator">:</span><span class="nv">//postgres</span><span class="p p-Indicator">:</span><span class="nv">postgres@127.0.0.1</span><span class="p p-Indicator">:</span><span class="nv">5432/example_production</span><span class="p p-Indicator">?</span><span class="nv">sslmode=disable"</span><span class="p p-Indicator">}}</span>
+</pre></div>
+<p><code>buffalo db create --all</code></p>
+<blockquote>
+<p>the buffalo framework will create all the necessary databases and tables</p>
+</blockquote>
+<p><em>(you can also <code>buffalo db drop --all</code> or <code>buffalo db drop --env test</code> to remove all or just one db)</em></p>
+<p>references:</p>
+<ul>
+<li><a href="https://hub.docker.com/_/postgres/">https://hub.docker.com/_/postgres/</a></li>
+<li><a href="https://gobuffalo.io/docs/db">https://gobuffalo.io/docs/db</a></li>
+</ul>
+<p>It is worth reading about the convention of how Buffalo lays out the directories and code <a href="https://gobuffalo.io/docs/directory-structure">https://gobuffalo.io/docs/directory-structure</a></p>
+<h2 id="start-developing-with-a-resource-generator">Start Developing with a Resource Generator</h2>
+<p><code>buffalo dev</code></p>
+<p>(Or use the following syntax for a non default port: <code>PORT=3001 buffalo dev</code>)</p>
+<p><code>curl localhost:3000</code></p>
+<blockquote>
+<p>Yup a default web page is routed and served</p>
+</blockquote>
+<div class="highlight"><pre><span></span>buffalo generate resource users name email title:nulls.Text
+buffalo db migrate
+</pre></div>
+<p>Resulting output...</p>
+<div class="highlight"><pre><span></span>--&gt; actions/users.go
+--&gt; actions/users_test.go
+--&gt; locales/users.en-us.yaml
+--&gt; templates/users/_form.html
+--&gt; templates/users/edit.html
+--&gt; templates/users/index.html
+--&gt; templates/users/new.html
+--&gt; templates/users/show.html
+--&gt; buffalo db g model user name email title:nulls.Text
+v3.41.1
+
+--&gt; models/user.go
+--&gt; models/user_test.go
+--&gt; goimports -w actions/actions_test.go actions/app.go actions/home.go actions/home_test.go actions/render.go actions/users.go actions/users_test.go grifts/db.go grifts/init.go main.go models/models.go models/models_test.go models/user.go models/user_test.go
+&gt; migrations/20171203042126_create_users.up.fizz
+&gt; migrations/20171203042126_create_users.down.fizz
+--&gt; goimports -w actions/actions_test.go actions/app.go actions/home.go actions/home_test.go actions/render.go actions/users.go actions/users_test.go grifts/db.go grifts/init.go main.go models/models.go models/models_test.go models/user.go models/user_test.go
+</pre></div>
+<blockquote>
+<p>The code generator is very helpful, especially after the database tables are updated with the migrate command</p>
+</blockquote>
+<p><code>curl localhost:3000</code></p>
+<blockquote>
+<p>The list of REST resources now includes all the usual HTTP methods</p>
+</blockquote>
+<p><code>curl localhost:3000/users</code></p>
+<blockquote>
+<p>The GET endpoint lists all of the existing users (in the database) and has a button to create a new user</p>
+</blockquote>
+<p>Now you can use a web browser to play with the Web UI</p>
+<p>You can also query the database</p>
+<div class="highlight"><pre><span></span>sudo docker run -it --rm --link pg:postgres postgres:alpine psql --help
+sudo docker run -it --rm --link pg:postgres postgres:alpine psql --host postgres --username postgres
+    \list
+    \connect example_development
+    \dt+
+    \d+ users
+    select * from users;
+</pre></div>
+<h2 id="avoiding-the-frontend">Avoiding the Frontend</h2>
+<p>Because javascript moves so quickly (and breaks things) it is easier to skip these steps and focus on the backend.</p>
+<div class="highlight"><pre><span></span># maybe skip these (and all the accompanying dependencies) to avoid suckiness
+sudo apt-get install -y npm
+sudo npm cache clean -f
+sudo npm install -g n
+npm --version
+node --version
+npm install
+</pre></div>
+<blockquote>
+<p>npm installs the authrecipe dependencies but first use npm in order to install nodejs via the "n" helper</p>
+</blockquote>
+<p>Without these the javascript assets or other things that were supposed to make the forms look pretty are not available but everything still works.</p>
+<h2 id="authentication">Authentication</h2>
+<p>One of the first building blocks of any decent site is authentication.  Luckily there are a couple of packages that make basic and SSO authentication easier.</p>
+<h3 id="basic-authentication-with-the-database">Basic Authentication with the Database</h3>
+<p>To just use an example (leverage the Buffalo author's in-progress tutorial ;)</p>
+<div class="highlight"><pre><span></span>sudo docker run --rm -it --publish 0.0.0.0:5432:5432 --name pg -e POSTGRES_PASSWORD=postgres postgres:alpine
+git clone https://github.com/gobuffalo/authrecipe
+cd authrecipe
+go get
+buffalo db create --all
+buffalo db migrate
+buffalo dev
+</pre></div>
+<blockquote>
+<p>that is the minimum to get up and runnning...</p>
+</blockquote>
+<p>With a browser you can "sign in" or "register" (create a new user with a password)</p>
+<p>TODO: more work to port over how to create secure endpoints with a "CheckAuth" middleware...</p>
+<h3 id="authentication-using-an-external-identity-provider">Authentication using an External Identity Provider</h3>
+<p>For instructions on how to have users authenticate and secure resources with identity providers like Github, Facebook, Google, etc.</p>
+<ul>
+<li><a href="https://blog.gobuffalo.io/buffalo-tutorial-create-a-site-with-github-auth-629582e2763e">https://blog.gobuffalo.io/buffalo-tutorial-create-a-site-with-github-auth-629582e2763e</a></li>
+<li><a href="https://github.com/markbates/goth">https://github.com/markbates/goth</a></li>
+</ul>
+            <aside>
+            <hr/>
+            <nav>
+            <ul class="articles_timeline">
+ 
+                <li class="previous_article">« <a href="https://blog.john-pfeiffer.com/dynamic-programming-and-memoization-and-the-compute-versus-storage-tradeoff/" title="Previous: Dynamic Programming and Memoization and the Compute versus Storage Tradeoff">Dynamic Programming and Memoization and the Compute versus Storage Tradeoff</a></li>
+            </ul>
+            </nav>
+            </aside>
+        </div>
+        <section>
+        <div class="span2" style="float:right;font-size:0.9em;">
+ 
+            <h4>Published</h4>
+            <time pubdate="pubdate" datetime="2017-12-02T19:44:00-08:00">Dec 2, 2017</time>
+            <h4>Category</h4>
+            <a class="category-link" href="/categories.html#programming-ref">programming</a> 
+            <h4>~658 words</h4>
+            <h4>Tags</h4>
+            <ul class="list-of-tags tags-in-article"> 
+                <li><a href="/tags.html#authentication-ref">authentication
+                    <span>1</span>
+</a></li>
+                <li><a href="/tags.html#buffalo-ref">buffalo
+                    <span>1</span>
+</a></li>
+                <li><a href="/tags.html#go-ref">go
+                    <span>8</span>
+</a></li>
+                <li><a href="/tags.html#golang-ref">golang
+                    <span>8</span>
+</a></li>
+                <li><a href="/tags.html#saml-ref">saml
+                    <span>1</span>
+</a></li>
+                <li><a href="/tags.html#sso-ref">sso
+                    <span>1</span>
+</a></li>
+                <li><a href="/tags.html#web-ref">web
+                    <span>1</span>
+</a></li>
+            </ul>
+
+        </div>
+        </section>
+</div>
+</article>
+				</div>
+				<div class="span1"></div>
+			</div>
+		</div>
+    </div>
+<footer>
+<div id="footer">
+    <ul class="footer-content">
+    </ul>
+</div>
+</footer>            <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+    </body>
+</html>
