@@ -190,19 +190,6 @@ Here is a major digression into Go slices which is a pointer structure that hold
     <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">a</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">2</span><span class="p">])</span> <span class="c1">// 2</span>
     <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nb">append</span><span class="p">(</span><span class="nx">a</span><span class="p">,</span> <span class="nx">a</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span><span class="o">...</span><span class="p">))</span> <span class="c1">// 1, 2, 3, 2</span>
 
-
-<span class="p">:::</span><span class="k">go</span>
-<span class="kn">package</span> <span class="nx">main</span>
-
-<span class="kn">import</span> <span class="p">(</span>
-    <span class="s">"fmt"</span>
-<span class="p">)</span>
-
-<span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
-    <span class="nx">a</span> <span class="o">:=</span> <span class="p">[]</span><span class="kt">int</span><span class="p">{</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">}</span>
-    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">a</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">2</span><span class="p">])</span> <span class="c1">// 2</span>
-    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nb">append</span><span class="p">(</span><span class="nx">a</span><span class="p">,</span> <span class="nx">a</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span><span class="o">...</span><span class="p">))</span> <span class="c1">// 1, 2, 3, 2</span>
-
     <span class="c1">// pre-allocating might be premature optimization and lead to bugs</span>
     <span class="nx">premature</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">([]</span><span class="kt">string</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
     <span class="nx">premature</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="p">=</span> <span class="s">"foo"</span>
@@ -214,19 +201,23 @@ Here is a major digression into Go slices which is a pointer structure that hold
     <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nx">s</span><span class="p">),</span> <span class="nx">s</span><span class="p">)</span> <span class="c1">// "5 [add multiple items at once]"</span>
 
     <span class="c1">// COPY also known as ADD to a slice (in this case add to a nil slice)</span>
-    <span class="nx">b</span> <span class="o">:=</span> <span class="nb">append</span><span class="p">([]</span><span class="nb">string</span><span class="p">(</span><span class="kc">nil</span><span class="p">),</span> <span class="nx">s</span><span class="o">...</span><span class="p">)</span> <span class="c1">// the triple dots (ellipsis in english) indicates a variadic parameter</span>
-    <span class="c1">// https://golang.org/ref/spec#Passing_arguments_to_..._parameters , https://golang.org/src/builtin/builtin.go?s=4716:4763#L124</span>
+    <span class="c1">// the triple dots (ellipsis in english) indicates a variadic parameter</span>
+    <span class="nx">b</span> <span class="o">:=</span> <span class="nb">append</span><span class="p">([]</span><span class="nb">string</span><span class="p">(</span><span class="kc">nil</span><span class="p">),</span> <span class="nx">s</span><span class="o">...</span><span class="p">)</span>
+    <span class="c1">// https://golang.org/ref/spec#Passing_arguments_to_..._parameters</span>
+    <span class="c1">// https://golang.org/src/builtin/builtin.go?s=4716:4763#L124</span>
     <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nx">b</span><span class="p">),</span> <span class="nx">b</span><span class="p">)</span> <span class="c1">// "5 [add multiple items at once]"</span>
 
     <span class="nx">c</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">([]</span><span class="kt">string</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="nx">s</span><span class="p">))</span> <span class="c1">// perhaps more readable</span>
     <span class="nb">copy</span><span class="p">(</span><span class="nx">c</span><span class="p">,</span> <span class="nx">s</span><span class="p">)</span>
     <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nx">c</span><span class="p">),</span> <span class="nx">c</span><span class="p">)</span> <span class="c1">// "5 [add multiple items at once]"</span>
 
-    <span class="c1">// CUT - but warning, this only removes it from the slice, NOT the underlying array so a possible memory leak</span>
+    <span class="c1">// CUT - but warning, this only removes it from the slice... </span>
+    <span class="c1">// NOT the underlying array so a possible memory leak!</span>
     <span class="nx">s</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">s</span><span class="p">[:</span><span class="mi">1</span><span class="p">],</span> <span class="nx">s</span><span class="p">[</span><span class="mi">4</span><span class="p">:]</span><span class="o">...</span><span class="p">)</span> <span class="c1">// up to but not including index 1, start at index 4 to the end</span>
     <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nx">s</span><span class="p">),</span> <span class="nx">s</span><span class="p">)</span>      <span class="c1">// "2 [add once]"</span>
 
-    <span class="c1">// DELETE index 2 (same ordering), no memory leak by correctly setting it to the zero value (usually nil for objects)</span>
+    <span class="c1">// DELETE index 2 (same ordering)...</span>
+    <span class="c1">// so no memory leak by correctly setting it to the zero value (usually nil for objects)</span>
     <span class="nb">copy</span><span class="p">(</span><span class="nx">b</span><span class="p">[</span><span class="mi">2</span><span class="p">:],</span> <span class="nx">b</span><span class="p">[</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">:])</span>
     <span class="nx">b</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="nx">b</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="p">=</span> <span class="s">""</span>
     <span class="nx">b</span> <span class="p">=</span> <span class="nx">b</span><span class="p">[:</span><span class="nb">len</span><span class="p">(</span><span class="nx">b</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
@@ -483,7 +474,7 @@ Since go starts from simple blocks we build, as needed, more complex tools like 
             <time pubdate="pubdate" datetime="2016-10-02T23:45:00-07:00">Oct 2, 2016</time>
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#programming-ref">programming</a> 
-            <h4>~1699 words</h4>
+            <h4>~1681 words</h4>
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article"> 
                 <li><a href="/tags.html#algorithms-ref">algorithms
