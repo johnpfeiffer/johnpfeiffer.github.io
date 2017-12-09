@@ -69,6 +69,7 @@
 <li><a href="#tips-on-learning-a-new-programming-language">Tips on learning a new programming language</a></li>
 <li><a href="#arrays-underlying-slices-with-memory-addresses-and-unsafe-pointers">Arrays underlying slices with memory addresses and unsafe pointers</a><ul>
 <li><a href="#examples-of-go-slice-operations-and-tricks">Examples of Go Slice operations and tricks</a></li>
+<li><a href="#gotcha-with-slices-and-pointers">Gotcha with Slices and Pointers</a></li>
 </ul>
 </li>
 <li><a href="#functions-anonymous-functions-functions-as-parameters-and-filters">Functions, Anonymous Functions, Functions as Parameters, and Filters</a></li>
@@ -148,6 +149,7 @@ Here is a major digression into Go slices which is a pointer structure that hold
     <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">"\nSafe examination of the second location in the slice: %#v"</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">h</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
     <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">()</span>
 <span class="p">}</span>
+
 
 
 <span class="nx">example</span> <span class="kc">nil</span> <span class="nx">pointer</span><span class="p">:</span> <span class="p">[]</span><span class="nb">int</span><span class="p">(</span><span class="kc">nil</span><span class="p">)</span>
@@ -237,12 +239,10 @@ package main</p>
 <span class="n">fmt</span><span class="p">.</span><span class="n">Println</span><span class="p">(</span><span class="n">len</span><span class="p">(</span><span class="n">b</span><span class="p">),</span> <span class="n">b</span><span class="p">)</span> <span class="c1">// "5 [once at foobar add multiple]"</span>
 </pre></div>
 <p>}</p>
-<blockquote>
-<p>Slices are fairly fundamental and while most things are easy there are definitely some gotchas</p>
-</blockquote>
 </li>
 </ul>
 <blockquote>
+<p>Slices are fairly fundamental and while most things are easy there are definitely some gotchas</p>
 <p>A critical thing to remember when reasoning is that slices are references to underlying arrays, so small subslice from a very large slice will prevent that larger object/array from being garbage collected</p>
 </blockquote>
 <ul>
@@ -253,6 +253,31 @@ package main</p>
 <blockquote>
 <p>Of course, read the docs and test it for your requirements, situation, and circumstances!</p>
 </blockquote>
+<h3 id="gotcha-with-slices-and-pointers">Gotcha with Slices and Pointers</h3>
+<p>Assigning a new slice variable (pointer) to an existing slice will link the two together.  This may lead to undesired "side-effects".</p>
+<div class="highlight"><pre><span></span><span class="kn">package</span> <span class="nx">main</span>
+
+<span class="kn">import</span> <span class="p">(</span>
+    <span class="s">"fmt"</span>
+<span class="p">)</span>
+
+<span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+    <span class="nx">s</span> <span class="o">:=</span> <span class="p">[]</span><span class="kt">string</span><span class="p">{</span><span class="s">"a"</span><span class="p">,</span> <span class="s">"b"</span><span class="p">,</span> <span class="s">"c"</span><span class="p">}</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">s</span><span class="p">)</span> <span class="c1">// [a b c]</span>
+    <span class="nx">i</span> <span class="o">:=</span> <span class="mi">1</span>
+    <span class="nx">temp</span> <span class="o">:=</span> <span class="nx">s</span>
+    <span class="nx">temp</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">temp</span><span class="p">[:</span><span class="nx">i</span><span class="p">],</span> <span class="nx">temp</span><span class="p">[</span><span class="nx">i</span><span class="o">+</span><span class="mi">1</span><span class="p">:]</span><span class="o">...</span><span class="p">)</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">temp</span><span class="p">)</span> <span class="c1">// [a c]</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">s</span><span class="p">)</span> <span class="c1">// [a c c]</span>
+
+    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">"%p \n"</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">s</span><span class="p">)</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">"%p \n"</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">temp</span><span class="p">)</span>
+<span class="p">}</span>
+</pre></div>
+<blockquote>
+<p>removing (cut or delete) a specific element in the slice using the new pointer affects the original slice</p>
+</blockquote>
+<p><a href="https://play.golang.org/p/togSAlnj6J">https://play.golang.org/p/togSAlnj6J</a></p>
 <h2 id="functions-anonymous-functions-functions-as-parameters-and-filters">Functions, Anonymous Functions, Functions as Parameters, and Filters</h2>
 <p>Go has functions as first class citizens.  Just assign a function to a variable or define a type that is a function signature.
 Since go starts from simple blocks we build, as needed, more complex tools like filtering from a slice of integers.</p>
@@ -447,7 +472,7 @@ Since go starts from simple blocks we build, as needed, more complex tools like 
             <time pubdate="pubdate" datetime="2016-10-02T23:45:00-07:00">Oct 2, 2016</time>
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#programming-ref">programming</a> 
-            <h4>~1596 words</h4>
+            <h4>~1675 words</h4>
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article"> 
                 <li><a href="/tags.html#algorithms-ref">algorithms

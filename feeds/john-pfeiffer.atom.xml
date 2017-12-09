@@ -2784,6 +2784,7 @@ Here is a major digression into Go slices which is a pointer structure that hold
 &lt;span class="p"&gt;}&lt;/span&gt;
 
 
+
 &lt;span class="nx"&gt;example&lt;/span&gt; &lt;span class="kc"&gt;nil&lt;/span&gt; &lt;span class="nx"&gt;pointer&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;[]&lt;/span&gt;&lt;span class="nb"&gt;int&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kc"&gt;nil&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;span class="nx"&gt;has&lt;/span&gt; &lt;span class="nx"&gt;memory&lt;/span&gt; &lt;span class="nx"&gt;adddress&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="mh"&gt;0xc42000e440&lt;/span&gt;
 &lt;span class="nx"&gt;example&lt;/span&gt; &lt;span class="nx"&gt;empty&lt;/span&gt; &lt;span class="nx"&gt;slice&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;[]&lt;/span&gt;&lt;span class="kt"&gt;int&lt;/span&gt;&lt;span class="p"&gt;{}&lt;/span&gt;
@@ -2871,12 +2872,10 @@ package main&lt;/p&gt;
 &lt;span class="n"&gt;fmt&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;Println&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;len&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;b&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt; &lt;span class="n"&gt;b&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="c1"&gt;// "5 [once at foobar add multiple]"&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;}&lt;/p&gt;
-&lt;blockquote&gt;
-&lt;p&gt;Slices are fairly fundamental and while most things are easy there are definitely some gotchas&lt;/p&gt;
-&lt;/blockquote&gt;
 &lt;/li&gt;
 &lt;/ul&gt;
 &lt;blockquote&gt;
+&lt;p&gt;Slices are fairly fundamental and while most things are easy there are definitely some gotchas&lt;/p&gt;
 &lt;p&gt;A critical thing to remember when reasoning is that slices are references to underlying arrays, so small subslice from a very large slice will prevent that larger object/array from being garbage collected&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;ul&gt;
@@ -2887,6 +2886,31 @@ package main&lt;/p&gt;
 &lt;blockquote&gt;
 &lt;p&gt;Of course, read the docs and test it for your requirements, situation, and circumstances!&lt;/p&gt;
 &lt;/blockquote&gt;
+&lt;h3 id="gotcha-with-slices-and-pointers"&gt;Gotcha with Slices and Pointers&lt;/h3&gt;
+&lt;p&gt;Assigning a new slice variable (pointer) to an existing slice will link the two together.  This may lead to undesired "side-effects".&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kn"&gt;package&lt;/span&gt; &lt;span class="nx"&gt;main&lt;/span&gt;
+
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;
+    &lt;span class="s"&gt;"fmt"&lt;/span&gt;
+&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="kd"&gt;func&lt;/span&gt; &lt;span class="nx"&gt;main&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="nx"&gt;s&lt;/span&gt; &lt;span class="o"&gt;:=&lt;/span&gt; &lt;span class="p"&gt;[]&lt;/span&gt;&lt;span class="kt"&gt;string&lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="s"&gt;"a"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s"&gt;"b"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s"&gt;"c"&lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;
+    &lt;span class="nx"&gt;fmt&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;Println&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;s&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="c1"&gt;// [a b c]&lt;/span&gt;
+    &lt;span class="nx"&gt;i&lt;/span&gt; &lt;span class="o"&gt;:=&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;
+    &lt;span class="nx"&gt;temp&lt;/span&gt; &lt;span class="o"&gt;:=&lt;/span&gt; &lt;span class="nx"&gt;s&lt;/span&gt;
+    &lt;span class="nx"&gt;temp&lt;/span&gt; &lt;span class="p"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;append&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;temp&lt;/span&gt;&lt;span class="p"&gt;[:&lt;/span&gt;&lt;span class="nx"&gt;i&lt;/span&gt;&lt;span class="p"&gt;],&lt;/span&gt; &lt;span class="nx"&gt;temp&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="nx"&gt;i&lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;:]&lt;/span&gt;&lt;span class="o"&gt;...&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="nx"&gt;fmt&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;Println&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;temp&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="c1"&gt;// [a c]&lt;/span&gt;
+    &lt;span class="nx"&gt;fmt&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;Println&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;s&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="c1"&gt;// [a c c]&lt;/span&gt;
+
+    &lt;span class="nx"&gt;fmt&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;Printf&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;"%p \n"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="nx"&gt;s&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="nx"&gt;fmt&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;Printf&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;"%p \n"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="nx"&gt;temp&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;removing (cut or delete) a specific element in the slice using the new pointer affects the original slice&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;a href="https://play.golang.org/p/togSAlnj6J"&gt;https://play.golang.org/p/togSAlnj6J&lt;/a&gt;&lt;/p&gt;
 &lt;h2 id="functions-anonymous-functions-functions-as-parameters-and-filters"&gt;Functions, Anonymous Functions, Functions as Parameters, and Filters&lt;/h2&gt;
 &lt;p&gt;Go has functions as first class citizens.  Just assign a function to a variable or define a type that is a function signature.
 Since go starts from simple blocks we build, as needed, more complex tools like filtering from a slice of integers.&lt;/p&gt;
