@@ -122,10 +122,23 @@ buffalo dev
 &lt;p&gt;TODO: more work to port over how to create secure endpoints with a "CheckAuth" middleware...&lt;/p&gt;
 &lt;h3 id="authentication-using-an-external-identity-provider"&gt;Authentication using an External Identity Provider&lt;/h3&gt;
 &lt;p&gt;For instructions on how to have users authenticate and secure resources with identity providers like Github, Facebook, Google, etc.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;sudo docker run --rm -it --publish 0.0.0.0:5432:5432 --name pg -e POSTGRES_PASSWORD=postgres postgres:alpine
+go get -u -v github.com/gobuffalo/buffalo/buffalo
+go get buffalo-goth
+buffalo new example
+buffalo generate goth-auth bitbucket
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;In order to set up the Bitbucket OAuth credentials:
+&lt;em&gt;Log into bitbucket -&amp;gt; from your user profile (avatar) dropdown choose "bitbucket settings" -&amp;gt; click on OAuth (on the left) -&amp;gt; Add consumer&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;CallbackURL (for development): http://127.0.0.1:3000/auth/bitbucket
+Permissions: account email&lt;/p&gt;
+&lt;p&gt;Now you have a KEY and SECRET&lt;/p&gt;
 &lt;ul&gt;
+&lt;li&gt;&lt;a href="https://confluence.atlassian.com/bitbucket/oauth-on-bitbucket-cloud-238027431.html"&gt;https://confluence.atlassian.com/bitbucket/oauth-on-bitbucket-cloud-238027431.html&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href="https://blog.gobuffalo.io/buffalo-tutorial-create-a-site-with-github-auth-629582e2763e"&gt;https://blog.gobuffalo.io/buffalo-tutorial-create-a-site-with-github-auth-629582e2763e&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href="https://github.com/markbates/goth"&gt;https://github.com/markbates/goth&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;</summary><category term="go"></category><category term="golang"></category><category term="web"></category><category term="buffalo"></category><category term="authentication"></category><category term="sso"></category><category term="saml"></category></entry><entry><title>Dynamic Programming and Memoization and the Compute versus Storage Tradeoff</title><link href="https://blog.john-pfeiffer.com/dynamic-programming-and-memoization-and-the-compute-versus-storage-tradeoff/" rel="alternate"></link><published>2017-11-06T20:45:00-08:00</published><updated>2017-11-06T20:45:00-08:00</updated><author><name>john pfeiffer</name></author><id>tag:blog.john-pfeiffer.com,2017-11-06:dynamic-programming-and-memoization-and-the-compute-versus-storage-tradeoff/</id><summary type="html">
+&lt;/ul&gt;
+&lt;p&gt;&lt;code&gt;BITBUCKET_KEY=foobar BITBUCKET_SECRET=barfoo buffalo dev&lt;/code&gt;&lt;/p&gt;</summary><category term="go"></category><category term="golang"></category><category term="web"></category><category term="buffalo"></category><category term="authentication"></category><category term="sso"></category><category term="saml"></category></entry><entry><title>Dynamic Programming and Memoization and the Compute versus Storage Tradeoff</title><link href="https://blog.john-pfeiffer.com/dynamic-programming-and-memoization-and-the-compute-versus-storage-tradeoff/" rel="alternate"></link><published>2017-11-06T20:45:00-08:00</published><updated>2017-11-06T20:45:00-08:00</updated><author><name>john pfeiffer</name></author><id>tag:blog.john-pfeiffer.com,2017-11-06:dynamic-programming-and-memoization-and-the-compute-versus-storage-tradeoff/</id><summary type="html">
 &lt;h2 id="tradeoffs"&gt;Tradeoffs&lt;/h2&gt;
 &lt;p&gt;There is an inevitable tradeoff of storage versus computation speed, or space used versus time to run, in every program.&lt;/p&gt;
 &lt;p&gt;Caching is often viewed as a performance optimization but sometimes it is the only way to achieve a result in a finite amount of time.&lt;/p&gt;
@@ -8000,8 +8013,8 @@ the other repo (i.e. a bitbucket static web site) will only contain the output (
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="ch"&gt;#!/bin/bash&lt;/span&gt;
 git pull
 &lt;span class="nv"&gt;GITMESSAGE&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="k"&gt;$(&lt;/span&gt;git log -n &lt;span class="m"&gt;1&lt;/span&gt;&lt;span class="k"&gt;)&lt;/span&gt;
-&lt;span class="nv"&gt;OUTPUT&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;"../outputreponame.bitbucket.org"&lt;/span&gt;
-./clean-output.sh &lt;span class="s2"&gt;"../sourcereponame.bitbucket.org"&lt;/span&gt;  &lt;span class="c1"&gt;# removes all of the old content&lt;/span&gt;
+&lt;span class="nv"&gt;OUTPUT&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;"../outputreponame.bitbucket.io"&lt;/span&gt;
+./clean-output.sh &lt;span class="s2"&gt;"../sourcereponame.bitbucket.io"&lt;/span&gt;  &lt;span class="c1"&gt;# removes all of the old content&lt;/span&gt;
 &lt;span class="nb"&gt;echo&lt;/span&gt; &lt;span class="s2"&gt;"&lt;/span&gt;&lt;span class="nv"&gt;$GITMESSAGE&lt;/span&gt;&lt;span class="s2"&gt;"&lt;/span&gt;
 pelican content
 cp -a ./output/* &lt;span class="nv"&gt;$OUTPUT&lt;/span&gt;
@@ -9321,11 +9334,11 @@ This script will help you create a new Pelican-based website.
 Please answer the following questions so this script can generate the files needed by Pelican.
 
 &amp;gt; Where do you want to create your new web site? [.]
-&amp;gt; What will be the title of this web site? johnpfeiffer.bitbucket.org
+&amp;gt; What will be the title of this web site? johnpfeiffer.bitbucket.io
 &amp;gt; Who will be the author of this web site? john pfeiffer
 &amp;gt; What will be the default language of this web site? [en]
 &amp;gt; Do you want to specify a URL prefix? e.g., http://example.com   (Y/n)
-&amp;gt; What is your URL prefix? (see above example; no trailing slash) https://johnpfeiffer.bitbucket.org
+&amp;gt; What is your URL prefix? (see above example; no trailing slash) https://johnpfeiffer.bitbucket.io
 &amp;gt; Do you want to enable article pagination? (Y/n)
 &amp;gt; Do you want to generate a Fabfile/Makefile to automate generation and publishing? (Y/n)
 &amp;gt; Do you want an auto-reload &amp;amp; simpleHTTP script to assist with theme and site development? (Y/n)
