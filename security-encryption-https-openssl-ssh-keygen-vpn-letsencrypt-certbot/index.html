@@ -134,7 +134,17 @@
 </ul>
 </li>
 <li><a href="#virtual-private-networks-and-openvpn">Virtual Private Networks and openVPN</a><ul>
+<li><a href="#docker-openvpn">Docker OpenVPN</a></li>
+<li><a href="#digital-ocean-openvpn">Digital Ocean OpenVPN</a><ul>
+<li><a href="#dedicated-ssh-user">Dedicated SSH User</a></li>
+<li><a href="#more-hardening">More Hardening</a></li>
+<li><a href="#prerequisites">Prerequisites</a></li>
+<li><a href="#configure-openvpn">Configure openvpn</a></li>
+</ul>
+</li>
 <li><a href="#connect-a-client-to-the-openvpn-server">Connect a client to the OpenVPN server</a><ul>
+<li><a href="#openvpn-client-config-infrastructure-on-the-remote-server">OpenVPN client config infrastructure on the remote server</a></li>
+<li><a href="#once-you-have-the-configuration">Once you have the configuration</a></li>
 <li><a href="#dns-security">DNS Security</a></li>
 </ul>
 </li>
@@ -673,6 +683,7 @@ ssh -L 9090:localhost:9090 -p 22 user@host.com -N
 <p>Future ideas: iptables 9090? forwarding?</p>
 <hr/>
 <h1 id="virtual-private-networks-and-openvpn">Virtual Private Networks and openVPN</h1>
+<h2 id="docker-openvpn">Docker OpenVPN</h2>
 <p>Using Docker is one of the easiest ways to leverage all of the open source tools (assuming for security you inspect the upstream source code, clone the Dockerfile, build your own docker image/container ;)</p>
 <div class="highlight"><pre><span></span># https://github.com/kylemanna/docker-openvpn
 # https://openvpn.net/index.php/open-source/documentation/howto.html
@@ -691,11 +702,279 @@ docker run -v $OVPN_DATA:/etc/openvpn --rm -it kylemanna/openvpn easyrsa build-c
 # export the client config with embedded certificates
 docker run -v $OVPN_DATA:/etc/openvpn --rm kylemanna/openvpn ovpn_getclient $FQDN &gt; $FQDN.ovpn
 </pre></div>
+<h2 id="digital-ocean-openvpn">Digital Ocean OpenVPN</h2>
+<h3 id="dedicated-ssh-user">Dedicated SSH User</h3>
+<ul>
+<li>create a new ssh key (ops sec best practice)</li>
+<li>Setup a free Firewall with ports tcp 22 and udp 1194</li>
+<li>Create and Deploy a new droplet ($5 in a region near you for lower latency, with your newly created SSH key)</li>
+<li>Once it has finished booting use the Digital Ocean web ui: Networking -&gt; Firewalls -&gt; FirewallName -&gt; Droplets to add the Droplet to the firewall</li>
+<li>ssh -i ~/.ssh/your-new-ssh-key root@1.2.3.4</li>
+<li>reset the root password: passwd</li>
+<li>Use the WebUI from Digital Ocean to verify you can access local console with the root user (and the new password)</li>
+<li>harden the machine by adding a dedicated ssh user (not root!)</li>
+<li>
+<ul>
+<li>useradd -s /bin/bash -m NEWUSERNAME</li>
+</ul>
+</li>
+<li>
+<ul>
+<li>usermod -a -G admin NEWUSERNAME</li>
+</ul>
+</li>
+<li>
+<ul>
+<li>passwd NEWUSERNAME</li>
+</ul>
+</li>
+<li>
+<ul>
+<li>verify this with: cat /etc/passwd | grep NEWUSERNAME ; cat /etc/group | grep NEWUSERNAME</li>
+</ul>
+</li>
+<li>
+<ul>
+<li>give the new user sudo permissions: visudo </li>
+</ul>
+</li>
+<li>
+<ul>
+<li>
+<ul>
+<li>UPDATE THE LINE TO: %admin ALL=(ALL) NOPASSWD:ALL</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<ul>
+<li>
+<ul>
+<li>MOVE THE LINE BELOW: %sudo    ALL=(ALL:ALL) ALL</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<ul>
+<li>
+<ul>
+<li>VERIFY: cat /etc/sudoers</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<ul>
+<li>mkdir -p /home/NEWUSERNAME/.ssh</li>
+</ul>
+</li>
+<li>
+<ul>
+<li>vim /home/NEWUSERNAME/.ssh/authorized_keys (paste the public key that matches the new ssh key)</li>
+</ul>
+</li>
+<li>
+<ul>
+<li>/etc/init.d/ssh force-reload</li>
+</ul>
+</li>
+<li>
+<ul>
+<li>/etc/init.d/ssh restart</li>
+</ul>
+</li>
+<li>
+<ul>
+<li>BE SURE that /home/NEWUSERNAME/.ssh and authorized_keys is owned by the new user (chown)</li>
+</ul>
+</li>
+<li>
+<ul>
+<li>VERIFY WITH VERBOSE the new user can SSH with: ssh -v -i ~/.ssh/your-new-ssh-key NEWUSERNAME@1.2.3.4</li>
+</ul>
+</li>
+<li>
+<ul>
+<li>VERIFY PERMISSIONS ONCE LOGGED IN WITH SSH: sudo su</li>
+</ul>
+</li>
+</ul>
+<h3 id="more-hardening">More Hardening</h3>
+<ul>
+<li>disable root user from using SSH access and harden with a non-standard port</li>
+<li>
+<ul>
+<li>vim /etc/ssh/sshd_config</li>
+</ul>
+</li>
+<li>
+<ul>
+<li>
+<ul>
+<li>Port 22222</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<ul>
+<li>
+<ul>
+<li>PermitRootLogin no</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<ul>
+<li>
+<ul>
+<li>ADD TO THE END OF THE FILE: AllowUsers NEWUSERNAME</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<ul>
+<li>service sshd restart</li>
+</ul>
+</li>
+<li>
+<ul>
+<li>VERIFY: netstat -antp  # should see 0.0.0.0:22222</li>
+</ul>
+</li>
+</ul>
+<h3 id="prerequisites">Prerequisites</h3>
+<div class="highlight"><pre><span></span>apt update
+apt install openvpn easy-rsa
+vim /etc/sysctl.conf
+    net.ipv4.ip_forward=1
+sudo sysctl -p
+</pre></div>
+<p>Setting up the certificate authority (since OpenVPN uses keys)</p>
+<div class="highlight"><pre><span></span>make-cadir ~/openvpn-ca
+cd ~/openvpn-ca
+</pre></div>
+<p><code>vim vars</code></p>
+<blockquote>
+<p>update the export KEY_NAME, KEY_ORG, KEY_EMAIL, KEY_OU to something more personalized</p>
+</blockquote>
+<div class="highlight"><pre><span></span>source vars
+./clean-all
+./build-ca
+</pre></div>
+<blockquote>
+<p>You can just press enter a bunch to use all the defaults that you preconfigured in the vars file previously</p>
+</blockquote>
+<p>`./build-key-server KEY_NAME (i.e. server or myvpn)</p>
+<blockquote>
+<p>Just press enter to accept all the defaults again (no challenge password!) and press y at the end to Sign and then Commit the certificates</p>
+</blockquote>
+<div class="highlight"><pre><span></span>./build-dh
+openvpn --genkey --secret keys/ta.key
+</pre></div>
+<p><code>./build-key client1</code></p>
+<blockquote>
+<p>if you want to build another one later you must use: sudo su ; cd /root/openvpn-ca ; source vars ; ./build-key client2</p>
+</blockquote>
+<h3 id="configure-openvpn">Configure openvpn</h3>
+<div class="highlight"><pre><span></span>cp ~/openvpn-ca/keys
+sudo cp ca.crt myvpn.crt myvpn.key ta.key dh2048.pem /etc/openvpn
+gunzip -c /usr/share/doc/openvpn/examples/sample-config-files/server.conf.gz | sudo tee /etc/openvpn/myvpn.conf
+</pre></div>
+<p><code>vim /etc/openvpn/myvpn.conf</code>
+    tls-auth ta.key 0 # Remove the preceding ; to uncomment this line
+    key-direction 0
+    cipher AES-256-CBC
+    auth SHA256
+    user nobody  # Remove the preceding ; to uncomment this line
+    group nogroup
+    push "redirect-gateway def1 bypass-dhcp"  # Remove the preceding ; to uncomment this line
+    push "dhcp-option DNS 208.67.222.222"  # Remove the preceding ; to uncomment this line
+    push "dhcp-option DNS 208.67.220.220"  # Remove the preceding ; to uncomment this line
+    block-outside-dns
+    cert myvpn.crt
+    key myvpn.key</p>
+<blockquote>
+<p>some tweaks for more security https://community.openvpn.net/openvpn/wiki/Hardening (the ta.key = tls auth)
+208.67.222.222 = opendns , https://openvpn.net/index.php/open-source/documentation/howto.html</p>
+</blockquote>
+<p><code>sudo systemctl start openvpn@myvpn</code>
+<code>sudo systemctl status openvpn@myvpn</code>
+<code>sudo systemctl enable openvpn@server</code></p>
+<blockquote>
+<p>Should end with "ovpn-myvpn[21142]: Initialization Sequence Completed"
+"enable" means that the service will start at boot</p>
+</blockquote>
+<p><code>netstat -antup</code></p>
+<blockquote>
+<p>Should list all the TCP and UDP listening services including port 1194, 0.0.0.0:1194</p>
+</blockquote>
+<p><code>ip addr show tun0</code></p>
+<blockquote>
+<p>Should show the tunnel interface is created what the network range is (e.g. 10.8.0.1)</p>
+</blockquote>
+<p>Consider updating myvpn.conf to use port 443 and proto tcp in order to assist clients traverse/reach the openvpn server in restricted environments</p>
+<p>TODO: automate using packer and digital ocean apis to create an image</p>
+<p><a href="https://www.digitalocean.com/community/tutorials/how-to-set-up-an-openvpn-server-on-ubuntu-16-04">https://www.digitalocean.com/community/tutorials/how-to-set-up-an-openvpn-server-on-ubuntu-16-04</a></p>
 <h2 id="connect-a-client-to-the-openvpn-server">Connect a client to the OpenVPN server</h2>
-<p>From a client computer SCP to download the $FQDN&gt;ovpn and then connect to the openvpn server</p>
-<div class="highlight"><pre><span></span>FQDN=youropenvpn.example.com
-sudo apt-get install -y openvpn
-sudo openvpn --config $FQDN.ovpn
+<h3 id="openvpn-client-config-infrastructure-on-the-remote-server">OpenVPN client config infrastructure on the remote server</h3>
+<div class="highlight"><pre><span></span>mkdir -p /root/client-configs/files
+chmod 700 /root/client-configs/files   
+cp /usr/share/doc/openvpn/examples/sample-config-files/client.conf /root/client-configs/base.conf
+vim /root/client-configs/base.conf
+    remote NEW-VPN-SERVER-IP-ADDRESS 1194
+    user nobody
+    group nogroup
+    # ca ca.crt
+    # cert client.crt
+    # key client.key
+    cipher AES-256-CBC
+    auth SHA256
+    key-direction 1
+</pre></div>
+<blockquote>
+<p>if you have modified the port and protocol ensure that 1194 and udp are updated accordingly
+windows clients will not be able to downgrad the user and group to nobody/nogroup
+commenting out the files as they will be embedded in the .ovpn config file</p>
+</blockquote>
+<p><code>vim /root/client-configs/make_config.sh</code>
+    KEY_DIR=/root/openvpn-ca/keys
+    OUTPUT_DIR=/root/client-configs/files
+    BASE_CONFIG=/root/client-configs/base.conf
+    cat ${BASE_CONFIG} \
+        &lt;(echo -e '<ca>') \
+        ${KEY_DIR}/ca.crt \
+        &lt;(echo -e '</ca>\n<cert>') \
+        ${KEY_DIR}/${1}.crt \
+        &lt;(echo -e '</cert>\n<key>') \
+        ${KEY_DIR}/${1}.key \
+        &lt;(echo -e '</key>\n<tls-auth>') \
+        ${KEY_DIR}/ta.key \
+        &lt;(echo -e '</tls-auth>') \
+        &gt; ${OUTPUT_DIR}/${1}.ovpn</p>
+<blockquote>
+<p>This automates creating a config file via a script</p>
+</blockquote>
+<div class="highlight"><pre><span></span>chmod 700 make_config.sh
+./make_config.sh client1
+ls -ahl /root/client-configs/files/
+</pre></div>
+<h3 id="once-you-have-the-configuration">Once you have the configuration</h3>
+<p><code>sudo apt-get install -y openvpn</code></p>
+<blockquote>
+<p>For a linux client this installs the openvpn client software</p>
+</blockquote>
+<p><code>scp -i ~/.ssh/VPNKEY -P 22222  NEWUSERNAME@VPN-IP-ADDRESS:client1.ovpn .</code></p>
+<blockquote>
+<p>of course no matter what we need the open vpn client configuration</p>
+</blockquote>
+<p>Or... From a client computer SCP to download the $FQDN&gt;ovpn and then connect to the openvpn server</p>
+<div class="highlight"><pre><span></span>sudo openvpn --config client1.ovpn
+
 # verify with the following in the output: "/sbin/ip addr add dev tun0 local 192.168.255.6 peer 192.168.255.5"
 # ifconfig -a  "tun0 ... inet addr:192.168.255.6"  , as you send traffic: RX bytes:4145707 (4.1 MB)  TX bytes:319025 (319.0 KB)
 curl checkip.amazonaws.com  # should return the IP address of the VPN server (not your local Wifi/ISP)
@@ -763,7 +1042,7 @@ curl https://dnsleaktest.com/
             <time pubdate="pubdate" datetime="2017-02-16T23:34:00-08:00">Feb 16, 2017</time>
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#it-ref">it</a> 
-            <h4>~3326 words</h4>
+            <h4>~4054 words</h4>
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article"> 
                 <li><a href="/tags.html#aes-ref">aes
