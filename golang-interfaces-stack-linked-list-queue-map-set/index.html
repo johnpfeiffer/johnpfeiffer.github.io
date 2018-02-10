@@ -74,8 +74,9 @@
 </li>
 </ul>
 </li>
-<li><a href="#polymorphism-with-go-interfaces">Polymorphism with Go Interfaces</a><ul>
-<li><a href="#bonus-first-in-first-out-queue">Bonus First In First Out Queue</a></li>
+<li><a href="#polymorphism-with-go-interfaces">Polymorphism with Go Interfaces</a></li>
+<li><a href="#doubly-linked-list-and-first-in-first-out-queue">Doubly Linked List and First In First Out Queue</a><ul>
+<li><a href="#doubly-linked-list-in-the-go-standard-library">Doubly Linked List in the Go Standard Library</a></li>
 </ul>
 </li>
 </ul>
@@ -295,10 +296,11 @@ This means you will rely on the very explicit _, ok pattern of checking for pres
 <li><a href="https://nathanleclaire.com/blog/2015/10/10/interfaces-and-composition-for-effective-unit-testing-in-golang/">https://nathanleclaire.com/blog/2015/10/10/interfaces-and-composition-for-effective-unit-testing-in-golang/</a></li>
 <li><a href="https://blog.cloudflare.com/go-interfaces-make-test-stubbing-easy/">https://blog.cloudflare.com/go-interfaces-make-test-stubbing-easy/</a></li>
 </ul>
-<h3 id="bonus-first-in-first-out-queue">Bonus First In First Out Queue</h3>
+<h2 id="doubly-linked-list-and-first-in-first-out-queue">Doubly Linked List and First In First Out Queue</h2>
 <p>With some small additions the linked list can be enhanced to provide the functionality of a Queue.
+The "doubly linked list" (<a href="https://en.wikipedia.org/wiki/Doubly_linked_list">https://en.wikipedia.org/wiki/Doubly_linked_list</a>) means that one can traverse from either the head (using next) or the tail (using previous).
 It is not too expensive to add the extra previous pointer to each node and a tail pointer and this makes the FIFO capabilities fairly straightforward.
-Thankfully with a garbage collected language like Go we do not have to worry about manually allocating or deallocating memory.</p>
+<em>Thankfully with a garbage collected language like Go we do not have to worry about manually allocating or deallocating memory, though we should always keep an eye out for memory leaks</em></p>
 <div class="highlight"><pre><span></span><span class="kn">package</span> <span class="nx">main</span>
 
 <span class="kn">import</span> <span class="p">(</span>
@@ -348,7 +350,6 @@ Thankfully with a garbage collected language like Go we do not have to worry abo
     <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">"dequeuing a value: "</span><span class="p">,</span> <span class="nx">q</span><span class="p">.</span><span class="nx">Dequeue</span><span class="p">())</span>
     <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">"FirstInFirstOut head: %v at memory address %p \n"</span><span class="p">,</span> <span class="nx">q</span><span class="p">.</span><span class="nx">head</span><span class="p">.</span><span class="nx">value</span><span class="p">,</span> <span class="nx">q</span><span class="p">.</span><span class="nx">head</span><span class="p">)</span>
     <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">"FirstInFirstOut tail: %v at memory address %p \n"</span><span class="p">,</span> <span class="nx">q</span><span class="p">.</span><span class="nx">tail</span><span class="p">.</span><span class="nx">value</span><span class="p">,</span> <span class="nx">q</span><span class="p">.</span><span class="nx">tail</span><span class="p">)</span>
-
 <span class="p">}</span>
 </pre></div>
 <blockquote>
@@ -357,8 +358,54 @@ Thankfully with a garbage collected language like Go we do not have to worry abo
 <ul>
 <li><a href="https://play.golang.org/p/aGMnou1jf7">https://play.golang.org/p/aGMnou1jf7</a> <em>your queue in play</em></li>
 <li><a href="https://en.wikipedia.org/wiki/Queue_(abstract_data_type)">https://en.wikipedia.org/wiki/Queue_(abstract_data_type)</a></li>
+<li><a href="https://en.wikipedia.org/wiki/FIFO_(computing_and_electronics)">https://en.wikipedia.org/wiki/FIFO_(computing_and_electronics)</a></li>
 <li><a href="https://www.cs.cmu.edu/~adamchik/15-121/lectures/Stacks%20and%20Queues/Stacks%20and%20Queues.html">https://www.cs.cmu.edu/~adamchik/15-121/lectures/Stacks%20and%20Queues/Stacks%20and%20Queues.html</a></li>
 </ul>
+<h3 id="doubly-linked-list-in-the-go-standard-library">Doubly Linked List in the Go Standard Library</h3>
+<p>Wonderfully there is an implementation of a Doubly Linked List in the Go standard library: <a href="https://golang.org/pkg/container/list/">https://golang.org/pkg/container/list/</a></p>
+<div class="highlight"><pre><span></span><span class="kn">package</span> <span class="nx">main</span>
+
+<span class="kn">import</span> <span class="p">(</span>
+    <span class="s">"container/list"</span>
+    <span class="s">"fmt"</span>
+<span class="p">)</span>
+
+<span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+    <span class="nx">L</span> <span class="o">:=</span> <span class="nx">list</span><span class="p">.</span><span class="nx">New</span><span class="p">()</span>
+    <span class="nx">e1</span> <span class="o">:=</span> <span class="nx">L</span><span class="p">.</span><span class="nx">PushFront</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="nx">L</span><span class="p">.</span><span class="nx">InsertAfter</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="nx">e1</span><span class="p">)</span>
+    <span class="nx">e3</span> <span class="o">:=</span> <span class="nx">L</span><span class="p">.</span><span class="nx">Back</span><span class="p">()</span>
+    <span class="nx">L</span><span class="p">.</span><span class="nx">InsertBefore</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="nx">e3</span><span class="p">)</span>
+    <span class="nx">displayList</span><span class="p">(</span><span class="nx">L</span><span class="p">)</span>
+
+    <span class="nx">L2</span> <span class="o">:=</span> <span class="nx">list</span><span class="p">.</span><span class="nx">New</span><span class="p">()</span>
+    <span class="nx">L2</span><span class="p">.</span><span class="nx">PushBack</span><span class="p">(</span><span class="s">"D"</span><span class="p">)</span>
+    <span class="nx">displayList</span><span class="p">(</span><span class="nx">L2</span><span class="p">)</span>
+    <span class="nx">L</span><span class="p">.</span><span class="nx">PushBackList</span><span class="p">(</span><span class="nx">L2</span><span class="p">)</span>
+    <span class="nx">displayList</span><span class="p">(</span><span class="nx">L</span><span class="p">)</span>
+
+    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">"\nTraverse in reverse with Prev(): "</span><span class="p">)</span>
+    <span class="k">for</span> <span class="nx">e</span> <span class="o">:=</span> <span class="nx">L</span><span class="p">.</span><span class="nx">Back</span><span class="p">();</span> <span class="nx">e</span> <span class="o">!=</span> <span class="kc">nil</span><span class="p">;</span> <span class="nx">e</span> <span class="p">=</span> <span class="nx">e</span><span class="p">.</span><span class="nx">Prev</span><span class="p">()</span> <span class="p">{</span>
+        <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">"%v "</span><span class="p">,</span> <span class="nx">e</span><span class="p">.</span><span class="nx">Value</span><span class="p">)</span>
+    <span class="p">}</span>
+
+    <span class="nx">L</span><span class="p">.</span><span class="nx">Remove</span><span class="p">(</span><span class="nx">e1</span><span class="p">)</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">"\nRemoved %v"</span><span class="p">,</span> <span class="nx">e1</span><span class="p">.</span><span class="nx">Value</span><span class="p">)</span>
+    <span class="nx">displayList</span><span class="p">(</span><span class="nx">L</span><span class="p">)</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">"\nFront is now: %v"</span><span class="p">,</span> <span class="nx">L</span><span class="p">.</span><span class="nx">Front</span><span class="p">().</span><span class="nx">Value</span><span class="p">)</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">"\n%#v"</span><span class="p">,</span> <span class="nx">L</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nx">displayList</span><span class="p">(</span><span class="nx">L</span> <span class="o">*</span><span class="nx">list</span><span class="p">.</span><span class="nx">List</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">"\nList length: %v \n"</span><span class="p">,</span> <span class="nx">L</span><span class="p">.</span><span class="nx">Len</span><span class="p">())</span>
+    <span class="k">for</span> <span class="nx">e</span> <span class="o">:=</span> <span class="nx">L</span><span class="p">.</span><span class="nx">Front</span><span class="p">();</span> <span class="nx">e</span> <span class="o">!=</span> <span class="kc">nil</span><span class="p">;</span> <span class="nx">e</span> <span class="p">=</span> <span class="nx">e</span><span class="p">.</span><span class="nx">Next</span><span class="p">()</span> <span class="p">{</span>
+        <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">"%v "</span><span class="p">,</span> <span class="nx">e</span><span class="p">.</span><span class="nx">Value</span><span class="p">)</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+<blockquote>
+<p>All of the node and pointer implementation is already handled for you, play with it here: <a href="https://play.golang.org/p/cy0ws48foRT">https://play.golang.org/p/cy0ws48foRT</a></p>
+</blockquote>
             <aside>
             <hr/>
             <nav>
@@ -378,7 +425,7 @@ Thankfully with a garbage collected language like Go we do not have to worry abo
             <time pubdate="pubdate" datetime="2016-10-05T20:34:00-07:00">Oct 5, 2016</time>
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#programming-ref">programming</a> 
-            <h4>~1302 words</h4>
+            <h4>~1446 words</h4>
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article"> 
                 <li><a href="/tags.html#go-ref">go
