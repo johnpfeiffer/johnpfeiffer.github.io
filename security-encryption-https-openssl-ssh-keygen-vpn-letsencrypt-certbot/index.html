@@ -150,7 +150,11 @@
 </li>
 </ul>
 </li>
-<li><a href="#letsencrypt-and-certbot-for-free-ssl-certificates">Letsencrypt and certbot for free SSL Certificates</a></li>
+<li><a href="#letsencrypt-and-certbot-for-free-ssl-certificates">Letsencrypt and certbot for free SSL Certificates</a><ul>
+<li><a href="#create-a-free-ssl-cert-with-certbot-in-docker">Create a free SSL cert with certbot in docker</a></li>
+<li><a href="#renew-your-ssl-certificate-with-certbot-and-cron">Renew your SSL certificate with certbot and cron</a></li>
+</ul>
+</li>
 <li><a href="#cryptography-exercises">Cryptography Exercises</a></li>
 </ul>
 </div>
@@ -524,15 +528,15 @@ chmod to modify permissions (to the "only the owner can read") since if the priv
 </pre></div>
 <h2 id="adding-a-public-key-to-a-remote-server">Adding a Public Key to a remote server</h2>
 <p>ON THE REMOTE SERVER IT SHOULD ONLY HAVE THE public key from .ssh/authorized_keys</p>
-<div class="highlight"><pre><span></span><span class="n">mkdir</span> <span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">username</span><span class="o">/</span><span class="p">.</span><span class="n">ssh</span>
-<span class="n">sudo</span> <span class="n">vi</span> <span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">username</span><span class="o">/</span><span class="p">.</span><span class="n">ssh</span><span class="o">/</span><span class="n">authorized_keys</span>
-<span class="o">&gt;</span> <span class="n">or</span>  <span class="n">cat</span> <span class="p">.</span><span class="n">ssh</span><span class="o">/</span><span class="n">id_rsa</span><span class="p">.</span><span class="n">pub</span> <span class="o">|</span> <span class="n">ssh</span> <span class="n">username</span><span class="mf">@123.45.56.78</span> <span class="s">"cat &gt;&gt; ~/.ssh/authorized_keys"</span>
+<div class="highlight"><pre><span></span>mkdir /home/username/.ssh
+sudo vi /home/username/.ssh/authorized_keys
+&gt; or  cat .ssh/id_rsa.pub <span class="p">|</span> ssh username@123.45.56.78 <span class="s2">"cat &gt;&gt; ~/.ssh/authorized_keys"</span>
 
-<span class="n">chmod</span> <span class="mi">400</span>  <span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">username</span><span class="o">/</span><span class="p">.</span><span class="n">ssh</span><span class="o">/</span><span class="n">authorized_keys</span>
+chmod <span class="m">400</span>  /home/username/.ssh/authorized_keys
 </pre></div>
 <p>Don't forget to modify:</p>
 <div class="highlight"><pre><span></span>sudo nano /etc/ssh/sshd_config
-#AuthorizedKeysFile     %h/.ssh/authorized_keys
+<span class="c1">#AuthorizedKeysFile     %h/.ssh/authorized_keys</span>
 
 /etc/init.d/ssh force-reload
 /etc/init.d/ssh restart
@@ -685,22 +689,22 @@ ssh -L 9090:localhost:9090 -p 22 user@host.com -N
 <h1 id="virtual-private-networks-and-openvpn">Virtual Private Networks and openVPN</h1>
 <h2 id="docker-openvpn">Docker OpenVPN</h2>
 <p>Using Docker is one of the easiest ways to leverage all of the open source tools (assuming for security you inspect the upstream source code, clone the Dockerfile, build your own docker image/container ;)</p>
-<div class="highlight"><pre><span></span># https://github.com/kylemanna/docker-openvpn
-# https://openvpn.net/index.php/open-source/documentation/howto.html
-export FQDN="example.com"
-export OVPN_DATA="ovpn-data"
-docker volume create --name $OVPN_DATA
-# generate the initial configuration in the volume
-docker run -v $OVPN_DATA:/etc/openvpn --rm kylemanna/openvpn ovpn_genconfig -u udp://$FQDN
-# generate the certificate in the volume (you must choose a passphrase)
-docker run -v $OVPN_DATA:/etc/openvpn --rm -it kylemanna/openvpn ovpn_initpki
-# start the openvpn service
-docker run -v $OVPN_DATA:/etc/openvpn -d -p 1194:1194/udp --cap-add=NET_ADMIN kylemanna/openvpn
+<div class="highlight"><pre><span></span><span class="c1"># https://github.com/kylemanna/docker-openvpn</span>
+<span class="c1"># https://openvpn.net/index.php/open-source/documentation/howto.html</span>
+<span class="nb">export</span> <span class="nv">FQDN</span><span class="o">=</span><span class="s2">"example.com"</span>
+<span class="nb">export</span> <span class="nv">OVPN_DATA</span><span class="o">=</span><span class="s2">"ovpn-data"</span>
+docker volume create --name <span class="nv">$OVPN_DATA</span>
+<span class="c1"># generate the initial configuration in the volume</span>
+docker run -v <span class="nv">$OVPN_DATA</span>:/etc/openvpn --rm kylemanna/openvpn ovpn_genconfig -u udp://<span class="nv">$FQDN</span>
+<span class="c1"># generate the certificate in the volume (you must choose a passphrase)</span>
+docker run -v <span class="nv">$OVPN_DATA</span>:/etc/openvpn --rm -it kylemanna/openvpn ovpn_initpki
+<span class="c1"># start the openvpn service</span>
+docker run -v <span class="nv">$OVPN_DATA</span>:/etc/openvpn -d -p <span class="m">1194</span>:1194/udp --cap-add<span class="o">=</span>NET_ADMIN kylemanna/openvpn
 
-# generate the client certificate without the passphrase
-docker run -v $OVPN_DATA:/etc/openvpn --rm -it kylemanna/openvpn easyrsa build-client-full $FQDN nopass
-# export the client config with embedded certificates
-docker run -v $OVPN_DATA:/etc/openvpn --rm kylemanna/openvpn ovpn_getclient $FQDN &gt; $FQDN.ovpn
+<span class="c1"># generate the client certificate without the passphrase</span>
+docker run -v <span class="nv">$OVPN_DATA</span>:/etc/openvpn --rm -it kylemanna/openvpn easyrsa build-client-full <span class="nv">$FQDN</span> nopass
+<span class="c1"># export the client config with embedded certificates</span>
+docker run -v <span class="nv">$OVPN_DATA</span>:/etc/openvpn --rm kylemanna/openvpn ovpn_getclient <span class="nv">$FQDN</span> &gt; <span class="nv">$FQDN</span>.ovpn
 </pre></div>
 <h2 id="digital-ocean-openvpn">Digital Ocean OpenVPN</h2>
 <h3 id="dedicated-ssh-user">Dedicated SSH User</h3>
@@ -869,7 +873,7 @@ cd ~/openvpn-ca
 <blockquote>
 <p>You can just press enter a bunch to use all the defaults that you preconfigured in the vars file previously</p>
 </blockquote>
-<p>`./build-key-server KEY_NAME (i.e. server or myvpn)</p>
+<p><code>./build-key-server KEY_NAME</code> (i.e. server or myvpn)</p>
 <blockquote>
 <p>Just press enter to accept all the defaults again (no challenge password!) and press y at the end to Sign and then Commit the certificates</p>
 </blockquote>
@@ -883,9 +887,10 @@ openvpn --genkey --secret keys/ta.key
 <h3 id="configure-openvpn">Configure openvpn</h3>
 <div class="highlight"><pre><span></span>cp ~/openvpn-ca/keys
 sudo cp ca.crt myvpn.crt myvpn.key ta.key dh2048.pem /etc/openvpn
-gunzip -c /usr/share/doc/openvpn/examples/sample-config-files/server.conf.gz | sudo tee /etc/openvpn/myvpn.conf
+gunzip -c /usr/share/doc/openvpn/examples/sample-config-files/server.conf.gz <span class="p">|</span> sudo tee /etc/openvpn/myvpn.conf
 </pre></div>
 <p><code>vim /etc/openvpn/myvpn.conf</code>
+    :::bash
     tls-auth ta.key 0 # Remove the preceding ; to uncomment this line
     key-direction 0
     cipher AES-256-CBC
@@ -926,18 +931,18 @@ gunzip -c /usr/share/doc/openvpn/examples/sample-config-files/server.conf.gz | s
 <h2 id="connect-a-client-to-the-openvpn-server">Connect a client to the OpenVPN server</h2>
 <h3 id="openvpn-client-config-infrastructure-on-the-remote-server">OpenVPN client config infrastructure on the remote server</h3>
 <div class="highlight"><pre><span></span>mkdir -p /root/client-configs/files
-chmod 700 /root/client-configs/files   
+chmod <span class="m">700</span> /root/client-configs/files   
 cp /usr/share/doc/openvpn/examples/sample-config-files/client.conf /root/client-configs/base.conf
 vim /root/client-configs/base.conf
-    remote NEW-VPN-SERVER-IP-ADDRESS 1194
+    remote NEW-VPN-SERVER-IP-ADDRESS <span class="m">1194</span>
     user nobody
     group nogroup
-    # ca ca.crt
-    # cert client.crt
-    # key client.key
+    <span class="c1"># ca ca.crt</span>
+    <span class="c1"># cert client.crt</span>
+    <span class="c1"># key client.key</span>
     cipher AES-256-CBC
     auth SHA256
-    key-direction 1
+    key-direction <span class="m">1</span>
 </pre></div>
 <blockquote>
 <p>if you have modified the port and protocol ensure that 1194 and udp are updated accordingly
@@ -945,6 +950,7 @@ windows clients will not be able to downgrad the user and group to nobody/nogrou
 commenting out the files as they will be embedded in the .ovpn config file</p>
 </blockquote>
 <p><code>vim /root/client-configs/make_config.sh</code>
+    :::bash
     KEY_DIR=/root/openvpn-ca/keys
     OUTPUT_DIR=/root/client-configs/files
     BASE_CONFIG=/root/client-configs/base.conf
@@ -990,9 +996,20 @@ curl https://dnsleaktest.com/
 <li>1.1.1.1 (cloudflare <a href="https://developers.cloudflare.com/1.1.1.1/commitment-to-privacy/">https://developers.cloudflare.com/1.1.1.1/commitment-to-privacy/</a>)</li>
 <li>185.121.177.177 or 169.239.202.202 (http://dnsrec.meo.ws/ part of opennic)</li>
 <li>84.200.69.80 or 84.200.70.40 (dns.watch free, neutral, privacy)</li>
-<li>https://www.opennic.org/</li>
+<li>
+<p>https://www.opennic.org/</p>
+<p>echo 185.121.177.177 &gt;&gt; /etc/resolvconf/resolv.conf.d/tail
+sudo resolvconf -u</p>
+<blockquote>
+<p>This should append the new resolver and force an update, though you may have to ifdown eth0 ; ifup eth0</p>
+</blockquote>
+</li>
 </ul>
-<p><code>echo 185.121.177.177 &gt;&gt; /etc/resolvconf/resolv.conf.d/tail</code></p>
+<p><code>dig -trace example.com</code>
+<code>nslookup -debug example.com</code></p>
+<blockquote>
+<p>either command will provide copious debugging output (and nslookup has an interactive mode with "d2" for extra debugging)</p>
+</blockquote>
 <p>These are DNS providers that have been assimilated into the borg:</p>
 <ul>
 <li>216.146.36.36 (Dyn DNS was acquired by Oracle)</li>
@@ -1004,20 +1021,43 @@ curl https://dnsleaktest.com/
 <p>A non standard protocol to encrypt DNS traffic: <a href="https://en.wikipedia.org/wiki/DNSCrypt">https://en.wikipedia.org/wiki/DNSCrypt</a></p>
 <hr/>
 <h1 id="letsencrypt-and-certbot-for-free-ssl-certificates">Letsencrypt and certbot for free SSL Certificates</h1>
-<p>A relatively recent development has been a widespread effort to help secure more of everyone's communications by encouraing web sites to install SSL certificates (and automate renewals) for free...</p>
-<p>Here is the tool that allows you to easily automate getting a free SSL certificate (trusted by libraries and browsers no less)</p>
-<p>Once again Docker simplifies things slightly (as long as you trust the container ;)</p>
-<p>Prerequisite: setup a DNS record for yourdomain.com to point to the server</p>
-<div class="highlight"><pre><span></span>docker run -it --rm -p 443:443 --name certbot -v /etc/letsencrypt:/etc/letsencrypt -v /var/log/letsencrypt:/var/log/letsencrypt quay.io/letsencrypt/letsencrypt certonly --standalone -d yourdomain.com
+<p>A relatively recent development has been a widespread effort to help secure more of everyone's communications by encouraing web sites to install SSL certificates (and automate renewals) for free.</p>
+<p>Here is the tool that allows you to easily automate getting a free SSL certificate (trusted by libraries and browsers no less)...</p>
+<p><em>Once again Docker simplifies things slightly (as long as you trust the container hosted by quay.io CoreOS who was acquired by RedHat ;)</em></p>
+<p>Prerequisite: setup a DNS record for yourdomain.com to point to the server ip address.</p>
+<h2 id="create-a-free-ssl-cert-with-certbot-in-docker">Create a free SSL cert with certbot in docker</h2>
+<div class="highlight"><pre><span></span>systemctl stop nginx
+sudo docker run -it --rm -p <span class="m">443</span>:443 --name certbot -v /etc/letsencrypt:/etc/letsencrypt -v /var/log/letsencrypt:/var/log/letsencrypt quay.io/letsencrypt/letsencrypt certonly --standalone -d yourdomain.com
+systemctl start nginx
 </pre></div>
 <ol>
+<li>Downloads the container if it is not already in <code>docker images</code></li>
 <li>Starts a container with a web server that binds to port 443 </li>
-<li>The same web server/tool sends a certificate signing request (from yourdomain.com) to letsencrypt.org</li>
+<li>The same web server/tool sends a certificate signing request (from your server running at yourdomain.com) to letsencrypt.org</li>
 <li>letsencrypt.org then attempts to contact the provided domain (DNS -&gt; IP -&gt; server -&gt; docker container)</li>
-<li>the web server/tool then securely downloads the new SSL certificate</li>
-<li>all of the files used in the process are stored in /etc/letsencrypt (in this "simple" mode /etc/letsencrypt/live/yourdomain.com/</li>
+<li>The containerized-certbot-web-server/tool then securely downloads the new SSL certificate</li>
+<li>Files created in the process are stored in /etc/letsencrypt</li>
+<li>The "evergreen" certs are presented via symlinks in /etc/letsencrypt/live/yourdomain.com/</li>
+<li>Specific versioned copies of the certificates are stored in /etc/letsencrypt/archive/yourdomain.com</li>
+<li>letsencrypt certbot tool automatically generates the /etc/nginx/conf.d/default.conf (<em>which points to the config and cert files in /etc/letsencrypt/</em>)</li>
 </ol>
+<h2 id="renew-your-ssl-certificate-with-certbot-and-cron">Renew your SSL certificate with certbot and cron</h2>
 <p>You can keep renewing the certificate (which lasts 90 days) for free and there are a number of other open source tools (which leverage the API/process)</p>
+<div class="highlight"><pre><span></span>systemctl stop nginx
+docker run -it --rm -p <span class="m">443</span>:443 --name certbot -v /etc/letsencrypt:/etc/letsencrypt -v /var/log/letsencrypt:/var/log/letsencrypt quay.io/letsencrypt/letsencrypt certonly --standalone --force-renewal -d yourdomain.com
+systemctl start nginx
+</pre></div>
+<blockquote>
+<p>you must stop the production web server briefly in order to generate the updated certificate</p>
+</blockquote>
+<p>If you want to use a cron job for certificate renewal then put the previous instructions into an executable file named ssl-cert-renewal.sh</p>
+<div class="highlight"><pre><span></span><span class="nb">echo</span> <span class="s1">'59 23 01 * * /home/USERNAME/ssl-cert-renewal.sh'</span> &gt;&gt; /home/USERNAME/mymonthly.cron
+crontab /home/USERNAME/mymonthly.cron
+crontab -l
+</pre></div>
+<blockquote>
+<p>be sure to append to mymonthly.cron as the crontab command will override any previous cron jobs</p>
+</blockquote>
 <ul>
 <li><a href="https://letsencrypt.org/how-it-works/">https://letsencrypt.org/how-it-works/</a></li>
 <li><a href="https://certbot.eff.org/docs/using.html#certbot-commands">https://certbot.eff.org/docs/using.html#certbot-commands</a></li>
@@ -1047,7 +1087,7 @@ curl https://dnsleaktest.com/
             <time pubdate="pubdate" datetime="2017-02-16T23:34:00-08:00">Feb 16, 2017</time>
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#it-ref">it</a> 
-            <h4>~4068 words</h4>
+            <h4>~4281 words</h4>
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article"> 
                 <li><a href="/tags.html#aes-ref">aes
