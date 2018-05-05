@@ -1,5 +1,161 @@
 <?xml version="1.0" encoding="utf-8"?>
-<rss version="2.0"><channel><title>johnpfeiffer</title><link>https://blog.john-pfeiffer.com/</link><description></description><lastBuildDate>Sat, 20 Jan 2018 21:14:00 -0800</lastBuildDate><item><title>Working successfully with remote contractors</title><link>https://blog.john-pfeiffer.com/working-successfully-with-remote-contractors/</link><description>
+<rss version="2.0"><channel><title>johnpfeiffer</title><link>https://blog.john-pfeiffer.com/</link><description></description><lastBuildDate>Tue, 01 May 2018 20:37:00 -0700</lastBuildDate><item><title>Go Web Development and Templates with Heroku</title><link>https://blog.john-pfeiffer.com/go-web-development-and-templates-with-heroku/</link><description>
+&lt;h2 id="prerequisites"&gt;Prerequisites&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;Please create a new version controlled source code repository using Github or Bitbucket or ?.&lt;/li&gt;
+&lt;li&gt;Have Golang installed&lt;/li&gt;
+&lt;li&gt;Download and install the official Go dependency tool "dep", &lt;a href="https://golang.github.io/dep/docs/installation.html"&gt;https://golang.github.io/dep/docs/installation.html&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="a-simple-http-server"&gt;A simple http server&lt;/h2&gt;
+&lt;p&gt;Your source repository currently only needs a single file: &lt;strong&gt;main.go&lt;/strong&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kn"&gt;package&lt;/span&gt; &lt;span class="nx"&gt;main&lt;/span&gt;
+
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;
+        &lt;span class="s"&gt;"fmt"&lt;/span&gt;
+        &lt;span class="s"&gt;"log"&lt;/span&gt;
+        &lt;span class="s"&gt;"net/http"&lt;/span&gt;
+        &lt;span class="s"&gt;"os"&lt;/span&gt;
+&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="kd"&gt;func&lt;/span&gt; &lt;span class="nx"&gt;myHandler&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;w&lt;/span&gt; &lt;span class="nx"&gt;http&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;ResponseWriter&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;r&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="nx"&gt;http&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;Request&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="nx"&gt;fmt&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;Fprintf&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;w&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s"&gt;"hi"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+
+&lt;span class="kd"&gt;func&lt;/span&gt; &lt;span class="nx"&gt;main&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="nx"&gt;port&lt;/span&gt; &lt;span class="o"&gt;:=&lt;/span&gt; &lt;span class="nx"&gt;getEnvOrDefault&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;"PORT"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s"&gt;"8080"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="nx"&gt;log&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;Println&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;"Listening on port"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;port&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="nx"&gt;http&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;HandleFunc&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;"/"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;myHandler&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="nx"&gt;http&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;ListenAndServe&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;":"&lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="nx"&gt;port&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kc"&gt;nil&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+
+&lt;span class="kd"&gt;func&lt;/span&gt; &lt;span class="nx"&gt;getEnvOrDefault&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;key&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;defaultValue&lt;/span&gt; &lt;span class="kt"&gt;string&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="kt"&gt;string&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="nx"&gt;result&lt;/span&gt; &lt;span class="o"&gt;:=&lt;/span&gt; &lt;span class="nx"&gt;defaultValue&lt;/span&gt;
+        &lt;span class="nx"&gt;val&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;ok&lt;/span&gt; &lt;span class="o"&gt;:=&lt;/span&gt; &lt;span class="nx"&gt;os&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;LookupEnv&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;key&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="nx"&gt;ok&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+                &lt;span class="nx"&gt;result&lt;/span&gt; &lt;span class="p"&gt;=&lt;/span&gt; &lt;span class="nx"&gt;val&lt;/span&gt;
+        &lt;span class="p"&gt;}&lt;/span&gt;
+        &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="nx"&gt;result&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;another example of a trivial web server using only the standard library&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Verify it runs locally with: &lt;code&gt;go run main.go&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;your browser should see "hi" in http://localhost:8080 and use "control + c" to cancel and quit the command line web server application&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;While previous examples used Google App Engine  &lt;a href="https://blog.john-pfeiffer.com/go-programming-intro-with-vs-code-and-arrays-slices-functions-and-testing/#a-simple-web-server"&gt;https://blog.john-pfeiffer.com/go-programming-intro-with-vs-code-and-arrays-slices-functions-and-testing/#a-simple-web-server&lt;/a&gt;, here we will leverage Heroku for deploying our web application.&lt;/p&gt;
+&lt;h2 id="go-dependency-management"&gt;Go Dependency Management&lt;/h2&gt;
+&lt;p&gt;First download and install the Go dependency tool:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://github.com/golang/dep"&gt;https://github.com/golang/dep&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://devcenter.heroku.com/articles/go-apps-with-dep#build-configuration"&gt;https://devcenter.heroku.com/articles/go-apps-with-dep#build-configuration&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href="https://devcenter.heroku.com/articles/go-apps-with-dep#getting-started"&gt;https://devcenter.heroku.com/articles/go-apps-with-dep#getting-started&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;:::bash
+cd DIRECTORY/OF/WEBAPP
+dep init
+go list -e .
+echo "[metadata.heroku]" &amp;gt;&amp;gt; Gopkg.toml
+echo "  root-package = \"&lt;code&gt;go list -e .&lt;/code&gt;\"" &amp;gt;&amp;gt; Gopkg.toml
+git status ; git diff
+git add --all .
+git commit -m "initial web app and using go dep"
+git push&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href="https://github.com/johnpfeiffer/web-go/blob/master/Gopkg.toml"&gt;https://github.com/johnpfeiffer/web-go/blob/master/Gopkg.toml&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="deploying-to-heroku-from-github-via-travis-ci"&gt;Deploying to Heroku from Github via Travis-CI&lt;/h2&gt;
+&lt;h3 id="heroku-prerequisites"&gt;Heroku Prerequisites&lt;/h3&gt;
+&lt;ol&gt;
+&lt;li&gt;Download and install the heroku CLI &lt;a href="https://devcenter.heroku.com/articles/getting-started-with-go#set-up"&gt;https://devcenter.heroku.com/articles/getting-started-with-go#set-up&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;cd /opt ; wget https://cli-assets.heroku.com/branches/stable/heroku-linux-amd64.tar.gz&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;tar xf heroku-linux-amd64.tar.gz&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;/opt/heroku/bin/heroku --version ; /opt/heroku/bin/heroku --help&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;/opt/heroku/bin/heroku login&lt;/code&gt; &lt;em&gt;this will prompt for your email and password and store the credentials in ~/.netrc&lt;/em&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;blockquote&gt;
+&lt;p&gt;For extra security consider using heroku CLI inside of an ephemeral docker container or a script that removes the credentials after each usage&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;em&gt;These instructions will now assume heroku "just works", i.e. &lt;code&gt;alias heroku='/opt/heroku/bin/heroku'&lt;/code&gt;&lt;/em&gt;&lt;/p&gt;
+&lt;h3 id="configuring-the-application-with-heroku"&gt;Configuring the Application with Heroku&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nb"&gt;cd&lt;/span&gt; DIRECTORY/OF/WEBAPP
+heroku &lt;span class="nb"&gt;help&lt;/span&gt;
+heroku create APPNAME --buildpack heroku/go
+heroku status
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;This has created an empty Go application in heroku&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Later on when deploying the application to heroku if you receive the following error: &lt;em&gt;No default language could be detected for this app&lt;/em&gt;, it means you did not set the buildpack language yet...&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;If you missed setting the buildpack language via CLI you can also use the WebUI after the app was already created &lt;a href="https://dashboard.heroku.com/apps/APPNAME/settings"&gt;https://dashboard.heroku.com/apps/APPNAME/settings&lt;/a&gt;&lt;/em&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://devcenter.heroku.com/articles/buildpacks"&gt;https://devcenter.heroku.com/articles/buildpacks&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Another gotcha is if you have not configured a dependency manager (even without dependencies!) you will see this error &lt;em&gt;App not compatible with buildpack&lt;/em&gt;.&lt;/p&gt;
+&lt;h3 id="travis-ci"&gt;Travis-CI&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://docs.travis-ci.com/user/deployment/heroku/"&gt;https://docs.travis-ci.com/user/deployment/heroku/&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;First you will need to have retrieved your auth token: &lt;code&gt;heroku auth:token&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;You can connect the repository that was already created in Github to Travis via &lt;a href="https://travis-ci.org"&gt;https://travis-ci.org&lt;/a&gt; , more specifically at &lt;a href="https://travis-ci.org/profile/USERNAME"&gt;https://travis-ci.org/profile/USERNAME&lt;/a&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;you may need to "sync account" if you very recently created a repository , otherwise you will see this error: &lt;em&gt;repository not known to https://api.travis-ci.org/: USERNAME/REPONAME&lt;/em&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;docker run -it --rm ruby:alpine /bin/sh
+apk update
+apk add --no-cache build-base git
+gem install travis travis-lint
+travis &lt;span class="nb"&gt;help&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;This docker example avoids installing ruby locally ;p&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Inside of the docker container you will need (using "vi" ;) to create a dummy .travis.yml file with the content:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;deploy&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;
+  &lt;span class="n"&gt;provider&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="n"&gt;heroku&lt;/span&gt;
+  &lt;span class="n"&gt;api_key&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;
+    &lt;span class="n"&gt;secure&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;"YOUR ENCRYPTED API KEY"&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;You can then run the following command which will update the .travis.yml file with the real encrypted auth token.
+&lt;code&gt;travis encrypt YOUR-HEROKU-TOKEN --add deploy.api_key -r USERNAME/REPONAME&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;In your source code repository your real .travis.yml file will be:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;language&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="n"&gt;go&lt;/span&gt;
+&lt;span class="n"&gt;script&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="kd"&gt;get&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="n"&gt;test&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;v&lt;/span&gt;
+&lt;span class="n"&gt;notifications&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;
+  &lt;span class="n"&gt;email&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="kc"&gt;false&lt;/span&gt;
+
+&lt;span class="n"&gt;deploy&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;
+  &lt;span class="n"&gt;provider&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="n"&gt;heroku&lt;/span&gt;
+  &lt;span class="n"&gt;api_key&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;
+    &lt;span class="n"&gt;secure&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="n"&gt;ABCD1234XYZLONGENCRYPTEDSTRING&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;h3 id="test-it"&gt;Test It&lt;/h3&gt;
+&lt;p&gt;Now a browser that hits the Heroku URL will see "hi" , &lt;a href="https://web-go.herokuapp.com/"&gt;https://web-go.herokuapp.com/&lt;/a&gt;&lt;/p&gt;
+&lt;h2 id="templates-for-content"&gt;Templates for Content&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://golang.org/pkg/html/template/"&gt;https://golang.org/pkg/html/template/&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="testdrivendesign-and-gorilla-mux"&gt;TestDrivenDesign and Gorilla Mux&lt;/h2&gt;
+&lt;p&gt;Tests help us communicate. Libraries and Composition, not Frameworks and Magic.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;TODO: Go Web and JSON&lt;/li&gt;
+&lt;li&gt;TODO: integrating heroku postgres , &lt;a href="https://devcenter.heroku.com/articles/getting-started-with-go#use-a-database"&gt;https://devcenter.heroku.com/articles/getting-started-with-go#use-a-database&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://github.com/johnpfeiffer/go-web-example"&gt;https://github.com/johnpfeiffer/go-web-example&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="miscellaneous"&gt;Miscellaneous&lt;/h2&gt;
+&lt;h3 id="logs-from-heroku"&gt;Logs from Heroku&lt;/h3&gt;
+&lt;p&gt;To see the logs from the web application running in heroku: &lt;code&gt;heroku logs --app APPNAME --tail&lt;/code&gt;&lt;/p&gt;
+&lt;h3 id="environment-variables-for-configuration"&gt;Environment Variables for Configuration&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://devcenter.heroku.com/articles/getting-started-with-go#define-config-vars"&gt;https://devcenter.heroku.com/articles/getting-started-with-go#define-config-vars&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="custom-domains"&gt;Custom Domains&lt;/h3&gt;
+&lt;p&gt;To use a custom domain name for your traffic &lt;a href="https://devcenter.heroku.com/articles/custom-domains"&gt;https://devcenter.heroku.com/articles/custom-domains&lt;/a&gt;&lt;/p&gt;
+&lt;h3 id="downloading-the-source-code-from-heroku"&gt;Downloading the source code from Heroku&lt;/h3&gt;
+&lt;p&gt;To download the source code from a running Heroku application: &lt;code&gt;heroku git:clone --app APPNAME&lt;/code&gt; &lt;a href="https://devcenter.heroku.com/articles/git-clone-heroku-app"&gt;https://devcenter.heroku.com/articles/git-clone-heroku-app&lt;/a&gt;&lt;/p&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">john pfeiffer</dc:creator><pubDate>Tue, 01 May 2018 20:37:00 -0700</pubDate><guid isPermaLink="false">tag:blog.john-pfeiffer.com,2018-05-01:go-web-development-and-templates-with-heroku/</guid><category>go</category><category>golang</category><category>web</category><category>gorilla mux</category><category>http</category><category>template</category><category>heroku</category></item><item><title>Working successfully with remote contractors</title><link>https://blog.john-pfeiffer.com/working-successfully-with-remote-contractors/</link><description>
 &lt;h2 id="some-background"&gt;Some Background&lt;/h2&gt;
 &lt;p&gt;It can be challenging to scale up an organization. One choice that can be made is "full time employee" versus "contractor". Another choice is "Co-Located" versus "Remote".&lt;/p&gt;
 &lt;p&gt;There are some important considerations with any combination but I'll share my experiences with "Remote Contractors".&lt;/p&gt;
@@ -4969,7 +5125,7 @@ Fill it in with something like OAUTH_USER=yourkeyhere:yoursecrethere&lt;/p&gt;
 &lt;h2 id="misc"&gt;Misc&lt;/h2&gt;
 &lt;p&gt;One thing that is interesting about this is that using OAuth tokens through a service is merely wrapping all of the manual steps I have in a previous blog post into a nice SaaS wrapper =)
 &lt;a href="https://blog.john-pfeiffer.com/publish-a-pelican-blog-using-a-bitbucket-post-webhook/"&gt;https://blog.john-pfeiffer.com/publish-a-pelican-blog-using-a-bitbucket-post-webhook/&lt;/a&gt;&lt;/p&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">john pfeiffer</dc:creator><pubDate>Mon, 21 Dec 2015 12:24:00 -0800</pubDate><guid isPermaLink="false">tag:blog.john-pfeiffer.com,2015-12-21:static-site-with-bitbucket-and-shippable-and-pelican/</guid><category>static site</category><category>pelican</category><category>bitbucket</category><category>shippable ci</category><category>ci</category><category>cd</category></item><item><title>Go Programming Intro with VS Code and Arrays Slices Functions and Testing</title><link>https://blog.john-pfeiffer.com/go-programming-intro-with-vs-code-and-arrays-slices-functions-and-testing/</link><description>
-&lt;p&gt;Introducing the Go Programming Language (aka golang) basics, interactive sandbox with &lt;a href="http://play.golang.org"&gt;http://play.golang.org&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Introducing the Go Programming Language (aka golang) basics, interactive sandbox with &lt;a href="https://play.golang.org"&gt;https://play.golang.org&lt;/a&gt;&lt;/p&gt;
 &lt;h2 id="prerequisites"&gt;Prerequisites&lt;/h2&gt;
 &lt;p&gt;Tooling is often essential to productivity.&lt;/p&gt;
 &lt;h3 id="download-and-install-the-go-language-compiler-and-tools"&gt;Download and install the go language compiler and tools&lt;/h3&gt;
@@ -5023,7 +5179,7 @@ go build
 &lt;/blockquote&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;a href="https://golang.org/doc/code.html#Command"&gt;https://golang.org/doc/code.html#Command&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href="http://dave.cheney.net/2014/01/21/using-go-test-build-and-install"&gt;http://dave.cheney.net/2014/01/21/using-go-test-build-and-install&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://dave.cheney.net/2014/01/21/using-go-test-build-and-install"&gt;https://dave.cheney.net/2014/01/21/using-go-test-build-and-install&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;A concrete example:&lt;/p&gt;
 &lt;ol&gt;
@@ -5116,7 +5272,7 @@ GOOS=linux GOARCH=amd64 go build -v
 &lt;p&gt;Dave Cheney's suggestion about "build vs install" is a good one since the cached intermediate .a files in the directory pkg/ may complicate things, especially for a cross compilation.&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;a href="https://golang.org/doc/install/source#environment"&gt;https://golang.org/doc/install/source#environment&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href="http://dave.cheney.net/2015/08/22/cross-compilation-with-go-1-5"&gt;http://dave.cheney.net/2015/08/22/cross-compilation-with-go-1-5&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://dave.cheney.net/2015/08/22/cross-compilation-with-go-1-5"&gt;https://dave.cheney.net/2015/08/22/cross-compilation-with-go-1-5&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 &lt;h3 id="download-and-install-an-ide"&gt;Download and install an IDE&lt;/h3&gt;
 &lt;p&gt;If you are used to larger projects then an IDE is quite helpful for colorization, auto completion, (right click or f12) goto definition, rename, build on save, auto formatting, etc.&lt;/p&gt;
@@ -5574,7 +5730,7 @@ cd /opt/goprojects/src/github.com/johnpfeiffer/YOURPROJECT
 &lt;span class="p"&gt;}&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 &lt;h3 id="efficient-string-append-and-replacement"&gt;Efficient String append and replacement&lt;/h3&gt;
-&lt;p&gt;&lt;a href="http://stackoverflow.com/questions/1760757/how-to-efficiently-concatenate-strings-in-go"&gt;http://stackoverflow.com/questions/1760757/how-to-efficiently-concatenate-strings-in-go&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://stackoverflow.com/questions/1760757/how-to-efficiently-concatenate-strings-in-go"&gt;https://stackoverflow.com/questions/1760757/how-to-efficiently-concatenate-strings-in-go&lt;/a&gt;&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kd"&gt;func&lt;/span&gt; &lt;span class="nx"&gt;myReplace&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;source&lt;/span&gt; &lt;span class="kt"&gt;string&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="kt"&gt;string&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
     &lt;span class="kd"&gt;var&lt;/span&gt; &lt;span class="nx"&gt;b&lt;/span&gt; &lt;span class="nx"&gt;bytes&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;Buffer&lt;/span&gt;
     &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="nx"&gt;_&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;c&lt;/span&gt; &lt;span class="o"&gt;:=&lt;/span&gt; &lt;span class="k"&gt;range&lt;/span&gt; &lt;span class="nx"&gt;source&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
@@ -5590,7 +5746,7 @@ cd /opt/goprojects/src/github.com/johnpfeiffer/YOURPROJECT
 &lt;h3 id="testing-with-go"&gt;Testing with Go&lt;/h3&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;a href="https://golang.org/pkg/testing/"&gt;https://golang.org/pkg/testing/&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href="http://nathanleclaire.com/blog/2015/10/10/interfaces-and-composition-for-effective-unit-testing-in-golang/"&gt;http://nathanleclaire.com/blog/2015/10/10/interfaces-and-composition-for-effective-unit-testing-in-golang/&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://nathanleclaire.com/blog/2015/10/10/interfaces-and-composition-for-effective-unit-testing-in-golang/"&gt;https://nathanleclaire.com/blog/2015/10/10/interfaces-and-composition-for-effective-unit-testing-in-golang/&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href="https://cloud.google.com/appengine/docs/go/tools/localunittesting/#Go_Introducing_the_Go_testing_package"&gt;https://cloud.google.com/appengine/docs/go/tools/localunittesting/#Go_Introducing_the_Go_testing_package&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 &lt;h3 id="a-simple-web-server"&gt;A simple web server&lt;/h3&gt;
