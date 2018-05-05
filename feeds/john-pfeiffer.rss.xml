@@ -4580,7 +4580,12 @@ ls -l
 &lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;&lt;code&gt;hi&lt;/code&gt;&lt;/p&gt;
 &lt;p&gt;Maybe &lt;/p&gt;
-&lt;p&gt;&lt;a href="http://dominik.honnef.co/posts/2015/06/go-musl/"&gt;http://dominik.honnef.co/posts/2015/06/go-musl/&lt;/a&gt; ?&lt;/p&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">john pfeiffer</dc:creator><pubDate>Sun, 28 Feb 2016 21:19:00 -0800</pubDate><guid isPermaLink="false">tag:blog.john-pfeiffer.com,2016-02-28:alpine-linux-introduction-tutorial/</guid><category>alpine</category><category>linux</category><category>security</category></item><item><title>Debian Packages for Deployment and Reprepro for a local apt repository</title><link>https://blog.john-pfeiffer.com/debian-packages-for-deployment-and-reprepro-for-a-local-apt-repository/</link><description>
+&lt;p&gt;&lt;a href="http://dominik.honnef.co/posts/2015/06/go-musl/"&gt;http://dominik.honnef.co/posts/2015/06/go-musl/&lt;/a&gt; ?&lt;/p&gt;
+&lt;h3 id="git-with-alpine"&gt;Git with Alpine&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;apk update
+apk add --no-cache git
+git --version
+&lt;/pre&gt;&lt;/div&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">john pfeiffer</dc:creator><pubDate>Sun, 28 Feb 2016 21:19:00 -0800</pubDate><guid isPermaLink="false">tag:blog.john-pfeiffer.com,2016-02-28:alpine-linux-introduction-tutorial/</guid><category>alpine</category><category>linux</category><category>security</category></item><item><title>Debian Packages for Deployment and Reprepro for a local apt repository</title><link>https://blog.john-pfeiffer.com/debian-packages-for-deployment-and-reprepro-for-a-local-apt-repository/</link><description>
 &lt;h3 id="what-is-a-debian-package"&gt;What is a Debian Package?&lt;/h3&gt;
 &lt;p&gt;A debian package is a way to distribute and install a collection of files (aka software) onto a system (i.e. Debian or Ubuntu).&lt;/p&gt;
 &lt;p&gt;While a piece of software might depend on other debian packages (e.g. libraries) usually a single .deb file represents some sort of module that serves a single purpose.&lt;/p&gt;
@@ -7384,7 +7389,7 @@ leafpad&lt;/alt&gt;&lt;/control&gt;&lt;/p&gt;
 &lt;p&gt;Create two new &lt;strong&gt;public repos&lt;/strong&gt;: username.github.io and source.username.github.io&lt;/p&gt;
 &lt;p&gt;In source.username.github.io you will put the source markdown and theme etc. from the pelican static blog.&lt;/p&gt;
 &lt;p&gt;The username.github.io will be where the output pelican transformed .html is automatically pushed by Travis CI and is conveniently served by GitHub pages. &lt;a href="https://pages.github.com/"&gt;https://pages.github.com/&lt;/a&gt;&lt;/p&gt;
-&lt;p&gt;Ensure &lt;a href="https://github.com/integrations/travis-ci"&gt;https://github.com/integrations/travis-ci&lt;/a&gt; is authorized by clicking on the Configure button.&lt;/p&gt;
+&lt;p&gt;Ensure &lt;a href="https://travis-ci.org"&gt;https://travis-ci.org&lt;/a&gt; is authorized by clicking on the Configure button, &lt;a href="https://docs.travis-ci.com/user/getting-started/"&gt;https://docs.travis-ci.com/user/getting-started/&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;(You can review the OAuth apps with &lt;a href="https://github.com/settings/applications"&gt;https://github.com/settings/applications&lt;/a&gt;)&lt;/p&gt;
 &lt;p&gt;While the Integration allows Travis CI to detect commits to your repositories it does not necessarily allow it to push changes into a repository, for that we'll use an OAuth Token.&lt;/p&gt;
 &lt;p&gt;Create a new personal oauth token: &lt;a href="https://github.com/settings/tokens/new"&gt;https://github.com/settings/tokens/new&lt;/a&gt;&lt;/p&gt;
@@ -7425,9 +7430,9 @@ apt-get install -y ruby1.9.3 build-essential
 sudo gem install travis travis-lint
 &lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;The actual travis commands...&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;travis help
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;travis &lt;span class="nb"&gt;help&lt;/span&gt;
 travis pubkey -r username/source.username.github.io
-travis encrypt GH_TOKEN=your_github_personal_oauth_token -r username/source.username.github.io
+travis encrypt &lt;span class="nv"&gt;GH_TOKEN&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;your_github_personal_oauth_token -r username/source.username.github.io
 &lt;/pre&gt;&lt;/div&gt;
 &lt;blockquote&gt;
 &lt;p&gt;Alternatively make a fake yaml file and get the exact output added by the commands:
@@ -7442,32 +7447,32 @@ travis encrypt GH_TOKEN=your_github_personal_oauth_token -r username/source.user
 &lt;/ul&gt;
 &lt;h4 id="travisyml"&gt;.travis.yml&lt;/h4&gt;
 &lt;p&gt;At the root of your source.username.github.io you'll need the Travis configuration file (yaml)&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;language&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="n"&gt;python&lt;/span&gt;
-&lt;span class="n"&gt;python&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;
-    &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="s2"&gt;"2.7"&lt;/span&gt;
-&lt;span class="n"&gt;before_install&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;
- &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;sudo&lt;/span&gt; &lt;span class="n"&gt;apt&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="kd"&gt;get&lt;/span&gt; &lt;span class="n"&gt;update&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;qq&lt;/span&gt;
-&lt;span class="n"&gt;install&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;
-    &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;pip&lt;/span&gt; &lt;span class="n"&gt;install&lt;/span&gt; &lt;span class="n"&gt;pelican&lt;/span&gt;&lt;span class="o"&gt;==&lt;/span&gt;&lt;span class="mf"&gt;3.6&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="mi"&gt;3&lt;/span&gt; &lt;span class="n"&gt;Markdown&lt;/span&gt;&lt;span class="o"&gt;==&lt;/span&gt;&lt;span class="mf"&gt;2.6&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="mi"&gt;7&lt;/span&gt; &lt;span class="n"&gt;beautifulsoup4&lt;/span&gt;&lt;span class="o"&gt;==&lt;/span&gt;&lt;span class="mf"&gt;4.5&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;
-&lt;span class="n"&gt;script&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;
-    &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;rm&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;rf&lt;/span&gt; &lt;span class="o"&gt;./&lt;/span&gt;&lt;span class="n"&gt;output&lt;/span&gt;
-    &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;rm&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;rf&lt;/span&gt; &lt;span class="o"&gt;./&lt;/span&gt;&lt;span class="n"&gt;cache&lt;/span&gt;
-    &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;rm&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;rf&lt;/span&gt; &lt;span class="o"&gt;./&lt;/span&gt;&lt;span class="n"&gt;plugins&lt;/span&gt;&lt;span class="o"&gt;/*&lt;/span&gt;
-    &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;git&lt;/span&gt; &lt;span class="n"&gt;clone&lt;/span&gt; &lt;span class="n"&gt;https&lt;/span&gt;&lt;span class="o"&gt;://&lt;/span&gt;&lt;span class="n"&gt;github&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;com&lt;/span&gt;&lt;span class="sr"&gt;/getpelican/&lt;/span&gt;&lt;span class="n"&gt;pelican&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;plugins&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;git&lt;/span&gt;
-    &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;mv&lt;/span&gt; &lt;span class="o"&gt;./&lt;/span&gt;&lt;span class="n"&gt;pelican&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;plugins&lt;/span&gt;&lt;span class="sr"&gt;/* ./&lt;/span&gt;&lt;span class="n"&gt;plugins&lt;/span&gt;
-    &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;pelican&lt;/span&gt; &lt;span class="o"&gt;./&lt;/span&gt;&lt;span class="n"&gt;content&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;o&lt;/span&gt; &lt;span class="o"&gt;./&lt;/span&gt;&lt;span class="n"&gt;output&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;s&lt;/span&gt; &lt;span class="o"&gt;./&lt;/span&gt;&lt;span class="n"&gt;publishconf&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;py&lt;/span&gt;
-    &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;git&lt;/span&gt; &lt;span class="n"&gt;clone&lt;/span&gt; &lt;span class="o"&gt;--&lt;/span&gt;&lt;span class="n"&gt;quiet&lt;/span&gt; &lt;span class="n"&gt;https&lt;/span&gt;&lt;span class="o"&gt;://&lt;/span&gt;&lt;span class="n"&gt;$&lt;/span&gt;&lt;span class="o"&gt;{&lt;/span&gt;&lt;span class="n"&gt;GH_TOKEN&lt;/span&gt;&lt;span class="o"&gt;}&lt;/span&gt;&lt;span class="err"&gt;@&lt;/span&gt;&lt;span class="n"&gt;github&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;com&lt;/span&gt;&lt;span class="sr"&gt;/username/username.github.io.git &amp;gt; /dev/&lt;/span&gt;&lt;span class="kc"&gt;null&lt;/span&gt;
-    &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;cd&lt;/span&gt; &lt;span class="n"&gt;johnpfeiffer&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;github&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;io&lt;/span&gt;
-    &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;git&lt;/span&gt; &lt;span class="n"&gt;config&lt;/span&gt; &lt;span class="n"&gt;user&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;email&lt;/span&gt; &lt;span class="s2"&gt;"me@john-pfeiffer.com"&lt;/span&gt;
-    &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;git&lt;/span&gt; &lt;span class="n"&gt;config&lt;/span&gt; &lt;span class="n"&gt;user&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;name&lt;/span&gt; &lt;span class="s2"&gt;"John Pfeiffer"&lt;/span&gt;
-    &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;rsync&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;rv&lt;/span&gt; &lt;span class="o"&gt;--&lt;/span&gt;&lt;span class="n"&gt;exclude&lt;/span&gt;&lt;span class="o"&gt;=.&lt;/span&gt;&lt;span class="n"&gt;git&lt;/span&gt; &lt;span class="o"&gt;../&lt;/span&gt;&lt;span class="n"&gt;output&lt;/span&gt;&lt;span class="o"&gt;/*&lt;/span&gt; &lt;span class="o"&gt;.&lt;/span&gt;
-    &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;git&lt;/span&gt; &lt;span class="n"&gt;add&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;f&lt;/span&gt; &lt;span class="o"&gt;.&lt;/span&gt;
-    &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;git&lt;/span&gt; &lt;span class="n"&gt;commit&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;m&lt;/span&gt; &lt;span class="s2"&gt;"Travis build $TRAVIS_BUILD_NUMBER"&lt;/span&gt;
-    &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;git&lt;/span&gt; &lt;span class="n"&gt;push&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;fq&lt;/span&gt; &lt;span class="n"&gt;origin&lt;/span&gt; &lt;span class="n"&gt;master&lt;/span&gt; &lt;span class="o"&gt;&amp;gt;&lt;/span&gt; &lt;span class="sr"&gt;/dev/&lt;/span&gt;&lt;span class="kc"&gt;null&lt;/span&gt;
-    &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;echo&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;e&lt;/span&gt; &lt;span class="s2"&gt;"Done\n"&lt;/span&gt;
-&lt;span class="n"&gt;env&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;
-   &lt;span class="n"&gt;global&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;
-     &lt;span class="n"&gt;secure&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="n"&gt;example126xOnLRCabGeZrxMUne9W0l5LTbN&lt;/span&gt;&lt;span class="sr"&gt;/hR5Wnq0P3nwrL4slWJ3rFAoi/wqivbINwZGOkU7e/OPVvjDCRivAIxeti61xtnKgyFL6rTvc7u5vAjCF6m4qx6+bXOx9YbXCEUdJmBd25qGBy3PIg4rt/&lt;/span&gt;&lt;span class="mi"&gt;524&lt;/span&gt;&lt;span class="n"&gt;DOBZhZ9t4glt8Qo&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;language: python
+python:
+    - &lt;span class="s2"&gt;"2.7"&lt;/span&gt;
+before_install:
+ - sudo apt-get update -qq
+install:
+    - pip install &lt;span class="nv"&gt;pelican&lt;/span&gt;&lt;span class="o"&gt;==&lt;/span&gt;&lt;span class="m"&gt;3&lt;/span&gt;.6.3 &lt;span class="nv"&gt;Markdown&lt;/span&gt;&lt;span class="o"&gt;==&lt;/span&gt;&lt;span class="m"&gt;2&lt;/span&gt;.6.7 &lt;span class="nv"&gt;beautifulsoup4&lt;/span&gt;&lt;span class="o"&gt;==&lt;/span&gt;&lt;span class="m"&gt;4&lt;/span&gt;.5.1
+script:
+    - rm -rf ./output
+    - rm -rf ./cache
+    - rm -rf ./plugins/*
+    - git clone https://github.com/getpelican/pelican-plugins.git
+    - mv ./pelican-plugins/* ./plugins
+    - pelican ./content -o ./output -s ./publishconf.py
+    - git clone --quiet https://&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;GH_TOKEN&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;@github.com/username/username.github.io.git &amp;gt; /dev/null
+    - &lt;span class="nb"&gt;cd&lt;/span&gt; johnpfeiffer.github.io
+    - git config user.email &lt;span class="s2"&gt;"me@john-pfeiffer.com"&lt;/span&gt;
+    - git config user.name &lt;span class="s2"&gt;"John Pfeiffer"&lt;/span&gt;
+    - rsync -rv --exclude&lt;span class="o"&gt;=&lt;/span&gt;.git ../output/* .
+    - git add -f .
+    - git commit -m &lt;span class="s2"&gt;"Travis build &lt;/span&gt;&lt;span class="nv"&gt;$TRAVIS_BUILD_NUMBER&lt;/span&gt;&lt;span class="s2"&gt;"&lt;/span&gt;
+    - git push -fq origin master &amp;gt; /dev/null
+    - &lt;span class="nb"&gt;echo&lt;/span&gt; -e &lt;span class="s2"&gt;"Done\n"&lt;/span&gt;
+env:
+   global:
+     secure: example126xOnLRCabGeZrxMUne9W0l5LTbN/hR5Wnq0P3nwrL4slWJ3rFAoi/wqivbINwZGOkU7e/OPVvjDCRivAIxeti61xtnKgyFL6rTvc7u5vAjCF6m4qx6+bXOx9YbXCEUdJmBd25qGBy3PIg4rt/524DOBZhZ9t4glt8Qo&lt;span class="o"&gt;=&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 &lt;blockquote&gt;
 &lt;ul&gt;
