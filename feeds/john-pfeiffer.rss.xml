@@ -52,8 +52,7 @@
 &lt;li&gt;&lt;a href="https://devcenter.heroku.com/articles/go-apps-with-dep#build-configuration"&gt;https://devcenter.heroku.com/articles/go-apps-with-dep#build-configuration&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;
 &lt;p&gt;&lt;a href="https://devcenter.heroku.com/articles/go-apps-with-dep#getting-started"&gt;https://devcenter.heroku.com/articles/go-apps-with-dep#getting-started&lt;/a&gt;&lt;/p&gt;
-&lt;p&gt;:::bash
-cd DIRECTORY/OF/WEBAPP
+&lt;p&gt;cd DIRECTORY/OF/WEBAPP
 dep init
 go list -e .
 echo "[metadata.heroku]" &amp;gt;&amp;gt; Gopkg.toml
@@ -64,7 +63,7 @@ git commit -m "initial web app and using go dep"
 git push&lt;/p&gt;
 &lt;/li&gt;
 &lt;li&gt;
-&lt;p&gt;&lt;a href="https://github.com/johnpfeiffer/web-go/blob/master/Gopkg.toml"&gt;https://github.com/johnpfeiffer/web-go/blob/master/Gopkg.toml&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Example simple Go dep configuration file &lt;a href="https://github.com/johnpfeiffer/web-go/blob/master/Gopkg.toml"&gt;https://github.com/johnpfeiffer/web-go/blob/master/Gopkg.toml&lt;/a&gt;&lt;/p&gt;
 &lt;/li&gt;
 &lt;/ul&gt;
 &lt;h2 id="deploying-to-heroku-from-github-via-travis-ci"&gt;Deploying to Heroku from Github via Travis-CI&lt;/h2&gt;
@@ -135,9 +134,42 @@ travis &lt;span class="nb"&gt;help&lt;/span&gt;
 &lt;h3 id="test-it"&gt;Test It&lt;/h3&gt;
 &lt;p&gt;Now a browser that hits the Heroku URL will see "hi" , &lt;a href="https://web-go.herokuapp.com/"&gt;https://web-go.herokuapp.com/&lt;/a&gt;&lt;/p&gt;
 &lt;h2 id="templates-for-content"&gt;Templates for Content&lt;/h2&gt;
+&lt;p&gt;Separating out the static html content from dynamic and business logic parts of the application is a key way to remain modular.
+Templates built into the Go standard library can provide output that is safe from code injection.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kd"&gt;var&lt;/span&gt; &lt;span class="nx"&gt;indexTemplate&lt;/span&gt; &lt;span class="p"&gt;=&lt;/span&gt; &lt;span class="nx"&gt;GetIndexTemplate&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+
+&lt;span class="kd"&gt;func&lt;/span&gt; &lt;span class="nx"&gt;myHandler&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;w&lt;/span&gt; &lt;span class="nx"&gt;http&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;ResponseWriter&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;r&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="nx"&gt;http&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;Request&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="nx"&gt;indexTemplate&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;Execute&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;w&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;NoData&lt;/span&gt;&lt;span class="p"&gt;{})&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;This small change to our previous &lt;em&gt;main.go&lt;/em&gt; allows our default web handler (aka controller) to return html&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kn"&gt;package&lt;/span&gt; &lt;span class="nx"&gt;main&lt;/span&gt;
+
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="s"&gt;"html/template"&lt;/span&gt;
+
+&lt;span class="c1"&gt;// NoData is an empty struct as I do not pass anything into the template&lt;/span&gt;
+&lt;span class="kd"&gt;type&lt;/span&gt; &lt;span class="nx"&gt;NoData&lt;/span&gt; &lt;span class="kd"&gt;struct&lt;/span&gt;&lt;span class="p"&gt;{}&lt;/span&gt;
+
+&lt;span class="c1"&gt;// GetIndexTemplate returns the index.html template https://golang.org/pkg/html/template/#Template&lt;/span&gt;
+&lt;span class="kd"&gt;func&lt;/span&gt; &lt;span class="nx"&gt;GetIndexTemplate&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="nx"&gt;template&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;Template&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="kd"&gt;var&lt;/span&gt; &lt;span class="nx"&gt;indexTemplate&lt;/span&gt; &lt;span class="p"&gt;=&lt;/span&gt; &lt;span class="nx"&gt;template&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;Must&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;template&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;New&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;"index"&lt;/span&gt;&lt;span class="p"&gt;).&lt;/span&gt;&lt;span class="nx"&gt;Parse&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;`&amp;lt;html&amp;gt;&amp;lt;head&amp;gt;&amp;lt;style type="text/css"&amp;gt;&lt;/span&gt;
+&lt;span class="s"&gt;body{&lt;/span&gt;
+&lt;span class="s"&gt;  font-size: 1.9em;&lt;/span&gt;
+&lt;span class="s"&gt;}&lt;/span&gt;
+&lt;span class="s"&gt;&amp;lt;/style&amp;gt;&amp;lt;/head&amp;gt;&amp;lt;body&amp;gt;hi&amp;lt;/body&amp;gt;&amp;lt;/html&amp;gt;&lt;/span&gt;
+&lt;span class="s"&gt;`&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="nx"&gt;indexTemplate&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;The function just returns the rendered template; since it is only called once in main it is not inefficient, and Must will panic if the template has an error&lt;/p&gt;
+&lt;/blockquote&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;a href="https://golang.org/pkg/html/template/"&gt;https://golang.org/pkg/html/template/&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
+&lt;h3 id="passing-variables-to-a-template"&gt;Passing Variables to a Template&lt;/h3&gt;
 &lt;h2 id="testdrivendesign-and-gorilla-mux"&gt;TestDrivenDesign and Gorilla Mux&lt;/h2&gt;
 &lt;p&gt;Tests help us communicate. Libraries and Composition, not Frameworks and Magic.&lt;/p&gt;
 &lt;ul&gt;
@@ -152,10 +184,10 @@ travis &lt;span class="nb"&gt;help&lt;/span&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;a href="https://devcenter.heroku.com/articles/getting-started-with-go#define-config-vars"&gt;https://devcenter.heroku.com/articles/getting-started-with-go#define-config-vars&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
-&lt;h3 id="custom-domains"&gt;Custom Domains&lt;/h3&gt;
+&lt;h3 id="custom-domains-with-heroku"&gt;Custom Domains with Heroku&lt;/h3&gt;
 &lt;p&gt;To use a custom domain name for your traffic &lt;a href="https://devcenter.heroku.com/articles/custom-domains"&gt;https://devcenter.heroku.com/articles/custom-domains&lt;/a&gt;&lt;/p&gt;
 &lt;h3 id="downloading-the-source-code-from-heroku"&gt;Downloading the source code from Heroku&lt;/h3&gt;
-&lt;p&gt;To download the source code from a running Heroku application: &lt;code&gt;heroku git:clone --app APPNAME&lt;/code&gt; &lt;a href="https://devcenter.heroku.com/articles/git-clone-heroku-app"&gt;https://devcenter.heroku.com/articles/git-clone-heroku-app&lt;/a&gt;&lt;/p&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">john pfeiffer</dc:creator><pubDate>Tue, 01 May 2018 20:37:00 -0700</pubDate><guid isPermaLink="false">tag:blog.john-pfeiffer.com,2018-05-01:go-web-development-and-templates-with-heroku/</guid><category>go</category><category>golang</category><category>web</category><category>gorilla mux</category><category>http</category><category>template</category><category>heroku</category></item><item><title>Working successfully with remote contractors</title><link>https://blog.john-pfeiffer.com/working-successfully-with-remote-contractors/</link><description>
+&lt;p&gt;To download the source code from a running Heroku application: &lt;code&gt;heroku git:clone --app APPNAME&lt;/code&gt; &lt;a href="https://devcenter.heroku.com/articles/git-clone-heroku-app"&gt;https://devcenter.heroku.com/articles/git-clone-heroku-app&lt;/a&gt;&lt;/p&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">john pfeiffer</dc:creator><pubDate>Tue, 01 May 2018 20:37:00 -0700</pubDate><guid isPermaLink="false">tag:blog.john-pfeiffer.com,2018-05-01:go-web-development-and-templates-with-heroku/</guid><category>go</category><category>golang</category><category>web</category><category>gorilla mux</category><category>http</category><category>template</category><category>heroku</category><category>postgres</category></item><item><title>Working successfully with remote contractors</title><link>https://blog.john-pfeiffer.com/working-successfully-with-remote-contractors/</link><description>
 &lt;h2 id="some-background"&gt;Some Background&lt;/h2&gt;
 &lt;p&gt;It can be challenging to scale up an organization. One choice that can be made is "full time employee" versus "contractor". Another choice is "Co-Located" versus "Remote".&lt;/p&gt;
 &lt;p&gt;There are some important considerations with any combination but I'll share my experiences with "Remote Contractors".&lt;/p&gt;
