@@ -168,6 +168,19 @@
 <p><strong>Ensure the Pipelines Environment variable of GOOGLE_CLIENT_SECRET is "Secured"</strong> so it is encrypted (i.e. all asterisks in the forms or in the log output)</p>
 <p>Full instructions: <a href="https://cloud.google.com/solutions/continuous-delivery-bitbucket-app-engine#setting_up_environment_variables">https://cloud.google.com/solutions/continuous-delivery-bitbucket-app-engine#setting_up_environment_variables</a></p>
 <h3 id="bitbucket-pipelinesyml-file">bitbucket-pipelines.yml file</h3>
+<blockquote>
+<p>Before using a secret (or really any environment variables) with bitbucket pipelines you will need to have a placeholder bitbucket-pipelines.yml so that you can officially "enable" it for the repository - after that the WebUI for configuration for pipelines will become accessible =(</p>
+</blockquote>
+<div class="highlight"><pre><span></span><span class="n">image</span><span class="o">:</span> <span class="n">python</span><span class="o">:</span><span class="mf">2.7</span>
+<span class="n">pipelines</span><span class="o">:</span>
+  <span class="k">default</span><span class="o">:</span>
+    <span class="o">-</span> <span class="n">step</span><span class="o">:</span>
+        <span class="n">script</span><span class="o">:</span>
+          <span class="o">-</span> <span class="n">python</span> <span class="o">--</span><span class="n">version</span>
+</pre></div>
+<blockquote>
+<p>Use this very trivial bitbucket-pipelines.yml in order to get at least one successful validation so that you can press the "Enable" button in the Bitbucket UI (I had to zoom my browser out to workaround some broken css/javascript)</p>
+</blockquote>
 <p>A yaml configuration file describes the work that you instruct Bitbucket Pipelines to do, in this case we are doing the extra work of grabbing the remote google cloud SDK and installing it so that we use it with the credentials to deploy the app.</p>
 <div class="highlight"><pre><span></span><span class="n">image</span><span class="o">:</span> <span class="n">python</span><span class="o">:</span><span class="mf">2.7</span>
 
@@ -193,6 +206,10 @@
 <blockquote>
 <p>A best practice is to pull the dependency from storage you have control over (or simply vendor the SDK in the source code) rather than downloading it every time and risking the upstream pinned version being removed</p>
 </blockquote>
+<ul>
+<li><a href="https://bitbucket-pipelines.prod.public.atl-paas.net/validator">https://bitbucket-pipelines.prod.public.atl-paas.net/validator</a> did not work for me (crazy javascript) but in theory this would be a very helpful tool</li>
+</ul>
+<p>Full bitbucket pipelines documentation: <a href="https://confluence.atlassian.com/bitbucket/build-test-and-deploy-with-pipelines-792496469.html">https://confluence.atlassian.com/bitbucket/build-test-and-deploy-with-pipelines-792496469.html</a></p>
 <h3 id="scriptsfetch_gae_sdkpy">scripts/fetch_gae_sdk.py</h3>
 <hr/>
 <div class="highlight"><pre><span></span><span class="ch">#!/usr/bin/env python</span>
@@ -364,6 +381,9 @@ git push
 <li><a href="https://docs.docker.com/docker-hub/builds/">https://docs.docker.com/docker-hub/builds/</a></li>
 <li><a href="https://hub.docker.com/r/foupfeiffer/gcloud-sdk/~/dockerfile/">https://hub.docker.com/r/foupfeiffer/gcloud-sdk/~/dockerfile/</a></li>
 </ul>
+<blockquote>
+<p>Unfortunately sometimes you have to just log in to Docker Hub and press the "Trigger" button to start the build since "automatically" does not seem to trigger correctly, e.g. <a href="https://hub.docker.com/r/foupfeiffer/gcloud-sdk/~/settings/automated-builds/">https://hub.docker.com/r/foupfeiffer/gcloud-sdk/~/settings/automated-builds/</a></p>
+</blockquote>
 <h3 id="using-a-public-image-from-docker-hub">Using a public image from Docker Hub</h3>
 <p>To verify App Engine publishing from the Docker container manually: 
 <code>docker run --rm -it --volume /opt/mysecrets:/opt/mysecrets --volume /opt/myrepo:/opt/myrepo foupfeiffer/gcloud-sdk /bin/bash</code></p>
@@ -419,7 +439,7 @@ gcloud --verbosity=error app deploy app.yaml --promote
             <time pubdate="pubdate" datetime="2017-05-23T22:24:00-07:00">May 23, 2017</time>
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#build-CI-CD-devops-ref">build-CI-CD-devops</a> 
-            <h4>~1657 words</h4>
+            <h4>~1797 words</h4>
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article"> 
                 <li><a href="/tags.html#bitbucket-ref">bitbucket

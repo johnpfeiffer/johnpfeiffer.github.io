@@ -95,6 +95,9 @@
 <li>Shippable have a free plan with 1 container that will do your builds (fine by me, Docker is fast!)</li>
 <li>Pelican converts markdown into .html and you can still use javascript for fancy things <a href="http://docs.getpelican.com/">http://docs.getpelican.com/</a></li>
 </ul>
+<blockquote>
+<p>Sadly it looks like the Shippable startup is having trouble maintaining/updating their Docker images so I recommend instead to use Bitbucket Pipelines <a href="https://blog.john-pfeiffer.com/continuous-delivery-with-bitbucket-pipelines-and-google-app-engine-deployment-and-the-storageobjectslist-error/#bitbucket-pipelines-configuration">https://blog.john-pfeiffer.com/continuous-delivery-with-bitbucket-pipelines-and-google-app-engine-deployment-and-the-storageobjectslist-error/#bitbucket-pipelines-configuration</a></p>
+</blockquote>
 <p>The basic process is to be triggered by a git push to the private repository of new/updated source markdown, use pelican to process it into .html, and then publish (git push) the new/updated .html to the static site repository.</p>
 <p>One reason to use two seperate repositories instead of only one repository is that if you make a commit to your markdown source repository that will trigger a CI run which will push the updated .html files to the repository which would be detected and maybe trigger an infinite loop.  Or at the least interleave your source code changes with generated output changes in the commit logs.  =]</p>
 <p>An alternative is using multiple branches but you'd better hope nobody ever deletes your source branch by accident.</p>
@@ -133,12 +136,25 @@
 </blockquote>
 <p><a href="https://confluence.atlassian.com/bitbucket/publishing-a-website-on-bitbucket-cloud-221449776.html">https://confluence.atlassian.com/bitbucket/publishing-a-website-on-bitbucket-cloud-221449776.html</a></p>
 <h3 id="get-oauth-access">Get OAuth Access</h3>
+<p>The goal here is to leverage the one-hour-access-token-generation-via-Oauth in order to write to a different repository in Bitbucket.</p>
 <p>Generate a Consumer OAuth2 Token with <a href="https://confluence.atlassian.com/bitbucket/oauth-on-bitbucket-cloud-238027431.html#OAuthonBitbucketCloud-Createaconsumer">https://confluence.atlassian.com/bitbucket/oauth-on-bitbucket-cloud-238027431.html#OAuthonBitbucketCloud-Createaconsumer</a></p>
+<p><em>(The UI in <a href="https://bitbucket.org/account/user/USERNAME/api">https://bitbucket.org/account/user/USERNAME/api</a> is fairly straightforward with "Add consumer")</em></p>
+<blockquote>
+<p>The least privilege required permissions would be "Repositories: Read, Write"
+You must define a callback URL, i.e. http://YOURDOMAIN:8888 , even if it is not used by this workaround</p>
+</blockquote>
 <p>Use curl to verify your token (this is how Shippable will get a 1 hour expiring access token to work on the target output repository)</p>
 <div class="highlight"><pre><span></span>curl https://bitbucket.org/site/oauth2/access_token -d grant_type=client_credentials -u yourkeyhere:yoursecrethere
+    {"access_token": "abcd1234...", "scopes": "repository:write", "expires_in": 3600, ...}
 </pre></div>
+<blockquote>
+<p>The curl command should get a JSON response which includes an access_token</p>
+</blockquote>
 <p><a href="http://stackoverflow.com/questions/24965307/how-to-manipulate-bitbucket-repository-with-token">http://stackoverflow.com/questions/24965307/how-to-manipulate-bitbucket-repository-with-token</a></p>
 <h2 id="shippable-setup">Shippable setup</h2>
+<blockquote>
+<p>Sadly it looks like the Shippable startup is having trouble maintaining/updating their Docker images so I recommend instead to use Bitbucket Pipelines <a href="https://blog.john-pfeiffer.com/continuous-delivery-with-bitbucket-pipelines-and-google-app-engine-deployment-and-the-storageobjectslist-error/#bitbucket-pipelines-configuration">https://blog.john-pfeiffer.com/continuous-delivery-with-bitbucket-pipelines-and-google-app-engine-deployment-and-the-storageobjectslist-error/#bitbucket-pipelines-configuration</a></p>
+</blockquote>
 <p>Enable the integration with Bitbucket: <a href="http://docs.shippable.com/#step-0-prerequisite">http://docs.shippable.com/#step-0-prerequisite</a></p>
 <p><em>Right from the beginning Shippable tries to ask which source repository provider (either GitHub or Bitbucket) you will be using.</em></p>
 <p>Use Shippable's OAuth implementation (Account Integration) to pick which Bitbucket repository</p>
@@ -228,7 +244,7 @@ Fill it in with something like OAUTH_USER=yourkeyhere:yoursecrethere</p>
             <time pubdate="pubdate" datetime="2015-12-21T12:24:00-08:00">Dec 21, 2015</time>
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#build-CI-CD-devops-ref">build-CI-CD-devops</a> 
-            <h4>~957 words</h4>
+            <h4>~1076 words</h4>
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article"> 
                 <li><a href="/tags.html#bitbucket-ref">bitbucket
