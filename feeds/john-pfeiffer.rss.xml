@@ -1,5 +1,182 @@
 <?xml version="1.0" encoding="utf-8"?>
-<rss version="2.0"><channel><title>johnpfeiffer</title><link>https://blog.john-pfeiffer.com/</link><description></description><lastBuildDate>Tue, 01 May 2018 20:37:00 -0700</lastBuildDate><item><title>Go Web Development and Templates with Heroku</title><link>https://blog.john-pfeiffer.com/go-web-development-and-templates-with-heroku/</link><description>
+<rss version="2.0"><channel><title>johnpfeiffer</title><link>https://blog.john-pfeiffer.com/</link><description></description><lastBuildDate>Sat, 12 May 2018 07:35:00 -0700</lastBuildDate><item><title>Infrastructure as Code with Terraform and AWS</title><link>https://blog.john-pfeiffer.com/infrastructure-as-code-with-terraform-and-aws/</link><description>
+&lt;h2 id="overview"&gt;Overview&lt;/h2&gt;
+&lt;p&gt;Just like building and maintaining hardware and physical servers by hand is manual drudge work (aka "toil"),
+so is the manual deployment of servers and networking etc. even on "Infrastructure as a Service".&lt;/p&gt;
+&lt;p&gt;The "Infrastructure as Code" movement emphasizes the value of human time and leverages source code and version control to manage the increasing complexity.
+&lt;em&gt;(Think of the exponential growth of logical systems with virtualization, cloud services, containers, and micro-services etc.)&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;Imagine a tool to automate deploying and managing virtual infrastructure...&lt;/p&gt;
+&lt;p&gt;While AmazonWebServices CloudFormation works for setting up infrastructure via a config file, the user experience is non-optimal and there is definitely "vendor-lock-in".&lt;/p&gt;
+&lt;p&gt;Hashicorp are a trusted brand in DevOps and having produced Vagrant, Packer, Consul, etc. it is easy to pick their Terraform product.&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;I have no affiliation with Hashicorp besides as a user of their software =)&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;While packer can build a single immutable image (an application or component) of a (virtual) server (or container),
+Terraform is the higher level tool where the full setup including Load Balancer, Database, etc. are managed.&lt;/p&gt;
+&lt;p&gt;The configuration files can be applied to various Cloud and Infrastructure vendors providing some measure of portability.&lt;/p&gt;
+&lt;p&gt;References:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://en.wikipedia.org/wiki/Infrastructure_as_Code"&gt;https://en.wikipedia.org/wiki/Infrastructure_as_Code&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://blog.john-pfeiffer.com/build-automation-using-packer-to-build-an-ami-use-immutable-not-chef"&gt;https://blog.john-pfeiffer.com/build-automation-using-packer-to-build-an-ami-use-immutable-not-chef&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://aws.amazon.com/documentation/cloudformation"&gt;https://aws.amazon.com/documentation/cloudformation&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://www.digitalocean.com/community/tutorials/how-to-use-terraform-with-digitalocean"&gt;https://www.digitalocean.com/community/tutorials/how-to-use-terraform-with-digitalocean&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="prerequisites"&gt;Prerequisites&lt;/h2&gt;
+&lt;p&gt;Basically you need access to the remote infrastructure, permissions to make changes (resources cost money!), and of course the Terraform tool.&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Download from &lt;a href="https://www.terraform.io/downloads.html"&gt;https://www.terraform.io/downloads.html&lt;/a&gt; (and probably unzip to \opt) the terraform binary, &lt;em&gt;you may also want to &lt;code&gt;echo "alias terraform='/opt/terraform'" &amp;gt;&amp;gt; ~/.bashrc&lt;/code&gt;&lt;/em&gt;&lt;/li&gt;
+&lt;li&gt;Verify that the terraform binary has been installed and can execute: &lt;code&gt;terraform version ; terraform help&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;Create an SSH keypair: &lt;code&gt;ssh-keygen -t rsa -C "myemail@example.com" -f $HOME/.ssh/aws.id_rsa&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;Upload the keypair to AWS &lt;a href="https://us-west-1.console.aws.amazon.com/ec2/v2/home?region=us-west-1#KeyPairs:sort=keyName"&gt;https://us-west-1.console.aws.amazon.com/ec2/v2/home?region=us-west-1#KeyPairs:sort=keyName&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Create a dedicated User with limited permissions: &lt;a href="https://console.aws.amazon.com/iam/home?region=us-west-1#/users"&gt;https://console.aws.amazon.com/iam/home?region=us-west-1#/users&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Ensure the new User (i.e. terraform-demo) only has "Programmatic Access" (aka API only, not WebUI)&lt;/li&gt;
+&lt;li&gt;Ensure the new User has permissions, i.e. is part of a Group (named ec2-only) that leverages the pre-generated policy name of EC2FullAccess)&lt;/li&gt;
+&lt;li&gt;The last step of the create user wizard should show the ACCESS_KEY and SECRET_KEY , make sure you &lt;strong&gt;save these in a password manager&lt;/strong&gt;.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Using Environment variables is a fairly standard and portable/secure way of providing credentials to Terraform, the &lt;strong&gt;region will determine where&lt;/strong&gt; resources are created&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;export AWS_ACCESS_KEY_ID="AKIAyourACCESSkey"
+export AWS_SECRET_ACCESS_KEY="yourSECRETkeyABC123"
+export AWS_DEFAULT_REGION="us-west-1"
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;&lt;em&gt;Alternatively save the credentials in the default amazon credentials file (~/.aws/credentials) by using &lt;code&gt;aws configure&lt;/code&gt;&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;References:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://www.terraform.io/docs/providers/aws/index.html"&gt;https://www.terraform.io/docs/providers/aws/index.html&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html"&gt;https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_managed-vs-inline.html"&gt;https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_managed-vs-inline.html&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://aws.amazon.com/about-aws/global-infrastructure"&gt;https://aws.amazon.com/about-aws/global-infrastructure&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="a-simple-build"&gt;A simple build&lt;/h2&gt;
+&lt;p&gt;The simple and common example of deploying a new server instance from an AmazonMachineImage (with a new VPC for network control)&lt;/p&gt;
+&lt;h3 id="example-terraform-file"&gt;Example Terraform File&lt;/h3&gt;
+&lt;p&gt;&lt;strong&gt;example.tf&lt;/strong&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kr"&gt;provider&lt;/span&gt; &lt;span class="s"&gt;"aws"&lt;/span&gt; &lt;span class=" -Punctuation"&gt;{&lt;/span&gt;
+&lt;span class="na"&gt;  region&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s2"&gt;"us-west-1"&lt;/span&gt;
+&lt;span class=" -Punctuation"&gt;}&lt;/span&gt;
+&lt;span class="kr"&gt;resource&lt;/span&gt; &lt;span class="s"&gt;"aws_instance" "example"&lt;/span&gt; &lt;span class=" -Punctuation"&gt;{&lt;/span&gt;
+&lt;span class="na"&gt;  ami&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s2"&gt;"ami-dc2739bc"&lt;/span&gt;
+&lt;span class="na"&gt;  instance_type&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s2"&gt;"t2.micro"&lt;/span&gt;
+&lt;span class="na"&gt;  subnet_id&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s2"&gt;"${aws_subnet.us-west-1a-public.id}"&lt;/span&gt;
+&lt;span class=" -Punctuation"&gt;}&lt;/span&gt;
+&lt;span class="kr"&gt;resource&lt;/span&gt; &lt;span class="s"&gt;"aws_vpc" "example"&lt;/span&gt; &lt;span class=" -Punctuation"&gt;{&lt;/span&gt;
+&lt;span class="na"&gt;  cidr_block&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s2"&gt;"192.168.1.0/24"&lt;/span&gt;
+&lt;span class="na"&gt;  enable_dns_hostnames&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;true&lt;/span&gt;
+&lt;span class="na"&gt;  enable_dns_support&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="kt"&gt;true&lt;/span&gt;
+&lt;span class=" -Punctuation"&gt;}&lt;/span&gt;
+&lt;span class="kr"&gt;resource&lt;/span&gt; &lt;span class="s"&gt;"aws_subnet" "us-east-1a-public"&lt;/span&gt; &lt;span class=" -Punctuation"&gt;{&lt;/span&gt;
+&lt;span class="na"&gt;  vpc_id&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s2"&gt;"${aws_vpc.example.id}"&lt;/span&gt;
+&lt;span class="na"&gt;  cidr_block&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s2"&gt;"192.168.1.0/28"&lt;/span&gt;
+&lt;span class="na"&gt;  availability_zone&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s2"&gt;"us-west-1a"&lt;/span&gt;
+&lt;span class=" -Punctuation"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;The provider is the target (with a specific sub region), and each resource has a type and a name (which can be referenced in later variables)&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;em&gt;While Amazon Linux images are hardened CentOS with security updates it can be convenient to use Ubuntu 16.04 (and most likely real world use cases will be from an AMI you have built yourself)&lt;/em&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;The AMI ID is region specific,  this example comes from us-west-1&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;References:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://cloud-images.ubuntu.com/locator/ec2"&gt;https://cloud-images.ubuntu.com/locator/ec2&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/AMIs.html"&gt;https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/AMIs.html&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://www.terraform.io/docs/providers/aws/r/instance.html"&gt;https://www.terraform.io/docs/providers/aws/r/instance.html&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://aws.amazon.com/premiumsupport/knowledge-center/instance-store-vs-ebs/"&gt;https://aws.amazon.com/premiumsupport/knowledge-center/instance-store-vs-ebs/&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/virtualization_types.html"&gt;https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/virtualization_types.html&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/default-vpc.html"&gt;https://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/default-vpc.html&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_Subnets.html"&gt;https://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_Subnets.html&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://aws.amazon.com/free"&gt;https://aws.amazon.com/free&lt;/a&gt; &lt;em&gt;(not much is free)&lt;/em&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="terraform-plan-and-apply"&gt;Terraform Plan and Apply&lt;/h3&gt;
+&lt;p&gt;The single configuration file and the following commands will deploy the prescribed infrastructure to AWS.&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;terraform init&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;install the AWS plugin (that is detected via the example.tf configuration file), you will need to git ignore .terraform and plugin binaries&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;code&gt;terraform plan&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;This will preview the steps that will occur&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;Terraform will perform the following actions:
+    + aws_instance.example
+        id:             &amp;lt;computed&amp;gt;
+        ami:            "ami-dc2739bc"
+        instance_type:    "t2.nano"
+        ...
+    + aws_subnet.us-west-1a-public
+        id:                               &amp;lt;computed&amp;gt;
+        assign_ipv6_address_on_creation:  "false"
+        availability_zone:                "us-west-1a"
+        ...
+    + aws_vpc.example
+        id:                               &amp;lt;computed&amp;gt;
+        assign_generated_ipv6_cidr_block: "false"
+        cidr_block:                       "192.168.1.0/24"
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;ul&gt;
+&lt;li&gt;means created , - means removed , the VPC and subnet ids may even be populated&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;To avoid the issue of VPC or no VPC (and for better default security) this will explicitly create a new VPC.&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;terraform apply&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Once again the expected results are displayed and a prompt requires confirmation&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;aws_instance.example: Creating...
+  ami:                          "" =&amp;gt; "ami-44273924"
+  ...
+aws_instance.example: Still creating... (10s elapsed)
+aws_instance.example: Creation complete after 16s (ID: i-0492ba9707e624a66)
+
+Apply complete! Resources: 1 added, 0 changed, 0 destroyed.
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;the &lt;strong&gt;.terraform.tfstate&lt;/strong&gt; file contains the current state of the current infrastructure&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;code&gt;terraform show&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;A full listing of the details of the infrastructure is returned&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;ul&gt;
+&lt;li&gt;To see the instance in the WebUI: &lt;a href="https://us-west-1.console.aws.amazon.com/ec2/v2/home?region=us-west-1#Instances:sort=instanceId"&gt;https://us-west-1.console.aws.amazon.com/ec2/v2/home?region=us-west-1#Instances:sort=instanceId&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Verify the new VPC &lt;a href="https://us-west-1.console.aws.amazon.com/vpc/home?region=us-west-1#vpcs:"&gt;https://us-west-1.console.aws.amazon.com/vpc/home?region=us-west-1#vpcs:&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="updates-to-existing-infrastructure-and-instances"&gt;Updates to Existing Infrastructure and Instances&lt;/h3&gt;
+&lt;p&gt;If you modify and save example.tf file to add a tag Name:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;resource "aws_instance" "example" {
+  tags {
+    Name = "terraform-example"
+  }
+...
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;&lt;code&gt;terraform plan ; terraform apply&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;The remote infrastructure (server) has been updated with a tag/Name "example" , &lt;code&gt;terraform show&lt;/code&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;If you change the resource AMI ID (i.e. the base immutable image from which the server was created) then Terraform will destroy the old server and deploy a new one&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://www.terraform.io/intro/getting-started/change.html"&gt;https://www.terraform.io/intro/getting-started/change.html&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://blog.gruntwork.io/an-introduction-to-terraform-f17df9c6d180"&gt;https://blog.gruntwork.io/an-introduction-to-terraform-f17df9c6d180&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="destroying"&gt;Destroying&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;terraform destroy&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;This is a destructive command, as always you must type "yes" ... "There is no undo"&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;Terraform will perform the following actions:
+  - aws_instance.example
+  - aws_subnet.us-west-1a-public
+  - aws_vpc.example
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;&lt;code&gt;terraform show&lt;/code&gt; will return nothing and inspection in the AWS Console (web ui) will show all the resources have been cleaned up =)&lt;/p&gt;
+&lt;h2 id="a-load-balanced-example"&gt;A Load Balanced Example&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://www.terraform.io/intro/examples/aws.html"&gt;https://www.terraform.io/intro/examples/aws.html&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://github.com/terraform-providers/terraform-provider-aws/tree/master/examples/two-tier"&gt;https://github.com/terraform-providers/terraform-provider-aws/tree/master/examples/two-tier&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">john pfeiffer</dc:creator><pubDate>Sat, 12 May 2018 07:35:00 -0700</pubDate><guid isPermaLink="false">tag:blog.john-pfeiffer.com,2018-05-12:infrastructure-as-code-with-terraform-and-aws/</guid><category>terraform</category><category>aws</category><category>digital ocean</category><category>devops</category><category>immutable</category></item><item><title>Go Web Development and Templates with Heroku</title><link>https://blog.john-pfeiffer.com/go-web-development-and-templates-with-heroku/</link><description>
 &lt;h2 id="prerequisites"&gt;Prerequisites&lt;/h2&gt;
 &lt;ul&gt;
 &lt;li&gt;Please create a new version controlled source code repository using Github or Bitbucket or ?.&lt;/li&gt;
@@ -2020,6 +2197,16 @@ chmod to modify permissions (to the "only the owner can read") since if the priv
 &lt;/pre&gt;&lt;/div&gt;
 &lt;blockquote&gt;
 &lt;p&gt;RSA is generally preferred, protocol 2, I only include the DSA command for completeness &lt;a href="http://security.stackexchange.com/questions/5096/rsa-vs-dsa-for-ssh-authentication-keys"&gt;http://security.stackexchange.com/questions/5096/rsa-vs-dsa-for-ssh-authentication-keys&lt;/a&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;ssh-keygen -l -f ~/.ssh/id_rsa.pub
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Check the number of bits for key strength, it should at least 2048 bits&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;ssh-keygen -t rsa -C "myemail@example.com" -f $HOME/.ssh/myserver.id_rsa
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Create an RSA based key with a specific email address label as an output in a specific directory and named file&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;h3 id="output-a-pub-from-a-private-key"&gt;output a .pub from a private key&lt;/h3&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;ssh-keygen -y -f id_rsa
