@@ -277,24 +277,37 @@ heroku status
 &lt;blockquote&gt;
 &lt;p&gt;you may need to "sync account" if you very recently created a repository , otherwise you will see this error: &lt;em&gt;repository not known to https://api.travis-ci.org/: USERNAME/REPONAME&lt;/em&gt;&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;docker run -it --rm ruby:alpine /bin/sh
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;sudo docker run -it --rm --volume /absolute/path/repo:/opt/repo --volume /opt/heroku:/opt/heroku ruby:alpine /bin/sh
 apk update
 apk add --no-cache build-base git
 gem install travis travis-lint
 travis &lt;span class="nb"&gt;help&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 &lt;blockquote&gt;
-&lt;p&gt;This docker example avoids installing ruby locally ;p&lt;/p&gt;
+&lt;p&gt;This docker example avoids installing ruby (or travis) locally ;p&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;p&gt;Inside of the docker container you will need (using "vi" ;) to create a dummy .travis.yml file with the content:&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;cd /opt/repo ; touch .travis.yml ; travis setup heroku&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;/opt/web-go # travis setup heroku
+Heroku API token: ************************************
+Heroku application name: |web-go|
+Deploy only from GITHUBUSERNAME/web-go? |yes| yes
+Encrypt API key? |yes| yes
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;This simple CLI wizard prompts for the Heroku auth token and populates the .travis.yml with the encrypted value&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;em&gt;If you want to do it manually you will need (using "vi" ;) to create a dummy .travis.yml file with the content:&lt;/em&gt;&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;deploy&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;
   &lt;span class="n"&gt;provider&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="n"&gt;heroku&lt;/span&gt;
   &lt;span class="n"&gt;api_key&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;
     &lt;span class="n"&gt;secure&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;"YOUR ENCRYPTED API KEY"&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;You can then run the following command which will update the .travis.yml file with the real encrypted auth token.
-&lt;code&gt;travis encrypt YOUR-HEROKU-TOKEN --add deploy.api_key -r USERNAME/REPONAME&lt;/code&gt;&lt;/p&gt;
-&lt;p&gt;In your source code repository your real .travis.yml file will be:&lt;/p&gt;
+&lt;code&gt;travis encrypt YOUR-HEROKU-TOKEN --add deploy.api_key -r GITHUBUSERNAME/REPONAME&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;You may get prompted to login if you use the incorrect USERNAME&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;In your source code repository your more complete .travis.yml file will be:&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;language&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="n"&gt;go&lt;/span&gt;
 &lt;span class="n"&gt;script&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="kd"&gt;get&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class="n"&gt;go&lt;/span&gt; &lt;span class="n"&gt;test&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;v&lt;/span&gt;
 &lt;span class="n"&gt;notifications&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;
