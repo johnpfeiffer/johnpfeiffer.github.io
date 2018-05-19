@@ -12,12 +12,13 @@ so is the manual deployment of servers and networking etc. even on "Infrastructu
 &lt;p&gt;I have no affiliation with Hashicorp besides as a user of their software =)&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;p&gt;While packer can build a single immutable image (an application or component) of a (virtual) server (or container),
-Terraform is the higher level tool where the full setup including Load Balancer, Database, etc. are managed.&lt;/p&gt;
+Terraform is the higher level tool where the full setup including Load Balancer, Database, etc. are managed.
+Terraform can also maintain "state" like replacing servers with (deploying) newer images that were built by packer.&lt;/p&gt;
 &lt;p&gt;The configuration files can be applied to various Cloud and Infrastructure vendors providing some measure of portability.&lt;/p&gt;
 &lt;p&gt;References:&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;a href="https://en.wikipedia.org/wiki/Infrastructure_as_Code"&gt;https://en.wikipedia.org/wiki/Infrastructure_as_Code&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href="https://blog.john-pfeiffer.com/build-automation-using-packer-to-build-an-ami-use-immutable-not-chef"&gt;https://blog.john-pfeiffer.com/build-automation-using-packer-to-build-an-ami-use-immutable-not-chef&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://blog.john-pfeiffer.com/build-automation-using-packer-to-build-an-ami-use-immutable-not-chef"&gt;https://blog.john-pfeiffer.com/build-automation-using-packer-to-build-an-ami-use-immutable-not-chef&lt;/a&gt; (packer runs commands to create a machine image - aka a server frozen as a file)&lt;/li&gt;
 &lt;li&gt;&lt;a href="https://aws.amazon.com/documentation/cloudformation"&gt;https://aws.amazon.com/documentation/cloudformation&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href="https://www.digitalocean.com/community/tutorials/how-to-use-terraform-with-digitalocean"&gt;https://www.digitalocean.com/community/tutorials/how-to-use-terraform-with-digitalocean&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
@@ -176,7 +177,12 @@ Apply complete! Resources: 1 added, 0 changed, 0 destroyed.
 &lt;ul&gt;
 &lt;li&gt;&lt;a href="https://www.terraform.io/intro/examples/aws.html"&gt;https://www.terraform.io/intro/examples/aws.html&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href="https://github.com/terraform-providers/terraform-provider-aws/tree/master/examples/two-tier"&gt;https://github.com/terraform-providers/terraform-provider-aws/tree/master/examples/two-tier&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;</summary><category term="terraform"></category><category term="aws"></category><category term="digital ocean"></category><category term="devops"></category><category term="immutable"></category></entry><entry><title>Go Web Development and Templates with Heroku</title><link href="https://blog.john-pfeiffer.com/go-web-development-and-templates-with-heroku/" rel="alternate"></link><published>2018-05-01T20:37:00-07:00</published><updated>2018-05-01T20:37:00-07:00</updated><author><name>john pfeiffer</name></author><id>tag:blog.john-pfeiffer.com,2018-05-01:go-web-development-and-templates-with-heroku/</id><summary type="html">
+&lt;/ul&gt;
+&lt;h2 id="tools-to-manage-state-vs-platform-as-a-service"&gt;Tools to Manage State vs Platform as a Service&lt;/h2&gt;
+&lt;p&gt;Infrastructure as Code focuses on tools to manage complexity. An alternative is to outsource the infrastructure entirely by using something like a PlatformAsAService.&lt;/p&gt;
+&lt;p&gt;Heroku (or Google AppEngine or Openshift) can simplify application deployment by reducing the input to simply the application code.&lt;/p&gt;
+&lt;p&gt;The PaaS vendor manages the infrastructure (including load balancers) and can provide a WebUI and APIs for adding dependencies (i.e. databases).&lt;/p&gt;
+&lt;p&gt;Though it may again require a vendor specific configuration file to specify which application is connected/has permissions to which database...&lt;/p&gt;</summary><category term="terraform"></category><category term="aws"></category><category term="digital ocean"></category><category term="devops"></category><category term="immutable"></category></entry><entry><title>Go Web Development and Templates with Heroku</title><link href="https://blog.john-pfeiffer.com/go-web-development-and-templates-with-heroku/" rel="alternate"></link><published>2018-05-01T20:37:00-07:00</published><updated>2018-05-01T20:37:00-07:00</updated><author><name>john pfeiffer</name></author><id>tag:blog.john-pfeiffer.com,2018-05-01:go-web-development-and-templates-with-heroku/</id><summary type="html">
 &lt;h2 id="prerequisites"&gt;Prerequisites&lt;/h2&gt;
 &lt;ul&gt;
 &lt;li&gt;Please create a new version controlled source code repository using Github or Bitbucket or ?.&lt;/li&gt;
@@ -195,7 +201,7 @@ Apply complete! Resources: 1 added, 0 changed, 0 destroyed.
 &lt;span class="p"&gt;)&lt;/span&gt;
 
 &lt;span class="kd"&gt;func&lt;/span&gt; &lt;span class="nx"&gt;myHandler&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;w&lt;/span&gt; &lt;span class="nx"&gt;http&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;ResponseWriter&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;r&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="nx"&gt;http&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;Request&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
-        &lt;span class="nx"&gt;fmt&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;Fprintf&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;w&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s"&gt;"hi"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="nx"&gt;w&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;Write&lt;/span&gt;&lt;span class="p"&gt;([]&lt;/span&gt;&lt;span class="nb"&gt;byte&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;"hi"&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
 &lt;span class="p"&gt;}&lt;/span&gt;
 
 &lt;span class="kd"&gt;func&lt;/span&gt; &lt;span class="nx"&gt;main&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
@@ -527,6 +533,30 @@ hi , try &lt;span class="p"&gt;&amp;lt;&lt;/span&gt;&lt;span class="nt"&gt;a&lt;
 &lt;/li&gt;
 &lt;/ul&gt;
 &lt;h2 id="miscellaneous"&gt;Miscellaneous&lt;/h2&gt;
+&lt;h3 id="how-to-return-specific-http-response-types"&gt;How to return specific HTTP Response types&lt;/h3&gt;
+&lt;p&gt;&lt;em&gt;Note these code snippets are the Handler function only, you should provide your own HTTP listener and multi-plexer&lt;/em&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kd"&gt;func&lt;/span&gt; &lt;span class="nx"&gt;headonly&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;w&lt;/span&gt; &lt;span class="nx"&gt;http&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;ResponseWriter&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;r&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="nx"&gt;http&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;Request&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="nx"&gt;w&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;Header&lt;/span&gt;&lt;span class="p"&gt;().&lt;/span&gt;&lt;span class="nx"&gt;Set&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;"Allow"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s"&gt;"HEAD, GET"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="nx"&gt;w&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;WriteHeader&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;200&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://play.golang.org/p/GCfxTLdLGYn"&gt;https://play.golang.org/p/GCfxTLdLGYn&lt;/a&gt; example returning the HTTP Header where clearly the default status code is 200&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href="https://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.7"&gt;https://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.7&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;:::go
+func getfile(w http.ResponseWriter, r *http.Request) {
+    fp := path.Join("images", "example.png")
+    http.ServeFile(w, r, fp)
+}&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href="https://play.golang.org/p/G9zQ0SmzjP_K"&gt;https://play.golang.org/p/G9zQ0SmzjP_K&lt;/a&gt; example writing, reading, and serving a file&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://golang.org/pkg/net/http/#ServeFile"&gt;https://golang.org/pkg/net/http/#ServeFile&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://golang.org/pkg/path/filepath/#Clean"&gt;https://golang.org/pkg/path/filepath/#Clean&lt;/a&gt; for sanitizing user input for loading file paths&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;An example http server inside the Go playground: &lt;a href="https://play.golang.org/p/B-aZuQOdFtB"&gt;https://play.golang.org/p/B-aZuQOdFtB&lt;/a&gt;&lt;/p&gt;
 &lt;h3 id="logs-from-heroku"&gt;Logs from Heroku&lt;/h3&gt;
 &lt;p&gt;To see the logs from the web application running in heroku: &lt;code&gt;heroku logs --app APPNAME --tail&lt;/code&gt;&lt;/p&gt;
 &lt;h3 id="environment-variables-for-configuration"&gt;Environment Variables for Configuration&lt;/h3&gt;
@@ -5706,11 +5736,14 @@ GOOS=linux GOARCH=amd64 go build -v
 &lt;p&gt;Suprisingly one of the most popular and effective Go IDE combinations is: &lt;a href="https://code.visualstudio.com/Docs/?dv=linux64_deb"&gt;https://code.visualstudio.com/Docs/?dv=linux64_deb&lt;/a&gt;&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;dpkg -i code_...amd64.deb
 &lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;To install &lt;a href="https://marketplace.visualstudio.com/items?itemName=lukehoban.Go"&gt;https://marketplace.visualstudio.com/items?itemName=lukehoban.Go&lt;/a&gt; aka &lt;a href="https://github.com/Microsoft/vscode-go"&gt;https://github.com/Microsoft/vscode-go&lt;/a&gt; you actually:&lt;/p&gt;
+&lt;p&gt;To install &lt;a href="https://marketplace.visualstudio.com/items?itemName=lukehoban.Go"&gt;https://marketplace.visualstudio.com/items?itemName=lukehoban.Go&lt;/a&gt; aka &lt;a href="https://github.com/Microsoft/vscode-go"&gt;https://github.com/Microsoft/vscode-go&lt;/a&gt; you actually...&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;The plugin has been renamed to "ms-vscode.go" =|&lt;/p&gt;
+&lt;/blockquote&gt;
 &lt;ol&gt;
 &lt;li&gt;open Visual Studio Code&lt;/li&gt;
 &lt;li&gt;Control + P (Launches VS Code Quick Open)&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;ext install Go&lt;/code&gt; (capital G for "lukehoban")&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;ext install ms-vscode.Go&lt;/code&gt;&lt;/li&gt;
 &lt;li&gt;restart when prompted&lt;/li&gt;
 &lt;li&gt;File -&amp;gt; Preferences -&amp;gt; Color Theme (Light Visual Studio ;)&lt;/li&gt;
 &lt;/ol&gt;
@@ -5738,6 +5771,7 @@ GOOS=linux GOARCH=amd64 go build -v
 &lt;/blockquote&gt;
 &lt;p&gt;Unfortunately it is not quite simple to execute the code directly in VSCode &lt;a href="https://github.com/Microsoft/vscode-go/issues/21"&gt;https://github.com/Microsoft/vscode-go/issues/21&lt;/a&gt;&lt;/p&gt;
 &lt;h4 id="vs-code-preferences-to-disable-telemetry-and-automatic-updates"&gt;VS Code preferences to disable telemetry and automatic updates&lt;/h4&gt;
+&lt;p&gt;To prevent the software from sending (some) data to Microsoft...&lt;/p&gt;
 &lt;p&gt;File -&amp;gt; Preferences -&amp;gt; Settings&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;"telemetry.enableTelemetry": false,
 "telemetry.enableCrashReporter": false,
@@ -5746,6 +5780,9 @@ GOOS=linux GOARCH=amd64 go build -v
 &lt;blockquote&gt;
 &lt;p&gt;disabling sending stats and crash reports to vortex.data.microsoft.com and also prevent checking for software updates&lt;/p&gt;
 &lt;/blockquote&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://code.visualstudio.com/Docs/supporting/FAQ#_how-to-disable-telemetry-reporting"&gt;https://code.visualstudio.com/Docs/supporting/FAQ#_how-to-disable-telemetry-reporting&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
 &lt;h4 id="custom-vs-code-icons-and-disabling-annoying-file-icons"&gt;Custom VS Code icons and disabling annoying file icons&lt;/h4&gt;
 &lt;p&gt;There is a feature to show file icons at the top of every file (i.e. distinguish visually/graphically between Go source and HTML)&lt;/p&gt;
 &lt;p&gt;&lt;a href="https://code.visualstudio.com/docs/getstarted/themes#_icon-themes"&gt;https://code.visualstudio.com/docs/getstarted/themes#_icon-themes&lt;/a&gt;&lt;/p&gt;
