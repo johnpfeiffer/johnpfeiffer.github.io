@@ -1,5 +1,175 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>johnpfeiffer</title><link href="https://blog.john-pfeiffer.com/" rel="alternate"></link><link href="https://blog.john-pfeiffer.com/feeds/john-pfeiffer.atom.xml" rel="self"></link><id>https://blog.john-pfeiffer.com/</id><updated>2018-05-12T07:35:00-07:00</updated><entry><title>Infrastructure as Code with Terraform and AWS</title><link href="https://blog.john-pfeiffer.com/infrastructure-as-code-with-terraform-and-aws/" rel="alternate"></link><published>2018-05-12T07:35:00-07:00</published><updated>2018-05-12T07:35:00-07:00</updated><author><name>john pfeiffer</name></author><id>tag:blog.john-pfeiffer.com,2018-05-12:infrastructure-as-code-with-terraform-and-aws/</id><summary type="html">
+<feed xmlns="http://www.w3.org/2005/Atom"><title>johnpfeiffer</title><link href="https://blog.john-pfeiffer.com/" rel="alternate"></link><link href="https://blog.john-pfeiffer.com/feeds/john-pfeiffer.atom.xml" rel="self"></link><id>https://blog.john-pfeiffer.com/</id><updated>2018-06-11T19:48:00-07:00</updated><entry><title>Go FaaS with AWS Lambda</title><link href="https://blog.john-pfeiffer.com/go-faas-with-aws-lambda/" rel="alternate"></link><published>2018-06-11T19:48:00-07:00</published><updated>2018-06-11T19:48:00-07:00</updated><author><name>john pfeiffer</name></author><id>tag:blog.john-pfeiffer.com,2018-06-11:go-faas-with-aws-lambda/</id><summary type="html">
+&lt;p&gt;The promise of creating functions that do not require server administration is amazing,
+the reality though includes a huge maze of vendor specific commands and frameworks (including permissions).&lt;/p&gt;
+&lt;h2 id="source-code"&gt;Source Code&lt;/h2&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kn"&gt;package&lt;/span&gt; &lt;span class="nx"&gt;main&lt;/span&gt;
+
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;
+    &lt;span class="s"&gt;"context"&lt;/span&gt;
+    &lt;span class="s"&gt;"fmt"&lt;/span&gt;
+    &lt;span class="s"&gt;"time"&lt;/span&gt;
+
+    &lt;span class="s"&gt;"github.com/aws/aws-lambda-go/lambda"&lt;/span&gt;
+&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="c1"&gt;// MyRequest demonstrates an input value&lt;/span&gt;
+&lt;span class="kd"&gt;type&lt;/span&gt; &lt;span class="nx"&gt;MyRequest&lt;/span&gt; &lt;span class="kd"&gt;struct&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="nx"&gt;Value&lt;/span&gt; &lt;span class="kt"&gt;string&lt;/span&gt; &lt;span class="s"&gt;`json:"value"`&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+
+&lt;span class="c1"&gt;// MyResponse helps illustrate how AWS Lambda auto&lt;/span&gt;
+&lt;span class="kd"&gt;type&lt;/span&gt; &lt;span class="nx"&gt;MyResponse&lt;/span&gt; &lt;span class="kd"&gt;struct&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="nx"&gt;Message&lt;/span&gt; &lt;span class="kt"&gt;string&lt;/span&gt; &lt;span class="s"&gt;`json:"message"`&lt;/span&gt;
+    &lt;span class="nx"&gt;Created&lt;/span&gt; &lt;span class="kt"&gt;string&lt;/span&gt; &lt;span class="s"&gt;`json:"created"`&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+
+&lt;span class="c1"&gt;// HandleRequest https://docs.aws.amazon.com/lambda/latest/dg/go-programming-model-handler-types.html&lt;/span&gt;
+&lt;span class="kd"&gt;func&lt;/span&gt; &lt;span class="nx"&gt;HandleRequest&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;ctx&lt;/span&gt; &lt;span class="nx"&gt;context&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;Context&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;req&lt;/span&gt; &lt;span class="nx"&gt;MyRequest&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;MyResponse&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kt"&gt;error&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="nx"&gt;t&lt;/span&gt; &lt;span class="o"&gt;:=&lt;/span&gt; &lt;span class="nx"&gt;time&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;Now&lt;/span&gt;&lt;span class="p"&gt;().&lt;/span&gt;&lt;span class="nx"&gt;UTC&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="nx"&gt;MyResponse&lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="nx"&gt;Message&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="nx"&gt;fmt&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;Sprintf&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;"hi %s"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;req&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;Value&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt;
+        &lt;span class="nx"&gt;Created&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="nx"&gt;fmt&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;Sprintf&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;"%s"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;t&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;Format&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;time&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;RFC3339&lt;/span&gt;&lt;span class="p"&gt;))},&lt;/span&gt; &lt;span class="kc"&gt;nil&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+
+&lt;span class="kd"&gt;func&lt;/span&gt; &lt;span class="nx"&gt;main&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="nx"&gt;lambda&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;Start&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;HandleRequest&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://aws.amazon.com/blogs/compute/announcing-go-support-for-aws-lambda"&gt;https://aws.amazon.com/blogs/compute/announcing-go-support-for-aws-lambda&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://docs.aws.amazon.com/lambda/latest/dg/go-programming-model-handler-types.html"&gt;https://docs.aws.amazon.com/lambda/latest/dg/go-programming-model-handler-types.html&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="aws-cli-deployment"&gt;AWS CLI Deployment&lt;/h2&gt;
+&lt;p&gt;To avoid some of the complexity with the CLI you may want to first dip your toes in with the Web UI creation of a Go Lambda:
+&lt;a href="https://us-west-1.console.aws.amazon.com/lambda/home?region=us-west-1#/create?firstrun=true"&gt;https://us-west-1.console.aws.amazon.com/lambda/home?region=us-west-1#/create?firstrun=true&lt;/a&gt;&lt;/p&gt;
+&lt;h3 id="packaging-for-upload"&gt;Packaging for Upload&lt;/h3&gt;
+&lt;p&gt;The easy part is creating a binary...&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;go build -o examplebinary&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;build into a single binary&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;code&gt;zip deployment.zip examplebinary&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;wrap it up in a zip&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id="prerequisites"&gt;Prerequisites&lt;/h3&gt;
+&lt;p&gt;Installing the awscli may be a chore (if pip is broken), but &lt;code&gt;sudo apt install awscli&lt;/code&gt; (from 16.04 should be advanced enough)&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;Unable to locate credentials. You can configure credentials by running "aws configure".&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;So in order to have credentials you must create a User in your AWS Account (with programmatic access only) which will generate an API key for you. (I suggest using the WebUI)&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html"&gt;https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://console.aws.amazon.com/iam/home?region=us-west-1#/users"&gt;https://console.aws.amazon.com/iam/home?region=us-west-1#/users&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Do not use your "Root" Admin account in AWS for the API credentials, security best practice means creating at least one separate User&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id="aws-permissions-and-roles"&gt;AWS Permissions and Roles&lt;/h3&gt;
+&lt;blockquote&gt;
+&lt;p&gt;You may have to use the Web UI or some other mechanism to create the IAM role with the correct permissions&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Gotcha: the minimum permission would be "lambda:CreateFunction"&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://docs.aws.amazon.com/lambda/latest/dg/intro-permission-model.html#lambda-intro-execution-role"&gt;https://docs.aws.amazon.com/lambda/latest/dg/intro-permission-model.html#lambda-intro-execution-role&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://console.aws.amazon.com/iam/home?region=us-west-1#/policies"&gt;https://console.aws.amazon.com/iam/home?region=us-west-1#/policies&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://console.aws.amazon.com/iam/home?region=us-west-1#/roles"&gt;https://console.aws.amazon.com/iam/home?region=us-west-1#/roles&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;This means the laborious process of creating a Policy that includes all the Lambda permissions (not very secure but it works)&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;iam:PassRole&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Hilariously the pre-created roles listed in the documentation do not have that specific IAM extra permission, somehow by default an Admin of the account should deploy lambdas?&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "VisualEditor0",
+            "Effect": "Allow",
+            "Action": [
+                "iam:PassRole",
+                "lambda:*"
+            ],
+            "Resource": "*"
+        }
+    ]
+}
+&lt;/pre&gt;&lt;/div&gt;
+&lt;h2 id="create-an-aws-user-with-api-credentials"&gt;Create an AWS user with API Credentials&lt;/h2&gt;
+&lt;p&gt;So in order to have API credentials (~/.aws/credentials) you have already created:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;A Policy&lt;/li&gt;
+&lt;li&gt;A Role that can use that Policy&lt;/li&gt;
+&lt;li&gt;A Group that has the Policy attached&lt;/li&gt;
+&lt;li&gt;A User that has credentials (and is in the Group with&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h3 id="the-actual-create-lambda-command"&gt;The Actual Create Lambda Command&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;aws lambda create-function &lt;span class="se"&gt;\&lt;/span&gt;
+--region us-west-1 &lt;span class="se"&gt;\&lt;/span&gt;
+--function-name ExampleFunction &lt;span class="se"&gt;\&lt;/span&gt;
+--zip-file fileb://./deployment.zip &lt;span class="se"&gt;\&lt;/span&gt;
+--runtime go1.x &lt;span class="se"&gt;\&lt;/span&gt;
+--role arn:aws:iam::1234YOURACCOUNT:role/lambda-all &lt;span class="se"&gt;\&lt;/span&gt;
+--handler examplebinary
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;fileb format = file binary&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;The JSON response from creating the new lambda function (and uploading the zipped Go binary)...&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;{
+    "LastModified": "2018-06-12T04:55:36.327+0000",
+    "Version": "$LATEST",
+    "FunctionArn": "arn:aws:lambda:us-west-1:1234YOURACCOUNT:function:ExampleFunction",
+    "MemorySize": 128,
+    "Runtime": "go1.x",
+    "Role": "arn:aws:iam::1234YOURACCOUNT:role/lambda-all",
+    "Description": "",
+    "CodeSha256": "45R3BZKesxMM3AuZ96lS9UoiOEGX964oHD/J8QQfLfQ=",
+    "Timeout": 3,
+    "FunctionName": "ExampleFunction",
+    "Handler": "examplebinary",
+    "CodeSize": 2793060
+}
+&lt;/pre&gt;&lt;/div&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://docs.aws.amazon.com/cli/latest/reference/lambda/create-function.html"&gt;https://docs.aws.amazon.com/cli/latest/reference/lambda/create-function.html&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="trigger-a-lambda-manually"&gt;Trigger a Lambda Manually&lt;/h2&gt;
+&lt;p&gt;Using the WebUI (AWS Console) you can select the function created with the CLI
+&lt;a href="https://us-west-1.console.aws.amazon.com/lambda/home?region=us-west-1#/functions"&gt;https://us-west-1.console.aws.amazon.com/lambda/home?region=us-west-1#/functions&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;By using the "Configure test events" (sometimes a dropdown on the right next to the Test button)&lt;/p&gt;
+&lt;p&gt;You can create a new "test event" , in this case a MyRequest (though any arbitrary extraneous JSON will be ignored)&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Note that the WebUI also provides a way to upload a newer zip file&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id="lambda-cron-aka-cloudwatch-scheduled-events"&gt;Lambda Cron aka CloudWatch Scheduled Events&lt;/h2&gt;
+&lt;p&gt;In the WebUI you can add a trigger via the Designer (on the left)&lt;/p&gt;
+&lt;p&gt;Select "CloudWatch Events" -&amp;gt; Configure triggers (scroll down) -&amp;gt; Create a new rule&lt;/p&gt;
+&lt;p&gt;Configure a trigger, "Scheduled" (as opposed to Rate which is similar but different ;)&lt;/p&gt;
+&lt;p&gt;Name: "examplecron"&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;cron(16 * ? * MON-FRI *)&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;This would be on the 16th minute every hour every day every month on Monday through Friday (every year)
+cron(Minutes Hours Day-of-month Month Day-of-week Year)&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Disabling the "example" Cloud Watch Event is as easy as toggling a radio button
+(this is an interesting way of controlling how/when your function executes)&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://docs.aws.amazon.com/lambda/latest/dg/tutorial-scheduled-events-schedule-expressions.html"&gt;https://docs.aws.amazon.com/lambda/latest/dg/tutorial-scheduled-events-schedule-expressions.html&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="lambda-monitoring"&gt;Lambda Monitoring&lt;/h2&gt;
+&lt;p&gt;In the same WebUI where you view the Lambda function (by name) you can click on Monitoring and click around to see Metrics
+(i.e. Lambda Cron aka CloudWatch Scheduled Events) actually "invoked" your function.&lt;/p&gt;
+&lt;p&gt;Of course if you haven't enabled CloudWatch Logging or more importantly created a "Log Group" then you get nothing.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/Working-with-log-groups-and-streams.html"&gt;https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/Working-with-log-groups-and-streams.html&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="more-info"&gt;More Info&lt;/h2&gt;
+&lt;p&gt;Here's a full source code example: &lt;a href="https://github.com/johnpfeiffer/aws-go-lambda"&gt;https://github.com/johnpfeiffer/aws-go-lambda&lt;/a&gt;
+Compare the unit tests to those from a full web server handler: &lt;a href="https://github.com/johnpfeiffer/go-web-example/blob/master/controller_test.go"&gt;https://github.com/johnpfeiffer/go-web-example/blob/master/controller_test.go&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Apparently in order to test the tight integration with using AWS Lambda to consume events from other AWS Services there's a tool:
+&lt;a href="https://aws.amazon.com/about-aws/whats-new/2017/08/introducing-aws-sam-local-a-cli-tool-to-test-aws-lambda-functions-locally"&gt;https://aws.amazon.com/about-aws/whats-new/2017/08/introducing-aws-sam-local-a-cli-tool-to-test-aws-lambda-functions-locally&lt;/a&gt;&lt;/p&gt;
+&lt;h2 id="api-gateway"&gt;API Gateway&lt;/h2&gt;
+&lt;p&gt;TODO (and probably using S3 too)&lt;/p&gt;</summary><category term="go"></category><category term="golang"></category><category term="aws"></category><category term="lambda"></category><category term="cron"></category><category term="iam"></category><category term="cloudwatch"></category></entry><entry><title>Infrastructure as Code with Terraform and AWS</title><link href="https://blog.john-pfeiffer.com/infrastructure-as-code-with-terraform-and-aws/" rel="alternate"></link><published>2018-05-12T07:35:00-07:00</published><updated>2018-05-12T07:35:00-07:00</updated><author><name>john pfeiffer</name></author><id>tag:blog.john-pfeiffer.com,2018-05-12:infrastructure-as-code-with-terraform-and-aws/</id><summary type="html">
 &lt;h2 id="overview"&gt;Overview&lt;/h2&gt;
 &lt;p&gt;Just like building and maintaining hardware and physical servers by hand is manual drudge work (aka "toil"),
 so is the manual deployment of servers and networking etc. even on "Infrastructure as a Service".&lt;/p&gt;
