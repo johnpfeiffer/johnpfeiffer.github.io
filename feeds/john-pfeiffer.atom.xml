@@ -2,6 +2,29 @@
 <feed xmlns="http://www.w3.org/2005/Atom"><title>johnpfeiffer</title><link href="https://blog.john-pfeiffer.com/" rel="alternate"></link><link href="https://blog.john-pfeiffer.com/feeds/john-pfeiffer.atom.xml" rel="self"></link><id>https://blog.john-pfeiffer.com/</id><updated>2018-06-11T19:48:00-07:00</updated><entry><title>Go FaaS with AWS Lambda</title><link href="https://blog.john-pfeiffer.com/go-faas-with-aws-lambda/" rel="alternate"></link><published>2018-06-11T19:48:00-07:00</published><updated>2018-06-11T19:48:00-07:00</updated><author><name>john pfeiffer</name></author><id>tag:blog.john-pfeiffer.com,2018-06-11:go-faas-with-aws-lambda/</id><summary type="html">
 &lt;p&gt;The promise of creating functions that do not require server administration is amazing,
 the reality though includes a huge maze of vendor specific commands and frameworks (including permissions).&lt;/p&gt;
+&lt;h2 id="why-function-as-a-service"&gt;Why Function as a Service&lt;/h2&gt;
+&lt;p&gt;In many ways most of the work in software engineering is "accidental complexity". Deployment. Input/Output Parsing. Monitoring. Logging. etc.&lt;/p&gt;
+&lt;p&gt;The "web request" model conquered (much like the historical domination of SQL) in the 90's as networks and the "inter-network" became popular 
+(overwhelming the fragmented and isolated vendor specific applications approaches).&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://www.nap.edu/read/6323/chapter/8#159"&gt;https://www.nap.edu/read/6323/chapter/8#159&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://en.wikipedia.org/wiki/SQL"&gt;https://en.wikipedia.org/wiki/SQL&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://en.wikipedia.org/wiki/Web_application#History"&gt;https://en.wikipedia.org/wiki/Web_application#History&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol#History"&gt;https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol#History&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Yet what if your problem/data is not an input/output web request? (Yes of course there are GPUs and dedicated co-location centers...)&lt;/p&gt;
+&lt;p&gt;Or what about loads of traffic that spike in very extreme bursts (and diminish to very almost nothing)?&lt;/p&gt;
+&lt;p&gt;The allure then is to have a function that runs on demand: truly elastic compute that does not require provisioning a server (not a virtual one and even without a web server).&lt;/p&gt;
+&lt;p&gt;Without mangaing an OS (and all that security headache!) and especially not paying for idle resources but instead only getting/paying for lots of compute when needed.&lt;/p&gt;
+&lt;p&gt;Of course there's no free lunch so as that complexity balloon gets squeezed it is the infrastructure/framework vendor that must "magically" provide the input, execute the function, and return the output.&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;The irony of "serverless" is that there's still a physical server, drivers, an operating system, and even a web framework, it's just someone else's (problem/revenue).&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;For "straightforward" web applications it may make more sense to directly offload the hosting/framework but still be in the same comfortable web server model (like Heroku)&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://blog.john-pfeiffer.com/infrastructure-as-code-with-terraform-and-aws/#tools-to-manage-state-vs-platform-as-a-service"&gt;https://blog.john-pfeiffer.com/infrastructure-as-code-with-terraform-and-aws/#tools-to-manage-state-vs-platform-as-a-service&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://blog.john-pfeiffer.com/go-web-development-and-templates-with-heroku"&gt;https://blog.john-pfeiffer.com/go-web-development-and-templates-with-heroku&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
 &lt;h2 id="source-code"&gt;Source Code&lt;/h2&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kn"&gt;package&lt;/span&gt; &lt;span class="nx"&gt;main&lt;/span&gt;
 
@@ -138,9 +161,24 @@ the reality though includes a huge maze of vendor specific commands and framewor
 &lt;a href="https://us-west-1.console.aws.amazon.com/lambda/home?region=us-west-1#/functions"&gt;https://us-west-1.console.aws.amazon.com/lambda/home?region=us-west-1#/functions&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;By using the "Configure test events" (sometimes a dropdown on the right next to the Test button)&lt;/p&gt;
 &lt;p&gt;You can create a new "test event" , in this case a MyRequest (though any arbitrary extraneous JSON will be ignored)&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="nt"&gt;"value"&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;"john"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+  &lt;span class="nt"&gt;"key2"&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;"value2"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+  &lt;span class="nt"&gt;"key1"&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;"value1"&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
 &lt;blockquote&gt;
-&lt;p&gt;Note that the WebUI also provides a way to upload a newer zip file&lt;/p&gt;
+&lt;p&gt;this test event sends one value and some extraneous JSON keys as input to the lambda function&lt;/p&gt;
 &lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="nt"&gt;"message"&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;"hi john"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+  &lt;span class="nt"&gt;"created"&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;"2018-06-12T04:34:22Z"&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;the lambda function output is automatically converted from an object to JSON&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Note that the WebUI also provides a way to upload a newer definition of the lambda function (zipped in a file)&lt;/p&gt;
 &lt;h2 id="lambda-cron-aka-cloudwatch-scheduled-events"&gt;Lambda Cron aka CloudWatch Scheduled Events&lt;/h2&gt;
 &lt;p&gt;In the WebUI you can add a trigger via the Designer (on the left)&lt;/p&gt;
 &lt;p&gt;Select "CloudWatch Events" -&amp;gt; Configure triggers (scroll down) -&amp;gt; Create a new rule&lt;/p&gt;

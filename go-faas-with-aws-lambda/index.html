@@ -66,6 +66,7 @@
         <h4>Contents</h4>
         <div class="toc">
 <ul>
+<li><a href="#why-function-as-a-service">Why Function as a Service</a></li>
 <li><a href="#source-code">Source Code</a></li>
 <li><a href="#aws-cli-deployment">AWS CLI Deployment</a><ul>
 <li><a href="#packaging-for-upload">Packaging for Upload</a></li>
@@ -91,6 +92,29 @@
             
 <p>The promise of creating functions that do not require server administration is amazing,
 the reality though includes a huge maze of vendor specific commands and frameworks (including permissions).</p>
+<h2 id="why-function-as-a-service">Why Function as a Service</h2>
+<p>In many ways most of the work in software engineering is "accidental complexity". Deployment. Input/Output Parsing. Monitoring. Logging. etc.</p>
+<p>The "web request" model conquered (much like the historical domination of SQL) in the 90's as networks and the "inter-network" became popular 
+(overwhelming the fragmented and isolated vendor specific applications approaches).</p>
+<ul>
+<li><a href="https://www.nap.edu/read/6323/chapter/8#159">https://www.nap.edu/read/6323/chapter/8#159</a></li>
+<li><a href="https://en.wikipedia.org/wiki/SQL">https://en.wikipedia.org/wiki/SQL</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Web_application#History">https://en.wikipedia.org/wiki/Web_application#History</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol#History">https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol#History</a></li>
+</ul>
+<p>Yet what if your problem/data is not an input/output web request? (Yes of course there are GPUs and dedicated co-location centers...)</p>
+<p>Or what about loads of traffic that spike in very extreme bursts (and diminish to very almost nothing)?</p>
+<p>The allure then is to have a function that runs on demand: truly elastic compute that does not require provisioning a server (not a virtual one and even without a web server).</p>
+<p>Without mangaing an OS (and all that security headache!) and especially not paying for idle resources but instead only getting/paying for lots of compute when needed.</p>
+<p>Of course there's no free lunch so as that complexity balloon gets squeezed it is the infrastructure/framework vendor that must "magically" provide the input, execute the function, and return the output.</p>
+<blockquote>
+<p>The irony of "serverless" is that there's still a physical server, drivers, an operating system, and even a web framework, it's just someone else's (problem/revenue).</p>
+</blockquote>
+<p>For "straightforward" web applications it may make more sense to directly offload the hosting/framework but still be in the same comfortable web server model (like Heroku)</p>
+<ul>
+<li><a href="https://blog.john-pfeiffer.com/infrastructure-as-code-with-terraform-and-aws/#tools-to-manage-state-vs-platform-as-a-service">https://blog.john-pfeiffer.com/infrastructure-as-code-with-terraform-and-aws/#tools-to-manage-state-vs-platform-as-a-service</a></li>
+<li><a href="https://blog.john-pfeiffer.com/go-web-development-and-templates-with-heroku">https://blog.john-pfeiffer.com/go-web-development-and-templates-with-heroku</a></li>
+</ul>
 <h2 id="source-code">Source Code</h2>
 <div class="highlight"><pre><span></span><span class="kn">package</span> <span class="nx">main</span>
 
@@ -227,9 +251,24 @@ the reality though includes a huge maze of vendor specific commands and framewor
 <a href="https://us-west-1.console.aws.amazon.com/lambda/home?region=us-west-1#/functions">https://us-west-1.console.aws.amazon.com/lambda/home?region=us-west-1#/functions</a></p>
 <p>By using the "Configure test events" (sometimes a dropdown on the right next to the Test button)</p>
 <p>You can create a new "test event" , in this case a MyRequest (though any arbitrary extraneous JSON will be ignored)</p>
+<div class="highlight"><pre><span></span><span class="p">{</span>
+  <span class="nt">"value"</span><span class="p">:</span> <span class="s2">"john"</span><span class="p">,</span>
+  <span class="nt">"key2"</span><span class="p">:</span> <span class="s2">"value2"</span><span class="p">,</span>
+  <span class="nt">"key1"</span><span class="p">:</span> <span class="s2">"value1"</span>
+<span class="p">}</span>
+</pre></div>
 <blockquote>
-<p>Note that the WebUI also provides a way to upload a newer zip file</p>
+<p>this test event sends one value and some extraneous JSON keys as input to the lambda function</p>
 </blockquote>
+<div class="highlight"><pre><span></span><span class="p">{</span>
+  <span class="nt">"message"</span><span class="p">:</span> <span class="s2">"hi john"</span><span class="p">,</span>
+  <span class="nt">"created"</span><span class="p">:</span> <span class="s2">"2018-06-12T04:34:22Z"</span>
+<span class="p">}</span>
+</pre></div>
+<blockquote>
+<p>the lambda function output is automatically converted from an object to JSON</p>
+</blockquote>
+<p>Note that the WebUI also provides a way to upload a newer definition of the lambda function (zipped in a file)</p>
 <h2 id="lambda-cron-aka-cloudwatch-scheduled-events">Lambda Cron aka CloudWatch Scheduled Events</h2>
 <p>In the WebUI you can add a trigger via the Designer (on the left)</p>
 <p>Select "CloudWatch Events" -&gt; Configure triggers (scroll down) -&gt; Create a new rule</p>
@@ -276,7 +315,7 @@ Compare the unit tests to those from a full web server handler: <a href="https:/
             <time pubdate="pubdate" datetime="2018-06-11T19:48:00-07:00">Jun 11, 2018</time>
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#build-CI-CD-devops-ref">build-CI-CD-devops</a> 
-            <h4>~725 words</h4>
+            <h4>~1012 words</h4>
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article"> 
                 <li><a href="/tags.html#aws-ref">aws
