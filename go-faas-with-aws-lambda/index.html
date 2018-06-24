@@ -6,7 +6,7 @@
         <meta name="author" content="john pfeiffer" />
         <meta name="copyright" content="john pfeiffer" />
 
-<meta name="keywords" content="go, golang, aws, lambda, cron, iam, cloudwatch, build-CI-CD-devops, " />
+<meta name="keywords" content="go, golang, aws, lambda, cron, iam, cloudwatch, dynamodb, apigateway, build-CI-CD-devops, " />
         <title>Go FaaS with AWS Lambda  · johnpfeiffer
 </title>
         <!--link href="https://cdn-images.mailchimp.com/embedcode/slim-081711.css" rel="stylesheet" type="text/css"-->
@@ -82,7 +82,14 @@
 <li><a href="#lambda-cron-aka-cloudwatch-scheduled-events">Lambda Cron aka CloudWatch Scheduled Events</a></li>
 <li><a href="#lambda-monitoring">Lambda Monitoring</a></li>
 <li><a href="#more-info">More Info</a></li>
-<li><a href="#api-gateway">API Gateway</a></li>
+<li><a href="#api-gateway">API Gateway</a><ul>
+<li><a href="#readonly-via-dynamodb">Readonly via DynamoDB</a><ul>
+<li><a href="#setup-a-new-api-gateway-connected-to-dynamodb">Setup a new API Gateway connected to DynamoDB</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#comparisons">Comparisons</a></li>
 </ul>
 </div>
         </nav>
@@ -103,7 +110,7 @@ the reality though includes a huge maze of vendor specific commands and framewor
 <li><a href="https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol#History">https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol#History</a></li>
 </ul>
 <p>Yet what if your problem/data is not an input/output web request? (Yes of course there are GPUs and dedicated co-location centers...)</p>
-<p>Or what about loads of traffic that spike in very extreme bursts (and diminish to very almost nothing)?</p>
+<p>Or what about loads of traffic that spike in very extreme bursts (and diminish to almost nothing)?</p>
 <p>The allure then is to have a function that runs on demand: truly elastic compute that does not require provisioning a server (not a virtual one and even without a web server).</p>
 <p>Without mangaing an OS (and all that security headache!) and especially not paying for idle resources but instead only getting/paying for lots of compute when needed.</p>
 <p>Of course there's no free lunch so as that complexity balloon gets squeezed it is the infrastructure/framework vendor that must "magically" provide the input, execute the function, and return the output.</p>
@@ -213,7 +220,7 @@ the reality though includes a huge maze of vendor specific commands and framewor
 <li>A Policy</li>
 <li>A Role that can use that Policy</li>
 <li>A Group that has the Policy attached</li>
-<li>A User that has credentials (and is in the Group with</li>
+<li>A User that has credentials (and is in the Group)</li>
 </ol>
 <h3 id="the-actual-create-lambda-command">The Actual Create Lambda Command</h3>
 <div class="highlight"><pre><span></span>aws lambda create-function <span class="se">\</span>
@@ -270,6 +277,8 @@ the reality though includes a huge maze of vendor specific commands and framewor
 </blockquote>
 <p>Note that the WebUI also provides a way to upload a newer definition of the lambda function (zipped in a file)</p>
 <h2 id="lambda-cron-aka-cloudwatch-scheduled-events">Lambda Cron aka CloudWatch Scheduled Events</h2>
+<p>The real power of AWS Lambdas involves how it becomes glue for connecting lots of other AWS services (and transformations).</p>
+<p>For example CloudWatch can be used to schedule/trigger a lambda.</p>
 <p>In the WebUI you can add a trigger via the Designer (on the left)</p>
 <p>Select "CloudWatch Events" -&gt; Configure triggers (scroll down) -&gt; Create a new rule</p>
 <p>Configure a trigger, "Scheduled" (as opposed to Rate which is similar but different ;)</p>
@@ -297,7 +306,122 @@ Compare the unit tests to those from a full web server handler: <a href="https:/
 <p>Apparently in order to test the tight integration with using AWS Lambda to consume events from other AWS Services there's a tool:
 <a href="https://aws.amazon.com/about-aws/whats-new/2017/08/introducing-aws-sam-local-a-cli-tool-to-test-aws-lambda-functions-locally">https://aws.amazon.com/about-aws/whats-new/2017/08/introducing-aws-sam-local-a-cli-tool-to-test-aws-lambda-functions-locally</a></p>
 <h2 id="api-gateway">API Gateway</h2>
-<p>TODO (and probably using S3 too)</p>
+<p>As a pre-requisite (and to leverage the fully integrated nature of the AWS ecosystem) we will create some data first...</p>
+<p><strong>And of course create a new Role that is linked to a Policy =(</strong></p>
+<p><a href="https://console.aws.amazon.com/iam/home?region=us-west-1#/roles">https://console.aws.amazon.com/iam/home?region=us-west-1#/roles</a></p>
+<p>Ensure you have a new Role (confusingly in the UI click through as a Lambda Service needing access) and choose the predefined Policy "AmazonDynamoDBFullAccess"</p>
+<div class="highlight"><pre><span></span><span class="n">arn</span><span class="o">:</span><span class="n">aws</span><span class="o">:</span><span class="n">iam</span><span class="o">::</span><span class="mi">123476797434</span><span class="o">:</span><span class="n">role</span><span class="o">/</span><span class="n">DynamoDBFull</span>
+</pre></div>
+<blockquote>
+<p>Of course you'll have your own unique ARN and Security best practice would involve defining a more precise role (i.e. not giving permission for Auto Scaling)</p>
+</blockquote>
+<p>Modify whom can assume the Role (using the AWS Web UI Console) <a href="https://console.aws.amazon.com/iam/home?region=us-west-1#/roles/DynamoDBFull?section=trust">https://console.aws.amazon.com/iam/home?region=us-west-1#/roles/DynamoDBFull?section=trust</a></p>
+<p>*If you receive an error later on it will be because of the Edit Trust Relationship, "API Gateway does not have permission to assume the provided role" *</p>
+<div class="highlight"><pre><span></span>{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": ["apigateway.amazonaws.com", "lambda.amazonaws.com"]
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}
+</pre></div>
+<p>Click on "Update Trust Policy"</p>
+<h3 id="readonly-via-dynamodb">Readonly via DynamoDB</h3>
+<p>Use the WebUI (console) to create a new table <a href="https://us-west-1.console.aws.amazon.com/dynamodb/home?region=us-west-1">https://us-west-1.console.aws.amazon.com/dynamodb/home?region=us-west-1</a></p>
+<ul>
+<li>Create a table named: stocks</li>
+<li>Primary Key: symbol (string)</li>
+<li>Sort Key: timestamp (number)</li>
+</ul>
+<p><em>Uncheck Auto Scaling "Read capacity" and "Write capacity" checkboxes</em></p>
+<blockquote>
+<p>Do not use the default settings, we will disable autoscaling in order to save money and somewhat arrive at fixed cost</p>
+</blockquote>
+<ul>
+<li><a href="https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/AutoScaling.Console.html#AutoScaling.Console.Modifying">https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/AutoScaling.Console.html#AutoScaling.Console.Modifying</a></li>
+<li><a href="https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/HowItWorks.NamingRulesDataTypes.html#HowItWorks.DataTypes">https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/HowItWorks.NamingRulesDataTypes.html#HowItWorks.DataTypes</a></li>
+</ul>
+<p><em>(Note that types are quite specific in DynamoDB, e.g. the binary "scalar" value can only contain up to 400KB of base64 encoded data)</em></p>
+<p>After a few minutes of initialization select the "Items" tab then the "Create item" button to manually create an entry:</p>
+<ul>
+<li><a href="https://us-west-1.console.aws.amazon.com/dynamodb/home?region=us-west-1#tables:selected=stocks;tab=items">https://us-west-1.console.aws.amazon.com/dynamodb/home?region=us-west-1#tables:selected=stocks;tab=items</a></li>
+</ul>
+<p>In the Web UI you will have to choose the dropdown (upper left) and change it from "Tree" to "Text" in order to enter a price</p>
+<div class="highlight"><pre><span></span><span class="p">{</span>
+  <span class="nt">"symbol"</span><span class="p">:</span> <span class="s2">"VFINX"</span><span class="p">,</span>
+  <span class="nt">"timestamp"</span><span class="p">:</span> <span class="mi">1529697600</span><span class="p">,</span>
+  <span class="nt">"price"</span><span class="p">:</span> <span class="mf">255.44</span>
+<span class="p">}</span>
+</pre></div>
+<blockquote>
+<p>Using a historical stock price (in dollars) at the close of business</p>
+</blockquote>
+<p><em>(Adding a second entry for 1529611200 and 254.95 can be helpful too)</em></p>
+<p>After clicking Save and possibly a "Refresh data from server" (arrow lines in a circle on the right) you will see the new entries.</p>
+<h4 id="setup-a-new-api-gateway-connected-to-dynamodb">Setup a new API Gateway connected to DynamoDB</h4>
+<p><a href="https://console.aws.amazon.com/apigateway/home?region=us-west-1#/apis/create">https://console.aws.amazon.com/apigateway/home?region=us-west-1#/apis/create</a></p>
+<p>"New API"</p>
+<p>API Name: stocks
+Endpoint Type: regional</p>
+<p>Actions (Resource Actions) -&gt; Create Resource</p>
+<p>Resource Name: stock
+Resource Path: /{symbol}</p>
+<p>Click "Create Resource" to save.</p>
+<p>Actions (Resource Actions) -&gt; Create Method (a dropdown appears in the WebUI below /{symbol}) , choose "GET"</p>
+<p>Integration type: AWS Service
+Region: us-west-1
+AWS Service: DynamoDB
+HTTP Method: POST (for interactions with DynamoDB)
+Action Type: Use action name
+Action: GetItem
+Execution role: arn:aws:iam::123476797434:role/DynamoDBFull
+Content Handling: Passthrough</p>
+<blockquote>
+<p>The permissions/role ARN was created earlier and GET using POST is actually for interacting with DynamoDB</p>
+</blockquote>
+<ul>
+<li>Click on the "Integration Request" for the /{symbol} - Get </li>
+<li>Scroll all the way to the bottom and expand "Body Mapping Templates" so that you can click on "Add mapping template"</li>
+</ul>
+<p>Content-Type: application/json</p>
+<p>Confusingly after you create your type you must click on it to get a UI to define the JSON transformation, use the following:</p>
+<div class="highlight"><pre><span></span>{
+  "TableName": "stocks",
+  "Key": {
+    "symbol": {"S": "$input.params('symbol')"},
+    "timestamp": {"N": "1529697600"}
+    }
+  }
+}
+</pre></div>
+<blockquote>
+<p>Emulating a direct low level request <a href="https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Programming.LowLevelAPI.html">https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Programming.LowLevelAPI.html</a></p>
+</blockquote>
+<p>Back at the Web UI for "/{symbol} - GET - Method Execution" there is a button "TEST" that allows for validation of the API Gateway.</p>
+<p>This is helpful for detecting early the inevitable bugs that crop up.</p>
+<p>(Note: it does not seem to me that debugging an API this is way is actually faster...)</p>
+<p>In the Test UI enter the stock symbol "VFINX" underneath {symbol} to emulate a GET request, then click on the "Test" button.</p>
+<p>The Response Body on the right shows the response (that the client would see - though often revealing an error directly from DynamoDB)</p>
+<p>*Careful readers will notice that the timestamp variable is hardcoded in the transformation, todo: make the timestamp part of the query parameter"</p>
+<h2 id="comparisons">Comparisons</h2>
+<p>Two things that are practically relevant are:</p>
+<ol>
+<li>Latency</li>
+<li>Cost</li>
+</ol>
+<p>Lambdas will inherently have "warm up time" from a "cold start", while this can be mitigated (with a canary warmer etc.),
+if your architecture is deliberately tying together lots of services over the network it may feel slow (and indeterministics).</p>
+<p>The contrast is to keep more things in memory or co-located in the same server. (Less network calls)</p>
+<p>Cost is fickle: Lambdas may be much cheaper but if configured incorrectly a DOS attack could create a lot of API Gateway events or CloudWatch logs (so indirect cost escalation).</p>
+<p>So there are workarounds but investing in them once again means the benefits (reduced overhead) come with a new complexity (and skill set).</p>
+<p>Google and Azure both provide functions as a service so while it may be possible to get price competition given the vendor lock-in nature switching costs may be non-trivial.</p>
+<p>Amazon cleverly have a "free tier" that covers enough to get developer hobby projects (aka time invested learning = biased professional purchasing choices) which covers everything in this article. <a href="https://aws.amazon.com/free/">https://aws.amazon.com/free/</a> <em>I have no affiliation with Amazon, Google, etc.</em></p>
+<p>From a philosophical perspective the choice is somewhat whether building with predefined vendor blocks (so WebUI or IaaC) is more valuable (time wise)/preferrable than code.</p>
             <aside>
             <hr/>
             <nav>
@@ -315,9 +439,12 @@ Compare the unit tests to those from a full web server handler: <a href="https:/
             <time pubdate="pubdate" datetime="2018-06-11T19:48:00-07:00">Jun 11, 2018</time>
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#build-CI-CD-devops-ref">build-CI-CD-devops</a> 
-            <h4>~1012 words</h4>
+            <h4>~1853 words</h4>
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article"> 
+                <li><a href="/tags.html#apigateway-ref">apigateway
+                    <span>1</span>
+</a></li>
                 <li><a href="/tags.html#aws-ref">aws
                     <span>3</span>
 </a></li>
@@ -326,6 +453,9 @@ Compare the unit tests to those from a full web server handler: <a href="https:/
 </a></li>
                 <li><a href="/tags.html#cron-ref">cron
                     <span>2</span>
+</a></li>
+                <li><a href="/tags.html#dynamodb-ref">dynamodb
+                    <span>1</span>
 </a></li>
                 <li><a href="/tags.html#go-ref">go
                     <span>10</span>
