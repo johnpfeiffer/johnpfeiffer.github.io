@@ -81,15 +81,17 @@
 <li><a href="#trigger-a-lambda-manually">Trigger a Lambda Manually</a></li>
 <li><a href="#lambda-cron-aka-cloudwatch-scheduled-events">Lambda Cron aka CloudWatch Scheduled Events</a></li>
 <li><a href="#lambda-monitoring">Lambda Monitoring</a></li>
-<li><a href="#more-info">More Info</a></li>
+<li><a href="#more-info-on-lambdas">More Info on Lambdas</a></li>
 <li><a href="#api-gateway">API Gateway</a><ul>
 <li><a href="#readonly-via-dynamodb">Readonly via DynamoDB</a><ul>
 <li><a href="#setup-a-new-api-gateway-connected-to-dynamodb">Setup a new API Gateway connected to DynamoDB</a></li>
 </ul>
 </li>
+<li><a href="#where-is-the-code">Where is the Code?</a></li>
 </ul>
 </li>
 <li><a href="#comparisons">Comparisons</a></li>
+<li><a href="#trust">Trust</a></li>
 </ul>
 </div>
         </nav>
@@ -300,7 +302,7 @@ cron(Minutes Hours Day-of-month Month Day-of-week Year)</p>
 <ul>
 <li><a href="https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/Working-with-log-groups-and-streams.html">https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/Working-with-log-groups-and-streams.html</a></li>
 </ul>
-<h2 id="more-info">More Info</h2>
+<h2 id="more-info-on-lambdas">More Info on Lambdas</h2>
 <p>Here's a full source code example: <a href="https://github.com/johnpfeiffer/aws-go-lambda">https://github.com/johnpfeiffer/aws-go-lambda</a>
 Compare the unit tests to those from a full web server handler: <a href="https://github.com/johnpfeiffer/go-web-example/blob/master/controller_test.go">https://github.com/johnpfeiffer/go-web-example/blob/master/controller_test.go</a></p>
 <p>Apparently in order to test the tight integration with using AWS Lambda to consume events from other AWS Services there's a tool:
@@ -316,7 +318,7 @@ Compare the unit tests to those from a full web server handler: <a href="https:/
 <p>Of course you'll have your own unique ARN and Security best practice would involve defining a more precise role (i.e. not giving permission for Auto Scaling)</p>
 </blockquote>
 <p>Modify whom can assume the Role (using the AWS Web UI Console) <a href="https://console.aws.amazon.com/iam/home?region=us-west-1#/roles/DynamoDBFull?section=trust">https://console.aws.amazon.com/iam/home?region=us-west-1#/roles/DynamoDBFull?section=trust</a></p>
-<p>*If you receive an error later on it will be because of the Edit Trust Relationship, "API Gateway does not have permission to assume the provided role" *</p>
+<p><em>If you receive an error later on it will be because of the Edit Trust Relationship, "API Gateway does not have permission to assume the provided role"</em></p>
 <div class="highlight"><pre><span></span>{
   "Version": "2012-10-17",
   "Statement": [
@@ -365,13 +367,21 @@ Compare the unit tests to those from a full web server handler: <a href="https:/
 <p>After clicking Save and possibly a "Refresh data from server" (arrow lines in a circle on the right) you will see the new entries.</p>
 <h4 id="setup-a-new-api-gateway-connected-to-dynamodb">Setup a new API Gateway connected to DynamoDB</h4>
 <p><a href="https://console.aws.amazon.com/apigateway/home?region=us-west-1#/apis/create">https://console.aws.amazon.com/apigateway/home?region=us-west-1#/apis/create</a></p>
+<ul>
+<li>
 <p>"New API"</p>
 <p>API Name: stocks
 Endpoint Type: regional</p>
+</li>
+<li>
 <p>Actions (Resource Actions) -&gt; Create Resource</p>
 <p>Resource Name: stock
 Resource Path: /{symbol}</p>
+</li>
+<li>
 <p>Click "Create Resource" to save.</p>
+</li>
+<li>
 <p>Actions (Resource Actions) -&gt; Create Method (a dropdown appears in the WebUI below /{symbol}) , choose "GET"</p>
 <p>Integration type: AWS Service
 Region: us-west-1
@@ -381,6 +391,8 @@ Action Type: Use action name
 Action: GetItem
 Execution role: arn:aws:iam::123476797434:role/DynamoDBFull
 Content Handling: Passthrough</p>
+</li>
+</ul>
 <blockquote>
 <p>The permissions/role ARN was created earlier and GET using POST is actually for interacting with DynamoDB</p>
 </blockquote>
@@ -407,7 +419,16 @@ Content Handling: Passthrough</p>
 <p>(Note: it does not seem to me that debugging an API this is way is actually faster...)</p>
 <p>In the Test UI enter the stock symbol "VFINX" underneath {symbol} to emulate a GET request, then click on the "Test" button.</p>
 <p>The Response Body on the right shows the response (that the client would see - though often revealing an error directly from DynamoDB)</p>
-<p>*Careful readers will notice that the timestamp variable is hardcoded in the transformation, todo: make the timestamp part of the query parameter"</p>
+<p><em>Careful readers will notice that the timestamp variable is hardcoded in the transformation, todo: make the timestamp part of the query parameter"</em></p>
+<h3 id="where-is-the-code">Where is the Code?</h3>
+<p>One thing that is missing from this trivial example is how version control is applied to ensure deterministic change (and best practice reviews).</p>
+<p>Rather than just using the WebUI we should leverage "Infrastructure as Code" like CloudFormation but I would suggest more complete tools like:</p>
+<ul>
+<li><a href="https://www.terraform.io/docs/providers/aws/guides/serverless-with-aws-lambda-and-api-gateway.html">https://www.terraform.io/docs/providers/aws/guides/serverless-with-aws-lambda-and-api-gateway.html</a></li>
+<li><a href="https://serverless.com/framework/docs/providers/aws/events/apigateway/">https://serverless.com/framework/docs/providers/aws/events/apigateway/</a></li>
+</ul>
+<p>One thing you might notice as you convert API Gateway + Lambda into code is that it begins to look a lot like code you would see in any web application,
+except that it is in a DomainSpecificLanguage for a specific vendor framework.</p>
 <h2 id="comparisons">Comparisons</h2>
 <p>Two things that are practically relevant are:</p>
 <ol>
@@ -422,6 +443,13 @@ if your architecture is deliberately tying together lots of services over the ne
 <p>Google and Azure both provide functions as a service so while it may be possible to get price competition given the vendor lock-in nature switching costs may be non-trivial.</p>
 <p>Amazon cleverly have a "free tier" that covers enough to get developer hobby projects (aka time invested learning = biased professional purchasing choices) which covers everything in this article. <a href="https://aws.amazon.com/free/">https://aws.amazon.com/free/</a> <em>I have no affiliation with Amazon, Google, etc.</em></p>
 <p>From a philosophical perspective the choice is somewhat whether building with predefined vendor blocks (so WebUI or IaaC) is more valuable (time wise)/preferrable than code.</p>
+<h2 id="trust">Trust</h2>
+<p>Something that underlies all of the AWS Lambda thinking and work is trust in the vendor.</p>
+<ul>
+<li>Trust in their security practices</li>
+<li>Trust in their uptime and operations team</li>
+<li>Trust in their business (both longevity and pricing)</li>
+</ul>
             <aside>
             <hr/>
             <nav>
@@ -439,7 +467,7 @@ if your architecture is deliberately tying together lots of services over the ne
             <time pubdate="pubdate" datetime="2018-06-11T19:48:00-07:00">Jun 11, 2018</time>
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#build-CI-CD-devops-ref">build-CI-CD-devops</a> 
-            <h4>~1853 words</h4>
+            <h4>~1985 words</h4>
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article"> 
                 <li><a href="/tags.html#apigateway-ref">apigateway

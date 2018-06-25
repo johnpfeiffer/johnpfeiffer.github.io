@@ -203,7 +203,7 @@ cron(Minutes Hours Day-of-month Month Day-of-week Year)&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;a href="https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/Working-with-log-groups-and-streams.html"&gt;https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/Working-with-log-groups-and-streams.html&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
-&lt;h2 id="more-info"&gt;More Info&lt;/h2&gt;
+&lt;h2 id="more-info-on-lambdas"&gt;More Info on Lambdas&lt;/h2&gt;
 &lt;p&gt;Here's a full source code example: &lt;a href="https://github.com/johnpfeiffer/aws-go-lambda"&gt;https://github.com/johnpfeiffer/aws-go-lambda&lt;/a&gt;
 Compare the unit tests to those from a full web server handler: &lt;a href="https://github.com/johnpfeiffer/go-web-example/blob/master/controller_test.go"&gt;https://github.com/johnpfeiffer/go-web-example/blob/master/controller_test.go&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;Apparently in order to test the tight integration with using AWS Lambda to consume events from other AWS Services there's a tool:
@@ -219,7 +219,7 @@ Compare the unit tests to those from a full web server handler: &lt;a href="http
 &lt;p&gt;Of course you'll have your own unique ARN and Security best practice would involve defining a more precise role (i.e. not giving permission for Auto Scaling)&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;p&gt;Modify whom can assume the Role (using the AWS Web UI Console) &lt;a href="https://console.aws.amazon.com/iam/home?region=us-west-1#/roles/DynamoDBFull?section=trust"&gt;https://console.aws.amazon.com/iam/home?region=us-west-1#/roles/DynamoDBFull?section=trust&lt;/a&gt;&lt;/p&gt;
-&lt;p&gt;*If you receive an error later on it will be because of the Edit Trust Relationship, "API Gateway does not have permission to assume the provided role" *&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;If you receive an error later on it will be because of the Edit Trust Relationship, "API Gateway does not have permission to assume the provided role"&lt;/em&gt;&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;{
   "Version": "2012-10-17",
   "Statement": [
@@ -268,13 +268,21 @@ Compare the unit tests to those from a full web server handler: &lt;a href="http
 &lt;p&gt;After clicking Save and possibly a "Refresh data from server" (arrow lines in a circle on the right) you will see the new entries.&lt;/p&gt;
 &lt;h4 id="setup-a-new-api-gateway-connected-to-dynamodb"&gt;Setup a new API Gateway connected to DynamoDB&lt;/h4&gt;
 &lt;p&gt;&lt;a href="https://console.aws.amazon.com/apigateway/home?region=us-west-1#/apis/create"&gt;https://console.aws.amazon.com/apigateway/home?region=us-west-1#/apis/create&lt;/a&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
 &lt;p&gt;"New API"&lt;/p&gt;
 &lt;p&gt;API Name: stocks
 Endpoint Type: regional&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
 &lt;p&gt;Actions (Resource Actions) -&amp;gt; Create Resource&lt;/p&gt;
 &lt;p&gt;Resource Name: stock
 Resource Path: /{symbol}&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
 &lt;p&gt;Click "Create Resource" to save.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
 &lt;p&gt;Actions (Resource Actions) -&amp;gt; Create Method (a dropdown appears in the WebUI below /{symbol}) , choose "GET"&lt;/p&gt;
 &lt;p&gt;Integration type: AWS Service
 Region: us-west-1
@@ -284,6 +292,8 @@ Action Type: Use action name
 Action: GetItem
 Execution role: arn:aws:iam::123476797434:role/DynamoDBFull
 Content Handling: Passthrough&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
 &lt;blockquote&gt;
 &lt;p&gt;The permissions/role ARN was created earlier and GET using POST is actually for interacting with DynamoDB&lt;/p&gt;
 &lt;/blockquote&gt;
@@ -310,7 +320,16 @@ Content Handling: Passthrough&lt;/p&gt;
 &lt;p&gt;(Note: it does not seem to me that debugging an API this is way is actually faster...)&lt;/p&gt;
 &lt;p&gt;In the Test UI enter the stock symbol "VFINX" underneath {symbol} to emulate a GET request, then click on the "Test" button.&lt;/p&gt;
 &lt;p&gt;The Response Body on the right shows the response (that the client would see - though often revealing an error directly from DynamoDB)&lt;/p&gt;
-&lt;p&gt;*Careful readers will notice that the timestamp variable is hardcoded in the transformation, todo: make the timestamp part of the query parameter"&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;Careful readers will notice that the timestamp variable is hardcoded in the transformation, todo: make the timestamp part of the query parameter"&lt;/em&gt;&lt;/p&gt;
+&lt;h3 id="where-is-the-code"&gt;Where is the Code?&lt;/h3&gt;
+&lt;p&gt;One thing that is missing from this trivial example is how version control is applied to ensure deterministic change (and best practice reviews).&lt;/p&gt;
+&lt;p&gt;Rather than just using the WebUI we should leverage "Infrastructure as Code" like CloudFormation but I would suggest more complete tools like:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://www.terraform.io/docs/providers/aws/guides/serverless-with-aws-lambda-and-api-gateway.html"&gt;https://www.terraform.io/docs/providers/aws/guides/serverless-with-aws-lambda-and-api-gateway.html&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://serverless.com/framework/docs/providers/aws/events/apigateway/"&gt;https://serverless.com/framework/docs/providers/aws/events/apigateway/&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;One thing you might notice as you convert API Gateway + Lambda into code is that it begins to look a lot like code you would see in any web application,
+except that it is in a DomainSpecificLanguage for a specific vendor framework.&lt;/p&gt;
 &lt;h2 id="comparisons"&gt;Comparisons&lt;/h2&gt;
 &lt;p&gt;Two things that are practically relevant are:&lt;/p&gt;
 &lt;ol&gt;
@@ -324,7 +343,14 @@ if your architecture is deliberately tying together lots of services over the ne
 &lt;p&gt;So there are workarounds but investing in them once again means the benefits (reduced overhead) come with a new complexity (and skill set).&lt;/p&gt;
 &lt;p&gt;Google and Azure both provide functions as a service so while it may be possible to get price competition given the vendor lock-in nature switching costs may be non-trivial.&lt;/p&gt;
 &lt;p&gt;Amazon cleverly have a "free tier" that covers enough to get developer hobby projects (aka time invested learning = biased professional purchasing choices) which covers everything in this article. &lt;a href="https://aws.amazon.com/free/"&gt;https://aws.amazon.com/free/&lt;/a&gt; &lt;em&gt;I have no affiliation with Amazon, Google, etc.&lt;/em&gt;&lt;/p&gt;
-&lt;p&gt;From a philosophical perspective the choice is somewhat whether building with predefined vendor blocks (so WebUI or IaaC) is more valuable (time wise)/preferrable than code.&lt;/p&gt;</summary><category term="go"></category><category term="golang"></category><category term="aws"></category><category term="lambda"></category><category term="cron"></category><category term="iam"></category><category term="cloudwatch"></category><category term="dynamodb"></category><category term="apigateway"></category></entry><entry><title>Infrastructure as Code with Terraform and AWS</title><link href="https://blog.john-pfeiffer.com/infrastructure-as-code-with-terraform-and-aws/" rel="alternate"></link><published>2018-05-12T07:35:00-07:00</published><updated>2018-05-12T07:35:00-07:00</updated><author><name>john pfeiffer</name></author><id>tag:blog.john-pfeiffer.com,2018-05-12:infrastructure-as-code-with-terraform-and-aws/</id><summary type="html">
+&lt;p&gt;From a philosophical perspective the choice is somewhat whether building with predefined vendor blocks (so WebUI or IaaC) is more valuable (time wise)/preferrable than code.&lt;/p&gt;
+&lt;h2 id="trust"&gt;Trust&lt;/h2&gt;
+&lt;p&gt;Something that underlies all of the AWS Lambda thinking and work is trust in the vendor.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Trust in their security practices&lt;/li&gt;
+&lt;li&gt;Trust in their uptime and operations team&lt;/li&gt;
+&lt;li&gt;Trust in their business (both longevity and pricing)&lt;/li&gt;
+&lt;/ul&gt;</summary><category term="go"></category><category term="golang"></category><category term="aws"></category><category term="lambda"></category><category term="cron"></category><category term="iam"></category><category term="cloudwatch"></category><category term="dynamodb"></category><category term="apigateway"></category></entry><entry><title>Infrastructure as Code with Terraform and AWS</title><link href="https://blog.john-pfeiffer.com/infrastructure-as-code-with-terraform-and-aws/" rel="alternate"></link><published>2018-05-12T07:35:00-07:00</published><updated>2018-05-12T07:35:00-07:00</updated><author><name>john pfeiffer</name></author><id>tag:blog.john-pfeiffer.com,2018-05-12:infrastructure-as-code-with-terraform-and-aws/</id><summary type="html">
 &lt;h2 id="overview"&gt;Overview&lt;/h2&gt;
 &lt;p&gt;Just like building and maintaining hardware and physical servers by hand is manual drudge work (aka "toil"),
 so is the manual deployment of servers and networking etc. even on "Infrastructure as a Service".&lt;/p&gt;
