@@ -11108,25 +11108,158 @@ code&lt;/a&gt; and &lt;a href="https://github.com/anomalizer/ngx_aws_auth"&gt;ng
     &lt;span class="p"&gt;...&lt;/span&gt;
 &lt;span class="p"&gt;}&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;</summary><category term="c"></category><category term="nginx"></category></entry><entry><title>Selenium headless browser automated testing with PhantomJS and Python</title><link href="https://blog.john-pfeiffer.com/selenium-headless-browser-automated-testing-with-phantomjs-and-python/" rel="alternate"></link><published>2013-09-17T21:04:00-07:00</published><updated>2013-09-17T21:04:00-07:00</updated><author><name>john pfeiffer</name></author><id>tag:blog.john-pfeiffer.com,2013-09-17:selenium-headless-browser-automated-testing-with-phantomjs-and-python/</id><summary type="html">
-&lt;h3 id="overview"&gt;Overview&lt;/h3&gt;
-&lt;p&gt;selenium: an automation framework for interactions with websites (like a programmatic browser) &lt;a href="http://docs.seleniumhq.org/docs/02_selenium_ide.jsp#introduction"&gt;http://docs.seleniumhq.org/docs/02_selenium_ide.jsp#introduction&lt;/a&gt;&lt;/p&gt;
-&lt;p&gt;webdriver is the interface: &lt;a href="http://selenium-python.readthedocs.org/api.html"&gt;http://selenium-python.readthedocs.org/api.html&lt;/a&gt; &lt;/p&gt;
+&lt;h3 id="why-automated-testing"&gt;Why Automated Testing&lt;/h3&gt;
+&lt;p&gt;Automated Testing is critical to maintaining quality while increasing velocity &lt;em&gt;(aka avoiding being crushed to death by technical debt).&lt;/em&gt;
+Web sites are inherently complex to test:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;requires a client and server,&lt;/li&gt;
+&lt;li&gt;combination of UI and Logic,&lt;/li&gt;
+&lt;li&gt;lots of paths,&lt;/li&gt;
+&lt;li&gt;etc&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;A challenge facing the HipChat team is how to maintain quality while supporting both SaaS and BTF versions, expanding the team, increasing the functionality, and experiment with architecture (or even just normal bug fixing refactoring).&lt;/p&gt;
+&lt;h3 id="choosing-selenium"&gt;Choosing Selenium&lt;/h3&gt;
+&lt;p&gt;Continued innovation by the Selenium project has created a stable and usable programmatic interface such that clicking on different components in a web page can be automated.&lt;/p&gt;
+&lt;p&gt;Selenium tests can be generated manually by a Firefox plugin &lt;a href="https://docs.seleniumhq.org/projects/ide/"&gt;https://docs.seleniumhq.org/projects/ide/&lt;/a&gt; and then saved to a .html file which is helpful in that it can be done by non programmers. Eessentially selenium as a Domain Specific Language creates artifacts rather than tribal knowledge.&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;The Selenium Documentation is overly complicated by legacy versions just use the IDE, play with the record button and click on stuff, save the .html, and analyze and you'll quickly get the hang of it.&lt;/em&gt;&lt;/p&gt;
+&lt;h4 id="example-selenium-test-html"&gt;Example Selenium Test HTML&lt;/h4&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="cp"&gt;&amp;lt;?xml version="1.0" encoding="UTF-8"?&amp;gt;&lt;/span&gt;
+&lt;span class="cp"&gt;&amp;lt;!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/&amp;gt;&lt;/span&gt;
+&lt;span class="p"&gt;&amp;lt;&lt;/span&gt;&lt;span class="nt"&gt;html&lt;/span&gt; &lt;span class="na"&gt;xmlns&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;"http://www.w3.org/1999/xhtml"&lt;/span&gt; &lt;span class="na"&gt;xml:lang&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;"en"&lt;/span&gt; &lt;span class="na"&gt;lang&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;"en"&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;
+&lt;span class="p"&gt;&amp;lt;&lt;/span&gt;&lt;span class="nt"&gt;head&lt;/span&gt; &lt;span class="na"&gt;profile&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;"http://selenium-ide.openqa.org/profiles/test-case"&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;
+&lt;span class="p"&gt;&amp;lt;&lt;/span&gt;&lt;span class="nt"&gt;meta&lt;/span&gt; &lt;span class="na"&gt;http-equiv&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;"Content-Type"&lt;/span&gt; &lt;span class="na"&gt;content&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;"text/html; charset=UTF-8"&lt;/span&gt; &lt;span class="p"&gt;/&amp;gt;&lt;/span&gt;
+&lt;span class="p"&gt;&amp;lt;&lt;/span&gt;&lt;span class="nt"&gt;link&lt;/span&gt; &lt;span class="na"&gt;rel&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;"selenium.base"&lt;/span&gt; &lt;span class="na"&gt;href&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;"https://mysite.com/"&lt;/span&gt; &lt;span class="p"&gt;/&amp;gt;&lt;/span&gt;
+&lt;span class="p"&gt;&amp;lt;&lt;/span&gt;&lt;span class="nt"&gt;title&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;selenium-login&lt;span class="p"&gt;&amp;lt;/&lt;/span&gt;&lt;span class="nt"&gt;title&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;
+&lt;span class="p"&gt;&amp;lt;/&lt;/span&gt;&lt;span class="nt"&gt;head&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;
+&lt;span class="p"&gt;&amp;lt;&lt;/span&gt;&lt;span class="nt"&gt;body&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class="p"&gt;&amp;lt;&lt;/span&gt;&lt;span class="nt"&gt;table&lt;/span&gt; &lt;span class="na"&gt;cellpadding&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;"1"&lt;/span&gt; &lt;span class="na"&gt;cellspacing&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;"1"&lt;/span&gt; &lt;span class="na"&gt;border&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;"1"&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class="p"&gt;&amp;lt;&lt;/span&gt;&lt;span class="nt"&gt;thead&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class="p"&gt;&amp;lt;&lt;/span&gt;&lt;span class="nt"&gt;tr&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&amp;lt;&lt;/span&gt;&lt;span class="nt"&gt;td&lt;/span&gt; &lt;span class="na"&gt;rowspan&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;"1"&lt;/span&gt; &lt;span class="na"&gt;colspan&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;"3"&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;selenium-login&lt;span class="p"&gt;&amp;lt;/&lt;/span&gt;&lt;span class="nt"&gt;td&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&amp;lt;/&lt;/span&gt;&lt;span class="nt"&gt;tr&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class="p"&gt;&amp;lt;/&lt;/span&gt;&lt;span class="nt"&gt;thead&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&amp;lt;&lt;/span&gt;&lt;span class="nt"&gt;tbody&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class="p"&gt;&amp;lt;&lt;/span&gt;&lt;span class="nt"&gt;tr&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class="p"&gt;&amp;lt;&lt;/span&gt;&lt;span class="nt"&gt;td&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;open&lt;span class="p"&gt;&amp;lt;/&lt;/span&gt;&lt;span class="nt"&gt;td&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class="p"&gt;&amp;lt;&lt;/span&gt;&lt;span class="nt"&gt;td&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;/&lt;span class="p"&gt;&amp;lt;/&lt;/span&gt;&lt;span class="nt"&gt;td&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class="p"&gt;&amp;lt;&lt;/span&gt;&lt;span class="nt"&gt;td&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&amp;lt;/&lt;/span&gt;&lt;span class="nt"&gt;td&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class="p"&gt;&amp;lt;/&lt;/span&gt;&lt;span class="nt"&gt;tr&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class="p"&gt;&amp;lt;&lt;/span&gt;&lt;span class="nt"&gt;tr&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class="p"&gt;&amp;lt;&lt;/span&gt;&lt;span class="nt"&gt;td&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;type&lt;span class="p"&gt;&amp;lt;/&lt;/span&gt;&lt;span class="nt"&gt;td&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class="p"&gt;&amp;lt;&lt;/span&gt;&lt;span class="nt"&gt;td&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;id=email&lt;span class="p"&gt;&amp;lt;/&lt;/span&gt;&lt;span class="nt"&gt;td&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class="p"&gt;&amp;lt;&lt;/span&gt;&lt;span class="nt"&gt;td&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;admin@mysite.com&lt;span class="p"&gt;&amp;lt;/&lt;/span&gt;&lt;span class="nt"&gt;td&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class="p"&gt;&amp;lt;/&lt;/span&gt;&lt;span class="nt"&gt;tr&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class="p"&gt;&amp;lt;&lt;/span&gt;&lt;span class="nt"&gt;tr&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class="p"&gt;&amp;lt;&lt;/span&gt;&lt;span class="nt"&gt;td&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;type&lt;span class="p"&gt;&amp;lt;/&lt;/span&gt;&lt;span class="nt"&gt;td&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class="p"&gt;&amp;lt;&lt;/span&gt;&lt;span class="nt"&gt;td&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;id=password&lt;span class="p"&gt;&amp;lt;/&lt;/span&gt;&lt;span class="nt"&gt;td&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class="p"&gt;&amp;lt;&lt;/span&gt;&lt;span class="nt"&gt;td&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;examplepassword&lt;span class="p"&gt;&amp;lt;/&lt;/span&gt;&lt;span class="nt"&gt;td&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class="p"&gt;&amp;lt;/&lt;/span&gt;&lt;span class="nt"&gt;tr&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class="p"&gt;&amp;lt;&lt;/span&gt;&lt;span class="nt"&gt;tr&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class="p"&gt;&amp;lt;&lt;/span&gt;&lt;span class="nt"&gt;td&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;clickAndWait&lt;span class="p"&gt;&amp;lt;/&lt;/span&gt;&lt;span class="nt"&gt;td&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class="p"&gt;&amp;lt;&lt;/span&gt;&lt;span class="nt"&gt;td&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;id=signin&lt;span class="p"&gt;&amp;lt;/&lt;/span&gt;&lt;span class="nt"&gt;td&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class="p"&gt;&amp;lt;&lt;/span&gt;&lt;span class="nt"&gt;td&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&amp;lt;/&lt;/span&gt;&lt;span class="nt"&gt;td&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class="p"&gt;&amp;lt;/&lt;/span&gt;&lt;span class="nt"&gt;tr&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class="p"&gt;&amp;lt;&lt;/span&gt;&lt;span class="nt"&gt;tr&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class="p"&gt;&amp;lt;&lt;/span&gt;&lt;span class="nt"&gt;td&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;assertLocation&lt;span class="p"&gt;&amp;lt;/&lt;/span&gt;&lt;span class="nt"&gt;td&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class="p"&gt;&amp;lt;&lt;/span&gt;&lt;span class="nt"&gt;td&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;https://mysite.com/home&lt;span class="p"&gt;&amp;lt;/&lt;/span&gt;&lt;span class="nt"&gt;td&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class="p"&gt;&amp;lt;&lt;/span&gt;&lt;span class="nt"&gt;td&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&amp;lt;/&lt;/span&gt;&lt;span class="nt"&gt;td&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class="p"&gt;&amp;lt;/&lt;/span&gt;&lt;span class="nt"&gt;tr&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class="p"&gt;&amp;lt;&lt;/span&gt;&lt;span class="nt"&gt;tr&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class="p"&gt;&amp;lt;&lt;/span&gt;&lt;span class="nt"&gt;td&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;assertElementPresent&lt;span class="p"&gt;&amp;lt;/&lt;/span&gt;&lt;span class="nt"&gt;td&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class="p"&gt;&amp;lt;&lt;/span&gt;&lt;span class="nt"&gt;td&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;link=Launch the web app&lt;span class="p"&gt;&amp;lt;/&lt;/span&gt;&lt;span class="nt"&gt;td&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class="p"&gt;&amp;lt;&lt;/span&gt;&lt;span class="nt"&gt;td&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&amp;lt;/&lt;/span&gt;&lt;span class="nt"&gt;td&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class="p"&gt;&amp;lt;/&lt;/span&gt;&lt;span class="nt"&gt;tr&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class="p"&gt;&amp;lt;/&lt;/span&gt;&lt;span class="nt"&gt;tbody&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&amp;lt;/&lt;/span&gt;&lt;span class="nt"&gt;table&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;
+&lt;span class="p"&gt;&amp;lt;/&lt;/span&gt;&lt;span class="nt"&gt;body&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;
+&lt;span class="p"&gt;&amp;lt;/&lt;/span&gt;&lt;span class="nt"&gt;html&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;To get started with the IDE automation framework for interactions with websites (like a programmatic browser) &lt;a href="http://docs.seleniumhq.org/docs/02_selenium_ide.jsp#introduction"&gt;http://docs.seleniumhq.org/docs/02_selenium_ide.jsp#introduction&lt;/a&gt;&lt;/p&gt;
+&lt;h3 id="selenium-webdriver"&gt;Selenium WebDriver&lt;/h3&gt;
+&lt;p&gt;Characteristics of good test plans are focusing on "happy path" high value tests, avoiding fragility/brittleness (any change invalidates many tests), and of course avoiding manual intervention.&lt;/p&gt;
+&lt;p&gt;Having a huge suite of IDE based tests incurs potentially unsustainable technical testing debt &lt;em&gt;(e.g. investigating/rewriting why/when many tests fail).&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;And requiring a testing machine with a UI with a browser etc. is a lot of overhead if you intend on (correctly!) running the tests really often.&lt;/p&gt;
+&lt;p&gt;Converting raw .html tests to a specific language binding (i.e. moving more to WhiteBox) can remove non essential parts of the test and increase flexibility (multiple browsers!).&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;sudo pip install selenium&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;installation assuming linux and python&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h4 id="example-selenium-python-webdriver"&gt;Example Selenium Python Webdriver&lt;/h4&gt;
+&lt;blockquote&gt;
+&lt;p&gt;The IDE helpfully not only can save a Test but can File -&amp;gt; Export Test Case As -&amp;gt; python&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;selenium&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;webdriver&lt;/span&gt;
+&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;selenium.webdriver.common.by&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;By&lt;/span&gt;
+&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;selenium.webdriver.common.keys&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;Keys&lt;/span&gt;
+&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;selenium.webdriver.support.ui&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;Select&lt;/span&gt;
+&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;selenium.common.exceptions&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;NoSuchElementException&lt;/span&gt;
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;unittest&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="nn"&gt;time&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="nn"&gt;re&lt;/span&gt;
+
+
+&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;SeleniumLogin&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;unittest&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;TestCase&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;setUp&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+    &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;driver&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;webdriver&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;Firefox&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+    &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;driver&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;implicitly_wait&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;30&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;base_url&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s2"&gt;"https://mysite.com/"&lt;/span&gt;
+    &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;verificationErrors&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[]&lt;/span&gt;
+    &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;accept_next_alert&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="bp"&gt;True&lt;/span&gt;
+
+&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;test_selenium_login&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+    &lt;span class="n"&gt;driver&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;driver&lt;/span&gt;
+    &lt;span class="n"&gt;driver&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;get&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;base_url&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="s2"&gt;"/"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;driver&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;find_element_by_id&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;"email"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;clear&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+    &lt;span class="n"&gt;driver&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;find_element_by_id&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;"email"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;send_keys&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;"admin@mysite.com"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;driver&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;find_element_by_id&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;"password"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;clear&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+    &lt;span class="n"&gt;driver&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;find_element_by_id&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;"password"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;send_keys&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;"examplepassword"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;driver&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;find_element_by_id&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;"signin"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;click&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+    &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;assertEqual&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;"https://mysite.com/home"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;driver&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;current_url&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;assertTrue&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;is_element_present&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;By&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;LINK_TEXT&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s2"&gt;"Launch the web app"&lt;/span&gt;
+
+&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;is_element_present&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;how&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;what&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+    &lt;span class="k"&gt;try&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;driver&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;find_element&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;by&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;how&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;value&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;what&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="k"&gt;except&lt;/span&gt; &lt;span class="n"&gt;NoSuchElementException&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;e&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="bp"&gt;False&lt;/span&gt;
+    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="bp"&gt;True&lt;/span&gt;
+
+&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;is_alert_present&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+    &lt;span class="k"&gt;try&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;driver&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;switch_to_alert&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+    &lt;span class="k"&gt;except&lt;/span&gt; &lt;span class="n"&gt;NoAlertPresentException&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;e&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="bp"&gt;False&lt;/span&gt;
+    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="bp"&gt;True&lt;/span&gt;
+
+&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;close_alert_and_get_its_text&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+    &lt;span class="k"&gt;try&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="n"&gt;alert&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;driver&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;switch_to_alert&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+    &lt;span class="n"&gt;alert_text&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;alert&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;text&lt;/span&gt;
+    &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;accept_next_alert&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+        &lt;span class="n"&gt;alert&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;accept&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+    &lt;span class="k"&gt;else&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="n"&gt;alert&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;dismiss&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;alert_text&lt;/span&gt;
+    &lt;span class="k"&gt;finally&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;accept_next_alert&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="bp"&gt;True&lt;/span&gt;
+
+&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;tearDown&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+    &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;driver&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;quit&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+    &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;assertEqual&lt;/span&gt;&lt;span class="p"&gt;([],&lt;/span&gt; &lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;verificationErrors&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+
+&lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="vm"&gt;__name__&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="s2"&gt;"__main__"&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;span class="n"&gt;unittest&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;main&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;&lt;code&gt;python selenium-login.py runs the tests (opens Firefox, executes all of the commands)&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;Docs for the webdriver interface:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://selenium-python.readthedocs.io/api.html"&gt;https://selenium-python.readthedocs.io/api.html&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://seleniumhq.github.io/selenium/docs/api/py/api.html"&gt;https://seleniumhq.github.io/selenium/docs/api/py/api.html&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
 &lt;blockquote&gt;
 &lt;p&gt;useful for looking up things like &lt;code&gt;driver.current_url&lt;/code&gt;&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;p&gt;phantomjs: headless browser &lt;a href="http://phantomjs.org"&gt;http://phantomjs.org&lt;/a&gt;&lt;/p&gt;
-&lt;h3 id="install"&gt;Install&lt;/h3&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;sudo pip install selenium
-wget &amp;lt;https://bitbucket.org/ariya/phantomjs/downloads/phantomjs-1.9.8-linux-x86_64.tar.bz2&amp;gt;
+&lt;h3 id="selenium-performance-with-phantomjs"&gt;Selenium Performance with PhantomJS&lt;/h3&gt;
+&lt;p&gt;Removing the UI requirement improves test performance and increases the options of where the test is run (Dev machines, headless VMs, cloud servers, etc.)&lt;/p&gt;
+&lt;p&gt;Installing the python selenium library, downloading the phantomJS binary running it was relatively easy with Ubuntu Linux since the project integrated GhostDriver too.&lt;/p&gt;
+&lt;p&gt;The phantomjs headless browser &lt;a href="http://phantomjs.org"&gt;http://phantomjs.org&lt;/a&gt; &lt;strong&gt;Archived as of 2018-03 and no longer under active development&lt;/strong&gt;&lt;/p&gt;
+&lt;h4 id="installing-phantomjs"&gt;Installing PhantomJS&lt;/h4&gt;
+&lt;p&gt;&lt;strong&gt;Archived as of 2018-03 and no longer under active development&lt;/strong&gt; &lt;a href="http://phantomjs.org/download.html"&gt;http://phantomjs.org/download.html&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;For example for Linux one might use:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;wget &amp;lt;https://bitbucket.org/ariya/phantomjs/downloads/phantomjs-1.9.8-linux-x86_64.tar.bz2&amp;gt;
 tar -xjvf phantomjs-1.9.8-linux-x86_64.tar.bz2
 &lt;/pre&gt;&lt;/div&gt;
-&lt;h3 id="run"&gt;Run&lt;/h3&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;phantomjs-1.9.8-linux-x86_64/bin/phantomjs --webdriver=9134
-&lt;/pre&gt;&lt;/div&gt;
-&lt;blockquote&gt;
-&lt;p&gt;ghostdriver included and running on port 9134&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;h3 id="example-python-script"&gt;Example python script&lt;/h3&gt;
+&lt;h4 id="example-phantomjs-webdriver-python-script"&gt;Example PhantomJS webdriver python script&lt;/h4&gt;
 &lt;p&gt;&lt;strong&gt;mini script to just show usage&lt;/strong&gt;&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;selenium&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;webdriver&lt;/span&gt;
 
@@ -11135,11 +11268,17 @@ tar -xjvf phantomjs-1.9.8-linux-x86_64.tar.bz2
 &lt;span class="k"&gt;print&lt;/span&gt; &lt;span class="n"&gt;driver&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;current_url&lt;/span&gt;
 &lt;span class="n"&gt;driver&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;quit&lt;/span&gt;
 &lt;span class="k"&gt;print&lt;/span&gt; &lt;span class="s2"&gt;"done"&lt;/span&gt;
-
-
-&lt;span class="n"&gt;phantomjs&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mf"&gt;1.9&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="mi"&gt;8&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;linux&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;x86_64&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nb"&gt;bin&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;phantomjs&lt;/span&gt; &lt;span class="o"&gt;--&lt;/span&gt;&lt;span class="n"&gt;webdriver&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mi"&gt;9134&lt;/span&gt; &lt;span class="o"&gt;--&lt;/span&gt;&lt;span class="n"&gt;ignore&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;ssl&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;errors&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;true&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
-&lt;h3 id="advanced-python-example"&gt;Advanced Python example&lt;/h3&gt;
+&lt;p&gt;&lt;strong&gt;To run the phantomJS binary&lt;/strong&gt; &lt;code&gt;phantomjs-1.9.8-linux-x86_64/bin/phantomjs --webdriver=9134&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;ghostdriver included and running on port 9134&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;As an example I found PhantomJS to be at least twice as fast as Firefox
+    ./phantomjs --webdriver=127.0.0.1:9134 --ignore-ssl-errors=true&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;skip verifying SSL &lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h4 id="advanced-python-and-phantomjs-example"&gt;Advanced Python and PhantomJS example&lt;/h4&gt;
 &lt;blockquote&gt;
 &lt;p&gt;more complete example with python unittest framework (used the Firefox Selenium IDE plugin -&amp;gt; Export)&lt;/p&gt;
 &lt;p&gt;logs in, asserts there is an Admin tab which when clicked shows Group Info&lt;/p&gt;
@@ -11270,12 +11409,7 @@ tar -xjvf phantomjs-1.9.8-linux-x86_64.tar.bz2
     &lt;span class="n"&gt;driver&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;quit&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
     &lt;span class="k"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;'done'&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
-&lt;h3 id="references"&gt;References&lt;/h3&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;a href="http://phantomjs.org/release-1.8.html"&gt;http://phantomjs.org/release-1.8.html&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href="https://github.com/ariya/phantomjs/wiki/API-Reference"&gt;https://github.com/ariya/phantomjs/wiki/API-Reference&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href="http://www.realpython.com/blog/python/headless-selenium-testing-with-python-and-phantomjs"&gt;http://www.realpython.com/blog/python/headless-selenium-testing-with-python-and-phantomjs&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;</summary><category term="selenium"></category><category term="python"></category><category term="programming"></category><category term="test"></category><category term="phantomjs"></category><category term="CI"></category></entry><entry><title>Attack of the Spiders, Bots, and Crawlers</title><link href="https://blog.john-pfeiffer.com/attack-of-the-spiders-bots-and-crawlers/" rel="alternate"></link><published>2013-07-20T23:00:00-07:00</published><updated>2013-07-20T23:00:00-07:00</updated><author><name>john pfeiffer</name></author><id>tag:blog.john-pfeiffer.com,2013-07-20:attack-of-the-spiders-bots-and-crawlers/</id><summary type="html">&lt;p&gt;It is well known that search engines need to index what the contents of webpages are in order to return accurate results to Users. It may not be well known how much traffic that generates.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;More Info&lt;/strong&gt; &lt;a href="https://realpython.com/headless-selenium-testing-with-python-and-phantomjs/"&gt;https://realpython.com/headless-selenium-testing-with-python-and-phantomjs/&lt;/a&gt;&lt;/p&gt;</summary><category term="selenium"></category><category term="python"></category><category term="programming"></category><category term="test"></category><category term="phantomjs"></category><category term="CI"></category><category term="tech debt"></category></entry><entry><title>Attack of the Spiders, Bots, and Crawlers</title><link href="https://blog.john-pfeiffer.com/attack-of-the-spiders-bots-and-crawlers/" rel="alternate"></link><published>2013-07-20T23:00:00-07:00</published><updated>2013-07-20T23:00:00-07:00</updated><author><name>john pfeiffer</name></author><id>tag:blog.john-pfeiffer.com,2013-07-20:attack-of-the-spiders-bots-and-crawlers/</id><summary type="html">&lt;p&gt;It is well known that search engines need to index what the contents of webpages are in order to return accurate results to Users. It may not be well known how much traffic that generates.&lt;/p&gt;
 &lt;p&gt;In this sampling from my logs (not representative of anything), 57% of the traffic in the log is from bots (I'm not turning them away, skip to the end on how to do that).&lt;/p&gt;
 &lt;p&gt;Drupal (CMS) is remarkably good at making content for bots to read so it's not surprising they're all slurping, and of course if you want to be popular you need all of those indexes to know about you...&lt;/p&gt;
 &lt;h3 id="how-many-hits-from-each-kind-of-bot"&gt;How many hits from each kind of bot&lt;/h3&gt;

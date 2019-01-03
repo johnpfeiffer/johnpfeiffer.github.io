@@ -6,7 +6,7 @@
         <meta name="author" content="john pfeiffer" />
         <meta name="copyright" content="john pfeiffer" />
 
-<meta name="keywords" content="selenium, python, programming, test, phantomjs, CI, programming, " />
+<meta name="keywords" content="selenium, python, programming, test, phantomjs, CI, tech debt, programming, " />
         <title>Selenium headless browser automated testing with PhantomJS and Python  · johnpfeiffer
 </title>
         <!--link href="https://cdn-images.mailchimp.com/embedcode/slim-081711.css" rel="stylesheet" type="text/css"-->
@@ -66,13 +66,22 @@
         <h4>Contents</h4>
         <div class="toc">
 <ul>
-<li><a href="#overview">Overview</a></li>
-<li><a href="#install">Install</a></li>
-<li><a href="#run">Run</a></li>
-<li><a href="#example-python-script">Example python script</a></li>
-<li><a href="#advanced-python-example">Advanced Python example</a></li>
+<li><a href="#why-automated-testing">Why Automated Testing</a></li>
+<li><a href="#choosing-selenium">Choosing Selenium</a><ul>
+<li><a href="#example-selenium-test-html">Example Selenium Test HTML</a></li>
+</ul>
+</li>
+<li><a href="#selenium-webdriver">Selenium WebDriver</a><ul>
+<li><a href="#example-selenium-python-webdriver">Example Selenium Python Webdriver</a></li>
+</ul>
+</li>
+<li><a href="#selenium-performance-with-phantomjs">Selenium Performance with PhantomJS</a><ul>
+<li><a href="#installing-phantomjs">Installing PhantomJS</a></li>
+<li><a href="#example-phantomjs-webdriver-python-script">Example PhantomJS webdriver python script</a></li>
+<li><a href="#advanced-python-and-phantomjs-example">Advanced Python and PhantomJS example</a></li>
+</ul>
+</li>
 <li><a href="#basic-polling-with-firefox-and-mac">Basic Polling with Firefox and Mac</a></li>
-<li><a href="#references">References</a></li>
 </ul>
 </div>
         </nav>
@@ -80,25 +89,158 @@
     <div class="span8 article-content">
 
             
-<h3 id="overview">Overview</h3>
-<p>selenium: an automation framework for interactions with websites (like a programmatic browser) <a href="http://docs.seleniumhq.org/docs/02_selenium_ide.jsp#introduction">http://docs.seleniumhq.org/docs/02_selenium_ide.jsp#introduction</a></p>
-<p>webdriver is the interface: <a href="http://selenium-python.readthedocs.org/api.html">http://selenium-python.readthedocs.org/api.html</a> </p>
+<h3 id="why-automated-testing">Why Automated Testing</h3>
+<p>Automated Testing is critical to maintaining quality while increasing velocity <em>(aka avoiding being crushed to death by technical debt).</em>
+Web sites are inherently complex to test:</p>
+<ul>
+<li>requires a client and server,</li>
+<li>combination of UI and Logic,</li>
+<li>lots of paths,</li>
+<li>etc</li>
+</ul>
+<p>A challenge facing the HipChat team is how to maintain quality while supporting both SaaS and BTF versions, expanding the team, increasing the functionality, and experiment with architecture (or even just normal bug fixing refactoring).</p>
+<h3 id="choosing-selenium">Choosing Selenium</h3>
+<p>Continued innovation by the Selenium project has created a stable and usable programmatic interface such that clicking on different components in a web page can be automated.</p>
+<p>Selenium tests can be generated manually by a Firefox plugin <a href="https://docs.seleniumhq.org/projects/ide/">https://docs.seleniumhq.org/projects/ide/</a> and then saved to a .html file which is helpful in that it can be done by non programmers. Eessentially selenium as a Domain Specific Language creates artifacts rather than tribal knowledge.</p>
+<p><em>The Selenium Documentation is overly complicated by legacy versions just use the IDE, play with the record button and click on stuff, save the .html, and analyze and you'll quickly get the hang of it.</em></p>
+<h4 id="example-selenium-test-html">Example Selenium Test HTML</h4>
+<div class="highlight"><pre><span></span><span class="cp">&lt;?xml version="1.0" encoding="UTF-8"?&gt;</span>
+<span class="cp">&lt;!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/&gt;</span>
+<span class="p">&lt;</span><span class="nt">html</span> <span class="na">xmlns</span><span class="o">=</span><span class="s">"http://www.w3.org/1999/xhtml"</span> <span class="na">xml:lang</span><span class="o">=</span><span class="s">"en"</span> <span class="na">lang</span><span class="o">=</span><span class="s">"en"</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">head</span> <span class="na">profile</span><span class="o">=</span><span class="s">"http://selenium-ide.openqa.org/profiles/test-case"</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">meta</span> <span class="na">http-equiv</span><span class="o">=</span><span class="s">"Content-Type"</span> <span class="na">content</span><span class="o">=</span><span class="s">"text/html; charset=UTF-8"</span> <span class="p">/&gt;</span>
+<span class="p">&lt;</span><span class="nt">link</span> <span class="na">rel</span><span class="o">=</span><span class="s">"selenium.base"</span> <span class="na">href</span><span class="o">=</span><span class="s">"https://mysite.com/"</span> <span class="p">/&gt;</span>
+<span class="p">&lt;</span><span class="nt">title</span><span class="p">&gt;</span>selenium-login<span class="p">&lt;/</span><span class="nt">title</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">head</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">body</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">table</span> <span class="na">cellpadding</span><span class="o">=</span><span class="s">"1"</span> <span class="na">cellspacing</span><span class="o">=</span><span class="s">"1"</span> <span class="na">border</span><span class="o">=</span><span class="s">"1"</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">thead</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">tr</span><span class="p">&gt;&lt;</span><span class="nt">td</span> <span class="na">rowspan</span><span class="o">=</span><span class="s">"1"</span> <span class="na">colspan</span><span class="o">=</span><span class="s">"3"</span><span class="p">&gt;</span>selenium-login<span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;&lt;/</span><span class="nt">tr</span><span class="p">&gt;</span>
+    <span class="p">&lt;/</span><span class="nt">thead</span><span class="p">&gt;&lt;</span><span class="nt">tbody</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">tr</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">td</span><span class="p">&gt;</span>open<span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">td</span><span class="p">&gt;</span>/<span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">td</span><span class="p">&gt;&lt;/</span><span class="nt">td</span><span class="p">&gt;</span>
+    <span class="p">&lt;/</span><span class="nt">tr</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">tr</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">td</span><span class="p">&gt;</span>type<span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">td</span><span class="p">&gt;</span>id=email<span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">td</span><span class="p">&gt;</span>admin@mysite.com<span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;</span>
+    <span class="p">&lt;/</span><span class="nt">tr</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">tr</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">td</span><span class="p">&gt;</span>type<span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">td</span><span class="p">&gt;</span>id=password<span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">td</span><span class="p">&gt;</span>examplepassword<span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;</span>
+    <span class="p">&lt;/</span><span class="nt">tr</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">tr</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">td</span><span class="p">&gt;</span>clickAndWait<span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">td</span><span class="p">&gt;</span>id=signin<span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">td</span><span class="p">&gt;&lt;/</span><span class="nt">td</span><span class="p">&gt;</span>
+    <span class="p">&lt;/</span><span class="nt">tr</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">tr</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">td</span><span class="p">&gt;</span>assertLocation<span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">td</span><span class="p">&gt;</span>https://mysite.com/home<span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">td</span><span class="p">&gt;&lt;/</span><span class="nt">td</span><span class="p">&gt;</span>
+    <span class="p">&lt;/</span><span class="nt">tr</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">tr</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">td</span><span class="p">&gt;</span>assertElementPresent<span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">td</span><span class="p">&gt;</span>link=Launch the web app<span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">td</span><span class="p">&gt;&lt;/</span><span class="nt">td</span><span class="p">&gt;</span>
+    <span class="p">&lt;/</span><span class="nt">tr</span><span class="p">&gt;</span>
+    <span class="p">&lt;/</span><span class="nt">tbody</span><span class="p">&gt;&lt;/</span><span class="nt">table</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">body</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">html</span><span class="p">&gt;</span>
+</pre></div>
+<p>To get started with the IDE automation framework for interactions with websites (like a programmatic browser) <a href="http://docs.seleniumhq.org/docs/02_selenium_ide.jsp#introduction">http://docs.seleniumhq.org/docs/02_selenium_ide.jsp#introduction</a></p>
+<h3 id="selenium-webdriver">Selenium WebDriver</h3>
+<p>Characteristics of good test plans are focusing on "happy path" high value tests, avoiding fragility/brittleness (any change invalidates many tests), and of course avoiding manual intervention.</p>
+<p>Having a huge suite of IDE based tests incurs potentially unsustainable technical testing debt <em>(e.g. investigating/rewriting why/when many tests fail).</em></p>
+<p>And requiring a testing machine with a UI with a browser etc. is a lot of overhead if you intend on (correctly!) running the tests really often.</p>
+<p>Converting raw .html tests to a specific language binding (i.e. moving more to WhiteBox) can remove non essential parts of the test and increase flexibility (multiple browsers!).</p>
+<p><code>sudo pip install selenium</code></p>
+<blockquote>
+<p>installation assuming linux and python</p>
+</blockquote>
+<h4 id="example-selenium-python-webdriver">Example Selenium Python Webdriver</h4>
+<blockquote>
+<p>The IDE helpfully not only can save a Test but can File -&gt; Export Test Case As -&gt; python</p>
+</blockquote>
+<div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">selenium</span> <span class="kn">import</span> <span class="n">webdriver</span>
+<span class="kn">from</span> <span class="nn">selenium.webdriver.common.by</span> <span class="kn">import</span> <span class="n">By</span>
+<span class="kn">from</span> <span class="nn">selenium.webdriver.common.keys</span> <span class="kn">import</span> <span class="n">Keys</span>
+<span class="kn">from</span> <span class="nn">selenium.webdriver.support.ui</span> <span class="kn">import</span> <span class="n">Select</span>
+<span class="kn">from</span> <span class="nn">selenium.common.exceptions</span> <span class="kn">import</span> <span class="n">NoSuchElementException</span>
+<span class="kn">import</span> <span class="nn">unittest</span><span class="o">,</span> <span class="nn">time</span><span class="o">,</span> <span class="nn">re</span>
+
+
+<span class="k">class</span> <span class="nc">SeleniumLogin</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">driver</span> <span class="o">=</span> <span class="n">webdriver</span><span class="o">.</span><span class="n">Firefox</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">driver</span><span class="o">.</span><span class="n">implicitly_wait</span><span class="p">(</span><span class="mi">30</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">base_url</span> <span class="o">=</span> <span class="s2">"https://mysite.com/"</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">verificationErrors</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">accept_next_alert</span> <span class="o">=</span> <span class="bp">True</span>
+
+<span class="k">def</span> <span class="nf">test_selenium_login</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">driver</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">driver</span>
+    <span class="n">driver</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base_url</span> <span class="o">+</span> <span class="s2">"/"</span><span class="p">)</span>
+    <span class="n">driver</span><span class="o">.</span><span class="n">find_element_by_id</span><span class="p">(</span><span class="s2">"email"</span><span class="p">)</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+    <span class="n">driver</span><span class="o">.</span><span class="n">find_element_by_id</span><span class="p">(</span><span class="s2">"email"</span><span class="p">)</span><span class="o">.</span><span class="n">send_keys</span><span class="p">(</span><span class="s2">"admin@mysite.com"</span><span class="p">)</span>
+    <span class="n">driver</span><span class="o">.</span><span class="n">find_element_by_id</span><span class="p">(</span><span class="s2">"password"</span><span class="p">)</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+    <span class="n">driver</span><span class="o">.</span><span class="n">find_element_by_id</span><span class="p">(</span><span class="s2">"password"</span><span class="p">)</span><span class="o">.</span><span class="n">send_keys</span><span class="p">(</span><span class="s2">"examplepassword"</span><span class="p">)</span>
+    <span class="n">driver</span><span class="o">.</span><span class="n">find_element_by_id</span><span class="p">(</span><span class="s2">"signin"</span><span class="p">)</span><span class="o">.</span><span class="n">click</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="s2">"https://mysite.com/home"</span><span class="p">,</span> <span class="n">driver</span><span class="o">.</span><span class="n">current_url</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">is_element_present</span><span class="p">(</span><span class="n">By</span><span class="o">.</span><span class="n">LINK_TEXT</span><span class="p">,</span> <span class="s2">"Launch the web app"</span>
+
+<span class="k">def</span> <span class="nf">is_element_present</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">how</span><span class="p">,</span> <span class="n">what</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">driver</span><span class="o">.</span><span class="n">find_element</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="n">how</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">what</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">NoSuchElementException</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span> <span class="k">return</span> <span class="bp">False</span>
+    <span class="k">return</span> <span class="bp">True</span>
+
+<span class="k">def</span> <span class="nf">is_alert_present</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">driver</span><span class="o">.</span><span class="n">switch_to_alert</span><span class="p">()</span>
+    <span class="k">except</span> <span class="n">NoAlertPresentException</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span> <span class="k">return</span> <span class="bp">False</span>
+    <span class="k">return</span> <span class="bp">True</span>
+
+<span class="k">def</span> <span class="nf">close_alert_and_get_its_text</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+    <span class="n">alert</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">driver</span><span class="o">.</span><span class="n">switch_to_alert</span><span class="p">()</span>
+    <span class="n">alert_text</span> <span class="o">=</span> <span class="n">alert</span><span class="o">.</span><span class="n">text</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">accept_next_alert</span><span class="p">:</span>
+        <span class="n">alert</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+    <span class="n">alert</span><span class="o">.</span><span class="n">dismiss</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">alert_text</span>
+    <span class="k">finally</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">accept_next_alert</span> <span class="o">=</span> <span class="bp">True</span>
+
+<span class="k">def</span> <span class="nf">tearDown</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">driver</span><span class="o">.</span><span class="n">quit</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">([],</span> <span class="bp">self</span><span class="o">.</span><span class="n">verificationErrors</span><span class="p">)</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
+<span class="n">unittest</span><span class="o">.</span><span class="n">main</span><span class="p">()</span>
+</pre></div>
+<p><code>python selenium-login.py runs the tests (opens Firefox, executes all of the commands)</code></p>
+<p>Docs for the webdriver interface:</p>
+<ul>
+<li><a href="https://selenium-python.readthedocs.io/api.html">https://selenium-python.readthedocs.io/api.html</a></li>
+<li><a href="https://seleniumhq.github.io/selenium/docs/api/py/api.html">https://seleniumhq.github.io/selenium/docs/api/py/api.html</a></li>
+</ul>
 <blockquote>
 <p>useful for looking up things like <code>driver.current_url</code></p>
 </blockquote>
-<p>phantomjs: headless browser <a href="http://phantomjs.org">http://phantomjs.org</a></p>
-<h3 id="install">Install</h3>
-<div class="highlight"><pre><span></span>sudo pip install selenium
-wget &lt;https://bitbucket.org/ariya/phantomjs/downloads/phantomjs-1.9.8-linux-x86_64.tar.bz2&gt;
+<h3 id="selenium-performance-with-phantomjs">Selenium Performance with PhantomJS</h3>
+<p>Removing the UI requirement improves test performance and increases the options of where the test is run (Dev machines, headless VMs, cloud servers, etc.)</p>
+<p>Installing the python selenium library, downloading the phantomJS binary running it was relatively easy with Ubuntu Linux since the project integrated GhostDriver too.</p>
+<p>The phantomjs headless browser <a href="http://phantomjs.org">http://phantomjs.org</a> <strong>Archived as of 2018-03 and no longer under active development</strong></p>
+<h4 id="installing-phantomjs">Installing PhantomJS</h4>
+<p><strong>Archived as of 2018-03 and no longer under active development</strong> <a href="http://phantomjs.org/download.html">http://phantomjs.org/download.html</a></p>
+<p>For example for Linux one might use:</p>
+<div class="highlight"><pre><span></span>wget &lt;https://bitbucket.org/ariya/phantomjs/downloads/phantomjs-1.9.8-linux-x86_64.tar.bz2&gt;
 tar -xjvf phantomjs-1.9.8-linux-x86_64.tar.bz2
 </pre></div>
-<h3 id="run">Run</h3>
-<div class="highlight"><pre><span></span>phantomjs-1.9.8-linux-x86_64/bin/phantomjs --webdriver=9134
-</pre></div>
-<blockquote>
-<p>ghostdriver included and running on port 9134</p>
-</blockquote>
-<h3 id="example-python-script">Example python script</h3>
+<h4 id="example-phantomjs-webdriver-python-script">Example PhantomJS webdriver python script</h4>
 <p><strong>mini script to just show usage</strong></p>
 <div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">selenium</span> <span class="kn">import</span> <span class="n">webdriver</span>
 
@@ -107,11 +249,17 @@ tar -xjvf phantomjs-1.9.8-linux-x86_64.tar.bz2
 <span class="k">print</span> <span class="n">driver</span><span class="o">.</span><span class="n">current_url</span>
 <span class="n">driver</span><span class="o">.</span><span class="n">quit</span>
 <span class="k">print</span> <span class="s2">"done"</span>
-
-
-<span class="n">phantomjs</span><span class="o">-</span><span class="mf">1.9</span><span class="o">.</span><span class="mi">8</span><span class="o">-</span><span class="n">linux</span><span class="o">-</span><span class="n">x86_64</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">phantomjs</span> <span class="o">--</span><span class="n">webdriver</span><span class="o">=</span><span class="mi">9134</span> <span class="o">--</span><span class="n">ignore</span><span class="o">-</span><span class="n">ssl</span><span class="o">-</span><span class="n">errors</span><span class="o">=</span><span class="n">true</span>
 </pre></div>
-<h3 id="advanced-python-example">Advanced Python example</h3>
+<p><strong>To run the phantomJS binary</strong> <code>phantomjs-1.9.8-linux-x86_64/bin/phantomjs --webdriver=9134</code></p>
+<blockquote>
+<p>ghostdriver included and running on port 9134</p>
+</blockquote>
+<p>As an example I found PhantomJS to be at least twice as fast as Firefox
+    ./phantomjs --webdriver=127.0.0.1:9134 --ignore-ssl-errors=true</p>
+<blockquote>
+<p>skip verifying SSL </p>
+</blockquote>
+<h4 id="advanced-python-and-phantomjs-example">Advanced Python and PhantomJS example</h4>
 <blockquote>
 <p>more complete example with python unittest framework (used the Firefox Selenium IDE plugin -&gt; Export)</p>
 <p>logs in, asserts there is an Admin tab which when clicked shows Group Info</p>
@@ -242,12 +390,7 @@ tar -xjvf phantomjs-1.9.8-linux-x86_64.tar.bz2
     <span class="n">driver</span><span class="o">.</span><span class="n">quit</span><span class="p">()</span>
     <span class="k">print</span><span class="p">(</span><span class="s1">'done'</span><span class="p">)</span>
 </pre></div>
-<h3 id="references">References</h3>
-<ul>
-<li><a href="http://phantomjs.org/release-1.8.html">http://phantomjs.org/release-1.8.html</a></li>
-<li><a href="https://github.com/ariya/phantomjs/wiki/API-Reference">https://github.com/ariya/phantomjs/wiki/API-Reference</a></li>
-<li><a href="http://www.realpython.com/blog/python/headless-selenium-testing-with-python-and-phantomjs">http://www.realpython.com/blog/python/headless-selenium-testing-with-python-and-phantomjs</a></li>
-</ul>
+<p><strong>More Info</strong> <a href="https://realpython.com/headless-selenium-testing-with-python-and-phantomjs/">https://realpython.com/headless-selenium-testing-with-python-and-phantomjs/</a></p>
             <aside>
             <hr/>
             <nav>
@@ -267,7 +410,7 @@ tar -xjvf phantomjs-1.9.8-linux-x86_64.tar.bz2
             <time pubdate="pubdate" datetime="2013-09-17T21:04:00-07:00">Sep 17, 2013</time>
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#programming-ref">programming</a> 
-            <h4>~348 words</h4>
+            <h4>~968 words</h4>
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article"> 
                 <li><a href="/tags.html#CI-ref">CI
@@ -284,6 +427,9 @@ tar -xjvf phantomjs-1.9.8-linux-x86_64.tar.bz2
 </a></li>
                 <li><a href="/tags.html#selenium-ref">selenium
                     <span>2</span>
+</a></li>
+                <li><a href="/tags.html#tech-debt-ref">tech debt
+                    <span>1</span>
 </a></li>
                 <li><a href="/tags.html#test-ref">test
                     <span>1</span>
