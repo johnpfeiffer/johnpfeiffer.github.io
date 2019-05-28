@@ -191,60 +191,60 @@
 </blockquote>
 <h3 id="packer-and-digitalocean">Packer and DigitalOcean</h3>
 <p>DigitalOcean is a relatively new player (compared to Linode and even AWS) but they provide a very fast and easy to use way of building boxes (a snapshot can be used like an AMI to spin up multiple instances).</p>
-<div class="highlight"><pre><span></span><span class="x">{</span>
-<span class="x">  "_comment": "https://www.packer.io/docs/builders/digitalocean.html",</span>
-<span class="x">  "variables": {</span>
-<span class="x">    "digitalocean_api_token": "</span><span class="cp">{{</span><span class="nv">env</span> <span class="err">`</span><span class="nv">DIGITALOCEAN_API_TOKEN</span><span class="err">`</span><span class="cp">}}</span><span class="x">",</span>
-<span class="x">    "newuser_name": "</span><span class="cp">{{</span><span class="nv">env</span> <span class="err">`</span><span class="nv">NEWUSER_NAME</span><span class="err">`</span><span class="cp">}}</span><span class="x">",</span>
-<span class="x">    "newuser_password": "</span><span class="cp">{{</span><span class="nv">env</span> <span class="err">`</span><span class="nv">NEWUSER_PASSWORD</span><span class="err">`</span><span class="cp">}}</span><span class="x">"</span>
-<span class="x">  },</span>
+<div class="highlight"><pre><span></span><span class="err">{</span>
+  <span class="s2">"_comment"</span><span class="p">:</span> <span class="s2">"https://www.packer.io/docs/builders/digitalocean.html"</span><span class="p">,</span>
+  <span class="s2">"variables"</span><span class="p">:</span> <span class="err">{</span>
+    <span class="s2">"digitalocean_api_token"</span><span class="p">:</span> <span class="s2">"{{env `DIGITALOCEAN_API_TOKEN`}}"</span><span class="p">,</span>
+    <span class="s2">"newuser_name"</span><span class="p">:</span> <span class="s2">"{{env `NEWUSER_NAME`}}"</span><span class="p">,</span>
+    <span class="s2">"newuser_password"</span><span class="p">:</span> <span class="s2">"{{env `NEWUSER_PASSWORD`}}"</span>
+  <span class="err">}</span><span class="p">,</span>
 
-<span class="x">  "builders": [{</span>
-<span class="x">    "type": "digitalocean",</span>
-<span class="x">    "api_token": "</span><span class="cp">{{</span><span class="nv">user</span> <span class="err">`</span><span class="nv">digitalocean_api_token</span><span class="err">`</span><span class="cp">}}</span><span class="x">",</span>
-<span class="x">    "size": "512mb",</span>
-<span class="x">    "region": "lon1",</span>
-<span class="x">    "image": "ubuntu-16-04-x64",</span>
-<span class="x">    "droplet_name": "built-from-packer-</span><span class="cp">{{</span><span class="nv">timestamp</span><span class="cp">}}</span><span class="x">",</span>
-<span class="x">    "snapshot_name": "built-from-packer-</span><span class="cp">{{</span><span class="nv">timestamp</span><span class="cp">}}</span><span class="x">"</span>
-<span class="x">  }],</span>
+  <span class="s2">"builders"</span><span class="p">:</span> <span class="p">[</span><span class="err">{</span>
+    <span class="s2">"type"</span><span class="p">:</span> <span class="s2">"digitalocean"</span><span class="p">,</span>
+    <span class="s2">"api_token"</span><span class="p">:</span> <span class="s2">"{{user `digitalocean_api_token`}}"</span><span class="p">,</span>
+    <span class="s2">"size"</span><span class="p">:</span> <span class="s2">"512mb"</span><span class="p">,</span>
+    <span class="s2">"region"</span><span class="p">:</span> <span class="s2">"lon1"</span><span class="p">,</span>
+    <span class="s2">"image"</span><span class="p">:</span> <span class="s2">"ubuntu-16-04-x64"</span><span class="p">,</span>
+    <span class="s2">"droplet_name"</span><span class="p">:</span> <span class="s2">"built-from-packer-{{timestamp}}"</span><span class="p">,</span>
+    <span class="s2">"snapshot_name"</span><span class="p">:</span> <span class="s2">"built-from-packer-{{timestamp}}"</span>
+  <span class="err">}</span><span class="p">],</span>
 
-<span class="x">  "provisioners": [</span>
-<span class="x">    {</span>
-<span class="x">      "type": "shell",</span>
-<span class="x">      "inline": [</span>
-<span class="x">        "ip a",</span>
-<span class="x">        "curl -s http://checkip.amazonaws.com",</span>
-<span class="x">        "apt-get update",</span>
-<span class="x">        "sudo apt-get install -y vim curl wget byobu ntp",</span>
-<span class="x">        "timedatectl set-timezone Etc/UTC",</span>
-<span class="x">        "cat /etc/timezone",</span>
-<span class="x">        "date",</span>
-<span class="x">        "useradd -s /bin/bash -m </span><span class="cp">{{</span><span class="nv">user</span> <span class="err">`</span><span class="nv">newuser_name</span><span class="err">`</span><span class="cp">}}</span><span class="x">",</span>
-<span class="x">        "usermod -a -G admin </span><span class="cp">{{</span><span class="nv">user</span> <span class="err">`</span><span class="nv">newuser_name</span><span class="err">`</span><span class="cp">}}</span><span class="x">",</span>
-<span class="x">        "echo '</span><span class="cp">{{</span><span class="nv">user</span> <span class="err">`</span><span class="nv">newuser_name</span><span class="err">`</span><span class="cp">}}</span><span class="x">:</span><span class="cp">{{</span><span class="nv">user</span> <span class="err">`</span><span class="nv">newuser_password</span><span class="err">`</span><span class="cp">}}</span><span class="x">'|chpasswd",</span>
-<span class="x">        "cat /etc/passwd",</span>
-<span class="x">        "sed -i 's/Port 22/Port 2222/g' /etc/ssh/sshd_config",</span>
-<span class="x">        "sed -i 's/PermitRootLogin yes/PermitRootLogin no/g' /etc/ssh/sshd_config",</span>
-<span class="x">        "echo 'PasswordAuthentication no' &gt;&gt; /etc/ssh/sshd_config",</span>
-<span class="x">        "cat /etc/ssh/sshd_config",</span>
-<span class="x">        "mkdir -p /home/</span><span class="cp">{{</span><span class="nv">user</span> <span class="err">`</span><span class="nv">newuser_name</span><span class="err">`</span><span class="cp">}}</span><span class="x">/.ssh",</span>
-<span class="x">        "mkdir -p /opt/www/html"</span>
-<span class="x">      ]</span>
-<span class="x">    },</span>
-<span class="x">    {</span>
-<span class="x">      "type": "file",</span>
-<span class="x">      "source": "authorized_keys",</span>
-<span class="x">      "destination": "/home/</span><span class="cp">{{</span><span class="nv">user</span> <span class="err">`</span><span class="nv">newuser_name</span><span class="err">`</span><span class="cp">}}</span><span class="x">/.ssh/authorized_keys"</span>
-<span class="x">    }</span>
-<span class="x">  ]</span>
+  <span class="s2">"provisioners"</span><span class="p">:</span> <span class="p">[</span>
+    <span class="err">{</span>
+      <span class="s2">"type"</span><span class="p">:</span> <span class="s2">"shell"</span><span class="p">,</span>
+      <span class="s2">"inline"</span><span class="p">:</span> <span class="p">[</span>
+        <span class="s2">"ip a"</span><span class="p">,</span>
+        <span class="s2">"curl -s http://checkip.amazonaws.com"</span><span class="p">,</span>
+        <span class="s2">"apt-get update"</span><span class="p">,</span>
+        <span class="s2">"sudo apt-get install -y vim curl wget byobu ntp"</span><span class="p">,</span>
+        <span class="s2">"timedatectl set-timezone Etc/UTC"</span><span class="p">,</span>
+        <span class="s2">"cat /etc/timezone"</span><span class="p">,</span>
+        <span class="s2">"date"</span><span class="p">,</span>
+        <span class="s2">"useradd -s /bin/bash -m {{user `newuser_name`}}"</span><span class="p">,</span>
+        <span class="s2">"usermod -a -G admin {{user `newuser_name`}}"</span><span class="p">,</span>
+        <span class="s2">"echo '{{user `newuser_name`}}:{{user `newuser_password`}}'|chpasswd"</span><span class="p">,</span>
+        <span class="s2">"cat /etc/passwd"</span><span class="p">,</span>
+        <span class="s2">"sed -i 's/Port 22/Port 2222/g' /etc/ssh/sshd_config"</span><span class="p">,</span>
+        <span class="s2">"sed -i 's/PermitRootLogin yes/PermitRootLogin no/g' /etc/ssh/sshd_config"</span><span class="p">,</span>
+        <span class="s2">"echo 'PasswordAuthentication no' &gt;&gt; /etc/ssh/sshd_config"</span><span class="p">,</span>
+        <span class="s2">"cat /etc/ssh/sshd_config"</span><span class="p">,</span>
+        <span class="s2">"mkdir -p /home/{{user `newuser_name`}}/.ssh"</span><span class="p">,</span>
+        <span class="s2">"mkdir -p /opt/www/html"</span>
+      <span class="p">]</span>
+    <span class="err">}</span><span class="p">,</span>
+    <span class="err">{</span>
+      <span class="s2">"type"</span><span class="p">:</span> <span class="s2">"file"</span><span class="p">,</span>
+      <span class="s2">"source"</span><span class="p">:</span> <span class="s2">"authorized_keys"</span><span class="p">,</span>
+      <span class="s2">"destination"</span><span class="p">:</span> <span class="s2">"/home/{{user `newuser_name`}}/.ssh/authorized_keys"</span>
+    <span class="err">}</span>
+  <span class="p">]</span>
 
-<span class="x">}</span>
+<span class="err">}</span>
 </pre></div>
 <blockquote>
 <p>This is a simple example that automates some of the security best practices of a non standard username, non standard ssh port, no ssh root login, no ssh password based login, etc.</p>
 </blockquote>
-<div class="highlight"><pre><span></span>NEWUSER_NAME=yourusername NEWUSER_PASSWORD=yourpassword DIGITALOCEAN_API_TOKEN=012345yourtoken /opt/packer build packer.json
+<div class="highlight"><pre><span></span><span class="n">NEWUSER_NAME</span><span class="o">=</span><span class="n">yourusername</span> <span class="n">NEWUSER_PASSWORD</span><span class="o">=</span><span class="n">yourpassword</span> <span class="n">DIGITALOCEAN_API_TOKEN</span><span class="o">=</span><span class="mi">012345</span><span class="n">yourtoken</span> <span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">packer</span> <span class="n">build</span> <span class="n">packer</span><span class="p">.</span><span class="n">json</span>
 </pre></div>
 <h3 id="why-not-docker-containers">Why not docker containers?</h3>
 <p>Actually I prefer docker containers as the artifact and deployment vehicle for services but it's not the only hammer in your toolbelt.  And you have to setup the Docker hosts somehow, right? </p>

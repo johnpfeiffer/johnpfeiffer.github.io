@@ -184,26 +184,26 @@
 <p>Use this very trivial bitbucket-pipelines.yml in order to get at least one successful validation so that you can press the "Enable" button in the Bitbucket UI (I had to zoom my browser out to workaround some broken css/javascript)</p>
 </blockquote>
 <p>A yaml configuration file describes the work that you instruct Bitbucket Pipelines to do, in this case we are doing the extra work of grabbing the remote google cloud SDK and installing it so that we use it with the credentials to deploy the app.</p>
-<div class="highlight"><pre><span></span><span class="n">image</span><span class="o">:</span> <span class="n">python</span><span class="o">:</span><span class="mf">2.7</span>
+<div class="highlight"><pre><span></span><span class="nv">image</span>: <span class="nv">python</span>:<span class="mi">2</span>.<span class="mi">7</span>
 
-<span class="n">pipelines</span><span class="o">:</span>
-  <span class="k">default</span><span class="o">:</span>
-    <span class="o">-</span> <span class="n">step</span><span class="o">:</span>
-        <span class="n">script</span><span class="o">:</span>
-          <span class="o">-</span> <span class="n">export</span> <span class="n">CLOUDSDK_CORE_DISABLE_PROMPTS</span><span class="o">=</span><span class="mi">1</span>
-          <span class="o">-</span> <span class="n">SDK_VERSION</span><span class="o">=</span><span class="mf">127.0</span><span class="o">.</span><span class="mi">0</span>
-          <span class="o">-</span> <span class="n">SDK_FILENAME</span><span class="o">=</span><span class="n">google</span><span class="o">-</span><span class="n">cloud</span><span class="o">-</span><span class="n">sdk</span><span class="o">-</span><span class="n">$</span><span class="o">{</span><span class="n">SDK_VERSION</span><span class="o">}-</span><span class="n">linux</span><span class="o">-</span><span class="n">x86_64</span><span class="o">.</span><span class="na">tar</span><span class="o">.</span><span class="na">gz</span>
-          <span class="o">-</span> <span class="n">curl</span> <span class="o">-</span><span class="n">O</span> <span class="o">-</span><span class="n">J</span> <span class="n">https</span><span class="o">://</span><span class="n">dl</span><span class="o">.</span><span class="na">google</span><span class="o">.</span><span class="na">com</span><span class="sr">/dl/cloudsdk/channels/rapid/downloads/</span><span class="n">$</span><span class="o">{</span><span class="n">SDK_FILENAME</span><span class="o">}</span>
-          <span class="o">-</span> <span class="n">tar</span> <span class="o">-</span><span class="n">zxvf</span> <span class="n">$</span><span class="o">{</span><span class="n">SDK_FILENAME</span><span class="o">}</span> <span class="o">--</span><span class="n">directory</span> <span class="n">$</span><span class="o">{</span><span class="n">HOME</span><span class="o">}</span>
-          <span class="o">-</span> <span class="n">export</span> <span class="n">PATH</span><span class="o">=</span><span class="n">$</span><span class="o">{</span><span class="n">PATH</span><span class="o">}:</span><span class="n">$</span><span class="o">{</span><span class="n">HOME</span><span class="o">}/</span><span class="n">google</span><span class="o">-</span><span class="n">cloud</span><span class="o">-</span><span class="n">sdk</span><span class="o">/</span><span class="n">bin</span>
-          <span class="o">-</span> <span class="n">GAE_PYTHONPATH</span><span class="o">=</span><span class="n">$</span><span class="o">{</span><span class="n">HOME</span><span class="o">}/</span><span class="n">google_appengine</span>
-          <span class="o">-</span> <span class="n">export</span> <span class="n">PYTHONPATH</span><span class="o">=</span><span class="n">$</span><span class="o">{</span><span class="n">PYTHONPATH</span><span class="o">}:</span><span class="n">$</span><span class="o">{</span><span class="n">GAE_PYTHONPATH</span><span class="o">}</span>
-          <span class="o">-</span> <span class="n">python</span> <span class="n">scripts</span><span class="o">/</span><span class="n">fetch_gae_sdk</span><span class="o">.</span><span class="na">py</span> <span class="n">$</span><span class="o">(</span><span class="n">dirname</span> <span class="s2">"${GAE_PYTHONPATH}"</span><span class="o">)</span>
-          <span class="o">-</span> <span class="n">echo</span> <span class="s2">"${PYTHONPATH}"</span> <span class="o">&amp;&amp;</span> <span class="n">ls</span> <span class="n">$</span><span class="o">{</span><span class="n">GAE_PYTHONPATH</span><span class="o">}</span>
-          <span class="o">-</span> <span class="n">echo</span> <span class="s2">"key = '${GOOGLE_API_KEY}'"</span> <span class="o">&gt;</span> <span class="n">api_key</span><span class="o">.</span><span class="na">py</span>
-          <span class="o">-</span> <span class="n">echo</span> <span class="n">$</span><span class="o">{</span><span class="n">GOOGLE_CLIENT_SECRET</span><span class="o">}</span> <span class="o">&gt;</span> <span class="n">client</span><span class="o">-</span><span class="n">secret</span><span class="o">.</span><span class="na">json</span>
-          <span class="o">-</span> <span class="n">gcloud</span> <span class="n">auth</span> <span class="n">activate</span><span class="o">-</span><span class="n">service</span><span class="o">-</span><span class="n">account</span> <span class="o">--</span><span class="n">key</span><span class="o">-</span><span class="n">file</span> <span class="n">client</span><span class="o">-</span><span class="n">secret</span><span class="o">.</span><span class="na">json</span>
-          <span class="o">-</span> <span class="n">gcloud</span> <span class="o">--</span><span class="n">verbosity</span><span class="o">=</span><span class="n">error</span> <span class="n">app</span> <span class="n">deploy</span> <span class="n">app</span><span class="o">.</span><span class="na">yaml</span> <span class="o">--</span><span class="n">promote</span>
+<span class="nv">pipelines</span>:
+  <span class="nv">default</span>:
+    <span class="o">-</span> <span class="nv">step</span>:
+        <span class="nv">script</span>:
+          <span class="o">-</span> <span class="nv">export</span> <span class="nv">CLOUDSDK_CORE_DISABLE_PROMPTS</span><span class="o">=</span><span class="mi">1</span>
+          <span class="o">-</span> <span class="nv">SDK_VERSION</span><span class="o">=</span><span class="mi">127</span>.<span class="mi">0</span>.<span class="mi">0</span>
+          <span class="o">-</span> <span class="nv">SDK_FILENAME</span><span class="o">=</span><span class="nv">google</span><span class="o">-</span><span class="nv">cloud</span><span class="o">-</span><span class="nv">sdk</span><span class="o">-</span>${<span class="nv">SDK_VERSION</span>}<span class="o">-</span><span class="nv">linux</span><span class="o">-</span><span class="nv">x86_64</span>.<span class="nv">tar</span>.<span class="nv">gz</span>
+          <span class="o">-</span> <span class="nv">curl</span> <span class="o">-</span><span class="nv">O</span> <span class="o">-</span><span class="nv">J</span> <span class="nv">https</span>:<span class="o">//</span><span class="nv">dl</span>.<span class="nv">google</span>.<span class="nv">com</span><span class="o">/</span><span class="nv">dl</span><span class="o">/</span><span class="nv">cloudsdk</span><span class="o">/</span><span class="nv">channels</span><span class="o">/</span><span class="nv">rapid</span><span class="o">/</span><span class="nv">downloads</span><span class="o">/</span>${<span class="nv">SDK_FILENAME</span>}
+          <span class="o">-</span> <span class="nv">tar</span> <span class="o">-</span><span class="nv">zxvf</span> ${<span class="nv">SDK_FILENAME</span>} <span class="o">--</span><span class="nv">directory</span> ${<span class="nv">HOME</span>}
+          <span class="o">-</span> <span class="nv">export</span> <span class="nv">PATH</span><span class="o">=</span>${<span class="nv">PATH</span>}:${<span class="nv">HOME</span>}<span class="o">/</span><span class="nv">google</span><span class="o">-</span><span class="nv">cloud</span><span class="o">-</span><span class="nv">sdk</span><span class="o">/</span><span class="nv">bin</span>
+          <span class="o">-</span> <span class="nv">GAE_PYTHONPATH</span><span class="o">=</span>${<span class="nv">HOME</span>}<span class="o">/</span><span class="nv">google_appengine</span>
+          <span class="o">-</span> <span class="nv">export</span> <span class="nv">PYTHONPATH</span><span class="o">=</span>${<span class="nv">PYTHONPATH</span>}:${<span class="nv">GAE_PYTHONPATH</span>}
+          <span class="o">-</span> <span class="nv">python</span> <span class="nv">scripts</span><span class="o">/</span><span class="nv">fetch_gae_sdk</span>.<span class="nv">py</span> $<span class="ss">(</span><span class="k">dirname</span> <span class="s2">"</span><span class="s">${GAE_PYTHONPATH}</span><span class="s2">"</span><span class="ss">)</span>
+          <span class="o">-</span> <span class="nv">echo</span> <span class="s2">"</span><span class="s">${PYTHONPATH}</span><span class="s2">"</span> <span class="o">&amp;&amp;</span> <span class="nv">ls</span> ${<span class="nv">GAE_PYTHONPATH</span>}
+          <span class="o">-</span> <span class="nv">echo</span> <span class="s2">"</span><span class="s">key = '${GOOGLE_API_KEY}'</span><span class="s2">"</span> <span class="o">&gt;</span> <span class="nv">api_key</span>.<span class="nv">py</span>
+          <span class="o">-</span> <span class="nv">echo</span> ${<span class="nv">GOOGLE_CLIENT_SECRET</span>} <span class="o">&gt;</span> <span class="nv">client</span><span class="o">-</span><span class="nv">secret</span>.<span class="nv">json</span>
+          <span class="o">-</span> <span class="nv">gcloud</span> <span class="nv">auth</span> <span class="nv">activate</span><span class="o">-</span><span class="nv">service</span><span class="o">-</span><span class="nv">account</span> <span class="o">--</span><span class="nv">key</span><span class="o">-</span><span class="nv">file</span> <span class="nv">client</span><span class="o">-</span><span class="nv">secret</span>.<span class="nv">json</span>
+          <span class="o">-</span> <span class="nv">gcloud</span> <span class="o">--</span><span class="nv">verbosity</span><span class="o">=</span><span class="nv">error</span> <span class="nv">app</span> <span class="nv">deploy</span> <span class="nv">app</span>.<span class="nv">yaml</span> <span class="o">--</span><span class="nv">promote</span>
 </pre></div>
 <blockquote>
 <p>A best practice is to pull the dependency from storage you have control over (or simply vendor the SDK in the source code) rather than downloading it every time and risking the upstream pinned version being removed</p>
@@ -316,9 +316,9 @@
 </blockquote>
 <h2 id="push-a-commit-to-trigger-a-deployment">Push a commit to trigger a deployment</h2>
 <p>The whole point of all of that work is to make life easier for every commit that follows.</p>
-<div class="highlight"><pre><span></span>git add --all .
-git commit -m 'example google app engine app deployed via bitbucket pipelines'
-git push
+<div class="highlight"><pre><span></span><span class="n">git</span> <span class="k">add</span> <span class="c1">--all .</span>
+<span class="n">git</span> <span class="k">commit</span> <span class="o">-</span><span class="n">m</span> <span class="s1">'example google app engine app deployed via bitbucket pipelines'</span>
+<span class="n">git</span> <span class="n">push</span>
 </pre></div>
 <p>You can monitor the results of every change in the Addon's output logs:</p>
 <ul>
@@ -335,7 +335,7 @@ git push
 <h2 id="actually-using-automated-testing">Actually using automated testing</h2>
 <p>CI (continuous integration) testing is the ideal next thing to add as this allows you to automatically prevent critical errors from being deployed to production.</p>
 <p>This means adding unit tests (test_main.py) and then running them by updating bitbucket-pipelines.yml</p>
-<div class="highlight"><pre><span></span>- python test_main.py
+<div class="highlight"><pre><span></span><span class="o">-</span> <span class="n">python</span> <span class="n">test_main</span><span class="p">.</span><span class="n">py</span>
 </pre></div>
 <p>It is also possible to keep extending the work required by installing any requirements.txt dependencies (i.e. only required for testing) or running post deployment end-to-end smoke tests.</p>
 <h2 id="double-checking-security">Double checking security</h2>
@@ -390,12 +390,12 @@ git push
 <p>To verify App Engine publishing from the Docker container manually: 
 <code>docker run --rm -it --volume /opt/mysecrets:/opt/mysecrets --volume /opt/myrepo:/opt/myrepo foupfeiffer/gcloud-sdk /bin/bash</code></p>
 <p>Run these commands in the Docker container...</p>
-<div class="highlight"><pre><span></span>cp -a /opt/mysecrets/api_key.py /opt/myrepo
-export CLOUDSDK_CORE_DISABLE_PROMPTS=1
-export CLOUDSDK_CORE_PROJECT=example-gae-id
-cd /opt/myrepo
-gcloud auth activate-service-account --key-file /opt/mysecrets/client-secret.json
-gcloud --verbosity=error app deploy app.yaml --promote
+<div class="highlight"><pre><span></span><span class="n">cp</span> <span class="o">-</span><span class="n">a</span> <span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">mysecrets</span><span class="o">/</span><span class="n">api_key</span><span class="p">.</span><span class="n">py</span> <span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">myrepo</span>
+<span class="n">export</span> <span class="n">CLOUDSDK_CORE_DISABLE_PROMPTS</span><span class="o">=</span><span class="mi">1</span>
+<span class="n">export</span> <span class="n">CLOUDSDK_CORE_PROJECT</span><span class="o">=</span><span class="n">example</span><span class="o">-</span><span class="n">gae</span><span class="o">-</span><span class="n">id</span>
+<span class="n">cd</span> <span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">myrepo</span>
+<span class="n">gcloud</span> <span class="n">auth</span> <span class="n">activate</span><span class="o">-</span><span class="n">service</span><span class="o">-</span><span class="n">account</span> <span class="c1">--key-file /opt/mysecrets/client-secret.json</span>
+<span class="n">gcloud</span> <span class="c1">--verbosity=error app deploy app.yaml --promote</span>
 </pre></div>
 <blockquote>
 <p>You are about to deploy the following services: Uploading 7 files to Google Cloud Storage</p>
