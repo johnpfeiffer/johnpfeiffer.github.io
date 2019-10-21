@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en-US">
+    <head>
+        <meta charset="utf-8"> 
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="author" content="john pfeiffer" />
+        <meta name="copyright" content="john pfeiffer" />
+
+<meta name="keywords" content="aws, eb, elastic beanstalk, python, flask, build-CI-CD-devops, " />
+        <title>Intro to Amazon AWS Elastic Beanstalk  · johnpfeiffer
+</title>
+        <!--link href="https://cdn-images.mailchimp.com/embedcode/slim-081711.css" rel="stylesheet" type="text/css"-->
+        <!--link href="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css" rel="stylesheet"-->
+        <link href="https://blog.john-pfeiffer.com/theme/css/bootstrap-combined.min.css" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="https://blog.john-pfeiffer.com/theme/css/style.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="https://blog.john-pfeiffer.com/theme/css/solarizedlight.css" media="screen">
+        <link rel="shortcut icon" href="https://blog.john-pfeiffer.com/theme/images/favicon.ico" type="image/x-icon" />
+        <link rel="apple-touch-icon" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon.png" />
+        <link rel="apple-touch-icon" sizes="57x57" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-57x57.png" />
+        <link rel="apple-touch-icon" sizes="72x72" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-72x72.png" />
+        <link rel="apple-touch-icon" sizes="114x114" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-114x114.png" />
+        <link rel="apple-touch-icon" sizes="144x144" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-144x144.png" />
+        <link rel="icon" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-144x144.png" />
+    </head>
+    <body>
+	<div id="content-sans-footer">
+        <div class="dropdown-backdrop">
+
+			<div class="navbar navbar-static-top">
+				<div class="navbar-inner">
+					<div class="container">
+						<a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+							<span class="icon-bar"></span>
+							<span class="icon-bar"></span>
+							<span class="icon-bar"></span>
+						</a>
+						<a class="brand" href="https://blog.john-pfeiffer.com/"><span class=site-name>johnpfeiffer</span></a>
+						<div class="nav-collapse collapse">
+							<ul class="nav pull-right top-menu">
+								<li ><a href="https://blog.john-pfeiffer.com">Home</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/john-likes/">John Likes</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/categories.html">Categories</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/tags.html">Tags</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/archives.html">Archives</a></li>
+								<li><form class="navbar-search" action="https://blog.john-pfeiffer.com/search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="container-fluid">
+			<div class="row-fluid">
+				<div class="span1"></div>
+				<div class="span10">
+<article>
+<div class="row-fluid">
+    <header class="page_header span10 offset2">
+    <h1><a href="https://blog.john-pfeiffer.com/intro-to-amazon-aws-elastic-beanstalk/"> Intro to Amazon AWS Elastic Beanstalk  </a></h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+    <div class="span2 table-of-content">
+        <nav>
+        <h4>Contents</h4>
+        <div class="toc">
+<ul>
+<li><a href="#installing-dependencies-to-use-the-cli">Installing dependencies (to use the CLI)</a></li>
+<li><a href="#aws-account-credentials-to-generate-a-cli-security-file">AWS account credentials to generate a CLI security file</a></li>
+<li><a href="#initial-directory-and-dependency-setup">Initial directory and dependency setup</a><ul>
+<li><a href="#a-tiny-flask-python-webapp">A tiny flask python webapp</a></li>
+</ul>
+</li>
+<li><a href="#creating-an-elastic-beanstalk-project">Creating an Elastic Beanstalk Project</a><ul>
+<li><a href="#alternatively-using-the-aws-console-ui">Alternatively using the AWS Console UI</a></li>
+<li><a href="#cleanup-and-pricing">Cleanup and Pricing</a></li>
+<li><a href="#logs">Logs</a></li>
+</ul>
+</li>
+<li><a href="#credentials-via-environment-variables">Credentials via Environment Variables</a></li>
+<li><a href="#more-info">More info</a></li>
+</ul>
+</div>
+        </nav>
+    </div>
+    <div class="span8 article-content">
+
+            
+<p>While InfrastructureAsAService lightens the load of Operations, to truly push forward Developers require a frictionless place to deploy applications.</p>
+<p>Platform-as-a-Service fills this niche: for this specific example AWS Elastic Beanstalk attempts to create a layer of abstraction on top of existing Amazon technologies. <em>(updated in 2019)</em></p>
+<blockquote>
+<p>PaaS = no OS management, no ssh required, no chef/puppet scripting, potentially easier (dynamic) scaling</p>
+</blockquote>
+<p><em>A previous article about a Google PaaS <a href="https://blog.john-pfeiffer.com/google-app-engine-python">https://blog.john-pfeiffer.com/google-app-engine-python</a></em></p>
+<h2 id="installing-dependencies-to-use-the-cli">Installing dependencies (to use the CLI)</h2>
+<p>The AWS CLI relies heavily on Python.  <em>Originally this guide was written for python2 but now the world is all python3.</em></p>
+<div class="highlight"><pre><span></span><span class="n">which</span> <span class="n">pip3</span>
+<span class="n">pip3</span> <span class="c1">--version</span>
+<span class="n">sudo</span> <span class="n">apt</span> <span class="n">install</span> <span class="n">python3</span><span class="o">-</span><span class="n">pip</span> <span class="c1">--reinstall</span>
+</pre></div>
+<blockquote>
+<p><em>(to fix when it is missing in ubuntu)</em></p>
+</blockquote>
+<p><code>pip3 install --upgrade awscli</code></p>
+<blockquote>
+<p>make sure to be on the latest AWS CLI</p>
+</blockquote>
+<p><code>pip install awsebcli --upgrade</code></p>
+<blockquote>
+<p>This might upgrade libraries from the OS that you prefer not to, so you could use --user</p>
+</blockquote>
+<ol>
+<li><a href="https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/Welcome.html">https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/Welcome.html</a> to ElasticBeanstalk</li>
+<li><a href="https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/eb-cli3-install-advanced.html">https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/eb-cli3-install-advanced.html</a></li>
+<li>export PATH=$PATH:~/.local/bin</li>
+<li>Optionally add this to ~/.bashrc , e.g. <code>echo "export PATH=$PATH:~/.local/bin" &gt;&gt; ~/.bashrc</code></li>
+</ol>
+<p><em>hopefully <a href="https://github.com/aws/aws-elastic-beanstalk-cli-setup">https://github.com/aws/aws-elastic-beanstalk-cli-setup</a> listing all the dependencies can help if there are any issues</em></p>
+<p><em>(deprecated) Read about how to use the CLI <a href="https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/using-api-cli.html">https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/using-api-cli.html</a></em></p>
+<h2 id="aws-account-credentials-to-generate-a-cli-security-file">AWS account credentials to generate a CLI security file</h2>
+<p>There is the usual best practice of creating an IAM user <em>(e.g. ebdemo)</em> with a group that has the "AWSElasticBeanstalkFullAccess" attached policy...</p>
+<p>And with those credentials...</p>
+<p><code>vim ~/.ssh/awscli</code></p>
+<div class="highlight"><pre><span></span><span class="n">AWSAccessKeyId</span><span class="o">=</span><span class="k">Write</span> <span class="n">your</span> <span class="n">AWS</span> <span class="k">access</span> <span class="n">ID</span>
+<span class="n">AWSSecretKey</span><span class="o">=</span><span class="k">Write</span> <span class="n">your</span> <span class="n">AWS</span> <span class="n">secret</span> <span class="k">key</span>
+</pre></div>
+<p><code>chmod 600 ~/.ssh/awscli</code>
+<code>export AWS_CREDENTIAL_FILE=~/.ssh/awscli</code></p>
+<p>Or alternatively use the usual AWS CLI: <code>aws configure</code> <em>which puts things in ~/.aws/credentials</em></p>
+<h2 id="initial-directory-and-dependency-setup">Initial directory and dependency setup</h2>
+<div class="highlight"><pre><span></span><span class="n">mkdir</span> <span class="n">ebjohnexample</span>
+<span class="n">cd</span> <span class="n">ebjohnexample</span>
+<span class="n">virtualenv</span> <span class="n">venv</span> <span class="c1">--python python3.6</span>
+<span class="k">source</span> <span class="n">venv</span><span class="o">/</span><span class="n">bin</span><span class="o">/</span><span class="n">activate</span>
+<span class="n">pip</span> <span class="n">install</span> <span class="n">flask</span><span class="o">==</span><span class="mi">1</span><span class="p">.</span><span class="mi">1</span><span class="p">.</span><span class="mi">1</span>
+<span class="n">pip</span> <span class="k">freeze</span> <span class="o">&gt;</span> <span class="n">requirements</span><span class="p">.</span><span class="n">txt</span>
+<span class="n">vim</span> <span class="n">application</span><span class="p">.</span><span class="n">py</span>
+</pre></div>
+<h3 id="a-tiny-flask-python-webapp">A tiny flask python webapp</h3>
+<p><em>application.py</em></p>
+<div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">flask</span> <span class="k">import</span> <span class="n">Flask</span>
+
+<span class="n">application</span> <span class="o">=</span> <span class="n">Flask</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+<span class="nd">@application</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">"/"</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">hello</span><span class="p">():</span>
+    <span class="k">return</span> <span class="s2">"hi"</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
+    <span class="n">application</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+</pre></div>
+<p><code>python application.py</code></p>
+<div class="highlight"><pre><span></span><span class="nv">Serving</span> <span class="nv">Flask</span> <span class="nv">app</span> <span class="s2">"</span><span class="s">application</span><span class="s2">"</span> <span class="ss">(</span><span class="nv">lazy</span> <span class="nv">loading</span><span class="ss">)</span>
+<span class="nv">Environment</span>: <span class="nv">production</span>
+<span class="nv">WARNING</span>: <span class="nv">This</span> <span class="nv">is</span> <span class="nv">a</span> <span class="nv">development</span> <span class="nv">server</span>. <span class="k">Do</span> <span class="nv">not</span> <span class="nv">use</span> <span class="nv">it</span> <span class="nv">in</span> <span class="nv">a</span> <span class="nv">production</span> <span class="nv">deployment</span>.
+<span class="nv">Use</span> <span class="nv">a</span> <span class="nv">production</span> <span class="nv">WSGI</span> <span class="nv">server</span> <span class="nv">instead</span>.
+<span class="nv">Debug</span> <span class="nv">mode</span>: <span class="nv">off</span>
+<span class="nv">Running</span> <span class="nv">on</span> <span class="nv">http</span>:<span class="o">//</span><span class="mi">127</span>.<span class="mi">0</span>.<span class="mi">0</span>.<span class="mi">1</span>:<span class="mi">5000</span><span class="o">/</span> <span class="ss">(</span><span class="nv">Press</span> <span class="nv">CTRL</span><span class="o">+</span><span class="nv">C</span> <span class="nv">to</span> <span class="nv">quit</span><span class="ss">)</span>
+</pre></div>
+<p><code>curl 127.0.0.1:5000</code></p>
+<ul>
+<li><a href="https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/create-deploy-python-flask.html">https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/create-deploy-python-flask.html</a></li>
+<li><a href="https://pypi.org/project/Flask/">https://pypi.org/project/Flask/</a></li>
+</ul>
+<h2 id="creating-an-elastic-beanstalk-project">Creating an Elastic Beanstalk Project</h2>
+<p>While Java and .jar files are probably the obvious example I preferred to do this in python =)</p>
+<p><em>The pricing/charges are "only" for the underlying resources, so at first an EC2 instance plus a load balancer...</em></p>
+<p><code>echo "venv" &gt; .ebignore ; cat .ebignore</code></p>
+<blockquote>
+<p>ensure elastic beanstalk ignores the local dev dependencies</p>
+</blockquote>
+<p><code>eb init -p python-3.6 ebjohnexample --region us-east-1</code></p>
+<blockquote>
+<p>creates a python3.6 elastic beanstalk application named "ebjohnexample"</p>
+</blockquote>
+<p><em>Ignoring setting up SSH since we really ought to never SSH into application servers , 12factor and all that</em></p>
+<p><a href="https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/eb3-init.html">https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/eb3-init.html</a></p>
+<p><code>eb create development</code></p>
+<blockquote>
+<p>This command can take around 5 minutes to create all the resources</p>
+</blockquote>
+<div class="highlight"><pre><span></span><span class="nv">Creating</span> <span class="nv">application</span> <span class="nv">version</span> <span class="nv">archive</span> <span class="s2">"</span><span class="s">app-191020_203345</span><span class="s2">"</span>.
+<span class="nv">Uploading</span> <span class="nv">ebjohnexample</span><span class="o">/</span><span class="nv">app</span><span class="o">-</span><span class="mi">191020</span><span class="nv">_203345</span>.<span class="nv">zip</span> <span class="nv">to</span> <span class="nv">S3</span>. <span class="nv">This</span> <span class="nv">may</span> <span class="nv">take</span> <span class="nv">a</span> <span class="k">while</span>.
+<span class="nv">Upload</span> <span class="nv">Complete</span>.
+<span class="nv">Environment</span> <span class="nv">details</span> <span class="k">for</span>: <span class="nv">development</span>
+  <span class="nv">Application</span> <span class="nv">name</span>: <span class="nv">ebjohnexample</span>
+  <span class="nv">Region</span>: <span class="nv">us</span><span class="o">-</span><span class="nv">east</span><span class="o">-</span><span class="mi">1</span>
+  <span class="nv">Deployed</span> <span class="nv">Version</span>: <span class="nv">app</span><span class="o">-</span><span class="mi">191020</span><span class="nv">_203345</span>
+  <span class="nv">Environment</span> <span class="nv">ID</span>: <span class="nv">e</span><span class="o">-</span><span class="nv">zqag8vpi2p</span>
+  <span class="nv">Platform</span>: <span class="nv">arn</span>:<span class="nv">aws</span>:<span class="nv">elasticbeanstalk</span>:<span class="nv">us</span><span class="o">-</span><span class="nv">east</span><span class="o">-</span><span class="mi">1</span>::<span class="nv">platform</span><span class="o">/</span><span class="nv">Python</span> <span class="mi">3</span>.<span class="mi">6</span> <span class="nv">running</span> <span class="nv">on</span> <span class="mi">64</span><span class="nv">bit</span> <span class="nv">Amazon</span> <span class="nv">Linux</span><span class="o">/</span><span class="mi">2</span>.<span class="mi">9</span>.<span class="mi">3</span>
+  <span class="nv">Tier</span>: <span class="nv">WebServer</span><span class="o">-</span><span class="nv">Standard</span><span class="o">-</span><span class="mi">1</span>.<span class="mi">0</span>
+  <span class="nv">CNAME</span>: <span class="nv">UNKNOWN</span>
+  <span class="nv">Updated</span>: <span class="mi">2019</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">21</span> <span class="mi">03</span>:<span class="mi">33</span>:<span class="mi">48</span>.<span class="mi">839000</span><span class="o">+</span><span class="mi">00</span>:<span class="mi">00</span>
+
+    <span class="nv">Printing</span> <span class="nv">Status</span>:
+<span class="mi">2019</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">21</span> <span class="mi">03</span>:<span class="mi">33</span>:<span class="mi">47</span>    <span class="nv">INFO</span>    <span class="nv">createEnvironment</span> <span class="nv">is</span> <span class="nv">starting</span>.
+<span class="mi">2019</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">21</span> <span class="mi">03</span>:<span class="mi">33</span>:<span class="mi">49</span>    <span class="nv">INFO</span>    <span class="nv">Using</span> <span class="nv">elasticbeanstalk</span><span class="o">-</span><span class="nv">us</span><span class="o">-</span><span class="nv">east</span><span class="o">-</span><span class="mi">1</span><span class="o">-</span><span class="mi">538676797434</span> <span class="nv">as</span> <span class="nv">Amazon</span> <span class="nv">S3</span> <span class="nv">storage</span> <span class="nv">bucket</span> <span class="k">for</span> <span class="nv">environment</span> <span class="nv">data</span>.
+<span class="mi">2019</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">21</span> <span class="mi">03</span>:<span class="mi">34</span>:<span class="mi">15</span>    <span class="nv">INFO</span>    <span class="nv">Created</span> <span class="nv">load</span> <span class="nv">balancer</span> <span class="nv">named</span>: <span class="nv">awseb</span><span class="o">-</span><span class="nv">e</span><span class="o">-</span><span class="nv">z</span><span class="o">-</span><span class="nv">AWSEBLoa</span><span class="o">-</span><span class="mi">1</span><span class="nv">LEU58ECO2D9O</span>
+<span class="mi">2019</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">21</span> <span class="mi">03</span>:<span class="mi">34</span>:<span class="mi">16</span>    <span class="nv">INFO</span>    <span class="nv">Created</span> <span class="nv">security</span> <span class="nv">group</span> <span class="nv">named</span>: <span class="nv">awseb</span><span class="o">-</span><span class="nv">e</span><span class="o">-</span><span class="nv">zqag8vpi2p</span><span class="o">-</span><span class="nv">stack</span><span class="o">-</span><span class="nv">AWSEBSecurityGroup</span><span class="o">-</span><span class="nv">HFU5QRINE35V</span>
+<span class="mi">2019</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">21</span> <span class="mi">03</span>:<span class="mi">34</span>:<span class="mi">31</span>    <span class="nv">INFO</span>    <span class="nv">Created</span> <span class="nv">Auto</span> <span class="nv">Scaling</span> <span class="nv">launch</span> <span class="nv">configuration</span> <span class="nv">named</span>: <span class="nv">awseb</span><span class="o">-</span><span class="nv">e</span><span class="o">-</span><span class="nv">zqag8vpi2p</span><span class="o">-</span><span class="nv">stack</span><span class="o">-</span><span class="nv">AWSEBAutoScalingLaunchConfiguration</span><span class="o">-</span><span class="mi">1</span><span class="nv">WRM6IN89BH24</span>
+<span class="mi">2019</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">21</span> <span class="mi">03</span>:<span class="mi">36</span>:<span class="mi">04</span>    <span class="nv">INFO</span>    <span class="nv">Created</span> <span class="nv">Auto</span> <span class="nv">Scaling</span> <span class="nv">group</span> <span class="nv">named</span>: <span class="nv">awseb</span><span class="o">-</span><span class="nv">e</span><span class="o">-</span><span class="nv">zqag8vpi2p</span><span class="o">-</span><span class="nv">stack</span><span class="o">-</span><span class="nv">AWSEBAutoScalingGroup</span><span class="o">-</span><span class="mi">10</span><span class="nv">LS20VBXQLOU</span>
+<span class="mi">2019</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">21</span> <span class="mi">03</span>:<span class="mi">36</span>:<span class="mi">04</span>    <span class="nv">INFO</span>    <span class="nv">Waiting</span> <span class="k">for</span> <span class="nv">EC2</span> <span class="nv">instances</span> <span class="nv">to</span> <span class="nv">launch</span>. <span class="nv">This</span> <span class="nv">may</span> <span class="nv">take</span> <span class="nv">a</span> <span class="nv">few</span> <span class="nv">minutes</span>.
+<span class="mi">2019</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">21</span> <span class="mi">03</span>:<span class="mi">36</span>:<span class="mi">20</span>    <span class="nv">INFO</span>    <span class="nv">Created</span> <span class="nv">Auto</span> <span class="nv">Scaling</span> <span class="nv">group</span> <span class="nv">policy</span> <span class="nv">named</span>: <span class="nv">arn</span>:<span class="nv">aws</span>:<span class="nv">autoscaling</span>:<span class="nv">us</span><span class="o">-</span><span class="nv">east</span><span class="o">-</span><span class="mi">1</span>:<span class="mi">538676797434</span>:<span class="nv">scalingPolicy</span>:<span class="nv">a0d4a40a</span><span class="o">-</span><span class="mi">5060</span><span class="o">-</span><span class="mi">406</span><span class="nv">b</span><span class="o">-</span><span class="nv">b3df</span><span class="o">-</span><span class="mi">8</span><span class="nv">ed43f8834d1</span>:<span class="nv">autoScalingGroupName</span><span class="o">/</span><span class="nv">awseb</span><span class="o">-</span><span class="nv">e</span><span class="o">-</span><span class="nv">zqag8vpi2p</span><span class="o">-</span><span class="nv">stack</span><span class="o">-</span><span class="nv">AWSEBAutoScalingGroup</span><span class="o">-</span><span class="mi">10</span><span class="nv">LS20VBXQLOU</span>:<span class="nv">policyName</span><span class="o">/</span><span class="nv">awseb</span><span class="o">-</span><span class="nv">e</span><span class="o">-</span><span class="nv">zqag8vpi2p</span><span class="o">-</span><span class="nv">stack</span><span class="o">-</span><span class="nv">AWSEBAutoScalingScaleUpPolicy</span><span class="o">-</span><span class="nv">AQUPYQ179IYF</span>
+<span class="mi">2019</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">21</span> <span class="mi">03</span>:<span class="mi">36</span>:<span class="mi">20</span>    <span class="nv">INFO</span>    <span class="nv">Created</span> <span class="nv">Auto</span> <span class="nv">Scaling</span> <span class="nv">group</span> <span class="nv">policy</span> <span class="nv">named</span>: <span class="nv">arn</span>:<span class="nv">aws</span>:<span class="nv">autoscaling</span>:<span class="nv">us</span><span class="o">-</span><span class="nv">east</span><span class="o">-</span><span class="mi">1</span>:<span class="mi">538676797434</span>:<span class="nv">scalingPolicy</span>:<span class="mi">59</span><span class="nv">cd3027</span><span class="o">-</span><span class="mi">4</span><span class="nv">bca</span><span class="o">-</span><span class="mi">42</span><span class="nv">a8</span><span class="o">-</span><span class="mi">8</span><span class="nv">feb</span><span class="o">-</span><span class="nv">fe342e5b786a</span>:<span class="nv">autoScalingGroupName</span><span class="o">/</span><span class="nv">awseb</span><span class="o">-</span><span class="nv">e</span><span class="o">-</span><span class="nv">zqag8vpi2p</span><span class="o">-</span><span class="nv">stack</span><span class="o">-</span><span class="nv">AWSEBAutoScalingGroup</span><span class="o">-</span><span class="mi">10</span><span class="nv">LS20VBXQLOU</span>:<span class="nv">policyName</span><span class="o">/</span><span class="nv">awseb</span><span class="o">-</span><span class="nv">e</span><span class="o">-</span><span class="nv">zqag8vpi2p</span><span class="o">-</span><span class="nv">stack</span><span class="o">-</span><span class="nv">AWSEBAutoScalingScaleDownPolicy</span><span class="o">-</span><span class="nv">CMAG2FZD4Y0B</span>
+<span class="mi">2019</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">21</span> <span class="mi">03</span>:<span class="mi">36</span>:<span class="mi">20</span>    <span class="nv">INFO</span>    <span class="nv">Created</span> <span class="nv">CloudWatch</span> <span class="nv">alarm</span> <span class="nv">named</span>: <span class="nv">awseb</span><span class="o">-</span><span class="nv">e</span><span class="o">-</span><span class="nv">zqag8vpi2p</span><span class="o">-</span><span class="nv">stack</span><span class="o">-</span><span class="nv">AWSEBCloudwatchAlarmLow</span><span class="o">-</span><span class="nv">HWA2PL3FJCDQ</span>
+<span class="mi">2019</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">21</span> <span class="mi">03</span>:<span class="mi">36</span>:<span class="mi">20</span>    <span class="nv">INFO</span>    <span class="nv">Created</span> <span class="nv">CloudWatch</span> <span class="nv">alarm</span> <span class="nv">named</span>: <span class="nv">awseb</span><span class="o">-</span><span class="nv">e</span><span class="o">-</span><span class="nv">zqag8vpi2p</span><span class="o">-</span><span class="nv">stack</span><span class="o">-</span><span class="nv">AWSEBCloudwatchAlarmHigh</span><span class="o">-</span><span class="mi">14</span><span class="nv">EGWT2CXU238</span>
+<span class="mi">2019</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">21</span> <span class="mi">03</span>:<span class="mi">37</span>:<span class="mi">10</span>    <span class="nv">INFO</span>    <span class="nv">Application</span> <span class="nv">available</span> <span class="nv">at</span> <span class="nv">development</span>.<span class="nv">xyxifvqn9z</span>.<span class="nv">us</span><span class="o">-</span><span class="nv">east</span><span class="o">-</span><span class="mi">1</span>.<span class="nv">elasticbeanstalk</span>.<span class="nv">com</span>.
+<span class="mi">2019</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">21</span> <span class="mi">03</span>:<span class="mi">37</span>:<span class="mi">10</span>    <span class="nv">INFO</span>    <span class="nv">Successfully</span> <span class="nv">launched</span> <span class="nv">environment</span>: <span class="nv">development</span>
+</pre></div>
+<blockquote>
+<p>Creates an "environment" (because we like to separate Dev, Test, and Production ... which means auto creating an S3 bucket, Elastic IP, and security group, etc.</p>
+</blockquote>
+<p>You can examine the application in the WebUI:</p>
+<p>By using AWS Web Console -&gt; Services -&gt; Elastic Beanstalk -&gt; "development" , to see configuration/status</p>
+<p>https://console.aws.amazon.com/elasticbeanstalk/home?region=us-east-1#/launchEnvironment?applicationName=ebjohnexample&amp;environmentId=e-zqag8vpi2p</p>
+<p><code>curl development.xyxifvqn9z.us-east-1.elasticbeanstalk.com</code></p>
+<p><code>eb status --verbose</code></p>
+<blockquote>
+<p>Verify the Status and Health</p>
+</blockquote>
+<div class="highlight"><pre><span></span><span class="nv">Environment</span> <span class="nv">details</span> <span class="k">for</span>: <span class="nv">development</span>
+  <span class="nv">Application</span> <span class="nv">name</span>: <span class="nv">ebjohnexample</span>
+  <span class="nv">Region</span>: <span class="nv">us</span><span class="o">-</span><span class="nv">east</span><span class="o">-</span><span class="mi">1</span>
+  <span class="nv">Deployed</span> <span class="nv">Version</span>: <span class="nv">app</span><span class="o">-</span><span class="mi">191020</span><span class="nv">_203345</span>
+  <span class="nv">Environment</span> <span class="nv">ID</span>: <span class="nv">e</span><span class="o">-</span><span class="nv">zqag8vpi2p</span>
+  <span class="nv">Platform</span>: <span class="nv">arn</span>:<span class="nv">aws</span>:<span class="nv">elasticbeanstalk</span>:<span class="nv">us</span><span class="o">-</span><span class="nv">east</span><span class="o">-</span><span class="mi">1</span>::<span class="nv">platform</span><span class="o">/</span><span class="nv">Python</span> <span class="mi">3</span>.<span class="mi">6</span> <span class="nv">running</span> <span class="nv">on</span> <span class="mi">64</span><span class="nv">bit</span> <span class="nv">Amazon</span> <span class="nv">Linux</span><span class="o">/</span><span class="mi">2</span>.<span class="mi">9</span>.<span class="mi">3</span>
+  <span class="nv">Tier</span>: <span class="nv">WebServer</span><span class="o">-</span><span class="nv">Standard</span><span class="o">-</span><span class="mi">1</span>.<span class="mi">0</span>
+  <span class="nv">CNAME</span>: <span class="nv">development</span>.<span class="nv">xyxifvqn9z</span>.<span class="nv">us</span><span class="o">-</span><span class="nv">east</span><span class="o">-</span><span class="mi">1</span>.<span class="nv">elasticbeanstalk</span>.<span class="nv">com</span>
+  <span class="nv">Updated</span>: <span class="mi">2019</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">21</span> <span class="mi">03</span>:<span class="mi">37</span>:<span class="mi">10</span>.<span class="mi">841000</span><span class="o">+</span><span class="mi">00</span>:<span class="mi">00</span>
+  <span class="nv">Status</span>: <span class="nv">Ready</span>
+  <span class="nv">Health</span>: <span class="nv">Green</span>
+  <span class="nv">Running</span> <span class="nv">instances</span>: <span class="mi">1</span>
+      <span class="nv">i</span><span class="o">-</span><span class="mi">0365</span><span class="nv">b4a823823ef5c</span>: <span class="nv">InService</span>
+</pre></div>
+<p><em>Since this was written AWS have created CodeCommit and Deploy for source control and deployment pipelines so even simpler (tighter) integration with Amazon</em></p>
+<h3 id="alternatively-using-the-aws-console-ui">Alternatively using the AWS Console UI</h3>
+<p><a href="https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/GettingStarted.CreateApp.html">https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/GettingStarted.CreateApp.html</a></p>
+<h3 id="cleanup-and-pricing">Cleanup and Pricing</h3>
+<p><code>eb terminate development</code></p>
+<blockquote>
+<p>terminate all instances, load balancers, etc. and delete the app from S3 entirely (since s3 costs money too)</p>
+</blockquote>
+<p><em>Probably having a better name than just development might make it clearer if there are multiple applications in EB</em></p>
+<p>Clearly there is very little operational management required: developers have AWS infrastructure at their fingertips.</p>
+<p>The EC2 instances <em>charged per hour cough-cough</em> costs depend on what sizing you use, t2.micro for a low traffic demo project is near nothing...</p>
+<p>But the load balancer at around $.02 an hour comes out to about 50 cents a day or <em>at least ~$15 a month</em> even if your application is doing nothing.</p>
+<p><a href="https://aws.amazon.com/elasticloadbalancing/pricing/">https://aws.amazon.com/elasticloadbalancing/pricing/</a></p>
+<hr/>
+<h3 id="logs">Logs</h3>
+<p>AWS Web Console -&gt; Deployment -&gt; Elastic Beanstalk -&gt; App Name -&gt; Logs</p>
+<p>Snapshot Logs -&gt; View Log File</p>
+<blockquote>
+<p>notice that ElasticBeanstalk leverages CloudFormation under the hood
+/opt/elasticbeanstalk/hooks/preinit/03wsgiuser.s
+also uses virtualenv and pip</p>
+</blockquote>
+<hr/>
+<h2 id="credentials-via-environment-variables">Credentials via Environment Variables</h2>
+<p>Environment Variables help keep configuration out of your code (e.g. access keys/passwords)</p>
+<p><code>mkdir .ebextensions</code>
+<code>vi .ebextensions/01.config</code></p>
+<blockquote>
+<p>configs are read and run sequentially</p>
+</blockquote>
+<p>BUT oddly enough .config files in ElasticBeanstalk actually need to be committed to the repo (security fail!)</p>
+<p><a href="https://stackoverflow.com/questions/14206760/how-to-set-an-environment-variable-in-amazon-elastic-beanstalk-python">https://stackoverflow.com/questions/14206760/how-to-set-an-environment-variable-in-amazon-elastic-beanstalk-python</a></p>
+<blockquote>
+<p>override these placeholders with actual secret values,</p>
+<p>AWS Web Console -&gt; Deployment -&gt; Elastic Beanstalk -&gt; App Name -&gt; Configuration -&gt; Software Configuration (Gear Symbol)</p>
+</blockquote>
+<div class="highlight"><pre><span></span> <span class="n">option_settings</span><span class="p">:</span>
+  <span class="o">-</span> <span class="n">option_name</span><span class="p">:</span> <span class="n">PARAM1</span>
+    <span class="n">value</span><span class="p">:</span> <span class="n">placeholder</span>
+</pre></div>
+<h2 id="more-info">More info</h2>
+<ul>
+<li><a href="https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/using-features.managing.ec2.html">https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/using-features.managing.ec2.html</a></li>
+<li><a href="https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/configuring-https.html">https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/configuring-https.html</a> to have your <em>own domain and SSL</em></li>
+<li><a href="https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/using-features.managing.elb.html">https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/using-features.managing.elb.html</a></li>
+</ul>
+<p><strong>container_commands</strong>
+<a href="https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/create_deploy_Python_django.html">https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/create_deploy_Python_django.html</a></p>
+<p><a href="https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/create_deploy_Python_custom_container.html">https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/create_deploy_Python_custom_container.html</a>
+<a href="https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/customize-containers-ec2.html">https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/customize-containers-ec2.html</a></p>
+<p><strong>Docker</strong>
+<a href="https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/create_deploy_docker_eb.html">https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/create_deploy_docker_eb.html</a></p>
+            <aside>
+            <hr/>
+            <nav>
+            <ul class="articles_timeline">
+ 
+                <li class="previous_article">« <a href="https://blog.john-pfeiffer.com/publish-a-pelican-blog-using-a-bitbucket-post-webhook/" title="Previous: Publish a pelican blog using a Bitbucket POST Webhook">Publish a pelican blog using a Bitbucket POST Webhook</a></li>
+ 
+                <li class="next_article"><a href="https://blog.john-pfeiffer.com/listjs-sort-filters-search-and-more-for-html-lists-and-tables-in-javascript/" title="Next: ListJS: Sort, Filters, Search and more for HTML lists and tables in Javascript">ListJS: Sort, Filters, Search and more for HTML lists and tables in Javascript</a> »</li>
+            </ul>
+            </nav>
+            </aside>
+        </div>
+        <section>
+        <div class="span2" style="float:right;font-size:0.9em;">
+ 
+            <h4>Published</h4>
+            <time pubdate="pubdate" datetime="2014-08-08T20:00:00-07:00">Aug 8, 2014</time>
+            <h4>Category</h4>
+            <a class="category-link" href="/categories.html#build-CI-CD-devops-ref">build-CI-CD-devops</a> 
+            <h4>~977 words</h4>
+            <h4>Tags</h4>
+            <ul class="list-of-tags tags-in-article"> 
+                <li><a href="/tags.html#aws-ref">aws
+                    <span>4</span>
+</a></li>
+                <li><a href="/tags.html#eb-ref">eb
+                    <span>1</span>
+</a></li>
+                <li><a href="/tags.html#elastic-beanstalk-ref">elastic beanstalk
+                    <span>1</span>
+</a></li>
+                <li><a href="/tags.html#flask-ref">flask
+                    <span>2</span>
+</a></li>
+                <li><a href="/tags.html#python-ref">python
+                    <span>11</span>
+</a></li>
+            </ul>
+
+        </div>
+        </section>
+</div>
+</article>
+				</div>
+				<div class="span1"></div>
+			</div>
+		</div>
+    </div>
+<footer>
+<div id="footer">
+    <ul class="footer-content">
+    </ul>
+</div>
+</footer>            <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+    </body>
+</html>
