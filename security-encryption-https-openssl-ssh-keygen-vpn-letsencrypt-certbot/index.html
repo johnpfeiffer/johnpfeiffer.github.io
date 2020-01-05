@@ -182,34 +182,34 @@
 <h2 id="pretty-good-encryption-for-pretty-good-privacy">Pretty Good Encryption for Pretty Good Privacy</h2>
 <p>While there is a lot of value in leveraging the GPG public and private keys for authenticity checking this is just about encrypted data...</p>
 <h3 id="gpg-encryption">GPG Encryption</h3>
-<div class="highlight"><pre><span></span><span class="n">gpg</span> <span class="o">-</span><span class="k">c</span> <span class="n">example</span><span class="p">.</span><span class="n">tar</span><span class="p">.</span><span class="n">gz</span>
+<div class="highlight"><pre><span></span><span class="err">gpg -c example.tar.gz</span>
 </pre></div>
 <blockquote>
 <p>prompts for a password to access the keyring and leverages existing (or automatically generates) public and private keys, and outputs example.tar.gz.gpg</p>
 </blockquote>
 <p><strong>Note: encrypting before compressing is meaningless since encrypted data is random and compression depends on repetition/patterns</strong></p>
-<div class="highlight"><pre><span></span><span class="n">gpg</span> <span class="c1">--yes --passphrase=password -c example.txt</span>
+<div class="highlight"><pre><span></span><span class="err">gpg --yes --passphrase=password -c example.txt</span>
 </pre></div>
 <blockquote>
 <p>non interactive encryption (if the private key is password protected), outputs example.txt.gpg</p>
 </blockquote>
-<div class="highlight"><pre><span></span><span class="n">echo</span> <span class="ss">"password"</span> <span class="o">|</span> <span class="n">gpg</span> <span class="c1">--yes --no-tty --batch --passphrase-fd 0 --output encrypted.txt.gpg  --symmetric --cipher-algo AES256 plain.txt</span>
+<div class="highlight"><pre><span></span><span class="err">echo "password" | gpg --yes --no-tty --batch --passphrase-fd 0 --output encrypted.txt.gpg  --symmetric --cipher-algo AES256 plain.txt</span>
 </pre></div>
 <blockquote>
 <p>non interactive AES 256 symmetric cipher rather than public/private keypairs</p>
 </blockquote>
 <h2 id="gpg-decryption">GPG Decryption</h2>
-<div class="highlight"><pre><span></span><span class="n">gpg</span> <span class="n">example</span><span class="p">.</span><span class="n">tar</span><span class="p">.</span><span class="n">gz</span><span class="p">.</span><span class="n">gpg</span>
+<div class="highlight"><pre><span></span><span class="err">gpg example.tar.gz.gpg</span>
 </pre></div>
 <blockquote>
 <p>enter the passphrase to access the private key to decrypt the file</p>
 </blockquote>
-<div class="highlight"><pre><span></span><span class="n">gpg</span> <span class="c1">--yes --passphrase=password example.txt.gpg</span>
+<div class="highlight"><pre><span></span><span class="err">gpg --yes --passphrase=password example.txt.gpg</span>
 </pre></div>
 <blockquote>
 <p>non-interactively access the private key to decrypt the file</p>
 </blockquote>
-<div class="highlight"><pre><span></span><span class="n">echo</span> <span class="ss">"password"</span> <span class="o">|</span> <span class="n">gpg</span> <span class="c1">--yes --no-tty --batch --passphrase-fd 0 --output plain.txt --decrypt encrypted.txt.gpg</span>
+<div class="highlight"><pre><span></span><span class="err">echo "password" | gpg --yes --no-tty --batch --passphrase-fd 0 --output plain.txt --decrypt encrypted.txt.gpg</span>
 </pre></div>
 <blockquote>
 <p>non interactively decrypt with symmetric encryption</p>
@@ -221,28 +221,28 @@
 <p>Security benefits from transparency in that if you provide the algorithm and source code in plain sight and attackers are still unable to decrypt/crack/manipulate the data then you are probably in good shape.</p>
 <p>Perhaps one of the most well known projects (open source and free!) to advance the practice of encryption is <a href="https://www.openssl.org/">https://www.openssl.org/</a></p>
 <p>Here we encrypt and decrypt a text file:</p>
-<div class="highlight"><pre><span></span><span class="n">openssl</span> <span class="n">aes</span><span class="o">-</span><span class="mi">256</span><span class="o">-</span><span class="n">cbc</span> <span class="o">-</span><span class="k">in</span> <span class="n">plain</span><span class="p">.</span><span class="n">txt</span> <span class="o">-</span><span class="k">out</span> <span class="n">message</span><span class="p">.</span><span class="k">encrypted</span>
+<div class="highlight"><pre><span></span><span class="err">openssl aes-256-cbc -in plain.txt -out message.encrypted</span>
 </pre></div>
 <blockquote>
 <p>prompted for a password (symmetric key) to encrypt the file with AES 256</p>
 </blockquote>
-<div class="highlight"><pre><span></span><span class="n">openssl</span> <span class="n">aes</span><span class="o">-</span><span class="mi">256</span><span class="o">-</span><span class="n">cbc</span> <span class="o">-</span><span class="n">d</span> <span class="o">-</span><span class="k">in</span> <span class="n">message</span><span class="p">.</span><span class="k">encrypted</span> <span class="o">-</span><span class="k">out</span> <span class="n">plain</span><span class="p">.</span><span class="n">txt</span>
+<div class="highlight"><pre><span></span><span class="err">openssl aes-256-cbc -d -in message.encrypted -out plain.txt</span>
 </pre></div>
 <blockquote>
 <p>prompted for a password to decrypt the message</p>
 </blockquote>
-<div class="highlight"><pre><span></span><span class="n">openssl</span> <span class="n">aes</span><span class="o">-</span><span class="mi">256</span><span class="o">-</span><span class="n">cbc</span> <span class="o">-</span><span class="k">in</span> <span class="n">plain</span><span class="p">.</span><span class="n">txt</span> <span class="o">-</span><span class="k">out</span> <span class="n">message</span><span class="p">.</span><span class="k">encrypted</span> <span class="o">-</span><span class="n">pass</span> <span class="n">pass</span><span class="p">:</span><span class="n">YOURPASSWORD</span>
+<div class="highlight"><pre><span></span><span class="err">openssl aes-256-cbc -in plain.txt -out message.encrypted -pass pass:YOURPASSWORD</span>
 </pre></div>
 <blockquote>
 <p>non-interactively provide the password to encrypt the file with AES 256</p>
 </blockquote>
-<div class="highlight"><pre><span></span><span class="n">openssl</span> <span class="n">aes</span><span class="o">-</span><span class="mi">256</span><span class="o">-</span><span class="n">cbc</span> <span class="o">-</span><span class="n">d</span> <span class="o">-</span><span class="k">in</span> <span class="n">message</span><span class="p">.</span><span class="k">encrypted</span> <span class="o">-</span><span class="k">out</span> <span class="n">plain</span><span class="p">.</span><span class="n">txt</span> <span class="o">-</span><span class="n">pass</span> <span class="n">pass</span><span class="p">:</span><span class="n">YOURPASSWORD</span>
+<div class="highlight"><pre><span></span><span class="err">openssl aes-256-cbc -d -in message.encrypted -out plain.txt -pass pass:YOURPASSWORD</span>
 </pre></div>
 <blockquote>
 <p>non-interactively provide the password to decrypt the file with AES 256</p>
 </blockquote>
 <p><em>an incorrect password will create a zero byte file</em></p>
-<div class="highlight"><pre><span></span><span class="n">openssl</span> <span class="n">aes</span><span class="o">-</span><span class="mi">256</span><span class="o">-</span><span class="n">cbc</span> <span class="o">-</span><span class="n">a</span> <span class="o">-</span><span class="n">d</span> <span class="o">-</span><span class="k">in</span> <span class="n">message</span><span class="p">.</span><span class="k">encrypted</span> <span class="o">-</span><span class="k">out</span> <span class="n">plain</span><span class="p">.</span><span class="n">txt</span>
+<div class="highlight"><pre><span></span><span class="err">openssl aes-256-cbc -a -d -in message.encrypted -out plain.txt</span>
 </pre></div>
 <blockquote>
 <p>if it's base64 encoded do not forget the -a</p>
@@ -261,146 +261,146 @@
 <p>The private key contains a series of numbers. Two of those numbers form the "public key", the others are part of your "private key".</p>
 <p>The "public key" bits are also embedded in your Certificate (we get them from your CSR - certificate signing request).</p>
 <h3 id="verify-the-ssl-certificate-and-private-key-match">Verify the SSL Certificate and Private Key match</h3>
-<div class="highlight"><pre><span></span><span class="p">(</span><span class="n">openssl</span> <span class="n">x509</span> <span class="o">-</span><span class="n">noout</span> <span class="o">-</span><span class="n">modulus</span> <span class="o">-</span><span class="k">in</span> <span class="n">server</span><span class="p">.</span><span class="n">pem</span> <span class="o">|</span> <span class="n">openssl</span> <span class="n">md5</span> <span class="p">;</span> <span class="n">openssl</span> <span class="n">rsa</span> <span class="o">-</span><span class="n">noout</span> <span class="o">-</span><span class="n">modulus</span> <span class="o">-</span><span class="k">in</span> <span class="n">server</span><span class="p">.</span><span class="k">key</span> <span class="o">|</span> <span class="n">openssl</span> <span class="n">md5</span><span class="p">)</span> <span class="o">|</span> <span class="n">uniq</span>
+<div class="highlight"><pre><span></span><span class="err">(openssl x509 -noout -modulus -in server.pem | openssl md5 ; openssl rsa -noout -modulus -in server.key | openssl md5) | uniq</span>
 </pre></div>
 <blockquote>
 <p>outputs a single hash if matching, if two hashes are output then it is not unique and the key and cert do not match</p>
 </blockquote>
 <p>To check that the public key in your cert matches the public portion of your private key:</p>
-<div class="highlight"><pre><span></span><span class="n">openssl</span> <span class="n">x509</span> <span class="o">-</span><span class="n">noout</span> <span class="o">-</span><span class="nb">text</span> <span class="o">-</span><span class="k">in</span> <span class="n">server</span><span class="p">.</span><span class="n">crt</span>
-<span class="n">openssl</span> <span class="n">rsa</span> <span class="o">-</span><span class="n">noout</span> <span class="o">-</span><span class="nb">text</span> <span class="o">-</span><span class="k">in</span> <span class="n">server</span><span class="p">.</span><span class="k">key</span>
+<div class="highlight"><pre><span></span><span class="err">openssl x509 -noout -text -in server.crt</span>
+<span class="err">openssl rsa -noout -text -in server.key</span>
 </pre></div>
 <p>But since the public exponent is usually 65537 and it's challening to compare a long modulus you can use the following approach:</p>
-<div class="highlight"><pre><span></span><span class="n">openssl</span> <span class="n">x509</span> <span class="o">-</span><span class="n">noout</span> <span class="o">-</span><span class="n">modulus</span> <span class="o">-</span><span class="k">in</span> <span class="n">server</span><span class="p">.</span><span class="n">crt</span> <span class="o">|</span> <span class="n">openssl</span> <span class="n">md5</span>
-<span class="n">openssl</span> <span class="n">rsa</span> <span class="o">-</span><span class="n">noout</span> <span class="o">-</span><span class="n">modulus</span> <span class="o">-</span><span class="k">in</span> <span class="n">server</span><span class="p">.</span><span class="k">key</span> <span class="o">|</span> <span class="n">openssl</span> <span class="n">md5</span>
+<div class="highlight"><pre><span></span><span class="err">openssl x509 -noout -modulus -in server.crt | openssl md5</span>
+<span class="err">openssl rsa -noout -modulus -in server.key | openssl md5</span>
 </pre></div>
 <blockquote>
 <p>the "modulus" and the "public exponent" portions of the cert and key ... aka the two md5sum hashes should match</p>
 </blockquote>
 <h3 id="verify-the-cert-and-intermediate-match-and-then-verify">Verify the Cert and Intermediate match and then Verify</h3>
-<div class="highlight"><pre><span></span><span class="n">openssl</span> <span class="n">verify</span> <span class="o">-</span><span class="n">purpose</span> <span class="n">sslserver</span> <span class="o">-</span><span class="n">CAfile</span> <span class="n">intermediate</span><span class="p">.</span><span class="n">pem</span> <span class="o">-</span><span class="k">verbose</span> <span class="n">server</span><span class="p">.</span><span class="n">pem</span>
+<div class="highlight"><pre><span></span><span class="err">openssl verify -purpose sslserver -CAfile intermediate.pem -verbose server.pem</span>
 </pre></div>
 <blockquote>
 <p>ensure the intermediate certificate matches the SSL certificate (if it does not SSL trust will not work correctly)</p>
 </blockquote>
 <h3 id="verify-a-csr-matches-the-key-and-certificate">Verify a CSR matches the Key and Certificate</h3>
 <p>To check to which key or certificate a particular CSR belongs you can compute</p>
-<div class="highlight"><pre><span></span><span class="n">openssl</span> <span class="n">req</span> <span class="o">-</span><span class="n">noout</span> <span class="o">-</span><span class="n">modulus</span> <span class="o">-</span><span class="k">in</span> <span class="n">server</span><span class="p">.</span><span class="n">csr</span> <span class="o">|</span> <span class="n">openssl</span> <span class="n">md5</span>
+<div class="highlight"><pre><span></span><span class="err">openssl req -noout -modulus -in server.csr | openssl md5</span>
 </pre></div>
 <h2 id="creating-keys-and-certificates-and-certificate-requests">Creating keys and certificates and certificate requests</h2>
 <h3 id="openssl-new-key-and-cert-one-liner">openssl New Key and Cert One Liner</h3>
-<div class="highlight"><pre><span></span><span class="n">openssl</span> <span class="n">req</span> <span class="o">-</span><span class="n">subj</span> <span class="s1">'/CN=example.com/O=My Company Name LTD./C=US'</span> <span class="o">-</span><span class="k">new</span> <span class="o">-</span><span class="n">newkey</span> <span class="n">rsa</span><span class="p">:</span><span class="mi">2048</span> <span class="o">-</span><span class="n">days</span> <span class="mi">365</span> <span class="o">-</span><span class="n">nodes</span> <span class="o">-</span><span class="n">x509</span> <span class="o">-</span><span class="n">keyout</span> <span class="n">server</span><span class="p">.</span><span class="k">key</span> <span class="o">-</span><span class="k">out</span> <span class="n">server</span><span class="p">.</span><span class="n">crt</span>
+<div class="highlight"><pre><span></span><span class="err">openssl req -subj '/CN=example.com/O=My Company Name LTD./C=US' -new -newkey rsa:2048 -days 365 -nodes -x509 -keyout server.key -out server.crt</span>
 </pre></div>
 <blockquote>
 <p>one liner to generate a self signed SSL key and certificate, since SSL certs are rotated regularly we can use 2048 instead of 4096 bits</p>
 </blockquote>
 <h3 id="openssl-certificate-commands">openssl certificate commands</h3>
-<div class="highlight"><pre><span></span><span class="n">openssl</span> <span class="n">req</span> <span class="o">-</span><span class="k">out</span> <span class="n">CSR</span><span class="p">.</span><span class="n">csr</span> <span class="o">-</span><span class="k">new</span> <span class="o">-</span><span class="n">newkey</span> <span class="n">rsa</span><span class="p">:</span><span class="mi">2048</span> <span class="o">-</span><span class="n">nodes</span> <span class="o">-</span><span class="n">keyout</span> <span class="n">privateKey</span><span class="p">.</span><span class="k">key</span>
+<div class="highlight"><pre><span></span><span class="err">openssl req -out CSR.csr -new -newkey rsa:2048 -nodes -keyout privateKey.key</span>
 </pre></div>
 <blockquote>
 <p>create 2048 bit nopass key + csr (certificate signing request - usually sent to a Certificate Authority that is in the root chain bundled with major browsers and libraries)</p>
 </blockquote>
-<div class="highlight"><pre><span></span><span class="n">openssl</span> <span class="n">x509</span> <span class="o">-</span><span class="n">req</span> <span class="o">-</span><span class="n">days</span> <span class="mi">365</span> <span class="o">-</span><span class="k">in</span> <span class="n">CSR</span><span class="p">.</span><span class="n">csr</span> <span class="o">-</span><span class="n">signkey</span> <span class="n">privateKey</span><span class="p">.</span><span class="k">key</span> <span class="o">-</span><span class="k">out</span> <span class="n">cert</span><span class="p">.</span><span class="n">crt</span>
+<div class="highlight"><pre><span></span><span class="err">openssl x509 -req -days 365 -in CSR.csr -signkey privateKey.key -out cert.crt</span>
 </pre></div>
 <blockquote>
 <p>self sign a CSR and generate a self signed SSL certificate</p>
 </blockquote>
-<div class="highlight"><pre><span></span><span class="n">openssl</span> <span class="n">rsa</span> <span class="o">-</span><span class="k">in</span> <span class="n">mykey</span><span class="p">.</span><span class="n">pem</span> <span class="o">-</span><span class="n">pubout</span>
+<div class="highlight"><pre><span></span><span class="err">openssl rsa -in mykey.pem -pubout</span>
 </pre></div>
 <blockquote>
 <p>display the public key generated from the private key</p>
 </blockquote>
-<div class="highlight"><pre><span></span><span class="n">openssl</span> <span class="n">rsa</span> <span class="o">-</span><span class="k">in</span> <span class="n">mykey</span><span class="p">.</span><span class="n">pem</span> <span class="o">-</span><span class="n">pubout</span> <span class="o">-</span><span class="k">out</span> <span class="n">mykey</span><span class="p">.</span><span class="n">pub</span>
+<div class="highlight"><pre><span></span><span class="err">openssl rsa -in mykey.pem -pubout -out mykey.pub</span>
 </pre></div>
 <blockquote>
 <p>use the private key to generate and save the public key to a file</p>
 </blockquote>
-<div class="highlight"><pre><span></span><span class="n">openssl</span> <span class="n">req</span> <span class="o">-</span><span class="nb">text</span> <span class="o">-</span><span class="n">noout</span> <span class="o">-</span><span class="n">verify</span> <span class="o">-</span><span class="k">in</span> <span class="n">CSR</span><span class="p">.</span><span class="n">csr</span>
+<div class="highlight"><pre><span></span><span class="err">openssl req -text -noout -verify -in CSR.csr</span>
 </pre></div>
 <blockquote>
 <p>Verify a CSR certificate request</p>
 </blockquote>
-<div class="highlight"><pre><span></span><span class="n">openssl</span> <span class="n">rsa</span> <span class="o">-</span><span class="k">check</span> <span class="o">-</span><span class="k">in</span> <span class="n">cert</span><span class="p">.</span><span class="k">key</span>
+<div class="highlight"><pre><span></span><span class="err">openssl rsa -check -in cert.key</span>
 </pre></div>
 <blockquote>
 <p>Verify a key</p>
 </blockquote>
-<div class="highlight"><pre><span></span><span class="n">openssl</span> <span class="n">x509</span> <span class="o">-</span><span class="nb">text</span> <span class="o">-</span><span class="k">in</span> <span class="n">cert</span><span class="p">.</span><span class="n">crt</span>
+<div class="highlight"><pre><span></span><span class="err">openssl x509 -text -in cert.crt</span>
 </pre></div>
 <blockquote>
 <p>View INFO about a cert and see the cert</p>
 </blockquote>
-<div class="highlight"><pre><span></span><span class="n">openssl</span> <span class="n">x509</span> <span class="o">-</span><span class="n">noout</span> <span class="o">-</span><span class="n">issuer</span> <span class="o">-</span><span class="n">subject</span> <span class="o">-</span><span class="n">dates</span> <span class="o">-</span><span class="k">in</span> <span class="n">cert</span><span class="p">.</span><span class="n">crt</span>
+<div class="highlight"><pre><span></span><span class="err">openssl x509 -noout -issuer -subject -dates -in cert.crt</span>
 </pre></div>
 <blockquote>
 <p>View specific items in the certificate (and do not print out the full certificate)</p>
 </blockquote>
-<div class="highlight"><pre><span></span><span class="n">openssl</span> <span class="n">req</span> <span class="o">-</span><span class="k">out</span> <span class="n">CSR</span><span class="p">.</span><span class="n">csr</span> <span class="o">-</span><span class="k">key</span> <span class="n">privateKey</span><span class="p">.</span><span class="k">key</span> <span class="o">-</span><span class="k">new</span>
+<div class="highlight"><pre><span></span><span class="err">openssl req -out CSR.csr -key privateKey.key -new</span>
 </pre></div>
 <blockquote>
 <p>Generate a certificate signing request (CSR) for an existing private key</p>
 </blockquote>
-<div class="highlight"><pre><span></span><span class="n">openssl</span> <span class="n">x509</span> <span class="o">-</span><span class="n">x509toreq</span> <span class="o">-</span><span class="k">in</span> <span class="n">certificate</span><span class="p">.</span><span class="n">crt</span> <span class="o">-</span><span class="k">out</span> <span class="n">CSR</span><span class="p">.</span><span class="n">csr</span> <span class="o">-</span><span class="n">signkey</span> <span class="n">privateKey</span><span class="p">.</span><span class="k">key</span>
+<div class="highlight"><pre><span></span><span class="err">openssl x509 -x509toreq -in certificate.crt -out CSR.csr -signkey privateKey.key</span>
 </pre></div>
 <blockquote>
 <p>Generate a certificate signing request based on an existing certificate and private key</p>
 </blockquote>
 <h3 id="creating-an-rsa-certificate-with-a-password">Creating an RSA certificate with a password</h3>
-<div class="highlight"><pre><span></span><span class="n">openssl</span> <span class="n">genrsa</span> <span class="o">-</span><span class="n">des3</span> <span class="o">-</span><span class="k">out</span> <span class="n">domainname</span><span class="p">.</span><span class="k">key</span> <span class="mi">2048</span>
+<div class="highlight"><pre><span></span><span class="err">openssl genrsa -des3 -out domainname.key 2048</span>
 </pre></div>
 <blockquote>
 <p>Create a 2048 bit private key with passphrase</p>
 </blockquote>
-<div class="highlight"><pre><span></span><span class="n">openssl</span> <span class="n">req</span> <span class="o">-</span><span class="k">new</span> <span class="o">-</span><span class="k">key</span> <span class="n">domainname</span><span class="p">.</span><span class="k">key</span> <span class="o">-</span><span class="k">out</span> <span class="n">domainname</span><span class="p">.</span><span class="n">csr</span>
+<div class="highlight"><pre><span></span><span class="err">openssl req -new -key domainname.key -out domainname.csr</span>
 </pre></div>
 <blockquote>
 <p>CREATE A CSR, CEERTIFICATE SIGNED REQUEST</p>
 </blockquote>
 <p>Common Name (domain name) = fully qualified domain name</p>
-<div class="highlight"><pre><span></span><span class="n">openssl</span> <span class="n">x509</span> <span class="o">-</span><span class="n">req</span> <span class="o">-</span><span class="n">days</span> <span class="mi">365</span> <span class="o">-</span><span class="k">in</span> <span class="n">CSR</span><span class="p">.</span><span class="n">csr</span> <span class="o">-</span><span class="n">signkey</span> <span class="n">privateKey</span><span class="p">.</span><span class="k">key</span> <span class="o">-</span><span class="k">out</span> <span class="n">cert</span><span class="p">.</span><span class="n">crt</span>
+<div class="highlight"><pre><span></span><span class="err">openssl x509 -req -days 365 -in CSR.csr -signkey privateKey.key -out cert.crt</span>
 </pre></div>
 <blockquote>
 <p>Generate a self signed cert</p>
 </blockquote>
 <h3 id="remove-a-passphrase-to-install-a-private-key-on-a-server">Remove a passphrase to install a private key on a server</h3>
-<div class="highlight"><pre><span></span><span class="n">openssl</span> <span class="n">rsa</span> <span class="o">-</span><span class="k">in</span> <span class="n">domainname</span><span class="o">-</span><span class="n">passphrase</span><span class="p">.</span><span class="k">key</span> <span class="o">-</span><span class="k">out</span> <span class="n">domainname</span><span class="o">-</span><span class="n">server</span><span class="p">.</span><span class="k">key</span>
+<div class="highlight"><pre><span></span><span class="err">openssl rsa -in domainname-passphrase.key -out domainname-server.key</span>
 </pre></div>
 <p>OR</p>
-<div class="highlight"><pre><span></span><span class="n">openssl</span> <span class="n">rsa</span> <span class="o">-</span><span class="k">in</span> <span class="n">privateKey</span><span class="p">.</span><span class="n">pem</span> <span class="o">-</span><span class="k">out</span> <span class="n">newPrivateKey</span><span class="p">.</span><span class="n">pem</span>
+<div class="highlight"><pre><span></span><span class="err">openssl rsa -in privateKey.pem -out newPrivateKey.pem</span>
 </pre></div>
 <h2 id="use-openssls-built-in-webserver">Use openssl's built in webserver</h2>
-<div class="highlight"><pre><span></span><span class="n">openssl</span> <span class="n">s_server</span> <span class="o">-</span><span class="n">cert</span> <span class="n">server</span><span class="p">.</span><span class="n">pem</span> <span class="o">-</span><span class="k">key</span> <span class="n">server</span><span class="o">-</span><span class="n">nopass</span><span class="p">.</span><span class="k">key</span>
+<div class="highlight"><pre><span></span><span class="err">openssl s_server -cert server.pem -key server-nopass.key</span>
 </pre></div>
 <blockquote>
 <p>start a TCP server with the provided certificate and key on the default port of 4433</p>
 </blockquote>
-<div class="highlight"><pre><span></span><span class="n">openssl</span> <span class="n">s_server</span> <span class="o">-</span><span class="n">cert</span> <span class="n">server</span><span class="p">.</span><span class="n">pem</span> <span class="o">-</span><span class="n">accept</span> <span class="mi">4433</span> <span class="o">-</span><span class="n">www</span>
+<div class="highlight"><pre><span></span><span class="err">openssl s_server -cert server.pem -accept 4433 -www</span>
 </pre></div>
 <blockquote>
 <p>start an HTTPS server with the cert and key combined in a .pem on the specific port (e.g. 4433)</p>
 </blockquote>
-<div class="highlight"><pre><span></span><span class="n">telnet</span> <span class="n">localhost</span> <span class="mi">4433</span>
+<div class="highlight"><pre><span></span><span class="err">telnet localhost 4433</span>
 </pre></div>
 <blockquote>
 <p>verify basic network connectivity</p>
 </blockquote>
-<div class="highlight"><pre><span></span><span class="n">wget</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">localhost</span><span class="p">:</span><span class="mi">4433</span> <span class="c1">--no-check-certificate</span>
+<div class="highlight"><pre><span></span><span class="err">wget https://localhost:4433 --no-check-certificate</span>
 </pre></div>
 <blockquote>
 <p>verify basic network connectivity and download the contents without validating the SSL certificate</p>
 </blockquote>
-<div class="highlight"><pre><span></span><span class="nv">openssl</span> <span class="nv">s_client</span> <span class="o">-</span><span class="nv">showcerts</span> <span class="o">-</span><span class="k">connect</span> <span class="nv">localhost</span>:<span class="mi">4433</span>
+<div class="highlight"><pre><span></span><span class="err">openssl s_client -showcerts -connect localhost:4433</span>
 </pre></div>
 <blockquote>
 <p>show the ciphers and certificates of a server, "18 (self signed certificate)</p>
 </blockquote>
-<div class="highlight"><pre><span></span><span class="nv">openssl</span> <span class="nv">s_client</span> <span class="o">-</span><span class="k">connect</span> <span class="nv">ldaps</span>.<span class="nv">example</span>.<span class="nv">com</span>:<span class="mi">10636</span> <span class="o">-</span><span class="nv">CAfile</span> <span class="nv">intermediate</span>.<span class="nv">crt</span>
+<div class="highlight"><pre><span></span><span class="err">openssl s_client -connect ldaps.example.com:10636 -CAfile intermediate.crt</span>
 </pre></div>
 <blockquote>
 <p>show the ciphers and certificates of a server while providing client-side the Root + Intermediate Chain certificates</p>
 </blockquote>
 <h3 id="get-a-remote-server-ssl-certificate-using-openssl-and-sed">Get a remote server ssl certificate using openssl and sed</h3>
-<div class="highlight"><pre><span></span><span class="nv">echo</span> <span class="o">|</span> <span class="nv">openssl</span> <span class="nv">s_client</span> <span class="o">-</span><span class="k">connect</span> ${<span class="nv">REMOTEHOST</span>}:${<span class="nv">REMOTEPORT</span>} <span class="mi">2</span><span class="o">&gt;&amp;</span><span class="mi">1</span> <span class="o">|</span> <span class="nv">sed</span> <span class="o">-</span><span class="nv">ne</span> <span class="s1">'</span><span class="s">/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p</span><span class="s1">'</span>
+<div class="highlight"><pre><span></span>echo | openssl s_client -connect <span class="cp">${</span><span class="n">REMOTEHOST</span><span class="cp">}</span>:<span class="cp">${</span><span class="n">REMOTEPORT</span><span class="cp">}</span> 2&gt;<span class="err">&amp;</span>1 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p'
 </pre></div>
 <h3 id="getting-and-verifying-an-intermediate-certificate">Getting and verifying an Intermediate Certificate</h3>
 <p>Popular web browsers will often have lock symbols or other ways for you to see (and download) a certificate)</p>
@@ -433,17 +433,17 @@
 <p>You can copy and paste the certificate portion into cert.crt</p>
 <p>Also copy and paste the private key portion into the cert.key</p>
 <h2 id="configure-an-existing-key-certificate-into-pkcs12">Configure an existing key + certificate into PKCS12</h2>
-<div class="highlight"><pre><span></span><span class="n">openssl</span> <span class="n">pkcs12</span> <span class="o">-</span><span class="n">export</span> <span class="o">-</span><span class="n">inkey</span> <span class="n">cert</span><span class="p">.</span><span class="k">key</span> <span class="o">-</span><span class="k">in</span> <span class="n">cert</span><span class="p">.</span><span class="n">pem</span> <span class="o">-</span><span class="k">out</span> <span class="n">keystore</span><span class="p">.</span><span class="n">p12</span>
+<div class="highlight"><pre><span></span><span class="err">openssl pkcs12 -export -inkey cert.key -in cert.pem -out keystore.p12</span>
 </pre></div>
 <hr/>
 <h1 id="keytool-and-java-key-stores">KEYTOOL AND JAVA KEY STORES</h1>
 <p>Java, just like web servers, have public and private encryption keys in order to enable cryptography and encryption from within the applications.</p>
-<div class="highlight"><pre><span></span><span class="n">keytool</span> <span class="o">-</span><span class="n">list</span> <span class="o">-</span><span class="n">v</span> <span class="o">-</span><span class="n">keystore</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">jvm</span><span class="o">/</span><span class="n">java</span><span class="o">-</span><span class="mi">6</span><span class="o">-</span><span class="n">sun</span><span class="o">-</span><span class="mi">1</span><span class="p">.</span><span class="mi">6</span><span class="p">.</span><span class="mi">0</span><span class="p">.</span><span class="mi">24</span><span class="o">/</span><span class="n">jre</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="k">security</span><span class="o">/</span><span class="n">jssecacerts</span>
+<div class="highlight"><pre><span></span><span class="err">keytool -list -v -keystore /usr/lib/jvm/java-6-sun-1.6.0.24/jre/lib/security/jssecacerts</span>
 </pre></div>
 <blockquote>
 <p>hit enter as it has no password</p>
 </blockquote>
-<div class="highlight"><pre><span></span><span class="n">keytool</span> <span class="o">-</span><span class="n">list</span> <span class="o">-</span><span class="n">v</span> <span class="o">-</span><span class="n">keystore</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">java</span><span class="o">-</span><span class="mi">6</span><span class="o">-</span><span class="n">sun</span><span class="o">/</span><span class="k">security</span><span class="o">/</span><span class="n">cacerts</span>
+<div class="highlight"><pre><span></span><span class="err">keytool -list -v -keystore /etc/java-6-sun/security/cacerts</span>
 </pre></div>
 <blockquote>
 <p>default password is changeit</p>
@@ -492,8 +492,8 @@
 <h2 id="create-a-publicprivate-key-pair-for-ssh">Create a public/private key pair for SSH</h2>
 <p>Backup any existing ~/.ssh/id_rsa  (cp -a ~./ssh ~./ssh-bak)
 Backup any existing ~/.ssh/id_rsa.pub</p>
-<div class="highlight"><pre><span></span><span class="n">ssh</span><span class="o">-</span><span class="n">keygen</span><span class="w"> </span><span class="o">-</span><span class="n">t</span><span class="w"> </span><span class="n">rsa</span><span class="w"> </span><span class="o">-</span><span class="n">C</span><span class="w"> </span><span class="ss">"your_email@example.com"</span><span class="w"></span>
-<span class="n">chmod</span><span class="w"> </span><span class="mi">400</span><span class="w"> </span><span class="o">/</span><span class="k">path</span><span class="o">/</span><span class="k">to</span><span class="o">/</span><span class="n">id_rsa</span><span class="o">*</span><span class="w"></span>
+<div class="highlight"><pre><span></span><span class="err">ssh-keygen -t rsa -C "your_email@example.com"</span>
+<span class="err">chmod 400 /path/to/id_rsa*</span>
 </pre></div>
 <blockquote>
 <p>id_rsa and id_rsa.pub  *e.g. in /home/USERNAME/.ssh , <a href="https://en.wikipedia.org/wiki/Ssh-keygen">https://en.wikipedia.org/wiki/Ssh-keygen</a>
@@ -504,37 +504,37 @@ chmod to modify permissions (to the "only the owner can read") since if the priv
 <p>id_rsa.pub IS THE PUBLIC PORTION WHICH YOU ADD TO REMOTE SERVERS</p>
 <p>if you add a passphrase to your SSH key (to prevent hackers from simply copying the file)</p>
 </blockquote>
-<div class="highlight"><pre><span></span><span class="n">ssh</span><span class="o">-</span><span class="n">keygen</span> <span class="o">-</span><span class="n">y</span>
+<div class="highlight"><pre><span></span><span class="err">ssh-keygen -y</span>
 </pre></div>
 <blockquote>
 <p>prompted for the path to the file, then prompted for the password to outpout a public signature (.pub)</p>
 </blockquote>
-<div class="highlight"><pre><span></span><span class="n">ssh</span><span class="o">-</span><span class="n">keygen</span> <span class="o">-</span><span class="n">t</span> <span class="n">dsa</span>
+<div class="highlight"><pre><span></span><span class="err">ssh-keygen -t dsa</span>
 </pre></div>
 <blockquote>
 <p>RSA is generally preferred, protocol 2, I only include the DSA command for completeness <a href="http://security.stackexchange.com/questions/5096/rsa-vs-dsa-for-ssh-authentication-keys">http://security.stackexchange.com/questions/5096/rsa-vs-dsa-for-ssh-authentication-keys</a></p>
 </blockquote>
-<div class="highlight"><pre><span></span><span class="n">ssh</span><span class="o">-</span><span class="n">keygen</span> <span class="o">-</span><span class="n">l</span> <span class="o">-</span><span class="n">f</span> <span class="o">~/</span><span class="p">.</span><span class="n">ssh</span><span class="o">/</span><span class="n">id_rsa</span><span class="p">.</span><span class="n">pub</span>
+<div class="highlight"><pre><span></span><span class="err">ssh-keygen -l -f ~/.ssh/id_rsa.pub</span>
 </pre></div>
 <blockquote>
 <p>Check the number of bits for key strength, it should at least 2048 bits</p>
 </blockquote>
-<div class="highlight"><pre><span></span><span class="n">ssh</span><span class="o">-</span><span class="n">keygen</span><span class="w"> </span><span class="o">-</span><span class="n">t</span><span class="w"> </span><span class="n">rsa</span><span class="w"> </span><span class="o">-</span><span class="n">C</span><span class="w"> </span><span class="ss">"myemail@example.com"</span><span class="w"> </span><span class="o">-</span><span class="n">f</span><span class="w"> </span><span class="err">$</span><span class="n">HOME</span><span class="o">/</span><span class="p">.</span><span class="n">ssh</span><span class="o">/</span><span class="n">myserver</span><span class="p">.</span><span class="n">id_rsa</span><span class="w"></span>
+<div class="highlight"><pre><span></span><span class="err">ssh-keygen -t rsa -C "myemail@example.com" -f $HOME/.ssh/myserver.id_rsa</span>
 </pre></div>
 <blockquote>
 <p>Create an RSA based key with a specific email address label as an output in a specific directory and named file</p>
 </blockquote>
 <h3 id="output-a-pub-from-a-private-key">output a .pub from a private key</h3>
-<div class="highlight"><pre><span></span><span class="n">ssh</span><span class="o">-</span><span class="n">keygen</span> <span class="o">-</span><span class="n">y</span> <span class="o">-</span><span class="n">f</span> <span class="n">id_rsa</span>
+<div class="highlight"><pre><span></span><span class="err">ssh-keygen -y -f id_rsa</span>
 </pre></div>
 <h3 id="generate-a-fingerprint-for-verification-of-a-host">generate a fingerprint for verification of a host</h3>
-<div class="highlight"><pre><span></span><span class="n">ssh</span><span class="o">-</span><span class="n">keygen</span> <span class="o">-</span><span class="n">lf</span> <span class="n">id_rsa</span><span class="p">.</span><span class="n">pub</span>
+<div class="highlight"><pre><span></span><span class="err">ssh-keygen -lf id_rsa.pub</span>
 </pre></div>
 <h3 id="amazon-ec2-instances-have-a-different-method-ec2-add-keypair">AMAZON ec2 instances have a different method, ec2-add-keypair</h3>
-<div class="highlight"><pre><span></span><span class="n">openssl</span> <span class="n">pkcs8</span> <span class="o">-</span><span class="k">in</span> <span class="n">myec2key</span><span class="p">.</span><span class="n">pem</span> <span class="o">-</span><span class="n">nocrypt</span> <span class="o">-</span><span class="n">topk8</span> <span class="o">-</span><span class="n">outform</span> <span class="n">DER</span> <span class="o">|</span> <span class="n">openssl</span> <span class="n">sha1</span> <span class="o">-</span><span class="k">c</span>
+<div class="highlight"><pre><span></span><span class="err">openssl pkcs8 -in myec2key.pem -nocrypt -topk8 -outform DER | openssl sha1 -c</span>
 </pre></div>
 <h3 id="ec2-import-keypair">ec2-import-keypair:</h3>
-<div class="highlight"><pre><span></span><span class="n">openssl</span> <span class="n">pkey</span> <span class="o">-</span><span class="k">in</span> <span class="o">~/</span><span class="p">.</span><span class="n">ssh</span><span class="o">/</span><span class="n">ec2</span><span class="o">/</span><span class="k">primary</span><span class="p">.</span><span class="n">pem</span> <span class="o">-</span><span class="n">pubout</span> <span class="o">-</span><span class="n">outform</span> <span class="n">DER</span> <span class="o">|</span> <span class="n">openssl</span> <span class="n">md5</span> <span class="o">-</span><span class="k">c</span>
+<div class="highlight"><pre><span></span><span class="err">openssl pkey -in ~/.ssh/ec2/primary.pem -pubout -outform DER | openssl md5 -c</span>
 </pre></div>
 <h2 id="adding-a-public-key-to-a-remote-server">Adding a Public Key to a remote server</h2>
 <p>ON THE REMOTE SERVER IT SHOULD ONLY HAVE THE public key from .ssh/authorized_keys</p>
@@ -559,7 +559,7 @@ OPTIONAL?  <code>exec ssh-agent sh -c 'ssh-add &lt;/dev/null &amp;&amp; exec /us
 <blockquote>
 <p>verbose, use identity from private key</p>
 </blockquote>
-<div class="highlight"><pre><span></span><span class="n">ssh</span><span class="w"> </span><span class="o">-</span><span class="n">vvvv</span><span class="w"> </span><span class="o">-</span><span class="n">i</span><span class="w"> </span><span class="n">id_rsa</span><span class="w"> </span><span class="n">username</span><span class="nv">@example</span><span class="p">.</span><span class="n">com</span><span class="w"></span>
+<div class="highlight"><pre><span></span><span class="err">ssh -vvvv -i id_rsa username@example.com</span>
 </pre></div>
 <blockquote>
 <p>if errors like (nil) verify permissions and ownership (whoami=username)</p>
@@ -567,7 +567,7 @@ OPTIONAL?  <code>exec ssh-agent sh -c 'ssh-add &lt;/dev/null &amp;&amp; exec /us
 <p><em>Don't forget you sometimes have chmod 400</em></p>
 <h3 id="ssh-ignore-strict-hosts-checking">SSH ignore strict hosts checking</h3>
 <p>(i.e. developing against an FQDN with a dynamic ip, this does expose you to the improbable risk of an imposter "man in the middle" server)</p>
-<div class="highlight"><pre><span></span><span class="n">ssh</span> <span class="o">-</span><span class="n">i</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="k">local</span><span class="o">/</span><span class="n">bamboo</span><span class="o">/</span><span class="n">bamboo_id_rsa</span> <span class="o">-</span><span class="n">o</span> <span class="n">UserKnownHostsFile</span><span class="o">=/</span><span class="n">dev</span><span class="o">/</span><span class="k">null</span> <span class="o">-</span><span class="n">o</span> <span class="n">StrictHostKeyChecking</span><span class="o">=</span><span class="k">no</span>
+<div class="highlight"><pre><span></span><span class="err">ssh -i /usr/local/bamboo/bamboo_id_rsa -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no</span>
 </pre></div>
 <blockquote>
 <p>this command line parameter will not store nor verify the remote server's signature</p>
@@ -583,7 +583,7 @@ OPTIONAL?  <code>exec ssh-agent sh -c 'ssh-add &lt;/dev/null &amp;&amp; exec /us
 </pre></div>
 <h3 id="ssh-agent-forwarding">SSH Agent Forwarding</h3>
 <p>It can be insecure to forward your SSH access through a jumpbox to a machine deeper in your network, though it is generally worse to leave SSH keyson a jumpbox.</p>
-<div class="highlight"><pre><span></span><span class="n">ssh</span><span class="o">-</span><span class="k">add</span> <span class="o">~/</span><span class="p">.</span><span class="n">ssh</span><span class="o">/</span><span class="n">example</span><span class="p">.</span><span class="n">pem</span>
+<div class="highlight"><pre><span></span><span class="err">ssh-add ~/.ssh/example.pem</span>
 </pre></div>
 <blockquote>
 <p>add a specific key to the ssh agent
@@ -601,14 +601,14 @@ an optional step to list the keys that ssh-agent has loaded in memory</p>
 <p>the extra indentation is to indicate that from the jumpbox you are able to ssh to the internal machine</p>
 </blockquote>
 <p>A more permanent configuration change by using ~/.ssh/config</p>
-<div class="highlight"><pre><span></span><span class="k">Host</span> <span class="mi">1</span><span class="p">.</span><span class="mi">2</span><span class="p">.</span><span class="mi">3</span><span class="p">.</span><span class="mi">4</span>
-    <span class="n">ForwardAgent</span> <span class="n">yes</span>
-    <span class="n">IdentityFile</span> <span class="o">~/</span><span class="p">.</span><span class="n">ssh</span><span class="o">/</span><span class="n">example</span><span class="p">.</span><span class="n">pem</span>
+<div class="highlight"><pre><span></span><span class="err">Host 1.2.3.4</span>
+<span class="err">    ForwardAgent yes</span>
+<span class="err">    IdentityFile ~/.ssh/example.pem</span>
 </pre></div>
 <p><a href="https://linux.die.net/man/1/ssh-add">https://linux.die.net/man/1/ssh-add</a></p>
 <h3 id="ssh-tcp-tunnel">SSH TCP tunnel</h3>
 <p>In this example the SSH tunnel could be used for a SOCKS proxy for the browser...</p>
-<div class="highlight"><pre><span></span><span class="n">ssh</span><span class="w"> </span><span class="o">-</span><span class="n">ND</span><span class="w"> </span><span class="mi">9999</span><span class="w"> </span><span class="k">user</span><span class="nv">@example</span><span class="p">.</span><span class="n">org</span><span class="w"></span>
+<div class="highlight"><pre><span></span><span class="err">ssh -ND 9999 user@example.org</span>
 </pre></div>
 <blockquote>
 <p>connect via ssh to a remote server, after the password prompt the process will stay open for connections locally via port 9999</p>
@@ -620,22 +620,22 @@ an optional step to list the keys that ssh-agent has loaded in memory</p>
 <blockquote>
 <p>Note that for an even more limited security profile the container could run as an HTTP proxy as it will only handle HTTP traffic (rather than all TCP)</p>
 </blockquote>
-<div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">run</span> <span class="c1">--detach --rm --privileged --publish 2222:2222 ubuntu-xenial-vpn</span>
+<div class="highlight"><pre><span></span><span class="err">docker run --detach --rm --privileged --publish 2222:2222 ubuntu-xenial-vpn</span>
 </pre></div>
 <blockquote>
 <p>the container is running SSHD</p>
 </blockquote>
-<div class="highlight"><pre><span></span><span class="n">ssh</span><span class="w"> </span><span class="o">-</span><span class="n">p</span><span class="w"> </span><span class="mi">2222</span><span class="w"> </span><span class="o">-</span><span class="n">o</span><span class="w"> </span><span class="n">UserKnownHostsFile</span><span class="o">=/</span><span class="n">dev</span><span class="o">/</span><span class="k">null</span><span class="w"> </span><span class="o">-</span><span class="n">o</span><span class="w"> </span><span class="n">StrictHostKeyChecking</span><span class="o">=</span><span class="k">no</span><span class="w"> </span><span class="n">root</span><span class="nv">@localhost</span><span class="w"></span>
-<span class="n">openconnect</span><span class="w"> </span><span class="nl">https</span><span class="p">:</span><span class="o">//</span><span class="n">vpn</span><span class="p">.</span><span class="n">example</span><span class="p">.</span><span class="n">com</span><span class="w"></span>
+<div class="highlight"><pre><span></span><span class="err">ssh -p 2222 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no root@localhost</span>
+<span class="err">openconnect https://vpn.example.com</span>
 </pre></div>
 <blockquote>
 <p>SSH into the container and start the openconnect vpn connection and authenticate</p>
 </blockquote>
-<div class="highlight"><pre><span></span><span class="n">ssh</span><span class="w"> </span><span class="o">-</span><span class="n">ND</span><span class="w"> </span><span class="mi">9999</span><span class="w"> </span><span class="o">-</span><span class="n">p</span><span class="w"> </span><span class="mi">2222</span><span class="w"> </span><span class="o">-</span><span class="n">o</span><span class="w"> </span><span class="n">UserKnownHostsFile</span><span class="o">=/</span><span class="n">dev</span><span class="o">/</span><span class="k">null</span><span class="w"> </span><span class="o">-</span><span class="n">o</span><span class="w"> </span><span class="n">StrictHostKeyChecking</span><span class="o">=</span><span class="k">no</span><span class="w"> </span><span class="n">root</span><span class="nv">@localhost</span><span class="w"></span>
+<div class="highlight"><pre><span></span><span class="err">ssh -ND 9999 -p 2222 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no root@localhost</span>
 </pre></div>
 <h4 id="configure-firefox-to-use-the-socks-host">Configure Firefox to use the SOCKS Host</h4>
-<div class="highlight"><pre><span></span><span class="n">Firefox</span> <span class="o">-&gt;</span> <span class="n">Edit</span> <span class="o">-&gt;</span> <span class="n">Preferences</span> <span class="o">-&gt;</span> <span class="n">Advanced</span> <span class="o">-&gt;</span> <span class="n">Network</span> <span class="o">-&gt;</span> <span class="k">Connection</span> <span class="o">-&gt;</span> <span class="n">Settings</span>
-<span class="n">Manual</span> <span class="n">Proxy</span> <span class="n">configuration</span><span class="p">:</span> <span class="n">SOCKS</span> <span class="k">Host</span><span class="p">:</span> <span class="n">localhost</span><span class="p">,</span> <span class="n">Port</span> <span class="mi">9999</span>
+<div class="highlight"><pre><span></span><span class="err">Firefox -&gt; Edit -&gt; Preferences -&gt; Advanced -&gt; Network -&gt; Connection -&gt; Settings</span>
+<span class="err">Manual Proxy configuration: SOCKS Host: localhost, Port 9999</span>
 </pre></div>
 <blockquote>
 <p>firefox sends requests to the server over the ssh encrypted connection</p>
@@ -649,7 +649,7 @@ an optional step to list the keys that ssh-agent has loaded in memory</p>
 </blockquote>
 <p>This ensures the browser will use the SOCKS proxy domain name server rather than the local machines</p>
 <h3 id="ssh-tunnel-for-windows-rdp">SSH tunnel for Windows RDP</h3>
-<div class="highlight"><pre><span></span><span class="n">ssh</span> <span class="o">-</span><span class="n">L</span> <span class="mi">3389</span><span class="p">:</span><span class="mi">172</span><span class="p">.</span><span class="mi">24</span><span class="p">.</span><span class="mi">32</span><span class="p">.</span><span class="mi">40</span><span class="p">:</span><span class="mi">3389</span> <span class="mi">172</span><span class="p">.</span><span class="mi">24</span><span class="p">.</span><span class="mi">32</span><span class="p">.</span><span class="mi">100</span> <span class="o">-</span><span class="n">l</span> <span class="n">sshusername</span> <span class="o">-</span><span class="n">N</span>
+<div class="highlight"><pre><span></span><span class="err">ssh -L 3389:172.24.32.40:3389 172.24.32.100 -l sshusername -N</span>
 </pre></div>
 <ul>
 <li>L = local port is forwarded to the remote host and port</li>
@@ -661,8 +661,8 @@ an optional step to list the keys that ssh-agent has loaded in memory</p>
 <h3 id="ssh-tunneling-in-general">ssh tunneling in general</h3>
 <p>local port:host:remote-port</p>
 <h4 id="ssh-tunnel-on-port-9090-cherokee-admin">ssh tunnel on port 9090 (cherokee-admin)</h4>
-<div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">vi</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">sysctl</span><span class="p">.</span><span class="n">conf</span>
-    <span class="n">net</span><span class="p">.</span><span class="n">ipv6</span><span class="p">.</span><span class="n">conf</span><span class="p">.</span><span class="k">all</span><span class="p">.</span><span class="n">disable_ipv6</span><span class="o">=</span><span class="mi">1</span>
+<div class="highlight"><pre><span></span><span class="err">sudo vi /etc/sysctl.conf</span>
+<span class="err">    net.ipv6.conf.all.disable_ipv6=1</span>
 </pre></div>
 <p><strong> On the remote server start the admin UI (which only allows access via 127.0.0.1 by default for security reasons)</strong>
     sudo cherokee-admin</p>
@@ -688,7 +688,7 @@ an optional step to list the keys that ssh-agent has loaded in memory</p>
 <li>N = do not execute a remote command (port forwarding only)</li>
 </ul>
 </blockquote>
-<div class="highlight"><pre><span></span><span class="n">ssh</span> <span class="o">-</span><span class="n">L</span> <span class="mi">9090</span><span class="p">:</span><span class="n">localhost</span><span class="p">:</span><span class="mi">9090</span> <span class="n">remote_IP</span>
+<div class="highlight"><pre><span></span><span class="err">ssh -L 9090:localhost:9090 remote_IP</span>
 </pre></div>
 <blockquote>
 <p>assumes the ssh port is 22 and the remote user is the same as the local user, not a good assumption</p>
@@ -862,23 +862,23 @@ docker run -v <span class="nv">$OVPN_DATA</span>:/etc/openvpn --rm kylemanna/ope
 </li>
 </ul>
 <h3 id="prerequisites">Prerequisites</h3>
-<div class="highlight"><pre><span></span><span class="n">apt</span> <span class="k">update</span>
-<span class="n">apt</span> <span class="n">install</span> <span class="n">openvpn</span> <span class="n">easy</span><span class="o">-</span><span class="n">rsa</span>
-<span class="n">vim</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">sysctl</span><span class="p">.</span><span class="n">conf</span>
-    <span class="n">net</span><span class="p">.</span><span class="n">ipv4</span><span class="p">.</span><span class="n">ip_forward</span><span class="o">=</span><span class="mi">1</span>
-<span class="n">sudo</span> <span class="n">sysctl</span> <span class="o">-</span><span class="n">p</span>
+<div class="highlight"><pre><span></span><span class="err">apt update</span>
+<span class="err">apt install openvpn easy-rsa</span>
+<span class="err">vim /etc/sysctl.conf</span>
+<span class="err">    net.ipv4.ip_forward=1</span>
+<span class="err">sudo sysctl -p</span>
 </pre></div>
 <p>Setting up the certificate authority (since OpenVPN uses keys)</p>
-<div class="highlight"><pre><span></span><span class="n">make</span><span class="o">-</span><span class="n">cadir</span> <span class="o">~/</span><span class="n">openvpn</span><span class="o">-</span><span class="n">ca</span>
-<span class="n">cd</span> <span class="o">~/</span><span class="n">openvpn</span><span class="o">-</span><span class="n">ca</span>
+<div class="highlight"><pre><span></span><span class="err">make-cadir ~/openvpn-ca</span>
+<span class="err">cd ~/openvpn-ca</span>
 </pre></div>
 <p><code>vim vars</code></p>
 <blockquote>
 <p>update the export KEY_NAME, KEY_ORG, KEY_EMAIL, KEY_OU to something more personalized</p>
 </blockquote>
-<div class="highlight"><pre><span></span><span class="k">source</span> <span class="n">vars</span>
-<span class="p">.</span><span class="o">/</span><span class="n">clean</span><span class="o">-</span><span class="k">all</span>
-<span class="p">.</span><span class="o">/</span><span class="n">build</span><span class="o">-</span><span class="n">ca</span>
+<div class="highlight"><pre><span></span><span class="err">source vars</span>
+<span class="err">./clean-all</span>
+<span class="err">./build-ca</span>
 </pre></div>
 <blockquote>
 <p>You can just press enter a bunch to use all the defaults that you preconfigured in the vars file previously</p>
@@ -887,8 +887,8 @@ docker run -v <span class="nv">$OVPN_DATA</span>:/etc/openvpn --rm kylemanna/ope
 <blockquote>
 <p>Just press enter to accept all the defaults again (no challenge password!) and press y at the end to Sign and then Commit the certificates</p>
 </blockquote>
-<div class="highlight"><pre><span></span><span class="p">.</span><span class="o">/</span><span class="n">build</span><span class="o">-</span><span class="n">dh</span>
-<span class="n">openvpn</span> <span class="c1">--genkey --secret keys/ta.key</span>
+<div class="highlight"><pre><span></span><span class="err">./build-dh</span>
+<span class="err">openvpn --genkey --secret keys/ta.key</span>
 </pre></div>
 <p><code>./build-key client1</code></p>
 <blockquote>
@@ -978,9 +978,9 @@ commenting out the files as they will be embedded in the .ovpn config file</p>
 <blockquote>
 <p>This automates creating a config file via a script</p>
 </blockquote>
-<div class="highlight"><pre><span></span><span class="n">chmod</span> <span class="mi">700</span> <span class="n">make_config</span><span class="p">.</span><span class="n">sh</span>
-<span class="p">.</span><span class="o">/</span><span class="n">make_config</span><span class="p">.</span><span class="n">sh</span> <span class="n">client1</span>
-<span class="n">ls</span> <span class="o">-</span><span class="n">ahl</span> <span class="o">/</span><span class="n">root</span><span class="o">/</span><span class="n">client</span><span class="o">-</span><span class="n">configs</span><span class="o">/</span><span class="n">files</span><span class="o">/</span>
+<div class="highlight"><pre><span></span><span class="err">chmod 700 make_config.sh</span>
+<span class="err">./make_config.sh client1</span>
+<span class="err">ls -ahl /root/client-configs/files/</span>
 </pre></div>
 <h3 id="once-you-have-the-configuration">Once you have the configuration</h3>
 <p><code>sudo apt-get install -y openvpn</code></p>
@@ -992,13 +992,13 @@ commenting out the files as they will be embedded in the .ovpn config file</p>
 <p>of course no matter what we need the open vpn client configuration</p>
 </blockquote>
 <p>Or... From a client computer SCP to download the $FQDN&gt;ovpn and then connect to the openvpn server</p>
-<div class="highlight"><pre><span></span><span class="nv">sudo</span> <span class="nv">openvpn</span> <span class="o">--</span><span class="nv">config</span> <span class="nv">client1</span>.<span class="nv">ovpn</span>
+<div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">openvpn</span> <span class="c1">--config client1.ovpn</span>
 
-# <span class="nv">verify</span> <span class="nv">with</span> <span class="nv">the</span> <span class="nv">following</span> <span class="nv">in</span> <span class="nv">the</span> <span class="nv">output</span>: <span class="s2">"</span><span class="s">/sbin/ip addr add dev tun0 local 192.168.255.6 peer 192.168.255.5</span><span class="s2">"</span>
-# <span class="nv">ifconfig</span> <span class="o">-</span><span class="nv">a</span>  <span class="s2">"</span><span class="s">tun0 ... inet addr:192.168.255.6</span><span class="s2">"</span>  , <span class="nv">as</span> <span class="nv">you</span> <span class="k">send</span> <span class="nv">traffic</span>: <span class="nv">RX</span> <span class="nv">bytes</span>:<span class="mi">4145707</span> <span class="ss">(</span><span class="mi">4</span>.<span class="mi">1</span> <span class="nv">MB</span><span class="ss">)</span>  <span class="nv">TX</span> <span class="nv">bytes</span>:<span class="mi">319025</span> <span class="ss">(</span><span class="mi">319</span>.<span class="mi">0</span> <span class="nv">KB</span><span class="ss">)</span>
-<span class="nv">curl</span> <span class="nv">checkip</span>.<span class="nv">amazonaws</span>.<span class="nv">com</span>  # <span class="nv">should</span> <span class="k">return</span> <span class="nv">the</span> <span class="nv">IP</span> <span class="nv">address</span> <span class="nv">of</span> <span class="nv">the</span> <span class="nv">VPN</span> <span class="nv">server</span> <span class="ss">(</span><span class="nv">not</span> <span class="nv">your</span> <span class="nv">local</span> <span class="nv">Wifi</span><span class="o">/</span><span class="nv">ISP</span><span class="ss">)</span>
-<span class="nv">curl</span> <span class="nv">https</span>:<span class="o">//</span><span class="nv">dnsleaktest</span>.<span class="nv">com</span><span class="o">/</span>
-# <span class="nv">https</span>:<span class="o">//</span><span class="nv">whoer</span>.<span class="nv">net</span><span class="o">/</span>#<span class="nv">extended</span>
+<span class="o">#</span> <span class="n">verify</span> <span class="k">with</span> <span class="n">the</span> <span class="n">following</span> <span class="k">in</span> <span class="n">the</span> <span class="k">output</span><span class="p">:</span> <span class="ss">"/sbin/ip addr add dev tun0 local 192.168.255.6 peer 192.168.255.5"</span>
+<span class="o">#</span> <span class="n">ifconfig</span> <span class="o">-</span><span class="n">a</span>  <span class="ss">"tun0 ... inet addr:192.168.255.6"</span>  <span class="p">,</span> <span class="k">as</span> <span class="n">you</span> <span class="n">send</span> <span class="n">traffic</span><span class="p">:</span> <span class="n">RX</span> <span class="n">bytes</span><span class="p">:</span><span class="mi">4145707</span> <span class="p">(</span><span class="mi">4</span><span class="p">.</span><span class="mi">1</span> <span class="n">MB</span><span class="p">)</span>  <span class="n">TX</span> <span class="n">bytes</span><span class="p">:</span><span class="mi">319025</span> <span class="p">(</span><span class="mi">319</span><span class="p">.</span><span class="mi">0</span> <span class="n">KB</span><span class="p">)</span>
+<span class="n">curl</span> <span class="n">checkip</span><span class="p">.</span><span class="n">amazonaws</span><span class="p">.</span><span class="n">com</span>  <span class="o">#</span> <span class="n">should</span> <span class="k">return</span> <span class="n">the</span> <span class="n">IP</span> <span class="n">address</span> <span class="k">of</span> <span class="n">the</span> <span class="n">VPN</span> <span class="n">server</span> <span class="p">(</span><span class="k">not</span> <span class="n">your</span> <span class="k">local</span> <span class="n">Wifi</span><span class="o">/</span><span class="n">ISP</span><span class="p">)</span>
+<span class="n">curl</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">dnsleaktest</span><span class="p">.</span><span class="n">com</span><span class="o">/</span>
+<span class="o">#</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">whoer</span><span class="p">.</span><span class="n">net</span><span class="o">/#</span><span class="n">extended</span>
 </pre></div>
 <h3 id="dns-security">DNS Security</h3>
 <p>Moreover your DNS server can "leak" or be hijacked, here are some good alternatives to your snooping ISP or "big brother" evil corp.</p>

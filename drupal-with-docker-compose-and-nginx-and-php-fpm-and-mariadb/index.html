@@ -175,107 +175,107 @@
 <h2 id="the-pragmatic-solution">The pragmatic solution</h2>
 <p>Instead, as I was already using packer on DigitalOcean to automate building the Host and uploading the custom configs, docker-compose.yaml, and Drupal source, I added a few steps to install nginx directly to the Host OS.</p>
 <h3 id="packerjson">packer.json</h3>
-<div class="highlight"><pre><span></span><span class="n">NEWUSER_NAME</span><span class="o">=</span><span class="n">username</span> <span class="n">NEWUSER_PASSWORD</span><span class="o">=</span><span class="n">yourpassword</span> <span class="n">DIGITALOCEAN_API_TOKEN</span><span class="o">=</span><span class="n">yourapitoken</span> <span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">packer</span> <span class="n">build</span> <span class="n">packer</span><span class="p">.</span><span class="n">json</span>
+<div class="highlight"><pre><span></span><span class="err">NEWUSER_NAME=username NEWUSER_PASSWORD=yourpassword DIGITALOCEAN_API_TOKEN=yourapitoken /opt/packer build packer.json</span>
 </pre></div>
 <blockquote>
 <p>A few files and a single command (packer is just a single binary downloaded from hashicorp) I can have another Docker based Drupal host ready (awyeah)</p>
 </blockquote>
-<div class="highlight"><pre><span></span>{
-  <span class="s2">"</span><span class="s">_comment</span><span class="s2">"</span>: <span class="s2">"</span><span class="s">https://www.packer.io/docs/builders/digitalocean.html</span><span class="s2">"</span>,
-  <span class="s2">"</span><span class="s">variables</span><span class="s2">"</span>: {
-    <span class="s2">"</span><span class="s">digitalocean_api_token</span><span class="s2">"</span>: <span class="s2">"</span><span class="s">{{env `DIGITALOCEAN_API_TOKEN`}}</span><span class="s2">"</span>,
-    <span class="s2">"</span><span class="s">newuser_name</span><span class="s2">"</span>: <span class="s2">"</span><span class="s">{{env `NEWUSER_NAME`}}</span><span class="s2">"</span>,
-    <span class="s2">"</span><span class="s">newuser_password</span><span class="s2">"</span>: <span class="s2">"</span><span class="s">{{env `NEWUSER_PASSWORD`}}</span><span class="s2">"</span>
-  },
+<div class="highlight"><pre><span></span><span class="err">{</span>
+  <span class="s2">"_comment"</span><span class="p">:</span> <span class="s2">"https://www.packer.io/docs/builders/digitalocean.html"</span><span class="p">,</span>
+  <span class="s2">"variables"</span><span class="p">:</span> <span class="err">{</span>
+    <span class="s2">"digitalocean_api_token"</span><span class="p">:</span> <span class="s2">"{{env `DIGITALOCEAN_API_TOKEN`}}"</span><span class="p">,</span>
+    <span class="s2">"newuser_name"</span><span class="p">:</span> <span class="s2">"{{env `NEWUSER_NAME`}}"</span><span class="p">,</span>
+    <span class="s2">"newuser_password"</span><span class="p">:</span> <span class="s2">"{{env `NEWUSER_PASSWORD`}}"</span>
+  <span class="err">}</span><span class="p">,</span>
 
-  <span class="s2">"</span><span class="s">builders</span><span class="s2">"</span>: [{
-    <span class="s2">"</span><span class="s">type</span><span class="s2">"</span>: <span class="s2">"</span><span class="s">digitalocean</span><span class="s2">"</span>,
-    <span class="s2">"</span><span class="s">api_token</span><span class="s2">"</span>: <span class="s2">"</span><span class="s">{{user `digitalocean_api_token`}}</span><span class="s2">"</span>,
-    <span class="s2">"</span><span class="s">size</span><span class="s2">"</span>: <span class="s2">"</span><span class="s">512mb</span><span class="s2">"</span>,
-    <span class="s2">"</span><span class="s">region</span><span class="s2">"</span>: <span class="s2">"</span><span class="s">lon1</span><span class="s2">"</span>,
-    <span class="s2">"</span><span class="s">image</span><span class="s2">"</span>: <span class="s2">"</span><span class="s">ubuntu-16-04-x64</span><span class="s2">"</span>,
-    <span class="s2">"</span><span class="s">droplet_name</span><span class="s2">"</span>: <span class="s2">"</span><span class="s">drupal-from-packer-{{timestamp}}</span><span class="s2">"</span>,
-    <span class="s2">"</span><span class="s">snapshot_name</span><span class="s2">"</span>: <span class="s2">"</span><span class="s">drupal-from-packer-{{isotime \</span><span class="s2">"</span><span class="mi">2006</span>.<span class="mi">01</span>.<span class="mi">02</span>.<span class="mi">030405</span>\<span class="s2">"</span><span class="s">}}</span><span class="s2">"</span>
-  }],
+  <span class="s2">"builders"</span><span class="p">:</span> <span class="p">[</span><span class="err">{</span>
+    <span class="s2">"type"</span><span class="p">:</span> <span class="s2">"digitalocean"</span><span class="p">,</span>
+    <span class="s2">"api_token"</span><span class="p">:</span> <span class="s2">"{{user `digitalocean_api_token`}}"</span><span class="p">,</span>
+    <span class="s2">"size"</span><span class="p">:</span> <span class="s2">"512mb"</span><span class="p">,</span>
+    <span class="s2">"region"</span><span class="p">:</span> <span class="s2">"lon1"</span><span class="p">,</span>
+    <span class="s2">"image"</span><span class="p">:</span> <span class="s2">"ubuntu-16-04-x64"</span><span class="p">,</span>
+    <span class="s2">"droplet_name"</span><span class="p">:</span> <span class="s2">"drupal-from-packer-{{timestamp}}"</span><span class="p">,</span>
+    <span class="s2">"snapshot_name"</span><span class="p">:</span> <span class="s2">"drupal-from-packer-{{isotime \"2006.01.02.030405\"}}"</span>
+  <span class="err">}</span><span class="p">],</span>
 
-  <span class="s2">"</span><span class="s">provisioners</span><span class="s2">"</span>: [
-    {
-      <span class="s2">"</span><span class="s">type</span><span class="s2">"</span>: <span class="s2">"</span><span class="s">shell</span><span class="s2">"</span>,
-      <span class="s2">"</span><span class="s">inline</span><span class="s2">"</span>: [
-        <span class="s2">"</span><span class="s">ip a</span><span class="s2">"</span>,
-        <span class="s2">"</span><span class="s">curl -s http://checkip.amazonaws.com</span><span class="s2">"</span>,
-        <span class="s2">"</span><span class="s">apt-get update</span><span class="s2">"</span>,
-        <span class="s2">"</span><span class="s">sudo apt-get install -y vim curl wget byobu ntp tar gzip</span><span class="s2">"</span>,
-        <span class="s2">"</span><span class="s">timedatectl set-timezone Etc/UTC</span><span class="s2">"</span>,
-        <span class="s2">"</span><span class="s">cat /etc/timezone</span><span class="s2">"</span>,
-        <span class="s2">"</span><span class="s">date</span><span class="s2">"</span>,
-        <span class="s2">"</span><span class="s">useradd -s /bin/bash -m {{user `newuser_name`}}</span><span class="s2">"</span>,
-        <span class="s2">"</span><span class="s">usermod -a -G admin {{user `newuser_name`}}</span><span class="s2">"</span>,
-        <span class="s2">"</span><span class="s">echo '{{user `newuser_name`}}:{{user `newuser_password`}}'|chpasswd</span><span class="s2">"</span>,
-        <span class="s2">"</span><span class="s">cat /etc/passwd</span><span class="s2">"</span>,
-        <span class="s2">"</span><span class="s">sed -i 's/Port 22/Port 2222/g' /etc/ssh/sshd_config</span><span class="s2">"</span>,
-        <span class="s2">"</span><span class="s">sed -i 's/PermitRootLogin yes/PermitRootLogin no/g' /etc/ssh/sshd_config</span><span class="s2">"</span>,
-        <span class="s2">"</span><span class="s">echo 'PasswordAuthentication no' &gt;&gt; /etc/ssh/sshd_config</span><span class="s2">"</span>,
-        <span class="s2">"</span><span class="s">cat /etc/ssh/sshd_config</span><span class="s2">"</span>,
-        <span class="s2">"</span><span class="s">mkdir -p /home/{{user `newuser_name`}}/.ssh</span><span class="s2">"</span>,
-        <span class="s2">"</span><span class="s">fallocate -l 1G /swapfile</span><span class="s2">"</span>,
-        <span class="s2">"</span><span class="s">chmod 600 /swapfile</span><span class="s2">"</span>,
-        <span class="s2">"</span><span class="s">mkswap /swapfile</span><span class="s2">"</span>,
-        <span class="s2">"</span><span class="s">swapon /swapfile</span><span class="s2">"</span>,
-        <span class="s2">"</span><span class="s">swapon --show</span><span class="s2">"</span>,
-        <span class="s2">"</span><span class="s">free -h</span><span class="s2">"</span>,
-        <span class="s2">"</span><span class="s">echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab</span><span class="s2">"</span>,
-        <span class="s2">"</span><span class="s">echo 'vm.swappiness=10' | sudo tee -a /etc/sysctl.conf</span><span class="s2">"</span>,
-        <span class="s2">"</span><span class="s">echo 'vm.vfs_cache_pressure=50' | sudo tee -a /etc/sysctl.conf</span><span class="s2">"</span>
-      ]
-    },
-    {
-      <span class="s2">"</span><span class="s">type</span><span class="s2">"</span>: <span class="s2">"</span><span class="s">file</span><span class="s2">"</span>,
-      <span class="s2">"</span><span class="s">source</span><span class="s2">"</span>: <span class="s2">"</span><span class="s">authorized_keys</span><span class="s2">"</span>,
-      <span class="s2">"</span><span class="s">destination</span><span class="s2">"</span>: <span class="s2">"</span><span class="s">/home/{{user `newuser_name`}}/.ssh/authorized_keys</span><span class="s2">"</span>
-    },
-    {
-      <span class="s2">"</span><span class="s">type</span><span class="s2">"</span>: <span class="s2">"</span><span class="s">shell</span><span class="s2">"</span>,
-      <span class="s2">"</span><span class="s">script</span><span class="s2">"</span>: <span class="s2">"</span><span class="s">install-docker.sh</span><span class="s2">"</span>
-    },
-    {
-      <span class="s2">"</span><span class="s">type</span><span class="s2">"</span>: <span class="s2">"</span><span class="s">file</span><span class="s2">"</span>,
-      <span class="s2">"</span><span class="s">source</span><span class="s2">"</span>: <span class="s2">"</span><span class="s">docker-compose.yml</span><span class="s2">"</span>,
-      <span class="s2">"</span><span class="s">destination</span><span class="s2">"</span>: <span class="s2">"</span><span class="s">/home/{{user `newuser_name`}}/docker-compose.yml</span><span class="s2">"</span>
-    },
-    {
-      <span class="s2">"</span><span class="s">type</span><span class="s2">"</span>: <span class="s2">"</span><span class="s">shell</span><span class="s2">"</span>,
-      <span class="s2">"</span><span class="s">inline</span><span class="s2">"</span>: [
-        <span class="s2">"</span><span class="s">mkdir -p /var/www/html</span><span class="s2">"</span>,
-        <span class="s2">"</span><span class="s">wget https://bitbucket.org/yourusername/yourrepository/raw/97360be2edd53b93149d750db24f749aebc27988/binaries/drupal-7.50.tar.gz</span><span class="s2">"</span>,
-        <span class="s2">"</span><span class="s">tar xf drupal-7.50.tar.gz --strip-components=1 -C /var/www/html</span><span class="s2">"</span>,
-        <span class="s2">"</span><span class="s">ls -ahl /var/www/html</span><span class="s2">"</span>,
-        <span class="s2">"</span><span class="s">mkdir -p /var/www/html/sites/default/files</span><span class="s2">"</span>,
-        <span class="s2">"</span><span class="s">chmod 777 /var/www/html/sites/default/files</span><span class="s2">"</span>,
-        <span class="s2">"</span><span class="s">cp -a /var/www/html/sites/default/default.settings.php /var/www/html/sites/default/settings.php</span><span class="s2">"</span>,
-        <span class="s2">"</span><span class="s">chmod 777 /var/www/html/sites/default/settings.php</span><span class="s2">"</span>
-      ]
-    },
-    {
-      <span class="s2">"</span><span class="s">type</span><span class="s2">"</span>: <span class="s2">"</span><span class="s">shell</span><span class="s2">"</span>,
-      <span class="s2">"</span><span class="s">inline</span><span class="s2">"</span>: [
-        <span class="s2">"</span><span class="s">apt-get install -y nginx</span><span class="s2">"</span>
-      ]
-    },
-    {
-      <span class="s2">"</span><span class="s">type</span><span class="s2">"</span>: <span class="s2">"</span><span class="s">file</span><span class="s2">"</span>,
-      <span class="s2">"</span><span class="s">source</span><span class="s2">"</span>: <span class="s2">"</span><span class="s">nginx.conf</span><span class="s2">"</span>,
-      <span class="s2">"</span><span class="s">destination</span><span class="s2">"</span>: <span class="s2">"</span><span class="s">/etc/nginx/nginx.conf</span><span class="s2">"</span>
-    },
-    {
-      <span class="s2">"</span><span class="s">type</span><span class="s2">"</span>: <span class="s2">"</span><span class="s">file</span><span class="s2">"</span>,
-      <span class="s2">"</span><span class="s">source</span><span class="s2">"</span>: <span class="s2">"</span><span class="s">default.conf</span><span class="s2">"</span>,
-      <span class="s2">"</span><span class="s">destination</span><span class="s2">"</span>: <span class="s2">"</span><span class="s">/etc/nginx/conf.d/default.conf</span><span class="s2">"</span>
-    }
+  <span class="s2">"provisioners"</span><span class="p">:</span> <span class="p">[</span>
+    <span class="err">{</span>
+      <span class="s2">"type"</span><span class="p">:</span> <span class="s2">"shell"</span><span class="p">,</span>
+      <span class="s2">"inline"</span><span class="p">:</span> <span class="p">[</span>
+        <span class="s2">"ip a"</span><span class="p">,</span>
+        <span class="s2">"curl -s http://checkip.amazonaws.com"</span><span class="p">,</span>
+        <span class="s2">"apt-get update"</span><span class="p">,</span>
+        <span class="s2">"sudo apt-get install -y vim curl wget byobu ntp tar gzip"</span><span class="p">,</span>
+        <span class="s2">"timedatectl set-timezone Etc/UTC"</span><span class="p">,</span>
+        <span class="s2">"cat /etc/timezone"</span><span class="p">,</span>
+        <span class="s2">"date"</span><span class="p">,</span>
+        <span class="s2">"useradd -s /bin/bash -m {{user `newuser_name`}}"</span><span class="p">,</span>
+        <span class="s2">"usermod -a -G admin {{user `newuser_name`}}"</span><span class="p">,</span>
+        <span class="s2">"echo '{{user `newuser_name`}}:{{user `newuser_password`}}'|chpasswd"</span><span class="p">,</span>
+        <span class="s2">"cat /etc/passwd"</span><span class="p">,</span>
+        <span class="s2">"sed -i 's/Port 22/Port 2222/g' /etc/ssh/sshd_config"</span><span class="p">,</span>
+        <span class="s2">"sed -i 's/PermitRootLogin yes/PermitRootLogin no/g' /etc/ssh/sshd_config"</span><span class="p">,</span>
+        <span class="s2">"echo 'PasswordAuthentication no' &gt;&gt; /etc/ssh/sshd_config"</span><span class="p">,</span>
+        <span class="s2">"cat /etc/ssh/sshd_config"</span><span class="p">,</span>
+        <span class="s2">"mkdir -p /home/{{user `newuser_name`}}/.ssh"</span><span class="p">,</span>
+        <span class="s2">"fallocate -l 1G /swapfile"</span><span class="p">,</span>
+        <span class="s2">"chmod 600 /swapfile"</span><span class="p">,</span>
+        <span class="s2">"mkswap /swapfile"</span><span class="p">,</span>
+        <span class="s2">"swapon /swapfile"</span><span class="p">,</span>
+        <span class="s2">"swapon --show"</span><span class="p">,</span>
+        <span class="s2">"free -h"</span><span class="p">,</span>
+        <span class="s2">"echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab"</span><span class="p">,</span>
+        <span class="s2">"echo 'vm.swappiness=10' | sudo tee -a /etc/sysctl.conf"</span><span class="p">,</span>
+        <span class="s2">"echo 'vm.vfs_cache_pressure=50' | sudo tee -a /etc/sysctl.conf"</span>
+      <span class="p">]</span>
+    <span class="err">}</span><span class="p">,</span>
+    <span class="err">{</span>
+      <span class="s2">"type"</span><span class="p">:</span> <span class="s2">"file"</span><span class="p">,</span>
+      <span class="s2">"source"</span><span class="p">:</span> <span class="s2">"authorized_keys"</span><span class="p">,</span>
+      <span class="s2">"destination"</span><span class="p">:</span> <span class="s2">"/home/{{user `newuser_name`}}/.ssh/authorized_keys"</span>
+    <span class="err">}</span><span class="p">,</span>
+    <span class="err">{</span>
+      <span class="s2">"type"</span><span class="p">:</span> <span class="s2">"shell"</span><span class="p">,</span>
+      <span class="s2">"script"</span><span class="p">:</span> <span class="s2">"install-docker.sh"</span>
+    <span class="err">}</span><span class="p">,</span>
+    <span class="err">{</span>
+      <span class="s2">"type"</span><span class="p">:</span> <span class="s2">"file"</span><span class="p">,</span>
+      <span class="s2">"source"</span><span class="p">:</span> <span class="s2">"docker-compose.yml"</span><span class="p">,</span>
+      <span class="s2">"destination"</span><span class="p">:</span> <span class="s2">"/home/{{user `newuser_name`}}/docker-compose.yml"</span>
+    <span class="err">}</span><span class="p">,</span>
+    <span class="err">{</span>
+      <span class="s2">"type"</span><span class="p">:</span> <span class="s2">"shell"</span><span class="p">,</span>
+      <span class="s2">"inline"</span><span class="p">:</span> <span class="p">[</span>
+        <span class="s2">"mkdir -p /var/www/html"</span><span class="p">,</span>
+        <span class="s2">"wget https://bitbucket.org/yourusername/yourrepository/raw/97360be2edd53b93149d750db24f749aebc27988/binaries/drupal-7.50.tar.gz"</span><span class="p">,</span>
+        <span class="s2">"tar xf drupal-7.50.tar.gz --strip-components=1 -C /var/www/html"</span><span class="p">,</span>
+        <span class="s2">"ls -ahl /var/www/html"</span><span class="p">,</span>
+        <span class="s2">"mkdir -p /var/www/html/sites/default/files"</span><span class="p">,</span>
+        <span class="s2">"chmod 777 /var/www/html/sites/default/files"</span><span class="p">,</span>
+        <span class="s2">"cp -a /var/www/html/sites/default/default.settings.php /var/www/html/sites/default/settings.php"</span><span class="p">,</span>
+        <span class="s2">"chmod 777 /var/www/html/sites/default/settings.php"</span>
+      <span class="p">]</span>
+    <span class="err">}</span><span class="p">,</span>
+    <span class="err">{</span>
+      <span class="s2">"type"</span><span class="p">:</span> <span class="s2">"shell"</span><span class="p">,</span>
+      <span class="s2">"inline"</span><span class="p">:</span> <span class="p">[</span>
+        <span class="s2">"apt-get install -y nginx"</span>
+      <span class="p">]</span>
+    <span class="err">}</span><span class="p">,</span>
+    <span class="err">{</span>
+      <span class="s2">"type"</span><span class="p">:</span> <span class="s2">"file"</span><span class="p">,</span>
+      <span class="s2">"source"</span><span class="p">:</span> <span class="s2">"nginx.conf"</span><span class="p">,</span>
+      <span class="s2">"destination"</span><span class="p">:</span> <span class="s2">"/etc/nginx/nginx.conf"</span>
+    <span class="err">}</span><span class="p">,</span>
+    <span class="err">{</span>
+      <span class="s2">"type"</span><span class="p">:</span> <span class="s2">"file"</span><span class="p">,</span>
+      <span class="s2">"source"</span><span class="p">:</span> <span class="s2">"default.conf"</span><span class="p">,</span>
+      <span class="s2">"destination"</span><span class="p">:</span> <span class="s2">"/etc/nginx/conf.d/default.conf"</span>
+    <span class="err">}</span>
 
-  ]
+  <span class="p">]</span>
 
-}
+<span class="err">}</span>
 </pre></div>
 <blockquote>
 <p>HINT: A DigitalOcean 512MB droplet needs swap enabled due to the MySQL/MariaDB memory defaults, otherwise you get strange errors about inode unavailable while starting the MariaDB container</p>
@@ -506,41 +506,41 @@ mysql:
 <p>customize increased visibility of the #site-slogan { , occasionally needs cache cleared in admin/config/development/performance
 The oneliner is a complicated way of sed replacing two lines at once (tr replaces newlines with \r temporarily)</p>
 </blockquote>
-<div class="highlight"><pre><span></span><span class="n">sed</span> <span class="o">-</span><span class="n">i</span> <span class="s1">'s/font-size: 87.5/font-size: 120/'</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">html</span><span class="o">/</span><span class="n">themes</span><span class="o">/</span><span class="n">bartik</span><span class="o">/</span><span class="n">css</span><span class="o">/</span><span class="n">style</span><span class="p">.</span><span class="n">css</span>
+<div class="highlight"><pre><span></span><span class="err">sed -i 's/font-size: 87.5/font-size: 120/' /var/www/html/themes/bartik/css/style.css</span>
 </pre></div>
 <blockquote>
 <p>Because the world does not need yet another 10pt font website</p>
 </blockquote>
-<div class="highlight"><pre><span></span><span class="n">hostnamectl</span> <span class="k">set</span><span class="o">-</span><span class="n">hostname</span> <span class="n">physicstime</span><span class="p">.</span><span class="n">com</span>
-<span class="n">docker</span><span class="o">-</span><span class="n">compose</span> <span class="n">up</span> <span class="o">&amp;</span>
+<div class="highlight"><pre><span></span><span class="err">hostnamectl set-hostname physicstime.com</span>
+<span class="err">docker-compose up &amp;</span>
 </pre></div>
 <blockquote>
 <p>Hint: <code>/etc/hosts</code> locally and use a browser to do initial install.php config before a DNS cutover</p>
 <p>DB connection string requires 172.17.0.1 (the default docker private IP network bridge)</p>
 </blockquote>
-<div class="highlight"><pre><span></span><span class="nv">root</span>@<span class="nv">physicstime</span>:<span class="o">/</span><span class="nv">home</span><span class="o">/</span><span class="nv">USER</span><span class="o">/</span><span class="nv">physicstime</span>.<span class="nv">com</span># <span class="nv">mv</span> <span class="nv">files</span><span class="o">/</span> <span class="o">/</span><span class="nv">var</span><span class="o">/</span><span class="nv">www</span><span class="o">/</span><span class="nv">html</span><span class="o">/</span><span class="nv">sites</span><span class="o">/</span><span class="nv">physicstime</span>.<span class="nv">com</span><span class="o">/</span>
-<span class="nv">mv</span> <span class="nv">all</span> <span class="o">/</span><span class="nv">var</span><span class="o">/</span><span class="nv">www</span><span class="o">/</span><span class="nv">html</span><span class="o">/</span><span class="nv">sites</span><span class="o">/</span>
+<div class="highlight"><pre><span></span><span class="n">root</span><span class="nv">@physicstime</span><span class="err">:</span><span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="k">USER</span><span class="o">/</span><span class="n">physicstime</span><span class="p">.</span><span class="n">com</span><span class="err">#</span><span class="w"> </span><span class="n">mv</span><span class="w"> </span><span class="n">files</span><span class="o">/</span><span class="w"> </span><span class="o">/</span><span class="nf">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">html</span><span class="o">/</span><span class="n">sites</span><span class="o">/</span><span class="n">physicstime</span><span class="p">.</span><span class="n">com</span><span class="o">/</span><span class="w"></span>
+<span class="n">mv</span><span class="w"> </span><span class="ow">all</span><span class="w"> </span><span class="o">/</span><span class="nf">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">html</span><span class="o">/</span><span class="n">sites</span><span class="o">/</span><span class="w"></span>
 
-<span class="nv">ifconfig</span> <span class="o">|</span> <span class="nv">grep</span> <span class="nv">Bc</span>
-    <span class="mi">172</span>.<span class="mi">17</span>.<span class="mi">0</span>.<span class="mi">1</span>
+<span class="n">ifconfig</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">grep</span><span class="w"> </span><span class="n">Bc</span><span class="w"></span>
+<span class="w">    </span><span class="mf">172.17.0.1</span><span class="w"></span>
 
-<span class="nv">docker</span> <span class="nv">run</span> <span class="o">-</span><span class="nv">it</span> <span class="o">--</span><span class="nv">rm</span> <span class="o">--</span><span class="nv">volume</span> <span class="o">/</span><span class="nv">opt</span>:<span class="o">/</span><span class="nv">opt</span> <span class="nv">mariadb</span>:<span class="mi">5</span>.<span class="mi">5</span> <span class="o">/</span><span class="nv">bin</span><span class="o">/</span><span class="nv">bash</span>
-    <span class="nv">mysql</span> <span class="o">-</span><span class="nv">h172</span>.<span class="mi">17</span>.<span class="mi">0</span>.<span class="mi">1</span> <span class="o">-</span><span class="nv">uYOURUSER</span> <span class="o">-</span><span class="nv">p</span> <span class="nv">physicstime</span>
-        <span class="k">show</span> <span class="nv">tables</span><span class="c1">;</span>
-        <span class="k">exit</span>
-    <span class="nv">mysql</span> <span class="o">-</span><span class="nv">h172</span>.<span class="mi">17</span>.<span class="mi">0</span>.<span class="mi">1</span> <span class="o">-</span><span class="nv">uroot</span> <span class="o">-</span><span class="nv">p</span> <span class="nv">physicstime</span> <span class="o">&lt;</span> <span class="nv">backup</span>.<span class="nv">sql</span>
+<span class="n">docker</span><span class="w"> </span><span class="n">run</span><span class="w"> </span><span class="o">-</span><span class="n">it</span><span class="w"> </span><span class="c1">--rm --volume /opt:/opt mariadb:5.5 /bin/bash</span>
+<span class="w">    </span><span class="n">mysql</span><span class="w"> </span><span class="o">-</span><span class="n">h172</span><span class="mf">.17.0.1</span><span class="w"> </span><span class="o">-</span><span class="n">uYOURUSER</span><span class="w"> </span><span class="o">-</span><span class="n">p</span><span class="w"> </span><span class="n">physicstime</span><span class="w"></span>
+<span class="w">        </span><span class="n">show</span><span class="w"> </span><span class="n">tables</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="k">exit</span><span class="w"></span>
+<span class="w">    </span><span class="n">mysql</span><span class="w"> </span><span class="o">-</span><span class="n">h172</span><span class="mf">.17.0.1</span><span class="w"> </span><span class="o">-</span><span class="n">uroot</span><span class="w"> </span><span class="o">-</span><span class="n">p</span><span class="w"> </span><span class="n">physicstime</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="k">backup</span><span class="p">.</span><span class="k">sql</span><span class="w"></span>
 
-<span class="nv">chown</span> <span class="nv">root</span>:<span class="nv">root</span> <span class="o">-</span><span class="nv">R</span> <span class="o">/</span><span class="nv">var</span><span class="o">/</span><span class="nv">www</span><span class="o">/</span><span class="nv">html</span><span class="o">/</span><span class="nv">sites</span><span class="o">/</span>
-<span class="nv">chmod</span> <span class="mi">400</span> <span class="o">/</span><span class="nv">var</span><span class="o">/</span><span class="nv">www</span><span class="o">/</span><span class="nv">html</span><span class="o">/</span><span class="nv">sites</span><span class="o">/</span><span class="nv">default</span><span class="o">/</span><span class="nv">settings</span>.<span class="nv">php</span>
+<span class="n">chown</span><span class="w"> </span><span class="nl">root</span><span class="p">:</span><span class="n">root</span><span class="w"> </span><span class="o">-</span><span class="n">R</span><span class="w"> </span><span class="o">/</span><span class="nf">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">html</span><span class="o">/</span><span class="n">sites</span><span class="o">/</span><span class="w"></span>
+<span class="n">chmod</span><span class="w"> </span><span class="mi">400</span><span class="w"> </span><span class="o">/</span><span class="nf">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">html</span><span class="o">/</span><span class="n">sites</span><span class="o">/</span><span class="k">default</span><span class="o">/</span><span class="n">settings</span><span class="p">.</span><span class="n">php</span><span class="w"></span>
 </pre></div>
 <blockquote>
 <p>ensure /var/www/html/sites/default/files has the correct permissions, otherwise no CSS for you!</p>
 </blockquote>
-<div class="highlight"><pre><span></span><span class="n">docker</span><span class="o">-</span><span class="n">compose</span> <span class="n">stop</span>
-<span class="n">docker</span> <span class="n">ps</span> <span class="c1">--all</span>
-<span class="n">docker</span><span class="o">-</span><span class="n">compose</span> <span class="n">up</span> <span class="o">&amp;</span>
-<span class="n">docker</span><span class="o">-</span><span class="n">compose</span> <span class="n">logs</span> <span class="o">|&amp;</span> <span class="n">tee</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">log</span><span class="o">/</span><span class="n">physicstime</span><span class="p">.</span><span class="n">log</span>
-<span class="n">tail</span> <span class="o">-</span><span class="n">f</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">log</span><span class="o">/</span><span class="n">physicstime</span><span class="p">.</span><span class="n">log</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">log</span><span class="o">/</span><span class="n">nginx</span><span class="o">/</span><span class="k">access</span><span class="p">.</span><span class="n">log</span>
+<div class="highlight"><pre><span></span><span class="err">docker-compose stop</span>
+<span class="err">docker ps --all</span>
+<span class="err">docker-compose up &amp;</span>
+<span class="err">docker-compose logs |&amp; tee /var/log/physicstime.log</span>
+<span class="err">tail -f /var/log/physicstime.log /var/log/nginx/access.log</span>
 </pre></div>
 <blockquote>
 <p>This starts it manually and displays any traffic</p>
@@ -559,87 +559,87 @@ The oneliner is a complicated way of sed replacing two lines at once (tr replace
 <hr/>
 <h2 id="adhoc-performance-and-latency-testing">Adhoc Performance and Latency Testing</h2>
 <p>Data driven decisions is a big deal, but let's be honest, engineers love numbers :)</p>
-<div class="highlight"><pre><span></span><span class="n">ab</span> <span class="o">-</span><span class="n">l</span> <span class="o">-</span><span class="n">r</span> <span class="o">-</span><span class="n">n</span> <span class="mi">500</span> <span class="o">-</span><span class="k">c</span> <span class="mi">100</span> <span class="o">-</span><span class="n">k</span> <span class="o">-</span><span class="n">H</span> <span class="ss">"Accept-Encoding: gzip, deflate"</span> <span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">physicstime</span><span class="p">.</span><span class="n">com</span><span class="o">/</span><span class="n">node</span><span class="o">?</span><span class="n">page</span><span class="o">=</span><span class="mi">1</span>
+<div class="highlight"><pre><span></span><span class="err">ab -l -r -n 500 -c 100 -k -H "Accept-Encoding: gzip, deflate" http://physicstime.com/node?page=1</span>
 </pre></div>
 <blockquote>
 <p>The unscientific "watching top": 80% for about 5 seconds vs 78% for about 5 seconds</p>
 </blockquote>
 <p><a href="https://httpd.apache.org/docs/2.4/programs/ab.html">https://httpd.apache.org/docs/2.4/programs/ab.html</a></p>
 <h3 id="linode-and-cherokee-and-php-cgi-53-and-mysql-55">Linode and Cherokee and php-cgi 5.3 and MySQL 5.5</h3>
-<div class="highlight"><pre><span></span><span class="nv">Concurrency</span> <span class="nv">Level</span>:      <span class="mi">100</span>
-<span class="nv">Time</span> <span class="nv">taken</span> <span class="k">for</span> <span class="nv">tests</span>:   <span class="mi">7</span>.<span class="mi">255</span> <span class="nv">seconds</span>
-<span class="nv">Complete</span> <span class="nv">requests</span>:      <span class="mi">500</span>
-<span class="nv">Failed</span> <span class="nv">requests</span>:        <span class="mi">0</span>
-<span class="nv">Keep</span><span class="o">-</span><span class="nv">Alive</span> <span class="nv">requests</span>:    <span class="mi">0</span>
-<span class="nv">Total</span> <span class="nv">transferred</span>:      <span class="mi">5321000</span> <span class="nv">bytes</span>
-<span class="nv">HTML</span> <span class="nv">transferred</span>:       <span class="mi">5089500</span> <span class="nv">bytes</span>
-<span class="nv">Requests</span> <span class="nv">per</span> <span class="nv">second</span>:    <span class="mi">68</span>.<span class="mi">92</span> [#<span class="o">/</span><span class="nv">sec</span>] <span class="ss">(</span><span class="nv">mean</span><span class="ss">)</span>
-<span class="nv">Time</span> <span class="nv">per</span> <span class="nv">request</span>:       <span class="mi">1451</span>.<span class="mi">029</span> [<span class="nv">ms</span>] <span class="ss">(</span><span class="nv">mean</span><span class="ss">)</span>
-<span class="nv">Time</span> <span class="nv">per</span> <span class="nv">request</span>:       <span class="mi">14</span>.<span class="mi">510</span> [<span class="nv">ms</span>] <span class="ss">(</span><span class="nv">mean</span>, <span class="nv">across</span> <span class="nv">all</span> <span class="nv">concurrent</span> <span class="nv">requests</span><span class="ss">)</span>
-<span class="nv">Transfer</span> <span class="nv">rate</span>:          <span class="mi">716</span>.<span class="mi">22</span> [<span class="nv">Kbytes</span><span class="o">/</span><span class="nv">sec</span>] <span class="nv">received</span>
+<div class="highlight"><pre><span></span><span class="n">Concurrency</span><span class="w"> </span><span class="k">Level</span><span class="err">:</span><span class="w">      </span><span class="mi">100</span><span class="w"></span>
+<span class="nc">Time</span><span class="w"> </span><span class="n">taken</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="nl">tests</span><span class="p">:</span><span class="w">   </span><span class="mf">7.255</span><span class="w"> </span><span class="n">seconds</span><span class="w"></span>
+<span class="n">Complete</span><span class="w"> </span><span class="nl">requests</span><span class="p">:</span><span class="w">      </span><span class="mi">500</span><span class="w"></span>
+<span class="n">Failed</span><span class="w"> </span><span class="nl">requests</span><span class="p">:</span><span class="w">        </span><span class="mi">0</span><span class="w"></span>
+<span class="n">Keep</span><span class="o">-</span><span class="n">Alive</span><span class="w"> </span><span class="nl">requests</span><span class="p">:</span><span class="w">    </span><span class="mi">0</span><span class="w"></span>
+<span class="n">Total</span><span class="w"> </span><span class="nl">transferred</span><span class="p">:</span><span class="w">      </span><span class="mi">5321000</span><span class="w"> </span><span class="n">bytes</span><span class="w"></span>
+<span class="n">HTML</span><span class="w"> </span><span class="nl">transferred</span><span class="p">:</span><span class="w">       </span><span class="mi">5089500</span><span class="w"> </span><span class="n">bytes</span><span class="w"></span>
+<span class="n">Requests</span><span class="w"> </span><span class="n">per</span><span class="w"> </span><span class="k">second</span><span class="err">:</span><span class="w">    </span><span class="mf">68.92</span><span class="w"> </span><span class="o">[</span><span class="n">#/sec</span><span class="o">]</span><span class="w"> </span><span class="p">(</span><span class="n">mean</span><span class="p">)</span><span class="w"></span>
+<span class="nc">Time</span><span class="w"> </span><span class="n">per</span><span class="w"> </span><span class="nl">request</span><span class="p">:</span><span class="w">       </span><span class="mf">1451.029</span><span class="w"> </span><span class="o">[</span><span class="n">ms</span><span class="o">]</span><span class="w"> </span><span class="p">(</span><span class="n">mean</span><span class="p">)</span><span class="w"></span>
+<span class="nc">Time</span><span class="w"> </span><span class="n">per</span><span class="w"> </span><span class="nl">request</span><span class="p">:</span><span class="w">       </span><span class="mf">14.510</span><span class="w"> </span><span class="o">[</span><span class="n">ms</span><span class="o">]</span><span class="w"> </span><span class="p">(</span><span class="n">mean</span><span class="p">,</span><span class="w"> </span><span class="n">across</span><span class="w"> </span><span class="ow">all</span><span class="w"> </span><span class="n">concurrent</span><span class="w"> </span><span class="n">requests</span><span class="p">)</span><span class="w"></span>
+<span class="n">Transfer</span><span class="w"> </span><span class="nl">rate</span><span class="p">:</span><span class="w">          </span><span class="mf">716.22</span><span class="w"> </span><span class="o">[</span><span class="n">Kbytes/sec</span><span class="o">]</span><span class="w"> </span><span class="n">received</span><span class="w"></span>
 
-<span class="nv">Connection</span> <span class="nv">Times</span> <span class="ss">(</span><span class="nv">ms</span><span class="ss">)</span>
-              <span class="nv">min</span>  <span class="nv">mean</span>[<span class="o">+/-</span><span class="nv">sd</span>] <span class="nv">median</span>   <span class="nv">max</span>
-<span class="k">Connect</span>:        <span class="mi">2</span>    <span class="mi">2</span>   <span class="mi">0</span>.<span class="mi">4</span>      <span class="mi">2</span>       <span class="mi">6</span>
-<span class="nv">Processing</span>:   <span class="mi">102</span> <span class="mi">1313</span> <span class="mi">320</span>.<span class="mi">0</span>   <span class="mi">1437</span>    <span class="mi">1525</span>
-<span class="nv">Waiting</span>:       <span class="mi">89</span> <span class="mi">1308</span> <span class="mi">320</span>.<span class="mi">2</span>   <span class="mi">1431</span>    <span class="mi">1521</span>
-<span class="nv">Total</span>:        <span class="mi">104</span> <span class="mi">1315</span> <span class="mi">319</span>.<span class="mi">8</span>   <span class="mi">1439</span>    <span class="mi">1526</span>
+<span class="k">Connection</span><span class="w"> </span><span class="n">Times</span><span class="w"> </span><span class="p">(</span><span class="n">ms</span><span class="p">)</span><span class="w"></span>
+<span class="w">              </span><span class="nf">min</span><span class="w">  </span><span class="n">mean</span><span class="o">[</span><span class="n">+/-sd</span><span class="o">]</span><span class="w"> </span><span class="n">median</span><span class="w">   </span><span class="nf">max</span><span class="w"></span>
+<span class="k">Connect</span><span class="err">:</span><span class="w">        </span><span class="mi">2</span><span class="w">    </span><span class="mi">2</span><span class="w">   </span><span class="mf">0.4</span><span class="w">      </span><span class="mi">2</span><span class="w">       </span><span class="mi">6</span><span class="w"></span>
+<span class="nl">Processing</span><span class="p">:</span><span class="w">   </span><span class="mi">102</span><span class="w"> </span><span class="mi">1313</span><span class="w"> </span><span class="mf">320.0</span><span class="w">   </span><span class="mi">1437</span><span class="w">    </span><span class="mi">1525</span><span class="w"></span>
+<span class="nl">Waiting</span><span class="p">:</span><span class="w">       </span><span class="mi">89</span><span class="w"> </span><span class="mi">1308</span><span class="w"> </span><span class="mf">320.2</span><span class="w">   </span><span class="mi">1431</span><span class="w">    </span><span class="mi">1521</span><span class="w"></span>
+<span class="nl">Total</span><span class="p">:</span><span class="w">        </span><span class="mi">104</span><span class="w"> </span><span class="mi">1315</span><span class="w"> </span><span class="mf">319.8</span><span class="w">   </span><span class="mi">1439</span><span class="w">    </span><span class="mi">1526</span><span class="w"></span>
 
-<span class="nv">Percentage</span> <span class="nv">of</span> <span class="nv">the</span> <span class="nv">requests</span> <span class="nv">served</span> <span class="nv">within</span> <span class="nv">a</span> <span class="nv">certain</span> <span class="nv">time</span> <span class="ss">(</span><span class="nv">ms</span><span class="ss">)</span>
-  <span class="mi">50</span><span class="o">%</span>   <span class="mi">1439</span>
-  <span class="mi">66</span><span class="o">%</span>   <span class="mi">1456</span>
-  <span class="mi">75</span><span class="o">%</span>   <span class="mi">1466</span>
-  <span class="mi">80</span><span class="o">%</span>   <span class="mi">1473</span>
-  <span class="mi">90</span><span class="o">%</span>   <span class="mi">1488</span>
-  <span class="mi">95</span><span class="o">%</span>   <span class="mi">1505</span>
-  <span class="mi">98</span><span class="o">%</span>   <span class="mi">1516</span>
-  <span class="mi">99</span><span class="o">%</span>   <span class="mi">1519</span>
- <span class="mi">100</span><span class="o">%</span>   <span class="mi">1526</span> <span class="ss">(</span><span class="nv">longest</span> <span class="nv">request</span><span class="ss">)</span>
+<span class="n">Percentage</span><span class="w"> </span><span class="k">of</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">requests</span><span class="w"> </span><span class="n">served</span><span class="w"> </span><span class="k">within</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">certain</span><span class="w"> </span><span class="nc">time</span><span class="w"> </span><span class="p">(</span><span class="n">ms</span><span class="p">)</span><span class="w"></span>
+<span class="w">  </span><span class="mi">50</span><span class="o">%</span><span class="w">   </span><span class="mi">1439</span><span class="w"></span>
+<span class="w">  </span><span class="mi">66</span><span class="o">%</span><span class="w">   </span><span class="mi">1456</span><span class="w"></span>
+<span class="w">  </span><span class="mi">75</span><span class="o">%</span><span class="w">   </span><span class="mi">1466</span><span class="w"></span>
+<span class="w">  </span><span class="mi">80</span><span class="o">%</span><span class="w">   </span><span class="mi">1473</span><span class="w"></span>
+<span class="w">  </span><span class="mi">90</span><span class="o">%</span><span class="w">   </span><span class="mi">1488</span><span class="w"></span>
+<span class="w">  </span><span class="mi">95</span><span class="o">%</span><span class="w">   </span><span class="mi">1505</span><span class="w"></span>
+<span class="w">  </span><span class="mi">98</span><span class="o">%</span><span class="w">   </span><span class="mi">1516</span><span class="w"></span>
+<span class="w">  </span><span class="mi">99</span><span class="o">%</span><span class="w">   </span><span class="mi">1519</span><span class="w"></span>
+<span class="w"> </span><span class="mi">100</span><span class="o">%</span><span class="w">   </span><span class="mi">1526</span><span class="w"> </span><span class="p">(</span><span class="n">longest</span><span class="w"> </span><span class="n">request</span><span class="p">)</span><span class="w"></span>
 </pre></div>
 <h3 id="digitalocean-and-nginx-and-docker-php-fpm-and-mariadb-55">DigitalOcean and nginx and Docker php-fpm and MariaDB 5.5</h3>
-<div class="highlight"><pre><span></span><span class="nv">Concurrency</span> <span class="nv">Level</span>:      <span class="mi">100</span>
-<span class="nv">Time</span> <span class="nv">taken</span> <span class="k">for</span> <span class="nv">tests</span>:   <span class="mi">7</span>.<span class="mi">791</span> <span class="nv">seconds</span>
-<span class="nv">Complete</span> <span class="nv">requests</span>:      <span class="mi">500</span>
-<span class="nv">Failed</span> <span class="nv">requests</span>:        <span class="mi">0</span>
-<span class="nv">Keep</span><span class="o">-</span><span class="nv">Alive</span> <span class="nv">requests</span>:    <span class="mi">0</span>
-<span class="nv">Total</span> <span class="nv">transferred</span>:      <span class="mi">5320068</span> <span class="nv">bytes</span>
-<span class="nv">HTML</span> <span class="nv">transferred</span>:       <span class="mi">5082000</span> <span class="nv">bytes</span>
-<span class="nv">Requests</span> <span class="nv">per</span> <span class="nv">second</span>:    <span class="mi">64</span>.<span class="mi">18</span> [#<span class="o">/</span><span class="nv">sec</span>] <span class="ss">(</span><span class="nv">mean</span><span class="ss">)</span>
-<span class="nv">Time</span> <span class="nv">per</span> <span class="nv">request</span>:       <span class="mi">1558</span>.<span class="mi">145</span> [<span class="nv">ms</span>] <span class="ss">(</span><span class="nv">mean</span><span class="ss">)</span>
-<span class="nv">Time</span> <span class="nv">per</span> <span class="nv">request</span>:       <span class="mi">15</span>.<span class="mi">581</span> [<span class="nv">ms</span>] <span class="ss">(</span><span class="nv">mean</span>, <span class="nv">across</span> <span class="nv">all</span> <span class="nv">concurrent</span> <span class="nv">requests</span><span class="ss">)</span>
-<span class="nv">Transfer</span> <span class="nv">rate</span>:          <span class="mi">666</span>.<span class="mi">87</span> [<span class="nv">Kbytes</span><span class="o">/</span><span class="nv">sec</span>] <span class="nv">received</span>
+<div class="highlight"><pre><span></span><span class="n">Concurrency</span><span class="w"> </span><span class="k">Level</span><span class="err">:</span><span class="w">      </span><span class="mi">100</span><span class="w"></span>
+<span class="nc">Time</span><span class="w"> </span><span class="n">taken</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="nl">tests</span><span class="p">:</span><span class="w">   </span><span class="mf">7.791</span><span class="w"> </span><span class="n">seconds</span><span class="w"></span>
+<span class="n">Complete</span><span class="w"> </span><span class="nl">requests</span><span class="p">:</span><span class="w">      </span><span class="mi">500</span><span class="w"></span>
+<span class="n">Failed</span><span class="w"> </span><span class="nl">requests</span><span class="p">:</span><span class="w">        </span><span class="mi">0</span><span class="w"></span>
+<span class="n">Keep</span><span class="o">-</span><span class="n">Alive</span><span class="w"> </span><span class="nl">requests</span><span class="p">:</span><span class="w">    </span><span class="mi">0</span><span class="w"></span>
+<span class="n">Total</span><span class="w"> </span><span class="nl">transferred</span><span class="p">:</span><span class="w">      </span><span class="mi">5320068</span><span class="w"> </span><span class="n">bytes</span><span class="w"></span>
+<span class="n">HTML</span><span class="w"> </span><span class="nl">transferred</span><span class="p">:</span><span class="w">       </span><span class="mi">5082000</span><span class="w"> </span><span class="n">bytes</span><span class="w"></span>
+<span class="n">Requests</span><span class="w"> </span><span class="n">per</span><span class="w"> </span><span class="k">second</span><span class="err">:</span><span class="w">    </span><span class="mf">64.18</span><span class="w"> </span><span class="o">[</span><span class="n">#/sec</span><span class="o">]</span><span class="w"> </span><span class="p">(</span><span class="n">mean</span><span class="p">)</span><span class="w"></span>
+<span class="nc">Time</span><span class="w"> </span><span class="n">per</span><span class="w"> </span><span class="nl">request</span><span class="p">:</span><span class="w">       </span><span class="mf">1558.145</span><span class="w"> </span><span class="o">[</span><span class="n">ms</span><span class="o">]</span><span class="w"> </span><span class="p">(</span><span class="n">mean</span><span class="p">)</span><span class="w"></span>
+<span class="nc">Time</span><span class="w"> </span><span class="n">per</span><span class="w"> </span><span class="nl">request</span><span class="p">:</span><span class="w">       </span><span class="mf">15.581</span><span class="w"> </span><span class="o">[</span><span class="n">ms</span><span class="o">]</span><span class="w"> </span><span class="p">(</span><span class="n">mean</span><span class="p">,</span><span class="w"> </span><span class="n">across</span><span class="w"> </span><span class="ow">all</span><span class="w"> </span><span class="n">concurrent</span><span class="w"> </span><span class="n">requests</span><span class="p">)</span><span class="w"></span>
+<span class="n">Transfer</span><span class="w"> </span><span class="nl">rate</span><span class="p">:</span><span class="w">          </span><span class="mf">666.87</span><span class="w"> </span><span class="o">[</span><span class="n">Kbytes/sec</span><span class="o">]</span><span class="w"> </span><span class="n">received</span><span class="w"></span>
 
-<span class="nv">Connection</span> <span class="nv">Times</span> <span class="ss">(</span><span class="nv">ms</span><span class="ss">)</span>
-              <span class="nv">min</span>  <span class="nv">mean</span>[<span class="o">+/-</span><span class="nv">sd</span>] <span class="nv">median</span>   <span class="nv">max</span>
-<span class="k">Connect</span>:        <span class="mi">0</span>    <span class="mi">1</span>   <span class="mi">1</span>.<span class="mi">1</span>      <span class="mi">0</span>       <span class="mi">4</span>
-<span class="nv">Processing</span>:   <span class="mi">542</span> <span class="mi">1421</span> <span class="mi">201</span>.<span class="mi">6</span>   <span class="mi">1453</span>    <span class="mi">2020</span>
-<span class="nv">Waiting</span>:      <span class="mi">531</span> <span class="mi">1417</span> <span class="mi">201</span>.<span class="mi">2</span>   <span class="mi">1447</span>    <span class="mi">2017</span>
-<span class="nv">Total</span>:        <span class="mi">545</span> <span class="mi">1422</span> <span class="mi">201</span>.<span class="mi">0</span>   <span class="mi">1453</span>    <span class="mi">2022</span>
+<span class="k">Connection</span><span class="w"> </span><span class="n">Times</span><span class="w"> </span><span class="p">(</span><span class="n">ms</span><span class="p">)</span><span class="w"></span>
+<span class="w">              </span><span class="nf">min</span><span class="w">  </span><span class="n">mean</span><span class="o">[</span><span class="n">+/-sd</span><span class="o">]</span><span class="w"> </span><span class="n">median</span><span class="w">   </span><span class="nf">max</span><span class="w"></span>
+<span class="k">Connect</span><span class="err">:</span><span class="w">        </span><span class="mi">0</span><span class="w">    </span><span class="mi">1</span><span class="w">   </span><span class="mf">1.1</span><span class="w">      </span><span class="mi">0</span><span class="w">       </span><span class="mi">4</span><span class="w"></span>
+<span class="nl">Processing</span><span class="p">:</span><span class="w">   </span><span class="mi">542</span><span class="w"> </span><span class="mi">1421</span><span class="w"> </span><span class="mf">201.6</span><span class="w">   </span><span class="mi">1453</span><span class="w">    </span><span class="mi">2020</span><span class="w"></span>
+<span class="nl">Waiting</span><span class="p">:</span><span class="w">      </span><span class="mi">531</span><span class="w"> </span><span class="mi">1417</span><span class="w"> </span><span class="mf">201.2</span><span class="w">   </span><span class="mi">1447</span><span class="w">    </span><span class="mi">2017</span><span class="w"></span>
+<span class="nl">Total</span><span class="p">:</span><span class="w">        </span><span class="mi">545</span><span class="w"> </span><span class="mi">1422</span><span class="w"> </span><span class="mf">201.0</span><span class="w">   </span><span class="mi">1453</span><span class="w">    </span><span class="mi">2022</span><span class="w"></span>
 
-<span class="nv">Percentage</span> <span class="nv">of</span> <span class="nv">the</span> <span class="nv">requests</span> <span class="nv">served</span> <span class="nv">within</span> <span class="nv">a</span> <span class="nv">certain</span> <span class="nv">time</span> <span class="ss">(</span><span class="nv">ms</span><span class="ss">)</span>
-  <span class="mi">50</span><span class="o">%</span>   <span class="mi">1453</span>
-  <span class="mi">66</span><span class="o">%</span>   <span class="mi">1470</span>
-  <span class="mi">75</span><span class="o">%</span>   <span class="mi">1485</span>
-  <span class="mi">80</span><span class="o">%</span>   <span class="mi">1494</span>
-  <span class="mi">90</span><span class="o">%</span>   <span class="mi">1510</span>
-  <span class="mi">95</span><span class="o">%</span>   <span class="mi">1674</span>
-  <span class="mi">98</span><span class="o">%</span>   <span class="mi">1877</span>
-  <span class="mi">99</span><span class="o">%</span>   <span class="mi">1930</span>
- <span class="mi">100</span><span class="o">%</span>   <span class="mi">2022</span> <span class="ss">(</span><span class="nv">longest</span> <span class="nv">request</span><span class="ss">)</span>
+<span class="n">Percentage</span><span class="w"> </span><span class="k">of</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">requests</span><span class="w"> </span><span class="n">served</span><span class="w"> </span><span class="k">within</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">certain</span><span class="w"> </span><span class="nc">time</span><span class="w"> </span><span class="p">(</span><span class="n">ms</span><span class="p">)</span><span class="w"></span>
+<span class="w">  </span><span class="mi">50</span><span class="o">%</span><span class="w">   </span><span class="mi">1453</span><span class="w"></span>
+<span class="w">  </span><span class="mi">66</span><span class="o">%</span><span class="w">   </span><span class="mi">1470</span><span class="w"></span>
+<span class="w">  </span><span class="mi">75</span><span class="o">%</span><span class="w">   </span><span class="mi">1485</span><span class="w"></span>
+<span class="w">  </span><span class="mi">80</span><span class="o">%</span><span class="w">   </span><span class="mi">1494</span><span class="w"></span>
+<span class="w">  </span><span class="mi">90</span><span class="o">%</span><span class="w">   </span><span class="mi">1510</span><span class="w"></span>
+<span class="w">  </span><span class="mi">95</span><span class="o">%</span><span class="w">   </span><span class="mi">1674</span><span class="w"></span>
+<span class="w">  </span><span class="mi">98</span><span class="o">%</span><span class="w">   </span><span class="mi">1877</span><span class="w"></span>
+<span class="w">  </span><span class="mi">99</span><span class="o">%</span><span class="w">   </span><span class="mi">1930</span><span class="w"></span>
+<span class="w"> </span><span class="mi">100</span><span class="o">%</span><span class="w">   </span><span class="mi">2022</span><span class="w"> </span><span class="p">(</span><span class="n">longest</span><span class="w"> </span><span class="n">request</span><span class="p">)</span><span class="w"></span>
 </pre></div>
 <blockquote>
 <p>So it seems there's a slight edge in either cherokee over nginx OR not running dockerized applications OR linode vs digitalocean BUT...</p>
 </blockquote>
 <p>When I tweaked it for higher concurrency <code>ab -l -r -n 500 -c 200 -k -H "Accept-Encoding: gzip, deflate" http://physicstime.com/node?page=8</code></p>
 <p>Linode + Cherokee + php-cgi</p>
-<div class="highlight"><pre><span></span><span class="nv">Time</span> <span class="nv">taken</span> <span class="k">for</span> <span class="nv">tests</span>:   <span class="mi">9</span>.<span class="mi">933</span> <span class="nv">seconds</span>
-<span class="nv">Requests</span> <span class="nv">per</span> <span class="nv">second</span>:    <span class="mi">50</span>.<span class="mi">34</span> [#<span class="o">/</span><span class="nv">sec</span>] <span class="ss">(</span><span class="nv">mean</span><span class="ss">)</span>
-<span class="nv">Time</span> <span class="nv">per</span> <span class="nv">request</span>:       <span class="mi">3973</span>.<span class="mi">367</span> [<span class="nv">ms</span>] <span class="ss">(</span><span class="nv">mean</span><span class="ss">)</span>
+<div class="highlight"><pre><span></span><span class="nc">Time</span><span class="w"> </span><span class="n">taken</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="nl">tests</span><span class="p">:</span><span class="w">   </span><span class="mf">9.933</span><span class="w"> </span><span class="n">seconds</span><span class="w"></span>
+<span class="n">Requests</span><span class="w"> </span><span class="n">per</span><span class="w"> </span><span class="k">second</span><span class="err">:</span><span class="w">    </span><span class="mf">50.34</span><span class="w"> </span><span class="o">[</span><span class="n">#/sec</span><span class="o">]</span><span class="w"> </span><span class="p">(</span><span class="n">mean</span><span class="p">)</span><span class="w"></span>
+<span class="nc">Time</span><span class="w"> </span><span class="n">per</span><span class="w"> </span><span class="nl">request</span><span class="p">:</span><span class="w">       </span><span class="mf">3973.367</span><span class="w"> </span><span class="o">[</span><span class="n">ms</span><span class="o">]</span><span class="w"> </span><span class="p">(</span><span class="n">mean</span><span class="p">)</span><span class="w"></span>
 </pre></div>
 <p>DigitalOcean + Nginx + Docker + php-fpm</p>
-<div class="highlight"><pre><span></span><span class="nv">Time</span> <span class="nv">taken</span> <span class="k">for</span> <span class="nv">tests</span>:   <span class="mi">8</span>.<span class="mi">120</span> <span class="nv">seconds</span>
-<span class="nv">Requests</span> <span class="nv">per</span> <span class="nv">second</span>:    <span class="mi">61</span>.<span class="mi">58</span> [#<span class="o">/</span><span class="nv">sec</span>] <span class="ss">(</span><span class="nv">mean</span><span class="ss">)</span>
-<span class="nv">Time</span> <span class="nv">per</span> <span class="nv">request</span>:       <span class="mi">3248</span>.<span class="mi">067</span> [<span class="nv">ms</span>] <span class="ss">(</span><span class="nv">mean</span><span class="ss">)</span>
+<div class="highlight"><pre><span></span><span class="nc">Time</span><span class="w"> </span><span class="n">taken</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="nl">tests</span><span class="p">:</span><span class="w">   </span><span class="mf">8.120</span><span class="w"> </span><span class="n">seconds</span><span class="w"></span>
+<span class="n">Requests</span><span class="w"> </span><span class="n">per</span><span class="w"> </span><span class="k">second</span><span class="err">:</span><span class="w">    </span><span class="mf">61.58</span><span class="w"> </span><span class="o">[</span><span class="n">#/sec</span><span class="o">]</span><span class="w"> </span><span class="p">(</span><span class="n">mean</span><span class="p">)</span><span class="w"></span>
+<span class="nc">Time</span><span class="w"> </span><span class="n">per</span><span class="w"> </span><span class="nl">request</span><span class="p">:</span><span class="w">       </span><span class="mf">3248.067</span><span class="w"> </span><span class="o">[</span><span class="n">ms</span><span class="o">]</span><span class="w"> </span><span class="p">(</span><span class="n">mean</span><span class="p">)</span><span class="w"></span>
 </pre></div>
 <p>I can see the trend reverse (shrug)</p>
 <h4 id="latency-testing">Latency testing</h4>

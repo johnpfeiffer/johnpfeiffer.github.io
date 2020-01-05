@@ -85,14 +85,14 @@
 <h3 id="self-signed-java-keystore">Self Signed Java Keystore</h3>
 <p>A Java Keystore is different from a normal cert + key combo. Example "self signed" java keystore, key, certificate combo</p>
 <p>NOTE: CN should really be ldap.domain.com , not Zanzibar!!!!</p>
-<div class="highlight"><pre><span></span><span class="n">keytool</span> <span class="o">-</span><span class="n">genkey</span> <span class="o">-</span><span class="n">keyalg</span> <span class="ss">&quot;RSA&quot;</span> <span class="o">-</span><span class="n">dname</span> <span class="ss">&quot;cn=zanzibar, ou=ApacheDS, o=ASF, c=US&quot;</span>  <span class="o">-</span><span class="k">alias</span> <span class="n">zanzibar</span> <span class="o">-</span><span class="n">keystore</span> <span class="n">zanzibar</span><span class="p">.</span><span class="n">jks</span> <span class="o">-</span><span class="n">storepass</span> <span class="n">secret</span> <span class="o">-</span><span class="n">validity</span> <span class="mi">730</span>
+<div class="highlight"><pre><span></span><span class="err">keytool -genkey -keyalg &quot;RSA&quot; -dname &quot;cn=zanzibar, ou=ApacheDS, o=ASF, c=US&quot;  -alias zanzibar -keystore zanzibar.jks -storepass secret -validity 730</span>
 </pre></div>
 
 
 <blockquote>
 <p>Press Enter to use the same password for certificate as we already entered above for the keystore</p>
 </blockquote>
-<div class="highlight"><pre><span></span><span class="n">keytool</span> <span class="o">-</span><span class="n">list</span> <span class="o">-</span><span class="n">v</span> <span class="o">-</span><span class="n">keystore</span> <span class="n">zanzibar</span><span class="p">.</span><span class="n">jks</span> <span class="o">-</span><span class="n">storetype</span> <span class="n">jks</span> <span class="o">-</span><span class="n">storepass</span> <span class="n">secret</span>
+<div class="highlight"><pre><span></span><span class="err">keytool -list -v -keystore zanzibar.jks -storetype jks -storepass secret</span>
 </pre></div>
 
 
@@ -130,9 +130,9 @@
 <p>start the service and check ports listening, established, time wait (especially 10636)</p>
 </blockquote>
 <p>JXplorer or ApacheDirectoryStudio connection "LDAP -&gt; New Connection -&gt; hostname , port = 10636" (SSL or LDAPS)</p>
-<div class="highlight"><pre><span></span><span class="n">BindDN</span> <span class="k">or</span> <span class="k">user</span> <span class="p">(</span><span class="n">click</span> <span class="k">on</span> <span class="k">Check</span> <span class="n">Authentication</span><span class="p">)</span>
-<span class="n">uid</span><span class="o">=</span><span class="k">admin</span><span class="p">,</span><span class="n">ou</span><span class="o">=</span><span class="k">system</span> 
-<span class="n">password</span><span class="o">=</span> <span class="n">secret</span>
+<div class="highlight"><pre><span></span><span class="err">BindDN or user (click on Check Authentication)</span>
+<span class="err">uid=admin,ou=system </span>
+<span class="err">password= secret</span>
 </pre></div>
 
 
@@ -142,19 +142,19 @@
     javax.naming.CommunicationException: zanzibar:10636 [Root exception is java.net.ConnectException: Connection refused: connect]</p>
 </blockquote>
 <p>ENSURE THAT YOUR TRANSPORT IS NOT ONLY ALLOWING localhost! (below is the locked down setting...)</p>
-<div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">tcpTransport</span> <span class="n">address</span><span class="o">=</span><span class="ss">&quot;localhost&quot;</span> <span class="n">port</span><span class="o">=</span><span class="ss">&quot;10636&quot;</span> <span class="n">enableSSL</span><span class="o">=</span><span class="ss">&quot;true&quot;</span><span class="o">/&gt;</span>
+<div class="highlight"><pre><span></span><span class="err">&lt;tcpTransport address=&quot;localhost&quot; port=&quot;10636&quot; enableSSL=&quot;true&quot;/&gt;</span>
 </pre></div>
 
 
 <h3 id="modify-the-iptables-firewall">Modify the iptables firewall</h3>
 <p>Allow well known LDAP (389) and LDAPS (636) ports to work with ApacheDS</p>
-<div class="highlight"><pre><span></span><span class="n">iptables</span> <span class="o">-</span><span class="n">A</span> <span class="n">PREROUTING</span> <span class="o">-</span><span class="n">t</span> <span class="n">nat</span> <span class="o">-</span><span class="n">i</span> <span class="n">eth0</span> <span class="o">-</span><span class="n">p</span> <span class="n">tcp</span> <span class="c1">--dport 389 -j REDIRECT --to-port 10389</span>
-<span class="n">iptables</span> <span class="o">-</span><span class="n">A</span> <span class="n">PREROUTING</span> <span class="o">-</span><span class="n">t</span> <span class="n">nat</span> <span class="o">-</span><span class="n">i</span> <span class="n">eth0</span> <span class="o">-</span><span class="n">p</span> <span class="n">tcp</span> <span class="c1">--dport 636 -j REDIRECT --to-port 10636</span>
+<div class="highlight"><pre><span></span><span class="err">iptables -A PREROUTING -t nat -i eth0 -p tcp --dport 389 -j REDIRECT --to-port 10389</span>
+<span class="err">iptables -A PREROUTING -t nat -i eth0 -p tcp --dport 636 -j REDIRECT --to-port 10636</span>
 </pre></div>
 
 
 <h3 id="test-and-verify-connectivity-from-a-remote-machine">Test and verify connectivity from a remote machine</h3>
-<div class="highlight"><pre><span></span><span class="n">ldapsearch</span> <span class="o">-</span><span class="n">H</span> <span class="n">ldap</span><span class="p">:</span><span class="o">//</span><span class="n">ldap</span><span class="p">.</span><span class="k">domain</span><span class="p">.</span><span class="n">com</span><span class="p">:</span><span class="mi">389</span> <span class="o">-</span><span class="n">x</span> <span class="o">-</span><span class="n">D</span> <span class="ss">&quot;uid=example,ou=system&quot;</span> <span class="o">-</span><span class="n">W</span> <span class="o">-</span><span class="n">b</span> <span class="ss">&quot;ou=system&quot;</span> <span class="ss">&quot;(uid=example)&quot;</span>
+<div class="highlight"><pre><span></span><span class="err">ldapsearch -H ldap://ldap.domain.com:389 -x -D &quot;uid=example,ou=system&quot; -W -b &quot;ou=system&quot; &quot;(uid=example)&quot;</span>
 </pre></div>
 
 
@@ -176,7 +176,7 @@
 
 
 <h3 id="test-and-verify-the-ldaps-connection">Test and Verify the LDAPS connection</h3>
-<div class="highlight"><pre><span></span><span class="nv">openssl</span> <span class="nv">s_client</span> <span class="o">-</span><span class="k">connect</span> <span class="nv">ldap</span>.<span class="nv">domain</span>.<span class="nv">com</span>:<span class="mi">636</span>
+<div class="highlight"><pre><span></span><span class="err">openssl s_client -connect ldap.domain.com:636</span>
 </pre></div>
 
 
@@ -208,7 +208,7 @@ Verify return code: 0 (ok)</p>
 
 <p>still need to figure out how to include the intermediate CAcert root chain...!</p>
 <h3 id="importingreplacing-a-jks-keystore">IMPORTING/REPLACING A JKS KEYSTORE</h3>
-<div class="highlight"><pre><span></span><span class="n">keytool</span> <span class="o">-</span><span class="n">importkeystore</span> <span class="o">-</span><span class="n">deststorepass</span> <span class="n">secret</span> <span class="o">-</span><span class="n">destkeypass</span> <span class="n">secret</span> <span class="o">-</span><span class="n">destkeystore</span> <span class="n">keystore</span><span class="p">.</span><span class="n">jks</span> <span class="o">-</span><span class="n">srckeystore</span> <span class="n">keystore</span><span class="p">.</span><span class="n">p12</span> <span class="o">-</span><span class="n">srcstoretype</span> <span class="n">PKCS12</span> <span class="o">-</span><span class="n">srcstorepass</span> <span class="n">secret</span> <span class="o">-</span><span class="k">alias</span> <span class="n">oldaliasname</span>
+<div class="highlight"><pre><span></span><span class="err">keytool -importkeystore -deststorepass secret -destkeypass secret -destkeystore keystore.jks -srckeystore keystore.p12 -srcstoretype PKCS12 -srcstorepass secret -alias oldaliasname</span>
 </pre></div>
 
 
@@ -243,7 +243,7 @@ Verify return code: 0 (ok)</p>
 
 <p><code>openssl s_client -connect domain.com:10636 -CAfile intermediate.crt</code></p>
 <hr />
-<div class="highlight"><pre><span></span><span class="n">ldapsearch</span> <span class="o">-</span><span class="n">H</span> <span class="n">ldaps</span><span class="p">:</span><span class="o">//</span><span class="n">ldap</span><span class="p">.</span><span class="k">domain</span><span class="p">.</span><span class="n">com</span><span class="p">:</span><span class="mi">10636</span> <span class="o">-</span><span class="n">x</span> <span class="o">-</span><span class="n">D</span> <span class="ss">&quot;uid=example,ou=system&quot;</span> <span class="o">-</span><span class="n">w</span> <span class="n">PASSWORD</span> <span class="o">-</span><span class="n">b</span> <span class="ss">&quot;ou=system&quot;</span> <span class="ss">&quot;(uid=example)&quot;</span>
+<div class="highlight"><pre><span></span><span class="err">ldapsearch -H ldaps://ldap.domain.com:10636 -x -D &quot;uid=example,ou=system&quot; -w PASSWORD -b &quot;ou=system&quot; &quot;(uid=example)&quot;</span>
 </pre></div>
 
 
@@ -260,8 +260,8 @@ Verify return code: 0 (ok)</p>
 
 
 <p>NOW THE BELOW WILL WORK</p>
-<div class="highlight"><pre><span></span><span class="n">ldapsearch</span> <span class="o">-</span><span class="n">H</span> <span class="n">ldaps</span><span class="p">:</span><span class="o">//</span><span class="n">ldap</span><span class="p">.</span><span class="k">domain</span><span class="p">.</span><span class="n">com</span><span class="p">:</span><span class="mi">10636</span> <span class="o">-</span><span class="n">x</span> <span class="o">-</span><span class="n">D</span> <span class="ss">&quot;uid=example,ou=system&quot;</span> <span class="o">-</span><span class="n">w</span> <span class="n">PASSWORD</span> <span class="o">-</span><span class="n">b</span> <span class="ss">&quot;ou=system&quot;</span> <span class="ss">&quot;(uid=example)&quot;</span>
-<span class="n">ldapsearch</span> <span class="o">-</span><span class="n">H</span> <span class="n">ldaps</span><span class="p">:</span><span class="o">//</span><span class="n">ldap</span><span class="p">.</span><span class="k">domain</span><span class="p">.</span><span class="n">com</span><span class="p">:</span><span class="mi">636</span> <span class="o">-</span><span class="n">x</span> <span class="o">-</span><span class="n">D</span> <span class="ss">&quot;uid=example,ou=system&quot;</span> <span class="o">-</span><span class="n">w</span> <span class="n">PASSWORD</span> <span class="o">-</span><span class="n">b</span> <span class="ss">&quot;ou=system&quot;</span> <span class="ss">&quot;(objectclass=*)&quot;</span>
+<div class="highlight"><pre><span></span><span class="err">ldapsearch -H ldaps://ldap.domain.com:10636 -x -D &quot;uid=example,ou=system&quot; -w PASSWORD -b &quot;ou=system&quot; &quot;(uid=example)&quot;</span>
+<span class="err">ldapsearch -H ldaps://ldap.domain.com:636 -x -D &quot;uid=example,ou=system&quot; -w PASSWORD -b &quot;ou=system&quot; &quot;(objectclass=*)&quot;</span>
 </pre></div>
             <aside>
             <hr/>

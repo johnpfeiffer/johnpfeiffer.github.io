@@ -162,23 +162,23 @@ v3.41.1
 </blockquote>
 <p>Now you can use a web browser to play with the Web UI</p>
 <p>You can also query the database</p>
-<div class="highlight"><pre><span></span><span class="nv">sudo</span> <span class="nv">docker</span> <span class="nv">run</span> <span class="o">-</span><span class="nv">it</span> <span class="o">--</span><span class="nv">rm</span> <span class="o">--</span><span class="nv">link</span> <span class="nv">pg</span>:<span class="nv">postgres</span> <span class="nv">postgres</span>:<span class="nv">alpine</span> <span class="nv">psql</span> <span class="o">--</span><span class="nv">help</span>
-<span class="nv">sudo</span> <span class="nv">docker</span> <span class="nv">run</span> <span class="o">-</span><span class="nv">it</span> <span class="o">--</span><span class="nv">rm</span> <span class="o">--</span><span class="nv">link</span> <span class="nv">pg</span>:<span class="nv">postgres</span> <span class="nv">postgres</span>:<span class="nv">alpine</span> <span class="nv">psql</span> <span class="o">--</span><span class="nv">host</span> <span class="nv">postgres</span> <span class="o">--</span><span class="nv">username</span> <span class="nv">postgres</span>
-    \<span class="nv">list</span>
-    \<span class="k">connect</span> <span class="nv">example_development</span>
-    \<span class="nv">dt</span><span class="o">+</span>
-    \<span class="nv">d</span><span class="o">+</span> <span class="nv">users</span>
-    <span class="nv">select</span> <span class="o">*</span> <span class="nv">from</span> <span class="nv">users</span><span class="c1">;</span>
+<div class="highlight"><pre><span></span><span class="err">sudo docker run -it --rm --link pg:postgres postgres:alpine psql --help</span>
+<span class="err">sudo docker run -it --rm --link pg:postgres postgres:alpine psql --host postgres --username postgres</span>
+<span class="err">    \list</span>
+<span class="err">    \connect example_development</span>
+<span class="err">    \dt+</span>
+<span class="err">    \d+ users</span>
+<span class="err">    select * from users;</span>
 </pre></div>
 <h2 id="avoiding-the-frontend">Avoiding the Frontend</h2>
 <p>Because javascript moves so quickly (and breaks things) it is easier to skip these steps and focus on the backend.</p>
-<div class="highlight"><pre><span></span><span class="o">#</span> <span class="n">maybe</span> <span class="n">skip</span> <span class="n">these</span> <span class="p">(</span><span class="k">and</span> <span class="k">all</span> <span class="n">the</span> <span class="n">accompanying</span> <span class="n">dependencies</span><span class="p">)</span> <span class="k">to</span> <span class="n">avoid</span> <span class="n">suckiness</span>
-<span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="k">get</span> <span class="n">install</span> <span class="o">-</span><span class="n">y</span> <span class="n">npm</span>
-<span class="n">sudo</span> <span class="n">npm</span> <span class="k">cache</span> <span class="n">clean</span> <span class="o">-</span><span class="n">f</span>
-<span class="n">sudo</span> <span class="n">npm</span> <span class="n">install</span> <span class="o">-</span><span class="k">g</span> <span class="n">n</span>
-<span class="n">npm</span> <span class="c1">--version</span>
-<span class="n">node</span> <span class="c1">--version</span>
-<span class="n">npm</span> <span class="n">install</span>
+<div class="highlight"><pre><span></span><span class="err"># maybe skip these (and all the accompanying dependencies) to avoid suckiness</span>
+<span class="err">sudo apt-get install -y npm</span>
+<span class="err">sudo npm cache clean -f</span>
+<span class="err">sudo npm install -g n</span>
+<span class="err">npm --version</span>
+<span class="err">node --version</span>
+<span class="err">npm install</span>
 </pre></div>
 <blockquote>
 <p>npm installs the authrecipe dependencies but first use npm in order to install nodejs via the "n" helper</p>
@@ -188,13 +188,13 @@ v3.41.1
 <p>One of the first building blocks of any decent site is authentication.  Luckily there are a couple of packages that make basic and SSO authentication easier.</p>
 <h3 id="basic-authentication-with-the-database">Basic Authentication with the Database</h3>
 <p>To just use an example (leverage the Buffalo author's in-progress tutorial ;)</p>
-<div class="highlight"><pre><span></span><span class="n">sudo</span><span class="w"> </span><span class="n">docker</span><span class="w"> </span><span class="n">run</span><span class="w"> </span><span class="c1">--rm -it --publish 0.0.0.0:5432:5432 --name pg -e POSTGRES_PASSWORD=postgres postgres:alpine</span>
-<span class="n">git</span><span class="w"> </span><span class="n">clone</span><span class="w"> </span><span class="nl">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="p">.</span><span class="n">com</span><span class="o">/</span><span class="n">gobuffalo</span><span class="o">/</span><span class="n">authrecipe</span><span class="w"></span>
-<span class="n">cd</span><span class="w"> </span><span class="n">authrecipe</span><span class="w"></span>
-<span class="k">go</span><span class="w"> </span><span class="k">get</span><span class="w"></span>
-<span class="n">buffalo</span><span class="w"> </span><span class="n">db</span><span class="w"> </span><span class="k">create</span><span class="w"> </span><span class="c1">--all</span>
-<span class="n">buffalo</span><span class="w"> </span><span class="n">db</span><span class="w"> </span><span class="n">migrate</span><span class="w"></span>
-<span class="n">buffalo</span><span class="w"> </span><span class="n">dev</span><span class="w"></span>
+<div class="highlight"><pre><span></span><span class="err">sudo docker run --rm -it --publish 0.0.0.0:5432:5432 --name pg -e POSTGRES_PASSWORD=postgres postgres:alpine</span>
+<span class="err">git clone https://github.com/gobuffalo/authrecipe</span>
+<span class="err">cd authrecipe</span>
+<span class="err">go get</span>
+<span class="err">buffalo db create --all</span>
+<span class="err">buffalo db migrate</span>
+<span class="err">buffalo dev</span>
 </pre></div>
 <blockquote>
 <p>that is the minimum to get up and runnning...</p>
@@ -203,11 +203,11 @@ v3.41.1
 <p>TODO: more work to port over how to create secure endpoints with a "CheckAuth" middleware...</p>
 <h3 id="authentication-using-an-external-identity-provider">Authentication using an External Identity Provider</h3>
 <p>For instructions on how to have users authenticate and secure resources with identity providers like Github, Facebook, Google, etc.</p>
-<div class="highlight"><pre><span></span><span class="n">sudo</span><span class="w"> </span><span class="n">docker</span><span class="w"> </span><span class="n">run</span><span class="w"> </span><span class="c1">--rm -it --publish 0.0.0.0:5432:5432 --name pg -e POSTGRES_PASSWORD=postgres postgres:alpine</span>
-<span class="k">go</span><span class="w"> </span><span class="k">get</span><span class="w"> </span><span class="o">-</span><span class="n">u</span><span class="w"> </span><span class="o">-</span><span class="n">v</span><span class="w"> </span><span class="n">github</span><span class="p">.</span><span class="n">com</span><span class="o">/</span><span class="n">gobuffalo</span><span class="o">/</span><span class="n">buffalo</span><span class="o">/</span><span class="n">buffalo</span><span class="w"></span>
-<span class="k">go</span><span class="w"> </span><span class="k">get</span><span class="w"> </span><span class="n">buffalo</span><span class="o">-</span><span class="n">goth</span><span class="w"></span>
-<span class="n">buffalo</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">example</span><span class="w"></span>
-<span class="n">buffalo</span><span class="w"> </span><span class="n">generate</span><span class="w"> </span><span class="n">goth</span><span class="o">-</span><span class="n">auth</span><span class="w"> </span><span class="n">bitbucket</span><span class="w"></span>
+<div class="highlight"><pre><span></span><span class="err">sudo docker run --rm -it --publish 0.0.0.0:5432:5432 --name pg -e POSTGRES_PASSWORD=postgres postgres:alpine</span>
+<span class="err">go get -u -v github.com/gobuffalo/buffalo/buffalo</span>
+<span class="err">go get buffalo-goth</span>
+<span class="err">buffalo new example</span>
+<span class="err">buffalo generate goth-auth bitbucket</span>
 </pre></div>
 <p>In order to set up the Bitbucket OAuth credentials:
 <em>Log into bitbucket -&gt; from your user profile (avatar) dropdown choose "bitbucket settings" -&gt; click on OAuth (on the left) -&gt; Add consumer</em></p>
