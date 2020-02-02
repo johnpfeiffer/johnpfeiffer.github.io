@@ -798,6 +798,51 @@ travis &lt;span class="nb"&gt;help&lt;/span&gt;
     &lt;span class="n"&gt;secure&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="n"&gt;ABCD1234XYZLONGENCRYPTEDSTRING&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;An interesting alternative to github and travis is bitbucket: &lt;a href="https://confluence.atlassian.com/bitbucket/deploy-to-heroku-872013667.html"&gt;https://confluence.atlassian.com/bitbucket/deploy-to-heroku-872013667.html&lt;/a&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://confluence.atlassian.com/bitbucket/variables-in-pipelines-794502608.html"&gt;https://confluence.atlassian.com/bitbucket/variables-in-pipelines-794502608.html&lt;/a&gt; (where you enter your heroku API key as a variable)&lt;/li&gt;
+&lt;li&gt;e.g. https://bitbucket.org/YOURUSERNAME/YOURREPONAME/addon/pipelines/deployments (on the far right there will be a gear symbol to configure variables)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Note that Using the Deployments UI (via adding the deployment: production line) will change the UI layout, and may require re-entering any Variables
+Also, use the Secured checkbox for any passwords or API keys when entered as a Variable&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;em&gt;bitbucket-pipelines.yml&lt;/em&gt;
+    image: golang
+    clone:
+      depth: full
+    pipelines:
+      default:
+        - step:
+        name: Build and test
+        script:
+          - source bitbucket-pipelines-go.sh
+          - cd ${IMPORT_PATH}/
+          - go get
+          - go build
+          - go test -v
+    # - git push https://heroku:$HEROKU_API_KEY@git.heroku.com/$HEROKU_APP_NAME.git HEAD
+        services:
+          - postgres 
+        - step:
+        name: Create artifact
+        script:
+          - tar czfv application.tgz *.go 
+        artifacts:
+          - application.tgz
+        - step:
+        name: Deploy to production
+        deployment: production
+        script:
+          - pipe: atlassian/heroku-deploy:0.1.1
+            variables:
+              HEROKU_API_KEY: $HEROKU_API_KEY
+              HEROKU_APP_NAME: $HEROKU_APP_NAME
+              ZIP_FILE: "application.tgz"&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;definitions&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;
+  &lt;span class="n"&gt;services&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;
+    &lt;span class="n"&gt;postgres&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;
+      &lt;span class="n"&gt;image&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="n"&gt;postgres&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
 &lt;h3 id="test-it"&gt;Test It&lt;/h3&gt;
 &lt;p&gt;Now a browser that hits the Heroku URL will see "hi" , &lt;a href="https://web-go.herokuapp.com/"&gt;https://web-go.herokuapp.com/&lt;/a&gt;&lt;/p&gt;
 &lt;h2 id="templates-for-content"&gt;Templates for Content&lt;/h2&gt;
@@ -3245,7 +3290,7 @@ commenting out the files as they will be embedded in the .ovpn config file&lt;/p
 &lt;blockquote&gt;
 &lt;p&gt;of course no matter what we need the open vpn client configuration&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;p&gt;Or... From a client computer SCP to download the $FQDN&amp;gt;ovpn and then connect to the openvpn server&lt;/p&gt;
+&lt;p&gt;Or... From a client computer SCP to download the $FQDN.ovpn and then connect to the openvpn server&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;sudo&lt;/span&gt; &lt;span class="n"&gt;openvpn&lt;/span&gt; &lt;span class="c1"&gt;--config client1.ovpn&lt;/span&gt;
 
 &lt;span class="o"&gt;#&lt;/span&gt; &lt;span class="n"&gt;verify&lt;/span&gt; &lt;span class="k"&gt;with&lt;/span&gt; &lt;span class="n"&gt;the&lt;/span&gt; &lt;span class="n"&gt;following&lt;/span&gt; &lt;span class="k"&gt;in&lt;/span&gt; &lt;span class="n"&gt;the&lt;/span&gt; &lt;span class="k"&gt;output&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="ss"&gt;"/sbin/ip addr add dev tun0 local 192.168.255.6 peer 192.168.255.5"&lt;/span&gt;
@@ -3254,6 +3299,18 @@ commenting out the files as they will be embedded in the .ovpn config file&lt;/p
 &lt;span class="n"&gt;curl&lt;/span&gt; &lt;span class="n"&gt;https&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="o"&gt;//&lt;/span&gt;&lt;span class="n"&gt;dnsleaktest&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;com&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;
 &lt;span class="o"&gt;#&lt;/span&gt; &lt;span class="n"&gt;https&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="o"&gt;//&lt;/span&gt;&lt;span class="n"&gt;whoer&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;net&lt;/span&gt;&lt;span class="o"&gt;/#&lt;/span&gt;&lt;span class="n"&gt;extended&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
+&lt;h3 id="import-a-ovpn-config-file-into-ubuntu-network-manager"&gt;Import a .ovpn config file into ubuntu network manager&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;sudo nmcli connection import type openvpn file myname.tcp.ovpn&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;[sudo] password for your-username:
+Connection 'mynameVPN' (abcd-37c175b2325d) successfully added.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h4 id="connect-to-a-vpn-from-the-cli"&gt;Connect to a VPN from the CLI&lt;/h4&gt;
+&lt;p&gt;&lt;code&gt;nmcli connection up mynameVPN&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;presuming the prior connection config was named mynameVPN&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;code&gt;nmcli connection show mynameVPN&lt;/code&gt;&lt;/p&gt;
 &lt;h3 id="dns-security"&gt;DNS Security&lt;/h3&gt;
 &lt;p&gt;Moreover your DNS server can "leak" or be hijacked, here are some good alternatives to your snooping ISP or "big brother" evil corp.&lt;/p&gt;
 &lt;ul&gt;
