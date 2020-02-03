@@ -1106,7 +1106,45 @@ hi , try &lt;span class="p"&gt;&amp;lt;&lt;/span&gt;&lt;span class="nt"&gt;a&lt;
 &lt;h3 id="custom-domains-with-heroku"&gt;Custom Domains with Heroku&lt;/h3&gt;
 &lt;p&gt;To use a custom domain name for your traffic &lt;a href="https://devcenter.heroku.com/articles/custom-domains"&gt;https://devcenter.heroku.com/articles/custom-domains&lt;/a&gt;&lt;/p&gt;
 &lt;h3 id="downloading-the-source-code-from-heroku"&gt;Downloading the source code from Heroku&lt;/h3&gt;
-&lt;p&gt;To download the source code from a running Heroku application: &lt;code&gt;heroku git:clone --app APPNAME&lt;/code&gt; &lt;a href="https://devcenter.heroku.com/articles/git-clone-heroku-app"&gt;https://devcenter.heroku.com/articles/git-clone-heroku-app&lt;/a&gt;&lt;/p&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">john pfeiffer</dc:creator><pubDate>Tue, 01 May 2018 20:37:00 -0700</pubDate><guid isPermaLink="false">tag:blog.john-pfeiffer.com,2018-05-01:go-web-development-and-templates-with-heroku/</guid><category>go</category><category>golang</category><category>web</category><category>gorilla mux</category><category>http</category><category>template</category><category>heroku</category><category>postgres</category></item><item><title>Working successfully with remote contractors</title><link>https://blog.john-pfeiffer.com/working-successfully-with-remote-contractors/</link><description>
+&lt;p&gt;To download the source code from a running Heroku application: &lt;code&gt;heroku git:clone --app APPNAME&lt;/code&gt; &lt;a href="https://devcenter.heroku.com/articles/git-clone-heroku-app"&gt;https://devcenter.heroku.com/articles/git-clone-heroku-app&lt;/a&gt;&lt;/p&gt;
+&lt;h2 id="using-https-for-a-go-web-server-with-a-self-signed-ssl-certficate"&gt;Using HTTPS for a Go Web Server with a Self Signed SSL Certficate&lt;/h2&gt;
+&lt;h3 id="one-liner-to-generate-a-self-signed-certificate"&gt;One Liner to generate a self signed certificate&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;openssl req -subj '/CN=example.com/O=My Company Name LTD./C=US' -new -newkey rsa:2048 -days 365 -nodes -x509 -keyout server.key -out server.crt&lt;/code&gt;&lt;/p&gt;
+&lt;h3 id="ssl-web-server-in-golang"&gt;SSL Web Server in Golang&lt;/h3&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kn"&gt;package&lt;/span&gt; &lt;span class="nx"&gt;main&lt;/span&gt;
+
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;
+        &lt;span class="s"&gt;"log"&lt;/span&gt;
+        &lt;span class="s"&gt;"net/http"&lt;/span&gt;
+        &lt;span class="s"&gt;"os"&lt;/span&gt;
+&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="kd"&gt;func&lt;/span&gt; &lt;span class="nx"&gt;myHandler&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;w&lt;/span&gt; &lt;span class="nx"&gt;http&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;ResponseWriter&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;r&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="nx"&gt;http&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;Request&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="nx"&gt;w&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;Write&lt;/span&gt;&lt;span class="p"&gt;([]&lt;/span&gt;&lt;span class="nb"&gt;byte&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;"hi"&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+
+&lt;span class="kd"&gt;func&lt;/span&gt; &lt;span class="nx"&gt;main&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="nx"&gt;certname&lt;/span&gt; &lt;span class="o"&gt;:=&lt;/span&gt; &lt;span class="s"&gt;"server.crt"&lt;/span&gt;
+        &lt;span class="nx"&gt;keyname&lt;/span&gt; &lt;span class="o"&gt;:=&lt;/span&gt; &lt;span class="s"&gt;"server.key"&lt;/span&gt;
+        &lt;span class="nx"&gt;port&lt;/span&gt; &lt;span class="o"&gt;:=&lt;/span&gt; &lt;span class="nx"&gt;getEnvOrDefault&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;"PORT"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s"&gt;"8080"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="nx"&gt;log&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;Println&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;"Listening on port"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;port&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="nx"&gt;http&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;HandleFunc&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;"/"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;myHandler&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="nx"&gt;log&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;Fatal&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;http&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;ListenAndServeTLS&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;":"&lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="nx"&gt;port&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;certname&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;keyname&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kc"&gt;nil&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+
+&lt;span class="kd"&gt;func&lt;/span&gt; &lt;span class="nx"&gt;getEnvOrDefault&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;key&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;defaultValue&lt;/span&gt; &lt;span class="kt"&gt;string&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="kt"&gt;string&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="nx"&gt;result&lt;/span&gt; &lt;span class="o"&gt;:=&lt;/span&gt; &lt;span class="nx"&gt;defaultValue&lt;/span&gt;
+        &lt;span class="nx"&gt;val&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;ok&lt;/span&gt; &lt;span class="o"&gt;:=&lt;/span&gt; &lt;span class="nx"&gt;os&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;LookupEnv&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;key&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="nx"&gt;ok&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+                &lt;span class="nx"&gt;result&lt;/span&gt; &lt;span class="p"&gt;=&lt;/span&gt; &lt;span class="nx"&gt;val&lt;/span&gt;
+        &lt;span class="p"&gt;}&lt;/span&gt;
+        &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="nx"&gt;result&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Note that self signed certificates will prompt a browser warning
+&lt;code&gt;curl --insecure https://localhost:8080&lt;/code&gt;&lt;/p&gt;
+&lt;/blockquote&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">john pfeiffer</dc:creator><pubDate>Tue, 01 May 2018 20:37:00 -0700</pubDate><guid isPermaLink="false">tag:blog.john-pfeiffer.com,2018-05-01:go-web-development-and-templates-with-heroku/</guid><category>go</category><category>golang</category><category>web</category><category>gorilla mux</category><category>http</category><category>template</category><category>heroku</category><category>postgres</category></item><item><title>Working successfully with remote contractors</title><link>https://blog.john-pfeiffer.com/working-successfully-with-remote-contractors/</link><description>
 &lt;h2 id="some-background"&gt;Some Background&lt;/h2&gt;
 &lt;p&gt;It can be challenging to scale up an organization. One choice that can be made is "full time employee" versus "contractor". Another choice is "Co-Located" versus "Remote".&lt;/p&gt;
 &lt;p&gt;There are some important considerations with any combination but I'll share my experiences with "Remote Contractors".&lt;/p&gt;
