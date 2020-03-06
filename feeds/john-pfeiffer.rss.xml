@@ -1,5 +1,112 @@
 <?xml version="1.0" encoding="utf-8"?>
-<rss version="2.0"><channel><title>johnpfeiffer</title><link>https://blog.john-pfeiffer.com/</link><description></description><lastBuildDate>Mon, 31 Dec 2018 12:34:00 -0800</lastBuildDate><item><title>Career Development and Software Engineering Roles</title><link>https://blog.john-pfeiffer.com/career-development-and-software-engineering-roles/</link><description>
+<rss version="2.0"><channel><title>johnpfeiffer</title><link>https://blog.john-pfeiffer.com/</link><description></description><lastBuildDate>Thu, 05 Mar 2020 21:10:00 -0800</lastBuildDate><item><title>Localstack APIGateway Lambda and S3 integration testing</title><link>https://blog.john-pfeiffer.com/localstack-apigateway-lambda-and-s3-integration-testing/</link><description>
+&lt;p&gt;One of the challenges with serverless is how to run integration tests in your dev environment, especially if you want to use a local development environment.&lt;/p&gt;
+&lt;p&gt;The AWS tool SAM does have a local mode but does not cover S3 nor Dynamo, etc.&lt;/p&gt;
+&lt;p&gt;A great tool to fill this need is Localstack.&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;Mirroring environments of Development, Staging, and Production, along with Integration or Acceptance tests, are best practices that allow you to write code with confidence and catch issues much earlier (and therefore more cheaply) than "Using your Users as QA in Production"&lt;/em&gt;&lt;/p&gt;
+&lt;h2 id="prerequisites"&gt;Prerequisites&lt;/h2&gt;
+&lt;p&gt;Background: my previous article about using AWS Lambdas with Golang&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://blog.john-pfeiffer.com/go-faas-with-aws-lambda/"&gt;https://blog.john-pfeiffer.com/go-faas-with-aws-lambda/&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="install-and-configure-the-aws-cli"&gt;Install and configure the AWS CLI&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;sudo apt install awscli&lt;/code&gt;
+&lt;em&gt;or for all the alternate installation options &lt;a href="https://aws.amazon.com/cli/"&gt;https://aws.amazon.com/cli/&lt;/a&gt;&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;Setup fake credentials...&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nb"&gt;echo&lt;/span&gt; -e &lt;span class="s2"&gt;"[default]\n\&lt;/span&gt;
+&lt;span class="s2"&gt;region=us-east-1\n\&lt;/span&gt;
+&lt;span class="s2"&gt;output=json"&lt;/span&gt; &amp;gt; ~/.aws/config
+
+&lt;span class="nb"&gt;echo&lt;/span&gt; -e &lt;span class="s2"&gt;"[default]\n\&lt;/span&gt;
+&lt;span class="s2"&gt;aws_access_key_id=AKIAFAKE\n\&lt;/span&gt;
+&lt;span class="s2"&gt;aws_secret_access_key=FAKE"&lt;/span&gt; &amp;gt; ~/.aws/credentials
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;&lt;a href="https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html"&gt;https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html&lt;/a&gt;&lt;/p&gt;
+&lt;h2 id="simplest-localstack-lambda-configuration"&gt;Simplest Localstack Lambda Configuration&lt;/h2&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nt"&gt;version&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s"&gt;"3"&lt;/span&gt;
+
+&lt;span class="nt"&gt;services&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+  &lt;span class="nt"&gt;localstack&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="nt"&gt;image&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s"&gt;"localstack/localstack"&lt;/span&gt;
+    &lt;span class="nt"&gt;ports&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+      &lt;span class="p p-Indicator"&gt;-&lt;/span&gt; &lt;span class="s"&gt;"4574:4574"&lt;/span&gt; &lt;span class="c1"&gt;# lambda&lt;/span&gt;
+    &lt;span class="nt"&gt;environment&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+      &lt;span class="p p-Indicator"&gt;-&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;SERVICES=lambda&lt;/span&gt;
+      &lt;span class="p p-Indicator"&gt;-&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;LAMBDA_EXECUTOR=docker&lt;/span&gt;
+      &lt;span class="p p-Indicator"&gt;-&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;DOCKER_HOST=unix:///var/run/docker.sock&lt;/span&gt;
+      &lt;span class="p p-Indicator"&gt;-&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;DEBUG=1&lt;/span&gt;
+    &lt;span class="nt"&gt;volumes&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+      &lt;span class="p p-Indicator"&gt;-&lt;/span&gt; &lt;span class="s"&gt;"/var/run/docker.sock:/var/run/docker.sock"&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;&lt;code&gt;sudo docker-compose up&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Creating task_localstack_1 ... done
+Attaching to task_localstack_1
+localstack_1  | Waiting for all LocalStack services to be ready
+localstack_1  | Starting mock Lambda service (http port 4574)...&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;a href="https://github.com/localstack/localstack"&gt;https://github.com/localstack/localstack&lt;/a&gt;&lt;/p&gt;
+&lt;h2 id="a-very-simple-go-lambda"&gt;A very simple Go Lambda&lt;/h2&gt;
+&lt;p&gt;&lt;code&gt;mkdir task&lt;/code&gt;
+&lt;code&gt;cd task&lt;/code&gt;
+&lt;code&gt;vim task.go&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kn"&gt;package&lt;/span&gt; &lt;span class="nx"&gt;main&lt;/span&gt;
+
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;
+    &lt;span class="s"&gt;"context"&lt;/span&gt;
+    &lt;span class="s"&gt;"fmt"&lt;/span&gt;
+
+    &lt;span class="s"&gt;"github.com/aws/aws-lambda-go/lambda"&lt;/span&gt;
+&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="c1"&gt;// MyEvent is a thing&lt;/span&gt;
+&lt;span class="kd"&gt;type&lt;/span&gt; &lt;span class="nx"&gt;MyEvent&lt;/span&gt; &lt;span class="kd"&gt;struct&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="nx"&gt;Name&lt;/span&gt; &lt;span class="kt"&gt;string&lt;/span&gt; &lt;span class="s"&gt;`json:"name"`&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+
+&lt;span class="c1"&gt;// HandleRequest yes&lt;/span&gt;
+&lt;span class="kd"&gt;func&lt;/span&gt; &lt;span class="nx"&gt;HandleRequest&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;ctx&lt;/span&gt; &lt;span class="nx"&gt;context&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;Context&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;name&lt;/span&gt; &lt;span class="nx"&gt;MyEvent&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;string&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kt"&gt;error&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="nx"&gt;fmt&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;Sprintf&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;"hi %s"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;name&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;Name&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt; &lt;span class="kc"&gt;nil&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+
+&lt;span class="kd"&gt;func&lt;/span&gt; &lt;span class="nx"&gt;main&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="nx"&gt;lambda&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;Start&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;HandleRequest&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;&lt;code&gt;go build&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;outputs a binary file "task", if on MacOS you may want to cross compile with: &lt;code&gt;GOOS=linux go build&lt;/code&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;code&gt;zip task.zip task&lt;/code&gt;&lt;/p&gt;
+&lt;h3 id="create-function-aka-upload-the-golang-code-to-the-localstack-lambda"&gt;Create-Function aka Upload the golang code to the localstack lambda&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;aws --endpoint-url=http://localhost:4574 lambda create-function --function-name=task --runtime="go1.x" --role=r1 --handler=task --zip-file fileb://task.zip&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;localstack_1  | 2020-03-06T05:09:38:DEBUG:localstack.utils.common: Starting download from http://a46a9ed6f485:4574/2015-03-31/functions/task/code to /tmp/tmpfile.6f1d50ce9ccf62f3094d3c7f9eb82573/archive.zip (5060419 bytes)
+localstack_1  | 2020-03-06T05:09:38:DEBUG:localstack.utils.common: Writing 1048576 bytes (total 1048576) to /tmp/tmpfile.6f1d50ce9ccf62f3094d3c7f9eb82573/archive.zip
+localstack_1  | 2020-03-06T05:09:38:DEBUG:localstack.utils.common: Done downloading http://a46a9ed6f485:4574/2015-03-31/functions/task/code, response code 200, total bytes 5060419&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id="get-the-dependency-docker-container-that-actually-executes-golang"&gt;Get the dependency docker container that actually executes Golang&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;docker pull lambci/lambda:go1.x&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Now you can invoke the Lambda with an input...&lt;/strong&gt;
+&lt;code&gt;aws lambda --endpoint-url=http://localhost:4574 invoke --function-name task --payload='{"Name": "world"}' --region=us-east-1 myout.log&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;{    "StatusCode": 200    }&lt;/p&gt;
+&lt;p&gt;localstack_1  | 2020-03-06T05:45:22:DEBUG:localstack.services.awslambda.lambda_executors: Lambda arn:aws:lambda:us-east-1:000000000000:function:task result / log output:
+"hi world"&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id="other-useful-commands-for-updating-or-deleting-your-localstack-lambda"&gt;Other useful commands for updating or deleting your localstack lambda&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;aws --endpoint-url=http://localhost:4574 lambda update-function-code --function-name=task --zip-file fileb://task.zip&lt;/code&gt;
+&lt;code&gt;aws --endpoint-url=http://localhost:4574 lambda delete-function --function-name task&lt;/code&gt;&lt;/p&gt;
+&lt;hr/&gt;
+&lt;p&gt;TODO: YAML with APIGateway + Lambda&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Go code for Request Event&lt;/li&gt;
+&lt;li&gt;curl example integration test&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;TODO: YAML with APIGateway + Lambda + S3
+- Go code for Request Event and write to S3
+- curl example integration test&lt;/p&gt;
+&lt;p&gt;Thanks to open source: &lt;a href="https://github.com/localstack/localstack/issues/561"&gt;https://github.com/localstack/localstack/issues/561&lt;/a&gt;&lt;/p&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">john pfeiffer</dc:creator><pubDate>Thu, 05 Mar 2020 21:10:00 -0800</pubDate><guid isPermaLink="false">tag:blog.john-pfeiffer.com,2020-03-05:localstack-apigateway-lambda-and-s3-integration-testing/</guid><category>go</category><category>golang</category><category>localstack</category><category>aws</category><category>testing</category><category>lambda</category><category>apigateway</category><category>s3</category><category>integration testing</category><category>docker-compose</category></item><item><title>Career Development and Software Engineering Roles</title><link>https://blog.john-pfeiffer.com/career-development-and-software-engineering-roles/</link><description>
 &lt;h2 id="career-development-is-vague-but-heavy"&gt;Career Development is Vague but Heavy&lt;/h2&gt;
 &lt;p&gt;It can be vague where someone's career was before they met you and how &lt;strong&gt;they&lt;/strong&gt; view their long term ambitions.&lt;/p&gt;
 &lt;p&gt;And when the work is getting done &lt;strong&gt;now&lt;/strong&gt; it is easy to understand why &lt;strong&gt;future&lt;/strong&gt; Career Development is one of the overlooked aspects of management.&lt;/p&gt;

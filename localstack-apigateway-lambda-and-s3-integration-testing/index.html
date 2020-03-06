@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en-US">
+    <head>
+        <meta charset="utf-8"> 
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="author" content="john pfeiffer" />
+        <meta name="copyright" content="john pfeiffer" />
+
+<meta name="keywords" content="go, golang, localstack, aws, testing, lambda, apigateway, s3, integration testing, docker-compose, build-CI-CD-devops, " />
+        <title>Localstack APIGateway Lambda and S3 integration testing · johnpfeiffer
+</title>
+        <!--link href="https://cdn-images.mailchimp.com/embedcode/slim-081711.css" rel="stylesheet" type="text/css"-->
+        <!--link href="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css" rel="stylesheet"-->
+        <link href="https://blog.john-pfeiffer.com/theme/css/bootstrap-combined.min.css" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="https://blog.john-pfeiffer.com/theme/css/style.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="https://blog.john-pfeiffer.com/theme/css/solarizedlight.css" media="screen">
+        <link rel="shortcut icon" href="https://blog.john-pfeiffer.com/theme/images/favicon.ico" type="image/x-icon" />
+        <link rel="apple-touch-icon" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon.png" />
+        <link rel="apple-touch-icon" sizes="57x57" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-57x57.png" />
+        <link rel="apple-touch-icon" sizes="72x72" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-72x72.png" />
+        <link rel="apple-touch-icon" sizes="114x114" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-114x114.png" />
+        <link rel="apple-touch-icon" sizes="144x144" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-144x144.png" />
+        <link rel="icon" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-144x144.png" />
+    </head>
+    <body>
+	<div id="content-sans-footer">
+        <div class="dropdown-backdrop">
+
+			<div class="navbar navbar-static-top">
+				<div class="navbar-inner">
+					<div class="container">
+						<a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+							<span class="icon-bar"></span>
+							<span class="icon-bar"></span>
+							<span class="icon-bar"></span>
+						</a>
+						<a class="brand" href="https://blog.john-pfeiffer.com/"><span class=site-name>johnpfeiffer</span></a>
+						<div class="nav-collapse collapse">
+							<ul class="nav pull-right top-menu">
+								<li ><a href="https://blog.john-pfeiffer.com">Home</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/john-likes/">John Likes</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/categories.html">Categories</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/tags.html">Tags</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/archives.html">Archives</a></li>
+								<li><form class="navbar-search" action="https://blog.john-pfeiffer.com/search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="container-fluid">
+			<div class="row-fluid">
+				<div class="span1"></div>
+				<div class="span10">
+<article>
+<div class="row-fluid">
+    <header class="page_header span10 offset2">
+    <h1><a href="https://blog.john-pfeiffer.com/localstack-apigateway-lambda-and-s3-integration-testing/"> Localstack APIGateway Lambda and S3 integration testing </a></h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+    <div class="span2 table-of-content">
+        <nav>
+        <h4>Contents</h4>
+        <div class="toc">
+<ul>
+<li><a href="#prerequisites">Prerequisites</a><ul>
+<li><a href="#install-and-configure-the-aws-cli">Install and configure the AWS CLI</a></li>
+</ul>
+</li>
+<li><a href="#simplest-localstack-lambda-configuration">Simplest Localstack Lambda Configuration</a></li>
+<li><a href="#a-very-simple-go-lambda">A very simple Go Lambda</a><ul>
+<li><a href="#create-function-aka-upload-the-golang-code-to-the-localstack-lambda">Create-Function aka Upload the golang code to the localstack lambda</a></li>
+<li><a href="#get-the-dependency-docker-container-that-actually-executes-golang">Get the dependency docker container that actually executes Golang</a></li>
+<li><a href="#other-useful-commands-for-updating-or-deleting-your-localstack-lambda">Other useful commands for updating or deleting your localstack lambda</a></li>
+</ul>
+</li>
+</ul>
+</div>
+        </nav>
+    </div>
+    <div class="span8 article-content">
+
+            
+<p>One of the challenges with serverless is how to run integration tests in your dev environment, especially if you want to use a local development environment.</p>
+<p>The AWS tool SAM does have a local mode but does not cover S3 nor Dynamo, etc.</p>
+<p>A great tool to fill this need is Localstack.</p>
+<p><em>Mirroring environments of Development, Staging, and Production, along with Integration or Acceptance tests, are best practices that allow you to write code with confidence and catch issues much earlier (and therefore more cheaply) than "Using your Users as QA in Production"</em></p>
+<h2 id="prerequisites">Prerequisites</h2>
+<p>Background: my previous article about using AWS Lambdas with Golang</p>
+<ul>
+<li><a href="https://blog.john-pfeiffer.com/go-faas-with-aws-lambda/">https://blog.john-pfeiffer.com/go-faas-with-aws-lambda/</a></li>
+</ul>
+<h3 id="install-and-configure-the-aws-cli">Install and configure the AWS CLI</h3>
+<p><code>sudo apt install awscli</code>
+<em>or for all the alternate installation options <a href="https://aws.amazon.com/cli/">https://aws.amazon.com/cli/</a></em></p>
+<p>Setup fake credentials...</p>
+<div class="highlight"><pre><span></span><span class="nb">echo</span> -e <span class="s2">"[default]\n\</span>
+<span class="s2">region=us-east-1\n\</span>
+<span class="s2">output=json"</span> &gt; ~/.aws/config
+
+<span class="nb">echo</span> -e <span class="s2">"[default]\n\</span>
+<span class="s2">aws_access_key_id=AKIAFAKE\n\</span>
+<span class="s2">aws_secret_access_key=FAKE"</span> &gt; ~/.aws/credentials
+</pre></div>
+<p><a href="https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html">https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html</a></p>
+<h2 id="simplest-localstack-lambda-configuration">Simplest Localstack Lambda Configuration</h2>
+<div class="highlight"><pre><span></span><span class="nt">version</span><span class="p">:</span> <span class="s">"3"</span>
+
+<span class="nt">services</span><span class="p">:</span>
+  <span class="nt">localstack</span><span class="p">:</span>
+    <span class="nt">image</span><span class="p">:</span> <span class="s">"localstack/localstack"</span>
+    <span class="nt">ports</span><span class="p">:</span>
+      <span class="p p-Indicator">-</span> <span class="s">"4574:4574"</span> <span class="c1"># lambda</span>
+    <span class="nt">environment</span><span class="p">:</span>
+      <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">SERVICES=lambda</span>
+      <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">LAMBDA_EXECUTOR=docker</span>
+      <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">DOCKER_HOST=unix:///var/run/docker.sock</span>
+      <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">DEBUG=1</span>
+    <span class="nt">volumes</span><span class="p">:</span>
+      <span class="p p-Indicator">-</span> <span class="s">"/var/run/docker.sock:/var/run/docker.sock"</span>
+</pre></div>
+<p><code>sudo docker-compose up</code></p>
+<blockquote>
+<p>Creating task_localstack_1 ... done
+Attaching to task_localstack_1
+localstack_1  | Waiting for all LocalStack services to be ready
+localstack_1  | Starting mock Lambda service (http port 4574)...</p>
+</blockquote>
+<p><a href="https://github.com/localstack/localstack">https://github.com/localstack/localstack</a></p>
+<h2 id="a-very-simple-go-lambda">A very simple Go Lambda</h2>
+<p><code>mkdir task</code>
+<code>cd task</code>
+<code>vim task.go</code></p>
+<div class="highlight"><pre><span></span><span class="kn">package</span> <span class="nx">main</span>
+
+<span class="kn">import</span> <span class="p">(</span>
+    <span class="s">"context"</span>
+    <span class="s">"fmt"</span>
+
+    <span class="s">"github.com/aws/aws-lambda-go/lambda"</span>
+<span class="p">)</span>
+
+<span class="c1">// MyEvent is a thing</span>
+<span class="kd">type</span> <span class="nx">MyEvent</span> <span class="kd">struct</span> <span class="p">{</span>
+    <span class="nx">Name</span> <span class="kt">string</span> <span class="s">`json:"name"`</span>
+<span class="p">}</span>
+
+<span class="c1">// HandleRequest yes</span>
+<span class="kd">func</span> <span class="nx">HandleRequest</span><span class="p">(</span><span class="nx">ctx</span> <span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span> <span class="nx">name</span> <span class="nx">MyEvent</span><span class="p">)</span> <span class="p">(</span><span class="kt">string</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nx">fmt</span><span class="p">.</span><span class="nx">Sprintf</span><span class="p">(</span><span class="s">"hi %s"</span><span class="p">,</span> <span class="nx">name</span><span class="p">.</span><span class="nx">Name</span><span class="p">),</span> <span class="kc">nil</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+    <span class="nx">lambda</span><span class="p">.</span><span class="nx">Start</span><span class="p">(</span><span class="nx">HandleRequest</span><span class="p">)</span>
+<span class="p">}</span>
+</pre></div>
+<p><code>go build</code></p>
+<blockquote>
+<p>outputs a binary file "task", if on MacOS you may want to cross compile with: <code>GOOS=linux go build</code></p>
+</blockquote>
+<p><code>zip task.zip task</code></p>
+<h3 id="create-function-aka-upload-the-golang-code-to-the-localstack-lambda">Create-Function aka Upload the golang code to the localstack lambda</h3>
+<p><code>aws --endpoint-url=http://localhost:4574 lambda create-function --function-name=task --runtime="go1.x" --role=r1 --handler=task --zip-file fileb://task.zip</code></p>
+<blockquote>
+<p>localstack_1  | 2020-03-06T05:09:38:DEBUG:localstack.utils.common: Starting download from http://a46a9ed6f485:4574/2015-03-31/functions/task/code to /tmp/tmpfile.6f1d50ce9ccf62f3094d3c7f9eb82573/archive.zip (5060419 bytes)
+localstack_1  | 2020-03-06T05:09:38:DEBUG:localstack.utils.common: Writing 1048576 bytes (total 1048576) to /tmp/tmpfile.6f1d50ce9ccf62f3094d3c7f9eb82573/archive.zip
+localstack_1  | 2020-03-06T05:09:38:DEBUG:localstack.utils.common: Done downloading http://a46a9ed6f485:4574/2015-03-31/functions/task/code, response code 200, total bytes 5060419</p>
+</blockquote>
+<h3 id="get-the-dependency-docker-container-that-actually-executes-golang">Get the dependency docker container that actually executes Golang</h3>
+<p><code>docker pull lambci/lambda:go1.x</code></p>
+<p><strong>Now you can invoke the Lambda with an input...</strong>
+<code>aws lambda --endpoint-url=http://localhost:4574 invoke --function-name task --payload='{"Name": "world"}' --region=us-east-1 myout.log</code></p>
+<blockquote>
+<p>{    "StatusCode": 200    }</p>
+<p>localstack_1  | 2020-03-06T05:45:22:DEBUG:localstack.services.awslambda.lambda_executors: Lambda arn:aws:lambda:us-east-1:000000000000:function:task result / log output:
+"hi world"</p>
+</blockquote>
+<h3 id="other-useful-commands-for-updating-or-deleting-your-localstack-lambda">Other useful commands for updating or deleting your localstack lambda</h3>
+<p><code>aws --endpoint-url=http://localhost:4574 lambda update-function-code --function-name=task --zip-file fileb://task.zip</code>
+<code>aws --endpoint-url=http://localhost:4574 lambda delete-function --function-name task</code></p>
+<hr/>
+<p>TODO: YAML with APIGateway + Lambda</p>
+<ul>
+<li>Go code for Request Event</li>
+<li>curl example integration test</li>
+</ul>
+<p>TODO: YAML with APIGateway + Lambda + S3
+- Go code for Request Event and write to S3
+- curl example integration test</p>
+<p>Thanks to open source: <a href="https://github.com/localstack/localstack/issues/561">https://github.com/localstack/localstack/issues/561</a></p>
+            <aside>
+            <hr/>
+            <nav>
+            <ul class="articles_timeline">
+ 
+                <li class="previous_article">« <a href="https://blog.john-pfeiffer.com/career-development-and-software-engineering-roles/" title="Previous: Career Development and Software Engineering Roles">Career Development and Software Engineering Roles</a></li>
+            </ul>
+            </nav>
+            </aside>
+        </div>
+        <section>
+        <div class="span2" style="float:right;font-size:0.9em;">
+ 
+            <h4>Published</h4>
+            <time pubdate="pubdate" datetime="2020-03-05T21:10:00-08:00">Mar 5, 2020</time>
+            <h4>Category</h4>
+            <a class="category-link" href="/categories.html#build-CI-CD-devops-ref">build-CI-CD-devops</a> 
+            <h4>~408 words</h4>
+            <h4>Tags</h4>
+            <ul class="list-of-tags tags-in-article"> 
+                <li><a href="/tags.html#apigateway-ref">apigateway
+                    <span>2</span>
+</a></li>
+                <li><a href="/tags.html#aws-ref">aws
+                    <span>5</span>
+</a></li>
+                <li><a href="/tags.html#docker-compose-ref">docker-compose
+                    <span>2</span>
+</a></li>
+                <li><a href="/tags.html#go-ref">go
+                    <span>11</span>
+</a></li>
+                <li><a href="/tags.html#golang-ref">golang
+                    <span>11</span>
+</a></li>
+                <li><a href="/tags.html#integration-testing-ref">integration testing
+                    <span>1</span>
+</a></li>
+                <li><a href="/tags.html#lambda-ref">lambda
+                    <span>2</span>
+</a></li>
+                <li><a href="/tags.html#localstack-ref">localstack
+                    <span>1</span>
+</a></li>
+                <li><a href="/tags.html#s3-ref">s3
+                    <span>2</span>
+</a></li>
+                <li><a href="/tags.html#testing-ref">testing
+                    <span>8</span>
+</a></li>
+            </ul>
+
+        </div>
+        </section>
+</div>
+</article>
+				</div>
+				<div class="span1"></div>
+			</div>
+		</div>
+    </div>
+<footer>
+<div id="footer">
+    <ul class="footer-content">
+    </ul>
+</div>
+</footer>            <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+    </body>
+</html>
