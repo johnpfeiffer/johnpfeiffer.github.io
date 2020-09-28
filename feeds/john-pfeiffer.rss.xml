@@ -1,5 +1,349 @@
 <?xml version="1.0" encoding="utf-8"?>
-<rss version="2.0"><channel><title>johnpfeiffer</title><link>https://blog.john-pfeiffer.com/</link><description></description><lastBuildDate>Thu, 05 Mar 2020 21:10:00 -0800</lastBuildDate><item><title>Localstack APIGateway Lambda and S3 integration testing</title><link>https://blog.john-pfeiffer.com/localstack-apigateway-lambda-and-s3-integration-testing/</link><description>
+<rss version="2.0"><channel><title>johnpfeiffer</title><link>https://blog.john-pfeiffer.com/</link><description></description><lastBuildDate>Sun, 27 Sep 2020 14:48:00 -0700</lastBuildDate><item><title>Using AWS CDK to configure deploy a Golang Lambda with APIGateway</title><link>https://blog.john-pfeiffer.com/using-aws-cdk-to-configure-deploy-a-golang-lambda-with-apigateway/</link><description>
+&lt;p&gt;Infrastructure as Code helps guarantee the elusive determinism we all seek in building applications and services.&lt;/p&gt;
+&lt;p&gt;AWS have brought their own specific product out which competes with the venerable Terraform and nicely focused Serverless.&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;All of these products use the json syntax of CloudFormation which is the foundational AWS syntax for describing resources&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;It is straightforward to iteratively setup and use AWS CDK (with the native Typescript syntax).&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;TODO: later add a quick CDK vocabulary guide&lt;/em&gt;&lt;/p&gt;
+&lt;h2 id="install-the-aws-cdk-tool"&gt;Install the AWS CDK Tool&lt;/h2&gt;
+&lt;p&gt;Have to use npm to install the cdk tool...&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;npm install -g aws-cdk&lt;/code&gt;&lt;/p&gt;
+&lt;h2 id="setup-the-project-directories"&gt;Setup the project directories&lt;/h2&gt;
+&lt;p&gt;&lt;code&gt;mkdir cdk-example&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;cd cdk-example&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;Create a subdirectory to compartmentalize all the infrastructure code (from the rest of the application)&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;mkdir infra&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;cd infra&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;cdk init app --language typescript&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;cdk ls&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="err"&gt;   InfraStack&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Names are hard but whatever you pick, like &lt;strong&gt;"Infra"&lt;/strong&gt;, will then show up in the AWS resources everywhere related to this project&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id="install-the-dependencies-for-aws-resources-that-cdk-will-manage"&gt;Install the dependencies for AWS resources that CDK will manage&lt;/h2&gt;
+&lt;p&gt;Option 1: manually install dependencies &lt;em&gt;(it will automatically insert this into package.json)&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;npm install @aws-cdk/aws-s3 @aws-cdk/aws-lambda&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;Option 2: write the lines into packages.json and run at the command line in the infra directory: &lt;code&gt;npm install&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Writing files first (and ensuring they are in version control) is a more IaaC pattern&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="s2"&gt;"dependencies"&lt;/span&gt;&lt;span class="err"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="nt"&gt;"@aws-cdk/aws-s3"&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;"*"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+  &lt;span class="nt"&gt;"@aws-cdk/core"&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;"*"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+  &lt;span class="nt"&gt;"source-map-support"&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;"^0.5.16"&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;h2 id="write-the-actual-infrastructure-code"&gt;Write the actual Infrastructure Code&lt;/h2&gt;
+&lt;p&gt;The initial application template creates an empty "class" that represents the "stack"
+&lt;em&gt;A stack is the group of resources together&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;lib/infra-stack.ts&lt;/strong&gt; has only 2 changes to the default file, the import of S3 and the new Bucket resource "MyExampleBucket"&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kr"&gt;import&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="kr"&gt;as&lt;/span&gt; &lt;span class="nx"&gt;cdk&lt;/span&gt; &lt;span class="nx"&gt;from&lt;/span&gt; &lt;span class="s1"&gt;'@aws-cdk/core'&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="kr"&gt;import&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="kr"&gt;as&lt;/span&gt; &lt;span class="nx"&gt;s3&lt;/span&gt; &lt;span class="nx"&gt;from&lt;/span&gt; &lt;span class="s1"&gt;'@aws-cdk/aws-s3'&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+
+&lt;span class="kr"&gt;export&lt;/span&gt; &lt;span class="kr"&gt;class&lt;/span&gt; &lt;span class="nx"&gt;InfraStack&lt;/span&gt; &lt;span class="kr"&gt;extends&lt;/span&gt; &lt;span class="nx"&gt;cdk&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;Stack&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="kr"&gt;constructor&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;scope&lt;/span&gt;: &lt;span class="kt"&gt;cdk.Construct&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;id&lt;/span&gt;: &lt;span class="kt"&gt;string&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;props?&lt;/span&gt;: &lt;span class="kt"&gt;cdk.StackProps&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="kr"&gt;super&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;scope&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;id&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;props&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+
+    &lt;span class="k"&gt;new&lt;/span&gt; &lt;span class="nx"&gt;s3&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;Bucket&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;this&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;'MyExampleBucket'&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+      &lt;span class="nx"&gt;versioned&lt;/span&gt;: &lt;span class="kt"&gt;true&lt;/span&gt;
+    &lt;span class="p"&gt;});&lt;/span&gt;
+  &lt;span class="p"&gt;}&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;The import renames are important to be consistent in subsequent code, so if something is "cdk" then it is cdk.Construct&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id="output-cloudformation-from-a-cdk-typescript-file"&gt;Output CloudFormation from a CDK Typescript file&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;cdk synth&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;this command will output to the display the CloudFormation that will be sent/used by AWS&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nt"&gt;Resources&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+  &lt;span class="nt"&gt;MyExampleBucket8D68EFCA&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="nt"&gt;Type&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;AWS::S3::Bucket&lt;/span&gt;
+    &lt;span class="nt"&gt;Properties&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+      &lt;span class="nt"&gt;VersioningConfiguration&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+        &lt;span class="nt"&gt;Status&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;Enabled&lt;/span&gt;
+    &lt;span class="nt"&gt;UpdateReplacePolicy&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;Retain&lt;/span&gt;
+    &lt;span class="nt"&gt;DeletionPolicy&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;Retain&lt;/span&gt;
+    &lt;span class="nt"&gt;Metadata&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+      &lt;span class="l l-Scalar l-Scalar-Plain"&gt;aws:cdk:path&lt;/span&gt;&lt;span class="p p-Indicator"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;InfraStack/MyExampleBucket/Resource&lt;/span&gt;
+  &lt;span class="nt"&gt;CDKMetadata&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="nt"&gt;Type&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;AWS::CDK::Metadata&lt;/span&gt;
+    &lt;span class="nt"&gt;Properties&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;To preview what will occur between changes to the .ts file...&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;cdk diff&lt;/code&gt;&lt;/p&gt;
+&lt;h2 id="deploy-resources-that-cdk-has-defined"&gt;Deploy resources that CDK has defined&lt;/h2&gt;
+&lt;p&gt;&lt;code&gt;cdk deploy&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;warning, really making a change in AWS (based on your creds)&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;InfraStack
+
+InfraStack: deploying...
+InfraStack: creating CloudFormation changeset...
+&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="m"&gt;3&lt;/span&gt;/3&lt;span class="o"&gt;)&lt;/span&gt;
+
+Stack ARN:
+arn:aws:cloudformation:us-east-1:409670809604:stack/InfraStack/b5167030-00fb-11eb-9f36-12f8925a37c4
+&lt;/pre&gt;&lt;/div&gt;
+&lt;h3 id="verify-the-new-bucket-was-created"&gt;Verify the new bucket was created&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;aws s3 ls | grep MyExampleBucket&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;this assumes you have installed the AWS CLI like &lt;code&gt;sudo apt install awscli&lt;/code&gt;&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;aws cloudformation list-stacks | grep InfraStack&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;this listing will also show deleted Stacks&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id="making-updates-with-cdk"&gt;Making updates with CDK&lt;/h2&gt;
+&lt;p&gt;A tiny snippet change to allow bucket deletion...&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://docs.aws.amazon.com/cdk/latest/guide/hello_world.html"&gt;https://docs.aws.amazon.com/cdk/latest/guide/hello_world.html&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://docs.aws.amazon.com/cdk/api/latest/typescript/api/aws-s3.html"&gt;https://docs.aws.amazon.com/cdk/api/latest/typescript/api/aws-s3.html&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://docs.aws.amazon.com/cdk/api/latest/typescript/api/aws-s3/bucketpolicyprops.html#aws_s3_BucketPolicyProps"&gt;https://docs.aws.amazon.com/cdk/api/latest/typescript/api/aws-s3/bucketpolicyprops.html#aws_s3_BucketPolicyProps&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href="https://docs.aws.amazon.com/cdk/api/latest/typescript/api/core/removalpolicy.html#core_RemovalPolicy"&gt;https://docs.aws.amazon.com/cdk/api/latest/typescript/api/core/removalpolicy.html#core_RemovalPolicy&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;:::typescript
+new s3.Bucket(this, 'MyExampleBucket', {
+  versioned: true,
+      removalPolicy: cdk.RemovalPolicy.DESTROY
+});&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="preview-changes-with-diff"&gt;Preview changes with diff&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;cdk diff&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;Stack InfraStack
+Resources
+&lt;span class="o"&gt;[&lt;/span&gt;~&lt;span class="o"&gt;]&lt;/span&gt; AWS::S3::Bucket JohnPBucket JohnPBucket8D68EFCA
+ ├─ &lt;span class="o"&gt;[&lt;/span&gt;~&lt;span class="o"&gt;]&lt;/span&gt; DeletionPolicy
+ │   ├─ &lt;span class="o"&gt;[&lt;/span&gt;-&lt;span class="o"&gt;]&lt;/span&gt; Retain
+ │   └─ &lt;span class="o"&gt;[&lt;/span&gt;+&lt;span class="o"&gt;]&lt;/span&gt; Delete
+ └─ &lt;span class="o"&gt;[&lt;/span&gt;~&lt;span class="o"&gt;]&lt;/span&gt; UpdateReplacePolicy
+     ├─ &lt;span class="o"&gt;[&lt;/span&gt;-&lt;span class="o"&gt;]&lt;/span&gt; Retain
+     └─ &lt;span class="o"&gt;[&lt;/span&gt;+&lt;span class="o"&gt;]&lt;/span&gt; Delete
+&lt;/pre&gt;&lt;/div&gt;
+&lt;h3 id="apply-the-new-changes"&gt;Apply the new changes&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;cdk deploy&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;InfraStack: deploying...
+InfraStack: creating CloudFormation changeset...
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;&lt;code&gt;cdk destroy&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;aws s3 ls | grep MyExampleBucket&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;aws cloudformation list-stacks | grep InfraStack&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;CDK enables "InfrastructureAsCode" and command line (or scripted) resource management, yet you must still understand the intricacies of the domain (i.e. that s3 buckets have policies and do not get destroyed by default)&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;s3 buckets are designed by default to not delete with a Stack, you must change the removal policy to do so&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr/&gt;
+&lt;h2 id="apigateway-plus-lambda-plus-go"&gt;APIGateway plus Lambda plus Go&lt;/h2&gt;
+&lt;h3 id="a-tiny-go-web-request-handler"&gt;A tiny Go Web Request Handler&lt;/h3&gt;
+&lt;p&gt;Put a simple placeholder Golang Lambda in place &lt;em&gt;using the Gin web framework for convenience&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;mkdir cdk-example/examplefunction/ ; cd cdk-example/examplefunction/&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;vim main.go&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;package&lt;/span&gt; &lt;span class="n"&gt;main&lt;/span&gt;
+
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;
+        &lt;span class="s2"&gt;"context"&lt;/span&gt;
+        &lt;span class="s2"&gt;"log"&lt;/span&gt;
+
+        &lt;span class="s2"&gt;"github.com/aws/aws-lambda-go/events"&lt;/span&gt;
+        &lt;span class="s2"&gt;"github.com/aws/aws-lambda-go/lambda"&lt;/span&gt;
+        &lt;span class="s2"&gt;"github.com/awslabs/aws-lambda-go-api-proxy/gin"&lt;/span&gt;
+        &lt;span class="s2"&gt;"github.com/gin-gonic/gin"&lt;/span&gt;
+&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="n"&gt;var&lt;/span&gt; &lt;span class="n"&gt;ginLambda&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;ginadapter&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;GinLambda&lt;/span&gt;
+
+&lt;span class="o"&gt;//&lt;/span&gt; &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;convenience&lt;/span&gt; &lt;span class="n"&gt;leverage&lt;/span&gt; &lt;span class="n"&gt;the&lt;/span&gt; &lt;span class="n"&gt;Go&lt;/span&gt; &lt;span class="n"&gt;init&lt;/span&gt; &lt;span class="n"&gt;startup&lt;/span&gt; &lt;span class="n"&gt;concept&lt;/span&gt; &lt;span class="n"&gt;to&lt;/span&gt; &lt;span class="n"&gt;define&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="k"&gt;global&lt;/span&gt; &lt;span class="n"&gt;web&lt;/span&gt; &lt;span class="n"&gt;server&lt;/span&gt; &lt;span class="nb"&gt;object&lt;/span&gt;
+&lt;span class="n"&gt;func&lt;/span&gt; &lt;span class="n"&gt;init&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="o"&gt;//&lt;/span&gt; &lt;span class="n"&gt;stdout&lt;/span&gt; &lt;span class="ow"&gt;and&lt;/span&gt; &lt;span class="n"&gt;stderr&lt;/span&gt; &lt;span class="n"&gt;are&lt;/span&gt; &lt;span class="n"&gt;sent&lt;/span&gt; &lt;span class="n"&gt;to&lt;/span&gt; &lt;span class="n"&gt;AWS&lt;/span&gt; &lt;span class="n"&gt;CloudWatch&lt;/span&gt; &lt;span class="n"&gt;Logs&lt;/span&gt;
+        &lt;span class="n"&gt;log&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;Printf&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;"Gin starting"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+        &lt;span class="n"&gt;r&lt;/span&gt; &lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;gin&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;Default&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+        &lt;span class="n"&gt;r&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;GET&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;"/ping"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;func&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;c&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;gin&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;Context&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+                &lt;span class="n"&gt;c&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;JSON&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;200&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;gin&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;H&lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;
+                        &lt;span class="s2"&gt;"message"&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;"pong"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+                &lt;span class="p"&gt;})&lt;/span&gt;
+        &lt;span class="p"&gt;})&lt;/span&gt;
+        &lt;span class="n"&gt;ginLambda&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;ginadapter&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;New&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;r&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+
+
+&lt;span class="o"&gt;//&lt;/span&gt; &lt;span class="n"&gt;Handler&lt;/span&gt; &lt;span class="ow"&gt;is&lt;/span&gt; &lt;span class="n"&gt;the&lt;/span&gt; &lt;span class="n"&gt;function&lt;/span&gt; &lt;span class="n"&gt;that&lt;/span&gt; &lt;span class="n"&gt;executes&lt;/span&gt; &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;every&lt;/span&gt; &lt;span class="n"&gt;Request&lt;/span&gt; &lt;span class="n"&gt;passed&lt;/span&gt; &lt;span class="n"&gt;into&lt;/span&gt; &lt;span class="n"&gt;the&lt;/span&gt; &lt;span class="n"&gt;Lambda&lt;/span&gt;
+&lt;span class="n"&gt;func&lt;/span&gt; &lt;span class="n"&gt;Handler&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;ctx&lt;/span&gt; &lt;span class="n"&gt;context&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;Context&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;req&lt;/span&gt; &lt;span class="n"&gt;events&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;APIGatewayProxyRequest&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;events&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;APIGatewayProxyResponse&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;error&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;ginLambda&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;ProxyWithContext&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;ctx&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;req&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+
+&lt;span class="n"&gt;func&lt;/span&gt; &lt;span class="n"&gt;main&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="k"&gt;lambda&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;Start&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;Handler&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;&lt;code&gt;go mod init&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Ensure dependencies (like the AWS SDK) are recognized by the Go package manager&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;code&gt;go test&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;This is the simplest way to trigger downloading the dependencies (imported packages)&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;a href="https://blog.golang.org/using-go-modules"&gt;https://blog.golang.org/using-go-modules&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;GOOS=linux GOARCH=amd64 go build -o main main.go&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;compile for the target arch , AWS Lambda ("firecracker") is Linux =]&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;a href="https://www.usenix.org/system/files/nsdi20-paper-agache.pdf"&gt;https://www.usenix.org/system/files/nsdi20-paper-agache.pdf&lt;/a&gt;&lt;/p&gt;
+&lt;h3 id="cdk-with-a-golang-lambda"&gt;CDK with a Golang Lambda&lt;/h3&gt;
+&lt;p&gt;No working from just the "infra" subdirectory in our project:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;cdk-example/infra/package.json&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;cdk-example/infra/lib/infra-stack.ts&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;code&gt;cd cdk-example/infra/&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;First update &lt;strong&gt;package.json&lt;/strong&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="s2"&gt;"dependencies"&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="s2"&gt;"@aws-cdk/core"&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;"*"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+  &lt;span class="s2"&gt;"@aws-cdk/aws-s3"&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;"*"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+  &lt;span class="s2"&gt;"@aws-cdk/aws-s3-assets"&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;"*"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+  &lt;span class="s2"&gt;"@aws-cdk/aws-lambda"&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;"*"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+  &lt;span class="s2"&gt;"source-map-support"&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;"^0.5.16"&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Do not forget to &lt;code&gt;npm install&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;Next update the &lt;strong&gt;lib/infra-stack.ts&lt;/strong&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Layout the resources from the deepest dependency first, so in this case a place for the golang function to be zipped&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://docs.aws.amazon.com/cdk/api/latest/docs/aws-s3-assets-readme.html"&gt;https://docs.aws.amazon.com/cdk/api/latest/docs/aws-s3-assets-readme.html&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href="https://docs.aws.amazon.com/cdk/api/latest/docs/aws-lambda-readme.html#handler-code"&gt;https://docs.aws.amazon.com/cdk/api/latest/docs/aws-lambda-readme.html#handler-code&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;:::typescript
+import * as cdk from '@aws-cdk/core';
+import * as s3 from '@aws-cdk/aws-s3';
+import * as lambda from '@aws-cdk/aws-lambda';
+import assets = require("@aws-cdk/aws-s3-assets")
+import path = require("path")&lt;/p&gt;
+&lt;p&gt;export class InfraStack extends cdk.Stack {
+  constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
+    super(scope, id, props);&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="o"&gt;//&lt;/span&gt; &lt;span class="n"&gt;Golang&lt;/span&gt; &lt;span class="n"&gt;binaries&lt;/span&gt; &lt;span class="n"&gt;must&lt;/span&gt; &lt;span class="n"&gt;have&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="n"&gt;place&lt;/span&gt; &lt;span class="k"&gt;where&lt;/span&gt; &lt;span class="n"&gt;they&lt;/span&gt; &lt;span class="k"&gt;are&lt;/span&gt; &lt;span class="n"&gt;uploaded&lt;/span&gt; &lt;span class="k"&gt;to&lt;/span&gt; &lt;span class="n"&gt;s3&lt;/span&gt; &lt;span class="k"&gt;as&lt;/span&gt; &lt;span class="n"&gt;a&lt;/span&gt; &lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;zip&lt;/span&gt;
+&lt;span class="n"&gt;const&lt;/span&gt; &lt;span class="n"&gt;asset&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="k"&gt;new&lt;/span&gt; &lt;span class="n"&gt;assets&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;Asset&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;this&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;'ExampleFunctionZip'&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="err"&gt;{&lt;/span&gt;
+  &lt;span class="n"&gt;path&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="n"&gt;path&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="k"&gt;join&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;__dirname&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;'../../examplefunction'&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt;
+&lt;span class="err"&gt;}&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+
+&lt;span class="n"&gt;const&lt;/span&gt; &lt;span class="k"&gt;handler&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="k"&gt;new&lt;/span&gt; &lt;span class="n"&gt;lambda&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="k"&gt;Function&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;this&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="ss"&gt;"ExampleFunction"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="err"&gt;{&lt;/span&gt;
+  &lt;span class="n"&gt;runtime&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="n"&gt;lambda&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;Runtime&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;GO_1_X&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+  &lt;span class="k"&gt;handler&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="ss"&gt;"main"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+  &lt;span class="n"&gt;code&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="n"&gt;lambda&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;Code&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;fromBucket&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;
+    &lt;span class="n"&gt;asset&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;bucket&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="n"&gt;asset&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;s3ObjectKey&lt;/span&gt;
+  &lt;span class="p"&gt;),&lt;/span&gt;
+&lt;span class="err"&gt;}&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;}
+}&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;code&gt;cdk synth&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;outputting the CloudFormation is a quick way to valied the syntax and see any warnings&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;code&gt;cdk deploy&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;InfraStack: deploying...
+&lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;%&lt;span class="o"&gt;]&lt;/span&gt; start: Publishing 05e95f6b38c932a779e68a7a685e9950eca688e775c77f84787f6fa3e2ade474:current
+&lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="m"&gt;100&lt;/span&gt;%&lt;span class="o"&gt;]&lt;/span&gt; success: Published 05e95f6b38c932a779e68a7a685e9950eca688e775c77f84787f6fa3e2ade474:current
+InfraStack: creating CloudFormation changeset...
+ &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="m"&gt;4&lt;/span&gt;/4&lt;span class="o"&gt;)&lt;/span&gt;
+ InfraStack
+
+Stack ARN:
+arn:aws:cloudformation:us-east-1:409670809604:stack/InfraStack/248d2960-0104-11eb-8cc5-0ac853a0932f
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Use the AWS Console UI and visually look at the cloud formation stacks&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;e.g. &lt;a href="https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/"&gt;https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;When you filter and click on your new stack (e.g. InfraStack) you will be able to see the Resources associated with that stack&lt;/p&gt;
+&lt;p&gt;The default policy "AWSLambdaBasicExecutionRole" will actually allow the Lambda to output logs to Cloudwatch&lt;/p&gt;
+&lt;h3 id="cdk-with-an-apigateway-integrated-with-a-go-lambda"&gt;CDK with an APIGateway integrated with a Go Lambda&lt;/h3&gt;
+&lt;p&gt;Create the APIG and attach it to the Lambda:&lt;/p&gt;
+&lt;p&gt;First update &lt;strong&gt;infra/package.json&lt;/strong&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;  &lt;span class="s2"&gt;"dependencies"&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="s2"&gt;"@aws-cdk/aws-apigateway"&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;"*"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="s2"&gt;"@aws-cdk/aws-lambda"&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;"*"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="s2"&gt;"@aws-cdk/aws-s3"&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;"*"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="s2"&gt;"@aws-cdk/aws-s3-assets"&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;"*"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="s2"&gt;"@aws-cdk/core"&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;"*"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="s2"&gt;"source-map-support"&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;"^0.5.16"&lt;/span&gt;
+  &lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;&lt;code&gt;npm install&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;Define the API Gateway in CDK &lt;em&gt;(only adding a few more lines)&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://docs.aws.amazon.com/cdk/api/latest/docs/aws-apigateway-readme.html#aws-lambda-backed-apis"&gt;https://docs.aws.amazon.com/cdk/api/latest/docs/aws-apigateway-readme.html#aws-lambda-backed-apis&lt;/a&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kr"&gt;import&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="kr"&gt;as&lt;/span&gt; &lt;span class="nx"&gt;cdk&lt;/span&gt; &lt;span class="nx"&gt;from&lt;/span&gt; &lt;span class="s1"&gt;'@aws-cdk/core'&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="kr"&gt;import&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="kr"&gt;as&lt;/span&gt; &lt;span class="nx"&gt;s3&lt;/span&gt; &lt;span class="nx"&gt;from&lt;/span&gt; &lt;span class="s1"&gt;'@aws-cdk/aws-s3'&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="kr"&gt;import&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="kr"&gt;as&lt;/span&gt; &lt;span class="nx"&gt;lambda&lt;/span&gt; &lt;span class="nx"&gt;from&lt;/span&gt; &lt;span class="s1"&gt;'@aws-cdk/aws-lambda'&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="kr"&gt;import&lt;/span&gt; &lt;span class="nx"&gt;assets&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nx"&gt;require&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;"@aws-cdk/aws-s3-assets"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="kr"&gt;import&lt;/span&gt; &lt;span class="nx"&gt;apigw&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nx"&gt;require&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;"@aws-cdk/aws-apigateway"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="kr"&gt;import&lt;/span&gt; &lt;span class="nx"&gt;path&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nx"&gt;require&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;"path"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+
+&lt;span class="kr"&gt;export&lt;/span&gt; &lt;span class="kr"&gt;class&lt;/span&gt; &lt;span class="nx"&gt;InfraStack&lt;/span&gt; &lt;span class="kr"&gt;extends&lt;/span&gt; &lt;span class="nx"&gt;cdk&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;Stack&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="kr"&gt;constructor&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;scope&lt;/span&gt;: &lt;span class="kt"&gt;cdk.Construct&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;id&lt;/span&gt;: &lt;span class="kt"&gt;string&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;props?&lt;/span&gt;: &lt;span class="kt"&gt;cdk.StackProps&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="kr"&gt;super&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;scope&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;id&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;props&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+
+    &lt;span class="c1"&gt;// Golang binaries must have a place where they are uploaded to s3 as a .zip&lt;/span&gt;
+    &lt;span class="kr"&gt;const&lt;/span&gt; &lt;span class="nx"&gt;asset&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="k"&gt;new&lt;/span&gt; &lt;span class="nx"&gt;assets&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;Asset&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;this&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;'ExampleFunctionZip'&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+      &lt;span class="nx"&gt;path&lt;/span&gt;: &lt;span class="kt"&gt;path.join&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;__dirname&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;'../../examplefunction'&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt;
+    &lt;span class="p"&gt;});&lt;/span&gt;
+
+    &lt;span class="kr"&gt;const&lt;/span&gt; &lt;span class="nx"&gt;myhandler&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="k"&gt;new&lt;/span&gt; &lt;span class="nx"&gt;lambda&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nb"&gt;Function&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;this&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s2"&gt;"ExampleFunction"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+      &lt;span class="nx"&gt;runtime&lt;/span&gt;: &lt;span class="kt"&gt;lambda.Runtime.GO_1_X&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+      &lt;span class="nx"&gt;handler&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;"main"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+      &lt;span class="nx"&gt;code&lt;/span&gt;: &lt;span class="kt"&gt;lambda.Code.fromBucket&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;
+        &lt;span class="nx"&gt;asset&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;bucket&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+        &lt;span class="nx"&gt;asset&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;s3ObjectKey&lt;/span&gt;
+      &lt;span class="p"&gt;),&lt;/span&gt;
+    &lt;span class="p"&gt;});&lt;/span&gt;
+
+    &lt;span class="c1"&gt;// all routes (and REST verbs) will pass through to the lambda&lt;/span&gt;
+    &lt;span class="kr"&gt;const&lt;/span&gt; &lt;span class="nx"&gt;api&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="k"&gt;new&lt;/span&gt; &lt;span class="nx"&gt;apigw&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;LambdaRestApi&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;this&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;'examplefunction'&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="nx"&gt;handler&lt;/span&gt;: &lt;span class="kt"&gt;myhandler&lt;/span&gt;&lt;span class="p"&gt;});&lt;/span&gt;
+  &lt;span class="p"&gt;}&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;one gotcha is the ordering of imports, have the "path" one last&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;code&gt;cdk synth&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;now the CloudFormation is very verbose =|&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;em&gt;upon inspection you will see the type of integration Lambda is as desired, AWS_PROXY&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;cdk deploy&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;There is a warning about security because AssumeRole&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;InfraStack: deploying...
+&lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;%&lt;span class="o"&gt;]&lt;/span&gt; start: Publishing 05e95f6b38c932a779e68a7a685e9950eca688e775c77f84787f6fa3e2ade474:current
+&lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="m"&gt;100&lt;/span&gt;%&lt;span class="o"&gt;]&lt;/span&gt; success: Published 05e95f6b38c932a779e68a7a685e9950eca688e775c77f84787f6fa3e2ade474:current
+InfraStack: creating CloudFormation changeset...
+  &lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="m"&gt;14&lt;/span&gt;/14&lt;span class="o"&gt;)&lt;/span&gt;
+InfraStack
+
+Outputs:
+InfraStack.examplefunctionEndpoint65D9943D &lt;span class="o"&gt;=&lt;/span&gt; https://abc123.execute-api.us-east-1.amazonaws.com/prod/
+
+Stack ARN:
+arn:aws:cloudformation:us-east-1:409670809604:stack/InfraStack/248d2960-0104-11eb-8cc5-0ac853a0932f
+&lt;/pre&gt;&lt;/div&gt;
+&lt;h2 id="verify-your-new-api-gateway-and-golang-lambda-with-curl"&gt;Verify your new API Gateway and Golang Lambda with CURL&lt;/h2&gt;
+&lt;p&gt;The very helpful output means you can use &lt;code&gt;CURL&lt;/code&gt; directly &lt;em&gt;(as you get to ignore the whole "this apigateway needs to be deployed to a stage")&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;curl https://abc123.execute-api.us-east-1.amazonaws.com/prod/ping&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;you should get back either 404 or "pong" =)&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;To see how much more work it is to do (and understand) the API Gateway concepts... &lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://blog.john-pfeiffer.com/localstack-apigateway-lambda-and-s3-integration-testing/"&gt;https://blog.john-pfeiffer.com/localstack-apigateway-lambda-and-s3-integration-testing/&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">john pfeiffer</dc:creator><pubDate>Sun, 27 Sep 2020 14:48:00 -0700</pubDate><guid isPermaLink="false">tag:blog.john-pfeiffer.com,2020-09-27:using-aws-cdk-to-configure-deploy-a-golang-lambda-with-apigateway/</guid><category>go</category><category>golang</category><category>aws</category><category>lambda</category><category>apigateway</category><category>cdk</category></item><item><title>Localstack APIGateway Lambda and S3 integration testing</title><link>https://blog.john-pfeiffer.com/localstack-apigateway-lambda-and-s3-integration-testing/</link><description>
 &lt;p&gt;One of the challenges with "serverless" is how to develop locally, especially things like running integration tests in your dev environment.&lt;/p&gt;
 &lt;p&gt;Imagine writing code for a lambda that reads and writes from S3, but without any AWS.&lt;/p&gt;
 &lt;p&gt;The AWS tool SAM does have a local mode but does not cover S3 nor Dynamo, etc.&lt;/p&gt;
