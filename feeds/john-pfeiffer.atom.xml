@@ -95,45 +95,45 @@ localstack_1  | Starting mock Lambda service (http port 4574)...&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;h3 id="get-the-dependency-docker-container-that-actually-executes-golang"&gt;Get the dependency docker container that actually executes Golang&lt;/h3&gt;
 &lt;p&gt;&lt;code&gt;docker pull lambci/lambda:go1.x&lt;/code&gt;&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;Now you can invoke the Lambda with an input...&lt;/strong&gt;
-&lt;code&gt;aws lambda --endpoint-url=http://localhost:4574 invoke --function-name task --payload='{"Name": "world"}' --region=us-east-1 myout.log&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Now you can invoke the Lambda with an input...&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;aws lambda --endpoint-url=http://localhost:4574 invoke --function-name task --payload='{"Name": "world"}' --region=us-east-1 myout.log&lt;/code&gt;&lt;/p&gt;
 &lt;blockquote&gt;
 &lt;p&gt;{    "StatusCode": 200    }&lt;/p&gt;
 &lt;p&gt;localstack_1  | 2020-03-06T05:45:22:DEBUG:localstack.services.awslambda.lambda_executors: Lambda arn:aws:lambda:us-east-1:000000000000:function:task result / log output:
 "hi world"&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;h3 id="other-useful-commands-for-updating-or-deleting-your-localstack-lambda"&gt;Other useful commands for updating or deleting your localstack lambda&lt;/h3&gt;
-&lt;p&gt;&lt;code&gt;aws --endpoint-url=http://localhost:4574 lambda list-functions&lt;/code&gt;
-&lt;code&gt;aws --endpoint-url=http://localhost:4574 lambda update-function-code --function-name=task --zip-file fileb://task.zip&lt;/code&gt;
+&lt;p&gt;&lt;code&gt;aws --endpoint-url=http://localhost:4574 lambda list-functions&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;aws --endpoint-url=http://localhost:4574 lambda update-function-code --function-name=task --zip-file fileb://task.zip&lt;/code&gt;
 &lt;code&gt;aws --endpoint-url=http://localhost:4574 lambda delete-function --function-name task&lt;/code&gt;&lt;/p&gt;
 &lt;hr/&gt;
 &lt;h2 id="api-gateway-and-lambda-with-localstack"&gt;API Gateway and Lambda with Localstack&lt;/h2&gt;
 &lt;p&gt;A very simple bit of "handler" code to exemplify the AWS Lambda Proxy Integration&lt;/p&gt;
-&lt;p&gt;:::go
-    package main&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;
-    &lt;span class="s2"&gt;"context"&lt;/span&gt;
-    &lt;span class="s2"&gt;"fmt"&lt;/span&gt;
-    &lt;span class="s2"&gt;"net/http"&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kn"&gt;package&lt;/span&gt; &lt;span class="nx"&gt;main&lt;/span&gt;
 
-    &lt;span class="s2"&gt;"github.com/aws/aws-lambda-go/events"&lt;/span&gt;
-    &lt;span class="s2"&gt;"github.com/aws/aws-lambda-go/lambda"&lt;/span&gt;
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;
+    &lt;span class="s"&gt;"context"&lt;/span&gt;
+    &lt;span class="s"&gt;"fmt"&lt;/span&gt;
+    &lt;span class="s"&gt;"net/http"&lt;/span&gt;
+
+    &lt;span class="s"&gt;"github.com/aws/aws-lambda-go/events"&lt;/span&gt;
+    &lt;span class="s"&gt;"github.com/aws/aws-lambda-go/lambda"&lt;/span&gt;
 &lt;span class="p"&gt;)&lt;/span&gt;
 
-&lt;span class="o"&gt;//&lt;/span&gt; &lt;span class="n"&gt;HandleRequest&lt;/span&gt; &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;an&lt;/span&gt; &lt;span class="n"&gt;event&lt;/span&gt; &lt;span class="n"&gt;https&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="o"&gt;//&lt;/span&gt;&lt;span class="n"&gt;docs&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;aws&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;amazon&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;com&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="k"&gt;lambda&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;latest&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;dg&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;golang&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;handler&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;html&lt;/span&gt;
-&lt;span class="o"&gt;//&lt;/span&gt; &lt;span class="nb"&gt;input&lt;/span&gt; &lt;span class="nb"&gt;object&lt;/span&gt; &lt;span class="n"&gt;defined&lt;/span&gt; &lt;span class="n"&gt;here&lt;/span&gt; &lt;span class="n"&gt;https&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="o"&gt;//&lt;/span&gt;&lt;span class="n"&gt;godoc&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;org&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;github&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;com&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;aws&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;aws&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="k"&gt;lambda&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;go&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;events&lt;/span&gt;&lt;span class="c1"&gt;#APIGatewayProxyRequest&lt;/span&gt;
-&lt;span class="n"&gt;func&lt;/span&gt; &lt;span class="n"&gt;HandleRequest&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;ctx&lt;/span&gt; &lt;span class="n"&gt;context&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;Context&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;req&lt;/span&gt; &lt;span class="n"&gt;events&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;APIGatewayProxyRequest&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;events&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;APIGatewayProxyResponse&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;error&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
-    &lt;span class="n"&gt;fmt&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;Printf&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;"DEBUG: %#v"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;req&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="c1"&gt;// HandleRequest for an event https://docs.aws.amazon.com/lambda/latest/dg/golang-handler.html&lt;/span&gt;
+&lt;span class="c1"&gt;// input object defined here https://godoc.org/github.com/aws/aws-lambda-go/events#APIGatewayProxyRequest&lt;/span&gt;
+&lt;span class="kd"&gt;func&lt;/span&gt; &lt;span class="nx"&gt;HandleRequest&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;ctx&lt;/span&gt; &lt;span class="nx"&gt;context&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;Context&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;req&lt;/span&gt; &lt;span class="nx"&gt;events&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;APIGatewayProxyRequest&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;events&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;APIGatewayProxyResponse&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="kt"&gt;error&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="nx"&gt;fmt&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;Printf&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;"DEBUG: %#v"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;req&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 
-    &lt;span class="o"&gt;//&lt;/span&gt; &lt;span class="n"&gt;https&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="o"&gt;//&lt;/span&gt;&lt;span class="n"&gt;docs&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;aws&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;amazon&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;com&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;apigateway&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;latest&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;developerguide&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nb"&gt;set&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;up&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="k"&gt;lambda&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;proxy&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;integrations&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;html&lt;/span&gt;&lt;span class="c1"&gt;#api-gateway-simple-proxy-for-lambda-output-format&lt;/span&gt;
-    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;events&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;APIGatewayProxyResponse&lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;
-        &lt;span class="n"&gt;StatusCode&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="n"&gt;http&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;StatusOK&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
-        &lt;span class="n"&gt;Body&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="n"&gt;req&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;Body&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
-    &lt;span class="p"&gt;},&lt;/span&gt; &lt;span class="n"&gt;nil&lt;/span&gt;
+    &lt;span class="c1"&gt;// https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html#api-gateway-simple-proxy-for-lambda-output-format&lt;/span&gt;
+    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="nx"&gt;events&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;APIGatewayProxyResponse&lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="nx"&gt;StatusCode&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="nx"&gt;http&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;StatusOK&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+        &lt;span class="nx"&gt;Body&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="nx"&gt;req&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;Body&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="p"&gt;},&lt;/span&gt; &lt;span class="kc"&gt;nil&lt;/span&gt;
 &lt;span class="p"&gt;}&lt;/span&gt;
 
-&lt;span class="n"&gt;func&lt;/span&gt; &lt;span class="n"&gt;main&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
-    &lt;span class="k"&gt;lambda&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;Start&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;HandleRequest&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="kd"&gt;func&lt;/span&gt; &lt;span class="nx"&gt;main&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="nx"&gt;lambda&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;Start&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;HandleRequest&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;span class="p"&gt;}&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;&lt;a href="https://docs.aws.amazon.com/lambda/latest/dg/golang-handler.html"&gt;https://docs.aws.amazon.com/lambda/latest/dg/golang-handler.html&lt;/a&gt;&lt;/p&gt;
@@ -144,8 +144,8 @@ localstack_1  | Starting mock Lambda service (http port 4574)...&lt;/p&gt;
 &lt;a href="https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html#api-gateway-simple-proxy-for-lambda-output-format"&gt;https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html#api-gateway-simple-proxy-for-lambda-output-format&lt;/a&gt;
 The custom reponse headers are where CORS can be configured&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;p&gt;&lt;code&gt;GOOS=linux go build &amp;amp;&amp;amp; zip task.zip task&lt;/code&gt;
-&lt;code&gt;aws --endpoint-url=http://localhost:4574 lambda update-function-code --function-name=task --zip-file fileb://task.zip&lt;/code&gt;
+&lt;p&gt;&lt;code&gt;GOOS=linux go build &amp;amp;&amp;amp; zip task.zip task&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;aws --endpoint-url=http://localhost:4574 lambda update-function-code --function-name=task --zip-file fileb://task.zip&lt;/code&gt;
 &lt;code&gt;aws --endpoint-url=http://localhost:4574 lambda list-functions&lt;/code&gt;&lt;/p&gt;
 &lt;blockquote&gt;
 &lt;p&gt;arn:aws:lambda:us-east-1:000000000000:function:task&lt;/p&gt;
@@ -156,59 +156,59 @@ The custom reponse headers are where CORS can be configured&lt;/p&gt;
 &lt;p&gt;{"StatusCode": 200}&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;hr/&gt;
-&lt;p&gt;&lt;code&gt;aws --endpoint-url=http://localhost:4567 apigateway create-rest-api --name myapi&lt;/code&gt;
-    :::json
-    {
-        "createdDate": 1583558847,
-        "apiKeySource": "HEADER",
-        "tags": {},
-        "name": "myapi",
-        "endpointConfiguration": {
-            "types": [
-                "EDGE"
-            ]
-        },
-        "id": "29a3p9encp"
-    }&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;aws --endpoint-url=http://localhost:4567 apigateway create-rest-api --name myapi&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="nt"&gt;"createdDate"&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;1583558847&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="nt"&gt;"apiKeySource"&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;"HEADER"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="nt"&gt;"tags"&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{},&lt;/span&gt;
+    &lt;span class="nt"&gt;"name"&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;"myapi"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="nt"&gt;"endpointConfiguration"&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="nt"&gt;"types"&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;
+            &lt;span class="s2"&gt;"EDGE"&lt;/span&gt;
+        &lt;span class="p"&gt;]&lt;/span&gt;
+    &lt;span class="p"&gt;},&lt;/span&gt;
+    &lt;span class="nt"&gt;"id"&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;"29a3p9encp"&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
 &lt;blockquote&gt;
 &lt;p&gt;That "id" of this REST API is important throughout the rest of the commands&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;p&gt;&lt;code&gt;aws --endpoint-url=http://localhost:4567 apigateway get-resources --rest-api-id 29a3p9encp&lt;/code&gt;
-    :::json
-    {
-        "items": [
-            {
-                "id": "62wy7bzofu",
-                "resourceMethods": {
-                    "GET": {}
-                },
-                "path": "/"
-            }
-        ]
-    }&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;aws --endpoint-url=http://localhost:4567 apigateway get-resources --rest-api-id 29a3p9encp&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="nt"&gt;"items"&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;
+        &lt;span class="p"&gt;{&lt;/span&gt;
+            &lt;span class="nt"&gt;"id"&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;"62wy7bzofu"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+            &lt;span class="nt"&gt;"resourceMethods"&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+                &lt;span class="nt"&gt;"GET"&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{}&lt;/span&gt;
+            &lt;span class="p"&gt;},&lt;/span&gt;
+            &lt;span class="nt"&gt;"path"&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;"/"&lt;/span&gt;
+        &lt;span class="p"&gt;}&lt;/span&gt;
+    &lt;span class="p"&gt;]&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
 &lt;blockquote&gt;
 &lt;p&gt;The "id" for the "/" resource is used as the "parent" for adding a "child" resource&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;p&gt;&lt;code&gt;aws --endpoint-url=http://localhost:4567 apigateway create-resource --rest-api-id 29a3p9encp --parent-id 62wy7bzofu --path-part mywidget&lt;/code&gt;
-    :::json
-    {
-        "pathPart": "mywidget",
-        "resourceMethods": {
-            "GET": {}
-        },
-        "id": "jylycd8v4u",
-        "parentId": "62wy7bzofu",
-        "path": "/mywidget"
-    }&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;aws --endpoint-url=http://localhost:4567 apigateway create-resource --rest-api-id 29a3p9encp --parent-id 62wy7bzofu --path-part mywidget&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="nt"&gt;"pathPart"&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;"mywidget"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="nt"&gt;"resourceMethods"&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="nt"&gt;"GET"&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{}&lt;/span&gt;
+    &lt;span class="p"&gt;},&lt;/span&gt;
+    &lt;span class="nt"&gt;"id"&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;"jylycd8v4u"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="nt"&gt;"parentId"&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;"62wy7bzofu"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="nt"&gt;"path"&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;"/mywidget"&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
 &lt;blockquote&gt;
 &lt;p&gt;We have created a REST resource /mywidget&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;p&gt;&lt;code&gt;aws --endpoint-url=http://localhost:4567 apigateway put-method --rest-api-id 29a3p9encp --resource-id jylycd8v4u --http-method GET --authorization-type NONE&lt;/code&gt;
-    :::json
-    {
-        "authorizationType": "NONE",
-        "httpMethod": "GET"
-    }&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;aws --endpoint-url=http://localhost:4567 apigateway put-method --rest-api-id 29a3p9encp --resource-id jylycd8v4u --http-method GET --authorization-type NONE&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="nt"&gt;"authorizationType"&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;"NONE"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="nt"&gt;"httpMethod"&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;"GET"&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
 &lt;blockquote&gt;
 &lt;p&gt;Now /mywidget does not require any authentication for GET requests&lt;/p&gt;
 &lt;/blockquote&gt;
@@ -231,70 +231,69 @@ The custom reponse headers are where CORS can be configured&lt;/p&gt;
 &lt;p&gt;This connects the AWS API Gateway GET /mywidget calls as a "proxy" (passing through the request) to the specified Lambda
 POST is required &lt;a href="https://docs.aws.amazon.com/lambda/latest/dg/API_Invoke.html"&gt;https://docs.aws.amazon.com/lambda/latest/dg/API_Invoke.html&lt;/a&gt;&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;p&gt;aws --endpoint-url=http://localhost:4567 apigateway create-deployment --rest-api-id 29a3p9encp --stage-name foobar
-    :::json
-    {
-        "createdDate": 1583565386,
-        "description": "",
-        "id": "mbe3fwe0pw"
-    }&lt;/p&gt;
+&lt;p&gt;aws --endpoint-url=http://localhost:4567 apigateway create-deployment --rest-api-id 29a3p9encp --stage-name foobar&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="nt"&gt;"createdDate"&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;1583565386&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="nt"&gt;"description"&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;""&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="nt"&gt;"id"&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;"mbe3fwe0pw"&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
 &lt;blockquote&gt;
 &lt;p&gt;This actually activates the endpoint for traffic&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;hr/&gt;
 &lt;p&gt;List everything that we have created...&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;aws --endpoint-url=http://localhost:4567 apigateway get-resources --rest-api-id 29a3p9encp&lt;/code&gt;
-    :::json
-    {
-        "items": [
-            {
-                "resourceMethods": {
-                    "GET": {}
-                },
-                "path": "/",
-                "id": "62wy7bzofu"
-            },
-            {
-                "resourceMethods": {
-                    "GET": {
-                        "methodIntegration": {
-                            "uri": "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:000000000000:function:task/invocations",
-                            "type": "AWS_PROXY",
-                            "httpMethod": "POST",
-                            "integrationResponses": {
-                                "200": {
-                                    "responseTemplates": {
-                                        "application/json": null
-                                    },
-                                    "statusCode": 200
-                                }
-                            }
-                        },
-                        "httpMethod": "GET",
-                        "authorizationType": "NONE"
-                    }
-                },
-                "parentId": "62wy7bzofu",
-                "id": "jylycd8v4u",
-                "path": "/mywidget",
-                "pathPart": "mywidget"
-            }
-        ]
-    }&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;aws --endpoint-url=http://localhost:4567 apigateway get-resources --rest-api-id 29a3p9encp&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="nt"&gt;"items"&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;
+        &lt;span class="p"&gt;{&lt;/span&gt;
+            &lt;span class="nt"&gt;"resourceMethods"&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+                &lt;span class="nt"&gt;"GET"&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{}&lt;/span&gt;
+            &lt;span class="p"&gt;},&lt;/span&gt;
+            &lt;span class="nt"&gt;"path"&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;"/"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+            &lt;span class="nt"&gt;"id"&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;"62wy7bzofu"&lt;/span&gt;
+        &lt;span class="p"&gt;},&lt;/span&gt;
+        &lt;span class="p"&gt;{&lt;/span&gt;
+            &lt;span class="nt"&gt;"resourceMethods"&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+                &lt;span class="nt"&gt;"GET"&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+                    &lt;span class="nt"&gt;"methodIntegration"&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+                        &lt;span class="nt"&gt;"uri"&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;"arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:000000000000:function:task/invocations"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+                        &lt;span class="nt"&gt;"type"&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;"AWS_PROXY"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+                        &lt;span class="nt"&gt;"httpMethod"&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;"POST"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+                        &lt;span class="nt"&gt;"integrationResponses"&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+                            &lt;span class="nt"&gt;"200"&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+                                &lt;span class="nt"&gt;"responseTemplates"&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+                                    &lt;span class="nt"&gt;"application/json"&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="kc"&gt;null&lt;/span&gt;
+                                &lt;span class="p"&gt;},&lt;/span&gt;
+                                &lt;span class="nt"&gt;"statusCode"&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;200&lt;/span&gt;
+                            &lt;span class="p"&gt;}&lt;/span&gt;
+                        &lt;span class="p"&gt;}&lt;/span&gt;
+                    &lt;span class="p"&gt;},&lt;/span&gt;
+                    &lt;span class="nt"&gt;"httpMethod"&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;"GET"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+                    &lt;span class="nt"&gt;"authorizationType"&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;"NONE"&lt;/span&gt;
+                &lt;span class="p"&gt;}&lt;/span&gt;
+            &lt;span class="p"&gt;},&lt;/span&gt;
+            &lt;span class="nt"&gt;"parentId"&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;"62wy7bzofu"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+            &lt;span class="nt"&gt;"id"&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;"jylycd8v4u"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+            &lt;span class="nt"&gt;"path"&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;"/mywidget"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+            &lt;span class="nt"&gt;"pathPart"&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;"mywidget"&lt;/span&gt;
+        &lt;span class="p"&gt;}&lt;/span&gt;
+    &lt;span class="p"&gt;]&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
 &lt;blockquote&gt;
 &lt;p&gt;The fully configured API Gateway and /mywidget resource linked to the Lambda code&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;p&gt;&lt;a href="https://docs.aws.amazon.com/cli/latest/reference/apigateway/test-invoke-method.html"&gt;https://docs.aws.amazon.com/cli/latest/reference/apigateway/test-invoke-method.html&lt;/a&gt;
 &lt;code&gt;aws apigateway test-invoke-method --endpoint-url=http://localhost:4567 --rest-api-id 29a3p9encp --resource-id jylycd8v4u --http-method GET&lt;/code&gt;&lt;/p&gt;
 &lt;hr/&gt;
-&lt;p&gt;&lt;code&gt;curl http://localhost:4567/restapis/29a3p9encp/&lt;/code&gt;
-    :::json
-    {"id": "29a3p9encp", "name": "myapi", "description": null, "createdDate": 1583565481, 
-        "apiKeySource": "HEADER", "endpointConfiguration": {"types": ["EDGE"]}, "tags": {}
-    }&lt;/p&gt;
-&lt;p&gt;curl -i http://localhost:4567/restapis/29a3p9encp/foobar/
-curl -i http://localhost:4567/restapis/29a3p9encp/foobar/&lt;em&gt;user_request&lt;/em&gt;/mywidget&lt;/p&gt;
-&lt;hr/&gt;
+&lt;p&gt;&lt;code&gt;curl http://localhost:4567/restapis/29a3p9encp/&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="nt"&gt;"id"&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;"29a3p9encp"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nt"&gt;"name"&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;"myapi"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nt"&gt;"description"&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="kc"&gt;null&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nt"&gt;"createdDate"&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;1583565481&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; 
+    &lt;span class="nt"&gt;"apiKeySource"&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;"HEADER"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nt"&gt;"endpointConfiguration"&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="nt"&gt;"types"&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="s2"&gt;"EDGE"&lt;/span&gt;&lt;span class="p"&gt;]},&lt;/span&gt; &lt;span class="nt"&gt;"tags"&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{}&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;&lt;code&gt;curl -i http://localhost:4567/restapis/29a3p9encp/foobar/&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;curl -i http://localhost:4567/restapis/29a3p9encp/foobar/_user_request_/mywidget&lt;/code&gt;&lt;/p&gt;
 &lt;hr/&gt;
 &lt;p&gt;Alternatively, HTTP_PROXY means you have to point it to a URI like https://example.com/my-existing-server&lt;/p&gt;
 &lt;ul&gt;

@@ -180,45 +180,45 @@ localstack_1  | Starting mock Lambda service (http port 4574)...</p>
 </blockquote>
 <h3 id="get-the-dependency-docker-container-that-actually-executes-golang">Get the dependency docker container that actually executes Golang</h3>
 <p><code>docker pull lambci/lambda:go1.x</code></p>
-<p><strong>Now you can invoke the Lambda with an input...</strong>
-<code>aws lambda --endpoint-url=http://localhost:4574 invoke --function-name task --payload='{"Name": "world"}' --region=us-east-1 myout.log</code></p>
+<p><strong>Now you can invoke the Lambda with an input...</strong></p>
+<p><code>aws lambda --endpoint-url=http://localhost:4574 invoke --function-name task --payload='{"Name": "world"}' --region=us-east-1 myout.log</code></p>
 <blockquote>
 <p>{    "StatusCode": 200    }</p>
 <p>localstack_1  | 2020-03-06T05:45:22:DEBUG:localstack.services.awslambda.lambda_executors: Lambda arn:aws:lambda:us-east-1:000000000000:function:task result / log output:
 "hi world"</p>
 </blockquote>
 <h3 id="other-useful-commands-for-updating-or-deleting-your-localstack-lambda">Other useful commands for updating or deleting your localstack lambda</h3>
-<p><code>aws --endpoint-url=http://localhost:4574 lambda list-functions</code>
-<code>aws --endpoint-url=http://localhost:4574 lambda update-function-code --function-name=task --zip-file fileb://task.zip</code>
+<p><code>aws --endpoint-url=http://localhost:4574 lambda list-functions</code></p>
+<p><code>aws --endpoint-url=http://localhost:4574 lambda update-function-code --function-name=task --zip-file fileb://task.zip</code>
 <code>aws --endpoint-url=http://localhost:4574 lambda delete-function --function-name task</code></p>
 <hr/>
 <h2 id="api-gateway-and-lambda-with-localstack">API Gateway and Lambda with Localstack</h2>
 <p>A very simple bit of "handler" code to exemplify the AWS Lambda Proxy Integration</p>
-<p>:::go
-    package main</p>
-<div class="highlight"><pre><span></span><span class="kn">import</span> <span class="p">(</span>
-    <span class="s2">"context"</span>
-    <span class="s2">"fmt"</span>
-    <span class="s2">"net/http"</span>
+<div class="highlight"><pre><span></span><span class="kn">package</span> <span class="nx">main</span>
 
-    <span class="s2">"github.com/aws/aws-lambda-go/events"</span>
-    <span class="s2">"github.com/aws/aws-lambda-go/lambda"</span>
+<span class="kn">import</span> <span class="p">(</span>
+    <span class="s">"context"</span>
+    <span class="s">"fmt"</span>
+    <span class="s">"net/http"</span>
+
+    <span class="s">"github.com/aws/aws-lambda-go/events"</span>
+    <span class="s">"github.com/aws/aws-lambda-go/lambda"</span>
 <span class="p">)</span>
 
-<span class="o">//</span> <span class="n">HandleRequest</span> <span class="k">for</span> <span class="n">an</span> <span class="n">event</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">docs</span><span class="o">.</span><span class="n">aws</span><span class="o">.</span><span class="n">amazon</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="k">lambda</span><span class="o">/</span><span class="n">latest</span><span class="o">/</span><span class="n">dg</span><span class="o">/</span><span class="n">golang</span><span class="o">-</span><span class="n">handler</span><span class="o">.</span><span class="n">html</span>
-<span class="o">//</span> <span class="nb">input</span> <span class="nb">object</span> <span class="n">defined</span> <span class="n">here</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">godoc</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">aws</span><span class="o">/</span><span class="n">aws</span><span class="o">-</span><span class="k">lambda</span><span class="o">-</span><span class="n">go</span><span class="o">/</span><span class="n">events</span><span class="c1">#APIGatewayProxyRequest</span>
-<span class="n">func</span> <span class="n">HandleRequest</span><span class="p">(</span><span class="n">ctx</span> <span class="n">context</span><span class="o">.</span><span class="n">Context</span><span class="p">,</span> <span class="n">req</span> <span class="n">events</span><span class="o">.</span><span class="n">APIGatewayProxyRequest</span><span class="p">)</span> <span class="p">(</span><span class="n">events</span><span class="o">.</span><span class="n">APIGatewayProxyResponse</span><span class="p">,</span> <span class="n">error</span><span class="p">)</span> <span class="p">{</span>
-    <span class="n">fmt</span><span class="o">.</span><span class="n">Printf</span><span class="p">(</span><span class="s2">"DEBUG: %#v"</span><span class="p">,</span> <span class="n">req</span><span class="p">)</span>
+<span class="c1">// HandleRequest for an event https://docs.aws.amazon.com/lambda/latest/dg/golang-handler.html</span>
+<span class="c1">// input object defined here https://godoc.org/github.com/aws/aws-lambda-go/events#APIGatewayProxyRequest</span>
+<span class="kd">func</span> <span class="nx">HandleRequest</span><span class="p">(</span><span class="nx">ctx</span> <span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span> <span class="nx">req</span> <span class="nx">events</span><span class="p">.</span><span class="nx">APIGatewayProxyRequest</span><span class="p">)</span> <span class="p">(</span><span class="nx">events</span><span class="p">.</span><span class="nx">APIGatewayProxyResponse</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">"DEBUG: %#v"</span><span class="p">,</span> <span class="nx">req</span><span class="p">)</span>
 
-    <span class="o">//</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">docs</span><span class="o">.</span><span class="n">aws</span><span class="o">.</span><span class="n">amazon</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">apigateway</span><span class="o">/</span><span class="n">latest</span><span class="o">/</span><span class="n">developerguide</span><span class="o">/</span><span class="nb">set</span><span class="o">-</span><span class="n">up</span><span class="o">-</span><span class="k">lambda</span><span class="o">-</span><span class="n">proxy</span><span class="o">-</span><span class="n">integrations</span><span class="o">.</span><span class="n">html</span><span class="c1">#api-gateway-simple-proxy-for-lambda-output-format</span>
-    <span class="k">return</span> <span class="n">events</span><span class="o">.</span><span class="n">APIGatewayProxyResponse</span><span class="p">{</span>
-        <span class="n">StatusCode</span><span class="p">:</span> <span class="n">http</span><span class="o">.</span><span class="n">StatusOK</span><span class="p">,</span>
-        <span class="n">Body</span><span class="p">:</span> <span class="n">req</span><span class="o">.</span><span class="n">Body</span><span class="p">,</span>
-    <span class="p">},</span> <span class="n">nil</span>
+    <span class="c1">// https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html#api-gateway-simple-proxy-for-lambda-output-format</span>
+    <span class="k">return</span> <span class="nx">events</span><span class="p">.</span><span class="nx">APIGatewayProxyResponse</span><span class="p">{</span>
+        <span class="nx">StatusCode</span><span class="p">:</span> <span class="nx">http</span><span class="p">.</span><span class="nx">StatusOK</span><span class="p">,</span>
+        <span class="nx">Body</span><span class="p">:</span> <span class="nx">req</span><span class="p">.</span><span class="nx">Body</span><span class="p">,</span>
+    <span class="p">},</span> <span class="kc">nil</span>
 <span class="p">}</span>
 
-<span class="n">func</span> <span class="n">main</span><span class="p">()</span> <span class="p">{</span>
-    <span class="k">lambda</span><span class="o">.</span><span class="n">Start</span><span class="p">(</span><span class="n">HandleRequest</span><span class="p">)</span>
+<span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+    <span class="nx">lambda</span><span class="p">.</span><span class="nx">Start</span><span class="p">(</span><span class="nx">HandleRequest</span><span class="p">)</span>
 <span class="p">}</span>
 </pre></div>
 <p><a href="https://docs.aws.amazon.com/lambda/latest/dg/golang-handler.html">https://docs.aws.amazon.com/lambda/latest/dg/golang-handler.html</a></p>
@@ -229,8 +229,8 @@ localstack_1  | Starting mock Lambda service (http port 4574)...</p>
 <a href="https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html#api-gateway-simple-proxy-for-lambda-output-format">https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html#api-gateway-simple-proxy-for-lambda-output-format</a>
 The custom reponse headers are where CORS can be configured</p>
 </blockquote>
-<p><code>GOOS=linux go build &amp;&amp; zip task.zip task</code>
-<code>aws --endpoint-url=http://localhost:4574 lambda update-function-code --function-name=task --zip-file fileb://task.zip</code>
+<p><code>GOOS=linux go build &amp;&amp; zip task.zip task</code></p>
+<p><code>aws --endpoint-url=http://localhost:4574 lambda update-function-code --function-name=task --zip-file fileb://task.zip</code>
 <code>aws --endpoint-url=http://localhost:4574 lambda list-functions</code></p>
 <blockquote>
 <p>arn:aws:lambda:us-east-1:000000000000:function:task</p>
@@ -241,59 +241,59 @@ The custom reponse headers are where CORS can be configured</p>
 <p>{"StatusCode": 200}</p>
 </blockquote>
 <hr/>
-<p><code>aws --endpoint-url=http://localhost:4567 apigateway create-rest-api --name myapi</code>
-    :::json
-    {
-        "createdDate": 1583558847,
-        "apiKeySource": "HEADER",
-        "tags": {},
-        "name": "myapi",
-        "endpointConfiguration": {
-            "types": [
-                "EDGE"
-            ]
-        },
-        "id": "29a3p9encp"
-    }</p>
+<p><code>aws --endpoint-url=http://localhost:4567 apigateway create-rest-api --name myapi</code></p>
+<div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="nt">"createdDate"</span><span class="p">:</span> <span class="mi">1583558847</span><span class="p">,</span>
+    <span class="nt">"apiKeySource"</span><span class="p">:</span> <span class="s2">"HEADER"</span><span class="p">,</span>
+    <span class="nt">"tags"</span><span class="p">:</span> <span class="p">{},</span>
+    <span class="nt">"name"</span><span class="p">:</span> <span class="s2">"myapi"</span><span class="p">,</span>
+    <span class="nt">"endpointConfiguration"</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">"types"</span><span class="p">:</span> <span class="p">[</span>
+            <span class="s2">"EDGE"</span>
+        <span class="p">]</span>
+    <span class="p">},</span>
+    <span class="nt">"id"</span><span class="p">:</span> <span class="s2">"29a3p9encp"</span>
+<span class="p">}</span>
+</pre></div>
 <blockquote>
 <p>That "id" of this REST API is important throughout the rest of the commands</p>
 </blockquote>
-<p><code>aws --endpoint-url=http://localhost:4567 apigateway get-resources --rest-api-id 29a3p9encp</code>
-    :::json
-    {
-        "items": [
-            {
-                "id": "62wy7bzofu",
-                "resourceMethods": {
-                    "GET": {}
-                },
-                "path": "/"
-            }
-        ]
-    }</p>
+<p><code>aws --endpoint-url=http://localhost:4567 apigateway get-resources --rest-api-id 29a3p9encp</code></p>
+<div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="nt">"items"</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span>
+            <span class="nt">"id"</span><span class="p">:</span> <span class="s2">"62wy7bzofu"</span><span class="p">,</span>
+            <span class="nt">"resourceMethods"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="nt">"GET"</span><span class="p">:</span> <span class="p">{}</span>
+            <span class="p">},</span>
+            <span class="nt">"path"</span><span class="p">:</span> <span class="s2">"/"</span>
+        <span class="p">}</span>
+    <span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
 <blockquote>
 <p>The "id" for the "/" resource is used as the "parent" for adding a "child" resource</p>
 </blockquote>
-<p><code>aws --endpoint-url=http://localhost:4567 apigateway create-resource --rest-api-id 29a3p9encp --parent-id 62wy7bzofu --path-part mywidget</code>
-    :::json
-    {
-        "pathPart": "mywidget",
-        "resourceMethods": {
-            "GET": {}
-        },
-        "id": "jylycd8v4u",
-        "parentId": "62wy7bzofu",
-        "path": "/mywidget"
-    }</p>
+<p><code>aws --endpoint-url=http://localhost:4567 apigateway create-resource --rest-api-id 29a3p9encp --parent-id 62wy7bzofu --path-part mywidget</code></p>
+<div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="nt">"pathPart"</span><span class="p">:</span> <span class="s2">"mywidget"</span><span class="p">,</span>
+    <span class="nt">"resourceMethods"</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">"GET"</span><span class="p">:</span> <span class="p">{}</span>
+    <span class="p">},</span>
+    <span class="nt">"id"</span><span class="p">:</span> <span class="s2">"jylycd8v4u"</span><span class="p">,</span>
+    <span class="nt">"parentId"</span><span class="p">:</span> <span class="s2">"62wy7bzofu"</span><span class="p">,</span>
+    <span class="nt">"path"</span><span class="p">:</span> <span class="s2">"/mywidget"</span>
+<span class="p">}</span>
+</pre></div>
 <blockquote>
 <p>We have created a REST resource /mywidget</p>
 </blockquote>
-<p><code>aws --endpoint-url=http://localhost:4567 apigateway put-method --rest-api-id 29a3p9encp --resource-id jylycd8v4u --http-method GET --authorization-type NONE</code>
-    :::json
-    {
-        "authorizationType": "NONE",
-        "httpMethod": "GET"
-    }</p>
+<p><code>aws --endpoint-url=http://localhost:4567 apigateway put-method --rest-api-id 29a3p9encp --resource-id jylycd8v4u --http-method GET --authorization-type NONE</code></p>
+<div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="nt">"authorizationType"</span><span class="p">:</span> <span class="s2">"NONE"</span><span class="p">,</span>
+    <span class="nt">"httpMethod"</span><span class="p">:</span> <span class="s2">"GET"</span>
+<span class="p">}</span>
+</pre></div>
 <blockquote>
 <p>Now /mywidget does not require any authentication for GET requests</p>
 </blockquote>
@@ -316,70 +316,69 @@ The custom reponse headers are where CORS can be configured</p>
 <p>This connects the AWS API Gateway GET /mywidget calls as a "proxy" (passing through the request) to the specified Lambda
 POST is required <a href="https://docs.aws.amazon.com/lambda/latest/dg/API_Invoke.html">https://docs.aws.amazon.com/lambda/latest/dg/API_Invoke.html</a></p>
 </blockquote>
-<p>aws --endpoint-url=http://localhost:4567 apigateway create-deployment --rest-api-id 29a3p9encp --stage-name foobar
-    :::json
-    {
-        "createdDate": 1583565386,
-        "description": "",
-        "id": "mbe3fwe0pw"
-    }</p>
+<p>aws --endpoint-url=http://localhost:4567 apigateway create-deployment --rest-api-id 29a3p9encp --stage-name foobar</p>
+<div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="nt">"createdDate"</span><span class="p">:</span> <span class="mi">1583565386</span><span class="p">,</span>
+    <span class="nt">"description"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+    <span class="nt">"id"</span><span class="p">:</span> <span class="s2">"mbe3fwe0pw"</span>
+<span class="p">}</span>
+</pre></div>
 <blockquote>
 <p>This actually activates the endpoint for traffic</p>
 </blockquote>
 <hr/>
 <p>List everything that we have created...</p>
-<p><code>aws --endpoint-url=http://localhost:4567 apigateway get-resources --rest-api-id 29a3p9encp</code>
-    :::json
-    {
-        "items": [
-            {
-                "resourceMethods": {
-                    "GET": {}
-                },
-                "path": "/",
-                "id": "62wy7bzofu"
-            },
-            {
-                "resourceMethods": {
-                    "GET": {
-                        "methodIntegration": {
-                            "uri": "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:000000000000:function:task/invocations",
-                            "type": "AWS_PROXY",
-                            "httpMethod": "POST",
-                            "integrationResponses": {
-                                "200": {
-                                    "responseTemplates": {
-                                        "application/json": null
-                                    },
-                                    "statusCode": 200
-                                }
-                            }
-                        },
-                        "httpMethod": "GET",
-                        "authorizationType": "NONE"
-                    }
-                },
-                "parentId": "62wy7bzofu",
-                "id": "jylycd8v4u",
-                "path": "/mywidget",
-                "pathPart": "mywidget"
-            }
-        ]
-    }</p>
+<p><code>aws --endpoint-url=http://localhost:4567 apigateway get-resources --rest-api-id 29a3p9encp</code></p>
+<div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="nt">"items"</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span>
+            <span class="nt">"resourceMethods"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="nt">"GET"</span><span class="p">:</span> <span class="p">{}</span>
+            <span class="p">},</span>
+            <span class="nt">"path"</span><span class="p">:</span> <span class="s2">"/"</span><span class="p">,</span>
+            <span class="nt">"id"</span><span class="p">:</span> <span class="s2">"62wy7bzofu"</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="nt">"resourceMethods"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="nt">"GET"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="nt">"methodIntegration"</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="nt">"uri"</span><span class="p">:</span> <span class="s2">"arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:000000000000:function:task/invocations"</span><span class="p">,</span>
+                        <span class="nt">"type"</span><span class="p">:</span> <span class="s2">"AWS_PROXY"</span><span class="p">,</span>
+                        <span class="nt">"httpMethod"</span><span class="p">:</span> <span class="s2">"POST"</span><span class="p">,</span>
+                        <span class="nt">"integrationResponses"</span><span class="p">:</span> <span class="p">{</span>
+                            <span class="nt">"200"</span><span class="p">:</span> <span class="p">{</span>
+                                <span class="nt">"responseTemplates"</span><span class="p">:</span> <span class="p">{</span>
+                                    <span class="nt">"application/json"</span><span class="p">:</span> <span class="kc">null</span>
+                                <span class="p">},</span>
+                                <span class="nt">"statusCode"</span><span class="p">:</span> <span class="mi">200</span>
+                            <span class="p">}</span>
+                        <span class="p">}</span>
+                    <span class="p">},</span>
+                    <span class="nt">"httpMethod"</span><span class="p">:</span> <span class="s2">"GET"</span><span class="p">,</span>
+                    <span class="nt">"authorizationType"</span><span class="p">:</span> <span class="s2">"NONE"</span>
+                <span class="p">}</span>
+            <span class="p">},</span>
+            <span class="nt">"parentId"</span><span class="p">:</span> <span class="s2">"62wy7bzofu"</span><span class="p">,</span>
+            <span class="nt">"id"</span><span class="p">:</span> <span class="s2">"jylycd8v4u"</span><span class="p">,</span>
+            <span class="nt">"path"</span><span class="p">:</span> <span class="s2">"/mywidget"</span><span class="p">,</span>
+            <span class="nt">"pathPart"</span><span class="p">:</span> <span class="s2">"mywidget"</span>
+        <span class="p">}</span>
+    <span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
 <blockquote>
 <p>The fully configured API Gateway and /mywidget resource linked to the Lambda code</p>
 </blockquote>
 <p><a href="https://docs.aws.amazon.com/cli/latest/reference/apigateway/test-invoke-method.html">https://docs.aws.amazon.com/cli/latest/reference/apigateway/test-invoke-method.html</a>
 <code>aws apigateway test-invoke-method --endpoint-url=http://localhost:4567 --rest-api-id 29a3p9encp --resource-id jylycd8v4u --http-method GET</code></p>
 <hr/>
-<p><code>curl http://localhost:4567/restapis/29a3p9encp/</code>
-    :::json
-    {"id": "29a3p9encp", "name": "myapi", "description": null, "createdDate": 1583565481, 
-        "apiKeySource": "HEADER", "endpointConfiguration": {"types": ["EDGE"]}, "tags": {}
-    }</p>
-<p>curl -i http://localhost:4567/restapis/29a3p9encp/foobar/
-curl -i http://localhost:4567/restapis/29a3p9encp/foobar/<em>user_request</em>/mywidget</p>
-<hr/>
+<p><code>curl http://localhost:4567/restapis/29a3p9encp/</code></p>
+<div class="highlight"><pre><span></span><span class="p">{</span><span class="nt">"id"</span><span class="p">:</span> <span class="s2">"29a3p9encp"</span><span class="p">,</span> <span class="nt">"name"</span><span class="p">:</span> <span class="s2">"myapi"</span><span class="p">,</span> <span class="nt">"description"</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span> <span class="nt">"createdDate"</span><span class="p">:</span> <span class="mi">1583565481</span><span class="p">,</span> 
+    <span class="nt">"apiKeySource"</span><span class="p">:</span> <span class="s2">"HEADER"</span><span class="p">,</span> <span class="nt">"endpointConfiguration"</span><span class="p">:</span> <span class="p">{</span><span class="nt">"types"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"EDGE"</span><span class="p">]},</span> <span class="nt">"tags"</span><span class="p">:</span> <span class="p">{}</span>
+<span class="p">}</span>
+</pre></div>
+<p><code>curl -i http://localhost:4567/restapis/29a3p9encp/foobar/</code></p>
+<p><code>curl -i http://localhost:4567/restapis/29a3p9encp/foobar/_user_request_/mywidget</code></p>
 <hr/>
 <p>Alternatively, HTTP_PROXY means you have to point it to a URI like https://example.com/my-existing-server</p>
 <ul>
@@ -422,7 +421,7 @@ curl -i http://localhost:4567/restapis/29a3p9encp/foobar/<em>user_request</em>/m
             <time pubdate="pubdate" datetime="2020-03-05T21:10:00-08:00">Mar 5, 2020</time>
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#build-CI-CD-devops-ref">build-CI-CD-devops</a> 
-            <h4>~938 words</h4>
+            <h4>~930 words</h4>
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article"> 
                 <li><a href="/tags.html#apigateway-ref">apigateway
