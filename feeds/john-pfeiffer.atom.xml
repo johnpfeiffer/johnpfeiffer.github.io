@@ -334,11 +334,20 @@ and be aware that the Sort function modifies the original slice&lt;/p&gt;
 &lt;p&gt;The gotcha is that different Keys could have the same Value&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;p&gt;Full source code examples: &lt;a href="https://github.com/johnpfeiffer/go-sort-example"&gt;https://github.com/johnpfeiffer/go-sort-example&lt;/a&gt;&lt;/p&gt;</summary><category term="go"></category><category term="golang"></category><category term="sort"></category><category term="sorting"></category><category term="map"></category></entry><entry><title>Using AWS CDK to configure deploy a Golang Lambda with APIGateway</title><link href="https://blog.john-pfeiffer.com/using-aws-cdk-to-configure-deploy-a-golang-lambda-with-apigateway/" rel="alternate"></link><published>2020-09-27T14:48:00-07:00</published><updated>2020-09-27T14:48:00-07:00</updated><author><name>john pfeiffer</name></author><id>tag:blog.john-pfeiffer.com,2020-09-27:using-aws-cdk-to-configure-deploy-a-golang-lambda-with-apigateway/</id><summary type="html">
-&lt;p&gt;Infrastructure as Code helps guarantee the elusive determinism we all seek in building applications and services.&lt;/p&gt;
-&lt;p&gt;AWS have brought their own specific product out which competes with the venerable Terraform and nicely focused Serverless.&lt;/p&gt;
+&lt;p&gt;Infrastructure as Code helps guarantee the elusive determinism in infrastructure that we all seek in building applications and services.
+Often you can defer that complexity by using Heroku, Google App Engine,  or other PaaS providers. But when you need to build something really complex (or with specific controls required including managing costs) then using IaaC to tame AWS Serverless reduces some of that pain.&lt;/p&gt;
+&lt;p&gt;AWS have created their own specific product (domain specific language) "CDK" which competes with the venerable Terraform and nicely focused Serverless.&lt;/p&gt;
 &lt;p&gt;&lt;em&gt;All of these products use the json syntax of CloudFormation which is the foundational AWS syntax for describing resources&lt;/em&gt;&lt;/p&gt;
 &lt;p&gt;It is straightforward to iteratively setup and use AWS CDK (with the native Typescript syntax).&lt;/p&gt;
-&lt;p&gt;&lt;em&gt;TODO: later add a quick CDK vocabulary guide&lt;/em&gt;&lt;/p&gt;
+&lt;h2 id="cdk-vocabulary"&gt;CDK vocabulary&lt;/h2&gt;
+&lt;p&gt;It all begins with &lt;strong&gt;stacks&lt;/strong&gt;.&lt;/p&gt;
+&lt;p&gt;From an object oriented perspective, a stack is a definition of components that can be instantiated. An "app" is a collection of related stacks.&lt;/p&gt;
+&lt;p&gt;Let's say you wanted your persistence (DynamoDB) in one stack, and your more execution oriented components (APIGateway and Lambda) in another stack, and your App might have environment specific parameters it needs to define and pass through to each stack.&lt;/p&gt;
+&lt;p&gt;This ability to use templates and customize how you structure things, reference other CDK files, etc. makes CDK very modular and re-usable (and yes Typescript is a programming language so you can have linters and tests).&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://docs.aws.amazon.com/cdk/latest/guide/stacks.html"&gt;https://docs.aws.amazon.com/cdk/latest/guide/stacks.html&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://intro-to-cdk.workshop.aws/what-is-cdk.html"&gt;https://intro-to-cdk.workshop.aws/what-is-cdk.html&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
 &lt;h2 id="install-the-aws-cdk-tool"&gt;Install the AWS CDK Tool&lt;/h2&gt;
 &lt;p&gt;Have to use npm to install the cdk tool...&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;npm install -g aws-cdk&lt;/code&gt;&lt;/p&gt;
@@ -438,10 +447,10 @@ arn:aws:cloudformation:us-east-1:409670809604:stack/InfraStack/b5167030-00fb-11e
 &lt;li&gt;&lt;a href="https://docs.aws.amazon.com/cdk/api/latest/typescript/api/aws-s3/bucketpolicyprops.html#aws_s3_BucketPolicyProps"&gt;https://docs.aws.amazon.com/cdk/api/latest/typescript/api/aws-s3/bucketpolicyprops.html#aws_s3_BucketPolicyProps&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;
 &lt;p&gt;&lt;a href="https://docs.aws.amazon.com/cdk/api/latest/typescript/api/core/removalpolicy.html#core_RemovalPolicy"&gt;https://docs.aws.amazon.com/cdk/api/latest/typescript/api/core/removalpolicy.html#core_RemovalPolicy&lt;/a&gt;&lt;/p&gt;
-&lt;p&gt;:::typescript
-new s3.Bucket(this, 'MyExampleBucket', {
+&lt;p&gt;:::typescript&lt;/p&gt;
+&lt;p&gt;new s3.Bucket(this, 'MyExampleBucket', {
   versioned: true,
-      removalPolicy: cdk.RemovalPolicy.DESTROY
+  removalPolicy: cdk.RemovalPolicy.DESTROY
 });&lt;/p&gt;
 &lt;/li&gt;
 &lt;/ul&gt;
@@ -527,7 +536,7 @@ InfraStack: creating CloudFormation changeset...
 &lt;/blockquote&gt;
 &lt;p&gt;&lt;a href="https://www.usenix.org/system/files/nsdi20-paper-agache.pdf"&gt;https://www.usenix.org/system/files/nsdi20-paper-agache.pdf&lt;/a&gt;&lt;/p&gt;
 &lt;h3 id="cdk-with-a-golang-lambda"&gt;CDK with a Golang Lambda&lt;/h3&gt;
-&lt;p&gt;No working from just the "infra" subdirectory in our project:&lt;/p&gt;
+&lt;p&gt;Focusing on just the "infra" subdirectory in our project:&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;strong&gt;cdk-example/infra/package.json&lt;/strong&gt;&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;cdk-example/infra/lib/infra-stack.ts&lt;/strong&gt;&lt;/li&gt;
@@ -581,6 +590,10 @@ import path = require("path")&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;cdk synth&lt;/code&gt;&lt;/p&gt;
 &lt;blockquote&gt;
 &lt;p&gt;outputting the CloudFormation is a quick way to valied the syntax and see any warnings&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;code&gt;cdk diff&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;outputting and previewing the changes that will appear in AWS&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;p&gt;&lt;code&gt;cdk deploy&lt;/code&gt;&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;InfraStack: deploying...
