@@ -32,7 +32,7 @@
 &lt;p&gt;In Github you can review what applications have access to your github account's source code with &lt;a href="https://github.com/settings/applications"&gt;https://github.com/settings/applications&lt;/a&gt;
 &lt;strong&gt;"Authorized Oauth Apps"&lt;/strong&gt;&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;p&gt;In CircleCI you can now see what projects you can setup builds for (apparently segregated by "organization" &lt;a href="https://app.circleci.com/projects/"&gt;https://app.circleci.com/projects/&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;In CircleCI you can now see what projects you can setup builds, apparently segregated by "organization" &lt;a href="https://app.circleci.com/projects/"&gt;https://app.circleci.com/projects/&lt;/a&gt;&lt;/p&gt;
 &lt;h2 id="setup-a-project"&gt;Setup a Project&lt;/h2&gt;
 &lt;p&gt;Not too surprisingly the UI then displays a list of all of the repos &lt;a href="https://app.circleci.com/projects/project-dashboard/github/johnpfeiffer/"&gt;https://app.circleci.com/projects/project-dashboard/github/johnpfeiffer/&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;&lt;em&gt;"Set Up Project" makes sense but for some odd reason the terminology is to "follow a project" when something has been configured by someone else in your organization&lt;/em&gt;&lt;/p&gt;
@@ -74,11 +74,16 @@
 &lt;p&gt;To resolve the issue run this golang command in the top directory of your source code:&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;go mod init&lt;/code&gt;&lt;/p&gt;
 &lt;p&gt;This will create a &lt;strong&gt;go.mod&lt;/strong&gt; file in your repository that allows dependencies to be properly resolved (and &lt;code&gt;go test&lt;/code&gt; which implicitly uses "go mod" to execute successfully)&lt;/p&gt;
+&lt;p&gt;Once that go.mod is committed and sent up to the github repo then CircleCI build will detect it and your go test during the build/test steps will stop failing&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;a href="https://golang.org/ref/mod#mod-commands"&gt;https://golang.org/ref/mod#mod-commands&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 &lt;h2 id="tweaks-to-your-circleci-config"&gt;Tweaks to your CircleCI Config&lt;/h2&gt;
-&lt;p&gt;After you have successfully run a build then the UI will show you what git sha commit kicked off the build, all the steps executed and output, etc.&lt;/p&gt;
+&lt;p&gt;After you have successfully run a build then the UI will show you:
+- how long the build took
+- what git sha commit kicked off the build
+- commit message
+- all the steps executed and output, etc.&lt;/p&gt;
 &lt;p&gt;&lt;a href="https://app.circleci.com/pipelines/github/johnpfeiffer/stringsmoar/7/workflows/39b3f880-2473-49d7-804d-d1364f08853e/jobs/9"&gt;https://app.circleci.com/pipelines/github/johnpfeiffer/stringsmoar/7/workflows/39b3f880-2473-49d7-804d-d1364f08853e/jobs/9&lt;/a&gt;&lt;/p&gt;
 &lt;h3 id="rerun-a-build-in-circleci"&gt;Rerun a build in CircleCI&lt;/h3&gt;
 &lt;p&gt;Sometimes it can take a bit to get used to the CircleCI UI, to drill down to a specific build your "breadcrumbs" will look like:&lt;/p&gt;
@@ -88,8 +93,8 @@
 &lt;h3 id="specific-project-settings-in-circleci"&gt;Specific Project Settings in CircleCI&lt;/h3&gt;
 &lt;p&gt;In a given Project, the three little dots will allow you to choose how to configure the project&lt;/p&gt;
 &lt;p&gt;&lt;a href="https://app.circleci.com/settings/project/github/johnpfeiffer/stringsmoar"&gt;https://app.circleci.com/settings/project/github/johnpfeiffer/stringsmoar&lt;/a&gt;&lt;/p&gt;
-&lt;p&gt;The one annoying thing is that if you remove your 3rd party access creds in GitHub its a pain to reconnect CircleCI&lt;/p&gt;
-&lt;p&gt;You should see a listing of SSH keys, you have to remove the old one there, unfollow the project and then re-follow it.&lt;/p&gt;
+&lt;p&gt;The one annoying thing is that if you remove your 3rd party access creds in GitHub it's a pain to reconnect CircleCI&lt;/p&gt;
+&lt;p&gt;In CircleCI project configuration you should see a listing of SSH keys, you have to remove the old one there, unfollow the project, and then re-follow the project.&lt;/p&gt;
 &lt;p&gt;Afterward you should see a new SSH key that CircleCI created in Github for this Project (the UI's both show the sha of the key but one is sha256 and the other is not)&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;a href="https://github.com/johnpfeiffer/stringsmoar/settings/keys"&gt;https://github.com/johnpfeiffer/stringsmoar/settings/keys&lt;/a&gt;&lt;/li&gt;
@@ -136,7 +141,9 @@
         &lt;span class="nt"&gt;command&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p p-Indicator"&gt;|&lt;/span&gt;
           &lt;span class="no"&gt;go test -coverprofile=c.out&lt;/span&gt;
           &lt;span class="no"&gt;go tool cover -html=c.out -o coverage.html&lt;/span&gt;
-          &lt;span class="no"&gt;mv coverage.html $TEST_RESULTS # extraneous use of an environment variable&lt;/span&gt;
+          &lt;span class="no"&gt;mv coverage.html $TEST_RESULTS&lt;/span&gt;
+          &lt;span class="no"&gt;go test -v ./... | go tool test2json &amp;gt; $TEST_RESULTS/test2json-output.json&lt;/span&gt;
+          &lt;span class="no"&gt;gotestsum --junitfile $TEST_RESULTS/gotestsum-report.xml&lt;/span&gt;
 
     &lt;span class="p p-Indicator"&gt;-&lt;/span&gt; &lt;span class="nt"&gt;store_artifacts&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="c1"&gt;# Upload test summary for display https://circleci.com/docs/2.0/artifacts/&lt;/span&gt;
         &lt;span class="nt"&gt;path&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;/tmp/test-results&lt;/span&gt;
@@ -153,12 +160,12 @@
 &lt;li&gt;&lt;a href="https://circleci.com/docs/2.0/artifacts/"&gt;https://circleci.com/docs/2.0/artifacts/&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href="https://circleci.com/docs/2.0/language-go/"&gt;https://circleci.com/docs/2.0/language-go/&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;&lt;em&gt;note that CircleCI seem to recommend the opensource helper "gotestsum" to generate junit style XML output from tests&lt;/em&gt;&lt;/p&gt;
-&lt;p&gt;TODO: have a better way to generate XML for the tests tab?&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;note that CircleCI golang docker container has the opensource helper "gotestsum" to generate junit style XML output from tests&lt;/em&gt;&lt;/p&gt;
 &lt;blockquote&gt;
 &lt;p&gt;JUnit XML or Cucumber JSON test metadata files&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;p&gt;From here on out you should hopefully have only Green Builds!&lt;/p&gt;</summary><category term="ci"></category><category term="circleci"></category><category term="continuous integration"></category><category term="continuous deployment"></category><category term="github"></category><category term="golang"></category><category term="go"></category><category term="go mod"></category></entry><entry><title>Bitcoin is a bad business model and when to invest in your Cost Center</title><link href="https://blog.john-pfeiffer.com/bitcoin-is-a-bad-business-model-and-when-to-invest-in-your-cost-center/" rel="alternate"></link><published>2021-01-23T08:44:00-08:00</published><updated>2021-01-23T08:44:00-08:00</updated><author><name>john pfeiffer</name></author><id>tag:blog.john-pfeiffer.com,2021-01-23:bitcoin-is-a-bad-business-model-and-when-to-invest-in-your-cost-center/</id><summary type="html">
+&lt;p&gt;From here on out you should hopefully have only Green Builds!&lt;/p&gt;
+&lt;p&gt;TODO: an article about how to do continuous deployment &lt;em&gt;(maybe CDK and AWS?)&lt;/em&gt;&lt;/p&gt;</summary><category term="ci"></category><category term="circleci"></category><category term="continuous integration"></category><category term="continuous deployment"></category><category term="github"></category><category term="golang"></category><category term="go"></category><category term="go mod"></category></entry><entry><title>Bitcoin is a bad business model and when to invest in your Cost Center</title><link href="https://blog.john-pfeiffer.com/bitcoin-is-a-bad-business-model-and-when-to-invest-in-your-cost-center/" rel="alternate"></link><published>2021-01-23T08:44:00-08:00</published><updated>2021-01-23T08:44:00-08:00</updated><author><name>john pfeiffer</name></author><id>tag:blog.john-pfeiffer.com,2021-01-23:bitcoin-is-a-bad-business-model-and-when-to-invest-in-your-cost-center/</id><summary type="html">
 &lt;h2 id="bitcoin-is-a-bad-business-model"&gt;Bitcoin is a bad business model&lt;/h2&gt;
 &lt;p&gt;A good business model creates value. Eventually it will create good cashflow (i.e. more money in your bank account each month).&lt;/p&gt;
 &lt;p&gt;While I understand that some may find the concept of an "unowned" virtual currency appealing, creating bitcoin (aka "mining") in and of itself is not differentiated and does not create value.&lt;/p&gt;
@@ -607,18 +614,17 @@ arn:aws:cloudformation:us-east-1:409670809604:stack/InfraStack/b5167030-00fb-11e
 &lt;/blockquote&gt;
 &lt;h2 id="making-updates-with-cdk"&gt;Making updates with CDK&lt;/h2&gt;
 &lt;p&gt;A tiny snippet change to allow bucket deletion...&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;new&lt;/span&gt; &lt;span class="nx"&gt;s3&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;Bucket&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;this&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;'MyExampleBucket'&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="nx"&gt;versioned&lt;/span&gt;: &lt;span class="kt"&gt;true&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+  &lt;span class="nx"&gt;removalPolicy&lt;/span&gt;: &lt;span class="kt"&gt;cdk.RemovalPolicy.DESTROY&lt;/span&gt;
+&lt;span class="p"&gt;});&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;a href="https://docs.aws.amazon.com/cdk/latest/guide/hello_world.html"&gt;https://docs.aws.amazon.com/cdk/latest/guide/hello_world.html&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href="https://docs.aws.amazon.com/cdk/api/latest/typescript/api/aws-s3.html"&gt;https://docs.aws.amazon.com/cdk/api/latest/typescript/api/aws-s3.html&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href="https://docs.aws.amazon.com/cdk/api/latest/typescript/api/aws-s3/bucketpolicyprops.html#aws_s3_BucketPolicyProps"&gt;https://docs.aws.amazon.com/cdk/api/latest/typescript/api/aws-s3/bucketpolicyprops.html#aws_s3_BucketPolicyProps&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href="https://docs.aws.amazon.com/cdk/api/latest/typescript/api/core/removalpolicy.html#core_RemovalPolicy"&gt;https://docs.aws.amazon.com/cdk/api/latest/typescript/api/core/removalpolicy.html#core_RemovalPolicy&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;Below is the specific code:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;new&lt;/span&gt; &lt;span class="nx"&gt;s3&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;Bucket&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;this&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;'MyExampleBucket'&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
-  &lt;span class="nx"&gt;versioned&lt;/span&gt;: &lt;span class="kt"&gt;true&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
-  &lt;span class="nx"&gt;removalPolicy&lt;/span&gt;: &lt;span class="kt"&gt;cdk.RemovalPolicy.DESTROY&lt;/span&gt;
-&lt;span class="p"&gt;});&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
 &lt;h3 id="preview-changes-with-diff"&gt;Preview changes with diff&lt;/h3&gt;
 &lt;p&gt;&lt;code&gt;cdk diff&lt;/code&gt;&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;Stack InfraStack
