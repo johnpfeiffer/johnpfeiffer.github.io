@@ -148,8 +148,9 @@
 <h3 id="double-checking-your-golang-version">Double checking your Golang Version</h3>
 <p>The wonderful thing about Docker is the extra transparency. In this case we might want to double check the version of Golang that is being used by the build agent.</p>
 <p>You can download and execute the same environment locally:</p>
-<p><code>docker run --rm -it circleci/golang:1.16</code>
-<code>go version</code></p>
+<div class="highlight"><pre><span></span>docker run --rm -it circleci/golang:1.16
+go version
+</pre></div>
 <blockquote>
 <p>go version go1.16.3 linux/amd64</p>
 </blockquote>
@@ -160,20 +161,22 @@
 <blockquote>
 <p>go: cannot find main module</p>
 </blockquote>
-<p>This means you have created a golang repo awhile back <em>(Golang 1.15 and older)</em> but are now using a later Golang binary...</p>
+<p>This means you have created a golang repo awhile back <em>(Golang 1.15 and older)</em> but are now using a newer/later Golang binary...</p>
 <p>To resolve the issue run this golang command in the top directory of your source code:</p>
 <p><code>go mod init</code></p>
 <p>This will create a <strong>go.mod</strong> file in your repository that allows dependencies to be properly resolved (and <code>go test</code> which implicitly uses "go mod" to execute successfully)</p>
-<p>Once that go.mod is committed and sent up to the github repo then CircleCI build will detect it and your go test during the build/test steps will stop failing</p>
+<p>Once that go.mod is committed and sent up to the Main branch in your github repo then CircleCI build will detect it and your "go test" step during the build/test steps will stop failing</p>
 <ul>
 <li><a href="https://golang.org/ref/mod#mod-commands">https://golang.org/ref/mod#mod-commands</a></li>
 </ul>
 <h2 id="tweaks-to-your-circleci-config">Tweaks to your CircleCI Config</h2>
-<p>After you have successfully run a build then the UI will show you:
-- how long the build took
-- what git sha commit kicked off the build
-- commit message
-- all the steps executed and output, etc.</p>
+<p>After you have successfully run a build then the UI will show you:</p>
+<ul>
+<li>how long the build took</li>
+<li>what git sha commit kicked off the build</li>
+<li>commit message</li>
+<li>all the steps executed and output, etc.</li>
+</ul>
 <p><a href="https://app.circleci.com/pipelines/github/johnpfeiffer/stringsmoar/7/workflows/39b3f880-2473-49d7-804d-d1364f08853e/jobs/9">https://app.circleci.com/pipelines/github/johnpfeiffer/stringsmoar/7/workflows/39b3f880-2473-49d7-804d-d1364f08853e/jobs/9</a></p>
 <h3 id="rerun-a-build-in-circleci">Rerun a build in CircleCI</h3>
 <p>Sometimes it can take a bit to get used to the CircleCI UI, to drill down to a specific build your "breadcrumbs" will look like:</p>
@@ -181,17 +184,17 @@
 <p>In that detailed output UI, to Rerun a build, choose the "Rerun" button from the beginning (or from a failed step)</p>
 <p><em>Flaky tests aka intermittent failures is not resolved by re-running your build/tests all the time ;p</em></p>
 <h3 id="specific-project-settings-in-circleci">Specific Project Settings in CircleCI</h3>
-<p>In a given Project, the three little dots will allow you to choose how to configure the project</p>
+<p>In the CircleCI UI, for a given Project, the three little dots will allow you to choose how to configure the project</p>
 <p><a href="https://app.circleci.com/settings/project/github/johnpfeiffer/stringsmoar">https://app.circleci.com/settings/project/github/johnpfeiffer/stringsmoar</a></p>
 <p>The one annoying thing is that if you remove your 3rd party access creds in GitHub it's a pain to reconnect CircleCI</p>
-<p>In CircleCI project configuration you should see a listing of SSH keys, you have to remove the old one there, unfollow the project, and then re-follow the project.</p>
-<p>Afterward you should see a new SSH key that CircleCI created in Github for this Project (the UI's both show the sha of the key but one is sha256 and the other is not)</p>
+<p>In the CircleCI configuration for a Project you should see a listing of SSH keys, you have to remove the old "deployment key" there (which means CircleCI can no longer access github), unfollow the project, and then re-follow the project <em>(which will then have CircleCI use your initial OAuth authorization to generate a new SSH deployment key in GitHub).</em></p>
+<p>Afterward you should see a new SSH key that CircleCI created in Github for this Project <em>(the UI's both show the sha of the key but one is sha256 and the other is not)</em></p>
 <ul>
 <li><a href="https://github.com/johnpfeiffer/stringsmoar/settings/keys">https://github.com/johnpfeiffer/stringsmoar/settings/keys</a></li>
-<li><a href="https://discuss.circleci.com/t/solved-permission-denied-publickey/19562">https://discuss.circleci.com/t/solved-permission-denied-publickey/19562</a> (someone had the same problem as me)</li>
+<li><a href="https://discuss.circleci.com/t/solved-permission-denied-publickey/19562">https://discuss.circleci.com/t/solved-permission-denied-publickey/19562</a> <em>(someone else had the same problem and documented their solution)</em></li>
 </ul>
 <h3 id="picking-the-size-of-your-build-executor">Picking the size of your build executor</h3>
-<p>By default CircleCI will choose "medium", if you want to save (free) credits then for smaller projects use</p>
+<p>By default CircleCI will choose executor size of "medium", if you want to save (free) credits then for smaller projects use "small" <em>(or conversely if you need more cpu/ram choose a larger size)</em></p>
 <div class="highlight"><pre><span></span><span class="nt">jobs</span><span class="p">:</span>
   <span class="nt">build</span><span class="p">:</span>
     <span class="nt">resource_class</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">small</span>
@@ -199,14 +202,14 @@
       <span class="p p-Indicator">-</span> <span class="nt">image</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">circleci/golang:1.16</span>
 </pre></div>
 <blockquote>
-<p>Good news is that builds usually trigger almost instantly so all the tweaks have a super fast feedback loop</p>
+<p>Good news: builds usually trigger almost instantly so all the little config tweaks have a super fast feedback loop</p>
 </blockquote>
 <ul>
 <li><a href="https://circleci.com/docs/2.0/executor-types/#available-docker-resource-classes">https://circleci.com/docs/2.0/executor-types/#available-docker-resource-classes</a></li>
 <li><a href="https://circleci.com/docs/2.0/getting-started/?section=getting-started">https://circleci.com/docs/2.0/getting-started/?section=getting-started</a></li>
 </ul>
 <h2 id="outputting-test-coverage-and-artifacts">Outputting Test Coverage and Artifacts</h2>
-<p>CircleCI has an extra space in the UI to display specific test output or artifacts whichmakes it easy to see the most common pain points rather than digging through all of the build stages output.</p>
+<p>CircleCI has an extra space in the UI to display specific test output or artifacts which makes it easy to see the most common pain points rather than digging through all of the build stages output.</p>
 <p><strong>your-repo/.circleci/config.yml</strong></p>
 <div class="highlight"><pre><span></span><span class="nt">version</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">2.1</span> <span class="c1"># https://circleci.com/docs/2.0/configuration-reference</span>
 <span class="nt">jobs</span><span class="p">:</span>
@@ -221,7 +224,6 @@
 
   <span class="nt">steps</span><span class="p">:</span>
     <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">checkout</span>
-    <span class="p p-Indicator">-</span> <span class="nt">run</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">mkdir -p $TEST_RESULTS</span>
     <span class="p p-Indicator">-</span> <span class="nt">run</span><span class="p">:</span>
         <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">Run unit tests</span>
         <span class="nt">command</span><span class="p">:</span> <span class="p p-Indicator">|</span>
@@ -229,13 +231,14 @@
     <span class="p p-Indicator">-</span> <span class="nt">run</span><span class="p">:</span>
         <span class="nt">name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">Run code coverage</span>
         <span class="nt">command</span><span class="p">:</span> <span class="p p-Indicator">|</span>
+          <span class="no">mkdir -p $TEST_RESULTS</span>
           <span class="no">go test -coverprofile=c.out</span>
           <span class="no">go tool cover -html=c.out -o coverage.html</span>
           <span class="no">mv coverage.html $TEST_RESULTS</span>
           <span class="no">go test -v ./... | go tool test2json &gt; $TEST_RESULTS/test2json-output.json</span>
           <span class="no">gotestsum --junitfile $TEST_RESULTS/gotestsum-report.xml</span>
 
-    <span class="p p-Indicator">-</span> <span class="nt">store_artifacts</span><span class="p">:</span> <span class="c1"># Upload test summary for display https://circleci.com/docs/2.0/artifacts/</span>
+    <span class="p p-Indicator">-</span> <span class="nt">store_artifacts</span><span class="p">:</span> <span class="c1"># Upload files like code coverage html for later viewing https://circleci.com/docs/2.0/artifacts/</span>
         <span class="nt">path</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">/tmp/test-results</span>
         <span class="nt">destination</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">raw-test-output</span>
     <span class="p p-Indicator">-</span> <span class="nt">store_test_results</span><span class="p">:</span> <span class="c1"># Upload test results for display https://circleci.com/docs/2.0/collect-test-data/</span>
@@ -274,7 +277,7 @@
             <time pubdate="pubdate" datetime="2021-04-14T20:43:00-07:00">Apr 14, 2021</time>
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#build-CI-CD-devops-ref">build-CI-CD-devops</a> 
-            <h4>~1268 words</h4>
+            <h4>~1330 words</h4>
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article"> 
                 <li><a href="/tags.html#ci-ref">ci

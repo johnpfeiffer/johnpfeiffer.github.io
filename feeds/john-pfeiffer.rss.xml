@@ -58,8 +58,9 @@
 &lt;h3 id="double-checking-your-golang-version"&gt;Double checking your Golang Version&lt;/h3&gt;
 &lt;p&gt;The wonderful thing about Docker is the extra transparency. In this case we might want to double check the version of Golang that is being used by the build agent.&lt;/p&gt;
 &lt;p&gt;You can download and execute the same environment locally:&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;docker run --rm -it circleci/golang:1.16&lt;/code&gt;
-&lt;code&gt;go version&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;docker run --rm -it circleci/golang:1.16
+go version
+&lt;/pre&gt;&lt;/div&gt;
 &lt;blockquote&gt;
 &lt;p&gt;go version go1.16.3 linux/amd64&lt;/p&gt;
 &lt;/blockquote&gt;
@@ -70,20 +71,22 @@
 &lt;blockquote&gt;
 &lt;p&gt;go: cannot find main module&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;p&gt;This means you have created a golang repo awhile back &lt;em&gt;(Golang 1.15 and older)&lt;/em&gt; but are now using a later Golang binary...&lt;/p&gt;
+&lt;p&gt;This means you have created a golang repo awhile back &lt;em&gt;(Golang 1.15 and older)&lt;/em&gt; but are now using a newer/later Golang binary...&lt;/p&gt;
 &lt;p&gt;To resolve the issue run this golang command in the top directory of your source code:&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;go mod init&lt;/code&gt;&lt;/p&gt;
 &lt;p&gt;This will create a &lt;strong&gt;go.mod&lt;/strong&gt; file in your repository that allows dependencies to be properly resolved (and &lt;code&gt;go test&lt;/code&gt; which implicitly uses "go mod" to execute successfully)&lt;/p&gt;
-&lt;p&gt;Once that go.mod is committed and sent up to the github repo then CircleCI build will detect it and your go test during the build/test steps will stop failing&lt;/p&gt;
+&lt;p&gt;Once that go.mod is committed and sent up to the Main branch in your github repo then CircleCI build will detect it and your "go test" step during the build/test steps will stop failing&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;a href="https://golang.org/ref/mod#mod-commands"&gt;https://golang.org/ref/mod#mod-commands&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 &lt;h2 id="tweaks-to-your-circleci-config"&gt;Tweaks to your CircleCI Config&lt;/h2&gt;
-&lt;p&gt;After you have successfully run a build then the UI will show you:
-- how long the build took
-- what git sha commit kicked off the build
-- commit message
-- all the steps executed and output, etc.&lt;/p&gt;
+&lt;p&gt;After you have successfully run a build then the UI will show you:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;how long the build took&lt;/li&gt;
+&lt;li&gt;what git sha commit kicked off the build&lt;/li&gt;
+&lt;li&gt;commit message&lt;/li&gt;
+&lt;li&gt;all the steps executed and output, etc.&lt;/li&gt;
+&lt;/ul&gt;
 &lt;p&gt;&lt;a href="https://app.circleci.com/pipelines/github/johnpfeiffer/stringsmoar/7/workflows/39b3f880-2473-49d7-804d-d1364f08853e/jobs/9"&gt;https://app.circleci.com/pipelines/github/johnpfeiffer/stringsmoar/7/workflows/39b3f880-2473-49d7-804d-d1364f08853e/jobs/9&lt;/a&gt;&lt;/p&gt;
 &lt;h3 id="rerun-a-build-in-circleci"&gt;Rerun a build in CircleCI&lt;/h3&gt;
 &lt;p&gt;Sometimes it can take a bit to get used to the CircleCI UI, to drill down to a specific build your "breadcrumbs" will look like:&lt;/p&gt;
@@ -91,17 +94,17 @@
 &lt;p&gt;In that detailed output UI, to Rerun a build, choose the "Rerun" button from the beginning (or from a failed step)&lt;/p&gt;
 &lt;p&gt;&lt;em&gt;Flaky tests aka intermittent failures is not resolved by re-running your build/tests all the time ;p&lt;/em&gt;&lt;/p&gt;
 &lt;h3 id="specific-project-settings-in-circleci"&gt;Specific Project Settings in CircleCI&lt;/h3&gt;
-&lt;p&gt;In a given Project, the three little dots will allow you to choose how to configure the project&lt;/p&gt;
+&lt;p&gt;In the CircleCI UI, for a given Project, the three little dots will allow you to choose how to configure the project&lt;/p&gt;
 &lt;p&gt;&lt;a href="https://app.circleci.com/settings/project/github/johnpfeiffer/stringsmoar"&gt;https://app.circleci.com/settings/project/github/johnpfeiffer/stringsmoar&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;The one annoying thing is that if you remove your 3rd party access creds in GitHub it's a pain to reconnect CircleCI&lt;/p&gt;
-&lt;p&gt;In CircleCI project configuration you should see a listing of SSH keys, you have to remove the old one there, unfollow the project, and then re-follow the project.&lt;/p&gt;
-&lt;p&gt;Afterward you should see a new SSH key that CircleCI created in Github for this Project (the UI's both show the sha of the key but one is sha256 and the other is not)&lt;/p&gt;
+&lt;p&gt;In the CircleCI configuration for a Project you should see a listing of SSH keys, you have to remove the old "deployment key" there (which means CircleCI can no longer access github), unfollow the project, and then re-follow the project &lt;em&gt;(which will then have CircleCI use your initial OAuth authorization to generate a new SSH deployment key in GitHub).&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;Afterward you should see a new SSH key that CircleCI created in Github for this Project &lt;em&gt;(the UI's both show the sha of the key but one is sha256 and the other is not)&lt;/em&gt;&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;a href="https://github.com/johnpfeiffer/stringsmoar/settings/keys"&gt;https://github.com/johnpfeiffer/stringsmoar/settings/keys&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href="https://discuss.circleci.com/t/solved-permission-denied-publickey/19562"&gt;https://discuss.circleci.com/t/solved-permission-denied-publickey/19562&lt;/a&gt; (someone had the same problem as me)&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://discuss.circleci.com/t/solved-permission-denied-publickey/19562"&gt;https://discuss.circleci.com/t/solved-permission-denied-publickey/19562&lt;/a&gt; &lt;em&gt;(someone else had the same problem and documented their solution)&lt;/em&gt;&lt;/li&gt;
 &lt;/ul&gt;
 &lt;h3 id="picking-the-size-of-your-build-executor"&gt;Picking the size of your build executor&lt;/h3&gt;
-&lt;p&gt;By default CircleCI will choose "medium", if you want to save (free) credits then for smaller projects use&lt;/p&gt;
+&lt;p&gt;By default CircleCI will choose executor size of "medium", if you want to save (free) credits then for smaller projects use "small" &lt;em&gt;(or conversely if you need more cpu/ram choose a larger size)&lt;/em&gt;&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nt"&gt;jobs&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
   &lt;span class="nt"&gt;build&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
     &lt;span class="nt"&gt;resource_class&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;small&lt;/span&gt;
@@ -109,14 +112,14 @@
       &lt;span class="p p-Indicator"&gt;-&lt;/span&gt; &lt;span class="nt"&gt;image&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;circleci/golang:1.16&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 &lt;blockquote&gt;
-&lt;p&gt;Good news is that builds usually trigger almost instantly so all the tweaks have a super fast feedback loop&lt;/p&gt;
+&lt;p&gt;Good news: builds usually trigger almost instantly so all the little config tweaks have a super fast feedback loop&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;a href="https://circleci.com/docs/2.0/executor-types/#available-docker-resource-classes"&gt;https://circleci.com/docs/2.0/executor-types/#available-docker-resource-classes&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href="https://circleci.com/docs/2.0/getting-started/?section=getting-started"&gt;https://circleci.com/docs/2.0/getting-started/?section=getting-started&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 &lt;h2 id="outputting-test-coverage-and-artifacts"&gt;Outputting Test Coverage and Artifacts&lt;/h2&gt;
-&lt;p&gt;CircleCI has an extra space in the UI to display specific test output or artifacts whichmakes it easy to see the most common pain points rather than digging through all of the build stages output.&lt;/p&gt;
+&lt;p&gt;CircleCI has an extra space in the UI to display specific test output or artifacts which makes it easy to see the most common pain points rather than digging through all of the build stages output.&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;your-repo/.circleci/config.yml&lt;/strong&gt;&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nt"&gt;version&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;2.1&lt;/span&gt; &lt;span class="c1"&gt;# https://circleci.com/docs/2.0/configuration-reference&lt;/span&gt;
 &lt;span class="nt"&gt;jobs&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
@@ -131,7 +134,6 @@
 
   &lt;span class="nt"&gt;steps&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
     &lt;span class="p p-Indicator"&gt;-&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;checkout&lt;/span&gt;
-    &lt;span class="p p-Indicator"&gt;-&lt;/span&gt; &lt;span class="nt"&gt;run&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;mkdir -p $TEST_RESULTS&lt;/span&gt;
     &lt;span class="p p-Indicator"&gt;-&lt;/span&gt; &lt;span class="nt"&gt;run&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
         &lt;span class="nt"&gt;name&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;Run unit tests&lt;/span&gt;
         &lt;span class="nt"&gt;command&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p p-Indicator"&gt;|&lt;/span&gt;
@@ -139,13 +141,14 @@
     &lt;span class="p p-Indicator"&gt;-&lt;/span&gt; &lt;span class="nt"&gt;run&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
         &lt;span class="nt"&gt;name&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;Run code coverage&lt;/span&gt;
         &lt;span class="nt"&gt;command&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p p-Indicator"&gt;|&lt;/span&gt;
+          &lt;span class="no"&gt;mkdir -p $TEST_RESULTS&lt;/span&gt;
           &lt;span class="no"&gt;go test -coverprofile=c.out&lt;/span&gt;
           &lt;span class="no"&gt;go tool cover -html=c.out -o coverage.html&lt;/span&gt;
           &lt;span class="no"&gt;mv coverage.html $TEST_RESULTS&lt;/span&gt;
           &lt;span class="no"&gt;go test -v ./... | go tool test2json &amp;gt; $TEST_RESULTS/test2json-output.json&lt;/span&gt;
           &lt;span class="no"&gt;gotestsum --junitfile $TEST_RESULTS/gotestsum-report.xml&lt;/span&gt;
 
-    &lt;span class="p p-Indicator"&gt;-&lt;/span&gt; &lt;span class="nt"&gt;store_artifacts&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="c1"&gt;# Upload test summary for display https://circleci.com/docs/2.0/artifacts/&lt;/span&gt;
+    &lt;span class="p p-Indicator"&gt;-&lt;/span&gt; &lt;span class="nt"&gt;store_artifacts&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="c1"&gt;# Upload files like code coverage html for later viewing https://circleci.com/docs/2.0/artifacts/&lt;/span&gt;
         &lt;span class="nt"&gt;path&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;/tmp/test-results&lt;/span&gt;
         &lt;span class="nt"&gt;destination&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;raw-test-output&lt;/span&gt;
     &lt;span class="p p-Indicator"&gt;-&lt;/span&gt; &lt;span class="nt"&gt;store_test_results&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="c1"&gt;# Upload test results for display https://circleci.com/docs/2.0/collect-test-data/&lt;/span&gt;
