@@ -61,47 +61,10 @@
 </div>
 
 <div class="row-fluid">
-    <div class="span2 table-of-content">
-        <nav>
-        <h4>Contents</h4>
-        <div class="toc">
-<ul>
-<li><a href="#replacing-cherokee-webserver-php-cgi-mysql">Replacing: cherokee webserver, php-cgi, MySQL</a></li>
-<li><a href="#almost-able-to-leverage-everything-right-out-of-the-box">Almost able to leverage everything right out of the box</a><ul>
-<li><a href="#docker-composeyml-for-nginx-and-drupal7-fpm-and-mariadb55">docker-compose.yml for nginx and drupal:7-fpm and mariadb:5.5</a></li>
-<li><a href="#and-the-bugs">And the bugs</a></li>
-<li><a href="#do-not-add-complexity">Do not add complexity</a></li>
-<li><a href="#cache-your-upstream-dependencies">Cache your upstream dependencies</a></li>
-</ul>
-</li>
-<li><a href="#the-pragmatic-solution">The pragmatic solution</a><ul>
-<li><a href="#packerjson">packer.json</a><ul>
-<li><a href="#install-dockersh">install-docker.sh</a></li>
-<li><a href="#docker-composeyml-with-drupal7-fpm-and-mariadb55">docker-compose.yml with drupal:7-fpm and mariadb:5.5</a></li>
-<li><a href="#nginxconf">nginx.conf</a></li>
-<li><a href="#defaultconf">default.conf</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li><a href="#post-boot-manual-configuration-ohgodwhy">Post boot manual configuration (ohgodwhy)</a></li>
-<li><a href="#adhoc-performance-and-latency-testing">Adhoc Performance and Latency Testing</a><ul>
-<li><a href="#linode-and-cherokee-and-php-cgi-53-and-mysql-55">Linode and Cherokee and php-cgi 5.3 and MySQL 5.5</a></li>
-<li><a href="#digitalocean-and-nginx-and-docker-php-fpm-and-mariadb-55">DigitalOcean and nginx and Docker php-fpm and MariaDB 5.5</a><ul>
-<li><a href="#latency-testing">Latency testing</a></li>
-</ul>
-</li>
-<li><a href="#conclusions">Conclusions</a></li>
-</ul>
-</li>
-</ul>
-</div>
-        </nav>
-    </div>
-    <div class="span8 article-content">
+        <div class="span8 offset2 article-content">
 
-            
-<h2 id="replacing-cherokee-webserver-php-cgi-mysql">Replacing: cherokee webserver, php-cgi, MySQL</h2>
+            <p>[TOC]</p>
+<h2>Replacing: cherokee webserver, php-cgi, MySQL</h2>
 <p>In my professional life I've seen the webserver front end default choice shift from Apache to NGINX occur for production services.</p>
 <p>Nginx is compelling due to simpler configuration and improved performance so I suspect the existing preponderance of Apache deployments are because "if it ain't broke don't fix it" (which makes lots of sense in Operations) along with the large number of Ops/SysAdmins who already know how to configure and integrate Apache (which makes a lot of sense to Management).</p>
 <p><a href="https://www.nginx.com/blog/nginx-vs-apache-our-view/">https://www.nginx.com/blog/nginx-vs-apache-our-view/</a></p>
@@ -114,55 +77,56 @@
 <li>allow for simpler component swapping or upgrades (with testing and rollback and even local Dev)</li>
 <li>leave room for adding other isolated components</li>
 </ul>
-<h2 id="almost-able-to-leverage-everything-right-out-of-the-box">Almost able to leverage everything right out of the box</h2>
+<h2>Almost able to leverage everything right out of the box</h2>
 <p>I spent time researching nginx and php-fpm and created a minimal config that worked (two docker commands) based on the slimmer alpine linux docker images. <a href="https://blog.john-pfeiffer.com/nginx-with-docker/">https://blog.john-pfeiffer.com/nginx-with-docker/</a></p>
 <p>This wasn't quite far off from the official Drupal Dockerfile except there are some more OS dependencies like GD and XML so I instead opted to use the official Drupal Docker image. (Non alpine linux so larger size but they've done the work of packaging the complexity and by not customizing it will be easier to update in the future - and avoid a Docker Build entirely!)</p>
-<h3 id="docker-composeyml-for-nginx-and-drupal7-fpm-and-mariadb55">docker-compose.yml for nginx and drupal:7-fpm and mariadb:5.5</h3>
-<div class="highlight"><pre><span></span><span class="o">#</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">docs</span><span class="p">.</span><span class="n">docker</span><span class="p">.</span><span class="n">com</span><span class="o">/</span><span class="n">compose</span><span class="o">/</span><span class="n">compose</span><span class="o">-</span><span class="n">file</span><span class="o">/</span>
-<span class="o">#</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">docs</span><span class="p">.</span><span class="n">docker</span><span class="p">.</span><span class="n">com</span><span class="o">/</span><span class="n">compose</span><span class="o">/</span><span class="n">environment</span><span class="o">-</span><span class="n">variables</span><span class="o">/</span>
-<span class="o">#</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">www</span><span class="p">.</span><span class="n">nginx</span><span class="p">.</span><span class="n">com</span><span class="o">/</span><span class="n">resources</span><span class="o">/</span><span class="n">wiki</span><span class="o">/</span><span class="k">start</span><span class="o">/</span><span class="n">topics</span><span class="o">/</span><span class="n">recipes</span><span class="o">/</span><span class="n">drupal</span>
+<h3>docker-compose.yml for nginx and drupal:7-fpm and mariadb:5.5</h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># https://docs.docker.com/compose/compose-file/</span>
+<span class="c1"># https://docs.docker.com/compose/environment-variables/</span>
+<span class="c1"># https://www.nginx.com/resources/wiki/start/topics/recipes/drupal</span>
 
 <span class="n">nginx</span><span class="p">:</span>
   <span class="n">image</span><span class="p">:</span> <span class="n">nginx</span><span class="p">:</span><span class="n">alpine</span>
   <span class="n">ports</span><span class="p">:</span>
-    <span class="o">-</span> <span class="ss">"80:80"</span>
+    <span class="o">-</span> <span class="s2">&quot;80:80&quot;</span>
   <span class="n">volumes</span><span class="p">:</span>
-    <span class="o">-</span> <span class="p">.</span><span class="o">/</span><span class="n">nginx</span><span class="p">.</span><span class="n">conf</span><span class="p">:</span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">nginx</span><span class="o">/</span><span class="n">nginx</span><span class="p">.</span><span class="n">conf</span><span class="p">:</span><span class="n">ro</span>
-    <span class="o">-</span> <span class="p">.</span><span class="o">/</span><span class="k">default</span><span class="p">.</span><span class="n">conf</span><span class="p">:</span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">nginx</span><span class="o">/</span><span class="n">conf</span><span class="p">.</span><span class="n">d</span><span class="o">/</span><span class="k">default</span><span class="p">.</span><span class="n">conf</span><span class="p">:</span><span class="n">ro</span>
-    <span class="o">-</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">html</span><span class="p">:</span><span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">html</span><span class="o">/</span>
+    <span class="o">-</span> <span class="o">./</span><span class="n">nginx</span><span class="o">.</span><span class="n">conf</span><span class="p">:</span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">nginx</span><span class="o">/</span><span class="n">nginx</span><span class="o">.</span><span class="n">conf</span><span class="p">:</span><span class="n">ro</span>
+    <span class="o">-</span> <span class="o">./</span><span class="n">default</span><span class="o">.</span><span class="n">conf</span><span class="p">:</span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">nginx</span><span class="o">/</span><span class="n">conf</span><span class="o">.</span><span class="n">d</span><span class="o">/</span><span class="n">default</span><span class="o">.</span><span class="n">conf</span><span class="p">:</span><span class="n">ro</span>
+    <span class="o">-</span> <span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">html</span><span class="p">:</span><span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">html</span><span class="o">/</span>
   <span class="n">links</span><span class="p">:</span>
     <span class="o">-</span> <span class="n">fpm</span>
 
-<span class="o">#</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">hub</span><span class="p">.</span><span class="n">docker</span><span class="p">.</span><span class="n">com</span><span class="o">/</span><span class="n">_</span><span class="o">/</span><span class="n">drupal</span><span class="o">/</span>
+<span class="c1"># https://hub.docker.com/_/drupal/</span>
 <span class="n">fpm</span><span class="p">:</span>
   <span class="n">image</span><span class="p">:</span> <span class="n">drupal</span><span class="p">:</span><span class="mi">7</span><span class="o">-</span><span class="n">fpm</span>
   <span class="n">ports</span><span class="p">:</span>
-    <span class="o">-</span> <span class="ss">"9000:9000"</span>
+    <span class="o">-</span> <span class="s2">&quot;9000:9000&quot;</span>
   <span class="n">volumes</span><span class="p">:</span>
-    <span class="o">-</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">html</span><span class="p">:</span><span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">html</span><span class="o">/</span>
+    <span class="o">-</span> <span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">html</span><span class="p">:</span><span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">html</span><span class="o">/</span>
   <span class="n">links</span><span class="p">:</span>
     <span class="o">-</span> <span class="n">mysql</span>
 
-<span class="o">#</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">hub</span><span class="p">.</span><span class="n">docker</span><span class="p">.</span><span class="n">com</span><span class="o">/</span><span class="n">_</span><span class="o">/</span><span class="n">mariadb</span><span class="o">/</span>
+<span class="c1"># https://hub.docker.com/_/mariadb/</span>
 <span class="n">mysql</span><span class="p">:</span>
-  <span class="n">image</span><span class="p">:</span> <span class="n">mariadb</span><span class="p">:</span><span class="mi">5</span><span class="p">.</span><span class="mi">5</span>
+  <span class="n">image</span><span class="p">:</span> <span class="n">mariadb</span><span class="p">:</span><span class="mf">5.5</span>
   <span class="n">ports</span><span class="p">:</span>
-    <span class="o">-</span> <span class="ss">"3306:3306"</span>
+    <span class="o">-</span> <span class="s2">&quot;3306:3306&quot;</span>
   <span class="n">environment</span><span class="p">:</span>
     <span class="o">-</span> <span class="n">MYSQL_ROOT_PASSWORD</span>
     <span class="o">-</span> <span class="n">MYSQL_USER</span>
     <span class="o">-</span> <span class="n">MYSQL_PASSWORD</span>
     <span class="o">-</span> <span class="n">MYSQL_DATABASE</span>
-</pre></div>
+</code></pre></div>
+
 <p>Adding the MariaDB (compatible with MySQL) image/container was fairly straightforward (just reading the docs on how to override and setup the default user and DB via Environment Variables)</p>
 <blockquote>
 <p>I am ok with the Database files being kept completely inside of a persistent container.  I expect to do regular backups (mysqldump and scp) and may also spend the money to just use DigitalOcean's backup service (no poweroff required!)</p>
 </blockquote>
-<h3 id="and-the-bugs">And the bugs</h3>
+<h3>And the bugs</h3>
 <p>I discovered a bug where the css/themes didn't render correctly.  As part of the troubleshooting I installed nginx, php, and MySQL locally on the host with my override configs (no bug exhibited).  I then replaced each "native host installed service" with the Docker one, working from the backend DB forward I was able to identify the issue.</p>
 <p>Unfortunately the nginx image uses a default user of "nginx" whereas the drupal:php image uses "www-data" which caused issues when accessing the Drupal source files (which I was sharing via --volume on the host, preferring to eschew a "data container").</p>
 <p>My personal Linux maxim still holds true: "If there's a problem with something running in Linux it's probably a Permissions issue". ;)</p>
-<h3 id="do-not-add-complexity">Do not add complexity</h3>
+<h3>Do not add complexity</h3>
 <p>I avoided creating my own docker image build FROM drupal:php with nginx included because:</p>
 <ul>
 <li>simplest with as few build steps possible</li>
@@ -170,113 +134,115 @@
 <li>contrary to the "one container one app" Docker principle</li>
 <li>tight coupling of nginx and php would make it harder to update one or the other independently</li>
 </ul>
-<h3 id="cache-your-upstream-dependencies">Cache your upstream dependencies</h3>
+<h3>Cache your upstream dependencies</h3>
 <p>Ironically I also ended up providing my own drupal.tar.gz downloaded from Drupal.org but cached in Bitbucket as the upstream ftp.drupal.org proved unreliable.</p>
-<h2 id="the-pragmatic-solution">The pragmatic solution</h2>
+<h2>The pragmatic solution</h2>
 <p>Instead, as I was already using packer on DigitalOcean to automate building the Host and uploading the custom configs, docker-compose.yaml, and Drupal source, I added a few steps to install nginx directly to the Host OS.</p>
-<h3 id="packerjson">packer.json</h3>
-<div class="highlight"><pre><span></span><span class="err">NEWUSER_NAME=username NEWUSER_PASSWORD=yourpassword DIGITALOCEAN_API_TOKEN=yourapitoken /opt/packer build packer.json</span>
-</pre></div>
+<h3>packer.json</h3>
+<div class="highlight"><pre><span></span><code>NEWUSER_NAME=username NEWUSER_PASSWORD=yourpassword DIGITALOCEAN_API_TOKEN=yourapitoken /opt/packer build packer.json
+</code></pre></div>
+
 <blockquote>
 <p>A few files and a single command (packer is just a single binary downloaded from hashicorp) I can have another Docker based Drupal host ready (awyeah)</p>
 </blockquote>
-<div class="highlight"><pre><span></span><span class="err">{</span>
-  <span class="s2">"_comment"</span><span class="p">:</span> <span class="s2">"https://www.packer.io/docs/builders/digitalocean.html"</span><span class="p">,</span>
-  <span class="s2">"variables"</span><span class="p">:</span> <span class="err">{</span>
-    <span class="s2">"digitalocean_api_token"</span><span class="p">:</span> <span class="s2">"{{env `DIGITALOCEAN_API_TOKEN`}}"</span><span class="p">,</span>
-    <span class="s2">"newuser_name"</span><span class="p">:</span> <span class="s2">"{{env `NEWUSER_NAME`}}"</span><span class="p">,</span>
-    <span class="s2">"newuser_password"</span><span class="p">:</span> <span class="s2">"{{env `NEWUSER_PASSWORD`}}"</span>
+<div class="highlight"><pre><span></span><code><span class="err">{</span>
+  <span class="s2">&quot;_comment&quot;</span><span class="o">:</span> <span class="s2">&quot;https://www.packer.io/docs/builders/digitalocean.html&quot;</span><span class="p">,</span>
+  <span class="s2">&quot;variables&quot;</span><span class="o">:</span> <span class="err">{</span>
+    <span class="s2">&quot;digitalocean_api_token&quot;</span><span class="o">:</span> <span class="s2">&quot;{{env `DIGITALOCEAN_API_TOKEN`}}&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;newuser_name&quot;</span><span class="o">:</span> <span class="s2">&quot;{{env `NEWUSER_NAME`}}&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;newuser_password&quot;</span><span class="o">:</span> <span class="s2">&quot;{{env `NEWUSER_PASSWORD`}}&quot;</span>
   <span class="err">}</span><span class="p">,</span>
 
-  <span class="s2">"builders"</span><span class="p">:</span> <span class="p">[</span><span class="err">{</span>
-    <span class="s2">"type"</span><span class="p">:</span> <span class="s2">"digitalocean"</span><span class="p">,</span>
-    <span class="s2">"api_token"</span><span class="p">:</span> <span class="s2">"{{user `digitalocean_api_token`}}"</span><span class="p">,</span>
-    <span class="s2">"size"</span><span class="p">:</span> <span class="s2">"512mb"</span><span class="p">,</span>
-    <span class="s2">"region"</span><span class="p">:</span> <span class="s2">"lon1"</span><span class="p">,</span>
-    <span class="s2">"image"</span><span class="p">:</span> <span class="s2">"ubuntu-16-04-x64"</span><span class="p">,</span>
-    <span class="s2">"droplet_name"</span><span class="p">:</span> <span class="s2">"drupal-from-packer-{{timestamp}}"</span><span class="p">,</span>
-    <span class="s2">"snapshot_name"</span><span class="p">:</span> <span class="s2">"drupal-from-packer-{{isotime \"2006.01.02.030405\"}}"</span>
-  <span class="err">}</span><span class="p">],</span>
+  <span class="s2">&quot;builders&quot;</span><span class="o">:</span> <span class="err">[{</span>
+    <span class="s2">&quot;type&quot;</span><span class="o">:</span> <span class="s2">&quot;digitalocean&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;api_token&quot;</span><span class="o">:</span> <span class="s2">&quot;{{user `digitalocean_api_token`}}&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;size&quot;</span><span class="o">:</span> <span class="s2">&quot;512mb&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;region&quot;</span><span class="o">:</span> <span class="s2">&quot;lon1&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;image&quot;</span><span class="o">:</span> <span class="s2">&quot;ubuntu-16-04-x64&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;droplet_name&quot;</span><span class="o">:</span> <span class="s2">&quot;drupal-from-packer-{{timestamp}}&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;snapshot_name&quot;</span><span class="o">:</span> <span class="s2">&quot;drupal-from-packer-{{isotime </span><span class="se">\&quot;</span><span class="s2">2006.01.02.030405</span><span class="se">\&quot;</span><span class="s2">}}&quot;</span>
+  <span class="err">}]</span><span class="p">,</span>
 
-  <span class="s2">"provisioners"</span><span class="p">:</span> <span class="p">[</span>
+  <span class="s2">&quot;provisioners&quot;</span><span class="o">:</span> <span class="err">[</span>
     <span class="err">{</span>
-      <span class="s2">"type"</span><span class="p">:</span> <span class="s2">"shell"</span><span class="p">,</span>
-      <span class="s2">"inline"</span><span class="p">:</span> <span class="p">[</span>
-        <span class="s2">"ip a"</span><span class="p">,</span>
-        <span class="s2">"curl -s http://checkip.amazonaws.com"</span><span class="p">,</span>
-        <span class="s2">"apt-get update"</span><span class="p">,</span>
-        <span class="s2">"sudo apt-get install -y vim curl wget byobu ntp tar gzip"</span><span class="p">,</span>
-        <span class="s2">"timedatectl set-timezone Etc/UTC"</span><span class="p">,</span>
-        <span class="s2">"cat /etc/timezone"</span><span class="p">,</span>
-        <span class="s2">"date"</span><span class="p">,</span>
-        <span class="s2">"useradd -s /bin/bash -m {{user `newuser_name`}}"</span><span class="p">,</span>
-        <span class="s2">"usermod -a -G admin {{user `newuser_name`}}"</span><span class="p">,</span>
-        <span class="s2">"echo '{{user `newuser_name`}}:{{user `newuser_password`}}'|chpasswd"</span><span class="p">,</span>
-        <span class="s2">"cat /etc/passwd"</span><span class="p">,</span>
-        <span class="s2">"sed -i 's/Port 22/Port 2222/g' /etc/ssh/sshd_config"</span><span class="p">,</span>
-        <span class="s2">"sed -i 's/PermitRootLogin yes/PermitRootLogin no/g' /etc/ssh/sshd_config"</span><span class="p">,</span>
-        <span class="s2">"echo 'PasswordAuthentication no' &gt;&gt; /etc/ssh/sshd_config"</span><span class="p">,</span>
-        <span class="s2">"cat /etc/ssh/sshd_config"</span><span class="p">,</span>
-        <span class="s2">"mkdir -p /home/{{user `newuser_name`}}/.ssh"</span><span class="p">,</span>
-        <span class="s2">"fallocate -l 1G /swapfile"</span><span class="p">,</span>
-        <span class="s2">"chmod 600 /swapfile"</span><span class="p">,</span>
-        <span class="s2">"mkswap /swapfile"</span><span class="p">,</span>
-        <span class="s2">"swapon /swapfile"</span><span class="p">,</span>
-        <span class="s2">"swapon --show"</span><span class="p">,</span>
-        <span class="s2">"free -h"</span><span class="p">,</span>
-        <span class="s2">"echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab"</span><span class="p">,</span>
-        <span class="s2">"echo 'vm.swappiness=10' | sudo tee -a /etc/sysctl.conf"</span><span class="p">,</span>
-        <span class="s2">"echo 'vm.vfs_cache_pressure=50' | sudo tee -a /etc/sysctl.conf"</span>
-      <span class="p">]</span>
+      <span class="s2">&quot;type&quot;</span><span class="o">:</span> <span class="s2">&quot;shell&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;inline&quot;</span><span class="o">:</span> <span class="err">[</span>
+        <span class="s2">&quot;ip a&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;curl -s http://checkip.amazonaws.com&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;apt-get update&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;sudo apt-get install -y vim curl wget byobu ntp tar gzip&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;timedatectl set-timezone Etc/UTC&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;cat /etc/timezone&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;date&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;useradd -s /bin/bash -m {{user `newuser_name`}}&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;usermod -a -G admin {{user `newuser_name`}}&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;echo &#39;{{user `newuser_name`}}:{{user `newuser_password`}}&#39;|chpasswd&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;cat /etc/passwd&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;sed -i &#39;s/Port 22/Port 2222/g&#39; /etc/ssh/sshd_config&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;sed -i &#39;s/PermitRootLogin yes/PermitRootLogin no/g&#39; /etc/ssh/sshd_config&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;echo &#39;PasswordAuthentication no&#39; &gt;&gt; /etc/ssh/sshd_config&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;cat /etc/ssh/sshd_config&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;mkdir -p /home/{{user `newuser_name`}}/.ssh&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;fallocate -l 1G /swapfile&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;chmod 600 /swapfile&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;mkswap /swapfile&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;swapon /swapfile&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;swapon --show&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;free -h&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;echo &#39;/swapfile none swap sw 0 0&#39; | sudo tee -a /etc/fstab&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;echo &#39;vm.swappiness=10&#39; | sudo tee -a /etc/sysctl.conf&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;echo &#39;vm.vfs_cache_pressure=50&#39; | sudo tee -a /etc/sysctl.conf&quot;</span>
+      <span class="err">]</span>
     <span class="err">}</span><span class="p">,</span>
     <span class="err">{</span>
-      <span class="s2">"type"</span><span class="p">:</span> <span class="s2">"file"</span><span class="p">,</span>
-      <span class="s2">"source"</span><span class="p">:</span> <span class="s2">"authorized_keys"</span><span class="p">,</span>
-      <span class="s2">"destination"</span><span class="p">:</span> <span class="s2">"/home/{{user `newuser_name`}}/.ssh/authorized_keys"</span>
+      <span class="s2">&quot;type&quot;</span><span class="o">:</span> <span class="s2">&quot;file&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;source&quot;</span><span class="o">:</span> <span class="s2">&quot;authorized_keys&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;destination&quot;</span><span class="o">:</span> <span class="s2">&quot;/home/{{user `newuser_name`}}/.ssh/authorized_keys&quot;</span>
     <span class="err">}</span><span class="p">,</span>
     <span class="err">{</span>
-      <span class="s2">"type"</span><span class="p">:</span> <span class="s2">"shell"</span><span class="p">,</span>
-      <span class="s2">"script"</span><span class="p">:</span> <span class="s2">"install-docker.sh"</span>
+      <span class="s2">&quot;type&quot;</span><span class="o">:</span> <span class="s2">&quot;shell&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;script&quot;</span><span class="o">:</span> <span class="s2">&quot;install-docker.sh&quot;</span>
     <span class="err">}</span><span class="p">,</span>
     <span class="err">{</span>
-      <span class="s2">"type"</span><span class="p">:</span> <span class="s2">"file"</span><span class="p">,</span>
-      <span class="s2">"source"</span><span class="p">:</span> <span class="s2">"docker-compose.yml"</span><span class="p">,</span>
-      <span class="s2">"destination"</span><span class="p">:</span> <span class="s2">"/home/{{user `newuser_name`}}/docker-compose.yml"</span>
+      <span class="s2">&quot;type&quot;</span><span class="o">:</span> <span class="s2">&quot;file&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;source&quot;</span><span class="o">:</span> <span class="s2">&quot;docker-compose.yml&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;destination&quot;</span><span class="o">:</span> <span class="s2">&quot;/home/{{user `newuser_name`}}/docker-compose.yml&quot;</span>
     <span class="err">}</span><span class="p">,</span>
     <span class="err">{</span>
-      <span class="s2">"type"</span><span class="p">:</span> <span class="s2">"shell"</span><span class="p">,</span>
-      <span class="s2">"inline"</span><span class="p">:</span> <span class="p">[</span>
-        <span class="s2">"mkdir -p /var/www/html"</span><span class="p">,</span>
-        <span class="s2">"wget https://bitbucket.org/yourusername/yourrepository/raw/97360be2edd53b93149d750db24f749aebc27988/binaries/drupal-7.50.tar.gz"</span><span class="p">,</span>
-        <span class="s2">"tar xf drupal-7.50.tar.gz --strip-components=1 -C /var/www/html"</span><span class="p">,</span>
-        <span class="s2">"ls -ahl /var/www/html"</span><span class="p">,</span>
-        <span class="s2">"mkdir -p /var/www/html/sites/default/files"</span><span class="p">,</span>
-        <span class="s2">"chmod 777 /var/www/html/sites/default/files"</span><span class="p">,</span>
-        <span class="s2">"cp -a /var/www/html/sites/default/default.settings.php /var/www/html/sites/default/settings.php"</span><span class="p">,</span>
-        <span class="s2">"chmod 777 /var/www/html/sites/default/settings.php"</span>
-      <span class="p">]</span>
+      <span class="s2">&quot;type&quot;</span><span class="o">:</span> <span class="s2">&quot;shell&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;inline&quot;</span><span class="o">:</span> <span class="err">[</span>
+        <span class="s2">&quot;mkdir -p /var/www/html&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;wget https://bitbucket.org/yourusername/yourrepository/raw/97360be2edd53b93149d750db24f749aebc27988/binaries/drupal-7.50.tar.gz&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;tar xf drupal-7.50.tar.gz --strip-components=1 -C /var/www/html&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ls -ahl /var/www/html&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;mkdir -p /var/www/html/sites/default/files&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;chmod 777 /var/www/html/sites/default/files&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;cp -a /var/www/html/sites/default/default.settings.php /var/www/html/sites/default/settings.php&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;chmod 777 /var/www/html/sites/default/settings.php&quot;</span>
+      <span class="err">]</span>
     <span class="err">}</span><span class="p">,</span>
     <span class="err">{</span>
-      <span class="s2">"type"</span><span class="p">:</span> <span class="s2">"shell"</span><span class="p">,</span>
-      <span class="s2">"inline"</span><span class="p">:</span> <span class="p">[</span>
-        <span class="s2">"apt-get install -y nginx"</span>
-      <span class="p">]</span>
+      <span class="s2">&quot;type&quot;</span><span class="o">:</span> <span class="s2">&quot;shell&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;inline&quot;</span><span class="o">:</span> <span class="err">[</span>
+        <span class="s2">&quot;apt-get install -y nginx&quot;</span>
+      <span class="err">]</span>
     <span class="err">}</span><span class="p">,</span>
     <span class="err">{</span>
-      <span class="s2">"type"</span><span class="p">:</span> <span class="s2">"file"</span><span class="p">,</span>
-      <span class="s2">"source"</span><span class="p">:</span> <span class="s2">"nginx.conf"</span><span class="p">,</span>
-      <span class="s2">"destination"</span><span class="p">:</span> <span class="s2">"/etc/nginx/nginx.conf"</span>
+      <span class="s2">&quot;type&quot;</span><span class="o">:</span> <span class="s2">&quot;file&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;source&quot;</span><span class="o">:</span> <span class="s2">&quot;nginx.conf&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;destination&quot;</span><span class="o">:</span> <span class="s2">&quot;/etc/nginx/nginx.conf&quot;</span>
     <span class="err">}</span><span class="p">,</span>
     <span class="err">{</span>
-      <span class="s2">"type"</span><span class="p">:</span> <span class="s2">"file"</span><span class="p">,</span>
-      <span class="s2">"source"</span><span class="p">:</span> <span class="s2">"default.conf"</span><span class="p">,</span>
-      <span class="s2">"destination"</span><span class="p">:</span> <span class="s2">"/etc/nginx/conf.d/default.conf"</span>
+      <span class="s2">&quot;type&quot;</span><span class="o">:</span> <span class="s2">&quot;file&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;source&quot;</span><span class="o">:</span> <span class="s2">&quot;default.conf&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;destination&quot;</span><span class="o">:</span> <span class="s2">&quot;/etc/nginx/conf.d/default.conf&quot;</span>
     <span class="err">}</span>
 
-  <span class="p">]</span>
+  <span class="err">]</span>
 
 <span class="err">}</span>
-</pre></div>
+</code></pre></div>
+
 <blockquote>
 <p>HINT: A DigitalOcean 512MB droplet needs swap enabled due to the MySQL/MariaDB memory defaults, otherwise you get strange errors about inode unavailable while starting the MariaDB container</p>
 </blockquote>
@@ -290,17 +256,18 @@
 </li>
 <li>A very nice tool to add is fail2ban (apt-get install fail2ban) but I want to ensure I tweak the configs correctly</li>
 </ul>
-<h4 id="install-dockersh">install-docker.sh</h4>
-<div class="highlight"><pre><span></span><span class="ch">#!/bin/sh</span>
+<h4>install-docker.sh</h4>
+<div class="highlight"><pre><span></span><code><span class="ch">#!/bin/sh</span>
 <span class="c1"># ubuntu 16.04 is xenial , https://blog.john-pfeiffer.com/docker-intro-install-run-and-port-forward/</span>
 sudo apt-key adv --keyserver hkp://pgp.mit.edu:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
-sudo sh -c <span class="s2">"echo 'deb https://apt.dockerproject.org/repo ubuntu-xenial main' &gt; /etc/apt/sources.list.d/docker.list"</span>
+sudo sh -c <span class="s2">&quot;echo &#39;deb https://apt.dockerproject.org/repo ubuntu-xenial main&#39; &gt; /etc/apt/sources.list.d/docker.list&quot;</span>
 sudo apt-get update <span class="o">||</span> <span class="nb">exit</span> <span class="m">1</span>
 sudo apt-get install -y linux-image-extra-<span class="k">$(</span>uname -r<span class="k">)</span> <span class="o">||</span> <span class="nb">exit</span> <span class="m">1</span>
 sudo apt-get install -y docker-engine docker-compose <span class="o">||</span> <span class="nb">exit</span> <span class="m">1</span>
 service docker status <span class="o">||</span> <span class="nb">exit</span> <span class="m">1</span>
 docker info <span class="o">||</span> <span class="nb">exit</span> <span class="m">1</span>
-</pre></div>
+</code></pre></div>
+
 <blockquote>
 <p>linux-image-extra is to ensure we have AUFS because docker needs a proper storage driver</p>
 </blockquote>
@@ -309,13 +276,13 @@ docker info <span class="o">||</span> <span class="nb">exit</span> <span class="
 <p><code>sudo curl -L "https://github.com/docker/compose/releases/download/1.25.4/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose</code>
 <code>sudo chmod +x /usr/local/bin/docker-compose</code>
 <code>which docker-compose ; sudo docker-compose --version</code></p>
-<h4 id="docker-composeyml-with-drupal7-fpm-and-mariadb55">docker-compose.yml with drupal:7-fpm and mariadb:5.5</h4>
-<div class="highlight"><pre><span></span><span class="c"># https://hub.docker.com/_/drupal/</span>
+<h4>docker-compose.yml with drupal:7-fpm and mariadb:5.5</h4>
+<div class="highlight"><pre><span></span><code><span class="c"># https://hub.docker.com/_/drupal/</span>
 fpm:
   image: drupal:7-fpm
   ports:
-    - <span class="s2">"127.0.0.1:9000:9000"</span>
-<span class="c">#    - "9000:9000"</span>
+    - <span class="s2">&quot;127.0.0.1:9000:9000&quot;</span>
+<span class="c">#    - &quot;9000:9000&quot;</span>
   volumes:
     - /var/www/html:/var/www/html/
   links:
@@ -325,18 +292,19 @@ fpm:
 mysql:
   image: mariadb:5.5
   ports:
-    - <span class="s2">"3306:3306"</span>
+    - <span class="s2">&quot;3306:3306&quot;</span>
   environment:
     - MYSQL_ROOT_PASSWORD
     - MYSQL_USER
     - MYSQL_PASSWORD
     - MYSQL_DATABASE
-</pre></div>
+</code></pre></div>
+
 <blockquote>
 <p>2 out of 3 ain't bad</p>
 </blockquote>
-<h4 id="nginxconf">nginx.conf</h4>
-<div class="highlight"><pre><span></span><span class="c1"># slightly modified /etc/nginx/nginx.conf from "apt-get install nginx"</span>
+<h4>nginx.conf</h4>
+<div class="highlight"><pre><span></span><code><span class="c1"># slightly modified /etc/nginx/nginx.conf from &quot;apt-get install nginx&quot;</span>
 <span class="c1"># https://www.nginx.com/resources/wiki/start/topics/examples/full/</span>
 
 <span class="k">user</span> <span class="s">www-data</span><span class="p">;</span>
@@ -364,16 +332,17 @@ mysql:
         <span class="kn">error_log</span> <span class="s">/var/log/nginx/error.log</span><span class="p">;</span>
 
         <span class="kn">gzip</span> <span class="no">on</span><span class="p">;</span>
-        <span class="kn">gzip_disable</span> <span class="s">"msie6"</span><span class="p">;</span>
+        <span class="kn">gzip_disable</span> <span class="s">&quot;msie6&quot;</span><span class="p">;</span>
 
         <span class="kn">gzip_types</span> <span class="s">text/plain</span> <span class="s">text/css</span> <span class="s">application/json</span> <span class="s">application/javascript</span> <span class="s">text/xml</span> <span class="s">application/xml</span> <span class="s">application/xml+rss</span> <span class="s">text/javascript</span><span class="p">;</span>
 
         <span class="kn">include</span> <span class="s">/etc/nginx/conf.d/*.conf</span><span class="p">;</span>
 
 <span class="p">}</span>
-</pre></div>
-<h4 id="defaultconf">default.conf</h4>
-<div class="highlight"><pre><span></span><span class="k">server</span> <span class="p">{</span>
+</code></pre></div>
+
+<h4>default.conf</h4>
+<div class="highlight"><pre><span></span><code><span class="k">server</span> <span class="p">{</span>
     <span class="kn">listen</span>      <span class="mi">80</span><span class="p">;</span>
     <span class="kn">server_name</span> <span class="s">physicstime.com</span><span class="p">;</span>
     <span class="kn">root</span> <span class="s">/var/www/html</span><span class="p">;</span> <span class="c1">## &lt;-- Your only path reference.</span>
@@ -402,12 +371,12 @@ mysql:
         <span class="kn">return</span> <span class="mi">403</span><span class="p">;</span>
     <span class="p">}</span>
 
-    <span class="c1"># Allow "Well-Known URIs" as per RFC 5785</span>
+    <span class="c1"># Allow &quot;Well-Known URIs&quot; as per RFC 5785</span>
     <span class="kn">location</span> <span class="p">~</span><span class="sr">*</span> <span class="s">^/.well-known/</span> <span class="p">{</span>
         <span class="kn">allow</span> <span class="s">all</span><span class="p">;</span>
     <span class="p">}</span>
 
-    <span class="c1"># Block access to "hidden" files and directories whose names begin with a</span>
+    <span class="c1"># Block access to &quot;hidden&quot; files and directories whose names begin with a</span>
     <span class="c1"># period. This includes directories used by version control systems such</span>
     <span class="c1"># as Subversion or Git to store control files.</span>
     <span class="kn">location</span> <span class="p">~</span> <span class="sr">(^|/)\.</span> <span class="p">{</span>
@@ -423,13 +392,13 @@ mysql:
         <span class="kn">rewrite</span> <span class="s">^/(.*)</span>$ <span class="s">/index.php?q=</span><span class="nv">$1</span><span class="p">;</span>
     <span class="p">}</span>
 
-    <span class="c1"># Don't allow direct access to PHP files in the vendor directory.</span>
+    <span class="c1"># Don&#39;t allow direct access to PHP files in the vendor directory.</span>
     <span class="kn">location</span> <span class="p">~</span> <span class="sr">/vendor/.*\.php$</span> <span class="p">{</span>
         <span class="kn">deny</span> <span class="s">all</span><span class="p">;</span>
         <span class="kn">return</span> <span class="mi">404</span><span class="p">;</span>
     <span class="p">}</span>
 
-    <span class="c1"># In Drupal 8, we must also match new paths where the '.php' appears in</span>
+    <span class="c1"># In Drupal 8, we must also match new paths where the &#39;.php&#39; appears in</span>
     <span class="c1"># the middle, such as update.php/selection. The rule we use is strict,</span>
     <span class="c1"># and only allows this pattern with the update.php front controller.</span>
     <span class="c1"># This allows legacy path aliases in the form of</span>
@@ -440,14 +409,14 @@ mysql:
     <span class="c1"># The laxer rule will continue to work if Drupal uses this new URL</span>
     <span class="c1"># pattern with front controllers other than update.php in a future</span>
     <span class="c1"># release.</span>
-    <span class="kn">location</span> <span class="p">~</span> <span class="sr">'\.php$|^/update.php'</span> <span class="p">{</span>
+    <span class="kn">location</span> <span class="p">~</span> <span class="sr">&#39;\.php$|^/update.php&#39;</span> <span class="p">{</span>
         <span class="kn">fastcgi_split_path_info</span> <span class="s">^(.+?\.php)(|/.*)</span>$<span class="p">;</span>
-        <span class="c1"># Security note: If you're running a version of PHP older than the</span>
-        <span class="c1"># latest 5.3, you should have "cgi.fix_pathinfo = 0;" in php.ini.</span>
+        <span class="c1"># Security note: If you&#39;re running a version of PHP older than the</span>
+        <span class="c1"># latest 5.3, you should have &quot;cgi.fix_pathinfo = 0;&quot; in php.ini.</span>
         <span class="c1"># See http://serverfault.com/q/627903/94922 for details.</span>
         <span class="kn">include</span> <span class="s">fastcgi_params</span><span class="p">;</span>
         <span class="c1"># Block httpoxy attacks. See https://httpoxy.org/.</span>
-        <span class="kn">fastcgi_param</span> <span class="s">HTTP_PROXY</span> <span class="s">""</span><span class="p">;</span>
+        <span class="kn">fastcgi_param</span> <span class="s">HTTP_PROXY</span> <span class="s">&quot;&quot;</span><span class="p">;</span>
         <span class="kn">fastcgi_param</span> <span class="s">SCRIPT_FILENAME</span> <span class="nv">$document_root$fastcgi_script_name</span><span class="p">;</span>
         <span class="kn">fastcgi_param</span> <span class="s">PATH_INFO</span> <span class="nv">$fastcgi_path_info</span><span class="p">;</span>
         <span class="kn">fastcgi_intercept_errors</span> <span class="no">on</span><span class="p">;</span>
@@ -490,88 +459,96 @@ mysql:
     <span class="p">}</span>
 
 <span class="p">}</span>
-</pre></div>
+</code></pre></div>
+
 <blockquote>
 <p>slightly modified from the wonderful reference provided by nginx, mostly the first 3 lines and later the fastcgi_pass</p>
 </blockquote>
 <ul>
 <li><a href="https://www.nginx.com/resources/wiki/start/topics/recipes/drupal/">https://www.nginx.com/resources/wiki/start/topics/recipes/drupal/</a></li>
 </ul>
-<h2 id="post-boot-manual-configuration-ohgodwhy">Post boot manual configuration (ohgodwhy)</h2>
+<h2>Post boot manual configuration (ohgodwhy)</h2>
 <p>Post boot of a "fresh from built-by-packer snapshot" there were still the basic steps of configuring Drupal (which I did manually with a browser and install.php though I'm pretty sure I could have just overridden the settings.php directly).</p>
 <p>And for this migration project a MySQL dump, SCP of the existing extra modules, and of course the already uploaded user images/files.</p>
 <p>I'm sure with more tinkering I can overcome the nginx vs www-data user permissions issue but since I time boxed this project I stuck with this compromise which is still much more improved and automated than my previous setup.</p>
 <p>For migrating data there is of course the prerequisite: <code>mysqldump -uroot -p physicstime &gt; backup.sql</code></p>
-<div class="highlight"><pre><span></span><span class="nt">vi</span> <span class="o">/</span><span class="nt">var</span><span class="o">/</span><span class="nt">www</span><span class="o">/</span><span class="nt">html</span><span class="o">/</span><span class="nt">themes</span><span class="o">/</span><span class="nt">bartik</span><span class="o">/</span><span class="nt">css</span><span class="o">/</span><span class="nt">style</span><span class="p">.</span><span class="nc">css</span>
-    <span class="nt">font-size</span><span class="o">:</span> <span class="nt">2</span><span class="p">.</span><span class="nc">929em</span><span class="o">;</span>
+<div class="highlight"><pre><span></span><code><span class="n">vi</span> <span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">html</span><span class="o">/</span><span class="n">themes</span><span class="o">/</span><span class="n">bartik</span><span class="o">/</span><span class="n">css</span><span class="o">/</span><span class="n">style</span><span class="o">.</span><span class="n">css</span>
+    <span class="n">font</span><span class="o">-</span><span class="n">size</span><span class="p">:</span> <span class="mf">2.929</span><span class="n">em</span><span class="p">;</span>
 
-<span class="nt">cat</span> <span class="o">/</span><span class="nt">var</span><span class="o">/</span><span class="nt">www</span><span class="o">/</span><span class="nt">html</span><span class="o">/</span><span class="nt">themes</span><span class="o">/</span><span class="nt">bartik</span><span class="o">/</span><span class="nt">css</span><span class="o">/</span><span class="nt">style</span><span class="p">.</span><span class="nc">css</span> <span class="o">|</span> <span class="nt">tr</span> <span class="s1">'\n'</span> <span class="s1">'\r'</span> <span class="o">|</span> <span class="nt">sed</span> <span class="nt">-e</span> <span class="s1">'s/#site-slogan {\r  font-size: 0.929em/#site-slogan {\r  font-size: 2.929em/'</span> <span class="o">|</span> <span class="nt">tr</span> <span class="s1">'\r'</span> <span class="s1">'\n'</span> <span class="o">&gt;</span> <span class="o">/</span><span class="nt">var</span><span class="o">/</span><span class="nt">www</span><span class="o">/</span><span class="nt">html</span><span class="o">/</span><span class="nt">themes</span><span class="o">/</span><span class="nt">bartik</span><span class="o">/</span><span class="nt">css</span><span class="o">/</span><span class="nt">style</span><span class="p">.</span><span class="nc">css</span><span class="p">.</span><span class="nc">updated</span>
-</pre></div>
+<span class="n">cat</span> <span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">html</span><span class="o">/</span><span class="n">themes</span><span class="o">/</span><span class="n">bartik</span><span class="o">/</span><span class="n">css</span><span class="o">/</span><span class="n">style</span><span class="o">.</span><span class="n">css</span> <span class="o">|</span> <span class="n">tr</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="s1">&#39;</span><span class="se">\r</span><span class="s1">&#39;</span> <span class="o">|</span> <span class="n">sed</span> <span class="o">-</span><span class="n">e</span> <span class="s1">&#39;s/#site-slogan {</span><span class="se">\r</span><span class="s1">  font-size: 0.929em/#site-slogan {</span><span class="se">\r</span><span class="s1">  font-size: 2.929em/&#39;</span> <span class="o">|</span> <span class="n">tr</span> <span class="s1">&#39;</span><span class="se">\r</span><span class="s1">&#39;</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">&gt;</span> <span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">html</span><span class="o">/</span><span class="n">themes</span><span class="o">/</span><span class="n">bartik</span><span class="o">/</span><span class="n">css</span><span class="o">/</span><span class="n">style</span><span class="o">.</span><span class="n">css</span><span class="o">.</span><span class="n">updated</span>
+</code></pre></div>
+
 <blockquote>
 <p>customize increased visibility of the #site-slogan { , occasionally needs cache cleared in admin/config/development/performance
 The oneliner is a complicated way of sed replacing two lines at once (tr replaces newlines with \r temporarily)</p>
 </blockquote>
-<div class="highlight"><pre><span></span><span class="err">sed -i 's/font-size: 87.5/font-size: 120/' /var/www/html/themes/bartik/css/style.css</span>
-</pre></div>
+<div class="highlight"><pre><span></span><code><span class="n">sed</span> <span class="o">-</span><span class="n">i</span> <span class="s1">&#39;s/font-size: 87.5/font-size: 120/&#39;</span> <span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">html</span><span class="o">/</span><span class="n">themes</span><span class="o">/</span><span class="n">bartik</span><span class="o">/</span><span class="n">css</span><span class="o">/</span><span class="n">style</span><span class="o">.</span><span class="n">css</span>
+</code></pre></div>
+
 <blockquote>
 <p>Because the world does not need yet another 10pt font website</p>
 </blockquote>
-<div class="highlight"><pre><span></span><span class="err">hostnamectl set-hostname physicstime.com</span>
-<span class="err">docker-compose up &amp;</span>
-</pre></div>
+<div class="highlight"><pre><span></span><code>hostnamectl set-hostname physicstime.com
+docker-compose up &amp;
+</code></pre></div>
+
 <blockquote>
 <p>Hint: <code>/etc/hosts</code> locally and use a browser to do initial install.php config before a DNS cutover</p>
 <p>DB connection string requires 172.17.0.1 (the default docker private IP network bridge)</p>
 </blockquote>
-<div class="highlight"><pre><span></span><span class="n">root</span><span class="nv">@physicstime</span><span class="err">:</span><span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="k">USER</span><span class="o">/</span><span class="n">physicstime</span><span class="p">.</span><span class="n">com</span><span class="err">#</span><span class="w"> </span><span class="n">mv</span><span class="w"> </span><span class="n">files</span><span class="o">/</span><span class="w"> </span><span class="o">/</span><span class="nf">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">html</span><span class="o">/</span><span class="n">sites</span><span class="o">/</span><span class="n">physicstime</span><span class="p">.</span><span class="n">com</span><span class="o">/</span><span class="w"></span>
-<span class="n">mv</span><span class="w"> </span><span class="ow">all</span><span class="w"> </span><span class="o">/</span><span class="nf">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">html</span><span class="o">/</span><span class="n">sites</span><span class="o">/</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="n">root</span><span class="err">@</span><span class="n">physicstime</span><span class="p">:</span><span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">USER</span><span class="o">/</span><span class="n">physicstime</span><span class="o">.</span><span class="n">com</span><span class="c1"># mv files/ /var/www/html/sites/physicstime.com/</span>
+<span class="n">mv</span> <span class="n">all</span> <span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">html</span><span class="o">/</span><span class="n">sites</span><span class="o">/</span>
 
-<span class="n">ifconfig</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">grep</span><span class="w"> </span><span class="n">Bc</span><span class="w"></span>
-<span class="w">    </span><span class="mf">172.17.0.1</span><span class="w"></span>
+<span class="n">ifconfig</span> <span class="o">|</span> <span class="n">grep</span> <span class="n">Bc</span>
+    <span class="mf">172.17</span><span class="o">.</span><span class="mf">0.1</span>
 
-<span class="n">docker</span><span class="w"> </span><span class="n">run</span><span class="w"> </span><span class="o">-</span><span class="n">it</span><span class="w"> </span><span class="c1">--rm --volume /opt:/opt mariadb:5.5 /bin/bash</span>
-<span class="w">    </span><span class="n">mysql</span><span class="w"> </span><span class="o">-</span><span class="n">h172</span><span class="mf">.17.0.1</span><span class="w"> </span><span class="o">-</span><span class="n">uYOURUSER</span><span class="w"> </span><span class="o">-</span><span class="n">p</span><span class="w"> </span><span class="n">physicstime</span><span class="w"></span>
-<span class="w">        </span><span class="n">show</span><span class="w"> </span><span class="n">tables</span><span class="p">;</span><span class="w"></span>
-<span class="w">        </span><span class="k">exit</span><span class="w"></span>
-<span class="w">    </span><span class="n">mysql</span><span class="w"> </span><span class="o">-</span><span class="n">h172</span><span class="mf">.17.0.1</span><span class="w"> </span><span class="o">-</span><span class="n">uroot</span><span class="w"> </span><span class="o">-</span><span class="n">p</span><span class="w"> </span><span class="n">physicstime</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="k">backup</span><span class="p">.</span><span class="k">sql</span><span class="w"></span>
+<span class="n">docker</span> <span class="n">run</span> <span class="o">-</span><span class="n">it</span> <span class="o">--</span><span class="n">rm</span> <span class="o">--</span><span class="n">volume</span> <span class="o">/</span><span class="n">opt</span><span class="p">:</span><span class="o">/</span><span class="n">opt</span> <span class="n">mariadb</span><span class="p">:</span><span class="mf">5.5</span> <span class="o">/</span><span class="n">bin</span><span class="o">/</span><span class="n">bash</span>
+    <span class="n">mysql</span> <span class="o">-</span><span class="n">h172</span><span class="o">.</span><span class="mf">17.0</span><span class="o">.</span><span class="mi">1</span> <span class="o">-</span><span class="n">uYOURUSER</span> <span class="o">-</span><span class="n">p</span> <span class="n">physicstime</span>
+        <span class="n">show</span> <span class="n">tables</span><span class="p">;</span>
+        <span class="n">exit</span>
+    <span class="n">mysql</span> <span class="o">-</span><span class="n">h172</span><span class="o">.</span><span class="mf">17.0</span><span class="o">.</span><span class="mi">1</span> <span class="o">-</span><span class="n">uroot</span> <span class="o">-</span><span class="n">p</span> <span class="n">physicstime</span> <span class="o">&lt;</span> <span class="n">backup</span><span class="o">.</span><span class="n">sql</span>
 
-<span class="n">chown</span><span class="w"> </span><span class="nl">root</span><span class="p">:</span><span class="n">root</span><span class="w"> </span><span class="o">-</span><span class="n">R</span><span class="w"> </span><span class="o">/</span><span class="nf">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">html</span><span class="o">/</span><span class="n">sites</span><span class="o">/</span><span class="w"></span>
-<span class="n">chmod</span><span class="w"> </span><span class="mi">400</span><span class="w"> </span><span class="o">/</span><span class="nf">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">html</span><span class="o">/</span><span class="n">sites</span><span class="o">/</span><span class="k">default</span><span class="o">/</span><span class="n">settings</span><span class="p">.</span><span class="n">php</span><span class="w"></span>
-</pre></div>
+<span class="n">chown</span> <span class="n">root</span><span class="p">:</span><span class="n">root</span> <span class="o">-</span><span class="n">R</span> <span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">html</span><span class="o">/</span><span class="n">sites</span><span class="o">/</span>
+<span class="n">chmod</span> <span class="mi">400</span> <span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">html</span><span class="o">/</span><span class="n">sites</span><span class="o">/</span><span class="n">default</span><span class="o">/</span><span class="n">settings</span><span class="o">.</span><span class="n">php</span>
+</code></pre></div>
+
 <blockquote>
 <p>ensure /var/www/html/sites/default/files has the correct permissions, otherwise no CSS for you!</p>
 </blockquote>
-<div class="highlight"><pre><span></span><span class="err">docker-compose stop</span>
-<span class="err">docker ps --all</span>
-<span class="err">docker-compose up &amp;</span>
-<span class="err">docker-compose logs |&amp; tee /var/log/physicstime.log</span>
-<span class="err">tail -f /var/log/physicstime.log /var/log/nginx/access.log</span>
-</pre></div>
+<div class="highlight"><pre><span></span><code><span class="n">docker</span><span class="o">-</span><span class="n">compose</span> <span class="n">stop</span>
+<span class="n">docker</span> <span class="n">ps</span> <span class="o">--</span><span class="n">all</span>
+<span class="n">docker</span><span class="o">-</span><span class="n">compose</span> <span class="n">up</span> <span class="o">&amp;</span>
+<span class="n">docker</span><span class="o">-</span><span class="n">compose</span> <span class="n">logs</span> <span class="o">|&amp;</span> <span class="n">tee</span> <span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="nb">log</span><span class="o">/</span><span class="n">physicstime</span><span class="o">.</span><span class="n">log</span>
+<span class="n">tail</span> <span class="o">-</span><span class="n">f</span> <span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="nb">log</span><span class="o">/</span><span class="n">physicstime</span><span class="o">.</span><span class="n">log</span> <span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="nb">log</span><span class="o">/</span><span class="n">nginx</span><span class="o">/</span><span class="n">access</span><span class="o">.</span><span class="n">log</span>
+</code></pre></div>
+
 <blockquote>
 <p>This starts it manually and displays any traffic</p>
 </blockquote>
-<div class="highlight"><pre><span></span><span class="n">cd</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">init</span><span class="p">.</span><span class="n">d</span><span class="p">;</span> <span class="n">touch</span> <span class="n">physicstime</span><span class="p">.</span><span class="n">sh</span><span class="p">;</span> <span class="n">chmod</span> <span class="o">+</span><span class="n">x</span> <span class="n">physicstime</span><span class="p">.</span><span class="n">sh</span><span class="p">;</span> <span class="n">vi</span> <span class="n">physicstime</span><span class="p">.</span><span class="n">sh</span>
+<div class="highlight"><pre><span></span><code><span class="n">cd</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">init</span><span class="o">.</span><span class="n">d</span><span class="p">;</span> <span class="n">touch</span> <span class="n">physicstime</span><span class="o">.</span><span class="n">sh</span><span class="p">;</span> <span class="n">chmod</span> <span class="o">+</span><span class="n">x</span> <span class="n">physicstime</span><span class="o">.</span><span class="n">sh</span><span class="p">;</span> <span class="n">vi</span> <span class="n">physicstime</span><span class="o">.</span><span class="n">sh</span>
 
-    <span class="o">#!/</span><span class="n">bin</span><span class="o">/</span><span class="n">bash</span>
-    <span class="n">echo</span> <span class="ss">"starting physicstime after boot"</span> <span class="o">&gt;&gt;</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">log</span><span class="o">/</span><span class="n">physicstime</span><span class="p">.</span><span class="n">log</span>
+    <span class="c1">#!/bin/bash</span>
+    <span class="n">echo</span> <span class="s2">&quot;starting physicstime after boot&quot;</span> <span class="o">&gt;&gt;</span> <span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="nb">log</span><span class="o">/</span><span class="n">physicstime</span><span class="o">.</span><span class="n">log</span>
     <span class="n">cd</span> <span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">YOURUSER</span><span class="p">;</span> <span class="n">docker</span><span class="o">-</span><span class="n">compose</span> <span class="n">up</span> <span class="o">&amp;</span>
 
-<span class="k">update</span><span class="o">-</span><span class="n">rc</span><span class="p">.</span><span class="n">d</span> <span class="n">physicstime</span><span class="p">.</span><span class="n">sh</span> <span class="k">defaults</span>
-</pre></div>
+<span class="n">update</span><span class="o">-</span><span class="n">rc</span><span class="o">.</span><span class="n">d</span> <span class="n">physicstime</span><span class="o">.</span><span class="n">sh</span> <span class="n">defaults</span>
+</code></pre></div>
+
 <blockquote>
 <p>this starts the docker based services automatically on boot (not including extra logging)</p>
 </blockquote>
-<hr/>
-<h2 id="adhoc-performance-and-latency-testing">Adhoc Performance and Latency Testing</h2>
+<hr>
+<h2>Adhoc Performance and Latency Testing</h2>
 <p>Data driven decisions is a big deal, but let's be honest, engineers love numbers :)</p>
-<div class="highlight"><pre><span></span><span class="err">ab -l -r -n 500 -c 100 -k -H "Accept-Encoding: gzip, deflate" http://physicstime.com/node?page=1</span>
-</pre></div>
+<div class="highlight"><pre><span></span><code>ab -l -r -n 500 -c 100 -k -H &quot;Accept-Encoding: gzip, deflate&quot; http://physicstime.com/node?page=1
+</code></pre></div>
+
 <blockquote>
 <p>The unscientific "watching top": 80% for about 5 seconds vs 78% for about 5 seconds</p>
 </blockquote>
 <p><a href="https://httpd.apache.org/docs/2.4/programs/ab.html">https://httpd.apache.org/docs/2.4/programs/ab.html</a></p>
-<h3 id="linode-and-cherokee-and-php-cgi-53-and-mysql-55">Linode and Cherokee and php-cgi 5.3 and MySQL 5.5</h3>
-<div class="highlight"><pre><span></span><span class="n">Concurrency</span><span class="w"> </span><span class="k">Level</span><span class="err">:</span><span class="w">      </span><span class="mi">100</span><span class="w"></span>
+<h3>Linode and Cherokee and php-cgi 5.3 and MySQL 5.5</h3>
+<div class="highlight"><pre><span></span><code><span class="n">Concurrency</span><span class="w"> </span><span class="k">Level</span><span class="err">:</span><span class="w">      </span><span class="mi">100</span><span class="w"></span>
 <span class="nc">Time</span><span class="w"> </span><span class="n">taken</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="nl">tests</span><span class="p">:</span><span class="w">   </span><span class="mf">7.255</span><span class="w"> </span><span class="n">seconds</span><span class="w"></span>
 <span class="n">Complete</span><span class="w"> </span><span class="nl">requests</span><span class="p">:</span><span class="w">      </span><span class="mi">500</span><span class="w"></span>
 <span class="n">Failed</span><span class="w"> </span><span class="nl">requests</span><span class="p">:</span><span class="w">        </span><span class="mi">0</span><span class="w"></span>
@@ -600,9 +577,10 @@ The oneliner is a complicated way of sed replacing two lines at once (tr replace
 <span class="w">  </span><span class="mi">98</span><span class="o">%</span><span class="w">   </span><span class="mi">1516</span><span class="w"></span>
 <span class="w">  </span><span class="mi">99</span><span class="o">%</span><span class="w">   </span><span class="mi">1519</span><span class="w"></span>
 <span class="w"> </span><span class="mi">100</span><span class="o">%</span><span class="w">   </span><span class="mi">1526</span><span class="w"> </span><span class="p">(</span><span class="n">longest</span><span class="w"> </span><span class="n">request</span><span class="p">)</span><span class="w"></span>
-</pre></div>
-<h3 id="digitalocean-and-nginx-and-docker-php-fpm-and-mariadb-55">DigitalOcean and nginx and Docker php-fpm and MariaDB 5.5</h3>
-<div class="highlight"><pre><span></span><span class="n">Concurrency</span><span class="w"> </span><span class="k">Level</span><span class="err">:</span><span class="w">      </span><span class="mi">100</span><span class="w"></span>
+</code></pre></div>
+
+<h3>DigitalOcean and nginx and Docker php-fpm and MariaDB 5.5</h3>
+<div class="highlight"><pre><span></span><code><span class="n">Concurrency</span><span class="w"> </span><span class="k">Level</span><span class="err">:</span><span class="w">      </span><span class="mi">100</span><span class="w"></span>
 <span class="nc">Time</span><span class="w"> </span><span class="n">taken</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="nl">tests</span><span class="p">:</span><span class="w">   </span><span class="mf">7.791</span><span class="w"> </span><span class="n">seconds</span><span class="w"></span>
 <span class="n">Complete</span><span class="w"> </span><span class="nl">requests</span><span class="p">:</span><span class="w">      </span><span class="mi">500</span><span class="w"></span>
 <span class="n">Failed</span><span class="w"> </span><span class="nl">requests</span><span class="p">:</span><span class="w">        </span><span class="mi">0</span><span class="w"></span>
@@ -631,23 +609,26 @@ The oneliner is a complicated way of sed replacing two lines at once (tr replace
 <span class="w">  </span><span class="mi">98</span><span class="o">%</span><span class="w">   </span><span class="mi">1877</span><span class="w"></span>
 <span class="w">  </span><span class="mi">99</span><span class="o">%</span><span class="w">   </span><span class="mi">1930</span><span class="w"></span>
 <span class="w"> </span><span class="mi">100</span><span class="o">%</span><span class="w">   </span><span class="mi">2022</span><span class="w"> </span><span class="p">(</span><span class="n">longest</span><span class="w"> </span><span class="n">request</span><span class="p">)</span><span class="w"></span>
-</pre></div>
+</code></pre></div>
+
 <blockquote>
 <p>So it seems there's a slight edge in either cherokee over nginx OR not running dockerized applications OR linode vs digitalocean BUT...</p>
 </blockquote>
 <p>When I tweaked it for higher concurrency <code>ab -l -r -n 500 -c 200 -k -H "Accept-Encoding: gzip, deflate" http://physicstime.com/node?page=8</code></p>
 <p>Linode + Cherokee + php-cgi</p>
-<div class="highlight"><pre><span></span><span class="nc">Time</span><span class="w"> </span><span class="n">taken</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="nl">tests</span><span class="p">:</span><span class="w">   </span><span class="mf">9.933</span><span class="w"> </span><span class="n">seconds</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="nc">Time</span><span class="w"> </span><span class="n">taken</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="nl">tests</span><span class="p">:</span><span class="w">   </span><span class="mf">9.933</span><span class="w"> </span><span class="n">seconds</span><span class="w"></span>
 <span class="n">Requests</span><span class="w"> </span><span class="n">per</span><span class="w"> </span><span class="k">second</span><span class="err">:</span><span class="w">    </span><span class="mf">50.34</span><span class="w"> </span><span class="o">[</span><span class="n">#/sec</span><span class="o">]</span><span class="w"> </span><span class="p">(</span><span class="n">mean</span><span class="p">)</span><span class="w"></span>
 <span class="nc">Time</span><span class="w"> </span><span class="n">per</span><span class="w"> </span><span class="nl">request</span><span class="p">:</span><span class="w">       </span><span class="mf">3973.367</span><span class="w"> </span><span class="o">[</span><span class="n">ms</span><span class="o">]</span><span class="w"> </span><span class="p">(</span><span class="n">mean</span><span class="p">)</span><span class="w"></span>
-</pre></div>
+</code></pre></div>
+
 <p>DigitalOcean + Nginx + Docker + php-fpm</p>
-<div class="highlight"><pre><span></span><span class="nc">Time</span><span class="w"> </span><span class="n">taken</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="nl">tests</span><span class="p">:</span><span class="w">   </span><span class="mf">8.120</span><span class="w"> </span><span class="n">seconds</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="nc">Time</span><span class="w"> </span><span class="n">taken</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="nl">tests</span><span class="p">:</span><span class="w">   </span><span class="mf">8.120</span><span class="w"> </span><span class="n">seconds</span><span class="w"></span>
 <span class="n">Requests</span><span class="w"> </span><span class="n">per</span><span class="w"> </span><span class="k">second</span><span class="err">:</span><span class="w">    </span><span class="mf">61.58</span><span class="w"> </span><span class="o">[</span><span class="n">#/sec</span><span class="o">]</span><span class="w"> </span><span class="p">(</span><span class="n">mean</span><span class="p">)</span><span class="w"></span>
 <span class="nc">Time</span><span class="w"> </span><span class="n">per</span><span class="w"> </span><span class="nl">request</span><span class="p">:</span><span class="w">       </span><span class="mf">3248.067</span><span class="w"> </span><span class="o">[</span><span class="n">ms</span><span class="o">]</span><span class="w"> </span><span class="p">(</span><span class="n">mean</span><span class="p">)</span><span class="w"></span>
-</pre></div>
+</code></pre></div>
+
 <p>I can see the trend reverse (shrug)</p>
-<h4 id="latency-testing">Latency testing</h4>
+<h4>Latency testing</h4>
 <p><a href="https://tools.pingdom.com/">https://tools.pingdom.com/</a></p>
 <ul>
 <li>website speed test (NY) for cherokee and php-cgi had a load time of 1.17s</li>
@@ -656,7 +637,7 @@ The oneliner is a complicated way of sed replacing two lines at once (tr replace
 <blockquote>
 <p>meh</p>
 </blockquote>
-<h3 id="conclusions">Conclusions</h3>
+<h3>Conclusions</h3>
 <p>Adding docker simplifies one kind of complexity (stringing together multiple services that are packaged upstream) but can come at some cost to performance. (Though this might also be due to the cheaper node price)</p>
 <p>The other major advantage of using docker is that different components/services can be upgraded independently (and even just "test upgraded") which allows for a faster adoption of upstream project improvements.</p>
 <p>I personally don't like relying on the OS of the host for all of the global dependencies to play nice (and especially that different packages won't have conflicting dependencies).</p>
@@ -683,7 +664,7 @@ The oneliner is a complicated way of sed replacing two lines at once (tr replace
             <time pubdate="pubdate" datetime="2016-07-28T23:59:00-07:00">Jul 28, 2016</time>
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#virtualization-ref">virtualization</a> 
-            <h4>~2479 words</h4>
+            <h4>~2480 words</h4>
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article"> 
                 <li><a href="/tags.html#digitalocean-ref">digitalocean

@@ -61,38 +61,22 @@
 </div>
 
 <div class="row-fluid">
-    <div class="span2 table-of-content">
-        <nav>
-        <h4>Contents</h4>
-        <div class="toc">
-<ul>
-<li><a href="#tradeoffs">Tradeoffs</a></li>
-<li><a href="#naive-fibonacci-recursion">Naive Fibonacci Recursion</a></li>
-<li><a href="#fibonacci-timings-and-golang-playground-time-is-frozen">Fibonacci timings and golang playground time is frozen</a></li>
-<li><a href="#memoization-aka-caching-with-fibonacci">Memoization aka Caching with Fibonacci</a></li>
-<li><a href="#dynamic-programming-with-fibonacci-numbers">Dynamic Programming with Fibonacci Numbers</a></li>
-<li><a href="#comparing-with-benchmarks">Comparing with Benchmarks</a></li>
-<li><a href="#insights">Insights</a></li>
-</ul>
-</div>
-        </nav>
-    </div>
-    <div class="span8 article-content">
+        <div class="span8 offset2 article-content">
 
-            
-<h2 id="tradeoffs">Tradeoffs</h2>
+            <p>[TOC]</p>
+<h2>Tradeoffs</h2>
 <p>There is an inevitable tradeoff of storage versus computation speed, or space used versus time to run, in every program.</p>
 <p>Caching is often viewed as a performance optimization but sometimes it is the only way to achieve a result in a finite amount of time.</p>
 <p><a href="https://en.wikipedia.org/wiki/Dynamic_programming">https://en.wikipedia.org/wiki/Dynamic_programming</a> is about breaking down a problem into sub-problems where each solution can be stored so that it can be looked up rather than recomputed.</p>
 <p><a href="https://en.wikipedia.org/wiki/Memoization">https://en.wikipedia.org/wiki/Memoization</a> is related in that it is about storing the output of a function call when specific parameters are provided.
 Thus it is often conceptualized as a special kind of caching.</p>
-<h2 id="naive-fibonacci-recursion">Naive Fibonacci Recursion</h2>
+<h2>Naive Fibonacci Recursion</h2>
 <p><a href="https://en.wikipedia.org/wiki/Fibonacci_number">https://en.wikipedia.org/wiki/Fibonacci_number</a> is a classic numerical series where each subsequent number is the sum of the previous two numbers: <code>1 1 2 3 5 8 13...</code> </p>
 <p>An interesting problem is to calculate the series up to a certain point.  The straightforward solution uses recursion:</p>
-<div class="highlight"><pre><span></span><span class="kn">package</span> <span class="nx">main</span>
+<div class="highlight"><pre><span></span><code><span class="kn">package</span> <span class="nx">main</span>
 
 <span class="kn">import</span> <span class="p">(</span>
-    <span class="s">"fmt"</span>
+    <span class="s">&quot;fmt&quot;</span>
 <span class="p">)</span>
 
 <span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
@@ -113,12 +97,13 @@ Thus it is often conceptualized as a special kind of caching.</p>
     <span class="p">}</span>
     <span class="k">return</span> <span class="nx">fib</span><span class="p">(</span><span class="nx">x</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="nx">fib</span><span class="p">(</span><span class="nx">x</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span>
 <span class="p">}</span>
-</pre></div>
+</code></pre></div>
+
 <p><code>go run main.go</code></p>
 <blockquote>
 <p>Each iteration in the series discards the previous results and then re-calculates the intermediate steps for each subsequent iteration</p>
 </blockquote>
-<h2 id="fibonacci-timings-and-golang-playground-time-is-frozen">Fibonacci timings and golang playground time is frozen</h2>
+<h2>Fibonacci timings and golang playground time is frozen</h2>
 <p><a href="https://play.golang.org/p/esejwsN0lQ">https://play.golang.org/p/esejwsN0lQ</a> is an example with timings but...
 ...sorry, the Go Playground does not really use time (and caches all output) so to really see the difference you must run the program locally (Andrew Gerrand explains)...</p>
 <ul>
@@ -128,9 +113,9 @@ Thus it is often conceptualized as a special kind of caching.</p>
 <li>http://www.gophercon.in/blog/2015/02/17/andrew/</li>
 <li>https://talks.golang.org/2014/go4gophers.slide#3</li>
 </ul>
-<h2 id="memoization-aka-caching-with-fibonacci">Memoization aka Caching with Fibonacci</h2>
+<h2>Memoization aka Caching with Fibonacci</h2>
 <p>It almost seems common sense that we should not be re-calculating answers that we already know for every step...</p>
-<div class="highlight"><pre><span></span><span class="kd">func</span> <span class="nx">fibSeriesMemoization</span><span class="p">(</span><span class="nx">n</span> <span class="kt">int</span><span class="p">)</span> <span class="p">[]</span><span class="kt">int</span> <span class="p">{</span>
+<div class="highlight"><pre><span></span><code><span class="kd">func</span> <span class="nx">fibSeriesMemoization</span><span class="p">(</span><span class="nx">n</span> <span class="kt">int</span><span class="p">)</span> <span class="p">[]</span><span class="kt">int</span> <span class="p">{</span>
     <span class="nx">a</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">([]</span><span class="kt">int</span><span class="p">,</span> <span class="nx">n</span><span class="p">)</span>
     <span class="nx">m</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">map</span><span class="p">[</span><span class="kt">int</span><span class="p">]</span><span class="kt">int</span><span class="p">)</span>
     <span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="mi">1</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;=</span> <span class="nx">n</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">{</span>
@@ -154,16 +139,17 @@ Thus it is often conceptualized as a special kind of caching.</p>
     <span class="p">}</span>
     <span class="k">return</span> <span class="nx">m</span><span class="p">[</span><span class="nx">x</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="nx">m</span><span class="p">[</span><span class="nx">x</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
 <span class="p">}</span>
-</pre></div>
+</code></pre></div>
+
 <blockquote>
 <p>Using a map as a lookup table caches the result of each function call during each iteration</p>
 </blockquote>
 <p><a href="https://play.golang.org/p/Wxgl_OwkTY">https://play.golang.org/p/Wxgl_OwkTY</a> again provides the full code (despite the Go playground not really providing time elapsed)</p>
 <p>That's it: identifying the extra work and storing it somewhere that can be referenced, the trade-off is now that more memory is required. =]</p>
-<h2 id="dynamic-programming-with-fibonacci-numbers">Dynamic Programming with Fibonacci Numbers</h2>
+<h2>Dynamic Programming with Fibonacci Numbers</h2>
 <p>This alternative implementation removes the recursion (and helper function) and instead uses a simple for loop and a slice of ints.
 It highlights the nuance of how Dynamic Programming is not necessarily just storing the result of a function call but genuinely understanding the nature of the problem.</p>
-<div class="highlight"><pre><span></span><span class="kd">func</span> <span class="nx">fibDynamic</span><span class="p">(</span><span class="nx">n</span> <span class="kt">int</span><span class="p">)</span> <span class="p">[]</span><span class="kt">int</span> <span class="p">{</span>
+<div class="highlight"><pre><span></span><code><span class="kd">func</span> <span class="nx">fibDynamic</span><span class="p">(</span><span class="nx">n</span> <span class="kt">int</span><span class="p">)</span> <span class="p">[]</span><span class="kt">int</span> <span class="p">{</span>
     <span class="nx">a</span> <span class="o">:=</span> <span class="p">[]</span><span class="kt">int</span><span class="p">{</span><span class="mi">1</span><span class="p">}</span>
     <span class="k">if</span> <span class="nx">n</span> <span class="o">==</span> <span class="mi">1</span> <span class="p">{</span>
         <span class="k">return</span> <span class="nx">a</span>
@@ -177,15 +163,16 @@ It highlights the nuance of how Dynamic Programming is not necessarily just stor
     <span class="p">}</span>
     <span class="k">return</span> <span class="nx">a</span>
 <span class="p">}</span>
-</pre></div>
+</code></pre></div>
+
 <blockquote>
 <p>this trivial example also benefits from the slice index corresponding well to a key for each fibonacci value in the "lookup table"</p>
 </blockquote>
 <p>The example Dynamic Programming solution avoids the map lookup and so should be the most performant <a href="https://play.golang.org/p/VY9ul6ievC">https://play.golang.org/p/VY9ul6ievC</a>, but since the Go Playground time elapsed does not work...</p>
-<h2 id="comparing-with-benchmarks">Comparing with Benchmarks</h2>
+<h2>Comparing with Benchmarks</h2>
 <p>Besides the "manual performance testing" with time and print statements you can use Go's more sophisticated tooling with bench.</p>
 <p>Create <strong>main_test.go</strong> and run <code>go test -v -run=NOMATCH -bench=BenchmarkFibonacciSeries</code></p>
-<div class="highlight"><pre><span></span><span class="kd">func</span> <span class="nx">BenchmarkFibonacciSeriesRecursive</span><span class="p">(</span><span class="nx">b</span> <span class="o">*</span><span class="nx">testing</span><span class="p">.</span><span class="nx">B</span><span class="p">)</span> <span class="p">{</span>
+<div class="highlight"><pre><span></span><code><span class="kd">func</span> <span class="nx">BenchmarkFibonacciSeriesRecursive</span><span class="p">(</span><span class="nx">b</span> <span class="o">*</span><span class="nx">testing</span><span class="p">.</span><span class="nx">B</span><span class="p">)</span> <span class="p">{</span>
     <span class="k">for</span> <span class="nx">n</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">n</span> <span class="p">&lt;</span> <span class="nx">b</span><span class="p">.</span><span class="nx">N</span><span class="p">;</span> <span class="nx">n</span><span class="o">++</span> <span class="p">{</span>
         <span class="nx">fibSeriesRecursive</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
     <span class="p">}</span>
@@ -202,11 +189,12 @@ It highlights the nuance of how Dynamic Programming is not necessarily just stor
         <span class="nx">fibDynamic</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
     <span class="p">}</span>
 <span class="p">}</span>
-</pre></div>
+</code></pre></div>
+
 <blockquote>
 <p>The nanoseconds per operation are dramatically less in the side-by-side comparison</p>
 </blockquote>
-<div class="highlight"><pre><span></span><span class="n">goos</span><span class="o">:</span> <span class="n">linux</span>
+<div class="highlight"><pre><span></span><code><span class="n">goos</span><span class="o">:</span> <span class="n">linux</span>
 <span class="n">goarch</span><span class="o">:</span> <span class="n">amd64</span>
 <span class="n">pkg</span><span class="o">:</span> <span class="n">bitbucket</span><span class="o">.</span><span class="na">org</span><span class="sr">/johnpfeiffer/gosrc/</span><span class="n">benchmarking</span>
 <span class="n">BenchmarkFibonacciSeriesRecursive</span><span class="o">-</span><span class="mi">4</span>                <span class="mi">10000</span>            <span class="mi">191632</span> <span class="n">ns</span><span class="o">/</span><span class="n">op</span>
@@ -214,12 +202,13 @@ It highlights the nuance of how Dynamic Programming is not necessarily just stor
 <span class="n">BenchmarkFibonacciSeriesDynamicProgramming</span><span class="o">-</span><span class="mi">4</span>     <span class="mi">2000000</span>               <span class="mi">814</span> <span class="n">ns</span><span class="o">/</span><span class="n">op</span>
 <span class="n">PASS</span>
 <span class="n">ok</span>      <span class="n">bitbucket</span><span class="o">.</span><span class="na">org</span><span class="sr">/johnpfeiffer/gosrc/</span><span class="n">benchmarking</span>   <span class="mf">7.157</span><span class="n">s</span>
-</pre></div>
+</code></pre></div>
+
 <ul>
 <li><a href="https://github.com/johnpfeiffer/go-fibonacci">https://github.com/johnpfeiffer/go-fibonacci</a> for full source code</li>
 <li><em>Reference for running go benchmarking <a href="https://blog.john-pfeiffer.com/golang-testing-benchmark-profiling-subtests-fuzz-testing/#running-specific-benchmarks">https://blog.john-pfeiffer.com/golang-testing-benchmark-profiling-subtests-fuzz-testing/#running-specific-benchmarks</a></em></li>
 </ul>
-<h2 id="insights">Insights</h2>
+<h2>Insights</h2>
 <p>The hardest part of applying caching is understanding the problem well enough to see where the extra work can be avoided.
 Thus I recommend pen and paper (or whiteboard) for diagramming the tree of (usually recursive) calls in order to see any patterns.</p>
 <p>The tradeoff of memory for computation (time!) is usually worth it given modern large amounts of cheap memory available (assuming we do not have to worry about cache invalidation ;).</p>
@@ -248,7 +237,7 @@ Thus I recommend pen and paper (or whiteboard) for diagramming the tree of (usua
             <time pubdate="pubdate" datetime="2017-11-06T20:45:00-08:00">Nov 6, 2017</time>
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#programming-ref">programming</a> 
-            <h4>~729 words</h4>
+            <h4>~730 words</h4>
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article"> 
                 <li><a href="/tags.html#benchmark-ref">benchmark

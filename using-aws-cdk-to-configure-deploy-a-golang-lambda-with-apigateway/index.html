@@ -61,51 +61,15 @@
 </div>
 
 <div class="row-fluid">
-    <div class="span2 table-of-content">
-        <nav>
-        <h4>Contents</h4>
-        <div class="toc">
-<ul>
-<li><a href="#cdk-vocabulary">CDK vocabulary</a></li>
-<li><a href="#install-the-aws-cdk-tool">Install the AWS CDK Tool</a></li>
-<li><a href="#setup-the-project-directories">Setup the project directories</a></li>
-<li><a href="#install-the-dependencies-for-aws-resources-that-cdk-will-manage">Install the dependencies for AWS resources that CDK will manage</a></li>
-<li><a href="#write-the-actual-infrastructure-code">Write the actual Infrastructure Code</a><ul>
-<li><a href="#output-cloudformation-from-a-cdk-typescript-file">Output CloudFormation from a CDK Typescript file</a></li>
-</ul>
-</li>
-<li><a href="#deploy-resources-that-cdk-has-defined">Deploy resources that CDK has defined</a><ul>
-<li><a href="#verify-the-new-bucket-was-created">Verify the new bucket was created</a></li>
-</ul>
-</li>
-<li><a href="#making-updates-with-cdk">Making updates with CDK</a><ul>
-<li><a href="#preview-changes-with-diff">Preview changes with diff</a></li>
-<li><a href="#apply-the-new-changes">Apply the new changes</a></li>
-</ul>
-</li>
-<li><a href="#apigateway-plus-lambda-plus-go">APIGateway plus Lambda plus Go</a><ul>
-<li><a href="#a-tiny-go-web-request-handler">A tiny Go Web Request Handler</a><ul>
-<li><a href="#manually-build-your-go-binary-for-aws-lambda">Manually build your go binary for AWS Lambda</a></li>
-</ul>
-</li>
-<li><a href="#cdk-with-a-golang-lambda">CDK with a Golang Lambda</a></li>
-<li><a href="#cdk-with-an-apigateway-integrated-with-a-go-lambda">CDK with an APIGateway integrated with a Go Lambda</a></li>
-</ul>
-</li>
-<li><a href="#verify-your-new-api-gateway-and-golang-lambda-with-curl">Verify your new API Gateway and Golang Lambda with CURL</a></li>
-</ul>
-</div>
-        </nav>
-    </div>
-    <div class="span8 article-content">
+        <div class="span8 offset2 article-content">
 
-            
+            <p>[TOC]</p>
 <p>Infrastructure as Code helps guarantee the elusive determinism in infrastructure that we all seek in building applications and services.
 Often you can defer that complexity by using Heroku, Google App Engine,  or other PaaS providers. But when you need to build something really complex (or with specific controls required including managing costs) then using IaaC to tame AWS Serverless reduces some of that pain.</p>
 <p>AWS have created their own specific product (domain specific language) "CDK" which competes with the venerable Terraform and nicely focused Serverless.</p>
 <p><em>All of these products use the json syntax of CloudFormation which is the foundational AWS syntax for describing resources</em></p>
 <p>It is straightforward to iteratively setup and use AWS CDK (with the native Typescript syntax).</p>
-<h2 id="cdk-vocabulary">CDK vocabulary</h2>
+<h2>CDK vocabulary</h2>
 <p>It all begins with <strong>stacks</strong>.</p>
 <p>From an object oriented perspective, a stack is a definition of components that can be instantiated. An "app" is a collection of related stacks.</p>
 <p>Let's say you wanted your persistence (DynamoDB) in one stack, and your more execution oriented components (APIGateway and Lambda) in another stack, and your App might have environment specific parameters it needs to define and pass through to each stack.</p>
@@ -114,13 +78,13 @@ Often you can defer that complexity by using Heroku, Google App Engine,  or othe
 <li><a href="https://docs.aws.amazon.com/cdk/latest/guide/stacks.html">https://docs.aws.amazon.com/cdk/latest/guide/stacks.html</a></li>
 <li><a href="https://intro-to-cdk.workshop.aws/what-is-cdk.html">https://intro-to-cdk.workshop.aws/what-is-cdk.html</a></li>
 </ul>
-<h2 id="install-the-aws-cdk-tool">Install the AWS CDK Tool</h2>
+<h2>Install the AWS CDK Tool</h2>
 <p>Have to use npm to install the cdk tool...</p>
 <p><code>npm install -g aws-cdk</code></p>
 <ul>
 <li><a href="https://docs.aws.amazon.com/cdk/latest/guide/cli.html">https://docs.aws.amazon.com/cdk/latest/guide/cli.html</a></li>
 </ul>
-<h2 id="setup-the-project-directories">Setup the project directories</h2>
+<h2>Setup the project directories</h2>
 <p><code>mkdir cdk-example</code></p>
 <p><code>cd cdk-example</code></p>
 <p>Create a subdirectory to compartmentalize all the infrastructure code <em>(from the rest of the application, i.e. don't mix the business logic with the infrastructure plumbing)</em></p>
@@ -132,50 +96,53 @@ Often you can defer that complexity by using Heroku, Google App Engine,  or othe
 </blockquote>
 <p><code>cdk ls</code></p>
 <blockquote>
-<div class="highlight"><pre><span></span><span class="err">   InfraStack</span>
-</pre></div>
+<div class="highlight"><pre><span></span><code>   InfraStack
+</code></pre></div>
+
 <p>Names are hard but whatever you pick, like <strong>"Infra"</strong>, will then show up in the AWS resources everywhere related to this project</p>
 </blockquote>
-<h2 id="install-the-dependencies-for-aws-resources-that-cdk-will-manage">Install the dependencies for AWS resources that CDK will manage</h2>
+<h2>Install the dependencies for AWS resources that CDK will manage</h2>
 <p>Option 1: manually install dependencies <em>(it will automatically insert this into package.json)</em></p>
 <p><code>npm install @aws-cdk/aws-s3 @aws-cdk/aws-lambda</code></p>
 <p>Option 2: write the lines into packages.json and run at the command line in the infra directory: <code>npm install</code></p>
 <blockquote>
 <p>Writing files first (and ensuring they are in version control) is a more IaaC pattern</p>
 </blockquote>
-<div class="highlight"><pre><span></span><span class="s2">"dependencies"</span><span class="err">:</span> <span class="p">{</span>
-  <span class="nt">"@aws-cdk/aws-s3"</span><span class="p">:</span> <span class="s2">"*"</span><span class="p">,</span>
-  <span class="nt">"@aws-cdk/core"</span><span class="p">:</span> <span class="s2">"*"</span><span class="p">,</span>
-  <span class="nt">"source-map-support"</span><span class="p">:</span> <span class="s2">"^0.5.16"</span>
+<div class="highlight"><pre><span></span><code><span class="nt">&quot;dependencies&quot;</span><span class="p">:</span> <span class="p">{</span>
+  <span class="nt">&quot;@aws-cdk/aws-s3&quot;</span><span class="p">:</span> <span class="s2">&quot;*&quot;</span><span class="p">,</span>
+  <span class="nt">&quot;@aws-cdk/core&quot;</span><span class="p">:</span> <span class="s2">&quot;*&quot;</span><span class="p">,</span>
+  <span class="nt">&quot;source-map-support&quot;</span><span class="p">:</span> <span class="s2">&quot;^0.5.16&quot;</span>
 <span class="p">}</span>
-</pre></div>
-<h2 id="write-the-actual-infrastructure-code">Write the actual Infrastructure Code</h2>
+</code></pre></div>
+
+<h2>Write the actual Infrastructure Code</h2>
 <p>The initial application template creates an empty "class" that represents the "stack", we customize and replace that code with the following...</p>
 <p><strong>lib/infra-stack.ts</strong> has only 2 changes to the default file, the import of S3 and the new Bucket resource "MyExampleBucket"</p>
-<div class="highlight"><pre><span></span><span class="kr">import</span> <span class="o">*</span> <span class="kr">as</span> <span class="nx">cdk</span> <span class="nx">from</span> <span class="s1">'@aws-cdk/core'</span><span class="p">;</span>
-<span class="kr">import</span> <span class="o">*</span> <span class="kr">as</span> <span class="nx">s3</span> <span class="nx">from</span> <span class="s1">'@aws-cdk/aws-s3'</span><span class="p">;</span>
+<div class="highlight"><pre><span></span><code><span class="k">import</span> <span class="o">*</span> <span class="kr">as</span> <span class="nx">cdk</span> <span class="kr">from</span> <span class="s1">&#39;@aws-cdk/core&#39;</span><span class="p">;</span>
+<span class="k">import</span> <span class="o">*</span> <span class="kr">as</span> <span class="nx">s3</span> <span class="kr">from</span> <span class="s1">&#39;@aws-cdk/aws-s3&#39;</span><span class="p">;</span>
 
-<span class="kr">export</span> <span class="kr">class</span> <span class="nx">InfraStack</span> <span class="kr">extends</span> <span class="nx">cdk</span><span class="p">.</span><span class="nx">Stack</span> <span class="p">{</span>
+<span class="k">export</span> <span class="kd">class</span> <span class="nx">InfraStack</span> <span class="k">extends</span> <span class="nx">cdk</span><span class="p">.</span><span class="nx">Stack</span> <span class="p">{</span>
   <span class="kr">constructor</span><span class="p">(</span><span class="nx">scope</span>: <span class="kt">cdk.Construct</span><span class="p">,</span> <span class="nx">id</span>: <span class="kt">string</span><span class="p">,</span> <span class="nx">props?</span>: <span class="kt">cdk.StackProps</span><span class="p">)</span> <span class="p">{</span>
-    <span class="kr">super</span><span class="p">(</span><span class="nx">scope</span><span class="p">,</span> <span class="nx">id</span><span class="p">,</span> <span class="nx">props</span><span class="p">);</span>
+    <span class="k">super</span><span class="p">(</span><span class="nx">scope</span><span class="p">,</span> <span class="nx">id</span><span class="p">,</span> <span class="nx">props</span><span class="p">);</span>
 
-    <span class="k">new</span> <span class="nx">s3</span><span class="p">.</span><span class="nx">Bucket</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="s1">'MyExampleBucket'</span><span class="p">,</span> <span class="p">{</span>
+    <span class="ow">new</span> <span class="nx">s3</span><span class="p">.</span><span class="nx">Bucket</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="s1">&#39;MyExampleBucket&#39;</span><span class="p">,</span> <span class="p">{</span>
       <span class="nx">versioned</span>: <span class="kt">true</span>
     <span class="p">});</span>
   <span class="p">}</span>
 <span class="p">}</span>
-</pre></div>
+</code></pre></div>
+
 <blockquote>
 <p>The import renames are important to be consistent in subsequent code, so if something is "cdk" then it is cdk.Construct</p>
 </blockquote>
 <p>More complex applications will use a "main entry point" that can refer to specific files for various stacks.
 - <a href="https://docs.aws.amazon.com/cdk/latest/guide/serverless_example.html">https://docs.aws.amazon.com/cdk/latest/guide/serverless_example.html</a></p>
-<h3 id="output-cloudformation-from-a-cdk-typescript-file">Output CloudFormation from a CDK Typescript file</h3>
+<h3>Output CloudFormation from a CDK Typescript file</h3>
 <p><code>cdk synth</code></p>
 <blockquote>
 <p>this command will output to the display the CloudFormation that will be sent/used by AWS</p>
 </blockquote>
-<div class="highlight"><pre><span></span><span class="nt">Resources</span><span class="p">:</span>
+<div class="highlight"><pre><span></span><code><span class="nt">Resources</span><span class="p">:</span>
   <span class="nt">MyExampleBucket8D68EFCA</span><span class="p">:</span>
     <span class="nt">Type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">AWS::S3::Bucket</span>
     <span class="nt">Properties</span><span class="p">:</span>
@@ -188,15 +155,16 @@ Often you can defer that complexity by using Heroku, Google App Engine,  or othe
   <span class="nt">CDKMetadata</span><span class="p">:</span>
     <span class="nt">Type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">AWS::CDK::Metadata</span>
     <span class="nt">Properties</span><span class="p">:</span>
-</pre></div>
+</code></pre></div>
+
 <p>To preview what will occur between changes to the .ts file...</p>
 <p><code>cdk diff</code></p>
-<h2 id="deploy-resources-that-cdk-has-defined">Deploy resources that CDK has defined</h2>
+<h2>Deploy resources that CDK has defined</h2>
 <p><code>cdk deploy</code></p>
 <blockquote>
 <p>warning, really making a change in AWS (based on your creds)</p>
 </blockquote>
-<div class="highlight"><pre><span></span>InfraStack
+<div class="highlight"><pre><span></span><code>InfraStack
 
 InfraStack: deploying...
 InfraStack: creating CloudFormation changeset...
@@ -204,30 +172,32 @@ InfraStack: creating CloudFormation changeset...
 
 Stack ARN:
 arn:aws:cloudformation:us-east-1:409670809604:stack/InfraStack/b5167030-00fb-11eb-9f36-12f8925a37c4
-</pre></div>
-<h3 id="verify-the-new-bucket-was-created">Verify the new bucket was created</h3>
+</code></pre></div>
+
+<h3>Verify the new bucket was created</h3>
 <p><code>aws s3 ls | grep MyExampleBucket</code></p>
 <p><em>this assumes you have installed the AWS CLI like <code>sudo apt install awscli</code></em></p>
 <p><code>aws cloudformation list-stacks | grep InfraStack</code></p>
 <blockquote>
 <p>this listing will also show deleted Stacks</p>
 </blockquote>
-<h2 id="making-updates-with-cdk">Making updates with CDK</h2>
+<h2>Making updates with CDK</h2>
 <p>A tiny snippet change to allow bucket deletion...</p>
-<div class="highlight"><pre><span></span><span class="k">new</span> <span class="nx">s3</span><span class="p">.</span><span class="nx">Bucket</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="s1">'MyExampleBucket'</span><span class="p">,</span> <span class="p">{</span>
+<div class="highlight"><pre><span></span><code><span class="ow">new</span> <span class="nx">s3</span><span class="p">.</span><span class="nx">Bucket</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="s1">&#39;MyExampleBucket&#39;</span><span class="p">,</span> <span class="p">{</span>
   <span class="nx">versioned</span>: <span class="kt">true</span><span class="p">,</span>
   <span class="nx">removalPolicy</span>: <span class="kt">cdk.RemovalPolicy.DESTROY</span>
 <span class="p">});</span>
-</pre></div>
+</code></pre></div>
+
 <ul>
 <li><a href="https://docs.aws.amazon.com/cdk/latest/guide/hello_world.html">https://docs.aws.amazon.com/cdk/latest/guide/hello_world.html</a></li>
 <li><a href="https://docs.aws.amazon.com/cdk/api/latest/typescript/api/aws-s3.html">https://docs.aws.amazon.com/cdk/api/latest/typescript/api/aws-s3.html</a></li>
 <li><a href="https://docs.aws.amazon.com/cdk/api/latest/typescript/api/aws-s3/bucketpolicyprops.html#aws_s3_BucketPolicyProps">https://docs.aws.amazon.com/cdk/api/latest/typescript/api/aws-s3/bucketpolicyprops.html#aws_s3_BucketPolicyProps</a></li>
 <li><a href="https://docs.aws.amazon.com/cdk/api/latest/typescript/api/core/removalpolicy.html#core_RemovalPolicy">https://docs.aws.amazon.com/cdk/api/latest/typescript/api/core/removalpolicy.html#core_RemovalPolicy</a></li>
 </ul>
-<h3 id="preview-changes-with-diff">Preview changes with diff</h3>
+<h3>Preview changes with diff</h3>
 <p><code>cdk diff</code></p>
-<div class="highlight"><pre><span></span>Stack InfraStack
+<div class="highlight"><pre><span></span><code>Stack InfraStack
 Resources
 <span class="o">[</span>~<span class="o">]</span> AWS::S3::Bucket JohnPBucket JohnPBucket8D68EFCA
  ├─ <span class="o">[</span>~<span class="o">]</span> DeletionPolicy
@@ -236,12 +206,14 @@ Resources
  └─ <span class="o">[</span>~<span class="o">]</span> UpdateReplacePolicy
      ├─ <span class="o">[</span>-<span class="o">]</span> Retain
      └─ <span class="o">[</span>+<span class="o">]</span> Delete
-</pre></div>
-<h3 id="apply-the-new-changes">Apply the new changes</h3>
+</code></pre></div>
+
+<h3>Apply the new changes</h3>
 <p><code>cdk deploy</code></p>
-<div class="highlight"><pre><span></span>InfraStack: deploying...
+<div class="highlight"><pre><span></span><code>InfraStack: deploying...
 InfraStack: creating CloudFormation changeset...
-</pre></div>
+</code></pre></div>
+
 <p><code>cdk destroy</code></p>
 <p><code>aws s3 ls | grep MyExampleBucket</code></p>
 <p><code>aws cloudformation list-stacks | grep InfraStack</code></p>
@@ -249,50 +221,51 @@ InfraStack: creating CloudFormation changeset...
 <blockquote>
 <p>s3 buckets are designed by default to not delete with a Stack, you must change the removal policy to do so</p>
 </blockquote>
-<hr/>
-<h2 id="apigateway-plus-lambda-plus-go">APIGateway plus Lambda plus Go</h2>
+<hr>
+<h2>APIGateway plus Lambda plus Go</h2>
 <p>The trick to using Golang with AWS Lambdas is that it is a compiled language. Many tutorials for lambdas (even for CDK) use javascript or python since those dynamic languages can just be put in "one more file" without a build step.</p>
-<h3 id="a-tiny-go-web-request-handler">A tiny Go Web Request Handler</h3>
+<h3>A tiny Go Web Request Handler</h3>
 <p>Put a simple placeholder Golang Lambda in place <em>using the Gin web framework for convenience</em></p>
 <p><code>mkdir cdk-example/examplefunction/ ; cd cdk-example/examplefunction/</code></p>
 <p><code>vim main.go</code></p>
-<div class="highlight"><pre><span></span><span class="n">package</span> <span class="n">main</span>
+<div class="highlight"><pre><span></span><code><span class="kn">package</span> <span class="nx">main</span>
 
 <span class="kn">import</span> <span class="p">(</span>
-        <span class="s2">"context"</span>
-        <span class="s2">"log"</span>
+        <span class="s">&quot;context&quot;</span>
+        <span class="s">&quot;log&quot;</span>
 
-        <span class="s2">"github.com/aws/aws-lambda-go/events"</span>
-        <span class="s2">"github.com/aws/aws-lambda-go/lambda"</span>
-        <span class="s2">"github.com/awslabs/aws-lambda-go-api-proxy/gin"</span>
-        <span class="s2">"github.com/gin-gonic/gin"</span>
+        <span class="s">&quot;github.com/aws/aws-lambda-go/events&quot;</span>
+        <span class="s">&quot;github.com/aws/aws-lambda-go/lambda&quot;</span>
+        <span class="s">&quot;github.com/awslabs/aws-lambda-go-api-proxy/gin&quot;</span>
+        <span class="s">&quot;github.com/gin-gonic/gin&quot;</span>
 <span class="p">)</span>
 
-<span class="n">var</span> <span class="n">ginLambda</span> <span class="o">*</span><span class="n">ginadapter</span><span class="o">.</span><span class="n">GinLambda</span>
+<span class="kd">var</span> <span class="nx">ginLambda</span> <span class="o">*</span><span class="nx">ginadapter</span><span class="p">.</span><span class="nx">GinLambda</span>
 
-<span class="o">//</span> <span class="k">for</span> <span class="n">convenience</span> <span class="n">leverage</span> <span class="n">the</span> <span class="n">Go</span> <span class="n">init</span> <span class="n">startup</span> <span class="n">concept</span> <span class="n">to</span> <span class="n">define</span> <span class="n">a</span> <span class="k">global</span> <span class="n">web</span> <span class="n">server</span> <span class="nb">object</span>
-<span class="n">func</span> <span class="n">init</span><span class="p">()</span> <span class="p">{</span>
-        <span class="o">//</span> <span class="n">stdout</span> <span class="ow">and</span> <span class="n">stderr</span> <span class="n">are</span> <span class="n">sent</span> <span class="n">to</span> <span class="n">AWS</span> <span class="n">CloudWatch</span> <span class="n">Logs</span>
-        <span class="n">log</span><span class="o">.</span><span class="n">Printf</span><span class="p">(</span><span class="s2">"Gin starting"</span><span class="p">)</span>
-        <span class="n">r</span> <span class="p">:</span><span class="o">=</span> <span class="n">gin</span><span class="o">.</span><span class="n">Default</span><span class="p">()</span>
-        <span class="n">r</span><span class="o">.</span><span class="n">GET</span><span class="p">(</span><span class="s2">"/ping"</span><span class="p">,</span> <span class="n">func</span><span class="p">(</span><span class="n">c</span> <span class="o">*</span><span class="n">gin</span><span class="o">.</span><span class="n">Context</span><span class="p">)</span> <span class="p">{</span>
-                <span class="n">c</span><span class="o">.</span><span class="n">JSON</span><span class="p">(</span><span class="mi">200</span><span class="p">,</span> <span class="n">gin</span><span class="o">.</span><span class="n">H</span><span class="p">{</span>
-                        <span class="s2">"message"</span><span class="p">:</span> <span class="s2">"pong"</span><span class="p">,</span>
+<span class="c1">// for convenience leverage the Go init startup concept to define a global web server object</span>
+<span class="kd">func</span> <span class="nx">init</span><span class="p">()</span> <span class="p">{</span>
+        <span class="c1">// stdout and stderr are sent to AWS CloudWatch Logs</span>
+        <span class="nx">log</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;Gin starting&quot;</span><span class="p">)</span>
+        <span class="nx">r</span> <span class="o">:=</span> <span class="nx">gin</span><span class="p">.</span><span class="nx">Default</span><span class="p">()</span>
+        <span class="nx">r</span><span class="p">.</span><span class="nx">GET</span><span class="p">(</span><span class="s">&quot;/ping&quot;</span><span class="p">,</span> <span class="kd">func</span><span class="p">(</span><span class="nx">c</span> <span class="o">*</span><span class="nx">gin</span><span class="p">.</span><span class="nx">Context</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">c</span><span class="p">.</span><span class="nx">JSON</span><span class="p">(</span><span class="mi">200</span><span class="p">,</span> <span class="nx">gin</span><span class="p">.</span><span class="nx">H</span><span class="p">{</span>
+                        <span class="s">&quot;message&quot;</span><span class="p">:</span> <span class="s">&quot;pong&quot;</span><span class="p">,</span>
                 <span class="p">})</span>
         <span class="p">})</span>
-        <span class="n">ginLambda</span> <span class="o">=</span> <span class="n">ginadapter</span><span class="o">.</span><span class="n">New</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+        <span class="nx">ginLambda</span> <span class="p">=</span> <span class="nx">ginadapter</span><span class="p">.</span><span class="nx">New</span><span class="p">(</span><span class="nx">r</span><span class="p">)</span>
 <span class="p">}</span>
 
 
-<span class="o">//</span> <span class="n">Handler</span> <span class="ow">is</span> <span class="n">the</span> <span class="n">function</span> <span class="n">that</span> <span class="n">executes</span> <span class="k">for</span> <span class="n">every</span> <span class="n">Request</span> <span class="n">passed</span> <span class="n">into</span> <span class="n">the</span> <span class="n">Lambda</span>
-<span class="n">func</span> <span class="n">Handler</span><span class="p">(</span><span class="n">ctx</span> <span class="n">context</span><span class="o">.</span><span class="n">Context</span><span class="p">,</span> <span class="n">req</span> <span class="n">events</span><span class="o">.</span><span class="n">APIGatewayProxyRequest</span><span class="p">)</span> <span class="p">(</span><span class="n">events</span><span class="o">.</span><span class="n">APIGatewayProxyResponse</span><span class="p">,</span> <span class="n">error</span><span class="p">)</span> <span class="p">{</span>
-        <span class="k">return</span> <span class="n">ginLambda</span><span class="o">.</span><span class="n">ProxyWithContext</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">req</span><span class="p">)</span>
+<span class="c1">// Handler is the function that executes for every Request passed into the Lambda</span>
+<span class="kd">func</span> <span class="nx">Handler</span><span class="p">(</span><span class="nx">ctx</span> <span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span> <span class="nx">req</span> <span class="nx">events</span><span class="p">.</span><span class="nx">APIGatewayProxyRequest</span><span class="p">)</span> <span class="p">(</span><span class="nx">events</span><span class="p">.</span><span class="nx">APIGatewayProxyResponse</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="nx">ginLambda</span><span class="p">.</span><span class="nx">ProxyWithContext</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span> <span class="nx">req</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="n">func</span> <span class="n">main</span><span class="p">()</span> <span class="p">{</span>
-        <span class="k">lambda</span><span class="o">.</span><span class="n">Start</span><span class="p">(</span><span class="n">Handler</span><span class="p">)</span>
+<span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+        <span class="nx">lambda</span><span class="p">.</span><span class="nx">Start</span><span class="p">(</span><span class="nx">Handler</span><span class="p">)</span>
 <span class="p">}</span>
-</pre></div>
+</code></pre></div>
+
 <p><code>go mod init</code></p>
 <blockquote>
 <p>Ensure dependencies (like the AWS SDK) are recognized by the Go package manager</p>
@@ -302,7 +275,7 @@ InfraStack: creating CloudFormation changeset...
 <p>This is the simplest way to trigger downloading the dependencies (imported packages), you may have to create a tiny main_test.go in order to force this to work</p>
 </blockquote>
 <p><a href="https://blog.golang.org/using-go-modules">https://blog.golang.org/using-go-modules</a></p>
-<h4 id="manually-build-your-go-binary-for-aws-lambda">Manually build your go binary for AWS Lambda</h4>
+<h4>Manually build your go binary for AWS Lambda</h4>
 <p>This will create an output file named "main"</p>
 <p><code>GOOS=linux GOARCH=amd64 go build -o main main.go</code></p>
 <blockquote>
@@ -315,7 +288,7 @@ InfraStack: creating CloudFormation changeset...
 <blockquote>
 <p>AWS requires these precompiled binaries to in .zip format</p>
 </blockquote>
-<h3 id="cdk-with-a-golang-lambda">CDK with a Golang Lambda</h3>
+<h3>CDK with a Golang Lambda</h3>
 <p>Focusing on just the "infra" subdirectory in our project:</p>
 <ul>
 <li><strong>cdk-example/infra/package.json</strong></li>
@@ -323,37 +296,38 @@ InfraStack: creating CloudFormation changeset...
 </ul>
 <p><code>cd cdk-example/infra/</code></p>
 <p>First update <strong>package.json</strong></p>
-<div class="highlight"><pre><span></span><span class="s2">"dependencies"</span><span class="o">:</span> <span class="p">{</span>
-  <span class="s2">"@aws-cdk/core"</span><span class="o">:</span> <span class="s2">"*"</span><span class="p">,</span>
-  <span class="s2">"@aws-cdk/aws-s3"</span><span class="o">:</span> <span class="s2">"*"</span><span class="p">,</span>
-  <span class="s2">"@aws-cdk/aws-s3-assets"</span><span class="o">:</span> <span class="s2">"*"</span><span class="p">,</span>
-  <span class="s2">"@aws-cdk/aws-lambda"</span><span class="o">:</span> <span class="s2">"*"</span><span class="p">,</span>
-  <span class="s2">"source-map-support"</span><span class="o">:</span> <span class="s2">"^0.5.16"</span>
+<div class="highlight"><pre><span></span><code><span class="s2">&quot;dependencies&quot;</span><span class="o">:</span> <span class="p">{</span>
+  <span class="s2">&quot;@aws-cdk/core&quot;</span><span class="o">:</span> <span class="s2">&quot;*&quot;</span><span class="p">,</span>
+  <span class="s2">&quot;@aws-cdk/aws-s3&quot;</span><span class="o">:</span> <span class="s2">&quot;*&quot;</span><span class="p">,</span>
+  <span class="s2">&quot;@aws-cdk/aws-s3-assets&quot;</span><span class="o">:</span> <span class="s2">&quot;*&quot;</span><span class="p">,</span>
+  <span class="s2">&quot;@aws-cdk/aws-lambda&quot;</span><span class="o">:</span> <span class="s2">&quot;*&quot;</span><span class="p">,</span>
+  <span class="s2">&quot;source-map-support&quot;</span><span class="o">:</span> <span class="s2">&quot;^0.5.16&quot;</span>
 <span class="p">}</span>
-</pre></div>
+</code></pre></div>
+
 <p>Do not forget to <code>npm install</code></p>
 <p>Next update the <strong>lib/infra-stack.ts</strong></p>
 <blockquote>
 <p>Layout the resources from the deepest dependency first, so in this case a place for the golang function to be zipped</p>
 </blockquote>
-<div class="highlight"><pre><span></span><span class="kr">import</span> <span class="o">*</span> <span class="kr">as</span> <span class="nx">cdk</span> <span class="nx">from</span> <span class="s1">'@aws-cdk/core'</span><span class="p">;</span>
-<span class="kr">import</span> <span class="o">*</span> <span class="kr">as</span> <span class="nx">s3</span> <span class="nx">from</span> <span class="s1">'@aws-cdk/aws-s3'</span><span class="p">;</span>
-<span class="kr">import</span> <span class="o">*</span> <span class="kr">as</span> <span class="nx">lambda</span> <span class="nx">from</span> <span class="s1">'@aws-cdk/aws-lambda'</span><span class="p">;</span>
-<span class="kr">import</span> <span class="nx">assets</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s2">"@aws-cdk/aws-s3-assets"</span><span class="p">)</span>
-<span class="kr">import</span> <span class="nx">path</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s2">"path"</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="k">import</span> <span class="o">*</span> <span class="kr">as</span> <span class="nx">cdk</span> <span class="kr">from</span> <span class="s1">&#39;@aws-cdk/core&#39;</span><span class="p">;</span>
+<span class="k">import</span> <span class="o">*</span> <span class="kr">as</span> <span class="nx">s3</span> <span class="kr">from</span> <span class="s1">&#39;@aws-cdk/aws-s3&#39;</span><span class="p">;</span>
+<span class="k">import</span> <span class="o">*</span> <span class="kr">as</span> <span class="nx">lambda</span> <span class="kr">from</span> <span class="s1">&#39;@aws-cdk/aws-lambda&#39;</span><span class="p">;</span>
+<span class="k">import</span> <span class="nx">assets</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s2">&quot;@aws-cdk/aws-s3-assets&quot;</span><span class="p">)</span>
+<span class="k">import</span> <span class="nx">path</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s2">&quot;path&quot;</span><span class="p">)</span>
 
-<span class="kr">export</span> <span class="kr">class</span> <span class="nx">InfraStack</span> <span class="kr">extends</span> <span class="nx">cdk</span><span class="p">.</span><span class="nx">Stack</span> <span class="p">{</span>
+<span class="k">export</span> <span class="kd">class</span> <span class="nx">InfraStack</span> <span class="k">extends</span> <span class="nx">cdk</span><span class="p">.</span><span class="nx">Stack</span> <span class="p">{</span>
   <span class="kr">constructor</span><span class="p">(</span><span class="nx">scope</span>: <span class="kt">cdk.Construct</span><span class="p">,</span> <span class="nx">id</span>: <span class="kt">string</span><span class="p">,</span> <span class="nx">props?</span>: <span class="kt">cdk.StackProps</span><span class="p">)</span> <span class="p">{</span>
-    <span class="kr">super</span><span class="p">(</span><span class="nx">scope</span><span class="p">,</span> <span class="nx">id</span><span class="p">,</span> <span class="nx">props</span><span class="p">);</span>
+    <span class="k">super</span><span class="p">(</span><span class="nx">scope</span><span class="p">,</span> <span class="nx">id</span><span class="p">,</span> <span class="nx">props</span><span class="p">);</span>
 
     <span class="c1">// Golang binaries must have a place where they are uploaded to s3 as a .zip</span>
-    <span class="kr">const</span> <span class="nx">asset</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">assets</span><span class="p">.</span><span class="nx">Asset</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="s1">'ExampleFunctionZip'</span><span class="p">,</span> <span class="p">{</span>
-      <span class="nx">path</span>: <span class="kt">path.join</span><span class="p">(</span><span class="nx">__dirname</span><span class="p">,</span> <span class="s1">'../../examplefunction.zip'</span><span class="p">),</span>
+    <span class="kd">const</span> <span class="nx">asset</span> <span class="o">=</span> <span class="ow">new</span> <span class="nx">assets</span><span class="p">.</span><span class="nx">Asset</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="s1">&#39;ExampleFunctionZip&#39;</span><span class="p">,</span> <span class="p">{</span>
+      <span class="nx">path</span>: <span class="kt">path.join</span><span class="p">(</span><span class="nx">__dirname</span><span class="p">,</span> <span class="s1">&#39;../../examplefunction.zip&#39;</span><span class="p">),</span>
     <span class="p">});</span>
 
-    <span class="kr">const</span> <span class="nx">handler</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">lambda</span><span class="p">.</span><span class="nb">Function</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="s2">"ExampleFunction"</span><span class="p">,</span> <span class="p">{</span>
+    <span class="kd">const</span> <span class="nx">handler</span> <span class="o">=</span> <span class="ow">new</span> <span class="nx">lambda</span><span class="p">.</span><span class="nb">Function</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="s2">&quot;ExampleFunction&quot;</span><span class="p">,</span> <span class="p">{</span>
       <span class="nx">runtime</span>: <span class="kt">lambda.Runtime.GO_1_X</span><span class="p">,</span>
-      <span class="nx">handler</span><span class="o">:</span> <span class="s2">"main"</span><span class="p">,</span>
+      <span class="nx">handler</span><span class="o">:</span> <span class="s2">&quot;main&quot;</span><span class="p">,</span>
       <span class="nx">code</span>: <span class="kt">lambda.Code.fromBucket</span><span class="p">(</span>
         <span class="nx">asset</span><span class="p">.</span><span class="nx">bucket</span><span class="p">,</span>
         <span class="nx">asset</span><span class="p">.</span><span class="nx">s3ObjectKey</span>
@@ -361,7 +335,8 @@ InfraStack: creating CloudFormation changeset...
     <span class="p">});</span>
   <span class="p">}</span>
 <span class="p">}</span>
-</pre></div>
+</code></pre></div>
+
 <blockquote>
 <p>This crucial glue code indicates that the Lambda will be named "ExampleFunction", that it will get the binary (zipped) from S3, and that the handler expects to have a binary "main"</p>
 </blockquote>
@@ -379,7 +354,7 @@ InfraStack: creating CloudFormation changeset...
 <p>outputting and previewing the changes that will appear in AWS</p>
 </blockquote>
 <p><code>cdk deploy</code></p>
-<div class="highlight"><pre><span></span>InfraStack: deploying...
+<div class="highlight"><pre><span></span><code>InfraStack: deploying...
 <span class="o">[</span><span class="m">0</span>%<span class="o">]</span> start: Publishing 05e95f6b38c932a779e68a7a685e9950eca688e775c77f84787f6fa3e2ade474:current
 <span class="o">[</span><span class="m">100</span>%<span class="o">]</span> success: Published 05e95f6b38c932a779e68a7a685e9950eca688e775c77f84787f6fa3e2ade474:current
 InfraStack: creating CloudFormation changeset...
@@ -388,48 +363,50 @@ InfraStack: creating CloudFormation changeset...
 
 Stack ARN:
 arn:aws:cloudformation:us-east-1:409670809604:stack/InfraStack/248d2960-0104-11eb-8cc5-0ac853a0932f
-</pre></div>
+</code></pre></div>
+
 <blockquote>
 <p>Use the AWS Console UI and visually look at the cloud formation stacks</p>
 </blockquote>
 <p>e.g. <a href="https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/">https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/</a></p>
 <p>When you filter and click on your new stack (e.g. InfraStack) you will be able to see the Resources associated with that stack</p>
 <p>The default policy "AWSLambdaBasicExecutionRole" will actually allow the Lambda to output logs to Cloudwatch</p>
-<h3 id="cdk-with-an-apigateway-integrated-with-a-go-lambda">CDK with an APIGateway integrated with a Go Lambda</h3>
+<h3>CDK with an APIGateway integrated with a Go Lambda</h3>
 <p>Create the APIG and attach it to the Lambda:</p>
 <p>First update <strong>infra/package.json</strong></p>
-<div class="highlight"><pre><span></span>  <span class="s2">"dependencies"</span><span class="o">:</span> <span class="p">{</span>
-    <span class="s2">"@aws-cdk/aws-apigateway"</span><span class="o">:</span> <span class="s2">"*"</span><span class="p">,</span>
-    <span class="s2">"@aws-cdk/aws-lambda"</span><span class="o">:</span> <span class="s2">"*"</span><span class="p">,</span>
-    <span class="s2">"@aws-cdk/aws-s3"</span><span class="o">:</span> <span class="s2">"*"</span><span class="p">,</span>
-    <span class="s2">"@aws-cdk/aws-s3-assets"</span><span class="o">:</span> <span class="s2">"*"</span><span class="p">,</span>
-    <span class="s2">"@aws-cdk/core"</span><span class="o">:</span> <span class="s2">"*"</span><span class="p">,</span>
-    <span class="s2">"source-map-support"</span><span class="o">:</span> <span class="s2">"^0.5.16"</span>
+<div class="highlight"><pre><span></span><code>  <span class="s2">&quot;dependencies&quot;</span><span class="o">:</span> <span class="p">{</span>
+    <span class="s2">&quot;@aws-cdk/aws-apigateway&quot;</span><span class="o">:</span> <span class="s2">&quot;*&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;@aws-cdk/aws-lambda&quot;</span><span class="o">:</span> <span class="s2">&quot;*&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;@aws-cdk/aws-s3&quot;</span><span class="o">:</span> <span class="s2">&quot;*&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;@aws-cdk/aws-s3-assets&quot;</span><span class="o">:</span> <span class="s2">&quot;*&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;@aws-cdk/core&quot;</span><span class="o">:</span> <span class="s2">&quot;*&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;source-map-support&quot;</span><span class="o">:</span> <span class="s2">&quot;^0.5.16&quot;</span>
   <span class="p">}</span>
-</pre></div>
+</code></pre></div>
+
 <p><code>npm install</code></p>
 <p>Define the API Gateway in CDK <em>(only adding a few more lines)</em></p>
 <p><a href="https://docs.aws.amazon.com/cdk/api/latest/docs/aws-apigateway-readme.html#aws-lambda-backed-apis">https://docs.aws.amazon.com/cdk/api/latest/docs/aws-apigateway-readme.html#aws-lambda-backed-apis</a></p>
-<div class="highlight"><pre><span></span><span class="kr">import</span> <span class="o">*</span> <span class="kr">as</span> <span class="nx">cdk</span> <span class="nx">from</span> <span class="s1">'@aws-cdk/core'</span><span class="p">;</span>
-<span class="kr">import</span> <span class="o">*</span> <span class="kr">as</span> <span class="nx">s3</span> <span class="nx">from</span> <span class="s1">'@aws-cdk/aws-s3'</span><span class="p">;</span>
-<span class="kr">import</span> <span class="o">*</span> <span class="kr">as</span> <span class="nx">lambda</span> <span class="nx">from</span> <span class="s1">'@aws-cdk/aws-lambda'</span><span class="p">;</span>
-<span class="kr">import</span> <span class="nx">assets</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s2">"@aws-cdk/aws-s3-assets"</span><span class="p">)</span>
-<span class="kr">import</span> <span class="nx">apigw</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s2">"@aws-cdk/aws-apigateway"</span><span class="p">)</span>
-<span class="kr">import</span> <span class="nx">path</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s2">"path"</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="k">import</span> <span class="o">*</span> <span class="kr">as</span> <span class="nx">cdk</span> <span class="kr">from</span> <span class="s1">&#39;@aws-cdk/core&#39;</span><span class="p">;</span>
+<span class="k">import</span> <span class="o">*</span> <span class="kr">as</span> <span class="nx">s3</span> <span class="kr">from</span> <span class="s1">&#39;@aws-cdk/aws-s3&#39;</span><span class="p">;</span>
+<span class="k">import</span> <span class="o">*</span> <span class="kr">as</span> <span class="nx">lambda</span> <span class="kr">from</span> <span class="s1">&#39;@aws-cdk/aws-lambda&#39;</span><span class="p">;</span>
+<span class="k">import</span> <span class="nx">assets</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s2">&quot;@aws-cdk/aws-s3-assets&quot;</span><span class="p">)</span>
+<span class="k">import</span> <span class="nx">apigw</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s2">&quot;@aws-cdk/aws-apigateway&quot;</span><span class="p">)</span>
+<span class="k">import</span> <span class="nx">path</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s2">&quot;path&quot;</span><span class="p">)</span>
 
 
-<span class="kr">export</span> <span class="kr">class</span> <span class="nx">InfraStack</span> <span class="kr">extends</span> <span class="nx">cdk</span><span class="p">.</span><span class="nx">Stack</span> <span class="p">{</span>
+<span class="k">export</span> <span class="kd">class</span> <span class="nx">InfraStack</span> <span class="k">extends</span> <span class="nx">cdk</span><span class="p">.</span><span class="nx">Stack</span> <span class="p">{</span>
   <span class="kr">constructor</span><span class="p">(</span><span class="nx">scope</span>: <span class="kt">cdk.Construct</span><span class="p">,</span> <span class="nx">id</span>: <span class="kt">string</span><span class="p">,</span> <span class="nx">props?</span>: <span class="kt">cdk.StackProps</span><span class="p">)</span> <span class="p">{</span>
-    <span class="kr">super</span><span class="p">(</span><span class="nx">scope</span><span class="p">,</span> <span class="nx">id</span><span class="p">,</span> <span class="nx">props</span><span class="p">);</span>
+    <span class="k">super</span><span class="p">(</span><span class="nx">scope</span><span class="p">,</span> <span class="nx">id</span><span class="p">,</span> <span class="nx">props</span><span class="p">);</span>
 
     <span class="c1">// Golang binaries must have a place where they are uploaded to s3 as a .zip</span>
-    <span class="kr">const</span> <span class="nx">asset</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">assets</span><span class="p">.</span><span class="nx">Asset</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="s1">'ExampleFunctionZip'</span><span class="p">,</span> <span class="p">{</span>
-      <span class="nx">path</span>: <span class="kt">path.join</span><span class="p">(</span><span class="nx">__dirname</span><span class="p">,</span> <span class="s1">'../../examplefunction'</span><span class="p">),</span>
+    <span class="kd">const</span> <span class="nx">asset</span> <span class="o">=</span> <span class="ow">new</span> <span class="nx">assets</span><span class="p">.</span><span class="nx">Asset</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="s1">&#39;ExampleFunctionZip&#39;</span><span class="p">,</span> <span class="p">{</span>
+      <span class="nx">path</span>: <span class="kt">path.join</span><span class="p">(</span><span class="nx">__dirname</span><span class="p">,</span> <span class="s1">&#39;../../examplefunction&#39;</span><span class="p">),</span>
     <span class="p">});</span>
 
-    <span class="kr">const</span> <span class="nx">myhandler</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">lambda</span><span class="p">.</span><span class="nb">Function</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="s2">"ExampleFunction"</span><span class="p">,</span> <span class="p">{</span>
+    <span class="kd">const</span> <span class="nx">myhandler</span> <span class="o">=</span> <span class="ow">new</span> <span class="nx">lambda</span><span class="p">.</span><span class="nb">Function</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="s2">&quot;ExampleFunction&quot;</span><span class="p">,</span> <span class="p">{</span>
       <span class="nx">runtime</span>: <span class="kt">lambda.Runtime.GO_1_X</span><span class="p">,</span>
-      <span class="nx">handler</span><span class="o">:</span> <span class="s2">"main"</span><span class="p">,</span>
+      <span class="nx">handler</span><span class="o">:</span> <span class="s2">&quot;main&quot;</span><span class="p">,</span>
       <span class="nx">code</span>: <span class="kt">lambda.Code.fromBucket</span><span class="p">(</span>
         <span class="nx">asset</span><span class="p">.</span><span class="nx">bucket</span><span class="p">,</span>
         <span class="nx">asset</span><span class="p">.</span><span class="nx">s3ObjectKey</span>
@@ -437,10 +414,11 @@ arn:aws:cloudformation:us-east-1:409670809604:stack/InfraStack/248d2960-0104-11e
     <span class="p">});</span>
 
     <span class="c1">// all routes (and REST verbs) will pass through to the lambda</span>
-    <span class="kr">const</span> <span class="nx">api</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">apigw</span><span class="p">.</span><span class="nx">LambdaRestApi</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="s1">'examplefunction'</span><span class="p">,</span> <span class="p">{</span><span class="nx">handler</span>: <span class="kt">myhandler</span><span class="p">});</span>
+    <span class="kd">const</span> <span class="nx">api</span> <span class="o">=</span> <span class="ow">new</span> <span class="nx">apigw</span><span class="p">.</span><span class="nx">LambdaRestApi</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="s1">&#39;examplefunction&#39;</span><span class="p">,</span> <span class="p">{</span><span class="nx">handler</span>: <span class="kt">myhandler</span><span class="p">});</span>
   <span class="p">}</span>
 <span class="p">}</span>
-</pre></div>
+</code></pre></div>
+
 <blockquote>
 <p>one gotcha is the ordering of imports, have the "path" one last</p>
 </blockquote>
@@ -453,7 +431,7 @@ arn:aws:cloudformation:us-east-1:409670809604:stack/InfraStack/248d2960-0104-11e
 <blockquote>
 <p>There is a warning about security because AssumeRole</p>
 </blockquote>
-<div class="highlight"><pre><span></span>InfraStack: deploying...
+<div class="highlight"><pre><span></span><code>InfraStack: deploying...
 <span class="o">[</span><span class="m">0</span>%<span class="o">]</span> start: Publishing 05e95f6b38c932a779e68a7a685e9950eca688e775c77f84787f6fa3e2ade474:current
 <span class="o">[</span><span class="m">100</span>%<span class="o">]</span> success: Published 05e95f6b38c932a779e68a7a685e9950eca688e775c77f84787f6fa3e2ade474:current
 InfraStack: creating CloudFormation changeset...
@@ -465,8 +443,9 @@ InfraStack.examplefunctionEndpoint65D9943D <span class="o">=</span> https://abc1
 
 Stack ARN:
 arn:aws:cloudformation:us-east-1:409670809604:stack/InfraStack/248d2960-0104-11eb-8cc5-0ac853a0932f
-</pre></div>
-<h2 id="verify-your-new-api-gateway-and-golang-lambda-with-curl">Verify your new API Gateway and Golang Lambda with CURL</h2>
+</code></pre></div>
+
+<h2>Verify your new API Gateway and Golang Lambda with CURL</h2>
 <p>The very helpful output means you can use <code>CURL</code> directly <em>(as you get to ignore the whole "this apigateway needs to be deployed to a stage")</em></p>
 <p><code>curl https://abc123.execute-api.us-east-1.amazonaws.com/prod/ping</code></p>
 <p><em>you should get back either 404 or "pong" =)</em></p>
@@ -493,7 +472,7 @@ arn:aws:cloudformation:us-east-1:409670809604:stack/InfraStack/248d2960-0104-11e
             <time pubdate="pubdate" datetime="2020-09-27T14:48:00-07:00">Sep 27, 2020</time>
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#build-CI-CD-devops-ref">build-CI-CD-devops</a> 
-            <h4>~1539 words</h4>
+            <h4>~1540 words</h4>
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article"> 
                 <li><a href="/tags.html#apigateway-ref">apigateway

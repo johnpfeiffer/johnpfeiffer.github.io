@@ -61,29 +61,10 @@
 </div>
 
 <div class="row-fluid">
-    <div class="span2 table-of-content">
-        <nav>
-        <h4>Contents</h4>
-        <div class="toc">
-<ul>
-<li><a href="#why-build-automation">Why build automation?</a></li>
-<li><a href="#why-not-chef">Why not chef?</a></li>
-<li><a href="#packer-to-the-rescue">Packer to the rescue</a><ul>
-<li><a href="#my_example_boxjson">my_example_box.json</a></li>
-<li><a href="#my_advanced_boxjson">my_advanced_box.json</a></li>
-</ul>
-</li>
-<li><a href="#packer-and-digitalocean">Packer and DigitalOcean</a></li>
-<li><a href="#why-not-docker-containers">Why not docker containers?</a></li>
-<li><a href="#more-info">more info</a></li>
-</ul>
-</div>
-        </nav>
-    </div>
-    <div class="span8 article-content">
+        <div class="span8 offset2 article-content">
 
-            
-<h3 id="why-build-automation">Why build automation?</h3>
+            <p>[TOC]</p>
+<h3>Why build automation?</h3>
 <p>Software has always been about automation and leveraging the computer's capacity for precision and repetition.</p>
 <p>Somehow though, software is sometimes still deployed using a series of often poorly documented steps (to physical hardware even!). I've been there, it ain't pretty. (badpokerface)</p>
 <p>The second time you need to build a server running service(s) you may be under time pressure. (Murphy's law says you might be building it again because the first one which was business critical blew up unexpectedly.)</p>
@@ -91,7 +72,7 @@
 <p>(Almost everyone agrees that technology employees are expensive and so by extension their time is constantly being wasted by everything they do).</p>
 <p>As virtualization (and linux!) took over the world there was an explosion of virtual machines that needed to be deployed and an evolution of a fairly standard virtual harwdare layer. (x86 cpu and Intel NIC anyone?)</p>
 <p>Suddenly you couldn't hire enough antisocial people to run around with floppies and scratching cds while shoving them into servers.</p>
-<h3 id="why-not-chef">Why not chef?</h3>
+<h3>Why not chef?</h3>
 <p>Chef, Puppet, and Ansible are the well known configuration management and build/deployment automation tools.</p>
 <p>Automated configuration management which tries to keep a remote server in a specific state seems like a good recipe for things going wrong</p>
 <p>I've used chef successfully quite a few times and the main things that make it a specialized tool that I prefer not to use:</p>
@@ -113,29 +94,30 @@
 <li><a href="http://erik.hollensbe.org/2013/03/16/the-chef-resource-run-queue/">http://erik.hollensbe.org/2013/03/16/the-chef-resource-run-queue/</a></li>
 </ol>
 <p>So is there a simpler way to just reliably, reproducibly, build a box?</p>
-<h3 id="packer-to-the-rescue">Packer to the rescue</h3>
+<h3>Packer to the rescue</h3>
 <p>Packer is from the same people who brought you Vagrant <a href="https://www.vagrantup.com/">https://www.vagrantup.com/</a> , that really easy way to set up a virtual machine... <a href="https://blog.john-pfeiffer.com/using-vagrant-to-deploy-instances-on-aws">https://blog.john-pfeiffer.com/using-vagrant-to-deploy-instances-on-aws</a></p>
 <p>It is very straightforward to read and actually you can still leverage chef (unless you realize that a series of shell commands is all you wanted anyways...)</p>
 <p>This leads to the better path of "immutable servers" <a href="http://martinfowler.com/bliki/ImmutableServer.html">http://martinfowler.com/bliki/ImmutableServer.html</a></p>
 <p><code>packer --version</code></p>
-<h4 id="my_example_boxjson">my_example_box.json</h4>
-<div class="highlight"><pre><span></span><span class="p">{</span>
-  <span class="nt">"variables"</span><span class="p">:</span> <span class="p">{</span>
-    <span class="nt">"aws_access_key"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
-    <span class="nt">"aws_secret_key"</span><span class="p">:</span> <span class="s2">""</span>
+<h4>my_example_box.json</h4>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+  <span class="nt">&quot;variables&quot;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="nt">&quot;aws_access_key&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;aws_secret_key&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span>
   <span class="p">},</span>
-  <span class="nt">"builders"</span><span class="p">:</span> <span class="p">[{</span>
-    <span class="nt">"type"</span><span class="p">:</span> <span class="s2">"amazon-ebs"</span><span class="p">,</span>
-    <span class="nt">"access_key"</span><span class="p">:</span> <span class="s2">"{{user `aws_access_key`}}"</span><span class="p">,</span>
-    <span class="nt">"secret_key"</span><span class="p">:</span> <span class="s2">"{{user `aws_secret_key`}}"</span><span class="p">,</span>
-    <span class="nt">"region"</span><span class="p">:</span> <span class="s2">"us-east-1"</span><span class="p">,</span>
-    <span class="nt">"source_ami"</span><span class="p">:</span> <span class="s2">"ami-de0d9eb7"</span><span class="p">,</span>
-    <span class="nt">"instance_type"</span><span class="p">:</span> <span class="s2">"t1.micro"</span><span class="p">,</span>
-    <span class="nt">"ssh_username"</span><span class="p">:</span> <span class="s2">"ubuntu"</span><span class="p">,</span>
-    <span class="nt">"ami_name"</span><span class="p">:</span> <span class="s2">"packer-example {{timestamp}}"</span>
+  <span class="nt">&quot;builders&quot;</span><span class="p">:</span> <span class="p">[{</span>
+    <span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;amazon-ebs&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;access_key&quot;</span><span class="p">:</span> <span class="s2">&quot;{{user `aws_access_key`}}&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;secret_key&quot;</span><span class="p">:</span> <span class="s2">&quot;{{user `aws_secret_key`}}&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;region&quot;</span><span class="p">:</span> <span class="s2">&quot;us-east-1&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;source_ami&quot;</span><span class="p">:</span> <span class="s2">&quot;ami-de0d9eb7&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;instance_type&quot;</span><span class="p">:</span> <span class="s2">&quot;t1.micro&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;ssh_username&quot;</span><span class="p">:</span> <span class="s2">&quot;ubuntu&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;ami_name&quot;</span><span class="p">:</span> <span class="s2">&quot;packer-example {{timestamp}}&quot;</span>
   <span class="p">}]</span>
 <span class="p">}</span>
-</pre></div>
+</code></pre></div>
+
 <p><code>packer validate mybox.json</code></p>
 <p><code>packer build mybox.json</code></p>
 <p><code>packer build -debug mybox.json</code></p>
@@ -148,108 +130,111 @@
 <p>Unfortunately it is not machine readable json output so you have to do some bash-fu to extract just the id</p>
 <p>Also unfortunately there is no way to tell packer to not terminate so you can troubleshoot, the workarounds are the -debug which is essentially "interactive" or adding sleep commands</p>
 </blockquote>
-<h4 id="my_advanced_boxjson">my_advanced_box.json</h4>
-<div class="highlight"><pre><span></span><span class="p">{</span>
-  <span class="nt">"_comment"</span><span class="p">:</span> <span class="s2">"This is a comment"</span><span class="p">,</span>
-  <span class="nt">"variables"</span><span class="p">:</span> <span class="p">{</span>
-      <span class="nt">"my_secret"</span><span class="p">:</span> <span class="s2">"{{env `MY_SECRET`}}"</span><span class="p">,</span>
+<h4>my_advanced_box.json</h4>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+  <span class="nt">&quot;_comment&quot;</span><span class="p">:</span> <span class="s2">&quot;This is a comment&quot;</span><span class="p">,</span>
+  <span class="nt">&quot;variables&quot;</span><span class="p">:</span> <span class="p">{</span>
+      <span class="nt">&quot;my_secret&quot;</span><span class="p">:</span> <span class="s2">&quot;{{env `MY_SECRET`}}&quot;</span><span class="p">,</span>
   <span class="p">},</span>
-  <span class="nt">"builders"</span><span class="p">:</span> <span class="p">[{</span>
-    <span class="nt">"type"</span><span class="p">:</span> <span class="s2">"amazon-ebs"</span><span class="p">,</span>
-    <span class="nt">"region"</span><span class="p">:</span> <span class="s2">"us-east-1"</span><span class="p">,</span>
-    <span class="nt">"source_ami"</span><span class="p">:</span> <span class="s2">"ami-de0d9eb7"</span><span class="p">,</span>
-    <span class="nt">"instance_type"</span><span class="p">:</span> <span class="s2">"t1.micro"</span><span class="p">,</span>
-    <span class="nt">"ssh_username"</span><span class="p">:</span> <span class="s2">"ubuntu"</span><span class="p">,</span>
-    <span class="nt">"ami_name"</span><span class="p">:</span> <span class="s2">"packer-example {{timestamp}}"</span>
-    <span class="s2">"subnet_id"</span><span class="p">:</span> <span class="s2">"subnet-f0be1234"</span><span class="p">,</span>
-    <span class="nt">"security_group_id"</span><span class="p">:</span> <span class="s2">"sg-9bf51234"</span><span class="p">,</span>
-    <span class="nt">"associate_public_ip_address"</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
-    <span class="nt">"ssh_keypair_name"</span><span class="p">:</span> <span class="s2">"my-packer"</span><span class="p">,</span>
-    <span class="nt">"ssh_private_key_file"</span><span class="p">:</span> <span class="s2">"./my-packer.pem"</span>
+  <span class="nt">&quot;builders&quot;</span><span class="p">:</span> <span class="p">[{</span>
+    <span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;amazon-ebs&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;region&quot;</span><span class="p">:</span> <span class="s2">&quot;us-east-1&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;source_ami&quot;</span><span class="p">:</span> <span class="s2">&quot;ami-de0d9eb7&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;instance_type&quot;</span><span class="p">:</span> <span class="s2">&quot;t1.micro&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;ssh_username&quot;</span><span class="p">:</span> <span class="s2">&quot;ubuntu&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;ami_name&quot;</span><span class="p">:</span> <span class="nt">&quot;packer-example {{timestamp}}&quot;</span>
+    <span class="nt">&quot;subnet_id&quot;</span><span class="p">:</span> <span class="s2">&quot;subnet-f0be1234&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;security_group_id&quot;</span><span class="p">:</span> <span class="s2">&quot;sg-9bf51234&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;associate_public_ip_address&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+    <span class="nt">&quot;ssh_keypair_name&quot;</span><span class="p">:</span> <span class="s2">&quot;my-packer&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;ssh_private_key_file&quot;</span><span class="p">:</span> <span class="s2">&quot;./my-packer.pem&quot;</span>
   <span class="p">}],</span>
-  <span class="nt">"provisioners"</span><span class="p">:</span> <span class="p">[{</span>
-    <span class="nt">"type"</span><span class="p">:</span> <span class="s2">"file"</span><span class="p">,</span>
-    <span class="nt">"source"</span><span class="p">:</span> <span class="s2">"./debs/"</span><span class="p">,</span>
-    <span class="nt">"destination"</span><span class="p">:</span> <span class="s2">"/tmp"</span>
+  <span class="nt">&quot;provisioners&quot;</span><span class="p">:</span> <span class="p">[{</span>
+    <span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;file&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;source&quot;</span><span class="p">:</span> <span class="s2">&quot;./debs/&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;destination&quot;</span><span class="p">:</span> <span class="s2">&quot;/tmp&quot;</span>
   <span class="p">},</span>
   <span class="p">{</span>
-    <span class="nt">"type"</span><span class="p">:</span> <span class="s2">"shell"</span><span class="p">,</span>
-    <span class="nt">"inline"</span><span class="p">:</span> <span class="p">[</span>
-      <span class="s2">"/sbin/ip a"</span><span class="p">,</span>
-      <span class="s2">"curl -s http://checkip.amazonaws.com"</span><span class="p">,</span>
-      <span class="s2">"ls -ahl /tmp"</span><span class="p">,</span>
-      <span class="s2">"echo {{user `my_secret`}} &gt; /tmp/{{isotime \"2006-01-02-030405\"}}--my-secret.txt"</span><span class="p">,</span>
-      <span class="s2">"sudo dpkg -i --force-confnew /tmp/*.deb"</span><span class="p">,</span>
-      <span class="s2">"machine_state_validation.sh"</span>
+    <span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;shell&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;inline&quot;</span><span class="p">:</span> <span class="p">[</span>
+      <span class="s2">&quot;/sbin/ip a&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;curl -s http://checkip.amazonaws.com&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;ls -ahl /tmp&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;echo {{user `my_secret`}} &gt; /tmp/{{isotime \&quot;2006-01-02-030405\&quot;}}--my-secret.txt&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;sudo dpkg -i --force-confnew /tmp/*.deb&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;machine_state_validation.sh&quot;</span>
     <span class="p">]</span>
   <span class="p">}]</span>
 <span class="p">}</span>
-</pre></div>
+</code></pre></div>
+
 <blockquote>
 <p>The access credentials could instead be environment variables: AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY</p>
 <p>Post instantiation validation is a really handy safeguard as statistically something always goes wrong somewhere and it's far cheaper to find out with a quick test versus a system that loses data.</p>
 </blockquote>
-<h3 id="packer-and-digitalocean">Packer and DigitalOcean</h3>
+<h3>Packer and DigitalOcean</h3>
 <p>DigitalOcean is a relatively new player (compared to Linode and even AWS) but they provide a very fast and easy to use way of building boxes (a snapshot can be used like an AMI to spin up multiple instances).</p>
-<div class="highlight"><pre><span></span><span class="err">{</span>
-  <span class="s2">"_comment"</span><span class="p">:</span> <span class="s2">"https://www.packer.io/docs/builders/digitalocean.html"</span><span class="p">,</span>
-  <span class="s2">"variables"</span><span class="p">:</span> <span class="err">{</span>
-    <span class="s2">"digitalocean_api_token"</span><span class="p">:</span> <span class="s2">"{{env `DIGITALOCEAN_API_TOKEN`}}"</span><span class="p">,</span>
-    <span class="s2">"newuser_name"</span><span class="p">:</span> <span class="s2">"{{env `NEWUSER_NAME`}}"</span><span class="p">,</span>
-    <span class="s2">"newuser_password"</span><span class="p">:</span> <span class="s2">"{{env `NEWUSER_PASSWORD`}}"</span>
+<div class="highlight"><pre><span></span><code><span class="err">{</span>
+  <span class="s2">&quot;_comment&quot;</span><span class="o">:</span> <span class="s2">&quot;https://www.packer.io/docs/builders/digitalocean.html&quot;</span><span class="p">,</span>
+  <span class="s2">&quot;variables&quot;</span><span class="o">:</span> <span class="err">{</span>
+    <span class="s2">&quot;digitalocean_api_token&quot;</span><span class="o">:</span> <span class="s2">&quot;{{env `DIGITALOCEAN_API_TOKEN`}}&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;newuser_name&quot;</span><span class="o">:</span> <span class="s2">&quot;{{env `NEWUSER_NAME`}}&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;newuser_password&quot;</span><span class="o">:</span> <span class="s2">&quot;{{env `NEWUSER_PASSWORD`}}&quot;</span>
   <span class="err">}</span><span class="p">,</span>
 
-  <span class="s2">"builders"</span><span class="p">:</span> <span class="p">[</span><span class="err">{</span>
-    <span class="s2">"type"</span><span class="p">:</span> <span class="s2">"digitalocean"</span><span class="p">,</span>
-    <span class="s2">"api_token"</span><span class="p">:</span> <span class="s2">"{{user `digitalocean_api_token`}}"</span><span class="p">,</span>
-    <span class="s2">"size"</span><span class="p">:</span> <span class="s2">"512mb"</span><span class="p">,</span>
-    <span class="s2">"region"</span><span class="p">:</span> <span class="s2">"lon1"</span><span class="p">,</span>
-    <span class="s2">"image"</span><span class="p">:</span> <span class="s2">"ubuntu-16-04-x64"</span><span class="p">,</span>
-    <span class="s2">"droplet_name"</span><span class="p">:</span> <span class="s2">"built-from-packer-{{timestamp}}"</span><span class="p">,</span>
-    <span class="s2">"snapshot_name"</span><span class="p">:</span> <span class="s2">"built-from-packer-{{timestamp}}"</span>
-  <span class="err">}</span><span class="p">],</span>
+  <span class="s2">&quot;builders&quot;</span><span class="o">:</span> <span class="err">[{</span>
+    <span class="s2">&quot;type&quot;</span><span class="o">:</span> <span class="s2">&quot;digitalocean&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;api_token&quot;</span><span class="o">:</span> <span class="s2">&quot;{{user `digitalocean_api_token`}}&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;size&quot;</span><span class="o">:</span> <span class="s2">&quot;512mb&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;region&quot;</span><span class="o">:</span> <span class="s2">&quot;lon1&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;image&quot;</span><span class="o">:</span> <span class="s2">&quot;ubuntu-16-04-x64&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;droplet_name&quot;</span><span class="o">:</span> <span class="s2">&quot;built-from-packer-{{timestamp}}&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;snapshot_name&quot;</span><span class="o">:</span> <span class="s2">&quot;built-from-packer-{{timestamp}}&quot;</span>
+  <span class="err">}]</span><span class="p">,</span>
 
-  <span class="s2">"provisioners"</span><span class="p">:</span> <span class="p">[</span>
+  <span class="s2">&quot;provisioners&quot;</span><span class="o">:</span> <span class="err">[</span>
     <span class="err">{</span>
-      <span class="s2">"type"</span><span class="p">:</span> <span class="s2">"shell"</span><span class="p">,</span>
-      <span class="s2">"inline"</span><span class="p">:</span> <span class="p">[</span>
-        <span class="s2">"ip a"</span><span class="p">,</span>
-        <span class="s2">"curl -s http://checkip.amazonaws.com"</span><span class="p">,</span>
-        <span class="s2">"apt-get update"</span><span class="p">,</span>
-        <span class="s2">"sudo apt-get install -y vim curl wget byobu ntp"</span><span class="p">,</span>
-        <span class="s2">"timedatectl set-timezone Etc/UTC"</span><span class="p">,</span>
-        <span class="s2">"cat /etc/timezone"</span><span class="p">,</span>
-        <span class="s2">"date"</span><span class="p">,</span>
-        <span class="s2">"useradd -s /bin/bash -m {{user `newuser_name`}}"</span><span class="p">,</span>
-        <span class="s2">"usermod -a -G admin {{user `newuser_name`}}"</span><span class="p">,</span>
-        <span class="s2">"echo '{{user `newuser_name`}}:{{user `newuser_password`}}'|chpasswd"</span><span class="p">,</span>
-        <span class="s2">"cat /etc/passwd"</span><span class="p">,</span>
-        <span class="s2">"sed -i 's/Port 22/Port 2222/g' /etc/ssh/sshd_config"</span><span class="p">,</span>
-        <span class="s2">"sed -i 's/PermitRootLogin yes/PermitRootLogin no/g' /etc/ssh/sshd_config"</span><span class="p">,</span>
-        <span class="s2">"echo 'PasswordAuthentication no' &gt;&gt; /etc/ssh/sshd_config"</span><span class="p">,</span>
-        <span class="s2">"cat /etc/ssh/sshd_config"</span><span class="p">,</span>
-        <span class="s2">"mkdir -p /home/{{user `newuser_name`}}/.ssh"</span><span class="p">,</span>
-        <span class="s2">"mkdir -p /opt/www/html"</span>
-      <span class="p">]</span>
+      <span class="s2">&quot;type&quot;</span><span class="o">:</span> <span class="s2">&quot;shell&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;inline&quot;</span><span class="o">:</span> <span class="err">[</span>
+        <span class="s2">&quot;ip a&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;curl -s http://checkip.amazonaws.com&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;apt-get update&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;sudo apt-get install -y vim curl wget byobu ntp&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;timedatectl set-timezone Etc/UTC&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;cat /etc/timezone&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;date&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;useradd -s /bin/bash -m {{user `newuser_name`}}&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;usermod -a -G admin {{user `newuser_name`}}&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;echo &#39;{{user `newuser_name`}}:{{user `newuser_password`}}&#39;|chpasswd&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;cat /etc/passwd&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;sed -i &#39;s/Port 22/Port 2222/g&#39; /etc/ssh/sshd_config&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;sed -i &#39;s/PermitRootLogin yes/PermitRootLogin no/g&#39; /etc/ssh/sshd_config&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;echo &#39;PasswordAuthentication no&#39; &gt;&gt; /etc/ssh/sshd_config&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;cat /etc/ssh/sshd_config&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;mkdir -p /home/{{user `newuser_name`}}/.ssh&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;mkdir -p /opt/www/html&quot;</span>
+      <span class="err">]</span>
     <span class="err">}</span><span class="p">,</span>
     <span class="err">{</span>
-      <span class="s2">"type"</span><span class="p">:</span> <span class="s2">"file"</span><span class="p">,</span>
-      <span class="s2">"source"</span><span class="p">:</span> <span class="s2">"authorized_keys"</span><span class="p">,</span>
-      <span class="s2">"destination"</span><span class="p">:</span> <span class="s2">"/home/{{user `newuser_name`}}/.ssh/authorized_keys"</span>
+      <span class="s2">&quot;type&quot;</span><span class="o">:</span> <span class="s2">&quot;file&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;source&quot;</span><span class="o">:</span> <span class="s2">&quot;authorized_keys&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;destination&quot;</span><span class="o">:</span> <span class="s2">&quot;/home/{{user `newuser_name`}}/.ssh/authorized_keys&quot;</span>
     <span class="err">}</span>
-  <span class="p">]</span>
+  <span class="err">]</span>
 
 <span class="err">}</span>
-</pre></div>
+</code></pre></div>
+
 <blockquote>
 <p>This is a simple example that automates some of the security best practices of a non standard username, non standard ssh port, no ssh root login, no ssh password based login, etc.</p>
 </blockquote>
-<div class="highlight"><pre><span></span><span class="err">NEWUSER_NAME=yourusername NEWUSER_PASSWORD=yourpassword DIGITALOCEAN_API_TOKEN=012345yourtoken /opt/packer build packer.json</span>
-</pre></div>
-<h3 id="why-not-docker-containers">Why not docker containers?</h3>
+<div class="highlight"><pre><span></span><code>NEWUSER_NAME=yourusername NEWUSER_PASSWORD=yourpassword DIGITALOCEAN_API_TOKEN=012345yourtoken /opt/packer build packer.json
+</code></pre></div>
+
+<h3>Why not docker containers?</h3>
 <p>Actually I prefer docker containers as the artifact and deployment vehicle for services but it's not the only hammer in your toolbelt.  And you have to setup the Docker hosts somehow, right? </p>
 <p>(Unless you've already uploaded your soul into the matrix and are using Googazon's PaaS and never have to sully your container delicate fingers with a crude virtual machine again).</p>
-<h3 id="more-info">more info</h3>
+<h3>more info</h3>
 <ul>
 <li>https://www.packer.io/docs/installation.html</li>
 <li>https://www.packer.io/docs/builders/amazon-ebs.html</li>
@@ -276,7 +261,7 @@
             <time pubdate="pubdate" datetime="2015-07-06T20:40:00-07:00">Jul 6, 2015</time>
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#build-CI-CD-devops-ref">build-CI-CD-devops</a> 
-            <h4>~1113 words</h4>
+            <h4>~1114 words</h4>
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article"> 
                 <li><a href="/tags.html#ami-ref">ami

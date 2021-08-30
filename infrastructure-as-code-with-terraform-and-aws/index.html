@@ -61,30 +61,10 @@
 </div>
 
 <div class="row-fluid">
-    <div class="span2 table-of-content">
-        <nav>
-        <h4>Contents</h4>
-        <div class="toc">
-<ul>
-<li><a href="#overview">Overview</a></li>
-<li><a href="#prerequisites">Prerequisites</a></li>
-<li><a href="#a-simple-build">A simple build</a><ul>
-<li><a href="#example-terraform-file">Example Terraform File</a></li>
-<li><a href="#terraform-plan-and-apply">Terraform Plan and Apply</a></li>
-<li><a href="#updates-to-existing-infrastructure-and-instances">Updates to Existing Infrastructure and Instances</a></li>
-<li><a href="#destroying">Destroying</a></li>
-</ul>
-</li>
-<li><a href="#a-load-balanced-example">A Load Balanced Example</a></li>
-<li><a href="#tools-to-manage-state-vs-platform-as-a-service">Tools to Manage State vs Platform as a Service</a></li>
-</ul>
-</div>
-        </nav>
-    </div>
-    <div class="span8 article-content">
+        <div class="span8 offset2 article-content">
 
-            
-<h2 id="overview">Overview</h2>
+            <p>[TOC]</p>
+<h2>Overview</h2>
 <p>Just like building and maintaining hardware and physical servers by hand is manual drudge work (aka "toil"),
 so is the manual deployment of servers and networking etc. even on "Infrastructure as a Service".</p>
 <p>The "Infrastructure as Code" movement emphasizes the value of human time and leverages source code and version control to manage the increasing complexity.
@@ -106,7 +86,7 @@ Terraform can also maintain "state" like replacing servers with (deploying) newe
 <li><a href="https://aws.amazon.com/documentation/cloudformation">https://aws.amazon.com/documentation/cloudformation</a></li>
 <li><a href="https://www.digitalocean.com/community/tutorials/how-to-use-terraform-with-digitalocean">https://www.digitalocean.com/community/tutorials/how-to-use-terraform-with-digitalocean</a></li>
 </ul>
-<h2 id="prerequisites">Prerequisites</h2>
+<h2>Prerequisites</h2>
 <p>Basically you need access to the remote infrastructure, permissions to make changes (resources cost money!), and of course the Terraform tool.</p>
 <ol>
 <li>Download from <a href="https://www.terraform.io/downloads.html">https://www.terraform.io/downloads.html</a> (and probably unzip to \opt) the terraform binary, <em>you may also want to <code>echo "alias terraform='/opt/terraform'" &gt;&gt; ~/.bashrc</code></em></li>
@@ -121,10 +101,11 @@ Terraform can also maintain "state" like replacing servers with (deploying) newe
 <blockquote>
 <p>Using Environment variables is a fairly standard and portable/secure way of providing credentials to Terraform, the <strong>region will determine where</strong> resources are created</p>
 </blockquote>
-<div class="highlight"><pre><span></span><span class="err">export AWS_ACCESS_KEY_ID="AKIAyourACCESSkey"</span>
-<span class="err">export AWS_SECRET_ACCESS_KEY="yourSECRETkeyABC123"</span>
-<span class="err">export AWS_DEFAULT_REGION="us-west-1"</span>
-</pre></div>
+<div class="highlight"><pre><span></span><code><span class="k">export</span> <span class="n">AWS_ACCESS_KEY_ID</span><span class="o">=</span><span class="s2">&quot;AKIAyourACCESSkey&quot;</span>
+<span class="k">export</span> <span class="n">AWS_SECRET_ACCESS_KEY</span><span class="o">=</span><span class="s2">&quot;yourSECRETkeyABC123&quot;</span>
+<span class="k">export</span> <span class="n">AWS_DEFAULT_REGION</span><span class="o">=</span><span class="s2">&quot;us-west-1&quot;</span>
+</code></pre></div>
+
 <p><em>Alternatively save the credentials in the default amazon credentials file (~/.aws/credentials) by using <code>aws configure</code></em></p>
 <p>References:</p>
 <ul>
@@ -133,29 +114,30 @@ Terraform can also maintain "state" like replacing servers with (deploying) newe
 <li><a href="https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_managed-vs-inline.html">https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_managed-vs-inline.html</a></li>
 <li><a href="https://aws.amazon.com/about-aws/global-infrastructure">https://aws.amazon.com/about-aws/global-infrastructure</a></li>
 </ul>
-<h2 id="a-simple-build">A simple build</h2>
+<h2>A simple build</h2>
 <p>The simple and common example of deploying a new server instance from an AmazonMachineImage (with a new VPC for network control)</p>
-<h3 id="example-terraform-file">Example Terraform File</h3>
+<h3>Example Terraform File</h3>
 <p><strong>example.tf</strong></p>
-<div class="highlight"><pre><span></span><span class="kr">provider</span> <span class="s">"aws"</span> <span class=" -Punctuation">{</span>
-<span class="na">  region</span> <span class="o">=</span> <span class="s2">"us-west-1"</span>
-<span class=" -Punctuation">}</span>
-<span class="kr">resource</span> <span class="s">"aws_instance" "example"</span> <span class=" -Punctuation">{</span>
-<span class="na">  ami</span> <span class="o">=</span> <span class="s2">"ami-dc2739bc"</span>
-<span class="na">  instance_type</span> <span class="o">=</span> <span class="s2">"t2.nano"</span>
-<span class="na">  subnet_id</span> <span class="o">=</span> <span class="s2">"${aws_subnet.us-west-1a-public.id}"</span>
-<span class=" -Punctuation">}</span>
-<span class="kr">resource</span> <span class="s">"aws_vpc" "example"</span> <span class=" -Punctuation">{</span>
-<span class="na">  cidr_block</span> <span class="o">=</span> <span class="s2">"192.168.1.0/24"</span>
-<span class="na">  enable_dns_hostnames</span> <span class="o">=</span> <span class="kt">true</span>
-<span class="na">  enable_dns_support</span> <span class="o">=</span> <span class="kt">true</span>
-<span class=" -Punctuation">}</span>
-<span class="kr">resource</span> <span class="s">"aws_subnet" "us-east-1a-public"</span> <span class=" -Punctuation">{</span>
-<span class="na">  vpc_id</span> <span class="o">=</span> <span class="s2">"${aws_vpc.example.id}"</span>
-<span class="na">  cidr_block</span> <span class="o">=</span> <span class="s2">"192.168.1.0/28"</span>
-<span class="na">  availability_zone</span> <span class="o">=</span> <span class="s2">"us-west-1a"</span>
-<span class=" -Punctuation">}</span>
-</pre></div>
+<div class="highlight"><pre><span></span><code><span class="kr">provider</span> <span class="nv">&quot;aws&quot;</span> <span class="p">{</span>
+  <span class="na">region</span> <span class="o">=</span> <span class="s2">&quot;us-west-1&quot;</span>
+<span class="p">}</span>
+<span class="kr">resource</span> <span class="nc">&quot;aws_instance&quot;</span> <span class="nv">&quot;example&quot;</span> <span class="p">{</span>
+  <span class="na">ami</span> <span class="o">=</span> <span class="s2">&quot;ami-dc2739bc&quot;</span>
+  <span class="na">instance_type</span> <span class="o">=</span> <span class="s2">&quot;t2.nano&quot;</span>
+  <span class="na">subnet_id</span> <span class="o">=</span> <span class="s2">&quot;${aws_subnet.us-west-1a-public.id}&quot;</span>
+<span class="p">}</span>
+<span class="kr">resource</span> <span class="nc">&quot;aws_vpc&quot;</span> <span class="nv">&quot;example&quot;</span> <span class="p">{</span>
+  <span class="na">cidr_block</span> <span class="o">=</span> <span class="s2">&quot;192.168.1.0/24&quot;</span>
+  <span class="na">enable_dns_hostnames</span> <span class="o">=</span> <span class="no">true</span>
+  <span class="na">enable_dns_support</span> <span class="o">=</span> <span class="no">true</span>
+<span class="p">}</span>
+<span class="kr">resource</span> <span class="nc">&quot;aws_subnet&quot;</span> <span class="nv">&quot;us-east-1a-public&quot;</span> <span class="p">{</span>
+  <span class="na">vpc_id</span> <span class="o">=</span> <span class="s2">&quot;${aws_vpc.example.id}&quot;</span>
+  <span class="na">cidr_block</span> <span class="o">=</span> <span class="s2">&quot;192.168.1.0/28&quot;</span>
+  <span class="na">availability_zone</span> <span class="o">=</span> <span class="s2">&quot;us-west-1a&quot;</span>
+<span class="p">}</span>
+</code></pre></div>
+
 <blockquote>
 <p>The provider is the target (with a specific sub region), and each resource has a type and a name (which can be referenced in later variables)</p>
 </blockquote>
@@ -174,7 +156,7 @@ Terraform can also maintain "state" like replacing servers with (deploying) newe
 <li><a href="https://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_Subnets.html">https://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_Subnets.html</a></li>
 <li><a href="https://aws.amazon.com/free">https://aws.amazon.com/free</a> <em>(not much is free)</em></li>
 </ul>
-<h3 id="terraform-plan-and-apply">Terraform Plan and Apply</h3>
+<h3>Terraform Plan and Apply</h3>
 <p>The single configuration file and the following commands will deploy the prescribed infrastructure to AWS.</p>
 <p><code>terraform init</code></p>
 <blockquote>
@@ -184,22 +166,23 @@ Terraform can also maintain "state" like replacing servers with (deploying) newe
 <blockquote>
 <p>This will preview the steps that will occur</p>
 </blockquote>
-<div class="highlight"><pre><span></span><span class="err">Terraform will perform the following actions:</span>
-<span class="err">    + aws_instance.example</span>
-<span class="err">        id:             &lt;computed&gt;</span>
-<span class="err">        ami:            "ami-dc2739bc"</span>
-<span class="err">        instance_type:    "t2.nano"</span>
-<span class="err">        ...</span>
-<span class="err">    + aws_subnet.us-west-1a-public</span>
-<span class="err">        id:                               &lt;computed&gt;</span>
-<span class="err">        assign_ipv6_address_on_creation:  "false"</span>
-<span class="err">        availability_zone:                "us-west-1a"</span>
-<span class="err">        ...</span>
-<span class="err">    + aws_vpc.example</span>
-<span class="err">        id:                               &lt;computed&gt;</span>
-<span class="err">        assign_generated_ipv6_cidr_block: "false"</span>
-<span class="err">        cidr_block:                       "192.168.1.0/24"</span>
-</pre></div>
+<div class="highlight"><pre><span></span><code><span class="n">Terraform</span> <span class="n">will</span> <span class="n">perform</span> <span class="n">the</span> <span class="n">following</span> <span class="nl">actions:</span>
+    <span class="o">+</span> <span class="n">aws_instance</span><span class="p">.</span><span class="n">example</span>
+        <span class="nl">id:</span>             <span class="o">&lt;</span><span class="n">computed</span><span class="o">&gt;</span>
+        <span class="nl">ami:</span>            <span class="s">&quot;ami-dc2739bc&quot;</span>
+        <span class="nl">instance_type:</span>    <span class="s">&quot;t2.nano&quot;</span>
+        <span class="p">...</span>
+    <span class="o">+</span> <span class="n">aws_subnet</span><span class="p">.</span><span class="n">us</span><span class="o">-</span><span class="n">west</span><span class="o">-</span><span class="mh">1</span><span class="n">a</span><span class="o">-</span><span class="n">public</span>
+        <span class="nl">id:</span>                               <span class="o">&lt;</span><span class="n">computed</span><span class="o">&gt;</span>
+        <span class="nl">assign_ipv6_address_on_creation:</span>  <span class="s">&quot;false&quot;</span>
+        <span class="nl">availability_zone:</span>                <span class="s">&quot;us-west-1a&quot;</span>
+        <span class="p">...</span>
+    <span class="o">+</span> <span class="n">aws_vpc</span><span class="p">.</span><span class="n">example</span>
+        <span class="nl">id:</span>                               <span class="o">&lt;</span><span class="n">computed</span><span class="o">&gt;</span>
+        <span class="nl">assign_generated_ipv6_cidr_block:</span> <span class="s">&quot;false&quot;</span>
+        <span class="nl">cidr_block:</span>                       <span class="s">&quot;192.168.1.0/24&quot;</span>
+</code></pre></div>
+
 <blockquote>
 <ul>
 <li>means created , - means removed , the VPC and subnet ids may even be populated</li>
@@ -210,14 +193,15 @@ Terraform can also maintain "state" like replacing servers with (deploying) newe
 <blockquote>
 <p>Once again the expected results are displayed and a prompt requires confirmation</p>
 </blockquote>
-<div class="highlight"><pre><span></span><span class="n">aws_instance</span><span class="p">.</span><span class="n">example</span><span class="p">:</span> <span class="n">Creating</span><span class="p">...</span>
-  <span class="n">ami</span><span class="p">:</span>                          <span class="ss">""</span> <span class="o">=&gt;</span> <span class="ss">"ami-44273924"</span>
-  <span class="p">...</span>
-<span class="n">aws_instance</span><span class="p">.</span><span class="n">example</span><span class="p">:</span> <span class="n">Still</span> <span class="n">creating</span><span class="p">...</span> <span class="p">(</span><span class="mi">10</span><span class="n">s</span> <span class="n">elapsed</span><span class="p">)</span>
-<span class="n">aws_instance</span><span class="p">.</span><span class="n">example</span><span class="p">:</span> <span class="n">Creation</span> <span class="n">complete</span> <span class="k">after</span> <span class="mi">16</span><span class="n">s</span> <span class="p">(</span><span class="n">ID</span><span class="p">:</span> <span class="n">i</span><span class="o">-</span><span class="mi">0492</span><span class="n">ba9707e624a66</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code>aws_instance.example: Creating...
+  ami:                          &quot;&quot; =&gt; &quot;ami-44273924&quot;
+  ...
+aws_instance.example: Still creating... (10s elapsed)
+aws_instance.example: Creation complete after 16s (ID: i-0492ba9707e624a66)
 
-<span class="n">Apply</span> <span class="n">complete</span><span class="o">!</span> <span class="n">Resources</span><span class="p">:</span> <span class="mi">1</span> <span class="n">added</span><span class="p">,</span> <span class="mi">0</span> <span class="n">changed</span><span class="p">,</span> <span class="mi">0</span> <span class="n">destroyed</span><span class="p">.</span>
-</pre></div>
+Apply complete! Resources: 1 added, 0 changed, 0 destroyed.
+</code></pre></div>
+
 <blockquote>
 <p>the <strong>.terraform.tfstate</strong> file contains the current state of the current infrastructure</p>
 </blockquote>
@@ -229,14 +213,15 @@ Terraform can also maintain "state" like replacing servers with (deploying) newe
 <li>To see the instance in the WebUI: <a href="https://us-west-1.console.aws.amazon.com/ec2/v2/home?region=us-west-1#Instances:sort=instanceId">https://us-west-1.console.aws.amazon.com/ec2/v2/home?region=us-west-1#Instances:sort=instanceId</a></li>
 <li>Verify the new VPC <a href="https://us-west-1.console.aws.amazon.com/vpc/home?region=us-west-1#vpcs:">https://us-west-1.console.aws.amazon.com/vpc/home?region=us-west-1#vpcs:</a></li>
 </ul>
-<h3 id="updates-to-existing-infrastructure-and-instances">Updates to Existing Infrastructure and Instances</h3>
+<h3>Updates to Existing Infrastructure and Instances</h3>
 <p>If you modify and save example.tf file to add a tag Name:</p>
-<div class="highlight"><pre><span></span><span class="err">resource "aws_instance" "example" {</span>
-<span class="err">  tags {</span>
-<span class="err">    Name = "terraform-example"</span>
-<span class="err">  }</span>
-<span class="err">...</span>
-</pre></div>
+<div class="highlight"><pre><span></span><code>resource &quot;aws_instance&quot; &quot;example&quot; {
+  tags {
+    Name = &quot;terraform-example&quot;
+  }
+...
+</code></pre></div>
+
 <p><code>terraform plan ; terraform apply</code></p>
 <blockquote>
 <p>The remote infrastructure (server) has been updated with a tag/Name "example" , <code>terraform show</code></p>
@@ -246,23 +231,24 @@ Terraform can also maintain "state" like replacing servers with (deploying) newe
 <li><a href="https://www.terraform.io/intro/getting-started/change.html">https://www.terraform.io/intro/getting-started/change.html</a></li>
 <li><a href="https://blog.gruntwork.io/an-introduction-to-terraform-f17df9c6d180">https://blog.gruntwork.io/an-introduction-to-terraform-f17df9c6d180</a></li>
 </ul>
-<h3 id="destroying">Destroying</h3>
+<h3>Destroying</h3>
 <p><code>terraform destroy</code></p>
 <blockquote>
 <p>This is a destructive command, as always you must type "yes" ... "There is no undo"</p>
 </blockquote>
-<div class="highlight"><pre><span></span><span class="err">Terraform will perform the following actions:</span>
-<span class="err">  - aws_instance.example</span>
-<span class="err">  - aws_subnet.us-west-1a-public</span>
-<span class="err">  - aws_vpc.example</span>
-</pre></div>
+<div class="highlight"><pre><span></span><code>Terraform will perform the following actions:
+  - aws_instance.example
+  - aws_subnet.us-west-1a-public
+  - aws_vpc.example
+</code></pre></div>
+
 <p><code>terraform show</code> will return nothing and inspection in the AWS Console (web ui) will show all the resources have been cleaned up =)</p>
-<h2 id="a-load-balanced-example">A Load Balanced Example</h2>
+<h2>A Load Balanced Example</h2>
 <ul>
 <li><a href="https://www.terraform.io/intro/examples/aws.html">https://www.terraform.io/intro/examples/aws.html</a></li>
 <li><a href="https://github.com/terraform-providers/terraform-provider-aws/tree/master/examples/two-tier">https://github.com/terraform-providers/terraform-provider-aws/tree/master/examples/two-tier</a></li>
 </ul>
-<h2 id="tools-to-manage-state-vs-platform-as-a-service">Tools to Manage State vs Platform as a Service</h2>
+<h2>Tools to Manage State vs Platform as a Service</h2>
 <p>Infrastructure as Code focuses on tools to manage complexity. An alternative is to outsource the infrastructure entirely by using something like a PlatformAsAService.</p>
 <p>Heroku (or Google AppEngine or Openshift) can simplify application deployment by reducing the input to simply the application code.</p>
 <p>The PaaS vendor manages the infrastructure (including load balancers) and can provide a WebUI and APIs for adding dependencies (i.e. databases).</p>
@@ -286,7 +272,7 @@ Terraform can also maintain "state" like replacing servers with (deploying) newe
             <time pubdate="pubdate" datetime="2018-05-12T07:35:00-07:00">May 12, 2018</time>
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#build-CI-CD-devops-ref">build-CI-CD-devops</a> 
-            <h4>~975 words</h4>
+            <h4>~976 words</h4>
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article"> 
                 <li><a href="/tags.html#aws-ref">aws

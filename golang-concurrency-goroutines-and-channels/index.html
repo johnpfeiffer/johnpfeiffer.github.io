@@ -61,33 +61,9 @@
 </div>
 
 <div class="row-fluid">
-    <div class="span2 table-of-content">
-        <nav>
-        <h4>Contents</h4>
-        <div class="toc">
-<ul>
-<li><a href="#go-and-goroutines">Go and Goroutines</a></li>
-<li><a href="#sync-with-a-waitgroup">Sync with a WaitGroup</a></li>
-<li><a href="#channels">Channels</a><ul>
-<li><a href="#buffered-channels-and-returning-a-value">Buffered channels and returning a value</a></li>
-<li><a href="#using-select-to-not-block-a-channel">Using Select to not block a channel</a></li>
-<li><a href="#real-example-of-concurrency-in-a-lan-scanner">Real Example of Concurrency in a LAN Scanner</a></li>
-<li><a href="#troubleshooting-race-conditions">Troubleshooting Race Conditions</a></li>
-<li><a href="#more-random-thoughts-on-concurrency-and-control">More random thoughts on concurrency and control</a><ul>
-<li><a href="#an-important-consideration-to-termination-is-cleanup">An important consideration to termination is cleanup</a></li>
-<li><a href="#poison-jobs-cons-and-pros">Poison Jobs cons and pros</a></li>
-<li><a href="#patterns-for-channels-and-flow-control">Patterns for Channels and Flow Control</a></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</div>
-        </nav>
-    </div>
-    <div class="span8 article-content">
+        <div class="span8 offset2 article-content">
 
-            
+            <p>[TOC]</p>
 <p>If there is a killer feature to Go it is the focus on concurrency.  This article captures some of the basics and I hope to someday write a follow-up article on more advanced topics.</p>
 <blockquote>
 <p>"Go is a compiled, concurrent, garbage-collected, statically typed language"</p>
@@ -101,26 +77,27 @@
 <li><a href="https://golang.org/doc/effective_go.html#concurrency">https://golang.org/doc/effective_go.html#concurrency</a></li>
 <li><a href="https://blog.golang.org/concurrency-is-not-parallelism">https://blog.golang.org/concurrency-is-not-parallelism</a></li>
 </ul>
-<h2 id="go-and-goroutines">Go and Goroutines</h2>
+<h2>Go and Goroutines</h2>
 <p>A goroutine is a "lightweight thread" that allows for a far higher amount of concurrency than just depending on OS processes or even traditional threading (and much simpler than attempting to explicitly organize around a defined number of processors or threads).</p>
 <p>In a very meta sense every Go program uses concurrency because the main function itself is an implicit goroutine (and will not wait or might block forever ;)</p>
-<div class="highlight"><pre><span></span><span class="kn">package</span> <span class="nx">main</span>
+<div class="highlight"><pre><span></span><code><span class="kn">package</span> <span class="nx">main</span>
 
 <span class="kn">import</span> <span class="p">(</span>
-    <span class="s">"fmt"</span>
-    <span class="s">"time"</span>
+    <span class="s">&quot;fmt&quot;</span>
+    <span class="s">&quot;time&quot;</span>
 <span class="p">)</span>
 
 <span class="kd">func</span> <span class="nx">example</span><span class="p">()</span> <span class="p">{</span>
     <span class="nx">time</span><span class="p">.</span><span class="nx">Sleep</span><span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="nx">time</span><span class="p">.</span><span class="nx">Second</span><span class="p">)</span>
-    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">"example"</span><span class="p">)</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;example&quot;</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
     <span class="k">go</span> <span class="nx">example</span><span class="p">()</span>
-    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">"done"</span><span class="p">)</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;done&quot;</span><span class="p">)</span>
 <span class="p">}</span>
-</pre></div>
+</code></pre></div>
+
 <blockquote>
 <p>This will exit without printing "example" because using the "go" keyword runs the example function in a new goroutine</p>
 </blockquote>
@@ -139,19 +116,19 @@
 <li><a href="https://en.wikipedia.org/wiki/Preemption_(computing)">https://en.wikipedia.org/wiki/Preemption_(computing)</a></li>
 <li><a href="https://github.com/golang/go/issues/10958">https://github.com/golang/go/issues/10958</a></li>
 </ul>
-<h2 id="sync-with-a-waitgroup">Sync with a WaitGroup</h2>
+<h2>Sync with a WaitGroup</h2>
 <p>The most straightforward way to fix the previous trivial example is to specify in advance that the implicit main goroutine should wait before continuing...</p>
-<div class="highlight"><pre><span></span><span class="kn">package</span> <span class="nx">main</span>
+<div class="highlight"><pre><span></span><code><span class="kn">package</span> <span class="nx">main</span>
 
 <span class="kn">import</span> <span class="p">(</span>
-    <span class="s">"fmt"</span>
-    <span class="s">"sync"</span>
-    <span class="s">"time"</span>
+    <span class="s">&quot;fmt&quot;</span>
+    <span class="s">&quot;sync&quot;</span>
+    <span class="s">&quot;time&quot;</span>
 <span class="p">)</span>
 
 <span class="kd">func</span> <span class="nx">example</span><span class="p">()</span> <span class="p">{</span>
     <span class="nx">time</span><span class="p">.</span><span class="nx">Sleep</span><span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="nx">time</span><span class="p">.</span><span class="nx">Second</span><span class="p">)</span>
-    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">"example"</span><span class="p">)</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;example&quot;</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
@@ -162,9 +139,10 @@
         <span class="nx">wg</span><span class="p">.</span><span class="nx">Done</span><span class="p">()</span>
     <span class="p">}()</span>
     <span class="nx">wg</span><span class="p">.</span><span class="nx">Wait</span><span class="p">()</span>
-    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">"done"</span><span class="p">)</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;done&quot;</span><span class="p">)</span>
 <span class="p">}</span>
-</pre></div>
+</code></pre></div>
+
 <blockquote>
 <ol>
 <li>The example function remains unchanged</li>
@@ -179,32 +157,33 @@
 <li><a href="https://play.golang.org/p/p0jDoiGBT4">https://play.golang.org/p/p0jDoiGBT4</a></li>
 <li><a href="https://golang.org/pkg/sync/#example_WaitGroup">https://golang.org/pkg/sync/#example_WaitGroup</a></li>
 </ul>
-<h2 id="channels">Channels</h2>
+<h2>Channels</h2>
 <p>Channels are the recommended way of communicating when using goroutines (and sharing resources).</p>
 <blockquote>
 <p>&lt;- the arrow always points to the left</p>
 </blockquote>
-<div class="highlight"><pre><span></span><span class="kn">package</span> <span class="nx">main</span>
+<div class="highlight"><pre><span></span><code><span class="kn">package</span> <span class="nx">main</span>
 
 <span class="kn">import</span> <span class="p">(</span>
-    <span class="s">"fmt"</span>
-    <span class="s">"time"</span>
+    <span class="s">&quot;fmt&quot;</span>
+    <span class="s">&quot;time&quot;</span>
 <span class="p">)</span>
 
 <span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
     <span class="nx">c</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">chan</span> <span class="kt">int</span><span class="p">)</span>
     <span class="k">go</span> <span class="kd">func</span><span class="p">()</span> <span class="p">{</span>
-        <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">"sleeping..."</span><span class="p">)</span>
+        <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;sleeping...&quot;</span><span class="p">)</span>
         <span class="nx">time</span><span class="p">.</span><span class="nx">Sleep</span><span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="nx">time</span><span class="p">.</span><span class="nx">Second</span><span class="p">)</span>
         <span class="nx">c</span> <span class="o">&lt;-</span> <span class="mi">42</span>
         <span class="nb">close</span><span class="p">(</span><span class="nx">c</span><span class="p">)</span>  <span class="c1">// IF NOT CLOSED THEN DEADLOCK</span>
         <span class="c1">// c &lt;- 2  DO NOT SEND TO A CLOSED CHANNEL, IT WILL PANIC</span>
     <span class="p">}()</span>
-    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">"anonymous function, a channel passed a value via closure"</span><span class="p">,</span> <span class="o">&lt;-</span><span class="nx">c</span><span class="p">)</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;anonymous function, a channel passed a value via closure&quot;</span><span class="p">,</span> <span class="o">&lt;-</span><span class="nx">c</span><span class="p">)</span>
     <span class="nx">v</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="o">&lt;-</span><span class="nx">c</span>
     <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">v</span><span class="p">,</span> <span class="nx">ok</span><span class="p">)</span>
 <span class="p">}</span>
-</pre></div>
+</code></pre></div>
+
 <blockquote>
 <ul>
 <li>since a channel is a reference type "make" is used and the &lt;- sends a value to the channel, later &lt;- is used to receive a value</li>
@@ -220,24 +199,24 @@
 <li><a href="https://gobyexample.com/channels">https://gobyexample.com/channels</a></li>
 <li><a href="https://dave.cheney.net/2013/04/30/curious-channels">https://dave.cheney.net/2013/04/30/curious-channels</a></li>
 </ul>
-<h3 id="buffered-channels-and-returning-a-value">Buffered channels and returning a value</h3>
+<h3>Buffered channels and returning a value</h3>
 <p>A common problem is one part of the application running faster than another part and one way to "unblock" the fast part is to use a buffer to create a queue for the slower part to catch up.
 This kind of issue occurs in a "pipeline" of producers/consumers (also known as sources/sinks)...</p>
-<div class="highlight"><pre><span></span><span class="kn">package</span> <span class="nx">main</span>
+<div class="highlight"><pre><span></span><code><span class="kn">package</span> <span class="nx">main</span>
 
 <span class="kn">import</span> <span class="p">(</span>
-    <span class="s">"fmt"</span>
-    <span class="s">"log"</span>
-    <span class="s">"sync"</span>
-    <span class="s">"time"</span>
+    <span class="s">&quot;fmt&quot;</span>
+    <span class="s">&quot;log&quot;</span>
+    <span class="s">&quot;sync&quot;</span>
+    <span class="s">&quot;time&quot;</span>
 <span class="p">)</span>
 
 <span class="kd">func</span> <span class="nx">slowReceiver</span><span class="p">(</span><span class="nx">c</span> <span class="o">&lt;-</span><span class="kd">chan</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">wg</span> <span class="o">*</span><span class="nx">sync</span><span class="p">.</span><span class="nx">WaitGroup</span><span class="p">)</span> <span class="p">{</span>
     <span class="k">for</span> <span class="p">{</span>
         <span class="nx">n</span> <span class="o">:=</span> <span class="o">&lt;-</span><span class="nx">c</span>
-        <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">"received"</span><span class="p">,</span> <span class="nx">n</span><span class="p">)</span>
+        <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;received&quot;</span><span class="p">,</span> <span class="nx">n</span><span class="p">)</span>
         <span class="nx">time</span><span class="p">.</span><span class="nx">Sleep</span><span class="p">(</span><span class="nx">time</span><span class="p">.</span><span class="nx">Second</span><span class="p">)</span>
-        <span class="c1">// c &lt;- 42 // THIS WOULD CAUSE AN ERROR "(send to receive-only type &lt;-chan int)"</span>
+        <span class="c1">// c &lt;- 42 // THIS WOULD CAUSE AN ERROR &quot;(send to receive-only type &lt;-chan int)&quot;</span>
         <span class="nx">wg</span><span class="p">.</span><span class="nx">Done</span><span class="p">()</span>
     <span class="p">}</span>
 <span class="p">}</span>
@@ -247,7 +226,7 @@ This kind of issue occurs in a "pipeline" of producers/consumers (also known as 
         <span class="nx">c</span> <span class="o">&lt;-</span> <span class="nx">i</span>
         <span class="nx">wg</span><span class="p">.</span><span class="nx">Add</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
         <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">i</span><span class="p">)</span>
-        <span class="c1">// fmt.Println(&lt;-c) // THIS WOULD CAUSE AN ERROR "(receive from send-only type chan&lt;- int)"</span>
+        <span class="c1">// fmt.Println(&lt;-c) // THIS WOULD CAUSE AN ERROR &quot;(receive from send-only type chan&lt;- int)&quot;</span>
     <span class="p">}</span>
 <span class="p">}</span>
 
@@ -260,7 +239,8 @@ This kind of issue occurs in a "pipeline" of producers/consumers (also known as 
     <span class="nx">wg</span><span class="p">.</span><span class="nx">Wait</span><span class="p">()</span>
     <span class="nx">log</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">time</span><span class="p">.</span><span class="nx">Since</span><span class="p">(</span><span class="nx">start</span><span class="p">))</span>
 <span class="p">}</span>
-</pre></div>
+</code></pre></div>
+
 <blockquote>
 <ul>
 <li>This example shows how to specify a channel of type that either only sends or only receives</li>
@@ -273,26 +253,26 @@ This kind of issue occurs in a "pipeline" of producers/consumers (also known as 
 <li><a href="https://play.golang.org/p/NcEOgCiSQs">https://play.golang.org/p/NcEOgCiSQs</a></li>
 <li><a href="https://tour.golang.org/concurrency/3">https://tour.golang.org/concurrency/3</a></li>
 </ul>
-<h3 id="using-select-to-not-block-a-channel">Using Select to not block a channel</h3>
+<h3>Using Select to not block a channel</h3>
 <p>Channels are most useful when they can block asynchronously until an event occurs.</p>
-<div class="highlight"><pre><span></span><span class="n">package</span> <span class="n">main</span>
+<div class="highlight"><pre><span></span><code><span class="n">package</span> <span class="n">main</span>
 
-<span class="kn">import</span> <span class="s2">"time"</span>
-<span class="kn">import</span> <span class="s2">"fmt"</span>
+<span class="kn">import</span> <span class="s2">&quot;time&quot;</span>
+<span class="kn">import</span> <span class="s2">&quot;fmt&quot;</span>
 
 <span class="n">func</span> <span class="n">main</span><span class="p">()</span> <span class="p">{</span>
-    <span class="n">c</span> <span class="p">:</span><span class="o">=</span> <span class="n">make</span><span class="p">(</span><span class="n">chan</span> <span class="n">string</span><span class="p">)</span>
-    <span class="n">q</span> <span class="p">:</span><span class="o">=</span> <span class="n">make</span><span class="p">(</span><span class="n">chan</span> <span class="nb">bool</span><span class="p">)</span>
+    <span class="n">c</span> <span class="o">:=</span> <span class="n">make</span><span class="p">(</span><span class="n">chan</span> <span class="n">string</span><span class="p">)</span>
+    <span class="n">q</span> <span class="o">:=</span> <span class="n">make</span><span class="p">(</span><span class="n">chan</span> <span class="nb">bool</span><span class="p">)</span>
     <span class="n">go</span> <span class="n">myDelayedQuit</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
     <span class="n">go</span> <span class="n">mySleep</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 
-    <span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="s2">"begin non blocking wait..."</span><span class="p">)</span>
+    <span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="s2">&quot;begin non blocking wait...&quot;</span><span class="p">)</span>
     <span class="k">for</span> <span class="p">{</span>
         <span class="n">select</span> <span class="p">{</span>
-        <span class="n">case</span> <span class="n">msg</span> <span class="p">:</span><span class="o">=</span> <span class="o">&lt;-</span><span class="n">c</span><span class="p">:</span>
-            <span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="s2">"received:"</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+        <span class="n">case</span> <span class="n">msg</span> <span class="o">:=</span> <span class="o">&lt;-</span><span class="n">c</span><span class="p">:</span>
+            <span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="s2">&quot;received:&quot;</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
         <span class="n">case</span> <span class="o">&lt;-</span><span class="n">q</span><span class="p">:</span>
-            <span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="s2">"done"</span><span class="p">)</span>
+            <span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="s2">&quot;done&quot;</span><span class="p">)</span>
             <span class="k">return</span>
         <span class="p">}</span>
     <span class="p">}</span>
@@ -300,14 +280,15 @@ This kind of issue occurs in a "pipeline" of producers/consumers (also known as 
 
 <span class="n">func</span> <span class="n">mySleep</span><span class="p">(</span><span class="n">a</span> <span class="n">chan</span> <span class="n">string</span><span class="p">,</span> <span class="n">n</span> <span class="nb">int</span><span class="p">)</span> <span class="p">{</span>
     <span class="n">time</span><span class="o">.</span><span class="n">Sleep</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">Second</span> <span class="o">*</span> <span class="n">time</span><span class="o">.</span><span class="n">Duration</span><span class="p">(</span><span class="n">n</span><span class="p">))</span>
-    <span class="n">a</span> <span class="o">&lt;-</span> <span class="s2">"woke up"</span>
+    <span class="n">a</span> <span class="o">&lt;-</span> <span class="s2">&quot;woke up&quot;</span>
 <span class="p">}</span>
 
 <span class="n">func</span> <span class="n">myDelayedQuit</span><span class="p">(</span><span class="n">b</span> <span class="n">chan</span> <span class="nb">bool</span><span class="p">)</span> <span class="p">{</span>
     <span class="n">time</span><span class="o">.</span><span class="n">Sleep</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">Second</span> <span class="o">*</span> <span class="mi">2</span><span class="p">)</span>
     <span class="n">b</span> <span class="o">&lt;-</span> <span class="n">true</span>
 <span class="p">}</span>
-</pre></div>
+</code></pre></div>
+
 <blockquote>
 <ul>
 <li><strong>for</strong> loops forever until the return statement</li>
@@ -319,14 +300,14 @@ This kind of issue occurs in a "pipeline" of producers/consumers (also known as 
 <ul>
 <li><a href="https://play.golang.org/p/JBrhHZVq6a">https://play.golang.org/p/JBrhHZVq6a</a></li>
 </ul>
-<h3 id="real-example-of-concurrency-in-a-lan-scanner">Real Example of Concurrency in a LAN Scanner</h3>
+<h3>Real Example of Concurrency in a LAN Scanner</h3>
 <p>A real world example is discovering all of the hosts listening on a given port in local area network (subnet).</p>
 <p>In a serial example waiting 2 seconds for each host to respond would mean waiting 512 seconds in a "normal" /24 subnet of ~256 hosts (ignoring the .255 broadcast and .0)</p>
-<div class="highlight"><pre><span></span><span class="nx">found</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">chan</span> <span class="nx">IPCheckResult</span><span class="p">,</span> <span class="nx">max</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="nx">found</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">chan</span> <span class="nx">IPCheckResult</span><span class="p">,</span> <span class="nx">max</span><span class="p">)</span>
 <span class="kd">var</span> <span class="nx">wg</span> <span class="nx">sync</span><span class="p">.</span><span class="nx">WaitGroup</span>
 <span class="nx">wg</span><span class="p">.</span><span class="nx">Add</span><span class="p">(</span><span class="nx">max</span><span class="p">)</span>
 <span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">a</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">addresses</span> <span class="p">{</span>
-    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">"checking"</span><span class="p">,</span> <span class="nx">a</span><span class="p">)</span>
+    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;checking&quot;</span><span class="p">,</span> <span class="nx">a</span><span class="p">)</span>
     <span class="c1">// https://golang.org/doc/faq#closures_and_goroutines</span>
     <span class="k">go</span> <span class="kd">func</span><span class="p">(</span><span class="nx">ip</span> <span class="kt">string</span><span class="p">)</span> <span class="p">{</span>
         <span class="nx">checkIP</span><span class="p">(</span><span class="nx">ip</span><span class="p">,</span> <span class="o">*</span><span class="nx">port</span><span class="p">,</span> <span class="nx">found</span><span class="p">)</span>
@@ -335,28 +316,30 @@ This kind of issue occurs in a "pipeline" of producers/consumers (also known as 
 <span class="p">}</span>
 <span class="nx">wg</span><span class="p">.</span><span class="nx">Wait</span><span class="p">()</span>
 <span class="nb">close</span><span class="p">(</span><span class="nx">found</span><span class="p">)</span>
-</pre></div>
+</code></pre></div>
+
 <blockquote>
 <p>Here the channel is simply used as a "lock free" place to aggregate all of the results of the goroutines, sync occurs via the waitgroup which will wait until every pre-added item is decremented by a Done(), there is definitely a possibility for an off-by-one gotcha that will hang your program!</p>
 </blockquote>
 <p><a href="https://bitbucket.org/johnpfeiffer/go-lanscan/src">https://bitbucket.org/johnpfeiffer/go-lanscan/src</a></p>
-<h3 id="troubleshooting-race-conditions">Troubleshooting Race Conditions</h3>
+<h3>Troubleshooting Race Conditions</h3>
 <p>A common gotcha is that in Go maps are not safe for concurrent use:</p>
 <ul>
 <li><a href="https://blog.golang.org/go-maps-in-action">https://blog.golang.org/go-maps-in-action</a></li>
 <li><a href="https://golang.org/doc/faq#atomic_maps">https://golang.org/doc/faq#atomic_maps</a></li>
 </ul>
 <p>In this example of a simple in memory cache the expiration was implemented...</p>
-<div class="highlight"><pre><span></span><span class="kd">func</span> <span class="p">(</span><span class="nx">memory</span> <span class="nx">MemoryCache</span><span class="p">)</span> <span class="nx">Set</span><span class="p">(</span><span class="nx">key</span> <span class="kt">string</span><span class="p">,</span> <span class="nx">value</span> <span class="kt">string</span><span class="p">,</span> <span class="nx">expiresSeconds</span> <span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
+<div class="highlight"><pre><span></span><code><span class="kd">func</span> <span class="p">(</span><span class="nx">memory</span> <span class="nx">MemoryCache</span><span class="p">)</span> <span class="nx">Set</span><span class="p">(</span><span class="nx">key</span> <span class="kt">string</span><span class="p">,</span> <span class="nx">value</span> <span class="kt">string</span><span class="p">,</span> <span class="nx">expiresSeconds</span> <span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
     <span class="nx">memory</span><span class="p">.</span><span class="nx">m</span><span class="p">[</span><span class="nx">key</span><span class="p">]</span> <span class="p">=</span> <span class="nx">value</span>
     <span class="nx">timer</span> <span class="o">:=</span> <span class="nx">time</span><span class="p">.</span><span class="nx">NewTimer</span><span class="p">(</span><span class="nx">time</span><span class="p">.</span><span class="nx">Duration</span><span class="p">(</span><span class="nx">expiresSeconds</span><span class="p">)</span> <span class="o">*</span> <span class="nx">time</span><span class="p">.</span><span class="nx">Second</span><span class="p">)</span>
     <span class="k">go</span> <span class="kd">func</span><span class="p">()</span> <span class="p">{</span>
         <span class="o">&lt;-</span><span class="nx">timer</span><span class="p">.</span><span class="nx">C</span>
         <span class="nx">memory</span><span class="p">.</span><span class="nx">Delete</span><span class="p">(</span><span class="nx">key</span><span class="p">)</span>
-        <span class="c1">// log.Println("Timer triggered cache expiration for", key)</span>
+        <span class="c1">// log.Println(&quot;Timer triggered cache expiration for&quot;, key)</span>
     <span class="p">}()</span>
 <span class="p">}</span>
-</pre></div>
+</code></pre></div>
+
 <blockquote>
 <p>The error here is that the goroutine that wakes up to "expire" and remove a key/value pair from the map may contend with any other later operation (i.e. Get, Set, Delete) that is also modifying the map</p>
 </blockquote>
@@ -367,19 +350,19 @@ This kind of issue occurs in a "pipeline" of producers/consumers (also known as 
 <ul>
 <li><a href="https://blog.golang.org/race-detector">https://blog.golang.org/race-detector</a></li>
 </ul>
-<h3 id="more-random-thoughts-on-concurrency-and-control">More random thoughts on concurrency and control</h3>
+<h3>More random thoughts on concurrency and control</h3>
 <p>Controlling goroutines is like controlling threads or even any other control flow.</p>
 <p>Iterative vs Recursive calculation of factorial means either predetermined count of iterations or an indeterminate count (recursion) with a (base case) signal for termination (often called a sentinel value).</p>
 <p>So either the External Controller knows when to stop or each actor checks if it is time to stop.</p>
-<h4 id="an-important-consideration-to-termination-is-cleanup">An important consideration to termination is cleanup</h4>
+<h4>An important consideration to termination is cleanup</h4>
 <p>If the actor is responsible for self cleanup (as it knows what resources it is using) this can lead to resource leaks if the actor terminates unexpectedly without cleaning up.</p>
 <p>If using "dependency injection" then the Controller has knowledge of what resources were shared with the agents and can do cleanup, even if actors terminate unexpectedly.</p>
 <p>An increasingly common approach is for the Framework to facilitate cleanup so that the complexity is removed from both the Controller and the actors (e.g. Garbage Collection or Go deferred)</p>
-<h4 id="poison-jobs-cons-and-pros">Poison Jobs cons and pros</h4>
+<h4>Poison Jobs cons and pros</h4>
 <p>One challenge with workers and a queue is the "poison job" which may create inefficiency or halt the system entirely as each worker who takes the job blocks/loops forever or terminates unexpectedly.</p>
 <p>One possible solution is to have a retry count so that any job which has timed out or failed and retried repeatedly is moved to a FailedJob queue (for future manual inspection and debugging) or logged and dropped entirely.</p>
 <p>Interestingly something like a "poison job" is actually a useful way to signal to concurrent actors to have an orderly termination even if they have not completed their jobs (i.e. a full system shutdown has been initiated and we want to trigger self cleanup).</p>
-<h4 id="patterns-for-channels-and-flow-control">Patterns for Channels and Flow Control</h4>
+<h4>Patterns for Channels and Flow Control</h4>
 <p>Go Channels represent a way to map out the dependencies and then allow the compiler to optimize for parallelization.</p>
 <p>Waiting indefinitely for all goroutines to return is naive, and any termination signal must have the ability to truly interrupt work in progress, which it does NOT for goroutines, so any call that a goroutine is making MUST have a timebound where it can check for the termination signal.</p>
 <p>Therefore write your goroutines carefully knowing that you cannot cancel/aka force them to return from an infinite loop/long call, unless you exit main entirely.</p>
@@ -410,7 +393,7 @@ This kind of issue occurs in a "pipeline" of producers/consumers (also known as 
             <time pubdate="pubdate" datetime="2017-04-12T22:54:00-07:00">Apr 12, 2017</time>
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#programming-ref">programming</a> 
-            <h4>~1642 words</h4>
+            <h4>~1643 words</h4>
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article"> 
                 <li><a href="/tags.html#channels-ref">channels

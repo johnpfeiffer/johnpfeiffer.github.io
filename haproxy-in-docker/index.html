@@ -61,91 +61,67 @@
 </div>
 
 <div class="row-fluid">
-    <div class="span2 table-of-content">
-        <nav>
-        <h4>Contents</h4>
-        <div class="toc">
-<ul>
-<li><a href="#prerequisites">Prerequisites</a><ul>
-<li><a href="#some-backend-web-servers">Some backend web servers</a></li>
-</ul>
-</li>
-<li><a href="#optmydatahaproxycfg">/opt/mydata/haproxy.cfg</a></li>
-<li><a href="#start-haproxysh">start haproxy.sh</a></li>
-<li><a href="#haproxy-stats">HAProxy Stats</a><ul>
-<li><a href="#optmydatahaproxycfg_1">/opt/mydata/haproxy.cfg</a></li>
-</ul>
-</li>
-<li><a href="#nginx-forward-proxy">nginx forward proxy</a><ul>
-<li><a href="#nginxconf">nginx.conf</a></li>
-</ul>
-</li>
-<li><a href="#haproxy-as-a-limited-outbound-proxy">HAProxy as a limited outbound proxy</a><ul>
-<li><a href="#optmydatahaproxycfg_2">/opt/mydata/haproxy.cfg</a></li>
-<li><a href="#starting-the-haproxy-docker-container">starting the haproxy docker container</a></li>
-</ul>
-</li>
-<li><a href="#more-info">more info</a></li>
-</ul>
-</div>
-        </nav>
-    </div>
-    <div class="span8 article-content">
+        <div class="span8 offset2 article-content">
 
-            
+            <p>[TOC]</p>
 <p>Not only are Containers fast, one of the biggest advantages of Containers is the ability to reduce complexity.</p>
 <p>Docker can turn an application/service, it's dependencies, and even the OS level requirements into a single blackbox package (that you can still inspect inside if you really want to).</p>
 <p>One thing I really like is less code.  Seriously.  Configuration over coding (whenever I don't need customization) means far less maintenance and bugs.</p>
 <p>Here's a trivial example of how I can leverage the HAProxy Docker image/container to load balance two web servers. (aka "reverse proxy" <a href="http://en.wikipedia.org/wiki/Reverse_proxy">http://en.wikipedia.org/wiki/Reverse_proxy</a>)</p>
-<div class="highlight"><pre><span></span><span class="err">    client -&gt; all other sites</span>
-<span class="err">      |</span>
-<span class="err">reverse proxy (haproxy)</span>
-<span class="err">  /         \</span>
-<span class="err">BackendA  BackendB</span>
-</pre></div>
+<div class="highlight"><pre><span></span><code>    <span class="n">client</span> <span class="o">-&gt;</span> <span class="kr">all</span> <span class="n">other</span> <span class="n">sites</span>
+      <span class="o">|</span>
+<span class="n">reverse</span> <span class="n">proxy</span> <span class="p">(</span><span class="n">haproxy</span><span class="p">)</span>
+  <span class="o">/</span>         <span class="err">\</span>
+<span class="n">BackendA</span>  <span class="n">BackendB</span>
+</code></pre></div>
+
 <blockquote>
 <p>There are new problems that go along with the benefits of any new technology, see the complicated networking/port coordination</p>
 </blockquote>
-<h3 id="prerequisites">Prerequisites</h3>
-<div class="highlight"><pre><span></span><span class="err">sudo docker pull haproxy:1.5</span>
-</pre></div>
-<h4 id="some-backend-web-servers">Some backend web servers</h4>
-<div class="highlight"><pre><span></span><span class="n">mkdir</span> <span class="o">-</span><span class="n">p</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">BackendA</span>
-<span class="n">echo</span> <span class="ss">"foo"</span> <span class="o">&gt;</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">BackendA</span><span class="o">/</span><span class="n">foo</span><span class="p">.</span><span class="n">txt</span>
-<span class="n">cd</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">BackendA</span>
-<span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">SimpleHTTPServer</span> <span class="mi">8000</span> <span class="o">&amp;</span>
+<h3>Prerequisites</h3>
+<div class="highlight"><pre><span></span><code>sudo docker pull haproxy:1.5
+</code></pre></div>
 
-<span class="n">mkdir</span> <span class="o">-</span><span class="n">p</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">BackendB</span>
-<span class="n">echo</span> <span class="ss">"bar"</span> <span class="o">&gt;</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">BackendB</span><span class="o">/</span><span class="n">bar</span><span class="p">.</span><span class="n">txt</span>
-<span class="n">cd</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">BackendB</span>
-<span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">SimpleHTTPServer</span> <span class="mi">8001</span> <span class="o">&amp;</span>
-</pre></div>
+<h4>Some backend web servers</h4>
+<div class="highlight"><pre><span></span><code>mkdir -p /tmp/BackendA
+echo &quot;foo&quot; &gt; /tmp/BackendA/foo.txt
+cd /tmp/BackendA
+python -m SimpleHTTPServer 8000 &amp;
+
+mkdir -p /tmp/BackendB
+echo &quot;bar&quot; &gt; /tmp/BackendB/bar.txt
+cd /tmp/BackendB
+python -m SimpleHTTPServer 8001 &amp;
+</code></pre></div>
+
 <blockquote>
 <p>Clearly a trivial example (more likely two remote hosts in logical/geographic disparate areas if aiming for High Availability, or at least on different hosts to scale with more resources)</p>
 </blockquote>
-<h3 id="optmydatahaproxycfg">/opt/mydata/haproxy.cfg</h3>
-<div class="highlight"><pre><span></span><span class="k">global</span>
-        <span class="n">debug</span>
+<h3>/opt/mydata/haproxy.cfg</h3>
+<div class="highlight"><pre><span></span><code><span class="nv">global</span>
+        <span class="nv">debug</span>
 
-<span class="k">defaults</span>
-        <span class="n">log</span> <span class="k">global</span>
-        <span class="k">mode</span>    <span class="n">http</span>
-        <span class="n">timeout</span> <span class="k">connect</span> <span class="mi">5000</span>
-        <span class="n">timeout</span> <span class="n">client</span> <span class="mi">5000</span>
-        <span class="n">timeout</span> <span class="n">server</span> <span class="mi">5000</span>
+<span class="nv">defaults</span>
+        <span class="nv">log</span> <span class="nv">global</span>
+        <span class="nv">mode</span>    <span class="nv">http</span>
+        <span class="nb">timeout</span> <span class="k">connect</span> <span class="mi">5000</span>
+        <span class="nb">timeout</span> <span class="nv">client</span> <span class="mi">5000</span>
+        <span class="nb">timeout</span> <span class="nv">server</span> <span class="mi">5000</span>
 
-<span class="k">listen</span> <span class="n">http_proxy</span> <span class="p">:</span><span class="mi">8443</span>
-        <span class="k">mode</span> <span class="n">tcp</span>
-        <span class="n">balance</span> <span class="n">roundrobin</span>
-        <span class="n">server</span> <span class="n">srv1</span> <span class="n">docker</span><span class="p">:</span><span class="mi">8000</span> <span class="k">check</span>
-        <span class="n">server</span> <span class="n">srv2</span> <span class="n">docker</span><span class="p">:</span><span class="mi">8001</span> <span class="k">check</span>
-</pre></div>
-<h3 id="start-haproxysh">start haproxy.sh</h3>
-<div class="highlight"><pre><span></span><span class="ch">#!/bin/bash</span>
-<span class="nv">HOSTIP</span><span class="o">=</span><span class="sb">`</span>ip addr show <span class="p">|</span> grep docker0 <span class="p">|</span> grep global <span class="p">|</span> awk <span class="s1">'{print $2}'</span> <span class="p">|</span> cut -d / -f1<span class="sb">`</span>
+<span class="nv">listen</span> <span class="nv">http_proxy</span> :<span class="mi">8443</span>
+        <span class="nv">mode</span> <span class="nv">tcp</span>
+        <span class="nv">balance</span> <span class="nv">roundrobin</span>
+        <span class="nv">server</span> <span class="nv">srv1</span> <span class="nv">docker</span>:<span class="mi">8000</span> <span class="nv">check</span>
+        <span class="nv">server</span> <span class="nv">srv2</span> <span class="nv">docker</span>:<span class="mi">8001</span> <span class="nv">check</span>
+</code></pre></div>
+
+<h3>start haproxy.sh</h3>
+<div class="highlight"><pre><span></span><code><span class="ch">#!/bin/bash</span>
+<span class="nv">HOSTIP</span><span class="o">=</span><span class="sb">`</span>ip addr show <span class="p">|</span> grep docker0 <span class="p">|</span> grep global <span class="p">|</span> awk <span class="s1">&#39;{print $2}&#39;</span> <span class="p">|</span> cut -d / -f1<span class="sb">`</span>
 
 sudo docker run -p <span class="m">8443</span>:8443 --add-host<span class="o">=</span>docker:<span class="si">${</span><span class="nv">HOSTIP</span><span class="si">}</span> --rm -it -v /opt/mydata/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro --name myhaproxy haproxy:1.5
-</pre></div>
+</code></pre></div>
+
 <blockquote>
 <p>Now that the docker container's /etc/hosts file has the Host IP Address injected (with the name "docker") the haproxy config file probably makes more sense</p>
 </blockquote>
@@ -170,9 +146,9 @@ sudo docker run -p <span class="m">8443</span>:8443 --add-host<span class="o">=<
 <hr>
 <ul>
 <li><a href="bar.txt">bar.txt</a>
-</li></ul>
+</ul>
 <hr>
-</hr></hr></body>
+</body>
 </html></p>
 <p>curl localhost:8443</p>
 <p>:::html
@@ -183,48 +159,51 @@ sudo docker run -p <span class="m">8443</span>:8443 --add-host<span class="o">=<
 <hr>
 <ul>
 <li><a href="foo.txt">foo.txt</a>
-</li></ul>
+</ul>
 <hr>
-</hr></hr></body>
+</body>
 </html></p>
 </li>
 </ul>
-<h3 id="haproxy-stats">HAProxy Stats</h3>
-<div class="highlight"><pre><span></span><span class="err">sudo docker rm -f myhaproxy</span>
-</pre></div>
-<h4 id="optmydatahaproxycfg_1">/opt/mydata/haproxy.cfg</h4>
-<div class="highlight"><pre><span></span><span class="k">global</span>
-    <span class="n">debug</span>
+<h3>HAProxy Stats</h3>
+<div class="highlight"><pre><span></span><code>sudo docker rm -f myhaproxy
+</code></pre></div>
 
-<span class="k">defaults</span>
-    <span class="n">log</span> <span class="k">global</span>
-    <span class="k">mode</span>    <span class="n">http</span>
-    <span class="n">timeout</span> <span class="k">connect</span> <span class="mi">5000</span>
-    <span class="n">timeout</span> <span class="n">client</span> <span class="mi">5000</span>
-    <span class="n">timeout</span> <span class="n">server</span> <span class="mi">5000</span>
+<h4>/opt/mydata/haproxy.cfg</h4>
+<div class="highlight"><pre><span></span><code><span class="nv">global</span>
+    <span class="nv">debug</span>
 
-<span class="k">listen</span> <span class="n">http_proxy</span> <span class="p">:</span><span class="mi">8443</span>
-    <span class="k">mode</span> <span class="n">tcp</span>
-    <span class="n">balance</span> <span class="n">roundrobin</span>
-    <span class="n">server</span> <span class="n">srv1</span> <span class="n">docker</span><span class="p">:</span><span class="mi">8000</span> <span class="k">check</span>
-    <span class="n">server</span> <span class="n">srv2</span> <span class="n">docker</span><span class="p">:</span><span class="mi">8001</span> <span class="k">check</span>
+<span class="nv">defaults</span>
+    <span class="nv">log</span> <span class="nv">global</span>
+    <span class="nv">mode</span>    <span class="nv">http</span>
+    <span class="nb">timeout</span> <span class="k">connect</span> <span class="mi">5000</span>
+    <span class="nb">timeout</span> <span class="nv">client</span> <span class="mi">5000</span>
+    <span class="nb">timeout</span> <span class="nv">server</span> <span class="mi">5000</span>
 
-<span class="o">#</span> <span class="n">optional</span> <span class="n">section</span> <span class="k">to</span> <span class="n">enable</span> <span class="k">statistics</span> <span class="k">for</span> <span class="n">haproxy</span> <span class="n">protected</span> <span class="k">by</span> <span class="n">basic</span> <span class="n">auth</span> <span class="p">(</span><span class="k">replace</span> <span class="k">with</span> <span class="n">your</span> <span class="n">own</span> <span class="k">user</span> <span class="k">and</span> <span class="n">password</span><span class="p">)</span>
-<span class="k">listen</span> <span class="n">stats</span> <span class="p">:</span><span class="mi">1936</span>
-    <span class="n">stats</span> <span class="n">enable</span>
-    <span class="n">stats</span> <span class="n">uri</span> <span class="o">/</span>
-    <span class="n">stats</span> <span class="n">realm</span> <span class="n">HAProxyStatistics</span>
-    <span class="n">stats</span> <span class="n">auth</span> <span class="k">user</span><span class="p">:</span><span class="n">password</span>
+<span class="nv">listen</span> <span class="nv">http_proxy</span> :<span class="mi">8443</span>
+    <span class="nv">mode</span> <span class="nv">tcp</span>
+    <span class="nv">balance</span> <span class="nv">roundrobin</span>
+    <span class="nv">server</span> <span class="nv">srv1</span> <span class="nv">docker</span>:<span class="mi">8000</span> <span class="nv">check</span>
+    <span class="nv">server</span> <span class="nv">srv2</span> <span class="nv">docker</span>:<span class="mi">8001</span> <span class="nv">check</span>
+
+# <span class="nv">optional</span> <span class="nv">section</span> <span class="nv">to</span> <span class="nv">enable</span> <span class="nv">statistics</span> <span class="k">for</span> <span class="nv">haproxy</span> <span class="nv">protected</span> <span class="nv">by</span> <span class="nv">basic</span> <span class="nv">auth</span> <span class="ss">(</span><span class="nv">replace</span> <span class="nv">with</span> <span class="nv">your</span> <span class="nv">own</span> <span class="nv">user</span> <span class="nv">and</span> <span class="nv">password</span><span class="ss">)</span>
+<span class="nv">listen</span> <span class="nv">stats</span> :<span class="mi">1936</span>
+    <span class="nv">stats</span> <span class="nv">enable</span>
+    <span class="nv">stats</span> <span class="nv">uri</span> <span class="o">/</span>
+    <span class="nv">stats</span> <span class="nv">realm</span> <span class="nv">HAProxyStatistics</span>
+    <span class="nv">stats</span> <span class="nv">auth</span> <span class="nv">user</span>:<span class="nv">password</span>
 
 
-<span class="p">.</span><span class="o">/</span><span class="k">start</span><span class="o">-</span><span class="n">haproxy</span><span class="p">.</span><span class="n">sh</span>
-</pre></div>
-<h3 id="nginx-forward-proxy">nginx forward proxy</h3>
+.<span class="o">/</span><span class="nv">start</span><span class="o">-</span><span class="nv">haproxy</span>.<span class="nv">sh</span>
+</code></pre></div>
+
+<h3>nginx forward proxy</h3>
 <p>client -&gt; forward proxy (nginx) -&gt; all other sites</p>
-<div class="highlight"><pre><span></span><span class="err">docker pull nginx:alpine</span>
-</pre></div>
-<h4 id="nginxconf">nginx.conf</h4>
-<div class="highlight"><pre><span></span><span class="nt">worker_processes</span>  <span class="nt">1</span><span class="o">;</span>
+<div class="highlight"><pre><span></span><code>docker pull nginx:alpine
+</code></pre></div>
+
+<h4>nginx.conf</h4>
+<div class="highlight"><pre><span></span><code><span class="nt">worker_processes</span>  <span class="nt">1</span><span class="o">;</span>
 
 <span class="nt">events</span> <span class="p">{</span>
     <span class="err">worker_connections</span>  <span class="err">1024</span><span class="p">;</span>
@@ -257,12 +236,14 @@ sudo docker run -p <span class="m">8443</span>:8443 --add-host<span class="o">=<
 
 
 <span class="nt">docker</span> <span class="nt">run</span> <span class="nt">-it</span> <span class="nt">--rm</span> <span class="nt">-p</span> <span class="nt">8080</span><span class="p">:</span><span class="nd">8080</span> <span class="nt">-v</span> <span class="o">/</span><span class="nt">tmp</span><span class="o">/</span><span class="nt">nginx</span><span class="p">.</span><span class="nc">conf</span><span class="o">:/</span><span class="nt">etc</span><span class="o">/</span><span class="nt">nginx</span><span class="o">/</span><span class="nt">nginx</span><span class="p">.</span><span class="nc">conf</span><span class="p">:</span><span class="nd">ro</span> <span class="nt">--name</span> <span class="nt">mynginx</span> <span class="nt">nginx</span><span class="p">:</span><span class="nd">alpine</span>
-</pre></div>
+</code></pre></div>
+
 <blockquote>
 <p>bind to port 8080 on the host and run an ephemeral container based on the alpine linux with nginx image that uses the /tmp/nginx config</p>
 </blockquote>
-<div class="highlight"><pre><span></span><span class="err">http_proxy=127.0.0.1:8080 curl example.com</span>
-</pre></div>
+<div class="highlight"><pre><span></span><code>http_proxy=127.0.0.1:8080 curl example.com
+</code></pre></div>
+
 <blockquote>
 <p>set the linux operating system proxy environment just for this one curl command and see the dockerized nginx forward proxy log show: 172.17.0.1 - - [06/May/2016:22:37:22 +0000] "GET HTTP://example.org/ HTTP/1.1" 200 1270 "-" "curl/7.35.0"</p>
 </blockquote>
@@ -273,9 +254,10 @@ sudo docker run -p <span class="m">8443</span>:8443 --add-host<span class="o">=<
 </blockquote>
 <p><strong> Warning </strong> do not use <em>http_proxy=http://127.0.0.1:8080</em> as that will fail =[</p>
 <p>You can permanently set the environment proxy with export http_proxy=127.0.0.1:8080</p>
-<h3 id="haproxy-as-a-limited-outbound-proxy">HAProxy as a limited outbound proxy</h3>
-<div class="highlight"><pre><span></span><span class="err">sudo docker pull haproxy:1.6-alpine</span>
-</pre></div>
+<h3>HAProxy as a limited outbound proxy</h3>
+<div class="highlight"><pre><span></span><code>sudo docker pull haproxy:1.6-alpine
+</code></pre></div>
+
 <p>Now that you have the 10MB haproxy image...</p>
 <blockquote>
 <p>Note there is a limitation to haproxy in that it always assumes a syslog facility (no direct logging to stdout or files)</p>
@@ -284,35 +266,37 @@ sudo docker run -p <span class="m">8443</span>:8443 --add-host<span class="o">=<
 <li><a href="https://github.com/dockerfile/haproxy/issues/3">https://github.com/dockerfile/haproxy/issues/3</a></li>
 <li><a href="http://www.gnu.org/software/libc/manual/html_node/Overview-of-Syslog.html">http://www.gnu.org/software/libc/manual/html_node/Overview-of-Syslog.html</a></li>
 </ul>
-<h4 id="optmydatahaproxycfg_2">/opt/mydata/haproxy.cfg</h4>
+<h4>/opt/mydata/haproxy.cfg</h4>
 <p>This is the more readable config style which separates the frontend from backend and this is haproxy 1.6</p>
 <blockquote>
 <p>The logging probably does not work =(</p>
 </blockquote>
-<div class="highlight"><pre><span></span><span class="k">global</span>
-        <span class="n">debug</span>
-        <span class="n">log</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">log</span> <span class="n">local0</span> <span class="n">info</span>
+<div class="highlight"><pre><span></span><code><span class="nv">global</span>
+        <span class="nv">debug</span>
+        <span class="nv">log</span> <span class="o">/</span><span class="nv">dev</span><span class="o">/</span><span class="nv">log</span> <span class="nv">local0</span> <span class="nv">info</span>
 
-<span class="k">defaults</span>
-        <span class="k">mode</span> <span class="n">http</span>
-        <span class="n">timeout</span> <span class="k">connect</span> <span class="mi">5</span><span class="n">s</span>
-        <span class="n">timeout</span> <span class="n">client</span> <span class="mi">5</span><span class="n">s</span>
-        <span class="n">timeout</span> <span class="n">server</span> <span class="mi">5</span><span class="n">s</span>
+<span class="nv">defaults</span>
+        <span class="nv">mode</span> <span class="nv">http</span>
+        <span class="nb">timeout</span> <span class="k">connect</span> <span class="mi">5</span><span class="nv">s</span>
+        <span class="nb">timeout</span> <span class="nv">client</span> <span class="mi">5</span><span class="nv">s</span>
+        <span class="nb">timeout</span> <span class="nv">server</span> <span class="mi">5</span><span class="nv">s</span>
 
-<span class="n">frontend</span> <span class="n">myfrontend</span>
-        <span class="n">bind</span> <span class="o">*</span><span class="p">:</span><span class="mi">8443</span>
-        <span class="n">default_backend</span> <span class="n">mybackend</span>
+<span class="nv">frontend</span> <span class="nv">myfrontend</span>
+        <span class="nv">bind</span> <span class="o">*</span>:<span class="mi">8443</span>
+        <span class="nv">default_backend</span> <span class="nv">mybackend</span>
 
-<span class="n">backend</span> <span class="n">mybackend</span>
-        <span class="n">server</span> <span class="n">s1</span> <span class="n">example</span><span class="p">.</span><span class="n">com</span><span class="p">:</span><span class="mi">443</span> <span class="n">ssl</span> <span class="n">verify</span> <span class="k">none</span>
-</pre></div>
-<h4 id="starting-the-haproxy-docker-container">starting the haproxy docker container</h4>
-<div class="highlight"><pre><span></span><span class="err">docker run -p 8443:8443 --rm -it -v /home/admin/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro -v /dev/log:/dev/log --name myhaproxy haproxy:1.6-alpine</span>
-</pre></div>
+<span class="nv">backend</span> <span class="nv">mybackend</span>
+        <span class="nv">server</span> <span class="nv">s1</span> <span class="nv">example</span>.<span class="nv">com</span>:<span class="mi">443</span> <span class="nv">ssl</span> <span class="nv">verify</span> <span class="nv">none</span>
+</code></pre></div>
+
+<h4>starting the haproxy docker container</h4>
+<div class="highlight"><pre><span></span><code>docker run -p 8443:8443 --rm -it -v /home/admin/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro -v /dev/log:/dev/log --name myhaproxy haproxy:1.6-alpine
+</code></pre></div>
+
 <blockquote>
 <p>Control + C to quit</p>
 </blockquote>
-<h3 id="more-info">more info</h3>
+<h3>more info</h3>
 <ul>
 <li><a href="https://registry.hub.docker.com/_/haproxy/">https://registry.hub.docker.com/_/haproxy/</a></li>
 <li><a href="https://cbonte.github.io/haproxy-dconv/configuration-1.5.html">https://cbonte.github.io/haproxy-dconv/configuration-1.5.html</a></li>
@@ -339,7 +323,7 @@ sudo docker run -p <span class="m">8443</span>:8443 --add-host<span class="o">=<
             <time pubdate="pubdate" datetime="2015-05-21T20:00:00-07:00">May 21, 2015</time>
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#virtualization-ref">virtualization</a> 
-            <h4>~756 words</h4>
+            <h4>~757 words</h4>
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article"> 
                 <li><a href="/tags.html#docker-ref">docker

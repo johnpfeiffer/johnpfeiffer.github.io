@@ -69,154 +69,154 @@
 <p>The reason I've chosen the awkward system of getting the system time over and over instead of the "convenient" windows timer is that I'm trying to learn and understand what I can do with programming, not how to copy and paste someone else's function.</p>
 <p>The "modular" aspect of <strong>get_current_time</strong> returning a string becomes very interesting as theoretically I could modify it to get time from an atomic clock or the internet and the application wouldn't know the difference.</p>
 <p>Anyways, here's some source code that does compile (but I think it has a very slow memory leak so don't leave it running all night... LOL)</p>
-<div class="highlight"><pre><span></span><span class="cm">/* 2010-02-12  john pfeiffer, MS windows clock v4 (updating time)</span>
+<div class="highlight"><pre><span></span><code><span class="cm">/* 2010-02-12  john pfeiffer, MS windows clock v4 (updating time)</span>
 <span class="cm">todo: wm_paint, wm_timer, strcpy instead of get_current?</span>
-<span class="cm">*/</span>
+<span class="cm">*/</span><span class="w"></span>
 
-<span class="cp">#include</span> <span class="cpf">&lt;stdlib.h&gt;</span><span class="cp"></span>
-<span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp"></span>
-<span class="cp">#include</span> <span class="cpf">&lt;time.h&gt;</span><span class="cp"></span>
-<span class="cp">#include</span> <span class="cpf">&lt;string.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;stdlib.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;stdio.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;time.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;string.h&gt;</span><span class="cp"></span>
 
-<span class="cp">#include</span> <span class="cpf">&lt;windows.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;windows.h&gt;</span><span class="cp"></span>
 <span class="cp">#define  IDC_ExitButton 40001</span>
 
 
-<span class="n">LRESULT</span> <span class="n">CALLBACK</span> <span class="nf">WindowProcedure</span><span class="p">(</span> <span class="n">HWND</span> <span class="n">hwnd</span><span class="p">,</span> <span class="n">UINT</span> <span class="n">message</span><span class="p">,</span> <span class="n">WPARAM</span> <span class="n">wParam</span><span class="p">,</span> <span class="n">LPARAM</span> <span class="n">lParam</span><span class="p">);</span>
+<span class="n">LRESULT</span><span class="w"> </span><span class="n">CALLBACK</span><span class="w"> </span><span class="n">WindowProcedure</span><span class="p">(</span><span class="w"> </span><span class="n">HWND</span><span class="w"> </span><span class="n">hwnd</span><span class="p">,</span><span class="w"> </span><span class="n">UINT</span><span class="w"> </span><span class="n">message</span><span class="p">,</span><span class="w"> </span><span class="n">WPARAM</span><span class="w"> </span><span class="n">wParam</span><span class="p">,</span><span class="w"> </span><span class="n">LPARAM</span><span class="w"> </span><span class="n">lParam</span><span class="p">);</span><span class="w"></span>
 
-<span class="kt">void</span> <span class="nf">get_current_time</span><span class="p">(</span> <span class="kt">char</span> <span class="n">current_time</span><span class="p">[</span><span class="mi">128</span><span class="p">]</span> <span class="p">);</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">get_current_time</span><span class="p">(</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="n">current_time</span><span class="p">[</span><span class="mi">128</span><span class="p">]</span><span class="w"> </span><span class="p">);</span><span class="w"></span>
 
-<span class="kt">int</span> <span class="n">WINAPI</span> <span class="nf">WinMain</span><span class="p">(</span> <span class="n">HINSTANCE</span> <span class="n">hThisInstance</span><span class="p">,</span> <span class="n">HINSTANCE</span> <span class="n">hPrevInstance</span><span class="p">,</span> <span class="n">LPSTR</span> <span class="n">lpszArgument</span><span class="p">,</span>   <span class="kt">int</span> <span class="n">ncmdshow</span><span class="p">)</span>
-<span class="p">{</span>
-    <span class="kt">char</span> <span class="n">current_time</span><span class="p">[</span><span class="mi">128</span><span class="p">];</span>
-    <span class="kt">char</span> <span class="n">temp_time</span><span class="p">[</span><span class="mi">128</span><span class="p">];</span>
+<span class="kt">int</span><span class="w"> </span><span class="n">WINAPI</span><span class="w"> </span><span class="n">WinMain</span><span class="p">(</span><span class="w"> </span><span class="n">HINSTANCE</span><span class="w"> </span><span class="n">hThisInstance</span><span class="p">,</span><span class="w"> </span><span class="n">HINSTANCE</span><span class="w"> </span><span class="n">hPrevInstance</span><span class="p">,</span><span class="w"> </span><span class="n">LPSTR</span><span class="w"> </span><span class="n">lpszArgument</span><span class="p">,</span><span class="w">   </span><span class="kt">int</span><span class="w"> </span><span class="n">ncmdshow</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="kt">char</span><span class="w"> </span><span class="n">current_time</span><span class="p">[</span><span class="mi">128</span><span class="p">];</span><span class="w"></span>
+<span class="w">    </span><span class="kt">char</span><span class="w"> </span><span class="n">temp_time</span><span class="p">[</span><span class="mi">128</span><span class="p">];</span><span class="w"></span>
 
-    <span class="n">HWND</span> <span class="n">hwnd</span><span class="p">;</span>           <span class="cm">/* The handle for our window */</span>
-    <span class="n">HWND</span> <span class="n">ButtonPushed</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+<span class="w">    </span><span class="n">HWND</span><span class="w"> </span><span class="n">hwnd</span><span class="p">;</span><span class="w">           </span><span class="cm">/* The handle for our window */</span><span class="w"></span>
+<span class="w">    </span><span class="n">HWND</span><span class="w"> </span><span class="n">ButtonPushed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span><span class="w"></span>
 
-    <span class="n">MSG</span> <span class="n">messages</span><span class="p">;</span>        <span class="cm">/* Messages to the application  */</span>
-    <span class="n">WNDCLASS</span> <span class="n">wc</span><span class="p">;</span>         <span class="cm">/* Data structure for our defined windowclass */</span>
+<span class="w">    </span><span class="n">MSG</span><span class="w"> </span><span class="n">messages</span><span class="p">;</span><span class="w">        </span><span class="cm">/* Messages to the application  */</span><span class="w"></span>
+<span class="w">    </span><span class="n">WNDCLASS</span><span class="w"> </span><span class="n">wc</span><span class="p">;</span><span class="w">         </span><span class="cm">/* Data structure for our defined windowclass */</span><span class="w"></span>
 
-    <span class="n">wc</span><span class="p">.</span><span class="n">style</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-    <span class="n">wc</span><span class="p">.</span><span class="n">lpfnWndProc</span> <span class="o">=</span> <span class="n">WindowProcedure</span><span class="p">;</span>   <span class="cm">/* This function is called by windows */</span>
-    <span class="n">wc</span><span class="p">.</span><span class="n">cbClsExtra</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>                   <span class="cm">/* No extra bytes after the window class */</span>
-    <span class="n">wc</span><span class="p">.</span><span class="n">cbWndExtra</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>                   <span class="cm">/* structure or the window instance */</span>
-    <span class="n">wc</span><span class="p">.</span><span class="n">hInstance</span> <span class="o">=</span> <span class="n">hThisInstance</span><span class="p">;</span>        <span class="cm">/* handle to the owner */</span>
-    <span class="n">wc</span><span class="p">.</span><span class="n">hIcon</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>                     <span class="cm">/* no special application icon */</span>
-    <span class="n">wc</span><span class="p">.</span><span class="n">hCursor</span> <span class="o">=</span> <span class="n">LoadCursor</span><span class="p">(</span><span class="nb">NULL</span><span class="p">,</span> <span class="n">IDC_ARROW</span><span class="p">);</span> <span class="cm">/* default cursor */</span>
-    <span class="n">wc</span><span class="p">.</span><span class="n">hbrBackground</span> <span class="o">=</span> <span class="p">(</span><span class="n">HBRUSH</span><span class="p">)</span> <span class="n">GetStockObject</span><span class="p">(</span><span class="n">LTGRAY_BRUSH</span><span class="p">);</span>   
-    <span class="n">wc</span><span class="p">.</span><span class="n">lpszMenuName</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>                   <span class="cm">/* No menu */</span>
-    <span class="n">wc</span><span class="p">.</span><span class="n">lpszClassName</span> <span class="o">=</span> <span class="s">&quot;WindowsApp&quot;</span><span class="p">;</span>          <span class="cm">/* the name of the windows class */</span>
-
-
-    <span class="cm">/* Register the window class, if fail quit the program with an error value */</span>
-    <span class="k">if</span><span class="p">(</span> <span class="n">RegisterClass</span><span class="p">(</span><span class="o">&amp;</span><span class="n">wc</span><span class="p">)</span> <span class="o">==</span><span class="mi">0</span> <span class="p">)</span>
-    <span class="p">{</span>
-        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>  
-    <span class="p">}</span>
-
-    <span class="cm">/* The class is registered, let&#39;s instantiate our window */</span>
-    <span class="n">hwnd</span> <span class="o">=</span> <span class="n">CreateWindowEx</span><span class="p">(</span> <span class="mi">1</span><span class="p">,</span> <span class="s">&quot;WindowsApp&quot;</span><span class="p">,</span> <span class="s">&quot;Windows Title&quot;</span><span class="p">,</span> <span class="n">WS_OVERLAPPEDWINDOW</span><span class="p">,</span>
-            <span class="n">CW_USEDEFAULT</span><span class="p">,</span> <span class="n">CW_USEDEFAULT</span><span class="p">,</span> <span class="n">CW_USEDEFAULT</span><span class="p">,</span> <span class="n">CW_USEDEFAULT</span><span class="p">,</span>
-            <span class="nb">NULL</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="n">hThisInstance</span><span class="p">,</span> <span class="nb">NULL</span> <span class="p">);</span>
-
-    <span class="cm">/* create button and store the handle */</span>
-    <span class="n">ButtonPushed</span> <span class="o">=</span> <span class="n">CreateWindow</span><span class="p">(</span> 
-        <span class="s">&quot;button&quot;</span><span class="p">,</span>                       <span class="cm">/* class name */</span>
-        <span class="s">&quot;Push to Quit&quot;</span><span class="p">,</span>                 <span class="cm">/* button caption */</span>
-        <span class="n">WS_CHILD</span> <span class="o">|</span><span class="n">WS_VISIBLE</span> <span class="o">|</span> <span class="n">BS_PUSHBUTTON</span><span class="p">,</span>  <span class="cm">/* the styles */</span>
-        <span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span>                            <span class="cm">/* the left and top coordinates */</span>
-        <span class="mi">150</span><span class="p">,</span><span class="mi">50</span><span class="p">,</span>                         <span class="cm">/* width and height */</span>
-        <span class="n">hwnd</span><span class="p">,</span>                           <span class="cm">/* parent window handle */</span>
-        <span class="p">(</span><span class="n">HMENU</span><span class="p">)</span><span class="n">IDC_ExitButton</span><span class="p">,</span>        <span class="cm">/* the ID of your button */</span>
-        <span class="n">hThisInstance</span><span class="p">,</span>                  <span class="cm">/* the instance of your application */</span>
-        <span class="nb">NULL</span><span class="p">)</span> <span class="p">;</span>                         <span class="cm">/* unnecessary extra */</span>
-
-    <span class="n">ShowWindow</span><span class="p">(</span><span class="n">hwnd</span><span class="p">,</span> <span class="n">ncmdshow</span><span class="p">);</span>     <span class="cm">/* Make the window visible on the screen */</span>
-    <span class="n">UpdateWindow</span><span class="p">(</span><span class="n">hwnd</span><span class="p">);</span>             <span class="cm">/* update with changes */</span>
-
-    <span class="n">get_current_time</span><span class="p">(</span> <span class="n">temp_time</span> <span class="p">);</span>   <span class="cm">/* get the current time initially */</span>
-
-    <span class="cm">/* Run the message loop. It will run until GetMessage( ) returns 0 */</span>
-    <span class="k">while</span><span class="p">(</span> <span class="n">GetMessage</span><span class="p">(</span><span class="o">&amp;</span><span class="n">messages</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="p">)</span>
-    <span class="p">{</span>
-        <span class="cm">/* nasty polling business, should be done with WM_TIMER */</span>
-        <span class="cm">/* if strings aren&#39;t the same then update the window */</span>
-        <span class="n">get_current_time</span><span class="p">(</span> <span class="n">current_time</span> <span class="p">);</span>
-
-        <span class="k">if</span><span class="p">(</span> <span class="n">strcmp</span><span class="p">(</span><span class="n">current_time</span><span class="p">,</span> <span class="n">temp_time</span><span class="p">)</span> <span class="p">)</span>
-        <span class="p">{</span>   
-            <span class="cm">/* debugging - am I getting the time comparison? */</span>
-            <span class="n">MessageBox</span><span class="p">(</span><span class="n">hwnd</span><span class="p">,</span> <span class="n">current_time</span><span class="p">,</span> <span class="n">temp_time</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
-
-            <span class="cm">/* theoretically the rest of this forces the window to refresh */</span>
-            <span class="n">UpdateWindow</span><span class="p">(</span><span class="n">hwnd</span><span class="p">);</span>
-
-            <span class="n">ShowWindow</span><span class="p">(</span><span class="n">hwnd</span><span class="p">,</span> <span class="n">ncmdshow</span><span class="p">);</span>
-            <span class="cm">/* update the new &quot;old time&quot; */</span>
-            <span class="n">get_current_time</span><span class="p">(</span> <span class="n">temp_time</span> <span class="p">);</span>               
-        <span class="p">}</span>
-
-        <span class="n">TranslateMessage</span><span class="p">(</span><span class="o">&amp;</span><span class="n">messages</span><span class="p">);</span> 
-        <span class="n">DispatchMessage</span><span class="p">(</span><span class="o">&amp;</span><span class="n">messages</span><span class="p">);</span>  
-    <span class="p">}</span>
-
-    <span class="cm">/* The program return-value is 0 - The value that PostQuitMessage( ) gave */</span>
-    <span class="k">return</span> <span class="n">messages</span><span class="p">.</span><span class="n">wParam</span><span class="p">;</span>
-<span class="p">}</span>
+<span class="w">    </span><span class="n">wc</span><span class="p">.</span><span class="n">style</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">wc</span><span class="p">.</span><span class="n">lpfnWndProc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">WindowProcedure</span><span class="p">;</span><span class="w">   </span><span class="cm">/* This function is called by windows */</span><span class="w"></span>
+<span class="w">    </span><span class="n">wc</span><span class="p">.</span><span class="n">cbClsExtra</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w">                   </span><span class="cm">/* No extra bytes after the window class */</span><span class="w"></span>
+<span class="w">    </span><span class="n">wc</span><span class="p">.</span><span class="n">cbWndExtra</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w">                   </span><span class="cm">/* structure or the window instance */</span><span class="w"></span>
+<span class="w">    </span><span class="n">wc</span><span class="p">.</span><span class="n">hInstance</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">hThisInstance</span><span class="p">;</span><span class="w">        </span><span class="cm">/* handle to the owner */</span><span class="w"></span>
+<span class="w">    </span><span class="n">wc</span><span class="p">.</span><span class="n">hIcon</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span><span class="w">                     </span><span class="cm">/* no special application icon */</span><span class="w"></span>
+<span class="w">    </span><span class="n">wc</span><span class="p">.</span><span class="n">hCursor</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LoadCursor</span><span class="p">(</span><span class="nb">NULL</span><span class="p">,</span><span class="w"> </span><span class="n">IDC_ARROW</span><span class="p">);</span><span class="w"> </span><span class="cm">/* default cursor */</span><span class="w"></span>
+<span class="w">    </span><span class="n">wc</span><span class="p">.</span><span class="n">hbrBackground</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">HBRUSH</span><span class="p">)</span><span class="w"> </span><span class="n">GetStockObject</span><span class="p">(</span><span class="n">LTGRAY_BRUSH</span><span class="p">);</span><span class="w">   </span>
+<span class="w">    </span><span class="n">wc</span><span class="p">.</span><span class="n">lpszMenuName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span><span class="w">                   </span><span class="cm">/* No menu */</span><span class="w"></span>
+<span class="w">    </span><span class="n">wc</span><span class="p">.</span><span class="n">lpszClassName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;WindowsApp&quot;</span><span class="p">;</span><span class="w">          </span><span class="cm">/* the name of the windows class */</span><span class="w"></span>
 
 
-<span class="cm">/* This function is called by the Windows function DispatchMessage( ) */</span>
-<span class="n">LRESULT</span> <span class="n">CALLBACK</span> <span class="nf">WindowProcedure</span><span class="p">(</span> <span class="n">HWND</span> <span class="n">hwnd</span><span class="p">,</span> <span class="n">UINT</span> <span class="n">message</span><span class="p">,</span> <span class="n">WPARAM</span> <span class="n">wParam</span><span class="p">,</span> <span class="n">LPARAM</span> <span class="n">lParam</span><span class="p">)</span>
-<span class="p">{</span>
-    <span class="kt">char</span> <span class="n">current_time</span><span class="p">[</span><span class="mi">128</span><span class="p">];</span>
-    <span class="n">PAINTSTRUCT</span> <span class="n">ps</span><span class="p">;</span>     <span class="cm">/* a structure for a paint job (see below */</span>
-    <span class="n">RECT</span> <span class="n">rect</span><span class="p">;</span>     <span class="cm">/* a struct to hold rectangle values (e.g. x,y coordinates) */</span>
-    <span class="n">HDC</span> <span class="n">hdc</span><span class="p">;</span>            <span class="cm">/* handle to a DC (buffer) for the screen */</span>
+<span class="w">    </span><span class="cm">/* Register the window class, if fail quit the program with an error value */</span><span class="w"></span>
+<span class="w">    </span><span class="k">if</span><span class="p">(</span><span class="w"> </span><span class="n">RegisterClass</span><span class="p">(</span><span class="o">&amp;</span><span class="n">wc</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="mi">0</span><span class="w"> </span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="mi">-1</span><span class="p">;</span><span class="w">  </span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
 
-    <span class="k">switch</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>                  <span class="cm">/* handle the messages */</span>
-    <span class="p">{</span>
-        <span class="k">case</span> <span class="nl">WM_COMMAND</span><span class="p">:</span>
-            <span class="k">switch</span><span class="p">(</span><span class="n">LOWORD</span><span class="p">(</span><span class="n">wParam</span><span class="p">))</span>    <span class="cm">/* find out what&#39;s been clicked */</span>
-            <span class="p">{</span>
-                <span class="k">case</span> <span class="nl">IDC_ExitButton</span><span class="p">:</span>
-                    <span class="n">PostQuitMessage</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
-                    <span class="k">break</span><span class="p">;</span>
+<span class="w">    </span><span class="cm">/* The class is registered, let&#39;s instantiate our window */</span><span class="w"></span>
+<span class="w">    </span><span class="n">hwnd</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">CreateWindowEx</span><span class="p">(</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;WindowsApp&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Windows Title&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">WS_OVERLAPPEDWINDOW</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="n">CW_USEDEFAULT</span><span class="p">,</span><span class="w"> </span><span class="n">CW_USEDEFAULT</span><span class="p">,</span><span class="w"> </span><span class="n">CW_USEDEFAULT</span><span class="p">,</span><span class="w"> </span><span class="n">CW_USEDEFAULT</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="nb">NULL</span><span class="p">,</span><span class="w"> </span><span class="nb">NULL</span><span class="p">,</span><span class="w"> </span><span class="n">hThisInstance</span><span class="p">,</span><span class="w"> </span><span class="nb">NULL</span><span class="w"> </span><span class="p">);</span><span class="w"></span>
 
-                <span class="k">default</span><span class="o">:</span>
-                    <span class="k">break</span><span class="p">;</span>
-            <span class="p">}</span>
-            <span class="k">break</span><span class="p">;</span>
+<span class="w">    </span><span class="cm">/* create button and store the handle */</span><span class="w"></span>
+<span class="w">    </span><span class="n">ButtonPushed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">CreateWindow</span><span class="p">(</span><span class="w"> </span>
+<span class="w">        </span><span class="s">&quot;button&quot;</span><span class="p">,</span><span class="w">                       </span><span class="cm">/* class name */</span><span class="w"></span>
+<span class="w">        </span><span class="s">&quot;Push to Quit&quot;</span><span class="p">,</span><span class="w">                 </span><span class="cm">/* button caption */</span><span class="w"></span>
+<span class="w">        </span><span class="n">WS_CHILD</span><span class="w"> </span><span class="o">|</span><span class="n">WS_VISIBLE</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">BS_PUSHBUTTON</span><span class="p">,</span><span class="w">  </span><span class="cm">/* the styles */</span><span class="w"></span>
+<span class="w">        </span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="w">                            </span><span class="cm">/* the left and top coordinates */</span><span class="w"></span>
+<span class="w">        </span><span class="mi">150</span><span class="p">,</span><span class="mi">50</span><span class="p">,</span><span class="w">                         </span><span class="cm">/* width and height */</span><span class="w"></span>
+<span class="w">        </span><span class="n">hwnd</span><span class="p">,</span><span class="w">                           </span><span class="cm">/* parent window handle */</span><span class="w"></span>
+<span class="w">        </span><span class="p">(</span><span class="n">HMENU</span><span class="p">)</span><span class="n">IDC_ExitButton</span><span class="p">,</span><span class="w">        </span><span class="cm">/* the ID of your button */</span><span class="w"></span>
+<span class="w">        </span><span class="n">hThisInstance</span><span class="p">,</span><span class="w">                  </span><span class="cm">/* the instance of your application */</span><span class="w"></span>
+<span class="w">        </span><span class="nb">NULL</span><span class="p">)</span><span class="w"> </span><span class="p">;</span><span class="w">                         </span><span class="cm">/* unnecessary extra */</span><span class="w"></span>
 
-        <span class="k">case</span> <span class="nl">WM_PAINT</span><span class="p">:</span>
-            <span class="n">GetClientRect</span><span class="p">(</span> <span class="n">hwnd</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">rect</span> <span class="p">);</span>       <span class="cm">/* get the size of our window */</span>
-            <span class="n">InvalidateRect</span> <span class="p">(</span> <span class="n">hwnd</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="n">TRUE</span> <span class="p">);</span>
-            <span class="n">hdc</span> <span class="o">=</span> <span class="n">BeginPaint</span><span class="p">(</span> <span class="n">hwnd</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">ps</span> <span class="p">);</span>      <span class="cm">/* begin painting to the buffer */</span>
+<span class="w">    </span><span class="n">ShowWindow</span><span class="p">(</span><span class="n">hwnd</span><span class="p">,</span><span class="w"> </span><span class="n">ncmdshow</span><span class="p">);</span><span class="w">     </span><span class="cm">/* Make the window visible on the screen */</span><span class="w"></span>
+<span class="w">    </span><span class="n">UpdateWindow</span><span class="p">(</span><span class="n">hwnd</span><span class="p">);</span><span class="w">             </span><span class="cm">/* update with changes */</span><span class="w"></span>
 
-            <span class="n">get_current_time</span><span class="p">(</span> <span class="n">current_time</span> <span class="p">);</span>
-            <span class="n">DrawText</span><span class="p">(</span> <span class="n">hdc</span><span class="p">,</span> <span class="n">TEXT</span><span class="p">(</span><span class="n">current_time</span><span class="p">),</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">rect</span><span class="p">,</span> <span class="n">DT_CENTER</span> <span class="o">|</span> <span class="n">DT_VCENTER</span> <span class="o">|</span> <span class="n">DT_SINGLELINE</span><span class="p">);</span>
-            <span class="n">EndPaint</span><span class="p">(</span> <span class="n">hwnd</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">ps</span><span class="p">);</span>
-            <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>    
-        <span class="k">case</span> <span class="nl">WM_DESTROY</span><span class="p">:</span>
-            <span class="n">PostQuitMessage</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>       
-            <span class="k">break</span><span class="p">;</span>
+<span class="w">    </span><span class="n">get_current_time</span><span class="p">(</span><span class="w"> </span><span class="n">temp_time</span><span class="w"> </span><span class="p">);</span><span class="w">   </span><span class="cm">/* get the current time initially */</span><span class="w"></span>
 
-        <span class="k">default</span><span class="o">:</span>                   <span class="cm">/* for messages that we don&#39;t deal with */</span>
-            <span class="k">return</span> <span class="n">DefWindowProc</span><span class="p">(</span><span class="n">hwnd</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">wParam</span><span class="p">,</span> <span class="n">lParam</span><span class="p">);</span>
-    <span class="p">}</span>
-    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
-<span class="p">}</span><span class="cm">/* end of WinMain */</span>
+<span class="w">    </span><span class="cm">/* Run the message loop. It will run until GetMessage( ) returns 0 */</span><span class="w"></span>
+<span class="w">    </span><span class="k">while</span><span class="p">(</span><span class="w"> </span><span class="n">GetMessage</span><span class="p">(</span><span class="o">&amp;</span><span class="n">messages</span><span class="p">,</span><span class="w"> </span><span class="nb">NULL</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="cm">/* nasty polling business, should be done with WM_TIMER */</span><span class="w"></span>
+<span class="w">        </span><span class="cm">/* if strings aren&#39;t the same then update the window */</span><span class="w"></span>
+<span class="w">        </span><span class="n">get_current_time</span><span class="p">(</span><span class="w"> </span><span class="n">current_time</span><span class="w"> </span><span class="p">);</span><span class="w"></span>
+
+<span class="w">        </span><span class="k">if</span><span class="p">(</span><span class="w"> </span><span class="n">strcmp</span><span class="p">(</span><span class="n">current_time</span><span class="p">,</span><span class="w"> </span><span class="n">temp_time</span><span class="p">)</span><span class="w"> </span><span class="p">)</span><span class="w"></span>
+<span class="w">        </span><span class="p">{</span><span class="w">   </span>
+<span class="w">            </span><span class="cm">/* debugging - am I getting the time comparison? */</span><span class="w"></span>
+<span class="w">            </span><span class="n">MessageBox</span><span class="p">(</span><span class="n">hwnd</span><span class="p">,</span><span class="w"> </span><span class="n">current_time</span><span class="p">,</span><span class="w"> </span><span class="n">temp_time</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">            </span><span class="cm">/* theoretically the rest of this forces the window to refresh */</span><span class="w"></span>
+<span class="w">            </span><span class="n">UpdateWindow</span><span class="p">(</span><span class="n">hwnd</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">            </span><span class="n">ShowWindow</span><span class="p">(</span><span class="n">hwnd</span><span class="p">,</span><span class="w"> </span><span class="n">ncmdshow</span><span class="p">);</span><span class="w"></span>
+<span class="w">            </span><span class="cm">/* update the new &quot;old time&quot; */</span><span class="w"></span>
+<span class="w">            </span><span class="n">get_current_time</span><span class="p">(</span><span class="w"> </span><span class="n">temp_time</span><span class="w"> </span><span class="p">);</span><span class="w">               </span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">        </span><span class="n">TranslateMessage</span><span class="p">(</span><span class="o">&amp;</span><span class="n">messages</span><span class="p">);</span><span class="w"> </span>
+<span class="w">        </span><span class="n">DispatchMessage</span><span class="p">(</span><span class="o">&amp;</span><span class="n">messages</span><span class="p">);</span><span class="w">  </span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="cm">/* The program return-value is 0 - The value that PostQuitMessage( ) gave */</span><span class="w"></span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">messages</span><span class="p">.</span><span class="n">wParam</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
 
 
-<span class="cm">/* Get the current time from the system and update the time string */</span>
-<span class="kt">void</span> <span class="nf">get_current_time</span><span class="p">(</span> <span class="kt">char</span> <span class="n">current_time</span><span class="p">[</span><span class="mi">128</span><span class="p">]</span> <span class="p">)</span>
-<span class="p">{</span>
-    <span class="kt">time_t</span> <span class="n">tempTime</span><span class="p">;</span>
-    <span class="cm">/* initialize the variable, otherwise only returns 1970 date */</span>
-    <span class="n">tempTime</span> <span class="o">=</span> <span class="n">time</span><span class="p">(</span><span class="nb">NULL</span><span class="p">);</span>  
-    <span class="n">strcpy</span><span class="p">(</span><span class="n">current_time</span><span class="p">,</span> <span class="n">asctime</span><span class="p">(</span><span class="n">localtime</span><span class="p">(</span><span class="o">&amp;</span><span class="n">tempTime</span><span class="p">)));</span>
-<span class="p">}</span>
-</pre></div>
+<span class="cm">/* This function is called by the Windows function DispatchMessage( ) */</span><span class="w"></span>
+<span class="n">LRESULT</span><span class="w"> </span><span class="n">CALLBACK</span><span class="w"> </span><span class="n">WindowProcedure</span><span class="p">(</span><span class="w"> </span><span class="n">HWND</span><span class="w"> </span><span class="n">hwnd</span><span class="p">,</span><span class="w"> </span><span class="n">UINT</span><span class="w"> </span><span class="n">message</span><span class="p">,</span><span class="w"> </span><span class="n">WPARAM</span><span class="w"> </span><span class="n">wParam</span><span class="p">,</span><span class="w"> </span><span class="n">LPARAM</span><span class="w"> </span><span class="n">lParam</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="kt">char</span><span class="w"> </span><span class="n">current_time</span><span class="p">[</span><span class="mi">128</span><span class="p">];</span><span class="w"></span>
+<span class="w">    </span><span class="n">PAINTSTRUCT</span><span class="w"> </span><span class="n">ps</span><span class="p">;</span><span class="w">     </span><span class="cm">/* a structure for a paint job (see below */</span><span class="w"></span>
+<span class="w">    </span><span class="n">RECT</span><span class="w"> </span><span class="n">rect</span><span class="p">;</span><span class="w">     </span><span class="cm">/* a struct to hold rectangle values (e.g. x,y coordinates) */</span><span class="w"></span>
+<span class="w">    </span><span class="n">HDC</span><span class="w"> </span><span class="n">hdc</span><span class="p">;</span><span class="w">            </span><span class="cm">/* handle to a DC (buffer) for the screen */</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">switch</span><span class="p">(</span><span class="n">message</span><span class="p">)</span><span class="w">                  </span><span class="cm">/* handle the messages */</span><span class="w"></span>
+<span class="w">    </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="k">case</span><span class="w"> </span><span class="nl">WM_COMMAND</span><span class="p">:</span><span class="w"></span>
+<span class="w">            </span><span class="k">switch</span><span class="p">(</span><span class="n">LOWORD</span><span class="p">(</span><span class="n">wParam</span><span class="p">))</span><span class="w">    </span><span class="cm">/* find out what&#39;s been clicked */</span><span class="w"></span>
+<span class="w">            </span><span class="p">{</span><span class="w"></span>
+<span class="w">                </span><span class="k">case</span><span class="w"> </span><span class="nl">IDC_ExitButton</span><span class="p">:</span><span class="w"></span>
+<span class="w">                    </span><span class="n">PostQuitMessage</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span><span class="w"></span>
+<span class="w">                    </span><span class="k">break</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">                </span><span class="k">default</span><span class="o">:</span><span class="w"></span>
+<span class="w">                    </span><span class="k">break</span><span class="p">;</span><span class="w"></span>
+<span class="w">            </span><span class="p">}</span><span class="w"></span>
+<span class="w">            </span><span class="k">break</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">        </span><span class="k">case</span><span class="w"> </span><span class="nl">WM_PAINT</span><span class="p">:</span><span class="w"></span>
+<span class="w">            </span><span class="n">GetClientRect</span><span class="p">(</span><span class="w"> </span><span class="n">hwnd</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">rect</span><span class="w"> </span><span class="p">);</span><span class="w">       </span><span class="cm">/* get the size of our window */</span><span class="w"></span>
+<span class="w">            </span><span class="n">InvalidateRect</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">hwnd</span><span class="p">,</span><span class="w"> </span><span class="nb">NULL</span><span class="p">,</span><span class="w"> </span><span class="n">TRUE</span><span class="w"> </span><span class="p">);</span><span class="w"></span>
+<span class="w">            </span><span class="n">hdc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">BeginPaint</span><span class="p">(</span><span class="w"> </span><span class="n">hwnd</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">ps</span><span class="w"> </span><span class="p">);</span><span class="w">      </span><span class="cm">/* begin painting to the buffer */</span><span class="w"></span>
+
+<span class="w">            </span><span class="n">get_current_time</span><span class="p">(</span><span class="w"> </span><span class="n">current_time</span><span class="w"> </span><span class="p">);</span><span class="w"></span>
+<span class="w">            </span><span class="n">DrawText</span><span class="p">(</span><span class="w"> </span><span class="n">hdc</span><span class="p">,</span><span class="w"> </span><span class="n">TEXT</span><span class="p">(</span><span class="n">current_time</span><span class="p">),</span><span class="w"> </span><span class="mi">-1</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">rect</span><span class="p">,</span><span class="w"> </span><span class="n">DT_CENTER</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">DT_VCENTER</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">DT_SINGLELINE</span><span class="p">);</span><span class="w"></span>
+<span class="w">            </span><span class="n">EndPaint</span><span class="p">(</span><span class="w"> </span><span class="n">hwnd</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">ps</span><span class="p">);</span><span class="w"></span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w">    </span>
+<span class="w">        </span><span class="k">case</span><span class="w"> </span><span class="nl">WM_DESTROY</span><span class="p">:</span><span class="w"></span>
+<span class="w">            </span><span class="n">PostQuitMessage</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span><span class="w">       </span>
+<span class="w">            </span><span class="k">break</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">        </span><span class="k">default</span><span class="o">:</span><span class="w">                   </span><span class="cm">/* for messages that we don&#39;t deal with */</span><span class="w"></span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="n">DefWindowProc</span><span class="p">(</span><span class="n">hwnd</span><span class="p">,</span><span class="w"> </span><span class="n">message</span><span class="p">,</span><span class="w"> </span><span class="n">wParam</span><span class="p">,</span><span class="w"> </span><span class="n">lParam</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="cm">/* end of WinMain */</span><span class="w"></span>
+
+
+<span class="cm">/* Get the current time from the system and update the time string */</span><span class="w"></span>
+<span class="kt">void</span><span class="w"> </span><span class="n">get_current_time</span><span class="p">(</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="n">current_time</span><span class="p">[</span><span class="mi">128</span><span class="p">]</span><span class="w"> </span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="kt">time_t</span><span class="w"> </span><span class="n">tempTime</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="cm">/* initialize the variable, otherwise only returns 1970 date */</span><span class="w"></span>
+<span class="w">    </span><span class="n">tempTime</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">time</span><span class="p">(</span><span class="nb">NULL</span><span class="p">);</span><span class="w">  </span>
+<span class="w">    </span><span class="n">strcpy</span><span class="p">(</span><span class="n">current_time</span><span class="p">,</span><span class="w"> </span><span class="n">asctime</span><span class="p">(</span><span class="n">localtime</span><span class="p">(</span><span class="o">&amp;</span><span class="n">tempTime</span><span class="p">)));</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div>
             <aside>
             <hr/>
             <nav>

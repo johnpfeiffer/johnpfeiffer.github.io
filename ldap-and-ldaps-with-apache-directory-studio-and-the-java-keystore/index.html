@@ -74,32 +74,29 @@
 </blockquote>
 <p>By default Apache DS listens on <strong>10389</strong> and <strong>10636</strong> (SSL)</p>
 <p>You can connect to it with Apache Dir Studio with "LDAP -&gt; New Connection -&gt; hostname , port = 10389"</p>
-<div class="highlight"><pre><span></span><span class="n">BindDN</span> <span class="k">or</span> <span class="k">user</span> <span class="p">(</span><span class="n">click</span> <span class="k">on</span> <span class="k">Check</span> <span class="n">Authentication</span><span class="p">)</span>
-<span class="n">uid</span><span class="o">=</span><span class="k">admin</span><span class="p">,</span><span class="n">ou</span><span class="o">=</span><span class="k">system</span>
-<span class="n">password</span><span class="o">=</span> <span class="n">secret</span>
+<div class="highlight"><pre><span></span><code>BindDN or user (click on Check Authentication)
+uid=admin,ou=system
+password= secret
 
-<span class="n">ldapsearch</span> <span class="o">-</span><span class="n">v</span> <span class="o">-</span><span class="n">H</span> <span class="n">ldap</span><span class="p">:</span><span class="o">//</span><span class="n">ldap</span><span class="p">.</span><span class="k">domain</span><span class="p">.</span><span class="n">com</span><span class="p">:</span><span class="mi">10389</span> <span class="o">-</span><span class="n">x</span> <span class="o">-</span><span class="n">D</span> <span class="ss">&quot;uid=admin,ou=system&quot;</span> <span class="o">-</span><span class="n">w</span> <span class="ss">&quot;secret&quot;</span> <span class="ss">&quot;(objectclass=*)&quot;</span> <span class="o">-</span><span class="n">b</span> <span class="ss">&quot;ou=system&quot;</span>
-</pre></div>
+ldapsearch -v -H ldap://ldap.domain.com:10389 -x -D &quot;uid=admin,ou=system&quot; -w &quot;secret&quot; &quot;(objectclass=*)&quot; -b &quot;ou=system&quot;
+</code></pre></div>
 
-
-<h3 id="self-signed-java-keystore">Self Signed Java Keystore</h3>
+<h3>Self Signed Java Keystore</h3>
 <p>A Java Keystore is different from a normal cert + key combo. Example "self signed" java keystore, key, certificate combo</p>
 <p>NOTE: CN should really be ldap.domain.com , not Zanzibar!!!!</p>
-<div class="highlight"><pre><span></span><span class="err">keytool -genkey -keyalg &quot;RSA&quot; -dname &quot;cn=zanzibar, ou=ApacheDS, o=ASF, c=US&quot;  -alias zanzibar -keystore zanzibar.jks -storepass secret -validity 730</span>
-</pre></div>
-
+<div class="highlight"><pre><span></span><code><span class="n">keytool</span> <span class="o">-</span><span class="n">genkey</span> <span class="o">-</span><span class="n">keyalg</span> <span class="s2">&quot;RSA&quot;</span> <span class="o">-</span><span class="n">dname</span> <span class="s2">&quot;cn=zanzibar, ou=ApacheDS, o=ASF, c=US&quot;</span>  <span class="o">-</span><span class="n">alias</span> <span class="n">zanzibar</span> <span class="o">-</span><span class="n">keystore</span> <span class="n">zanzibar</span><span class="o">.</span><span class="n">jks</span> <span class="o">-</span><span class="n">storepass</span> <span class="n">secret</span> <span class="o">-</span><span class="n">validity</span> <span class="mi">730</span>
+</code></pre></div>
 
 <blockquote>
 <p>Press Enter to use the same password for certificate as we already entered above for the keystore</p>
 </blockquote>
-<div class="highlight"><pre><span></span><span class="err">keytool -list -v -keystore zanzibar.jks -storetype jks -storepass secret</span>
-</pre></div>
+<div class="highlight"><pre><span></span><code><span class="n">keytool</span> <span class="o">-</span><span class="n">list</span> <span class="o">-</span><span class="n">v</span> <span class="o">-</span><span class="n">keystore</span> <span class="n">zanzibar</span><span class="o">.</span><span class="n">jks</span> <span class="o">-</span><span class="n">storetype</span> <span class="n">jks</span> <span class="o">-</span><span class="n">storepass</span> <span class="n">secret</span>
+</code></pre></div>
 
-
-<h3 id="apacheds-config-file">ApacheDS Config File</h3>
+<h3>ApacheDS Config File</h3>
 <p>SSL is enabled by default but needs to be modified to use a separate certificate:</p>
 <p><code>sudo vi /var/lib/apacheds-1.5.7/default/conf/server.xml</code></p>
-<div class="highlight"><pre><span></span> <span class="nt">&lt;ldapServer</span> <span class="na">id=</span><span class="s">&quot;ldapServer&quot;</span>
+<div class="highlight"><pre><span></span><code> <span class="nt">&lt;ldapServer</span> <span class="na">id=</span><span class="s">&quot;ldapServer&quot;</span>
 
             <span class="err">allowAnonyn</span> <span class="na">mousAccess=</span><span class="s">&quot;false&quot;</span>
             <span class="na">saslHost=</span><span class="s">&quot;ldap.example.com&quot;</span>
@@ -114,54 +111,48 @@
       <span class="nt">&lt;tcpTransport</span> <span class="na">address=</span><span class="s">&quot;0.0.0.0&quot;</span> <span class="na">port=</span><span class="s">&quot;10389&quot;</span> <span class="na">nbThreads=</span><span class="s">&quot;8&quot;</span> <span class="na">backLog=</span><span class="s">&quot;50&quot;</span> <span class="na">enableSSL=</span><span class="s">&quot;false&quot;</span><span class="nt">/&gt;</span>
       <span class="nt">&lt;tcpTransport</span> <span class="na">address=</span><span class="s">&quot;0.0.0.0&quot;</span> <span class="na">port=</span><span class="s">&quot;10636&quot;</span> <span class="na">nbThreads=</span><span class="s">&quot;8&quot;</span> <span class="na">backLog=</span><span class="s">&quot;50&quot;</span> <span class="na">enableSSL=</span><span class="s">&quot;true&quot;</span><span class="nt">/&gt;</span>
     <span class="nt">&lt;/transports&gt;</span>
-</pre></div>
+</code></pre></div>
 
+<hr>
+<h3>Start and verify the new config</h3>
+<div class="highlight"><pre><span></span><code>/etc/init.d/apacheds-1.5.7-default restart
+/etc/init.d/apacheds-1.5.7-default status
 
-<hr />
-<h3 id="start-and-verify-the-new-config">Start and verify the new config</h3>
-<div class="highlight"><pre><span></span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">init</span><span class="p">.</span><span class="n">d</span><span class="o">/</span><span class="n">apacheds</span><span class="o">-</span><span class="mi">1</span><span class="p">.</span><span class="mi">5</span><span class="p">.</span><span class="mi">7</span><span class="o">-</span><span class="k">default</span> <span class="k">restart</span>
-<span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">init</span><span class="p">.</span><span class="n">d</span><span class="o">/</span><span class="n">apacheds</span><span class="o">-</span><span class="mi">1</span><span class="p">.</span><span class="mi">5</span><span class="p">.</span><span class="mi">7</span><span class="o">-</span><span class="k">default</span> <span class="n">status</span>
-
-<span class="n">netstat</span> <span class="o">-</span><span class="n">an</span> <span class="c1">--inet</span>
-</pre></div>
-
+netstat -an --inet
+</code></pre></div>
 
 <blockquote>
 <p>start the service and check ports listening, established, time wait (especially 10636)</p>
 </blockquote>
 <p>JXplorer or ApacheDirectoryStudio connection "LDAP -&gt; New Connection -&gt; hostname , port = 10636" (SSL or LDAPS)</p>
-<div class="highlight"><pre><span></span><span class="err">BindDN or user (click on Check Authentication)</span>
-<span class="err">uid=admin,ou=system </span>
-<span class="err">password= secret</span>
-</pre></div>
-
+<div class="highlight"><pre><span></span><code>BindDN or user (click on Check Authentication)
+uid=admin,ou=system 
+password= secret
+</code></pre></div>
 
 <p>SELF SIGNED CERTIFICATE WARNING - you can view the certificate and choose to manually accept...</p>
 <blockquote>
-<p>NOTE IF YOU SEE THE ERROR "The connection failed - Connection refused: connect (zanzibar:10636)"<br />
+<p>NOTE IF YOU SEE THE ERROR "The connection failed - Connection refused: connect (zanzibar:10636)"<br>
     javax.naming.CommunicationException: zanzibar:10636 [Root exception is java.net.ConnectException: Connection refused: connect]</p>
 </blockquote>
 <p>ENSURE THAT YOUR TRANSPORT IS NOT ONLY ALLOWING localhost! (below is the locked down setting...)</p>
-<div class="highlight"><pre><span></span><span class="err">&lt;tcpTransport address=&quot;localhost&quot; port=&quot;10636&quot; enableSSL=&quot;true&quot;/&gt;</span>
-</pre></div>
+<div class="highlight"><pre><span></span><code>&lt;tcpTransport address=&quot;localhost&quot; port=&quot;10636&quot; enableSSL=&quot;true&quot;/&gt;
+</code></pre></div>
 
-
-<h3 id="modify-the-iptables-firewall">Modify the iptables firewall</h3>
+<h3>Modify the iptables firewall</h3>
 <p>Allow well known LDAP (389) and LDAPS (636) ports to work with ApacheDS</p>
-<div class="highlight"><pre><span></span><span class="err">iptables -A PREROUTING -t nat -i eth0 -p tcp --dport 389 -j REDIRECT --to-port 10389</span>
-<span class="err">iptables -A PREROUTING -t nat -i eth0 -p tcp --dport 636 -j REDIRECT --to-port 10636</span>
-</pre></div>
+<div class="highlight"><pre><span></span><code>iptables -A PREROUTING -t nat -i eth0 -p tcp --dport 389 -j REDIRECT --to-port 10389
+iptables -A PREROUTING -t nat -i eth0 -p tcp --dport 636 -j REDIRECT --to-port 10636
+</code></pre></div>
 
+<h3>Test and verify connectivity from a remote machine</h3>
+<div class="highlight"><pre><span></span><code>ldapsearch -H ldap://ldap.domain.com:389 -x -D &quot;uid=example,ou=system&quot; -W -b &quot;ou=system&quot; &quot;(uid=example)&quot;
+</code></pre></div>
 
-<h3 id="test-and-verify-connectivity-from-a-remote-machine">Test and verify connectivity from a remote machine</h3>
-<div class="highlight"><pre><span></span><span class="err">ldapsearch -H ldap://ldap.domain.com:389 -x -D &quot;uid=example,ou=system&quot; -W -b &quot;ou=system&quot; &quot;(uid=example)&quot;</span>
-</pre></div>
-
-
-<h3 id="extract-a-certificate-from-the-java-key-store">Extract a Certificate from the Java Key Store</h3>
+<h3>Extract a Certificate from the Java Key Store</h3>
 <p>EXTRACT A CERTIFICATE FROM A JKS INTO A .DER, THEN CONVERT IT INTO A .PEM AND IMPORT INTO THE JVM cacerts
 (this allows a java based app to connect to your self signed cert LDAP server)</p>
-<div class="highlight"><pre><span></span><span class="n">keytool</span> <span class="o">-</span><span class="nb">list</span> <span class="o">-</span><span class="n">v</span> <span class="o">-</span><span class="n">keystore</span> <span class="n">zanzibar</span><span class="o">.</span><span class="n">jks</span> <span class="o">-</span><span class="n">storetype</span> <span class="n">jks</span> <span class="o">-</span><span class="n">storepass</span> <span class="n">secret</span>
+<div class="highlight"><pre><span></span><code><span class="n">keytool</span> <span class="o">-</span><span class="nb">list</span> <span class="o">-</span><span class="n">v</span> <span class="o">-</span><span class="n">keystore</span> <span class="n">zanzibar</span><span class="o">.</span><span class="n">jks</span> <span class="o">-</span><span class="n">storetype</span> <span class="n">jks</span> <span class="o">-</span><span class="n">storepass</span> <span class="n">secret</span>
   <span class="n">Alias</span> <span class="n">name</span><span class="p">:</span> <span class="n">zanzibar</span>
 
 <span class="n">keytool</span> <span class="o">-</span><span class="n">export</span> <span class="o">-</span><span class="n">alias</span> <span class="n">zanzibar</span> <span class="o">-</span><span class="n">keystore</span> <span class="n">zanzibar</span><span class="o">.</span><span class="n">jks</span> <span class="o">-</span><span class="n">storepass</span> <span class="n">secret</span> <span class="o">&gt;</span> <span class="n">zanzibar</span><span class="o">.</span><span class="n">der</span>
@@ -171,60 +162,54 @@
 <span class="n">openssl</span> <span class="n">s_client</span> <span class="o">-</span><span class="n">connect</span> <span class="n">localhost</span><span class="p">:</span><span class="mi">10636</span>                           <span class="o">//</span><span class="n">Verify</span> <span class="k">return</span> <span class="n">code</span><span class="p">:</span> <span class="mi">18</span> <span class="p">(</span><span class="bp">self</span> <span class="n">signed</span> <span class="n">certificate</span><span class="p">)</span>
 <span class="n">openssl</span> <span class="n">s_client</span> <span class="o">-</span><span class="n">connect</span> <span class="n">localhost</span><span class="p">:</span><span class="mi">10636</span> <span class="o">-</span><span class="n">CAfile</span> <span class="n">zanzibar</span><span class="o">.</span><span class="n">crt</span>      <span class="o">//</span><span class="n">Verify</span> <span class="k">return</span> <span class="n">code</span><span class="p">:</span> <span class="mi">0</span> <span class="p">(</span><span class="n">ok</span><span class="p">)</span>
 
-<span class="n">keytool</span> <span class="o">-</span><span class="kn">import</span> <span class="o">-</span><span class="n">trustcacerts</span> <span class="o">-</span><span class="n">alias</span> <span class="n">zanzibar</span> <span class="o">-</span><span class="nb">file</span> <span class="n">zanzibar</span><span class="o">.</span><span class="n">crt</span> <span class="o">-</span><span class="n">keystore</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">java</span><span class="o">-</span><span class="mi">6</span><span class="o">-</span><span class="n">sun</span><span class="o">/</span><span class="n">security</span><span class="o">/</span><span class="n">cacerts</span> <span class="o">-</span><span class="n">storepass</span> <span class="n">changeit</span>
-</pre></div>
+<span class="n">keytool</span> <span class="o">-</span><span class="kn">import</span> <span class="o">-</span><span class="n">trustcacerts</span> <span class="o">-</span><span class="n">alias</span> <span class="n">zanzibar</span> <span class="o">-</span><span class="n">file</span> <span class="n">zanzibar</span><span class="o">.</span><span class="n">crt</span> <span class="o">-</span><span class="n">keystore</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">java</span><span class="o">-</span><span class="mi">6</span><span class="o">-</span><span class="n">sun</span><span class="o">/</span><span class="n">security</span><span class="o">/</span><span class="n">cacerts</span> <span class="o">-</span><span class="n">storepass</span> <span class="n">changeit</span>
+</code></pre></div>
 
-
-<h3 id="test-and-verify-the-ldaps-connection">Test and Verify the LDAPS connection</h3>
-<div class="highlight"><pre><span></span><span class="err">openssl s_client -connect ldap.domain.com:636</span>
-</pre></div>
-
+<h3>Test and Verify the LDAPS connection</h3>
+<div class="highlight"><pre><span></span><code><span class="nv">openssl</span> <span class="nv">s_client</span> <span class="o">-</span><span class="k">connect</span> <span class="nv">ldap</span>.<span class="nv">domain</span>.<span class="nv">com</span>:<span class="mi">636</span>
+</code></pre></div>
 
 <blockquote>
 <p>Verify return code: 18 (self signed certificate)
     openssl s_client -connect ldap.domain.com:636 -CAfile zanzibar.crt
 Verify return code: 0 (ok)</p>
 </blockquote>
-<hr />
-<hr />
-<h3 id="use-an-existing-certificate-and-key-and-create-a-java-key-store">Use an existing certificate and key and create a Java Key Store</h3>
+<hr>
+<hr>
+<h3>Use an existing certificate and key and create a Java Key Store</h3>
 <p>EXISTING CERTIFICATE AND KEY AND CREATE A .JKS</p>
-<div class="highlight"><pre><span></span><span class="n">openssl</span> <span class="n">pkcs12</span> <span class="o">-</span><span class="n">export</span> <span class="o">-</span><span class="k">in</span> <span class="n">cert</span><span class="p">.</span><span class="n">crt</span> <span class="o">-</span><span class="n">inkey</span> <span class="n">cert</span><span class="p">.</span><span class="k">key</span> <span class="o">-</span><span class="k">out</span> <span class="n">keystore</span><span class="p">.</span><span class="n">p12</span> <span class="o">-</span><span class="n">name</span> <span class="n">serveraliashostname</span> <span class="o">-</span><span class="n">CAfile</span> <span class="n">intermediatebundle</span><span class="p">.</span><span class="n">crt</span> <span class="o">-</span><span class="n">caname</span> <span class="n">root</span>
+<div class="highlight"><pre><span></span><code><span class="n">openssl</span> <span class="n">pkcs12</span> <span class="o">-</span><span class="k">export</span> <span class="o">-</span><span class="ow">in</span> <span class="n">cert</span><span class="o">.</span><span class="n">crt</span> <span class="o">-</span><span class="n">inkey</span> <span class="n">cert</span><span class="o">.</span><span class="n">key</span> <span class="o">-</span><span class="n">out</span> <span class="n">keystore</span><span class="o">.</span><span class="n">p12</span> <span class="o">-</span><span class="n">name</span> <span class="n">serveraliashostname</span> <span class="o">-</span><span class="n">CAfile</span> <span class="n">intermediatebundle</span><span class="o">.</span><span class="n">crt</span> <span class="o">-</span><span class="n">caname</span> <span class="n">root</span>
 <span class="n">Enter</span> <span class="n">Export</span> <span class="n">Password</span><span class="p">:</span> <span class="n">secret</span>
 
-<span class="n">keytool</span> <span class="o">-</span><span class="n">list</span> <span class="o">-</span><span class="n">v</span> <span class="o">-</span><span class="n">keystore</span> <span class="n">keystore</span><span class="p">.</span><span class="n">p12</span> <span class="o">-</span><span class="n">storetype</span> <span class="n">pkcs12</span>
-</pre></div>
+<span class="n">keytool</span> <span class="o">-</span><span class="n">list</span> <span class="o">-</span><span class="n">v</span> <span class="o">-</span><span class="n">keystore</span> <span class="n">keystore</span><span class="o">.</span><span class="n">p12</span> <span class="o">-</span><span class="n">storetype</span> <span class="n">pkcs12</span>
+</code></pre></div>
 
+<h4>CONVERT THE PKCS12 TO JKS FORMAT</h4>
+<div class="highlight"><pre><span></span><code><span class="n">keytool</span> <span class="o">-</span><span class="n">importkeystore</span> <span class="o">-</span><span class="n">srckeystore</span> <span class="n">keystore</span><span class="o">.</span><span class="n">p12</span> <span class="o">-</span><span class="n">srcstoretype</span> <span class="n">PKCS12</span> <span class="o">-</span><span class="n">deststoretype</span> <span class="n">JKS</span> <span class="o">-</span><span class="n">destkeystore</span> <span class="n">keystore</span><span class="o">.</span><span class="n">jks</span>
 
-<h4 id="convert-the-pkcs12-to-jks-format">CONVERT THE PKCS12 TO JKS FORMAT</h4>
-<div class="highlight"><pre><span></span><span class="n">keytool</span> <span class="o">-</span><span class="n">importkeystore</span> <span class="o">-</span><span class="n">srckeystore</span> <span class="n">keystore</span><span class="p">.</span><span class="n">p12</span> <span class="o">-</span><span class="n">srcstoretype</span> <span class="n">PKCS12</span> <span class="o">-</span><span class="n">deststoretype</span> <span class="n">JKS</span> <span class="o">-</span><span class="n">destkeystore</span> <span class="n">keystore</span><span class="p">.</span><span class="n">jks</span>
+<span class="n">keytool</span> <span class="o">-</span><span class="n">list</span> <span class="o">-</span><span class="n">v</span> <span class="o">-</span><span class="n">keystore</span> <span class="n">keystore</span><span class="o">.</span><span class="n">jks</span> <span class="o">-</span><span class="n">storetype</span> <span class="n">jks</span>
 
-<span class="n">keytool</span> <span class="o">-</span><span class="n">list</span> <span class="o">-</span><span class="n">v</span> <span class="o">-</span><span class="n">keystore</span> <span class="n">keystore</span><span class="p">.</span><span class="n">jks</span> <span class="o">-</span><span class="n">storetype</span> <span class="n">jks</span>
-
-<span class="n">sudo</span> <span class="n">vi</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">apacheds</span><span class="o">-</span><span class="mi">1</span><span class="p">.</span><span class="mi">5</span><span class="p">.</span><span class="mi">7</span><span class="o">/</span><span class="k">default</span><span class="o">/</span><span class="n">conf</span><span class="o">/</span><span class="n">server</span><span class="p">.</span><span class="n">xml</span> 
-      <span class="n">keystoreFile</span><span class="o">=</span><span class="ss">&quot;/var/lib/ssl/keystore.jks&quot;</span>
-</pre></div>
-
+<span class="n">sudo</span> <span class="n">vi</span> <span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">apacheds</span><span class="o">-</span><span class="mf">1.5</span><span class="o">.</span><span class="mi">7</span><span class="o">/</span><span class="n">default</span><span class="o">/</span><span class="n">conf</span><span class="o">/</span><span class="n">server</span><span class="o">.</span><span class="n">xml</span> 
+      <span class="n">keystoreFile</span><span class="o">=</span><span class="s2">&quot;/var/lib/ssl/keystore.jks&quot;</span>
+</code></pre></div>
 
 <p>still need to figure out how to include the intermediate CAcert root chain...!</p>
-<h3 id="importingreplacing-a-jks-keystore">IMPORTING/REPLACING A JKS KEYSTORE</h3>
-<div class="highlight"><pre><span></span><span class="err">keytool -importkeystore -deststorepass secret -destkeypass secret -destkeystore keystore.jks -srckeystore keystore.p12 -srcstoretype PKCS12 -srcstorepass secret -alias oldaliasname</span>
-</pre></div>
-
+<h3>IMPORTING/REPLACING A JKS KEYSTORE</h3>
+<div class="highlight"><pre><span></span><code><span class="n">keytool</span> <span class="o">-</span><span class="n">importkeystore</span> <span class="o">-</span><span class="n">deststorepass</span> <span class="n">secret</span> <span class="o">-</span><span class="n">destkeypass</span> <span class="n">secret</span> <span class="o">-</span><span class="n">destkeystore</span> <span class="n">keystore</span><span class="o">.</span><span class="n">jks</span> <span class="o">-</span><span class="n">srckeystore</span> <span class="n">keystore</span><span class="o">.</span><span class="n">p12</span> <span class="o">-</span><span class="n">srcstoretype</span> <span class="n">PKCS12</span> <span class="o">-</span><span class="n">srcstorepass</span> <span class="n">secret</span> <span class="o">-</span><span class="n">alias</span> <span class="n">oldaliasname</span>
+</code></pre></div>
 
 <p>GUI CONVERTER FROM PKCS12 to JKS (requires Java 1.6 or higher)
 <a href="http://portecle.sourceforge.net/">http://portecle.sourceforge.net/</a>  (open the .p12 , Tools -&gt; Keystore type to JKS)
 (seems to have a funny message where it needed change the password to "password)")</p>
-<div class="highlight"><pre><span></span><span class="n">keytool</span> <span class="o">-</span><span class="kn">import</span> <span class="o">-</span><span class="n">trustcacerts</span> <span class="o">-</span><span class="n">alias</span> <span class="n">ldap</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">com</span> <span class="o">-</span><span class="nb">file</span> <span class="n">cert</span><span class="o">.</span><span class="n">crt</span> <span class="o">-</span><span class="n">keystore</span> <span class="n">zanzibar</span><span class="o">.</span><span class="n">ks</span> <span class="o">-</span><span class="n">storepass</span> <span class="n">secret</span>
-<span class="n">keytool</span> <span class="o">-</span><span class="kn">import</span> <span class="o">-</span><span class="n">trustcacerts</span> <span class="o">-</span><span class="n">alias</span> <span class="n">root</span> <span class="o">-</span><span class="nb">file</span> <span class="n">GeoTrust</span><span class="o">.</span><span class="n">crt</span> <span class="o">-</span><span class="n">keystore</span> <span class="n">zanzibar</span><span class="o">.</span><span class="n">ks</span>
-</pre></div>
-
+<div class="highlight"><pre><span></span><code><span class="n">keytool</span> <span class="o">-</span><span class="kn">import</span> <span class="o">-</span><span class="n">trustcacerts</span> <span class="o">-</span><span class="n">alias</span> <span class="n">ldap</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">com</span> <span class="o">-</span><span class="n">file</span> <span class="n">cert</span><span class="o">.</span><span class="n">crt</span> <span class="o">-</span><span class="n">keystore</span> <span class="n">zanzibar</span><span class="o">.</span><span class="n">ks</span> <span class="o">-</span><span class="n">storepass</span> <span class="n">secret</span>
+<span class="n">keytool</span> <span class="o">-</span><span class="kn">import</span> <span class="o">-</span><span class="n">trustcacerts</span> <span class="o">-</span><span class="n">alias</span> <span class="n">root</span> <span class="o">-</span><span class="n">file</span> <span class="n">GeoTrust</span><span class="o">.</span><span class="n">crt</span> <span class="o">-</span><span class="n">keystore</span> <span class="n">zanzibar</span><span class="o">.</span><span class="n">ks</span>
+</code></pre></div>
 
 <blockquote>
 <p>Both self signed and third party certificates can be supported with ApacheDS LDAPS.</p>
 </blockquote>
 <p>LDAP with SSL is a little tricky and it's useful to use openssl and ldapsearch to verify.</p>
-<div class="highlight"><pre><span></span> <span class="nt">&lt;ldapServer</span> <span class="na">id=</span><span class="s">&quot;ldapServer&quot;</span>
+<div class="highlight"><pre><span></span><code> <span class="nt">&lt;ldapServer</span> <span class="na">id=</span><span class="s">&quot;ldapServer&quot;</span>
             <span class="na">allowAnonymousAccess=</span><span class="s">&quot;false&quot;</span>
             <span class="na">saslHost=</span><span class="s">&quot;ldap.example.com&quot;</span>
             <span class="na">saslPrincipal=</span><span class="s">&quot;ldap/ldap.example.com@EXAMPLE.COM&quot;</span>
@@ -238,31 +223,28 @@ Verify return code: 0 (ok)</p>
       <span class="nt">&lt;tcpTransport</span> <span class="na">address=</span><span class="s">&quot;0.0.0.0&quot;</span> <span class="na">port=</span><span class="s">&quot;10389&quot;</span> <span class="na">nbThreads=</span><span class="s">&quot;8&quot;</span> <span class="na">backLog=</span><span class="s">&quot;50&quot;</span> <span class="na">enableSSL=</span><span class="s">&quot;false&quot;</span><span class="nt">/&gt;</span>
       <span class="nt">&lt;tcpTransport</span> <span class="na">address=</span><span class="s">&quot;0.0.0.0&quot;</span> <span class="na">port=</span><span class="s">&quot;10636&quot;</span> <span class="na">nbThreads=</span><span class="s">&quot;8&quot;</span> <span class="na">backLog=</span><span class="s">&quot;50&quot;</span> <span class="na">enableSSL=</span><span class="s">&quot;true&quot;</span><span class="nt">/&gt;</span>
     <span class="nt">&lt;/transports&gt;</span>
-</pre></div>
-
+</code></pre></div>
 
 <p><code>openssl s_client -connect domain.com:10636 -CAfile intermediate.crt</code></p>
-<hr />
-<div class="highlight"><pre><span></span><span class="err">ldapsearch -H ldaps://ldap.domain.com:10636 -x -D &quot;uid=example,ou=system&quot; -w PASSWORD -b &quot;ou=system&quot; &quot;(uid=example)&quot;</span>
-</pre></div>
-
+<hr>
+<div class="highlight"><pre><span></span><code>ldapsearch -H ldaps://ldap.domain.com:10636 -x -D &quot;uid=example,ou=system&quot; -w PASSWORD -b &quot;ou=system&quot; &quot;(uid=example)&quot;
+</code></pre></div>
 
 <blockquote>
 <p>ERROR: ldap_sasl_bind(SIMPLE): Can't contact LDAP server (-1)</p>
 </blockquote>
 <p>ON A REMOTE MACHINE IN ORDER TO USE LDAPSEARCH WITH LDAPS 636...</p>
-<div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">nano</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">ldap</span><span class="o">/</span><span class="n">ldap</span><span class="p">.</span><span class="n">conf</span>
+<div class="highlight"><pre><span></span><code><span class="n">sudo</span> <span class="n">nano</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">ldap</span><span class="o">/</span><span class="n">ldap</span><span class="o">.</span><span class="n">conf</span>
 
-<span class="n">TLS_CACERT</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">ssl</span><span class="o">/</span><span class="n">intermediate</span><span class="p">.</span><span class="n">crt</span>
-<span class="n">TLS_CACERTDIR</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">ssl</span><span class="o">/</span>
-<span class="n">TLS_CERT</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">ssl</span><span class="o">/</span><span class="n">cert</span><span class="p">.</span><span class="n">crt</span>
-</pre></div>
-
+<span class="n">TLS_CACERT</span> <span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">ssl</span><span class="o">/</span><span class="n">intermediate</span><span class="o">.</span><span class="n">crt</span>
+<span class="n">TLS_CACERTDIR</span> <span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">ssl</span><span class="o">/</span>
+<span class="n">TLS_CERT</span> <span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">ssl</span><span class="o">/</span><span class="n">cert</span><span class="o">.</span><span class="n">crt</span>
+</code></pre></div>
 
 <p>NOW THE BELOW WILL WORK</p>
-<div class="highlight"><pre><span></span><span class="err">ldapsearch -H ldaps://ldap.domain.com:10636 -x -D &quot;uid=example,ou=system&quot; -w PASSWORD -b &quot;ou=system&quot; &quot;(uid=example)&quot;</span>
-<span class="err">ldapsearch -H ldaps://ldap.domain.com:636 -x -D &quot;uid=example,ou=system&quot; -w PASSWORD -b &quot;ou=system&quot; &quot;(objectclass=*)&quot;</span>
-</pre></div>
+<div class="highlight"><pre><span></span><code>ldapsearch -H ldaps://ldap.domain.com:10636 -x -D &quot;uid=example,ou=system&quot; -w PASSWORD -b &quot;ou=system&quot; &quot;(uid=example)&quot;
+ldapsearch -H ldaps://ldap.domain.com:636 -x -D &quot;uid=example,ou=system&quot; -w PASSWORD -b &quot;ou=system&quot; &quot;(objectclass=*)&quot;
+</code></pre></div>
             <aside>
             <hr/>
             <nav>

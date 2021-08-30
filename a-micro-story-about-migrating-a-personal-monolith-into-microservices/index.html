@@ -61,54 +61,22 @@
 </div>
 
 <div class="row-fluid">
-    <div class="span2 table-of-content">
-        <nav>
-        <h4>Contents</h4>
-        <div class="toc">
-<ul>
-<li><a href="#how-to-grow-a-monolith">How to grow a monolith</a><ul>
-<li><a href="#value-value-value">Value, value, value</a></li>
-<li><a href="#organic-sprawl">Organic Sprawl</a></li>
-<li><a href="#the-downsides-of-a-monolith">The downsides of a monolith</a></li>
-<li><a href="#in-context-linode-ubuntu-cherokee-and-drupal-were-good-choices-at-the-time">In Context: Linode, Ubuntu, Cherokee, and Drupal were good choices at the time</a></li>
-</ul>
-</li>
-<li><a href="#thinking-microservices">Thinking Microservices</a><ul>
-<li><a href="#discovering-the-real-problem-domain">Discovering the real problem domain</a></li>
-</ul>
-</li>
-<li><a href="#how-i-converted-to-microservices-big-bang-vs-kanban">How I Converted to Microservices: Big Bang vs Kanban</a><ul>
-<li><a href="#migration-has-extra-costs-of-research-and-tweaks-but-is-an-opportunity-for-new-benefits">Migration has extra costs of research and tweaks but is an opportunity for new benefits</a></li>
-<li><a href="#data-gravity-is-expensive-and-microservices-allows-polyglot-so-go-programming">Data Gravity is expensive and Microservices allows polyglot so Go Programming</a></li>
-<li><a href="#drupal-to-drupal">Drupal to Drupal</a><ul>
-<li><a href="#immutable-packer">Immutable Packer</a></li>
-<li><a href="#drupal-website-context-and-domain-problems">Drupal website context and domain problems</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li><a href="#why-not-just-automate-the-monolith">Why not just automate the monolith</a></li>
-<li><a href="#ongoing-and-future-work">Ongoing and Future Work</a></li>
-</ul>
-</div>
-        </nav>
-    </div>
-    <div class="span8 article-content">
+        <div class="span8 offset2 article-content">
 
-            
+            <p>[TOC]</p>
 <p>I'm a fan of best practices (who isn't?) and as complexity increases one of the modern paradigms is to use microservices to more transparently manage complexity, reduce tight coupling, and decrease maintenance overhead.</p>
 <p>Taking a different approach to my "less than webscale" personal web services has still made great improvements to the services and my quality of life.</p>
 <p>This article is categorized as Build and CI/CD and DevOps because while microservices is transformative for larger organizations to avoid the negative consequences of Conway's Law and provides a better architecture for really complex systems, in my case it was simply about decoupling deployments and not having all of my eggs in one basket. (e.g. the Drupal migration below actually did not affect the User Experience in any visible way).</p>
-<h2 id="how-to-grow-a-monolith">How to grow a monolith</h2>
-<h3 id="value-value-value">Value, value, value</h3>
+<h2>How to grow a monolith</h2>
+<h3>Value, value, value</h3>
 <p>I've had a Virtual Private Server for many years and have been always able to find something for free (or as my requirements increased at most $10 a month).  This has been at least 1000x worth the investment as it has provided a platform for learning and experimenting with all sorts of technology (Linux, PHP, Python, Twisted, MySQL, Redis, etc.) and of course a useful catch all tool (to check DNS resolution or temporarily store a file).</p>
 <p>I'm a firm believer in understanding the whole stack.  Maintaining the OS and managing deployments has made me conscious of the many hidden costs and compromises/trade-offs in software and services.</p>
-<h3 id="organic-sprawl">Organic Sprawl</h3>
+<h3>Organic Sprawl</h3>
 <p>While I started with a personal notes site in PHP, I eventually added a couple of personal blogs using Drupal, and then another Drupal site about physics (<a href="http://physicstime.com">http://physicstime.com</a>) for my father in law, and then a few experiments in Python (including uwsgi and Twisted).  This was all of course underpinned by the shared underlying Cherokee web server, Drupal, PHP, Python, MySQL, and Ubuntu.</p>
 <p>Physicstime alone has served over 500,000 visitors =)</p>
 <p>I envisioned that having a common platform would make it easier to add more sites and the shared maintenance meant I would only have to pay it once, especially considering the alternative of paying for and deploying many separate servers.</p>
 <p>I got to try a lot of different technologies but it started to be clear that it was not a "common platform" and maintenance (and just the mental energy of worrying about deferred maintenance) started to take up way too much time and effort.</p>
-<h3 id="the-downsides-of-a-monolith">The downsides of a monolith</h3>
+<h3>The downsides of a monolith</h3>
 <p>Anecdotes: a security update meant the infrastructure provider needed to restart all of their host machines which meant "hmmm, will all my services restart correctly on reboot?" - luckily yes.  Then I had to patch my virtual server (anything on the Internet is one vulnerability away from becoming taken over and in the least case being used for spam/DDoS and eventually being unable to actually serve my sites, in the worst case rooted or keystroke-logged in an attempt to hack my life or in a serious criminal pursuit).</p>
 <p>Oh and then there's the times the logs (web or auth due to anonymous attackers scanning) or backups filled the disk... (facepalm)</p>
 <p>Unavailability Due To:</p>
@@ -120,14 +88,14 @@
 <li>they all contend for the same resources</li>
 <li>they all share the same version/dependency requiring upgrading and testing everything at once</li>
 </ul>
-<h3 id="in-context-linode-ubuntu-cherokee-and-drupal-were-good-choices-at-the-time">In Context: Linode, Ubuntu, Cherokee, and Drupal were good choices at the time</h3>
+<h3>In Context: Linode, Ubuntu, Cherokee, and Drupal were good choices at the time</h3>
 <p>Firstly let me say I picked a great vendor (Linode) who was very solid (they limit bad actor customers which tends to make resources predictable) and that Ubuntu OS and Cherokee webserver are very easy to setup and maintain which is one reason why I've put this off for so long.</p>
 <p>Drupal does an ok job of separating the tech stack from the content publishing so it was possible to ignore the tech side for awhile.</p>
 <p>Another factor is that iPhones/Android, Dropbox, Bitbucket/GitHub, PaaS, and a whole generation of technologies were not around when I set this up.</p>
 <p>Finally, maybe it's a corollary to Moore's law and the prevalence of the cloud but there's quite a bit of free compute around than there used to be =]</p>
-<h2 id="thinking-microservices">Thinking Microservices</h2>
+<h2>Thinking Microservices</h2>
 <p>Thinking about microservices is like TDD (Test Driven Design): it exposes assumptions, unmanaged organic evolution, and accidental complexity.</p>
-<h3 id="discovering-the-real-problem-domain">Discovering the real problem domain</h3>
+<h3>Discovering the real problem domain</h3>
 <blockquote>
 <p>When you have a hammer everything looks like a nail</p>
 </blockquote>
@@ -135,7 +103,7 @@
 <p>Analyzing what I actually did with the various services I realized there were actually two distinct phases: creation and distribution.</p>
 <p>I did not have a "realtime" or "high volume dynamic data" use case, nor even a large number of content publishers that needed extra tooling.  (The plugins/additions I used weren't even that exotic.)</p>
 <p>In contrast the overhead was my irreplaceable time spent for the maintenance of Ubuntu patching/upgrades, including the underlying PHP, Drupal upgrades, backups, and of course the inestimable risk of running something on the Internet. =p</p>
-<h2 id="how-i-converted-to-microservices-big-bang-vs-kanban">How I Converted to Microservices: Big Bang vs Kanban</h2>
+<h2>How I Converted to Microservices: Big Bang vs Kanban</h2>
 <p>A common question is "how", and since "it depends" ;) in this case I had limited free hours to accomplish change and a strong desire to not break existing service.</p>
 <p>Rather than "Big Bang" I went Kanban <a href="https://en.m.wikipedia.org/wiki/Kanban_(development)">https://en.m.wikipedia.org/wiki/Kanban_(development)</a> (a much better analogy than Martin Fowler's "strangler pattern" analogy <a href="http://www.martinfowler.com/bliki/StranglerApplication.html">http://www.martinfowler.com/bliki/StranglerApplication.html</a>).  This allowed gradual migration with the least disruption and the most flexibility in when changes would occur.  As a not-to-be-underestimated bonus it was also the least stressful.</p>
 <p>Since I publish a post maybe once a month my blog was the simplest place to start.</p>
@@ -151,14 +119,14 @@
 <p>I migrated my content to a Pelican static site (with advanced functionality via a nice JavaScript theme) running on GitHub static pages and Travis CI.</p>
 <p>Having text in git provides a built in backup (published as html and stored remotely in markdown in the free "Software as a Service" repository) with of course a local git repo working copy on my laptop.</p>
 <p>The result is I only need to do a single git push of markdown text to deploy to production.  It's highly available, scalable, and as a bonus there is versioning and I got a fairly snazzy facelift with improved search.</p>
-<h3 id="migration-has-extra-costs-of-research-and-tweaks-but-is-an-opportunity-for-new-benefits">Migration has extra costs of research and tweaks but is an opportunity for new benefits</h3>
+<h3>Migration has extra costs of research and tweaks but is an opportunity for new benefits</h3>
 <p>First I had to research and evaluate static site generators and static site hosts.</p>
 <p>Next I had to learn how to setup a workflow with test data to automate the process from writing content to publishing.</p>
 <p>The actual data migration was quite lengthy.  This was due to the inevitable format change (export from Drupal to .md) and post transformation validation. </p>
 <p>Of course I also had to update DNS entries and even setup subdomains and 301 redirects.</p>
 <p>Like any rewrite I also ended up adding things (like tags).</p>
 <p>One of the most beneficial "while I'm already redoing everything anyways" enhancements was adding CDN and SSL via Cloudflare which actually added another layer of availability and security.</p>
-<h3 id="data-gravity-is-expensive-and-microservices-allows-polyglot-so-go-programming">Data Gravity is expensive and Microservices allows polyglot so Go Programming</h3>
+<h3>Data Gravity is expensive and Microservices allows polyglot so Go Programming</h3>
 <p>My personal notes are full of years of research and was the most time consuming, fulfilling the adages of "data gravity" and "unstructured data costs you" =(</p>
 <p>A free static site on bitbucket.org (markdown in a free git repository transformed to html for free via Shippable.com) used the same pattern (and Pelican tech) as my blog: version control, offloading the hosting to someone else, and JavaScript for search.</p>
 <p>While the file system organically captures metadata like "created date" I had to inject that into the content; I found this to be a data integrity improvement as I had noticed before that FTP and git have a tendency to discard that metadata.</p>
@@ -167,7 +135,7 @@
 <p>Oh right, so Go, aka Golang?</p>
 <p>I leveraged Google AppEngine and for fun got to use the relatively new programming language Go to write a custom 301 redirector to prevent links on the Internet from breaking and allow search engines link from all of the previous URLs to the new locations.</p>
 <p>While Python is very easy to pickup I found Go to be similar enough (especially to C) to be also not so hard to learn (lots of documentation!) and better able to do what I needed simply within the language (though Python pretty much has a library for everything it also has C dependencies that don't always play nice with a PlatformAsAService).</p>
-<h3 id="drupal-to-drupal">Drupal to Drupal</h3>
+<h3>Drupal to Drupal</h3>
 <blockquote>
 <p>The more things change the more they stay the same.</p>
 <p>Wherever you go there you are.</p>
@@ -176,12 +144,12 @@
 <p>Edit: one click was for Drupal8, yet another headache migration, so not in the scope of this project.</p>
 <p>Now at least as an isolated service (website) on a dedicated server, updates will be specific to it.</p>
 <p>I also put in the effort to use automation via Packer and experiment with Docker...</p>
-<h4 id="immutable-packer">Immutable Packer</h4>
+<h4>Immutable Packer</h4>
 <p>I considered Docker Machine and Ansible but both seemed the wrong tools for my purpose.</p>
 <p>Docker Machine is still relatively new and is more oriented towards a cluster of nodes.  Additionally the post docker image phase (ssh commands to install things) seems overly complex.</p>
 <p>Ansible (SSH paradigm) is simpler than chef but encourages a mutable long lived server.</p>
 <p>Packer has a simple and straight forward way of building an immutable server image for DigitalOcean yet retains the flexibility to adapt to other cloud vendors later if needed.</p>
-<h4 id="drupal-website-context-and-domain-problems">Drupal website context and domain problems</h4>
+<h4>Drupal website context and domain problems</h4>
 <p>Besides the basic components (Docker will simplify this): nginx, php, MySQL</p>
 <p>The ongoing issues:</p>
 <ul>
@@ -193,7 +161,7 @@
 <p>Hint: DigitalOcean offer full disk image backups as a paid service so if I ever stop being cheap this resolves pretty quickly</p>
 </blockquote>
 <p>The full details are in a separate post but I'm pretty happy that setting up the box from scratch again, upgrading the various subcomponents, or even migrating to a different vendor will be a lot easier in the future (and won't affect any of the other projects I have going on).</p>
-<h2 id="why-not-just-automate-the-monolith">Why not just automate the monolith</h2>
+<h2>Why not just automate the monolith</h2>
 <p>The "easy" answer may have been to automate more of my "ball of mud" to address the effort/efficiency of applying security updates.</p>
 <p>Yet the "better monolith" would mean I still owned the maintenance and uptime for a large percent of my services.</p>
 <p>The microservices approach of diversity means that with different providers (GitHub, Bitbucket, Google AppEngine, DigitalOcean, etc.) it is nearly impossible for them to all go down simultaneously or be affected by one another.</p>
@@ -203,7 +171,7 @@
 <p>"because it's there" or "because I can" are very often the reason things continue to be done in a suboptimal way ;)</p>
 </blockquote>
 <p>Now I will focus more on the "top" of the tech stack and high value content (like this blog post), less on the "how to automate and deploy" portion.</p>
-<h2 id="ongoing-and-future-work">Ongoing and Future Work</h2>
+<h2>Ongoing and Future Work</h2>
 <p>I still have to purchase/renew domains, update DNS, and write content.</p>
 <p>I still have to eventually find a platform that allows my father-in-law to publish content (and upload files) where I'm not responsible for security patches or backups ;)</p>
 <p>My experimenting is now done via a PaaS like Google AppEngine, Heroku, Openshift etc. or using Docker containers.  That means more admin and cognitive sprawl but PaaS and CaaS are more predisposed to version control and elastic/disposable architecture so in all a lot less maintenance.</p>
@@ -227,7 +195,7 @@
             <time pubdate="pubdate" datetime="2016-07-29T20:59:00-07:00">Jul 29, 2016</time>
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#build-CI-CD-devops-ref">build-CI-CD-devops</a> 
-            <h4>~2084 words</h4>
+            <h4>~2085 words</h4>
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article"> 
                 <li><a href="/tags.html#cherokee-ref">cherokee
