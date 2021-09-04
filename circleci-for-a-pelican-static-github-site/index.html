@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en-US">
+    <head>
+        <meta charset="utf-8"> 
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="author" content="john pfeiffer" />
+        <meta name="copyright" content="john pfeiffer" />
+
+<meta name="keywords" content="circleci pelican github, build-CI-CD-devops, " />
+        <title>CircleCI for a Pelican static Github site  · johnpfeiffer
+</title>
+        <!--link href="https://cdn-images.mailchimp.com/embedcode/slim-081711.css" rel="stylesheet" type="text/css"-->
+        <!--link href="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css" rel="stylesheet"-->
+        <link href="https://blog.john-pfeiffer.com/theme/css/bootstrap-combined.min.css" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="https://blog.john-pfeiffer.com/theme/css/style.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="https://blog.john-pfeiffer.com/theme/css/solarizedlight.css" media="screen">
+        <link rel="shortcut icon" href="https://blog.john-pfeiffer.com/theme/images/favicon.ico" type="image/x-icon" />
+        <link rel="apple-touch-icon" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon.png" />
+        <link rel="apple-touch-icon" sizes="57x57" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-57x57.png" />
+        <link rel="apple-touch-icon" sizes="72x72" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-72x72.png" />
+        <link rel="apple-touch-icon" sizes="114x114" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-114x114.png" />
+        <link rel="apple-touch-icon" sizes="144x144" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-144x144.png" />
+        <link rel="icon" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-144x144.png" />
+    </head>
+    <body>
+	<div id="content-sans-footer">
+        <div class="dropdown-backdrop">
+
+			<div class="navbar navbar-static-top">
+				<div class="navbar-inner">
+					<div class="container">
+						<a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+							<span class="icon-bar"></span>
+							<span class="icon-bar"></span>
+							<span class="icon-bar"></span>
+						</a>
+						<a class="brand" href="https://blog.john-pfeiffer.com/"><span class=site-name>johnpfeiffer</span></a>
+						<div class="nav-collapse collapse">
+							<ul class="nav pull-right top-menu">
+								<li ><a href="https://blog.john-pfeiffer.com">Home</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/john-likes/">John Likes</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/categories.html">Categories</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/tags.html">Tags</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/archives.html">Archives</a></li>
+								<li><form class="navbar-search" action="https://blog.john-pfeiffer.com/search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="container-fluid">
+			<div class="row-fluid">
+				<div class="span1"></div>
+				<div class="span10">
+<article>
+<div class="row-fluid">
+    <header class="page_header span10 offset2">
+    <h1><a href="https://blog.john-pfeiffer.com/circleci-for-a-pelican-static-github-site/"> CircleCI for a Pelican static Github site  </a></h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+    <div class="span2 table-of-content">
+        <nav>
+        <h4>Contents</h4>
+        <div class="toc">
+<ul>
+<li><a href="#a-new-pelican-dev-environment">A new Pelican Dev Environment</a><ul>
+<li><a href="#using-pelican-quickstart-for-a-skeleton">Using pelican-quickstart for a skeleton</a></li>
+<li><a href="#generate-html-from-markdown">Generate html from markdown</a></li>
+<li><a href="#docker-volume-with-your-pre-existing-blog-content">Docker volume with your pre-existing blog content</a></li>
+</ul>
+</li>
+<li><a href="#linking-github-to-circleci">Linking Github to CircleCI</a></li>
+<li><a href="#pushing-to-a-github-page-repository">Pushing to a Github Page repository</a><ul>
+<li><a href="#create-a-new-ssh-key-dedicated-to-only-this-purpose">Create a new SSH key dedicated to only this purpose</a></li>
+<li><a href="#circleci-config-explained">CircleCI config explained</a></li>
+</ul>
+</li>
+<li><a href="#pelican-plugins">Pelican Plugins</a></li>
+</ul>
+</div>
+        </nav>
+    </div>
+    <div class="span8 article-content">
+
+            
+<p>When I realized my previous CI/CD vendor had finally broken something <em>(after 7 years travis.org incompatibly became travis.com)</em> I decided out with the old and in with the new. Also, Python2 was deprecated so onto Python3!</p>
+<p>So this article is a non-comprehensive reprise of How to Setup a Static Site with Github Pages...</p>
+<ul>
+<li><a href="https://blog.john-pfeiffer.com/how-to-set-up-a-pelican-static-blog-site/">https://blog.john-pfeiffer.com/how-to-set-up-a-pelican-static-blog-site/</a></li>
+<li><a href="https://blog.john-pfeiffer.com/static-site-pelican-blog-with-github-pages-and-travis-ci/">https://blog.john-pfeiffer.com/static-site-pelican-blog-with-github-pages-and-travis-ci/</a></li>
+</ul>
+<p>Luckily I already had dabbled in CircleCI so the fundamentals were an easy copy paste: <a href="https://blog.john-pfeiffer.com/using-circleci-as-continuous-integration-and-continuous-deployment/">https://blog.john-pfeiffer.com/using-circleci-as-continuous-integration-and-continuous-deployment/</a></p>
+<p>Roughly we will:</p>
+<ol>
+<li>have python</li>
+<li>install dependencies (pelican)</li>
+<li>(optional) install plugins</li>
+<li>get blog source markdown <em>(ideally from version control like github)</em></li>
+<li>run build commands <em>(to convert markdown to html)</em></li>
+<li>push to a second github repository</li>
+</ol>
+<h1 id="a-new-pelican-dev-environment">A new Pelican Dev Environment</h1>
+<p><em>unfortunately getting Docker setup is outside the scope of this tutorial</em></p>
+<p>Just a practice run so you get a feel for it:</p>
+<div class="highlight"><pre><span></span><code>sudo docker run --rm -it cimg/python:3.8 /bin/bash
+python --version
+python -m pip install <span class="s2">"pelican[markdown]"</span> beautifulsoup4
+<span class="nb">exit</span>
+</code></pre></div>
+<blockquote>
+<p>an ephemeral docker container with interactive bash shell, cimg is the CircleCI optimized docker image, https://hub.docker.com/u/cimg versus https://hub.docker.com/r/circleci/python/</p>
+</blockquote>
+<p>Installing Pelican is documented: <a href="https://docs.getpelican.com/en/latest/">https://docs.getpelican.com/en/latest/</a></p>
+<h2 id="using-pelican-quickstart-for-a-skeleton">Using pelican-quickstart for a skeleton</h2>
+<p><em>assuming you are still in your docker container shell</em></p>
+<div class="highlight"><pre><span></span><code><span class="nv">PYVER</span><span class="o">=</span><span class="k">$(</span>ls /home/circleci/.pyenv/versions <span class="p">|</span> grep <span class="m">3</span>.8<span class="k">)</span>
+<span class="nb">cd</span> <span class="s2">"/home/circleci/.pyenv/versions/</span><span class="nv">$PYVER</span><span class="s2">/bin/"</span>
+./pelican --version
+mkdir yoursite
+<span class="nb">cd</span> yoursite
+../pelican-quickstart
+  Welcome to pelican-quickstart v4.6.0.
+  This script will <span class="nb">help</span> you create a new Pelican-based website.
+  ... <span class="o">(</span>accept all defaults<span class="o">)</span> ...
+  Done. Your new project is available at /home/circleci/.pyenv/versions/3.8.11/bin/yoursite
+</code></pre></div>
+<blockquote>
+<p>A little directory dancing in the container to get to the pip installed pelican binary</p>
+</blockquote>
+<p>You still need an article with a minimum of content...</p>
+<p><code>vim yoursite/content/my-article.md</code></p>
+<div class="highlight"><pre><span></span><code>Title: My Article
+Date: 2021-09-09 22:22
+Category: Technology
+
+Hello world.
+</code></pre></div>
+<h2 id="generate-html-from-markdown">Generate html from markdown</h2>
+<p><code>./pelican yoursite/content/</code></p>
+<blockquote>
+<p>creates an "output" directory with the HTML and all the index and other pages also updated</p>
+</blockquote>
+<div class="highlight"><pre><span></span><code>my-article.html
+archives.html
+authors.html
+categories.html
+category
+feeds
+index.html
+tags.html
+theme
+</code></pre></div>
+<h2 id="docker-volume-with-your-pre-existing-blog-content">Docker volume with your pre-existing blog content</h2>
+<div class="highlight"><pre><span></span><code>sudo docker run --volume /home/ubuntu/blogsource/:/home/circleci/blogsource --rm -it cimg/python:3.8 /bin/bash
+mkdir /home/circleci/OUT
+<span class="nv">PYVER</span><span class="o">=</span><span class="k">$(</span>ls /home/circleci/.pyenv/versions <span class="p">|</span> grep <span class="m">3</span>.8<span class="k">)</span>
+<span class="nb">cd</span> <span class="s2">"/home/circleci/.pyenv/versions/</span><span class="nv">$PYVER</span><span class="s2">/bin/"</span>
+</code></pre></div>
+<p>./pelican /home/circleci/blogsource/pelican-project/content -o /home/circleci/OUT -s /home/circleci/blogsource/pelican-project/publishconf.py</p>
+<blockquote>
+<p>Docker will mount your local directory with pelican project markdown mapped to "/home/circleci/blogsource" in the docker container
+<em>your local directory name and subdirectories are up to you ;)</em></p>
+</blockquote>
+<p><em>If you do not specify a new "output directory" then pelican may get confused if there is already content in "pelican-project/output"</em></p>
+<h1 id="linking-github-to-circleci">Linking Github to CircleCI</h1>
+<p><em>assuming you have your blog markdown in a Github repository and logged into CircleCI and authorized it for access to your Github repos</em></p>
+<p>Click on the CircleCI button for your source code: "Setup a Project"</p>
+<ul>
+<li>Use CircleCI's template for a configuration (a python project)</li>
+<li>customize it: <a href="https://circleci.com/docs/2.0/executor-types/">https://circleci.com/docs/2.0/executor-types/</a></li>
+<li>trial and error to get various commands in the docker container right (use the Dev environment above)</li>
+<li>There is a live-config-editor "Edit Config"</li>
+</ul>
+<p><strong>save and merge (.circleci/config.yml)</strong></p>
+<p>Now your source code (markdown) for your (pelican) blog should have a CircleCI configuration like the following:</p>
+<p><strong>.circleci/config.yml</strong></p>
+<div class="highlight"><pre><span></span><code><span class="nl">version</span><span class="p">:</span><span class="w"> </span><span class="mf">2.1</span><span class="w"></span>
+<span class="nl">jobs</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nl">build</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nl">resource_class</span><span class="p">:</span><span class="w"> </span><span class="n">small</span><span class="w"></span>
+<span class="w">    </span><span class="nl">docker</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="o">-</span><span class="w"> </span><span class="nc">image</span><span class="err">:</span><span class="w"> </span><span class="n">cimg</span><span class="o">/</span><span class="nl">python</span><span class="p">:</span><span class="mf">3.8</span><span class="w"></span>
+<span class="w">    </span><span class="nl">steps</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="o">-</span><span class="w"> </span><span class="n">checkout</span><span class="w"></span>
+<span class="w">      </span><span class="o">-</span><span class="w"> </span><span class="nl">run</span><span class="p">:</span><span class="w"></span>
+<span class="w">          </span><span class="nl">name</span><span class="p">:</span><span class="w"> </span><span class="n">Install</span><span class="w"> </span><span class="n">Pelican</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="n">Build</span><span class="w"> </span><span class="n">Content</span><span class="w"></span>
+<span class="w">          </span><span class="nl">command</span><span class="p">:</span><span class="w"> </span><span class="o">|</span><span class="w"></span>
+<span class="w">            </span><span class="n">python</span><span class="w"> </span><span class="o">-</span><span class="n">m</span><span class="w"> </span><span class="n">pip</span><span class="w"> </span><span class="n">install</span><span class="w"> </span><span class="ss">"pelican[markdown]"</span><span class="w"> </span><span class="n">beautifulsoup4</span><span class="w"></span>
+<span class="w">            </span><span class="n">pip</span><span class="w"> </span><span class="n">freeze</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">grep</span><span class="w"> </span><span class="n">pelican</span><span class="w"></span>
+<span class="w">            </span><span class="n">cd</span><span class="w"> </span><span class="p">..</span><span class="w"></span>
+<span class="w">            </span><span class="n">pwd</span><span class="w"></span>
+<span class="w">            </span><span class="n">ls</span><span class="w"> </span><span class="o">-</span><span class="n">ahl</span><span class="w"> </span><span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">circleci</span><span class="o">/</span><span class="n">project</span><span class="w"></span>
+<span class="w">            </span><span class="n">find</span><span class="w"> </span><span class="p">.</span><span class="w"> </span><span class="o">-</span><span class="n">type</span><span class="w"> </span><span class="n">f</span><span class="w"> </span><span class="o">-</span><span class="n">iname</span><span class="w"> </span><span class="n">pelican</span><span class="w"></span>
+<span class="w">            </span><span class="n">PYVER</span><span class="o">=</span><span class="err">$</span><span class="p">(</span><span class="n">ls</span><span class="w"> </span><span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">circleci</span><span class="o">/</span><span class="p">.</span><span class="n">pyenv</span><span class="o">/</span><span class="n">versions</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">grep</span><span class="w"> </span><span class="mf">3.8</span><span class="p">)</span><span class="w"></span>
+<span class="w">            </span><span class="n">cd</span><span class="w"> </span><span class="ss">".pyenv/versions/$PYVER/bin/"</span><span class="w"></span>
+<span class="w">            </span><span class="p">.</span><span class="o">/</span><span class="n">pelican</span><span class="w"> </span><span class="o">--</span><span class="n">version</span><span class="w"></span>
+<span class="w">            </span><span class="n">mkdir</span><span class="w"> </span><span class="o">-</span><span class="n">p</span><span class="w"> </span><span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">circleci</span><span class="o">/</span><span class="k">OUT</span><span class="w"></span>
+<span class="w">            </span><span class="p">.</span><span class="o">/</span><span class="n">pelican</span><span class="w"> </span><span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">circleci</span><span class="o">/</span><span class="n">project</span><span class="o">/</span><span class="n">content</span><span class="w"> </span><span class="o">-</span><span class="n">o</span><span class="w"> </span><span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">circleci</span><span class="o">/</span><span class="k">OUT</span><span class="w"> </span><span class="o">-</span><span class="n">s</span><span class="w"> </span><span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">circleci</span><span class="o">/</span><span class="n">project</span><span class="o">/</span><span class="n">publishconf</span><span class="p">.</span><span class="n">py</span><span class="w"></span>
+<span class="w">            </span><span class="n">ssh</span><span class="o">-</span><span class="k">add</span><span class="w"> </span><span class="o">-</span><span class="n">D</span><span class="w"></span>
+
+<span class="w">      </span><span class="o">-</span><span class="w"> </span><span class="nl">add_ssh_keys</span><span class="p">:</span><span class="w"></span>
+<span class="w">              </span><span class="nl">fingerprints</span><span class="p">:</span><span class="w"></span>
+<span class="w">                          </span><span class="o">-</span><span class="w"> </span><span class="ss">"4e:c1:a6:83:...:cc"</span><span class="w"></span>
+<span class="w">      </span><span class="o">-</span><span class="w"> </span><span class="nl">run</span><span class="p">:</span><span class="w"></span>
+<span class="w">          </span><span class="nl">name</span><span class="p">:</span><span class="w"> </span><span class="n">Publish</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="n">GitHub</span><span class="w"> </span><span class="k">Static</span><span class="w"> </span><span class="n">Site</span><span class="w"></span>
+<span class="w">          </span><span class="nl">command</span><span class="p">:</span><span class="w"> </span><span class="o">|</span><span class="w"></span>
+<span class="w">            </span><span class="n">cd</span><span class="w"> </span><span class="p">..</span><span class="w"></span>
+<span class="w">            </span><span class="n">ls</span><span class="w"> </span><span class="o">-</span><span class="n">ahl</span><span class="w"></span>
+<span class="w">            </span><span class="n">git</span><span class="w"> </span><span class="n">clone</span><span class="w"> </span><span class="n">git</span><span class="nv">@github</span><span class="p">.</span><span class="nl">com</span><span class="p">:</span><span class="n">johnpfeiffer</span><span class="o">/</span><span class="n">johnpfeiffer</span><span class="p">.</span><span class="n">github</span><span class="p">.</span><span class="n">io</span><span class="p">.</span><span class="n">git</span><span class="w"></span>
+<span class="w">            </span><span class="n">cd</span><span class="w"> </span><span class="n">johnpfeiffer</span><span class="p">.</span><span class="n">github</span><span class="p">.</span><span class="n">io</span><span class="w"></span>
+<span class="w">            </span><span class="n">git</span><span class="w"> </span><span class="n">config</span><span class="w"> </span><span class="k">user</span><span class="p">.</span><span class="n">email</span><span class="w"> </span><span class="ss">"me@john-pfeiffer.com"</span><span class="w"></span>
+<span class="w">            </span><span class="n">git</span><span class="w"> </span><span class="n">config</span><span class="w"> </span><span class="k">user</span><span class="p">.</span><span class="n">name</span><span class="w"> </span><span class="ss">"John Pfeiffer CircleCI"</span><span class="w"></span>
+<span class="w">            </span><span class="n">git</span><span class="w"> </span><span class="n">checkout</span><span class="w"> </span><span class="n">master</span><span class="w"></span>
+<span class="w">            </span><span class="n">cp</span><span class="w"> </span><span class="o">-</span><span class="n">a</span><span class="w"> </span><span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">circleci</span><span class="o">/</span><span class="k">OUT</span><span class="cm">/* .</span>
+<span class="cm">            git commit --allow-empty -am "CircleCI publishing $CIRCLE_BUILD_NUM from sha $CIRCLE_SHA1"</span>
+<span class="cm">            ls -ahl ~/.ssh/</span>
+<span class="cm">            GIT_SSH_COMMAND='ssh -v -i ~/.ssh/id_rsa_4ec1a683...cc' git push origin master</span>
+</code></pre></div>
+<blockquote>
+<p>Everything from add_ssh_keys and below should only be added once you have completed the SSH Key steps below</p>
+</blockquote>
+<p><strong>Removing all SSH keys from the CircleCI agent is because we're done checking out this repo and need to not confuse Git later</strong></p>
+<h1 id="pushing-to-a-github-page-repository">Pushing to a Github Page repository</h1>
+<p>The target for all of this has been your Github static page: <a href="https://pages.github.com/">https://pages.github.com/</a></p>
+<h2 id="create-a-new-ssh-key-dedicated-to-only-this-purpose">Create a new SSH key dedicated to only this purpose</h2>
+<div class="highlight"><pre><span></span><code>ssh-keygen -t rsa -b <span class="m">4096</span> -C <span class="s2">"CircleCI Deploy Key with Write Access"</span> -f /tmp/cikey
+</code></pre></div>
+<blockquote>
+<p>Note that this key is just for CircleCI for just this one repo</p>
+</blockquote>
+<p>Navigate to the "Deploy keys" section of the Settings of the Repo in github that will receive the pushes
+e.g https://github.com/johnpfeiffer/johnpfeiffer.github.io/settings/keys</p>
+<ul>
+<li>click on "Add deploy key"</li>
+<li>Paste in the cikey.pub file contents</li>
+<li>Ensure the "Allow write access" checkbox is checked</li>
+</ul>
+<p>In CircleCI:
+Go to your source project (under your username) and choose the "Project Settings" button, then subsection SSH Keys
+e.g. https://app.circleci.com/settings/project/github/johnpfeiffer/source.johnpfeiffer.github.io/ssh</p>
+<p>Copy the private "cikey" (which starts with "-----BEGIN RSA PRIVATE KEY-----") into your buffer.</p>
+<blockquote>
+<p>Do not share or paste your private key anywhere else than CircleCI</p>
+</blockquote>
+<p>Add an Additional SSH Key "Add SSH Key"
+Hostname: githubstaticpage
+Private Key: -----BEGIN RSA PRIVATE KEY-----...</p>
+<p>Now copy the "Fingerprint" of the key e.g. something like 4e:c1:...
+This is what goes in your circleCI config</p>
+<h2 id="circleci-config-explained">CircleCI config explained</h2>
+<p>This portion is your CircleCI agent manually checking out the actual "Pages" HTML repository:</p>
+<div class="highlight"><pre><span></span><code>            git clone git@github.com:johnpfeiffer/johnpfeiffer.github.io.git
+            cd johnpfeiffer.github.io
+            git config user.email "me@john-pfeiffer.com"
+            git config user.name "John Pfeiffer CircleCI"
+            git checkout master
+</code></pre></div>
+<p>It is important to copy the new HTML content in...
+                cp -a /home/circleci/OUT/* .</p>
+<p><em>technical debt is to use the rsync command to actually reflect removed content too</em></p>
+<p>Later we can use that fingerprint to explicitly specify git use that ssh key to push to github...</p>
+<div class="highlight"><pre><span></span><code>        GIT_SSH_COMMAND='ssh -v -i ~/.ssh/id_rsa_4ec1a683...cc' git push origin master
+</code></pre></div>
+<blockquote>
+<p>ssh verbose shows you which Identity/Key is being used to deploy/push to Github</p>
+</blockquote>
+<p>References
+- <a href="https://circleci.com/docs/2.0/add-ssh-key/">https://circleci.com/docs/2.0/add-ssh-key/</a>
+- <a href="https://blog.jdblischak.com/posts/circleci-ssh/">https://blog.jdblischak.com/posts/circleci-ssh/</a>
+- <a href="https://discuss.circleci.com/t/multiple-deploy-keys-for-github/25658/8">https://discuss.circleci.com/t/multiple-deploy-keys-for-github/25658/8</a>
+- <a href="https://discuss.circleci.com/t/cloning-another-private-repo-in-the-build/25505/3">https://discuss.circleci.com/t/cloning-another-private-repo-in-the-build/25505/3</a></p>
+<h1 id="pelican-plugins">Pelican Plugins</h1>
+<p>My site still uses the old plugins which I "vendored" into the actual repo for simplicity:</p>
+<ul>
+<li><a href="https://github.com/johnpfeiffer/source.johnpfeiffer.github.io/tree/master/plugins">https://github.com/johnpfeiffer/source.johnpfeiffer.github.io/tree/master/plugins</a> </li>
+<li><a href="https://github.com/getpelican/pelican-plugins">https://github.com/getpelican/pelican-plugins</a><blockquote>
+<p>10 MB of legacy plugins at "getpelican" because they still work</p>
+</blockquote>
+</li>
+</ul>
+<p>Instructions on Pelican Plugins in general (and the new way that I have not yet adopted)
+- <a href="https://docs.getpelican.com/en/latest/plugins.html">https://docs.getpelican.com/en/latest/plugins.html</a></p>
+<p>Thankfully this person documented how to use Pelican4.6 with MARKDOWN for the built in Table of Contents (TOC):
+- <a href="https://cloudbytes.dev/articles/add-a-table-of-contents-using-markdown-in-pelican">https://cloudbytes.dev/articles/add-a-table-of-contents-using-markdown-in-pelican</a></p>
+            <aside>
+            <hr/>
+            <nav>
+            <ul class="articles_timeline">
+ 
+                <li class="previous_article">« <a href="https://blog.john-pfeiffer.com/using-circleci-as-continuous-integration-and-continuous-deployment/" title="Previous: Using CircleCI as continuous integration and continuous deployment">Using CircleCI as continuous integration and continuous deployment</a></li>
+            </ul>
+            </nav>
+            </aside>
+        </div>
+        <section>
+        <div class="span2" style="float:right;font-size:0.9em;">
+ 
+            <h4>Published</h4>
+            <time pubdate="pubdate" datetime="2021-09-03T21:00:00-07:00">Sep 3, 2021</time>
+            <h4>Category</h4>
+            <a class="category-link" href="/categories.html#build-CI-CD-devops-ref">build-CI-CD-devops</a> 
+            <h4>~973 words</h4>
+            <h4>Tags</h4>
+            <ul class="list-of-tags tags-in-article"> 
+                <li><a href="/tags.html#circleci-pelican-github-ref">circleci pelican github
+                    <span>1</span>
+</a></li>
+            </ul>
+
+        </div>
+        </section>
+</div>
+</article>
+				</div>
+				<div class="span1"></div>
+			</div>
+		</div>
+    </div>
+<footer>
+<div id="footer">
+    <ul class="footer-content">
+    </ul>
+</div>
+</footer>            <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+    </body>
+</html>
