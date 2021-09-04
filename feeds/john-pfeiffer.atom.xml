@@ -74,11 +74,10 @@ theme
 mkdir /home/circleci/OUT
 &lt;span class="nv"&gt;PYVER&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="k"&gt;$(&lt;/span&gt;ls /home/circleci/.pyenv/versions &lt;span class="p"&gt;|&lt;/span&gt; grep &lt;span class="m"&gt;3&lt;/span&gt;.8&lt;span class="k"&gt;)&lt;/span&gt;
 &lt;span class="nb"&gt;cd&lt;/span&gt; &lt;span class="s2"&gt;"/home/circleci/.pyenv/versions/&lt;/span&gt;&lt;span class="nv"&gt;$PYVER&lt;/span&gt;&lt;span class="s2"&gt;/bin/"&lt;/span&gt;
+./pelican /home/circleci/blogsource/pelican-project/content -o /home/circleci/OUT -s /home/circleci/blogsource/pelican-project/publishconf.py
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;./pelican /home/circleci/blogsource/pelican-project/content -o /home/circleci/OUT -s /home/circleci/blogsource/pelican-project/publishconf.py&lt;/p&gt;
 &lt;blockquote&gt;
-&lt;p&gt;Docker will mount your local directory with pelican project markdown mapped to "/home/circleci/blogsource" in the docker container
-&lt;em&gt;your local directory name and subdirectories are up to you ;)&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;Docker will mount your local directory with pelican project markdown mapped to "/home/circleci/blogsource" in the docker container&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;p&gt;&lt;em&gt;If you do not specify a new "output directory" then pelican may get confused if there is already content in "pelican-project/output"&lt;/em&gt;&lt;/p&gt;
 &lt;h1 id="linking-github-to-circleci"&gt;Linking Github to CircleCI&lt;/h1&gt;
@@ -93,49 +92,49 @@ mkdir /home/circleci/OUT
 &lt;p&gt;&lt;strong&gt;save and merge (.circleci/config.yml)&lt;/strong&gt;&lt;/p&gt;
 &lt;p&gt;Now your source code (markdown) for your (pelican) blog should have a CircleCI configuration like the following:&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;.circleci/config.yml&lt;/strong&gt;&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nl"&gt;version&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mf"&gt;2.1&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
-&lt;span class="nl"&gt;jobs&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
-&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="nl"&gt;build&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
-&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="nl"&gt;resource_class&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;small&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
-&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="nl"&gt;docker&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
-&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nc"&gt;image&lt;/span&gt;&lt;span class="err"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;cimg&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nl"&gt;python&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="mf"&gt;3.8&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
-&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="nl"&gt;steps&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
-&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;checkout&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
-&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nl"&gt;run&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
-&lt;span class="w"&gt;          &lt;/span&gt;&lt;span class="nl"&gt;name&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;Install&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;Pelican&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="ow"&gt;and&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;Build&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;Content&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
-&lt;span class="w"&gt;          &lt;/span&gt;&lt;span class="nl"&gt;command&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;|&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
-&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="n"&gt;python&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;m&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;pip&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;install&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="ss"&gt;"pelican[markdown]"&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;beautifulsoup4&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
-&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="n"&gt;pip&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;freeze&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;|&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;grep&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;pelican&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
-&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="n"&gt;cd&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;..&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
-&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="n"&gt;pwd&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
-&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="n"&gt;ls&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;ahl&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;home&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;circleci&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;project&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
-&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="n"&gt;find&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;type&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;f&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;iname&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;pelican&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
-&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="n"&gt;PYVER&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="err"&gt;$&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;ls&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;home&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;circleci&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;pyenv&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;versions&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;|&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;grep&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mf"&gt;3.8&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
-&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="n"&gt;cd&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="ss"&gt;".pyenv/versions/$PYVER/bin/"&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
-&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;pelican&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;--&lt;/span&gt;&lt;span class="n"&gt;version&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
-&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="n"&gt;mkdir&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;p&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;home&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;circleci&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="k"&gt;OUT&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
-&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;pelican&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;home&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;circleci&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;project&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;content&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;o&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;home&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;circleci&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="k"&gt;OUT&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;s&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;home&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;circleci&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;project&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;publishconf&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;py&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
-&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="n"&gt;ssh&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="k"&gt;add&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;D&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nt"&gt;version&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;2.1&lt;/span&gt;
+&lt;span class="nt"&gt;jobs&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+  &lt;span class="nt"&gt;build&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+    &lt;span class="nt"&gt;resource_class&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;small&lt;/span&gt;
+    &lt;span class="nt"&gt;docker&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+      &lt;span class="p p-Indicator"&gt;-&lt;/span&gt; &lt;span class="nt"&gt;image&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;cimg/python:3.8&lt;/span&gt;
+    &lt;span class="nt"&gt;steps&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+      &lt;span class="p p-Indicator"&gt;-&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;checkout&lt;/span&gt;
+      &lt;span class="p p-Indicator"&gt;-&lt;/span&gt; &lt;span class="nt"&gt;run&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+          &lt;span class="nt"&gt;name&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;Install Pelican and Build Content&lt;/span&gt;
+          &lt;span class="nt"&gt;command&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p p-Indicator"&gt;|&lt;/span&gt;
+            &lt;span class="no"&gt;python -m pip install "pelican[markdown]" beautifulsoup4&lt;/span&gt;
+            &lt;span class="no"&gt;pip freeze | grep pelican&lt;/span&gt;
+            &lt;span class="no"&gt;cd ..&lt;/span&gt;
+            &lt;span class="no"&gt;pwd&lt;/span&gt;
+            &lt;span class="no"&gt;ls -ahl /home/circleci/project&lt;/span&gt;
+            &lt;span class="no"&gt;find . -type f -iname pelican&lt;/span&gt;
+            &lt;span class="no"&gt;PYVER=$(ls /home/circleci/.pyenv/versions | grep 3.8)&lt;/span&gt;
+            &lt;span class="no"&gt;cd ".pyenv/versions/$PYVER/bin/"&lt;/span&gt;
+            &lt;span class="no"&gt;./pelican --version&lt;/span&gt;
+            &lt;span class="no"&gt;mkdir -p /home/circleci/OUT&lt;/span&gt;
+            &lt;span class="no"&gt;./pelican /home/circleci/project/content -o /home/circleci/OUT -s /home/circleci/project/publishconf.py&lt;/span&gt;
+            &lt;span class="no"&gt;ssh-add -D&lt;/span&gt;
 
-&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nl"&gt;add_ssh_keys&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
-&lt;span class="w"&gt;              &lt;/span&gt;&lt;span class="nl"&gt;fingerprints&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
-&lt;span class="w"&gt;                          &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="ss"&gt;"4e:c1:a6:83:...:cc"&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
-&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nl"&gt;run&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
-&lt;span class="w"&gt;          &lt;/span&gt;&lt;span class="nl"&gt;name&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;Publish&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;to&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;GitHub&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;Static&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;Site&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
-&lt;span class="w"&gt;          &lt;/span&gt;&lt;span class="nl"&gt;command&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;|&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
-&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="n"&gt;cd&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;..&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
-&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="n"&gt;ls&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;ahl&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
-&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="n"&gt;git&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;clone&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;git&lt;/span&gt;&lt;span class="nv"&gt;@github&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nl"&gt;com&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="n"&gt;johnpfeiffer&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;johnpfeiffer&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;github&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;io&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;git&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
-&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="n"&gt;cd&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;johnpfeiffer&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;github&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;io&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
-&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="n"&gt;git&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;config&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;user&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;email&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="ss"&gt;"me@john-pfeiffer.com"&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
-&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="n"&gt;git&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;config&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;user&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;name&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="ss"&gt;"John Pfeiffer CircleCI"&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
-&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="n"&gt;git&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;checkout&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;master&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
-&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="n"&gt;cp&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;home&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;circleci&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="k"&gt;OUT&lt;/span&gt;&lt;span class="cm"&gt;/* .&lt;/span&gt;
-&lt;span class="cm"&gt;            git status&lt;/span&gt;
-&lt;span class="cm"&gt;            git add --all .&lt;/span&gt;
-&lt;span class="cm"&gt;            git commit --allow-empty -m "CircleCI publishing $CIRCLE_BUILD_NUM from sha $CIRCLE_SHA1"&lt;/span&gt;
-&lt;span class="cm"&gt;            ls -ahl ~/.ssh/&lt;/span&gt;
-&lt;span class="cm"&gt;            GIT_SSH_COMMAND='ssh -v -i ~/.ssh/id_rsa_4ec1a683...cc' git push origin master&lt;/span&gt;
+      &lt;span class="p p-Indicator"&gt;-&lt;/span&gt; &lt;span class="nt"&gt;add_ssh_keys&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+              &lt;span class="nt"&gt;fingerprints&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+                          &lt;span class="p p-Indicator"&gt;-&lt;/span&gt; &lt;span class="s"&gt;"4e:c1:a6:83:...:cc"&lt;/span&gt;
+      &lt;span class="p p-Indicator"&gt;-&lt;/span&gt; &lt;span class="nt"&gt;run&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+          &lt;span class="nt"&gt;name&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="l l-Scalar l-Scalar-Plain"&gt;Publish to GitHub Static Site&lt;/span&gt;
+          &lt;span class="nt"&gt;command&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p p-Indicator"&gt;|&lt;/span&gt;
+            &lt;span class="no"&gt;cd ..&lt;/span&gt;
+            &lt;span class="no"&gt;ls -ahl&lt;/span&gt;
+            &lt;span class="no"&gt;git clone git@github.com:johnpfeiffer/johnpfeiffer.github.io.git&lt;/span&gt;
+            &lt;span class="no"&gt;cd johnpfeiffer.github.io&lt;/span&gt;
+            &lt;span class="no"&gt;git config user.email "me@john-pfeiffer.com"&lt;/span&gt;
+            &lt;span class="no"&gt;git config user.name "John Pfeiffer CircleCI"&lt;/span&gt;
+            &lt;span class="no"&gt;git checkout master&lt;/span&gt;
+            &lt;span class="no"&gt;cp -a /home/circleci/OUT/* .&lt;/span&gt;
+            &lt;span class="no"&gt;git status&lt;/span&gt;
+            &lt;span class="no"&gt;git add --all .&lt;/span&gt;
+            &lt;span class="no"&gt;git commit --allow-empty -m "CircleCI publishing $CIRCLE_BUILD_NUM from sha $CIRCLE_SHA1"&lt;/span&gt;
+            &lt;span class="no"&gt;ls -ahl ~/.ssh/&lt;/span&gt;
+            &lt;span class="no"&gt;GIT_SSH_COMMAND='ssh -v -i ~/.ssh/id_rsa_4ec1a683...cc' git push origin master&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 &lt;blockquote&gt;
 &lt;p&gt;Everything from add_ssh_keys and below should only be added once you have completed the SSH Key steps below&lt;/p&gt;
@@ -176,20 +175,23 @@ This is what goes in your circleCI config&lt;/p&gt;
             git config user.name "John Pfeiffer CircleCI"
             git checkout master
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;It is important to copy the new HTML content in...
-                cp -a /home/circleci/OUT/* .&lt;/p&gt;
-&lt;p&gt;&lt;em&gt;technical debt is to use the rsync command to actually reflect removed content too&lt;/em&gt;&lt;/p&gt;
-&lt;p&gt;Later we can use that fingerprint to explicitly specify git use that ssh key to push to github...&lt;/p&gt;
+&lt;p&gt;It is important to copy the new HTML content in...&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;cp -a /home/circleci/OUT/* .
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;&lt;em&gt;technical debt: should use the rsync command to actually reflect removed content too&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;Here is where the previously created SSH Key and fingerprint are explicitly used to specify to git to use that ssh key to push to github...&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;        GIT_SSH_COMMAND='ssh -v -i ~/.ssh/id_rsa_4ec1a683...cc' git push origin master
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 &lt;blockquote&gt;
 &lt;p&gt;ssh verbose shows you which Identity/Key is being used to deploy/push to Github&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;p&gt;References
-- &lt;a href="https://circleci.com/docs/2.0/add-ssh-key/"&gt;https://circleci.com/docs/2.0/add-ssh-key/&lt;/a&gt;
-- &lt;a href="https://blog.jdblischak.com/posts/circleci-ssh/"&gt;https://blog.jdblischak.com/posts/circleci-ssh/&lt;/a&gt;
-- &lt;a href="https://discuss.circleci.com/t/multiple-deploy-keys-for-github/25658/8"&gt;https://discuss.circleci.com/t/multiple-deploy-keys-for-github/25658/8&lt;/a&gt;
-- &lt;a href="https://discuss.circleci.com/t/cloning-another-private-repo-in-the-build/25505/3"&gt;https://discuss.circleci.com/t/cloning-another-private-repo-in-the-build/25505/3&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;References&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://circleci.com/docs/2.0/add-ssh-key/"&gt;https://circleci.com/docs/2.0/add-ssh-key/&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://blog.jdblischak.com/posts/circleci-ssh/"&gt;https://blog.jdblischak.com/posts/circleci-ssh/&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://discuss.circleci.com/t/multiple-deploy-keys-for-github/25658/8"&gt;https://discuss.circleci.com/t/multiple-deploy-keys-for-github/25658/8&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://discuss.circleci.com/t/cloning-another-private-repo-in-the-build/25505/3"&gt;https://discuss.circleci.com/t/cloning-another-private-repo-in-the-build/25505/3&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
 &lt;h1 id="pelican-plugins"&gt;Pelican Plugins&lt;/h1&gt;
 &lt;p&gt;My site still uses the old plugins which I "vendored" into the actual repo for simplicity:&lt;/p&gt;
 &lt;ul&gt;
@@ -199,10 +201,14 @@ This is what goes in your circleCI config&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;Instructions on Pelican Plugins in general (and the new way that I have not yet adopted)
-- &lt;a href="https://docs.getpelican.com/en/latest/plugins.html"&gt;https://docs.getpelican.com/en/latest/plugins.html&lt;/a&gt;&lt;/p&gt;
-&lt;p&gt;Thankfully this person documented how to use Pelican4.6 with MARKDOWN for the built in Table of Contents (TOC):
-- &lt;a href="https://cloudbytes.dev/articles/add-a-table-of-contents-using-markdown-in-pelican"&gt;https://cloudbytes.dev/articles/add-a-table-of-contents-using-markdown-in-pelican&lt;/a&gt;&lt;/p&gt;</content><category term="build-CI-CD-devops"></category><category term="circleci pelican github"></category></entry><entry><title>Using CircleCI as continuous integration and continuous deployment</title><link href="https://blog.john-pfeiffer.com/using-circleci-as-continuous-integration-and-continuous-deployment/" rel="alternate"></link><published>2021-04-14T20:43:00-07:00</published><updated>2021-04-14T20:43:00-07:00</updated><author><name>john pfeiffer</name></author><id>tag:blog.john-pfeiffer.com,2021-04-14:/using-circleci-as-continuous-integration-and-continuous-deployment/</id><summary type="html">
+&lt;p&gt;Instructions on Pelican Plugins in general (and the new way that I have not yet adopted)&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://docs.getpelican.com/en/latest/plugins.html"&gt;https://docs.getpelican.com/en/latest/plugins.html&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Thankfully this person documented how to use Pelican4.6 with MARKDOWN for the built in Table of Contents (TOC):&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://cloudbytes.dev/articles/add-a-table-of-contents-using-markdown-in-pelican"&gt;https://cloudbytes.dev/articles/add-a-table-of-contents-using-markdown-in-pelican&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</content><category term="build-CI-CD-devops"></category><category term="circleci pelican github"></category></entry><entry><title>Using CircleCI as continuous integration and continuous deployment</title><link href="https://blog.john-pfeiffer.com/using-circleci-as-continuous-integration-and-continuous-deployment/" rel="alternate"></link><published>2021-04-14T20:43:00-07:00</published><updated>2021-04-14T20:43:00-07:00</updated><author><name>john pfeiffer</name></author><id>tag:blog.john-pfeiffer.com,2021-04-14:/using-circleci-as-continuous-integration-and-continuous-deployment/</id><summary type="html">
 &lt;p&gt;I avoid providing free advertising for products but often end up writing about how I have leveraged free products. =]&lt;/p&gt;
 &lt;p&gt;I have many posts over the years using vmware, openshift, heroku, google app engine, aws elastic beanstalk, ec2, aws lambdas, github, bitbucket, bitbucket pipelines, docker, digital ocean, and many more things …&lt;/p&gt;</summary><content type="html">
 &lt;p&gt;I avoid providing free advertising for products but often end up writing about how I have leveraged free products. =]&lt;/p&gt;
