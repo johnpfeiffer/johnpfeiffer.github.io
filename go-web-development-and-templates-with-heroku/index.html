@@ -61,35 +61,75 @@
 </div>
 
 <div class="row-fluid">
-        <div class="span8 offset2 article-content">
+    <div class="span2 table-of-content">
+        <nav>
+        <h4>Contents</h4>
+        <div class="toc"><span class="toctitle">Table of Contents</span><ul>
+<li><a href="#prerequisites">Prerequisites</a></li>
+<li><a href="#a-simple-http-server">A simple http server</a></li>
+<li><a href="#go-dependency-management">Go Dependency Management</a></li>
+<li><a href="#deploying-to-heroku-from-github-via-travis-ci">Deploying to Heroku from Github via Travis-CI</a><ul>
+<li><a href="#heroku-prerequisites">Heroku Prerequisites</a></li>
+<li><a href="#configuring-the-application-with-heroku">Configuring the Application with Heroku</a></li>
+<li><a href="#travis-ci">Travis-CI</a><ul>
+<li><a href="#bitbucket-pipelinesyml">bitbucket-pipelines.yml</a></li>
+</ul>
+</li>
+<li><a href="#test-it">Test It</a></li>
+</ul>
+</li>
+<li><a href="#templates-for-content">Templates for Content</a><ul>
+<li><a href="#passing-variables-to-a-template">Passing Variables to a Template</a></li>
+<li><a href="#html-template-blocks-as-reusable-components">HTML Template Blocks as Reusable Components</a></li>
+</ul>
+</li>
+<li><a href="#testdrivendesign-and-gorilla-mux">TestDrivenDesign and Gorilla Mux</a></li>
+<li><a href="#miscellaneous">Miscellaneous</a><ul>
+<li><a href="#how-to-return-specific-http-response-types">How to return specific HTTP Response types</a></li>
+<li><a href="#logs-from-heroku">Logs from Heroku</a></li>
+<li><a href="#environment-variables-for-configuration">Environment Variables for Configuration</a></li>
+<li><a href="#custom-domains-with-heroku">Custom Domains with Heroku</a></li>
+<li><a href="#downloading-the-source-code-from-heroku">Downloading the source code from Heroku</a></li>
+</ul>
+</li>
+<li><a href="#using-https-for-a-go-web-server-with-a-self-signed-ssl-certficate">Using HTTPS for a Go Web Server with a Self Signed SSL Certficate</a><ul>
+<li><a href="#one-liner-to-generate-a-self-signed-certificate">One Liner to generate a self signed certificate</a></li>
+<li><a href="#ssl-web-server-in-golang">SSL Web Server in Golang</a></li>
+</ul>
+</li>
+</ul>
+</div>
+        </nav>
+    </div>
+    <div class="span8 article-content">
 
-            <p>[TOC]</p>
-<h2>Prerequisites</h2>
+            
+<h2 id="prerequisites">Prerequisites</h2>
 <ul>
 <li>Please create a new version controlled source code repository using Github or Bitbucket or ?.</li>
 <li>Have Golang installed</li>
 <li>Download and install the official Go dependency tool "dep", <a href="https://golang.github.io/dep/docs/installation.html">https://golang.github.io/dep/docs/installation.html</a></li>
 </ul>
-<h2>A simple http server</h2>
+<h2 id="a-simple-http-server">A simple http server</h2>
 <p>Your source repository currently only needs a single file: <strong>main.go</strong></p>
 <div class="highlight"><pre><span></span><code><span class="kn">package</span> <span class="nx">main</span>
 
 <span class="kn">import</span> <span class="p">(</span>
-        <span class="s">&quot;fmt&quot;</span>
-        <span class="s">&quot;log&quot;</span>
-        <span class="s">&quot;net/http&quot;</span>
-        <span class="s">&quot;os&quot;</span>
+        <span class="s">"fmt"</span>
+        <span class="s">"log"</span>
+        <span class="s">"net/http"</span>
+        <span class="s">"os"</span>
 <span class="p">)</span>
 
 <span class="kd">func</span> <span class="nx">myHandler</span><span class="p">(</span><span class="nx">w</span> <span class="nx">http</span><span class="p">.</span><span class="nx">ResponseWriter</span><span class="p">,</span> <span class="nx">r</span> <span class="o">*</span><span class="nx">http</span><span class="p">.</span><span class="nx">Request</span><span class="p">)</span> <span class="p">{</span>
-        <span class="nx">w</span><span class="p">.</span><span class="nx">Write</span><span class="p">([]</span><span class="nb">byte</span><span class="p">(</span><span class="s">&quot;hi&quot;</span><span class="p">))</span>
+        <span class="nx">w</span><span class="p">.</span><span class="nx">Write</span><span class="p">([]</span><span class="nb">byte</span><span class="p">(</span><span class="s">"hi"</span><span class="p">))</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
-        <span class="nx">port</span> <span class="o">:=</span> <span class="nx">getEnvOrDefault</span><span class="p">(</span><span class="s">&quot;PORT&quot;</span><span class="p">,</span> <span class="s">&quot;8080&quot;</span><span class="p">)</span>
-        <span class="nx">log</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;Listening on port&quot;</span><span class="p">,</span> <span class="nx">port</span><span class="p">)</span>
-        <span class="nx">http</span><span class="p">.</span><span class="nx">HandleFunc</span><span class="p">(</span><span class="s">&quot;/&quot;</span><span class="p">,</span> <span class="nx">myHandler</span><span class="p">)</span>
-        <span class="nx">http</span><span class="p">.</span><span class="nx">ListenAndServe</span><span class="p">(</span><span class="s">&quot;:&quot;</span><span class="o">+</span><span class="nx">port</span><span class="p">,</span> <span class="kc">nil</span><span class="p">)</span>
+        <span class="nx">port</span> <span class="o">:=</span> <span class="nx">getEnvOrDefault</span><span class="p">(</span><span class="s">"PORT"</span><span class="p">,</span> <span class="s">"8080"</span><span class="p">)</span>
+        <span class="nx">log</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">"Listening on port"</span><span class="p">,</span> <span class="nx">port</span><span class="p">)</span>
+        <span class="nx">http</span><span class="p">.</span><span class="nx">HandleFunc</span><span class="p">(</span><span class="s">"/"</span><span class="p">,</span> <span class="nx">myHandler</span><span class="p">)</span>
+        <span class="nx">http</span><span class="p">.</span><span class="nx">ListenAndServe</span><span class="p">(</span><span class="s">":"</span><span class="o">+</span><span class="nx">port</span><span class="p">,</span> <span class="kc">nil</span><span class="p">)</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="nx">getEnvOrDefault</span><span class="p">(</span><span class="nx">key</span><span class="p">,</span> <span class="nx">defaultValue</span> <span class="kt">string</span><span class="p">)</span> <span class="kt">string</span> <span class="p">{</span>
@@ -101,7 +141,6 @@
         <span class="k">return</span> <span class="nx">result</span>
 <span class="p">}</span>
 </code></pre></div>
-
 <blockquote>
 <p>another example of a trivial web server using only the standard library</p>
 </blockquote>
@@ -110,44 +149,42 @@
 <p>your browser should see "hi" in http://localhost:8080 and use "control + c" to cancel and quit the command line web server application</p>
 </blockquote>
 <p>While previous examples used Google App Engine  <a href="https://blog.john-pfeiffer.com/go-programming-intro-with-vs-code-and-arrays-slices-functions-and-testing/#a-simple-web-server">https://blog.john-pfeiffer.com/go-programming-intro-with-vs-code-and-arrays-slices-functions-and-testing/#a-simple-web-server</a>, here we will leverage Heroku for deploying our web application.</p>
-<h2>Go Dependency Management</h2>
+<h2 id="go-dependency-management">Go Dependency Management</h2>
 <p>First download and install the Go dependency tool: <a href="https://github.com/golang/dep">https://github.com/golang/dep</a></p>
 <div class="highlight"><pre><span></span><code><span class="nb">cd</span> DIRECTORY/OF/WEBAPP
 dep init
 go list -e .
-<span class="nb">echo</span> <span class="s2">&quot;[metadata.heroku]&quot;</span> &gt;&gt; Gopkg.toml
-<span class="nb">echo</span> <span class="s2">&quot;  root-package = \&quot;`go list -e .`\&quot;&quot;</span> &gt;&gt; Gopkg.toml
+<span class="nb">echo</span> <span class="s2">"[metadata.heroku]"</span> &gt;&gt; Gopkg.toml
+<span class="nb">echo</span> <span class="s2">"  root-package = \"`go list -e .`\""</span> &gt;&gt; Gopkg.toml
 git status <span class="p">;</span> git diff
 git add --all .
-git commit -m <span class="s2">&quot;initial web app and using go dep&quot;</span>
+git commit -m <span class="s2">"initial web app and using go dep"</span>
 git push
 </code></pre></div>
-
 <ul>
 <li>An example simple Go dep configuration file <a href="https://github.com/johnpfeiffer/web-go/blob/master/Gopkg.toml">https://github.com/johnpfeiffer/web-go/blob/master/Gopkg.toml</a></li>
 <li>Further heroku metadata config options: <a href="https://devcenter.heroku.com/articles/go-apps-with-dep#build-configuration">https://devcenter.heroku.com/articles/go-apps-with-dep#build-configuration</a></li>
 <li>Similar heroku instructions on dep: <a href="https://devcenter.heroku.com/articles/go-apps-with-dep#getting-started">https://devcenter.heroku.com/articles/go-apps-with-dep#getting-started</a></li>
 </ul>
-<h2>Deploying to Heroku from Github via Travis-CI</h2>
-<h3>Heroku Prerequisites</h3>
+<h2 id="deploying-to-heroku-from-github-via-travis-ci">Deploying to Heroku from Github via Travis-CI</h2>
+<h3 id="heroku-prerequisites">Heroku Prerequisites</h3>
 <ol>
 <li>Download and install the heroku CLI <a href="https://devcenter.heroku.com/articles/getting-started-with-go#set-up">https://devcenter.heroku.com/articles/getting-started-with-go#set-up</a></li>
 <li><code>cd /opt ; wget https://cli-assets.heroku.com/branches/stable/heroku-linux-amd64.tar.gz</code></li>
 <li><code>tar xf heroku-linux-amd64.tar.gz</code></li>
 <li><code>/opt/heroku/bin/heroku --version ; /opt/heroku/bin/heroku --help</code></li>
-<li><code>/opt/heroku/bin/heroku login</code>  <em>this will prompt for your email and password and store the credentials in ~/.netrc</em></li>
+<li><code>/opt/heroku/bin/heroku login</code> <em>this will prompt for your email and password and store the credentials in ~/.netrc</em></li>
 </ol>
 <blockquote>
 <p>For extra security consider using heroku CLI inside of an ephemeral docker container or a script that removes the credentials after each usage</p>
 </blockquote>
 <p><em>These instructions will now assume heroku "just works", i.e. <code>alias heroku='/opt/heroku/bin/heroku'</code></em></p>
-<h3>Configuring the Application with Heroku</h3>
+<h3 id="configuring-the-application-with-heroku">Configuring the Application with Heroku</h3>
 <div class="highlight"><pre><span></span><code><span class="nb">cd</span> DIRECTORY/OF/WEBAPP
 heroku <span class="nb">help</span>
 heroku create APPNAME --buildpack heroku/go
 heroku status
 </code></pre></div>
-
 <blockquote>
 <p>This has created an empty Go application in Heroku</p>
 </blockquote>
@@ -158,7 +195,7 @@ heroku status
 <li><a href="https://devcenter.heroku.com/articles/buildpacks">https://devcenter.heroku.com/articles/buildpacks</a></li>
 </ul>
 <p>Another gotcha is if you have not configured a dependency manager (even without dependencies!) you will see this error <em>App not compatible with buildpack</em>.</p>
-<h3>Travis-CI</h3>
+<h3 id="travis-ci">Travis-CI</h3>
 <ul>
 <li><a href="https://docs.travis-ci.com/user/deployment/heroku/">https://docs.travis-ci.com/user/deployment/heroku/</a></li>
 </ul>
@@ -173,7 +210,6 @@ apk add --no-cache build-base git
 gem install travis travis-lint
 travis <span class="nb">help</span>
 </code></pre></div>
-
 <blockquote>
 <p>This docker example avoids installing ruby (or travis) locally ;p</p>
 </blockquote>
@@ -184,7 +220,6 @@ travis <span class="nb">help</span>
 <span class="n">Deploy</span><span class="w"> </span><span class="k">only</span><span class="w"> </span><span class="k">from</span><span class="w"> </span><span class="n">GITHUBUSERNAME</span><span class="o">/</span><span class="n">web</span><span class="o">-</span><span class="k">go</span><span class="vm">?</span><span class="w"> </span><span class="o">|</span><span class="n">yes</span><span class="o">|</span><span class="w"> </span><span class="n">yes</span><span class="w"></span>
 <span class="n">Encrypt</span><span class="w"> </span><span class="n">API</span><span class="w"> </span><span class="k">key</span><span class="vm">?</span><span class="w"> </span><span class="o">|</span><span class="n">yes</span><span class="o">|</span><span class="w"> </span><span class="n">yes</span><span class="w"></span>
 </code></pre></div>
-
 <blockquote>
 <p>This simple CLI wizard prompts for the Heroku auth token and populates the .travis.yml with the encrypted value</p>
 </blockquote>
@@ -192,9 +227,8 @@ travis <span class="nb">help</span>
 <div class="highlight"><pre><span></span><code><span class="n">deploy</span><span class="o">:</span>
   <span class="n">provider</span><span class="o">:</span> <span class="n">heroku</span>
   <span class="n">api_key</span><span class="o">:</span>
-    <span class="n">secure</span><span class="o">:</span> <span class="s2">&quot;YOUR ENCRYPTED API KEY&quot;</span>
+    <span class="n">secure</span><span class="o">:</span> <span class="s2">"YOUR ENCRYPTED API KEY"</span>
 </code></pre></div>
-
 <p>You can then run the following command which will update the .travis.yml file with the real encrypted auth token.
 <code>travis encrypt YOUR-HEROKU-TOKEN --add deploy.api_key -r GITHUBUSERNAME/REPONAME</code></p>
 <blockquote>
@@ -211,7 +245,6 @@ travis <span class="nb">help</span>
   <span class="n">api_key</span><span class="o">:</span>
     <span class="n">secure</span><span class="o">:</span> <span class="n">ABCD1234XYZLONGENCRYPTEDSTRING</span>
 </code></pre></div>
-
 <p>An interesting alternative to github and travis is bitbucket: <a href="https://confluence.atlassian.com/bitbucket/deploy-to-heroku-872013667.html">https://confluence.atlassian.com/bitbucket/deploy-to-heroku-872013667.html</a></p>
 <ul>
 <li><a href="https://confluence.atlassian.com/bitbucket/variables-in-pipelines-794502608.html">https://confluence.atlassian.com/bitbucket/variables-in-pipelines-794502608.html</a> (where you enter your heroku API key as a variable)</li>
@@ -224,7 +257,7 @@ travis <span class="nb">help</span>
 <ul>
 <li><a href="https://bitbucket.org/atlassian/heroku-deploy/src/master/README.md">https://bitbucket.org/atlassian/heroku-deploy/src/master/README.md</a></li>
 </ul>
-<h4>bitbucket-pipelines.yml</h4>
+<h4 id="bitbucket-pipelinesyml">bitbucket-pipelines.yml</h4>
 <div class="highlight"><pre><span></span><code><span class="n">image</span><span class="o">:</span> <span class="n">golang</span>
 <span class="n">clone</span><span class="o">:</span>
   <span class="n">depth</span><span class="o">:</span> <span class="n">full</span>
@@ -245,16 +278,15 @@ travis <span class="nb">help</span>
     <span class="n">postgres</span><span class="o">:</span>
       <span class="n">image</span><span class="o">:</span> <span class="n">postgres</span>
 </code></pre></div>
-
 <blockquote>
 <p>Try creating new credentials if you get an unauthorized error: Failed to create sources. Expected HTTP Status 200, got 401. Error message: {"id":"unauthorized","message":"Invalid credentials provided."}</p>
 </blockquote>
 <p><code>heroku authorizations:create</code></p>
 <p>You can see (and rename the description) of the Heroku tokens/api-keys listed at <a href="https://dashboard.heroku.com/account/applications">https://dashboard.heroku.com/account/applications</a></p>
 <p>You can input/update the token here: https://bitbucket.org/USERNAME/REPONAME/admin/addon/admin/pipelines/deployment-settings</p>
-<h3>Test It</h3>
+<h3 id="test-it">Test It</h3>
 <p>Now a browser that hits the Heroku URL will see "hi" , <a href="https://web-go.herokuapp.com/">https://web-go.herokuapp.com/</a></p>
-<h2>Templates for Content</h2>
+<h2 id="templates-for-content">Templates for Content</h2>
 <p>Separating out the static html content from dynamic and business logic parts of the application is a key way to remain modular.
 Templates built into the Go standard library can provide output that is safe from code injection.</p>
 <div class="highlight"><pre><span></span><code><span class="kd">var</span> <span class="nx">indexTemplate</span> <span class="p">=</span> <span class="nx">GetIndexTemplate</span><span class="p">()</span>
@@ -263,21 +295,20 @@ Templates built into the Go standard library can provide output that is safe fro
     <span class="nx">indexTemplate</span><span class="p">.</span><span class="nx">Execute</span><span class="p">(</span><span class="nx">w</span><span class="p">,</span> <span class="nx">NoData</span><span class="p">{})</span>
 <span class="p">}</span>
 </code></pre></div>
-
 <blockquote>
 <p>These small changes (var indexTemplate and indexTemplate.Execute) to the previous <strong>main.go</strong> allows the default web handler (aka controller) to return html</p>
 </blockquote>
 <p><strong>indextemplate.go</strong></p>
 <div class="highlight"><pre><span></span><code><span class="kn">package</span> <span class="nx">main</span>
 
-<span class="kn">import</span> <span class="s">&quot;html/template&quot;</span>
+<span class="kn">import</span> <span class="s">"html/template"</span>
 
 <span class="c1">// NoData is an empty struct as I do not pass anything into the template</span>
 <span class="kd">type</span> <span class="nx">NoData</span> <span class="kd">struct</span><span class="p">{}</span>
 
 <span class="c1">// GetIndexTemplate returns the index.html template https://golang.org/pkg/html/template/#Template</span>
 <span class="kd">func</span> <span class="nx">GetIndexTemplate</span><span class="p">()</span> <span class="o">*</span><span class="nx">template</span><span class="p">.</span><span class="nx">Template</span> <span class="p">{</span>
-    <span class="kd">var</span> <span class="nx">indexTemplate</span> <span class="p">=</span> <span class="nx">template</span><span class="p">.</span><span class="nx">Must</span><span class="p">(</span><span class="nx">template</span><span class="p">.</span><span class="nx">New</span><span class="p">(</span><span class="s">&quot;index&quot;</span><span class="p">).</span><span class="nx">Parse</span><span class="p">(</span><span class="s">`&lt;html&gt;&lt;head&gt;&lt;style type=&quot;text/css&quot;&gt;</span>
+    <span class="kd">var</span> <span class="nx">indexTemplate</span> <span class="p">=</span> <span class="nx">template</span><span class="p">.</span><span class="nx">Must</span><span class="p">(</span><span class="nx">template</span><span class="p">.</span><span class="nx">New</span><span class="p">(</span><span class="s">"index"</span><span class="p">).</span><span class="nx">Parse</span><span class="p">(</span><span class="s">`&lt;html&gt;&lt;head&gt;&lt;style type="text/css"&gt;</span>
 <span class="s">body{</span>
 <span class="s">  font-size: 1.9em;</span>
 <span class="s">}</span>
@@ -286,7 +317,6 @@ Templates built into the Go standard library can provide output that is safe fro
     <span class="k">return</span> <span class="nx">indexTemplate</span>
 <span class="p">}</span>
 </code></pre></div>
-
 <blockquote>
 <p>The function just returns the rendered template; since it is only called once in main it is not inefficient, and Must will panic if the template has an error</p>
 </blockquote>
@@ -294,16 +324,16 @@ Templates built into the Go standard library can provide output that is safe fro
 <ul>
 <li><a href="https://golang.org/pkg/html/template/">https://golang.org/pkg/html/template/</a></li>
 </ul>
-<h3>Passing Variables to a Template</h3>
+<h3 id="passing-variables-to-a-template">Passing Variables to a Template</h3>
 <p>Dynamic, data driven web sites emphasize the power of software to create tables that nobody wants to write by hand.</p>
 <p>Building on the previous two examples (main.go, indextemplate.go) we now have a variation that passes data to the template.</p>
 <p><strong>hexcolors.go</strong></p>
 <div class="highlight"><pre><span></span><code><span class="kn">package</span> <span class="nx">main</span>
 
 <span class="kn">import</span> <span class="p">(</span>
-    <span class="s">&quot;fmt&quot;</span>
-    <span class="s">&quot;html/template&quot;</span>
-    <span class="s">&quot;net/http&quot;</span>
+    <span class="s">"fmt"</span>
+    <span class="s">"html/template"</span>
+    <span class="s">"net/http"</span>
 <span class="p">)</span>
 
 <span class="c1">// HexColors wraps a list of colors as hexadecimal strings</span>
@@ -313,31 +343,29 @@ Templates built into the Go standard library can provide output that is safe fro
 
 <span class="c1">// GetHexTemplate returns the parsed file as a template object</span>
 <span class="kd">func</span> <span class="nx">GetHexTemplate</span><span class="p">()</span> <span class="o">*</span><span class="nx">template</span><span class="p">.</span><span class="nx">Template</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="nx">template</span><span class="p">.</span><span class="nx">Must</span><span class="p">(</span><span class="nx">template</span><span class="p">.</span><span class="nx">ParseFiles</span><span class="p">(</span><span class="s">&quot;hexcolorstemplate.html&quot;</span><span class="p">))</span>
+    <span class="k">return</span> <span class="nx">template</span><span class="p">.</span><span class="nx">Must</span><span class="p">(</span><span class="nx">template</span><span class="p">.</span><span class="nx">ParseFiles</span><span class="p">(</span><span class="s">"hexcolorstemplate.html"</span><span class="p">))</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="nx">hexController</span><span class="p">(</span><span class="nx">w</span> <span class="nx">http</span><span class="p">.</span><span class="nx">ResponseWriter</span><span class="p">,</span> <span class="nx">r</span> <span class="o">*</span><span class="nx">http</span><span class="p">.</span><span class="nx">Request</span><span class="p">)</span> <span class="p">{</span>
     <span class="nx">colors</span> <span class="o">:=</span> <span class="p">[]</span><span class="kt">string</span><span class="p">{}</span>
     <span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="mi">255</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;=</span> <span class="mi">16711680</span><span class="p">;</span> <span class="nx">i</span> <span class="p">=</span> <span class="nx">i</span> <span class="o">*</span> <span class="mi">256</span> <span class="p">{</span>
-        <span class="nx">s</span> <span class="o">:=</span> <span class="nx">fmt</span><span class="p">.</span><span class="nx">Sprintf</span><span class="p">(</span><span class="s">&quot;%06X&quot;</span><span class="p">,</span> <span class="nx">i</span><span class="p">)</span>
+        <span class="nx">s</span> <span class="o">:=</span> <span class="nx">fmt</span><span class="p">.</span><span class="nx">Sprintf</span><span class="p">(</span><span class="s">"%06X"</span><span class="p">,</span> <span class="nx">i</span><span class="p">)</span>
         <span class="nx">colors</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">colors</span><span class="p">,</span> <span class="nx">s</span><span class="p">)</span>
     <span class="p">}</span>
     <span class="nx">data</span> <span class="o">:=</span> <span class="nx">HexColors</span><span class="p">{</span><span class="nx">colors</span><span class="p">}</span>
     <span class="nx">hexTemplate</span><span class="p">.</span><span class="nx">Execute</span><span class="p">(</span><span class="nx">w</span><span class="p">,</span> <span class="nx">data</span><span class="p">)</span>
 <span class="p">}</span>
 </code></pre></div>
-
 <blockquote>
 <p>A handler/controller that generates hex color data</p>
 </blockquote>
 <p><strong>hexcolorstemplate.html</strong></p>
 <div class="highlight"><pre><span></span><code><span class="p">&lt;</span><span class="nt">table</span><span class="p">&gt;</span>
   {{range .Colors}}
-  <span class="p">&lt;</span><span class="nt">tr</span><span class="p">&gt;&lt;</span><span class="nt">td</span><span class="p">&gt;</span>{{.}}<span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;&lt;</span><span class="nt">td</span> <span class="na">style</span><span class="o">=</span><span class="s">&quot;background-color: {{.}}; &quot;</span><span class="p">&gt;</span>__<span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;&lt;/</span><span class="nt">tr</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">tr</span><span class="p">&gt;&lt;</span><span class="nt">td</span><span class="p">&gt;</span>{{.}}<span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;&lt;</span><span class="nt">td</span> <span class="na">style</span><span class="o">=</span><span class="s">"background-color: {{.}}; "</span><span class="p">&gt;</span>__<span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;&lt;/</span><span class="nt">tr</span><span class="p">&gt;</span>
   {{end}}
 <span class="p">&lt;/</span><span class="nt">table</span><span class="p">&gt;</span>
 </code></pre></div>
-
 <blockquote>
 <p>range iterates and creates a table row for each color , (the html and body is elided, see the previous example)</p>
 </blockquote>
@@ -348,7 +376,7 @@ Templates built into the Go standard library can provide output that is safe fro
 <li><a href="https://golang.org/pkg/html/template/#Template.ParseFiles">https://golang.org/pkg/html/template/#Template.ParseFiles</a></li>
 <li><a href="https://blog.gopheracademy.com/advent-2017/using-go-templates/">https://blog.gopheracademy.com/advent-2017/using-go-templates/</a></li>
 </ul>
-<h3>HTML Template Blocks as Reusable Components</h3>
+<h3 id="html-template-blocks-as-reusable-components">HTML Template Blocks as Reusable Components</h3>
 <p>Besides dynamic data and tables for "do not repeat yourself" there are also structural components that can be deduplicated.
 Changes in a base html or css template (or common component definition) can therefore reliably be applied to a large number of files.</p>
 <p>Jinja2 is famous in Python for making it easier to work with websites, here are two different helpful mechanisms in Go:</p>
@@ -362,40 +390,37 @@ Changes in a base html or css template (or common component definition) can ther
 <p><strong>indextemplate.go</strong></p>
 <div class="highlight"><pre><span></span><code><span class="o">...</span>
 <span class="kd">func</span> <span class="nx">GetIndexTemplate</span><span class="p">()</span> <span class="o">*</span><span class="nx">template</span><span class="p">.</span><span class="nx">Template</span> <span class="p">{</span>
-    <span class="nx">indexTemplate</span> <span class="o">:=</span> <span class="nx">template</span><span class="p">.</span><span class="nx">Must</span><span class="p">(</span><span class="nx">template</span><span class="p">.</span><span class="nx">ParseFiles</span><span class="p">(</span><span class="s">&quot;base.tmpl&quot;</span><span class="p">,</span> <span class="s">&quot;index.html&quot;</span><span class="p">))</span>
+    <span class="nx">indexTemplate</span> <span class="o">:=</span> <span class="nx">template</span><span class="p">.</span><span class="nx">Must</span><span class="p">(</span><span class="nx">template</span><span class="p">.</span><span class="nx">ParseFiles</span><span class="p">(</span><span class="s">"base.tmpl"</span><span class="p">,</span> <span class="s">"index.html"</span><span class="p">))</span>
     <span class="k">return</span> <span class="nx">indexTemplate</span>
 <span class="p">}</span>
 </code></pre></div>
-
 <blockquote>
 <p>This replaces the previous examples hardcoded html with a default base.tmpl that is then overridden by the "define" block in the index.html file, <strong>order matters</strong>!</p>
 </blockquote>
 <p><strong>base.tmpl</strong></p>
 <div class="highlight"><pre><span></span><code><span class="p">&lt;</span><span class="nt">html</span><span class="p">&gt;&lt;</span><span class="nt">head</span><span class="p">&gt;</span>
-<span class="p">&lt;</span><span class="nt">style</span> <span class="na">type</span><span class="o">=</span><span class="s">&quot;text/css&quot;</span><span class="p">&gt;</span>
-<span class="p">{</span><span class="err">{block</span> <span class="err">&quot;style&quot;</span> <span class="err">.</span><span class="p">}</span><span class="err">}</span>
+<span class="p">&lt;</span><span class="nt">style</span> <span class="na">type</span><span class="o">=</span><span class="s">"text/css"</span><span class="p">&gt;</span>
+<span class="p">{</span><span class="err">{block</span> <span class="err">"style"</span> <span class="err">.</span><span class="p">}</span><span class="err">}</span>
 <span class="nt">body</span><span class="p">{</span>
-  <span class="k">font-family</span><span class="p">:</span> <span class="s2">&quot;Georgia&quot;</span><span class="p">;</span>
+  <span class="k">font-family</span><span class="p">:</span> <span class="s2">"Georgia"</span><span class="p">;</span>
   <span class="k">font-size</span><span class="p">:</span> <span class="mf">1.9</span><span class="kt">em</span><span class="p">;</span>
 <span class="p">}</span>
 <span class="p">{</span><span class="err">{end</span><span class="p">}</span><span class="err">}</span>
 <span class="p">&lt;/</span><span class="nt">style</span><span class="p">&gt;</span>
 <span class="p">&lt;/</span><span class="nt">head</span><span class="p">&gt;</span>
 <span class="p">&lt;</span><span class="nt">body</span><span class="p">&gt;</span>
-{{block &quot;content&quot; .}}
+{{block "content" .}}
 {{end}}
 <span class="p">&lt;/</span><span class="nt">body</span><span class="p">&gt;&lt;/</span><span class="nt">html</span><span class="p">&gt;</span>
 </code></pre></div>
-
 <blockquote>
 <p>The HTML in base.tmpl has a "block" that provides a default style, content is an empty "block", <em>(clearly you can define variations of bases templates)</em></p>
 </blockquote>
 <p><strong>index.html</strong></p>
-<div class="highlight"><pre><span></span><code>{{define &quot;content&quot;}}
-hi , try <span class="p">&lt;</span><span class="nt">a</span> <span class="na">href</span><span class="o">=</span><span class="s">&quot;/hexcolors&quot;</span><span class="p">&gt;</span>hexcolors<span class="p">&lt;/</span><span class="nt">a</span><span class="p">&gt;</span>
+<div class="highlight"><pre><span></span><code>{{define "content"}}
+hi , try <span class="p">&lt;</span><span class="nt">a</span> <span class="na">href</span><span class="o">=</span><span class="s">"/hexcolors"</span><span class="p">&gt;</span>hexcolors<span class="p">&lt;/</span><span class="nt">a</span><span class="p">&gt;</span>
 {{end}}
 </code></pre></div>
-
 <blockquote>
 <p>The tiny index file heavily leverages the default base template and uses "define" to only override the content block</p>
 </blockquote>
@@ -403,39 +428,36 @@ hi , try <span class="p">&lt;</span><span class="nt">a</span> <span class="na">h
 <p>Further illustration by extending the templates usage a little further:</p>
 <p><strong>hexcolors.go</strong></p>
 <div class="highlight"><pre><span></span><code><span class="kd">func</span> <span class="nx">GetHexTemplate</span><span class="p">()</span> <span class="o">*</span><span class="nx">template</span><span class="p">.</span><span class="nx">Template</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="nx">template</span><span class="p">.</span><span class="nx">Must</span><span class="p">(</span><span class="nx">template</span><span class="p">.</span><span class="nx">ParseFiles</span><span class="p">(</span><span class="s">&quot;base.tmpl&quot;</span><span class="p">,</span> <span class="s">&quot;components.tmpl&quot;</span><span class="p">,</span> <span class="s">&quot;hexcolorstemplate.html&quot;</span><span class="p">))</span>
+    <span class="k">return</span> <span class="nx">template</span><span class="p">.</span><span class="nx">Must</span><span class="p">(</span><span class="nx">template</span><span class="p">.</span><span class="nx">ParseFiles</span><span class="p">(</span><span class="s">"base.tmpl"</span><span class="p">,</span> <span class="s">"components.tmpl"</span><span class="p">,</span> <span class="s">"hexcolorstemplate.html"</span><span class="p">))</span>
 <span class="p">}</span>
 </code></pre></div>
-
 <blockquote>
 <p>the template files must exist in the relative path and build in order</p>
 </blockquote>
 <p><strong>components.tmpl</strong></p>
-<div class="highlight"><pre><span></span><code>{{define &quot;tablestyle&quot;}}
+<div class="highlight"><pre><span></span><code>{{define "tablestyle"}}
   table, th, td {
     border: 2px solid black;
     font-size: 2.5em;
   }
 {{end}}
 </code></pre></div>
-
 <blockquote>
 <p>defining a specific fragment that can be used anywhere</p>
 </blockquote>
 <p><strong>hexcolorstemplate.html</strong></p>
-<div class="highlight"><pre><span></span><code>{{define &quot;style&quot;}}
-{{template &quot;tablestyle&quot; .}}
+<div class="highlight"><pre><span></span><code>{{define "style"}}
+{{template "tablestyle" .}}
 {{end}}
 
-{{define &quot;content&quot;}}
+{{define "content"}}
   <span class="p">&lt;</span><span class="nt">table</span><span class="p">&gt;</span>
     {{range .Colors}}
-    <span class="p">&lt;</span><span class="nt">tr</span><span class="p">&gt;&lt;</span><span class="nt">td</span><span class="p">&gt;</span>{{.}}<span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;&lt;</span><span class="nt">td</span> <span class="na">style</span><span class="o">=</span><span class="s">&quot;background-color: {{.}}; &quot;</span><span class="p">&gt;</span>__<span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;&lt;/</span><span class="nt">tr</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">tr</span><span class="p">&gt;&lt;</span><span class="nt">td</span><span class="p">&gt;</span>{{.}}<span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;&lt;</span><span class="nt">td</span> <span class="na">style</span><span class="o">=</span><span class="s">"background-color: {{.}}; "</span><span class="p">&gt;</span>__<span class="p">&lt;/</span><span class="nt">td</span><span class="p">&gt;&lt;/</span><span class="nt">tr</span><span class="p">&gt;</span>
     {{end}}
   <span class="p">&lt;/</span><span class="nt">table</span><span class="p">&gt;</span>
 {{end}}
 </code></pre></div>
-
 <blockquote>
 <p>the most complex example: the base template content is overridden with a table that gets data at runtime</p>
 <p>the style definition overrides the base template default style ; it actually gets populated by loading the tablestyle fragment definition</p>
@@ -450,7 +472,7 @@ hi , try <span class="p">&lt;</span><span class="nt">a</span> <span class="na">h
 <li><a href="https://github.com/golang/example/tree/master/template">https://github.com/golang/example/tree/master/template</a></li>
 <li><a href="https://golang.org/pkg/html/template/#Template.Clone">https://golang.org/pkg/html/template/#Template.Clone</a></li>
 </ul>
-<h2>TestDrivenDesign and Gorilla Mux</h2>
+<h2 id="testdrivendesign-and-gorilla-mux">TestDrivenDesign and Gorilla Mux</h2>
 <blockquote>
 <p>Tests communicate. Use libraries and composition, not frameworks and magic</p>
 </blockquote>
@@ -469,27 +491,25 @@ hi , try <span class="p">&lt;</span><span class="nt">a</span> <span class="na">h
 <p>TODO: integrating heroku postgres , <a href="https://devcenter.heroku.com/articles/getting-started-with-go#use-a-database">https://devcenter.heroku.com/articles/getting-started-with-go#use-a-database</a></p>
 </li>
 </ul>
-<h2>Miscellaneous</h2>
-<h3>How to return specific HTTP Response types</h3>
+<h2 id="miscellaneous">Miscellaneous</h2>
+<h3 id="how-to-return-specific-http-response-types">How to return specific HTTP Response types</h3>
 <p><em>Note these code snippets are the Handler function only, you should provide your own HTTP listener and multi-plexer</em></p>
 <div class="highlight"><pre><span></span><code><span class="kd">func</span> <span class="nx">headonly</span><span class="p">(</span><span class="nx">w</span> <span class="nx">http</span><span class="p">.</span><span class="nx">ResponseWriter</span><span class="p">,</span> <span class="nx">r</span> <span class="o">*</span><span class="nx">http</span><span class="p">.</span><span class="nx">Request</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nx">w</span><span class="p">.</span><span class="nx">Header</span><span class="p">().</span><span class="nx">Set</span><span class="p">(</span><span class="s">&quot;Allow&quot;</span><span class="p">,</span> <span class="s">&quot;HEAD, GET&quot;</span><span class="p">)</span>
+    <span class="nx">w</span><span class="p">.</span><span class="nx">Header</span><span class="p">().</span><span class="nx">Set</span><span class="p">(</span><span class="s">"Allow"</span><span class="p">,</span> <span class="s">"HEAD, GET"</span><span class="p">)</span>
     <span class="nx">w</span><span class="p">.</span><span class="nx">WriteHeader</span><span class="p">(</span><span class="mi">200</span><span class="p">)</span>
 <span class="p">}</span>
 </code></pre></div>
-
 <ul>
 <li><a href="https://play.golang.org/p/GCfxTLdLGYn">https://play.golang.org/p/GCfxTLdLGYn</a> example returning the HTTP Header where clearly the default status code is 200</li>
 <li><a href="https://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.7">https://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.7</a></li>
 </ul>
 <p><code>curl --silent --write-out "%{http_code}" localhost:8080</code></p>
 <div class="highlight"><pre><span></span><code><span class="kd">func</span> <span class="nx">httperror</span><span class="p">(</span><span class="nx">w</span> <span class="nx">http</span><span class="p">.</span><span class="nx">ResponseWriter</span><span class="p">,</span> <span class="nx">r</span> <span class="o">*</span><span class="nx">http</span><span class="p">.</span><span class="nx">Request</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nx">http</span><span class="p">.</span><span class="nx">Error</span><span class="p">(</span><span class="nx">w</span><span class="p">,</span> <span class="s">&quot;Internal Server Error&quot;</span><span class="p">,</span> <span class="nx">http</span><span class="p">.</span><span class="nx">StatusInternalServerError</span><span class="p">)</span>
+    <span class="nx">http</span><span class="p">.</span><span class="nx">Error</span><span class="p">(</span><span class="nx">w</span><span class="p">,</span> <span class="s">"Internal Server Error"</span><span class="p">,</span> <span class="nx">http</span><span class="p">.</span><span class="nx">StatusInternalServerError</span><span class="p">)</span>
     <span class="k">return</span>
     <span class="c1">// without the return statement execution would continue</span>
 <span class="p">}</span>
 </code></pre></div>
-
 <blockquote>
 <p>The http library understands that unexpected errors do occur but make sure to return so as to not continue executing code</p>
 </blockquote>
@@ -501,50 +521,49 @@ hi , try <span class="p">&lt;</span><span class="nt">a</span> <span class="na">h
 </ul>
 <p>Serving binary files...</p>
 <div class="highlight"><pre><span></span><code><span class="kd">func</span> <span class="nx">getfile</span><span class="p">(</span><span class="nx">w</span> <span class="nx">http</span><span class="p">.</span><span class="nx">ResponseWriter</span><span class="p">,</span> <span class="nx">r</span> <span class="o">*</span><span class="nx">http</span><span class="p">.</span><span class="nx">Request</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nx">fp</span> <span class="o">:=</span> <span class="nx">path</span><span class="p">.</span><span class="nx">Join</span><span class="p">(</span><span class="s">&quot;images&quot;</span><span class="p">,</span> <span class="s">&quot;example.png&quot;</span><span class="p">)</span>
+    <span class="nx">fp</span> <span class="o">:=</span> <span class="nx">path</span><span class="p">.</span><span class="nx">Join</span><span class="p">(</span><span class="s">"images"</span><span class="p">,</span> <span class="s">"example.png"</span><span class="p">)</span>
     <span class="nx">http</span><span class="p">.</span><span class="nx">ServeFile</span><span class="p">(</span><span class="nx">w</span><span class="p">,</span> <span class="nx">r</span><span class="p">,</span> <span class="nx">fp</span><span class="p">)</span>
 <span class="p">}</span>
 </code></pre></div>
-
 <ul>
 <li><a href="https://play.golang.org/p/G9zQ0SmzjP_K">https://play.golang.org/p/G9zQ0SmzjP_K</a> example writing, reading, and serving a file</li>
 <li><a href="https://golang.org/pkg/net/http/#ServeFile">https://golang.org/pkg/net/http/#ServeFile</a></li>
 <li><a href="https://golang.org/pkg/path/filepath/#Clean">https://golang.org/pkg/path/filepath/#Clean</a> for sanitizing user input for loading file paths</li>
 </ul>
 <p>An example http server inside the Go playground: <a href="https://play.golang.org/p/B-aZuQOdFtB">https://play.golang.org/p/B-aZuQOdFtB</a></p>
-<h3>Logs from Heroku</h3>
+<h3 id="logs-from-heroku">Logs from Heroku</h3>
 <p>To see the logs from the web application running in heroku: <code>heroku logs --app APPNAME --tail</code></p>
-<h3>Environment Variables for Configuration</h3>
+<h3 id="environment-variables-for-configuration">Environment Variables for Configuration</h3>
 <ul>
 <li><a href="https://devcenter.heroku.com/articles/getting-started-with-go#define-config-vars">https://devcenter.heroku.com/articles/getting-started-with-go#define-config-vars</a></li>
 </ul>
-<h3>Custom Domains with Heroku</h3>
+<h3 id="custom-domains-with-heroku">Custom Domains with Heroku</h3>
 <p>To use a custom domain name for your traffic <a href="https://devcenter.heroku.com/articles/custom-domains">https://devcenter.heroku.com/articles/custom-domains</a></p>
-<h3>Downloading the source code from Heroku</h3>
+<h3 id="downloading-the-source-code-from-heroku">Downloading the source code from Heroku</h3>
 <p>To download the source code from a running Heroku application: <code>heroku git:clone --app APPNAME</code> <a href="https://devcenter.heroku.com/articles/git-clone-heroku-app">https://devcenter.heroku.com/articles/git-clone-heroku-app</a></p>
-<h2>Using HTTPS for a Go Web Server with a Self Signed SSL Certficate</h2>
-<h3>One Liner to generate a self signed certificate</h3>
+<h2 id="using-https-for-a-go-web-server-with-a-self-signed-ssl-certficate">Using HTTPS for a Go Web Server with a Self Signed SSL Certficate</h2>
+<h3 id="one-liner-to-generate-a-self-signed-certificate">One Liner to generate a self signed certificate</h3>
 <p><code>openssl req -subj '/CN=example.com/O=My Company Name LTD./C=US' -new -newkey rsa:2048 -days 365 -nodes -x509 -keyout server.key -out server.crt</code></p>
-<h3>SSL Web Server in Golang</h3>
+<h3 id="ssl-web-server-in-golang">SSL Web Server in Golang</h3>
 <div class="highlight"><pre><span></span><code><span class="kn">package</span> <span class="nx">main</span>
 
 <span class="kn">import</span> <span class="p">(</span>
-        <span class="s">&quot;log&quot;</span>
-        <span class="s">&quot;net/http&quot;</span>
-        <span class="s">&quot;os&quot;</span>
+        <span class="s">"log"</span>
+        <span class="s">"net/http"</span>
+        <span class="s">"os"</span>
 <span class="p">)</span>
 
 <span class="kd">func</span> <span class="nx">myHandler</span><span class="p">(</span><span class="nx">w</span> <span class="nx">http</span><span class="p">.</span><span class="nx">ResponseWriter</span><span class="p">,</span> <span class="nx">r</span> <span class="o">*</span><span class="nx">http</span><span class="p">.</span><span class="nx">Request</span><span class="p">)</span> <span class="p">{</span>
-        <span class="nx">w</span><span class="p">.</span><span class="nx">Write</span><span class="p">([]</span><span class="nb">byte</span><span class="p">(</span><span class="s">&quot;hi&quot;</span><span class="p">))</span>
+        <span class="nx">w</span><span class="p">.</span><span class="nx">Write</span><span class="p">([]</span><span class="nb">byte</span><span class="p">(</span><span class="s">"hi"</span><span class="p">))</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
-        <span class="nx">certname</span> <span class="o">:=</span> <span class="s">&quot;server.crt&quot;</span>
-        <span class="nx">keyname</span> <span class="o">:=</span> <span class="s">&quot;server.key&quot;</span>
-        <span class="nx">port</span> <span class="o">:=</span> <span class="nx">getEnvOrDefault</span><span class="p">(</span><span class="s">&quot;PORT&quot;</span><span class="p">,</span> <span class="s">&quot;8080&quot;</span><span class="p">)</span>
-        <span class="nx">log</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;Listening on port&quot;</span><span class="p">,</span> <span class="nx">port</span><span class="p">)</span>
-        <span class="nx">http</span><span class="p">.</span><span class="nx">HandleFunc</span><span class="p">(</span><span class="s">&quot;/&quot;</span><span class="p">,</span> <span class="nx">myHandler</span><span class="p">)</span>
-        <span class="nx">log</span><span class="p">.</span><span class="nx">Fatal</span><span class="p">(</span><span class="nx">http</span><span class="p">.</span><span class="nx">ListenAndServeTLS</span><span class="p">(</span><span class="s">&quot;:&quot;</span><span class="o">+</span><span class="nx">port</span><span class="p">,</span> <span class="nx">certname</span><span class="p">,</span> <span class="nx">keyname</span><span class="p">,</span> <span class="kc">nil</span><span class="p">))</span>
+        <span class="nx">certname</span> <span class="o">:=</span> <span class="s">"server.crt"</span>
+        <span class="nx">keyname</span> <span class="o">:=</span> <span class="s">"server.key"</span>
+        <span class="nx">port</span> <span class="o">:=</span> <span class="nx">getEnvOrDefault</span><span class="p">(</span><span class="s">"PORT"</span><span class="p">,</span> <span class="s">"8080"</span><span class="p">)</span>
+        <span class="nx">log</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">"Listening on port"</span><span class="p">,</span> <span class="nx">port</span><span class="p">)</span>
+        <span class="nx">http</span><span class="p">.</span><span class="nx">HandleFunc</span><span class="p">(</span><span class="s">"/"</span><span class="p">,</span> <span class="nx">myHandler</span><span class="p">)</span>
+        <span class="nx">log</span><span class="p">.</span><span class="nx">Fatal</span><span class="p">(</span><span class="nx">http</span><span class="p">.</span><span class="nx">ListenAndServeTLS</span><span class="p">(</span><span class="s">":"</span><span class="o">+</span><span class="nx">port</span><span class="p">,</span> <span class="nx">certname</span><span class="p">,</span> <span class="nx">keyname</span><span class="p">,</span> <span class="kc">nil</span><span class="p">))</span>
 <span class="p">}</span>
 
 <span class="kd">func</span> <span class="nx">getEnvOrDefault</span><span class="p">(</span><span class="nx">key</span><span class="p">,</span> <span class="nx">defaultValue</span> <span class="kt">string</span><span class="p">)</span> <span class="kt">string</span> <span class="p">{</span>
@@ -556,7 +575,6 @@ hi , try <span class="p">&lt;</span><span class="nt">a</span> <span class="na">h
         <span class="k">return</span> <span class="nx">result</span>
 <span class="p">}</span>
 </code></pre></div>
-
 <blockquote>
 <p>Note that self signed certificates will prompt a browser warning
 <code>curl --insecure https://localhost:8080</code></p>
@@ -580,7 +598,7 @@ hi , try <span class="p">&lt;</span><span class="nt">a</span> <span class="na">h
             <time pubdate="pubdate" datetime="2018-05-01T20:37:00-07:00">May 1, 2018</time>
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#programming-ref">programming</a> 
-            <h4>~1954 words</h4>
+            <h4>~1953 words</h4>
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article"> 
                 <li><a href="/tags.html#go-ref">go

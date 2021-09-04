@@ -61,38 +61,61 @@
 </div>
 
 <div class="row-fluid">
-        <div class="span8 offset2 article-content">
+    <div class="span2 table-of-content">
+        <nav>
+        <h4>Contents</h4>
+        <div class="toc"><span class="toctitle">Table of Contents</span><ul>
+<li><a href="#most-common-commands">Most common commands</a></li>
+<li><a href="#interactive-commands">Interactive commands</a><ul>
+<li><a href="#iptables-allow-ping-with-a-ratelimit">iptables allow ping with a ratelimit</a></li>
+<li><a href="#clean-out-the-old-iptables-very-insecure-settings">Clean out the old iptables - very insecure settings</a></li>
+<li><a href="#allow-ssh-ping-and-established-but-block-all-by-default">Allow SSH, ping, and Established but block all by default</a></li>
+<li><a href="#bash-script-to-set-iptables-during-initd">bash script to set iptables during init.d</a></li>
+<li><a href="#web-server">Web Server</a></li>
+<li><a href="#web-and-xmpp-server">Web and XMPP Server</a></li>
+<li><a href="#ntp">NTP</a></li>
+<li><a href="#nat-forwarding">NAT forwarding</a></li>
+<li><a href="#cifs">CIFS</a></li>
+<li><a href="#allow-ad-lookups-ldapldaps">Allow AD Lookups LDAP/LDAPS</a></li>
+<li><a href="#dmz-setup-with-dual-nic">DMZ Setup with dual nic</a><ul>
+<li><a href="#forward-traffic-between-dmz-and-lan">forward traffic between DMZ and LAN</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#uncomplicated-firewall-ufw">Uncomplicated Firewall UFW</a></li>
+</ul>
+</div>
+        </nav>
+    </div>
+    <div class="span8 article-content">
 
-            <p>[TOC]</p>
+            
 <p>iptables is the tool to create a firewall in linux (manipulate the tables provided by the kernel firewall aka the netfilter)
 <a href="https://en.wikipedia.org/wiki/Netfilter">https://en.wikipedia.org/wiki/Netfilter</a></p>
 <div class="highlight"><pre><span></span><code>which iptables
 sudo /sbin/iptables --version
 </code></pre></div>
-
-<h2>Most common commands</h2>
+<h2 id="most-common-commands">Most common commands</h2>
 <div class="highlight"><pre><span></span><code>iptables -nvL
 </code></pre></div>
-
 <blockquote>
 <p>output the rules in the default "FILTER" table (INPUT, OUTPUT) in numeric , verbose, List all rules</p>
 </blockquote>
 <p><a href="http://ipset.netfilter.org/iptables.man.html">http://ipset.netfilter.org/iptables.man.html</a></p>
 <div class="highlight"><pre><span></span><code>iptables -nvL --line-numbers
 </code></pre></div>
-
 <blockquote>
 <p>numeric so no hostname lookups, verbose, List the rules in the chain</p>
 </blockquote>
-<h2>Interactive commands</h2>
+<h2 id="interactive-commands">Interactive commands</h2>
 <div class="highlight"><pre><span></span><code>iptables -D INPUT 5
 </code></pre></div>
-
 <blockquote>
 <p>delete the 5th line</p>
 </blockquote>
 <p><em>don't forget chmod +x firewall-script-filename.sh and /sbin/service iptables save</em></p>
-<h3>iptables allow ping with a ratelimit</h3>
+<h3 id="iptables-allow-ping-with-a-ratelimit">iptables allow ping with a ratelimit</h3>
 <div class="highlight"><pre><span></span><code>iptables -A INPUT -p icmp -m limit --limit 10/second -j ACCEPT
 iptables -A OUPUT -p icmp -j ACCEPT
 &gt; allow 10 inbound icmp packets (not tcp nor udp) per second and allow all icmp traffic outbound
@@ -103,8 +126,7 @@ iptables -A INPUT -p icmp --icmp-type echo-request -j ACCEPT
 iptables -A OUTPUT -p icmp --icmp-type echo-reply -j ACCEPT
 &gt; Allow outgoing ping replies, echo reply = 0 in numeric
 </code></pre></div>
-
-<h3>Clean out the old iptables - very insecure settings</h3>
+<h3 id="clean-out-the-old-iptables-very-insecure-settings">Clean out the old iptables - very insecure settings</h3>
 <div class="highlight"><pre><span></span><code>iptables -F
 iptables --delete-chain
 iptables -t nat -F
@@ -114,12 +136,11 @@ iptables -P INPUT ACCEPT
 iptables -P FORWARD ACCEPT
 iptables -P OUTPUT ACCEPT
 </code></pre></div>
-
 <blockquote>
 <p>Flush out all of the iptables and delete all of the chains (including the nat and mangle tables)
 Set the default policies to accept all packets</p>
 </blockquote>
-<h3>Allow SSH, ping, and Established but block all by default</h3>
+<h3 id="allow-ssh-ping-and-established-but-block-all-by-default">Allow SSH, ping, and Established but block all by default</h3>
 <div class="highlight"><pre><span></span><code><span class="ch">#!/bin/sh</span>
 iptables -I INPUT <span class="m">1</span> -i lo -j ACCEPT
 iptables -I OUTPUT <span class="m">1</span> -o lo -j ACCEPT
@@ -147,16 +168,14 @@ iptables -A INPUT -i eth1 -p icmp --icmp-type echo-request -j ACCEPT
 iptables -A OUTPUT -o eth1 -p icmp --icmp-type echo-reply -j ACCEPT
 &gt; Allow outgoing ping replies to eth1 , <span class="nb">echo</span> <span class="nv">reply</span> <span class="o">=</span> <span class="m">0</span> <span class="k">in</span> numeric
 </code></pre></div>
-
-<hr>
+<hr/>
 <div class="highlight"><pre><span></span><code>cat /proc/sys/net/ipv4/ip_forward
 echo 1 &gt; /proc/sys/net/ipv4/ip_forward
 </code></pre></div>
-
 <blockquote>
 <p>enable packet forwarding by the kernel, required to enable routing (especially with dual nics)</p>
 </blockquote>
-<h3>bash script to set iptables during init.d</h3>
+<h3 id="bash-script-to-set-iptables-during-initd">bash script to set iptables during init.d</h3>
 <div class="highlight"><pre><span></span><code><span class="ch">#!/bin/bash</span>
 <span class="c1"># script to set the initial firewall state as very restrictive</span>
 <span class="c1"># chmod +x SCRIPTNAME.sh</span>
@@ -201,8 +220,7 @@ iptables -A OUTPUT -p tcp -s <span class="m">0</span>/0 --sport <span class="m">
 iptables -A OUTPUT -p tcp --dport <span class="m">443</span> -m state --state NEW,ESTABLISHED -j ACCEPT
 iptables -A INPUT -p tcp -s <span class="m">0</span>/0 --sport <span class="m">443</span> --dport <span class="m">1024</span>:65535 -m state --state ESTABLISHED -j ACCEPT
 </code></pre></div>
-
-<h3>Web Server</h3>
+<h3 id="web-server">Web Server</h3>
 <div class="highlight"><pre><span></span><code><span class="ch">#!/bin/sh</span>
 iptables -F
 iptables --delete-chain
@@ -243,8 +261,7 @@ iptables -P OUTPUT DROP
 <span class="c1"># iptables -A INPUT -p icmp -m limit --limit 6/second -j ACCEPT</span>
 <span class="c1"># iptables -A OUPUT -p icmp -j ACCEPT</span>
 </code></pre></div>
-
-<h3>Web and XMPP Server</h3>
+<h3 id="web-and-xmpp-server">Web and XMPP Server</h3>
 <p><code>vi /etc/iptables.rules.xmpp</code></p>
 <div class="highlight"><pre><span></span><code>*filter
 :INPUT DROP <span class="o">[</span><span class="m">3</span>:572<span class="o">]</span>
@@ -271,10 +288,9 @@ iptables -P OUTPUT DROP
 -A OUTPUT -m state --state NEW -j LOG
 COMMIT
 </code></pre></div>
-
 <p><code>iptables-restore &lt; /etc/iptables.rules.xmpp</code></p>
-<hr>
-<h3>NTP</h3>
+<hr/>
+<h3 id="ntp">NTP</h3>
 <p><em>Getting the time and date synchronized through a restricted firewall</em></p>
 <table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="normal">1</span>
 <span class="normal">2</span>
@@ -307,21 +323,19 @@ iptables -A OUTPUT -p udp --sport <span class="m">123</span> -j ACCEPT
 
 <span class="o">&gt;</span> <span class="nv">MANUAL</span> <span class="o">=</span> <span class="nv">ntpdate</span> <span class="nv">pool</span>.<span class="nv">ntp</span>.<span class="nv">org</span> <span class="nv">will</span> <span class="nv">now</span> <span class="k">return</span> <span class="nv">socket</span> <span class="mi">123</span> <span class="nv">is</span> <span class="nv">in</span> <span class="nv">use</span>
 </code></pre></div>
-
-<hr>
-<h3>NAT forwarding</h3>
+<hr/>
+<h3 id="nat-forwarding">NAT forwarding</h3>
 <div class="highlight"><pre><span></span><code>iptables -A FORWARD -i eth1 -o eth0 -j ACCEPT
 iptables -A FORWARD -i eth0 -o eth1 -j ACCEPT
 iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
 </code></pre></div>
-
 <blockquote>
 <p>assuming that eth0 is your WAN and eth1 is your LAN</p>
 <p>accept all forwarding from eth1 to eth0 and back</p>
 <p>enable "nat" so that packets are addressed properly</p>
 </blockquote>
-<hr>
-<h3>CIFS</h3>
+<hr/>
+<h3 id="cifs">CIFS</h3>
 <div class="highlight"><pre><span></span><code><span class="nv">iptables</span> <span class="o">-</span><span class="nv">A</span> <span class="nv">INPUT</span> <span class="o">-</span><span class="nv">p</span> <span class="nv">tcp</span> <span class="o">-</span><span class="nv">s</span> <span class="mi">10</span>.<span class="mi">10</span>.<span class="mi">10</span>.<span class="mi">250</span> <span class="o">--</span><span class="nv">sport</span> <span class="mi">445</span> <span class="o">-</span><span class="nv">d</span> <span class="mi">0</span><span class="o">/</span><span class="mi">0</span> <span class="o">-</span><span class="nv">j</span> <span class="nv">ACCEPT</span>
 <span class="nv">iptables</span> <span class="o">-</span><span class="nv">A</span> <span class="nv">OUTPUT</span> <span class="o">-</span><span class="nv">p</span> <span class="nv">tcp</span> <span class="o">-</span><span class="nv">s</span> <span class="mi">0</span><span class="o">/</span><span class="mi">0</span> <span class="o">--</span><span class="nv">sport</span> <span class="mi">1024</span>:<span class="mi">65535</span> <span class="o">-</span><span class="nv">d</span> <span class="mi">10</span>.<span class="mi">10</span>.<span class="mi">10</span>.<span class="mi">250</span> <span class="o">--</span><span class="nv">dport</span> <span class="mi">445</span> <span class="o">-</span><span class="nv">m</span> <span class="nv">state</span> <span class="o">--</span><span class="nv">state</span> <span class="nv">NEW</span>,<span class="nv">ESTABLISHED</span> <span class="o">-</span><span class="nv">j</span> <span class="nv">ACCEPT</span>
 <span class="o">&gt;</span> <span class="nv">CIFS</span> <span class="nv">has</span> <span class="nv">been</span> <span class="nv">simplified</span> <span class="nv">to</span> <span class="nv">just</span> <span class="nv">use</span> <span class="mi">445</span> <span class="nv">TCP</span> <span class="nv">first</span>...
@@ -331,8 +345,7 @@ iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
 <span class="nv">netbios</span><span class="o">-</span><span class="nv">ssn</span> <span class="o">-</span> <span class="mi">139</span><span class="o">/</span><span class="nv">tcp</span> # <span class="nv">NETBIOS</span> <span class="nv">session</span> <span class="nv">service</span>
 <span class="nv">microsoft</span><span class="o">-</span><span class="nv">ds</span> <span class="o">-</span> <span class="mi">445</span><span class="o">/</span><span class="nv">tcp</span> # <span class="k">if</span> <span class="nv">you</span> <span class="nv">are</span> <span class="nv">using</span> <span class="nv">Active</span> <span class="nv">Directory</span>
 </code></pre></div>
-
-<h3>Allow AD Lookups LDAP/LDAPS</h3>
+<h3 id="allow-ad-lookups-ldapldaps">Allow AD Lookups LDAP/LDAPS</h3>
 <div class="highlight"><pre><span></span><code>iptables -A INPUT -p tcp -s 0/0 --sport 1024:65535 --dport 389 -m state --state NEW,ESTABLISHED -j ACCEPT
 iptables -A OUTPUT -p tcp -s 0/0 --sport 389 --dport 1024:65535 -m state --state ESTABLISHED -j ACCEPT
 
@@ -345,9 +358,8 @@ iptables -A OUTPUT -p tcp -s 0/0 --sport 636 --dport 1024:65535 -m state --state
 iptables -A OUTPUT -p tcp --dport 636 -m state --state NEW,ESTABLISHED -j ACCEPT
 iptables -A INPUT -p tcp -s 0/0 --sport 636 --dport 1024:65535 -m state --state ESTABLISHED -j ACCEPT
 </code></pre></div>
-
-<hr>
-<h3>DMZ Setup with dual nic</h3>
+<hr/>
+<h3 id="dmz-setup-with-dual-nic">DMZ Setup with dual nic</h3>
 <ul>
 <li>ATMOS = 10.10.254.195</li>
 <li>LAN (router?) =  10.10.254.1</li>
@@ -356,18 +368,16 @@ iptables -A INPUT -p tcp -s 0/0 --sport 636 --dport 1024:65535 -m state --state 
 <li>eth2 = DMZ  192.168.50.1</li>
 <li>Router 172.16.255.1</li>
 </ul>
-<h4>forward traffic between DMZ and LAN</h4>
+<h4 id="forward-traffic-between-dmz-and-lan">forward traffic between DMZ and LAN</h4>
 <div class="highlight"><pre><span></span><code>iptables -A FORWARD -i eth0 -o eth2 -m state --state NEW,ESTABLISHED,RELATED -j ACCEPT
 iptables -A FORWARD -i eth2 -o eth0 -m state --state ESTABLISHED,RELATED -j ACCEPT
 </code></pre></div>
-
 <blockquote>
 <p>forward traffic between DMZ and WAN servers SMTP, Mail etc</p>
 </blockquote>
 <div class="highlight"><pre><span></span><code>iptables -A FORWARD -i eth2 -o eth1 -m state --state ESTABLISHED,RELATED -j ACCEPT
 iptables -A FORWARD -i eth1 -o eth2 -m state --state NEW,ESTABLISHED,RELATED -j ACCEPT
 </code></pre></div>
-
 <blockquote>
 <p>Route incoming SMTP (port 25 ) traffic to DMZ server 192.168.2.2
     iptables -t nat -A PREROUTING -p tcp -i eth1 -d 202.54.1.1 --dport 25 -j DNAT --to-destination 192.168.2.2</p>
@@ -377,7 +387,7 @@ iptables -A FORWARD -i eth1 -o eth2 -m state --state NEW,ESTABLISHED,RELATED -j 
     iptables -t nat -A PREROUTING -p tcp -i eth1 -d 202.54.1.1 --dport 443 -j DNAT --to-destination 192.168.2.4</p>
 <p>End DMZ .. Add other rules</p>
 </blockquote>
-<h2>Uncomplicated Firewall UFW</h2>
+<h2 id="uncomplicated-firewall-ufw">Uncomplicated Firewall UFW</h2>
 <p>The uncomplicated firewall is a much simpler way to configure some basic rules and enable the firewall</p>
 <div class="highlight"><pre><span></span><code>sudo su
 ufw status verbose
@@ -388,7 +398,6 @@ ufw default deny outgoing
 ufw enable
 ufw status verbose
 </code></pre></div>
-
 <blockquote>
 <p>Allowing 22 (SSH) and 443 (HTTPS) and denying all other incoming and outgoing traffic</p>
 </blockquote>
@@ -396,7 +405,6 @@ ufw status verbose
 <span class="nv">ufw</span> <span class="k">show</span> <span class="nv">raw</span>
 <span class="nv">ufw</span> <span class="nv">disable</span>
 </code></pre></div>
-
 <blockquote>
 <p>removing a rule is as simple as prefixing the allow or deny command with delete
 disabling the firewall allows all traffic</p>
@@ -426,7 +434,7 @@ disabling the firewall allows all traffic</p>
             <time pubdate="pubdate" datetime="2009-01-01T00:00:00-08:00">Jan 1, 2009</time>
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#linux-ref">linux</a> 
-            <h4>~1800 words</h4>
+            <h4>~1799 words</h4>
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article"> 
                 <li><a href="/tags.html#firewall-ref">firewall

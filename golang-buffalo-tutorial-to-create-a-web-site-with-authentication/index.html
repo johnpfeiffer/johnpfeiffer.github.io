@@ -61,15 +61,31 @@
 </div>
 
 <div class="row-fluid">
-        <div class="span8 offset2 article-content">
+    <div class="span2 table-of-content">
+        <nav>
+        <h4>Contents</h4>
+        <div class="toc"><span class="toctitle">Table of Contents</span><ul>
+<li><a href="#buffalo-installation-and-prerequisites">Buffalo Installation and Prerequisites</a></li>
+<li><a href="#start-developing-with-a-resource-generator">Start Developing with a Resource Generator</a></li>
+<li><a href="#avoiding-the-frontend">Avoiding the Frontend</a></li>
+<li><a href="#authentication">Authentication</a><ul>
+<li><a href="#basic-authentication-with-the-database">Basic Authentication with the Database</a></li>
+<li><a href="#authentication-using-an-external-identity-provider">Authentication using an External Identity Provider</a></li>
+</ul>
+</li>
+</ul>
+</div>
+        </nav>
+    </div>
+    <div class="span8 article-content">
 
-            <p>[TOC]</p>
+            
 <p>Go's considerable tooling makes it a very productive and performant static language. Besides being ideal for developing APIs (goroutines!) it can then be convenient to also write the Web UI in Go.</p>
 <p>Although the standard library allows for writing a Go based website with templates and maximum flexibility, what if you want a quick start with "batteries included"?</p>
 <blockquote>
 <p>Code generation makes it easy to get started but all future customization depends on the developer, this is not a CMS =p</p>
 </blockquote>
-<h2>Buffalo Installation and Prerequisites</h2>
+<h2 id="buffalo-installation-and-prerequisites">Buffalo Installation and Prerequisites</h2>
 <p><em>Assuming the Go dev environment is already setup...</em></p>
 <p><code>go get -u -v github.com/gobuffalo/buffalo/buffalo</code></p>
 <p><code>buffalo new example</code></p>
@@ -87,12 +103,11 @@
   <span class="nt">pool</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">5</span>
 
 <span class="nt">test</span><span class="p">:</span>
-  <span class="nt">url</span><span class="p">:</span> <span class="p p-Indicator">{{</span><span class="nv">envOr &quot;TEST_DATABASE_URL&quot; &quot;postgres</span><span class="p p-Indicator">:</span><span class="nv">//postgres</span><span class="p p-Indicator">:</span><span class="nv">postgres@127.0.0.1</span><span class="p p-Indicator">:</span><span class="nv">5432/example_test</span><span class="p p-Indicator">?</span><span class="nv">sslmode=disable&quot;</span><span class="p p-Indicator">}}</span>
+  <span class="nt">url</span><span class="p">:</span> <span class="p p-Indicator">{{</span><span class="nv">envOr "TEST_DATABASE_URL" "postgres</span><span class="p p-Indicator">:</span><span class="nv">//postgres</span><span class="p p-Indicator">:</span><span class="nv">postgres@127.0.0.1</span><span class="p p-Indicator">:</span><span class="nv">5432/example_test</span><span class="p p-Indicator">?</span><span class="nv">sslmode=disable"</span><span class="p p-Indicator">}}</span>
 
 <span class="nt">production</span><span class="p">:</span>
-  <span class="nt">url</span><span class="p">:</span> <span class="p p-Indicator">{{</span><span class="nv">envOr &quot;DATABASE_URL&quot; &quot;postgres</span><span class="p p-Indicator">:</span><span class="nv">//postgres</span><span class="p p-Indicator">:</span><span class="nv">postgres@127.0.0.1</span><span class="p p-Indicator">:</span><span class="nv">5432/example_production</span><span class="p p-Indicator">?</span><span class="nv">sslmode=disable&quot;</span><span class="p p-Indicator">}}</span>
+  <span class="nt">url</span><span class="p">:</span> <span class="p p-Indicator">{{</span><span class="nv">envOr "DATABASE_URL" "postgres</span><span class="p p-Indicator">:</span><span class="nv">//postgres</span><span class="p p-Indicator">:</span><span class="nv">postgres@127.0.0.1</span><span class="p p-Indicator">:</span><span class="nv">5432/example_production</span><span class="p p-Indicator">?</span><span class="nv">sslmode=disable"</span><span class="p p-Indicator">}}</span>
 </code></pre></div>
-
 <p><code>buffalo db create --all</code></p>
 <blockquote>
 <p>the buffalo framework will create all the necessary databases and tables</p>
@@ -104,7 +119,7 @@
 <li><a href="https://gobuffalo.io/docs/db">https://gobuffalo.io/docs/db</a></li>
 </ul>
 <p>It is worth reading about the convention of how Buffalo lays out the directories and code <a href="https://gobuffalo.io/docs/directory-structure">https://gobuffalo.io/docs/directory-structure</a></p>
-<h2>Start Developing with a Resource Generator</h2>
+<h2 id="start-developing-with-a-resource-generator">Start Developing with a Resource Generator</h2>
 <p><code>buffalo dev</code></p>
 <p>(Or use the following syntax for a non default port: <code>PORT=3001 buffalo dev</code>)</p>
 <p><code>curl localhost:3000</code></p>
@@ -114,7 +129,6 @@
 <div class="highlight"><pre><span></span><code>buffalo generate resource users name email title:nulls.Text
 buffalo db migrate
 </code></pre></div>
-
 <p>Resulting output...</p>
 <div class="highlight"><pre><span></span><code>--&gt; actions/users.go
 --&gt; actions/users_test.go
@@ -134,7 +148,6 @@ v3.41.1
 &gt; migrations/20171203042126_create_users.down.fizz
 --&gt; goimports -w actions/actions_test.go actions/app.go actions/home.go actions/home_test.go actions/render.go actions/users.go actions/users_test.go grifts/db.go grifts/init.go main.go models/models.go models/models_test.go models/user.go models/user_test.go
 </code></pre></div>
-
 <blockquote>
 <p>The code generator is very helpful, especially after the database tables are updated with the migrate command</p>
 </blockquote>
@@ -156,8 +169,7 @@ v3.41.1
     <span class="err">\</span><span class="nt">d</span><span class="o">+</span> <span class="nt">users</span>
     <span class="nt">select</span> <span class="o">*</span> <span class="nt">from</span> <span class="nt">users</span><span class="o">;</span>
 </code></pre></div>
-
-<h2>Avoiding the Frontend</h2>
+<h2 id="avoiding-the-frontend">Avoiding the Frontend</h2>
 <p>Because javascript moves so quickly (and breaks things) it is easier to skip these steps and focus on the backend.</p>
 <div class="highlight"><pre><span></span><code># maybe skip these (and all the accompanying dependencies) to avoid suckiness
 sudo apt-get install -y npm
@@ -167,14 +179,13 @@ npm --version
 node --version
 npm install
 </code></pre></div>
-
 <blockquote>
 <p>npm installs the authrecipe dependencies but first use npm in order to install nodejs via the "n" helper</p>
 </blockquote>
 <p>Without these the javascript assets or other things that were supposed to make the forms look pretty are not available but everything still works.</p>
-<h2>Authentication</h2>
+<h2 id="authentication">Authentication</h2>
 <p>One of the first building blocks of any decent site is authentication.  Luckily there are a couple of packages that make basic and SSO authentication easier.</p>
-<h3>Basic Authentication with the Database</h3>
+<h3 id="basic-authentication-with-the-database">Basic Authentication with the Database</h3>
 <p>To just use an example (leverage the Buffalo author's in-progress tutorial ;)</p>
 <div class="highlight"><pre><span></span><code><span class="n">sudo</span><span class="w"> </span><span class="n">docker</span><span class="w"> </span><span class="n">run</span><span class="w"> </span><span class="o">--</span><span class="n">rm</span><span class="w"> </span><span class="o">-</span><span class="n">it</span><span class="w"> </span><span class="o">--</span><span class="n">publish</span><span class="w"> </span><span class="mf">0.0.0.0</span><span class="err">:</span><span class="mi">5432</span><span class="err">:</span><span class="mi">5432</span><span class="w"> </span><span class="o">--</span><span class="n">name</span><span class="w"> </span><span class="n">pg</span><span class="w"> </span><span class="o">-</span><span class="n">e</span><span class="w"> </span><span class="n">POSTGRES_PASSWORD</span><span class="o">=</span><span class="n">postgres</span><span class="w"> </span><span class="nl">postgres</span><span class="p">:</span><span class="n">alpine</span><span class="w"></span>
 <span class="n">git</span><span class="w"> </span><span class="n">clone</span><span class="w"> </span><span class="nl">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="p">.</span><span class="n">com</span><span class="o">/</span><span class="n">gobuffalo</span><span class="o">/</span><span class="n">authrecipe</span><span class="w"></span>
@@ -184,13 +195,12 @@ npm install
 <span class="n">buffalo</span><span class="w"> </span><span class="n">db</span><span class="w"> </span><span class="n">migrate</span><span class="w"></span>
 <span class="n">buffalo</span><span class="w"> </span><span class="n">dev</span><span class="w"></span>
 </code></pre></div>
-
 <blockquote>
 <p>that is the minimum to get up and runnning...</p>
 </blockquote>
 <p>With a browser you can "sign in" or "register" (create a new user with a password)</p>
 <p>TODO: more work to port over how to create secure endpoints with a "CheckAuth" middleware...</p>
-<h3>Authentication using an External Identity Provider</h3>
+<h3 id="authentication-using-an-external-identity-provider">Authentication using an External Identity Provider</h3>
 <p>For instructions on how to have users authenticate and secure resources with identity providers like Github, Facebook, Google, etc.</p>
 <div class="highlight"><pre><span></span><code><span class="n">sudo</span><span class="w"> </span><span class="n">docker</span><span class="w"> </span><span class="n">run</span><span class="w"> </span><span class="o">--</span><span class="n">rm</span><span class="w"> </span><span class="o">-</span><span class="n">it</span><span class="w"> </span><span class="o">--</span><span class="n">publish</span><span class="w"> </span><span class="mf">0.0.0.0</span><span class="err">:</span><span class="mi">5432</span><span class="err">:</span><span class="mi">5432</span><span class="w"> </span><span class="o">--</span><span class="n">name</span><span class="w"> </span><span class="n">pg</span><span class="w"> </span><span class="o">-</span><span class="n">e</span><span class="w"> </span><span class="n">POSTGRES_PASSWORD</span><span class="o">=</span><span class="n">postgres</span><span class="w"> </span><span class="nl">postgres</span><span class="p">:</span><span class="n">alpine</span><span class="w"></span>
 <span class="k">go</span><span class="w"> </span><span class="k">get</span><span class="w"> </span><span class="o">-</span><span class="n">u</span><span class="w"> </span><span class="o">-</span><span class="n">v</span><span class="w"> </span><span class="n">github</span><span class="p">.</span><span class="n">com</span><span class="o">/</span><span class="n">gobuffalo</span><span class="o">/</span><span class="n">buffalo</span><span class="o">/</span><span class="n">buffalo</span><span class="w"></span>
@@ -198,7 +208,6 @@ npm install
 <span class="n">buffalo</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">example</span><span class="w"></span>
 <span class="n">buffalo</span><span class="w"> </span><span class="n">generate</span><span class="w"> </span><span class="n">goth</span><span class="o">-</span><span class="n">auth</span><span class="w"> </span><span class="n">bitbucket</span><span class="w"></span>
 </code></pre></div>
-
 <p>In order to set up the Bitbucket OAuth credentials:
 <em>Log into bitbucket -&gt; from your user profile (avatar) dropdown choose "bitbucket settings" -&gt; click on OAuth (on the left) -&gt; Add consumer</em></p>
 <p>CallbackURL (for development): http://127.0.0.1:3000/auth/bitbucket
@@ -229,7 +238,7 @@ Permissions: account email</p>
             <time pubdate="pubdate" datetime="2017-12-02T19:44:00-08:00">Dec 2, 2017</time>
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#programming-ref">programming</a> 
-            <h4>~737 words</h4>
+            <h4>~736 words</h4>
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article"> 
                 <li><a href="/tags.html#authentication-ref">authentication

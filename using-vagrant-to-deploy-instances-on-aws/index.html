@@ -61,60 +61,77 @@
 </div>
 
 <div class="row-fluid">
-        <div class="span8 offset2 article-content">
+    <div class="span2 table-of-content">
+        <nav>
+        <h4>Contents</h4>
+        <div class="toc"><span class="toctitle">Table of Contents</span><ul>
+<li><a href="#install-vagrant-and-the-vagrant-aws-plugin">Install Vagrant and the Vagrant AWS plugin</a></li>
+<li><a href="#quickstart-vagrant-and-virtualbox-with-ubuntu-trusty-1404">Quickstart Vagrant and VirtualBox with Ubuntu Trusty 14.04</a></li>
+<li><a href="#vagrant-and-aws-ec2-with-ubuntu-precise-1204">Vagrant and AWS EC2 with Ubuntu Precise 12.04</a></li>
+<li><a href="#vagrant-provisioning">Vagrant provisioning</a></li>
+<li><a href="#advanced-vagrantfile-example">Advanced Vagrantfile example</a></li>
+<li><a href="#vagrant-and-ec2-vpc-ami-that-does-not-haveallow-sudo">Vagrant and EC2 VPC (AMI that does not have/allow sudo)</a></li>
+<li><a href="#virtualbox">VirtualBox</a><ul>
+<li><a href="#vagrantfile">Vagrantfile</a></li>
+</ul>
+</li>
+<li><a href="#more-info">more info</a></li>
+<li><a href="#troubleshooting">Troubleshooting</a></li>
+</ul>
+</div>
+        </nav>
+    </div>
+    <div class="span8 article-content">
 
-            <p>[TOC]</p>
+            
 <p>Vagrant is an infrastructure tool that simplifies deployment, such as virtual machines or in this case Amazon EC2 instances.</p>
-<h3>Install Vagrant and the Vagrant AWS plugin</h3>
+<h3 id="install-vagrant-and-the-vagrant-aws-plugin">Install Vagrant and the Vagrant AWS plugin</h3>
 <p>Download and install vagrant: <strong><a href="https://www.vagrantup.com/downloads">https://www.vagrantup.com/downloads</a></strong></p>
 <div class="highlight"><pre><span></span><code>wget https://releases.hashicorp.com/vagrant/1.7.4/vagrant_1.7.4_x86_64.deb
 dpkg -i vagrant_1.7.4_x86_64.deb
 vagrant --version
 vagrant plugin install vagrant-aws
 </code></pre></div>
-
-<h3>Quickstart Vagrant and VirtualBox with Ubuntu Trusty 14.04</h3>
+<h3 id="quickstart-vagrant-and-virtualbox-with-ubuntu-trusty-1404">Quickstart Vagrant and VirtualBox with Ubuntu Trusty 14.04</h3>
 <p>The simple local VirtualBox method was:</p>
 <div class="highlight"><pre><span></span><code><span class="nv">virtualbox</span> <span class="o">--</span><span class="nv">help</span>
 <span class="nv">vagrant</span> <span class="nv">init</span> <span class="nv">ubuntu</span><span class="o">/</span><span class="nv">trusty64</span><span class="c1">; vagrant up --provider virtualbox</span>
 
-    <span class="o">==&gt;</span> <span class="nv">default</span>: <span class="nv">Box</span> <span class="s1">&#39;</span><span class="s">ubuntu/trusty64</span><span class="s1">&#39;</span> <span class="nv">could</span> <span class="nv">not</span> <span class="nv">be</span> <span class="nv">found</span>. <span class="nv">Attempting</span> <span class="nv">to</span> <span class="nv">find</span> <span class="nv">and</span> <span class="nv">install</span>...
+    <span class="o">==&gt;</span> <span class="nv">default</span>: <span class="nv">Box</span> <span class="s1">'</span><span class="s">ubuntu/trusty64</span><span class="s1">'</span> <span class="nv">could</span> <span class="nv">not</span> <span class="nv">be</span> <span class="nv">found</span>. <span class="nv">Attempting</span> <span class="nv">to</span> <span class="nv">find</span> <span class="nv">and</span> <span class="nv">install</span>...
     <span class="nv">default</span>: <span class="nv">Box</span> <span class="nv">Provider</span>: <span class="nv">virtualbox</span>
     <span class="nv">default</span>: <span class="nv">Box</span> <span class="nv">Version</span>: <span class="o">&gt;=</span> <span class="mi">0</span>
-    <span class="o">==&gt;</span> <span class="nv">default</span>: <span class="nv">Loading</span> <span class="nv">metadata</span> <span class="k">for</span> <span class="nv">box</span> <span class="s1">&#39;</span><span class="s">ubuntu/trusty64</span><span class="s1">&#39;</span>
+    <span class="o">==&gt;</span> <span class="nv">default</span>: <span class="nv">Loading</span> <span class="nv">metadata</span> <span class="k">for</span> <span class="nv">box</span> <span class="s1">'</span><span class="s">ubuntu/trusty64</span><span class="s1">'</span>
     <span class="nv">default</span>: <span class="nv">URL</span>: <span class="nv">https</span>:<span class="o">//</span><span class="nv">atlas</span>.<span class="nv">hashicorp</span>.<span class="nv">com</span><span class="o">/</span><span class="nv">ubuntu</span><span class="o">/</span><span class="nv">trusty64</span>
 </code></pre></div>
-
 <blockquote>
 <p>this will do all the extra work for you of finding and downloading the "box" and starting it in VirtualBox</p>
 </blockquote>
-<h3>Vagrant and AWS EC2 with Ubuntu Precise 12.04</h3>
+<h3 id="vagrant-and-aws-ec2-with-ubuntu-precise-1204">Vagrant and AWS EC2 with Ubuntu Precise 12.04</h3>
 <p><code>vagrant box add dummy https://github.com/mitchellh/vagrant-aws/raw/master/dummy.box</code></p>
 <blockquote>
 <p><a href="https://atlas.hashicorp.com/boxes/search">https://atlas.hashicorp.com/boxes/search</a></p>
 </blockquote>
 <p><code>vagrant box list</code></p>
 <p><code>vi Vagrantfile</code></p>
-<div class="highlight"><pre><span></span><code><span class="nv">Vagrant</span>.<span class="nv">configure</span><span class="ss">(</span><span class="s2">&quot;</span><span class="s">2</span><span class="s2">&quot;</span><span class="ss">)</span> <span class="k">do</span> <span class="o">|</span><span class="nv">config</span><span class="o">|</span>
-    <span class="nv">config</span>.<span class="nv">vm</span>.<span class="nv">box</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="s">dummy</span><span class="s2">&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="nv">Vagrant</span>.<span class="nv">configure</span><span class="ss">(</span><span class="s2">"</span><span class="s">2</span><span class="s2">"</span><span class="ss">)</span> <span class="k">do</span> <span class="o">|</span><span class="nv">config</span><span class="o">|</span>
+    <span class="nv">config</span>.<span class="nv">vm</span>.<span class="nv">box</span> <span class="o">=</span> <span class="s2">"</span><span class="s">dummy</span><span class="s2">"</span>
     <span class="nv">config</span>.<span class="nv">vm</span>.<span class="nv">provider</span> :<span class="nv">aws</span> <span class="k">do</span> <span class="o">|</span><span class="nv">aws</span>, <span class="nv">override</span><span class="o">|</span>
-        <span class="nv">aws</span>.<span class="nv">access_key_id</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="s">YOURACCESSKEY</span><span class="s2">&quot;</span>
-        <span class="nv">aws</span>.<span class="nv">secret_access_key</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="s">YOURSECRETKEY</span><span class="s2">&quot;</span>
-        <span class="nv">aws</span>.<span class="nv">keypair_name</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="s">YOURKEYPAIRNAME</span><span class="s2">&quot;</span>
-        <span class="nv">aws</span>.<span class="nv">ami</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="s">ami-7747d01e</span><span class="s2">&quot;</span>
+        <span class="nv">aws</span>.<span class="nv">access_key_id</span> <span class="o">=</span> <span class="s2">"</span><span class="s">YOURACCESSKEY</span><span class="s2">"</span>
+        <span class="nv">aws</span>.<span class="nv">secret_access_key</span> <span class="o">=</span> <span class="s2">"</span><span class="s">YOURSECRETKEY</span><span class="s2">"</span>
+        <span class="nv">aws</span>.<span class="nv">keypair_name</span> <span class="o">=</span> <span class="s2">"</span><span class="s">YOURKEYPAIRNAME</span><span class="s2">"</span>
+        <span class="nv">aws</span>.<span class="nv">ami</span> <span class="o">=</span> <span class="s2">"</span><span class="s">ami-7747d01e</span><span class="s2">"</span>
         <span class="nv">aws</span>.<span class="nv">instance_ready_timeout</span> <span class="o">=</span> <span class="mi">300</span>
-        <span class="nv">aws</span>.<span class="nv">instance_type</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="s">m4.large</span><span class="s2">&quot;</span>
+        <span class="nv">aws</span>.<span class="nv">instance_type</span> <span class="o">=</span> <span class="s2">"</span><span class="s">m4.large</span><span class="s2">"</span>
         <span class="nv">aws</span>.<span class="nv">tags</span> <span class="o">=</span> {
-            <span class="s2">&quot;</span><span class="s">Name</span><span class="s2">&quot;</span> <span class="o">=&gt;</span> <span class="s2">&quot;</span><span class="s">MyCloudInstance</span><span class="s2">&quot;</span>,
+            <span class="s2">"</span><span class="s">Name</span><span class="s2">"</span> <span class="o">=&gt;</span> <span class="s2">"</span><span class="s">MyCloudInstance</span><span class="s2">"</span>,
         }
-        <span class="nv">override</span>.<span class="nv">vm</span>.<span class="nv">box</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="s">dummy</span><span class="s2">&quot;</span>
-        <span class="nv">override</span>.<span class="nv">vm</span>.<span class="nv">box_url</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="s">https://github.com/mitchellh/vagrant-aws/raw/master/dummy.box</span><span class="s2">&quot;</span>
-        <span class="nv">override</span>.<span class="nv">ssh</span>.<span class="nv">username</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="s">ubuntu</span><span class="s2">&quot;</span>
-        <span class="nv">override</span>.<span class="nv">ssh</span>.<span class="nv">private_key_path</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="s">./YOURKEYPAIRNAME.pem</span><span class="s2">&quot;</span>
+        <span class="nv">override</span>.<span class="nv">vm</span>.<span class="nv">box</span> <span class="o">=</span> <span class="s2">"</span><span class="s">dummy</span><span class="s2">"</span>
+        <span class="nv">override</span>.<span class="nv">vm</span>.<span class="nv">box_url</span> <span class="o">=</span> <span class="s2">"</span><span class="s">https://github.com/mitchellh/vagrant-aws/raw/master/dummy.box</span><span class="s2">"</span>
+        <span class="nv">override</span>.<span class="nv">ssh</span>.<span class="nv">username</span> <span class="o">=</span> <span class="s2">"</span><span class="s">ubuntu</span><span class="s2">"</span>
+        <span class="nv">override</span>.<span class="nv">ssh</span>.<span class="nv">private_key_path</span> <span class="o">=</span> <span class="s2">"</span><span class="s">./YOURKEYPAIRNAME.pem</span><span class="s2">"</span>
     <span class="k">end</span>
 <span class="k">end</span>
 </code></pre></div>
-
 <blockquote>
 <p>ubuntu/images/ubuntu-precise-12.04-amd64-server-20130204 - ami-7747d01e , no ebs storage - just instance storage , <a href="https://cloud-images.ubuntu.com/releases/">https://cloud-images.ubuntu.com/releases/</a> and <a href="https://atlas.hashicorp.com/boxes/search">https://atlas.hashicorp.com/boxes/search</a></p>
 <p>vagrant will by default upload all folders and files in your "project" folder where the Vagrantfile is located</p>
@@ -124,11 +141,11 @@ vagrant plugin install vagrant-aws
 <blockquote>
 <p>--debug is interactive mode and requires pressing enter between every step</p>
 </blockquote>
-<div class="highlight"><pre><span></span><code><span class="nv">Bringing</span> <span class="nv">machine</span> <span class="s1">&#39;</span><span class="s">default</span><span class="s1">&#39;</span> <span class="nv">up</span> <span class="nv">with</span> <span class="s1">&#39;</span><span class="s">aws</span><span class="s1">&#39;</span> <span class="nv">provider</span>...
+<div class="highlight"><pre><span></span><code><span class="nv">Bringing</span> <span class="nv">machine</span> <span class="s1">'</span><span class="s">default</span><span class="s1">'</span> <span class="nv">up</span> <span class="nv">with</span> <span class="s1">'</span><span class="s">aws</span><span class="s1">'</span> <span class="nv">provider</span>...
 <span class="o">==&gt;</span> <span class="nv">default</span>: <span class="nv">HandleBoxUrl</span> <span class="nv">middleware</span> <span class="nv">is</span> <span class="nv">deprecated</span>. <span class="nv">Use</span> <span class="nv">HandleBox</span> <span class="nv">instead</span>.
 <span class="o">==&gt;</span> <span class="nv">default</span>: <span class="nv">This</span> <span class="nv">is</span> <span class="nv">a</span> <span class="nv">bug</span> <span class="nv">with</span> <span class="nv">the</span> <span class="nv">provider</span>. <span class="nv">Please</span> <span class="nv">contact</span> <span class="nv">the</span> <span class="nv">creator</span>
 <span class="o">==&gt;</span> <span class="nv">default</span>: <span class="nv">of</span> <span class="nv">the</span> <span class="nv">provider</span> <span class="nv">you</span> <span class="nv">use</span> <span class="nv">to</span> <span class="nv">fix</span> <span class="nv">this</span>.
-<span class="o">==&gt;</span> <span class="nv">default</span>: <span class="nv">Warning</span><span class="o">!</span> <span class="nv">The</span> <span class="nv">AWS</span> <span class="nv">provider</span> <span class="nv">doesn</span><span class="s1">&#39;</span><span class="s">t support any of the Vagrant</span>
+<span class="o">==&gt;</span> <span class="nv">default</span>: <span class="nv">Warning</span><span class="o">!</span> <span class="nv">The</span> <span class="nv">AWS</span> <span class="nv">provider</span> <span class="nv">doesn</span><span class="s1">'</span><span class="s">t support any of the Vagrant</span>
 <span class="o">==&gt;</span> <span class="nv">default</span>: <span class="nv">high</span><span class="o">-</span><span class="nv">level</span> <span class="nv">network</span> <span class="nv">configurations</span> <span class="ss">(</span>`<span class="nv">config</span>.<span class="nv">vm</span>.<span class="nv">network</span>`<span class="ss">)</span>. <span class="nv">They</span>
 <span class="o">==&gt;</span> <span class="nv">default</span>: <span class="nv">will</span> <span class="nv">be</span> <span class="nv">silently</span> <span class="nv">ignored</span>.
 <span class="o">==&gt;</span> <span class="nv">default</span>: <span class="nv">Launching</span> <span class="nv">an</span> <span class="nv">instance</span> <span class="nv">with</span> <span class="nv">the</span> <span class="nv">following</span> <span class="nv">settings</span>...
@@ -141,12 +158,11 @@ vagrant plugin install vagrant-aws
 <span class="o">==&gt;</span> <span class="nv">default</span>:  <span class="o">--</span> <span class="nv">Monitoring</span>: <span class="nv">false</span>
 <span class="o">==&gt;</span> <span class="nv">default</span>:  <span class="o">--</span> <span class="nv">EBS</span> <span class="nv">optimized</span>: <span class="nv">false</span>
 <span class="o">==&gt;</span> <span class="nv">default</span>:  <span class="o">--</span> <span class="nv">Assigning</span> <span class="nv">a</span> <span class="nv">public</span> <span class="nv">IP</span> <span class="nv">address</span> <span class="nv">in</span> <span class="nv">a</span> <span class="nv">VPC</span>: <span class="nv">false</span>
-<span class="o">==&gt;</span> <span class="nv">default</span>: <span class="nv">Waiting</span> <span class="k">for</span> <span class="nv">instance</span> <span class="nv">to</span> <span class="nv">become</span> <span class="s2">&quot;</span><span class="s">ready</span><span class="s2">&quot;</span>...
+<span class="o">==&gt;</span> <span class="nv">default</span>: <span class="nv">Waiting</span> <span class="k">for</span> <span class="nv">instance</span> <span class="nv">to</span> <span class="nv">become</span> <span class="s2">"</span><span class="s">ready</span><span class="s2">"</span>...
 <span class="o">==&gt;</span> <span class="nv">default</span>: <span class="nv">Waiting</span> <span class="k">for</span> <span class="nv">SSH</span> <span class="nv">to</span> <span class="nv">become</span> <span class="nv">available</span>...
 <span class="o">==&gt;</span> <span class="nv">default</span>: <span class="nv">Machine</span> <span class="nv">is</span> <span class="nv">booted</span> <span class="nv">and</span> <span class="nv">ready</span> <span class="k">for</span> <span class="nv">use</span><span class="o">!</span>
 <span class="o">==&gt;</span> <span class="nv">default</span>: <span class="nv">Rsyncing</span> <span class="nv">folder</span>: <span class="o">/</span><span class="nv">home</span><span class="o">/</span><span class="nv">ubuntu</span><span class="o">/</span><span class="nv">myproject</span><span class="o">/</span> <span class="o">=&gt;</span> <span class="o">/</span><span class="nv">vagrant</span>
 </code></pre></div>
-
 <p><code>vagrant ssh</code></p>
 <blockquote>
 <p>the default-easiest-interface way of getting SSH access into the machine</p>
@@ -155,7 +171,6 @@ vagrant plugin install vagrant-aws
 vagrant ssh-config &gt; vagrant-ssh
 ssh -F vagrant-ssh default
 </code></pre></div>
-
 <blockquote>
 <p>alternative interactive ssh session: Use the HostName or AWS EC2 WebUI or <a href="http://aws.amazon.com/cli">http://aws.amazon.com/cli</a> to discover the remote machine IP address
 using ssh with the vagrant-ssh file output seems the simplest
@@ -173,76 +188,73 @@ ssh -i YOURKEYPAIRHERE.pem ubuntu@1.2.3.4 ls -ahl /vagrant</p>
 <p>UnsupportedOperation =&gt; The instance 'i-1295bf39' does not have an 'ebs' root device type and cannot be stopped. (Fog::Compute::AWS::Error)</p>
 </blockquote>
 <p><code>vagrant destroy</code></p>
-<div class="highlight"><pre><span></span><code>&gt; default: Are you sure you want to destroy the &#39;default&#39; VM? [y/N] Y
+<div class="highlight"><pre><span></span><code>&gt; default: Are you sure you want to destroy the 'default' VM? [y/N] Y
 &gt;
 &gt; ==&gt; default: Terminating the instance...
 </code></pre></div>
-
 <p><code>vagrant destroy -f</code></p>
 <blockquote>
 <p>non interactively destroy the instance and avoid the misleading error message: Vagrant is attempting to interface with the UI in a way that requires a TTY</p>
 </blockquote>
-<h3>Vagrant provisioning</h3>
+<h3 id="vagrant-provisioning">Vagrant provisioning</h3>
 <p>Allows for automated installation of software bundled into the <code>vagrant up</code> command</p>
 <p><code>vagrant up --provider=aws --no-provision</code> to prevent any provisioning</p>
-<div class="highlight"><pre><span></span><code>config.vm.provision &quot;shell&quot;, inline: &quot;echo Hello, World&quot;
+<div class="highlight"><pre><span></span><code>config.vm.provision "shell", inline: "echo Hello, World"
 
-config.vm.provision &quot;shell&quot;, path: &quot;script.sh&quot;
+config.vm.provision "shell", path: "script.sh"
 
-config.vm.provision &quot;shell&quot;, path: &quot;https://example.com/script.sh&quot;
+config.vm.provision "shell", path: "https://example.com/script.sh"
 </code></pre></div>
-
 <p><a href="http://docs.vagrantup.com/v2/provisioning">http://docs.vagrantup.com/v2/provisioning</a></p>
 <p><a href="http://docs.vagrantup.com/v2/provisioning/shell.html">http://docs.vagrantup.com/v2/provisioning/shell.html</a></p>
-<h3>Advanced Vagrantfile example</h3>
+<h3 id="advanced-vagrantfile-example">Advanced Vagrantfile example</h3>
 <div class="highlight"><pre><span></span><code><span class="c1"># -*- mode: ruby -*-</span>
 <span class="c1"># vi: set ft=ruby :</span>
 
-<span class="k">if</span> <span class="no">ENV</span><span class="o">[</span><span class="s1">&#39;UPDATEFQDN&#39;</span><span class="o">]</span>
-  <span class="n">updatedfqdn</span><span class="o">=</span><span class="no">ENV</span><span class="o">[</span><span class="s1">&#39;UPDATEFQDN&#39;</span><span class="o">]</span>
+<span class="k">if</span> <span class="no">ENV</span><span class="o">[</span><span class="s1">'UPDATEFQDN'</span><span class="o">]</span>
+  <span class="n">updatedfqdn</span><span class="o">=</span><span class="no">ENV</span><span class="o">[</span><span class="s1">'UPDATEFQDN'</span><span class="o">]</span>
 <span class="k">end</span>
 
 <span class="vg">$fqdnscript</span> <span class="o">=</span> <span class="o">&lt;&lt;</span><span class="dl">FQDNSCRIPT</span>
-<span class="sh">echo &quot;I am updating fqdn to #{updatedfqdn}...&quot;</span>
-<span class="sh">cat /etc/hosts | grep &quot;#{updatedfqdn}&quot; || sudo sed &#39;s/127.0.0.1/127.0.0.1 #{updatedfqdn}/&#39; -i /etc/hosts</span>
-<span class="sh">hostname | grep &quot;#{updatedfqdn}&quot; || sudo hostname #{updatedfqdn}</span>
+<span class="sh">echo "I am updating fqdn to #{updatedfqdn}..."</span>
+<span class="sh">cat /etc/hosts | grep "#{updatedfqdn}" || sudo sed 's/127.0.0.1/127.0.0.1 #{updatedfqdn}/' -i /etc/hosts</span>
+<span class="sh">hostname | grep "#{updatedfqdn}" || sudo hostname #{updatedfqdn}</span>
 <span class="dl">FQDNSCRIPT</span>
 
-<span class="no">Vagrant</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span><span class="s2">&quot;2&quot;</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span>
-    <span class="n">config</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">box</span> <span class="o">=</span> <span class="s2">&quot;dummy&quot;</span>
+<span class="no">Vagrant</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span><span class="s2">"2"</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">box</span> <span class="o">=</span> <span class="s2">"dummy"</span>
     <span class="n">config</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">provider</span> <span class="ss">:aws</span> <span class="k">do</span> <span class="o">|</span><span class="n">aws</span><span class="p">,</span> <span class="n">override</span><span class="o">|</span>
-        <span class="n">aws</span><span class="o">.</span><span class="n">access_key_id</span> <span class="o">=</span> <span class="s2">&quot;YOURACCESSKEY&quot;</span>
-        <span class="n">aws</span><span class="o">.</span><span class="n">secret_access_key</span> <span class="o">=</span> <span class="s2">&quot;YOURSECRETKEY&quot;</span>
-        <span class="n">aws</span><span class="o">.</span><span class="n">keypair_name</span> <span class="o">=</span> <span class="s2">&quot;YOURKEYPAIRNAME&quot;</span>
-        <span class="n">aws</span><span class="o">.</span><span class="n">ami</span> <span class="o">=</span> <span class="s2">&quot;ami-7747d01e&quot;</span>
+        <span class="n">aws</span><span class="o">.</span><span class="n">access_key_id</span> <span class="o">=</span> <span class="s2">"YOURACCESSKEY"</span>
+        <span class="n">aws</span><span class="o">.</span><span class="n">secret_access_key</span> <span class="o">=</span> <span class="s2">"YOURSECRETKEY"</span>
+        <span class="n">aws</span><span class="o">.</span><span class="n">keypair_name</span> <span class="o">=</span> <span class="s2">"YOURKEYPAIRNAME"</span>
+        <span class="n">aws</span><span class="o">.</span><span class="n">ami</span> <span class="o">=</span> <span class="s2">"ami-7747d01e"</span>
         <span class="n">aws</span><span class="o">.</span><span class="n">instance_ready_timeout</span> <span class="o">=</span> <span class="mi">300</span>
-        <span class="n">aws</span><span class="o">.</span><span class="n">instance_type</span> <span class="o">=</span> <span class="s2">&quot;m4.large&quot;</span>
+        <span class="n">aws</span><span class="o">.</span><span class="n">instance_type</span> <span class="o">=</span> <span class="s2">"m4.large"</span>
         <span class="n">aws</span><span class="o">.</span><span class="n">tags</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s2">&quot;Name&quot;</span> <span class="o">=&gt;</span> <span class="s2">&quot;MyCloudInstance&quot;</span><span class="p">,</span>
+            <span class="s2">"Name"</span> <span class="o">=&gt;</span> <span class="s2">"MyCloudInstance"</span><span class="p">,</span>
         <span class="p">}</span>
-        <span class="k">if</span> <span class="no">ENV</span><span class="o">[</span><span class="s1">&#39;bamboo_aws_use_iops&#39;</span><span class="o">]</span>
-          <span class="n">aws</span><span class="o">.</span><span class="n">block_device_mapping</span> <span class="o">=</span> <span class="o">[</span><span class="p">{</span> <span class="s1">&#39;DeviceName&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;/dev/sda1&#39;</span><span class="p">,</span> <span class="s1">&#39;Ebs.VolumeSize&#39;</span> <span class="o">=&gt;</span> <span class="mi">100</span><span class="p">,</span> <span class="s1">&#39;Ebs.VolumeType&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;io1&#39;</span><span class="p">,</span> <span class="s1">&#39;Ebs.Iops&#39;</span> <span class="o">=&gt;</span> <span class="mi">3000</span> <span class="p">}</span><span class="o">]</span>
+        <span class="k">if</span> <span class="no">ENV</span><span class="o">[</span><span class="s1">'bamboo_aws_use_iops'</span><span class="o">]</span>
+          <span class="n">aws</span><span class="o">.</span><span class="n">block_device_mapping</span> <span class="o">=</span> <span class="o">[</span><span class="p">{</span> <span class="s1">'DeviceName'</span> <span class="o">=&gt;</span> <span class="s1">'/dev/sda1'</span><span class="p">,</span> <span class="s1">'Ebs.VolumeSize'</span> <span class="o">=&gt;</span> <span class="mi">100</span><span class="p">,</span> <span class="s1">'Ebs.VolumeType'</span> <span class="o">=&gt;</span> <span class="s1">'io1'</span><span class="p">,</span> <span class="s1">'Ebs.Iops'</span> <span class="o">=&gt;</span> <span class="mi">3000</span> <span class="p">}</span><span class="o">]</span>
         <span class="k">else</span>
-          <span class="n">aws</span><span class="o">.</span><span class="n">block_device_mapping</span> <span class="o">=</span> <span class="o">[</span><span class="p">{</span> <span class="s1">&#39;DeviceName&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;/dev/sda1&#39;</span><span class="p">,</span> <span class="s1">&#39;Ebs.VolumeSize&#39;</span> <span class="o">=&gt;</span> <span class="mi">16</span><span class="p">,</span> <span class="s1">&#39;Ebs.VolumeType&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;gp2&#39;</span> <span class="p">}</span><span class="o">]</span>
+          <span class="n">aws</span><span class="o">.</span><span class="n">block_device_mapping</span> <span class="o">=</span> <span class="o">[</span><span class="p">{</span> <span class="s1">'DeviceName'</span> <span class="o">=&gt;</span> <span class="s1">'/dev/sda1'</span><span class="p">,</span> <span class="s1">'Ebs.VolumeSize'</span> <span class="o">=&gt;</span> <span class="mi">16</span><span class="p">,</span> <span class="s1">'Ebs.VolumeType'</span> <span class="o">=&gt;</span> <span class="s1">'gp2'</span> <span class="p">}</span><span class="o">]</span>
         <span class="k">end</span>
 
-        <span class="n">override</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">box</span> <span class="o">=</span> <span class="s2">&quot;dummy&quot;</span>
-        <span class="n">override</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">box_url</span> <span class="o">=</span> <span class="s2">&quot;https://github.com/mitchellh/vagrant-aws/raw/master/dummy.box&quot;</span>
-        <span class="n">override</span><span class="o">.</span><span class="n">ssh</span><span class="o">.</span><span class="n">username</span> <span class="o">=</span> <span class="s2">&quot;ubuntu&quot;</span>
-        <span class="n">override</span><span class="o">.</span><span class="n">ssh</span><span class="o">.</span><span class="n">private_key_path</span> <span class="o">=</span> <span class="s2">&quot;./YOURKEYPAIRNAME.pem&quot;</span>
-        <span class="n">override</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">synced_folder</span> <span class="s2">&quot;/etc/sslcerts&quot;</span><span class="p">,</span> <span class="s2">&quot;/tmp/sourcecode&quot;</span><span class="p">,</span> <span class="ss">type</span><span class="p">:</span> <span class="s2">&quot;rsync&quot;</span><span class="p">,</span> <span class="ss">create</span><span class="p">:</span> <span class="kp">true</span><span class="p">,</span> <span class="ss">rsync__exclude</span><span class="p">:</span> <span class="s2">&quot;.git/&quot;</span>
+        <span class="n">override</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">box</span> <span class="o">=</span> <span class="s2">"dummy"</span>
+        <span class="n">override</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">box_url</span> <span class="o">=</span> <span class="s2">"https://github.com/mitchellh/vagrant-aws/raw/master/dummy.box"</span>
+        <span class="n">override</span><span class="o">.</span><span class="n">ssh</span><span class="o">.</span><span class="n">username</span> <span class="o">=</span> <span class="s2">"ubuntu"</span>
+        <span class="n">override</span><span class="o">.</span><span class="n">ssh</span><span class="o">.</span><span class="n">private_key_path</span> <span class="o">=</span> <span class="s2">"./YOURKEYPAIRNAME.pem"</span>
+        <span class="n">override</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">synced_folder</span> <span class="s2">"/etc/sslcerts"</span><span class="p">,</span> <span class="s2">"/tmp/sourcecode"</span><span class="p">,</span> <span class="ss">type</span><span class="p">:</span> <span class="s2">"rsync"</span><span class="p">,</span> <span class="ss">create</span><span class="p">:</span> <span class="kp">true</span><span class="p">,</span> <span class="ss">rsync__exclude</span><span class="p">:</span> <span class="s2">".git/"</span>
     <span class="k">end</span>
-    <span class="n">config</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">provision</span> <span class="ss">:shell</span><span class="p">,</span> <span class="ss">:inline</span> <span class="o">=&gt;</span> <span class="s2">&quot;echo `hostname -f` &gt;&gt; /home/ubuntu/currenthostname.txt&quot;</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">provision</span> <span class="ss">:shell</span><span class="p">,</span> <span class="ss">:inline</span> <span class="o">=&gt;</span> <span class="s2">"echo `hostname -f` &gt;&gt; /home/ubuntu/currenthostname.txt"</span>
     <span class="n">config</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">provision</span> <span class="ss">:shell</span><span class="p">,</span> <span class="ss">:inline</span> <span class="o">=&gt;</span> <span class="vg">$fqdnscript</span>
 <span class="k">end</span>
 
-<span class="no">Bringing</span> <span class="n">machine</span> <span class="s1">&#39;default&#39;</span> <span class="n">up</span> <span class="n">with</span> <span class="s1">&#39;aws&#39;</span> <span class="n">provider</span><span class="o">...</span>
+<span class="no">Bringing</span> <span class="n">machine</span> <span class="s1">'default'</span> <span class="n">up</span> <span class="n">with</span> <span class="s1">'aws'</span> <span class="n">provider</span><span class="o">...</span>
 <span class="o">==&gt;</span> <span class="ss">default</span><span class="p">:</span> <span class="no">Running</span> <span class="ss">provisioner</span><span class="p">:</span> <span class="n">shell</span><span class="o">...</span>
 <span class="o">==&gt;</span> <span class="ss">default</span><span class="p">:</span> <span class="ss">Running</span><span class="p">:</span> <span class="n">inline</span> <span class="n">script</span>
 <span class="ss">stdin</span><span class="p">:</span> <span class="n">is</span> <span class="ow">not</span> <span class="n">a</span> <span class="n">ttty</span>
 <span class="n">I</span> <span class="n">am</span> <span class="n">provisioning</span> <span class="ow">and</span> <span class="n">updating</span> <span class="n">hostname</span><span class="o">...</span>
 </code></pre></div>
-
 <blockquote>
 <p>synced_folder is to sync other folders in your filesystem besides the folder with the Vagrantfile</p>
 <p>config.vm.hostname does not appear to work on AWS EC2 so the workaround above (|| statements to prevent extra reconfiguration)</p>
@@ -251,53 +263,52 @@ config.vm.provision &quot;shell&quot;, path: &quot;https://example.com/script.sh
 <li><a href="https://github.com/mitchellh/vagrant-aws">https://github.com/mitchellh/vagrant-aws</a></li>
 <li><a href="http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/block-device-mapping-concepts.html">http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/block-device-mapping-concepts.html</a></li>
 </ul>
-<h3>Vagrant and EC2 VPC (AMI that does not have/allow sudo)</h3>
+<h3 id="vagrant-and-ec2-vpc-ami-that-does-not-haveallow-sudo">Vagrant and EC2 VPC (AMI that does not have/allow sudo)</h3>
 <div class="highlight"><pre><span></span><code><span class="c1"># -*- mode: ruby -*-</span>
 <span class="c1"># vi: set ft=ruby :</span>
 
-<span class="no">Vagrant</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span><span class="s2">&quot;2&quot;</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span>
-    <span class="n">config</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">box</span> <span class="o">=</span> <span class="s2">&quot;dummy&quot;</span>
+<span class="no">Vagrant</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span><span class="s2">"2"</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">box</span> <span class="o">=</span> <span class="s2">"dummy"</span>
 
     <span class="n">config</span><span class="o">.</span><span class="n">ssh</span><span class="o">.</span><span class="n">pty</span> <span class="o">=</span> <span class="kp">true</span>
-    <span class="n">config</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">synced_folder</span> <span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="s2">&quot;/vagrant&quot;</span><span class="p">,</span> <span class="ss">disabled</span><span class="p">:</span> <span class="kp">true</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">synced_folder</span> <span class="s2">"."</span><span class="p">,</span> <span class="s2">"/vagrant"</span><span class="p">,</span> <span class="ss">disabled</span><span class="p">:</span> <span class="kp">true</span>
 
     <span class="n">config</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">provider</span> <span class="ss">:aws</span> <span class="k">do</span> <span class="o">|</span><span class="n">aws</span><span class="p">,</span> <span class="n">override</span><span class="o">|</span>
 
-        <span class="n">aws</span><span class="o">.</span><span class="n">access_key_id</span> <span class="o">=</span> <span class="s2">&quot;YOURACCESSKEY&quot;</span>
-        <span class="n">aws</span><span class="o">.</span><span class="n">secret_access_key</span> <span class="o">=</span> <span class="s2">&quot;YOURSECRETKEY&quot;</span>
-        <span class="n">aws</span><span class="o">.</span><span class="n">keypair_name</span> <span class="o">=</span> <span class="s2">&quot;YOURKEYPAIRNAME&quot;</span>
-        <span class="n">aws</span><span class="o">.</span><span class="n">ami</span> <span class="o">=</span> <span class="s2">&quot;ami-7747d01e&quot;</span>
+        <span class="n">aws</span><span class="o">.</span><span class="n">access_key_id</span> <span class="o">=</span> <span class="s2">"YOURACCESSKEY"</span>
+        <span class="n">aws</span><span class="o">.</span><span class="n">secret_access_key</span> <span class="o">=</span> <span class="s2">"YOURSECRETKEY"</span>
+        <span class="n">aws</span><span class="o">.</span><span class="n">keypair_name</span> <span class="o">=</span> <span class="s2">"YOURKEYPAIRNAME"</span>
+        <span class="n">aws</span><span class="o">.</span><span class="n">ami</span> <span class="o">=</span> <span class="s2">"ami-7747d01e"</span>
         <span class="n">aws</span><span class="o">.</span><span class="n">instance_ready_timeout</span> <span class="o">=</span> <span class="mi">300</span>
-        <span class="n">aws</span><span class="o">.</span><span class="n">instance_type</span> <span class="o">=</span> <span class="s2">&quot;m4.large&quot;</span>
+        <span class="n">aws</span><span class="o">.</span><span class="n">instance_type</span> <span class="o">=</span> <span class="s2">"m4.large"</span>
         <span class="n">aws</span><span class="o">.</span><span class="n">tags</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s2">&quot;Name&quot;</span> <span class="o">=&gt;</span> <span class="s2">&quot;MyCloudInstance&quot;</span><span class="p">,</span>
+            <span class="s2">"Name"</span> <span class="o">=&gt;</span> <span class="s2">"MyCloudInstance"</span><span class="p">,</span>
         <span class="p">}</span>
-        <span class="n">aws</span><span class="o">.</span><span class="n">security_groups</span> <span class="o">=</span> <span class="o">[</span> <span class="s2">&quot;my_aws_security_group_id&quot;</span> <span class="o">]</span>
-        <span class="n">aws</span><span class="o">.</span><span class="n">subnet_id</span> <span class="o">=</span> <span class="s2">&quot;my_aws_subnet_id&quot;</span>
+        <span class="n">aws</span><span class="o">.</span><span class="n">security_groups</span> <span class="o">=</span> <span class="o">[</span> <span class="s2">"my_aws_security_group_id"</span> <span class="o">]</span>
+        <span class="n">aws</span><span class="o">.</span><span class="n">subnet_id</span> <span class="o">=</span> <span class="s2">"my_aws_subnet_id"</span>
         <span class="n">aws</span><span class="o">.</span><span class="n">associate_public_ip</span> <span class="o">=</span> <span class="kp">true</span>
 
-        <span class="n">aws</span><span class="o">.</span><span class="n">user_data</span> <span class="o">=</span> <span class="s2">&quot;#cloud-boothook</span><span class="se">\n</span><span class="s2">#!/bin/bash</span><span class="se">\n</span><span class="s2">touch /opt/.license/.eula</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="n">aws</span><span class="o">.</span><span class="n">user_data</span> <span class="o">=</span> <span class="s2">"#cloud-boothook</span><span class="se">\n</span><span class="s2">#!/bin/bash</span><span class="se">\n</span><span class="s2">touch /opt/.license/.eula</span><span class="se">\n</span><span class="s2">"</span>
 
-        <span class="n">override</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">box</span> <span class="o">=</span> <span class="s2">&quot;dummy&quot;</span>
-        <span class="n">override</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">box_url</span> <span class="o">=</span> <span class="s2">&quot;https://github.com/mitchellh/vagrant-aws/raw/master/dummy.box&quot;</span>
+        <span class="n">override</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">box</span> <span class="o">=</span> <span class="s2">"dummy"</span>
+        <span class="n">override</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">box_url</span> <span class="o">=</span> <span class="s2">"https://github.com/mitchellh/vagrant-aws/raw/master/dummy.box"</span>
 
-        <span class="n">override</span><span class="o">.</span><span class="n">ssh</span><span class="o">.</span><span class="n">username</span> <span class="o">=</span> <span class="s2">&quot;ubuntu&quot;</span>
-        <span class="n">override</span><span class="o">.</span><span class="n">ssh</span><span class="o">.</span><span class="n">private_key_path</span> <span class="o">=</span> <span class="s2">&quot;/home/ubuntu/my_aws.pem&quot;</span>
+        <span class="n">override</span><span class="o">.</span><span class="n">ssh</span><span class="o">.</span><span class="n">username</span> <span class="o">=</span> <span class="s2">"ubuntu"</span>
+        <span class="n">override</span><span class="o">.</span><span class="n">ssh</span><span class="o">.</span><span class="n">private_key_path</span> <span class="o">=</span> <span class="s2">"/home/ubuntu/my_aws.pem"</span>
     <span class="k">end</span>
 <span class="k">end</span>
 </code></pre></div>
-
-<hr>
+<hr/>
 <p><strong><code>vagrant up --provider=aws --no-provision --debug</code></strong></p>
-<hr>
-<div class="highlight"><pre><span></span><code><span class="n">INFO</span> <span class="n">vagrant</span><span class="o">:</span> <span class="n n-Quoted">`vagrant`</span> <span class="n">invoked</span><span class="o">:</span> <span class="err">[</span><span class="s2">&quot;up&quot;</span><span class="p">,</span> <span class="s2">&quot;--provider=aws&quot;</span><span class="p">,</span> <span class="s2">&quot;--no-provision&quot;</span><span class="p">,</span> <span class="s2">&quot;--debug&quot;</span><span class="err">]</span>
+<hr/>
+<div class="highlight"><pre><span></span><code><span class="n">INFO</span> <span class="n">vagrant</span><span class="o">:</span> <span class="n n-Quoted">`vagrant`</span> <span class="n">invoked</span><span class="o">:</span> <span class="err">[</span><span class="s2">"up"</span><span class="p">,</span> <span class="s2">"--provider=aws"</span><span class="p">,</span> <span class="s2">"--no-provision"</span><span class="p">,</span> <span class="s2">"--debug"</span><span class="err">]</span>
 
-<span class="n">Bringing</span> <span class="n">machine</span> <span class="s1">&#39;default&#39;</span> <span class="n">up</span> <span class="k">with</span> <span class="s1">&#39;aws&#39;</span> <span class="n">provider</span><span class="p">...</span>
+<span class="n">Bringing</span> <span class="n">machine</span> <span class="s1">'default'</span> <span class="n">up</span> <span class="k">with</span> <span class="s1">'aws'</span> <span class="n">provider</span><span class="p">...</span>
 <span class="o">==&gt;</span> <span class="k">default</span><span class="o">:</span> <span class="n">Launching</span> <span class="n">an</span> <span class="k">instance</span> <span class="k">with</span> <span class="n">the</span> <span class="k">following</span> <span class="k">set</span><span class="n">tings</span><span class="p">...</span>
 <span class="n">INFO</span> <span class="n">interface</span><span class="o">:</span> <span class="n">info</span><span class="o">:</span>  <span class="c1">-- Type: m4.large</span>
 <span class="n">INFO</span> <span class="n">interface</span><span class="o">:</span> <span class="n">info</span><span class="o">:</span> <span class="o">==&gt;</span> <span class="k">default</span><span class="o">:</span>  <span class="c1">-- User Data: #cloud-boothook</span>
 <span class="n">INFO</span> <span class="n">interface</span><span class="o">:</span> <span class="n">info</span><span class="o">:</span> <span class="o">==&gt;</span> <span class="k">default</span><span class="o">:</span>  <span class="c1">-- Assigning a public IP address in a VPC: true</span>
-<span class="o">==&gt;</span> <span class="k">default</span><span class="o">:</span> <span class="n">Waiting</span> <span class="k">for</span> <span class="k">instance</span> <span class="k">to</span> <span class="n">become</span> <span class="s2">&quot;ready&quot;</span><span class="p">...</span>
+<span class="o">==&gt;</span> <span class="k">default</span><span class="o">:</span> <span class="n">Waiting</span> <span class="k">for</span> <span class="k">instance</span> <span class="k">to</span> <span class="n">become</span> <span class="s2">"ready"</span><span class="p">...</span>
 <span class="o">==&gt;</span> <span class="k">default</span><span class="o">:</span> <span class="n">Waiting</span> <span class="k">for</span> <span class="n">SSH</span> <span class="k">to</span> <span class="n">become</span> <span class="n">available</span><span class="p">...</span>
 
 <span class="n">DEBUG</span> <span class="n">ssh</span><span class="o">:</span> <span class="o">==</span> <span class="n">Net</span><span class="o">-</span><span class="n">SSH</span> <span class="k">connection</span> <span class="n">debug</span><span class="o">-</span><span class="k">level</span> <span class="n">log</span> <span class="k">END</span> <span class="o">==</span>
@@ -319,7 +330,6 @@ config.vm.provision &quot;shell&quot;, path: &quot;https://example.com/script.sh
 
 <span class="n">INFO</span> <span class="n">interface</span><span class="o">:</span> <span class="n">info</span><span class="o">:</span> <span class="n">Machine</span> <span class="k">not</span> <span class="n">provisioning</span> <span class="n">because</span> <span class="n n-Quoted">`--no-provision`</span> <span class="k">is</span> <span class="n">specified</span><span class="p">.</span>
 </code></pre></div>
-
 <blockquote>
 <p>After all of that it is safe to either have <code>vagrant provision</code> or <code>vagrant ssh -c "ls -ahl"</code></p>
 </blockquote>
@@ -356,44 +366,43 @@ config.vm.provision &quot;shell&quot;, path: &quot;https://example.com/script.sh
 </ul>
 </li>
 </ul>
-<h3>VirtualBox</h3>
+<h3 id="virtualbox">VirtualBox</h3>
 <p>A really easy A way to start an Ubuntu 14.04 box locally with VirtualBox, the shell provisioner is less elegant than chef/puppet/ansible but gets the job done (installs Docker and Docker Compose)</p>
 <p><a href="https://www.virtualbox.org/wiki/Linux_Downloads">https://www.virtualbox.org/wiki/Linux_Downloads</a></p>
-<h4>Vagrantfile</h4>
+<h4 id="vagrantfile">Vagrantfile</h4>
 <div class="highlight"><pre><span></span><code><span class="nv">VERSIONS</span> <span class="o">=</span> {
-  <span class="s1">&#39;</span><span class="s">trusty</span><span class="s1">&#39;</span> <span class="o">=&gt;</span> {
-    <span class="s1">&#39;</span><span class="s">box</span><span class="s1">&#39;</span> <span class="o">=&gt;</span> <span class="s2">&quot;</span><span class="s">canonical-ubuntu-14.04</span><span class="s2">&quot;</span>,
-    <span class="s1">&#39;</span><span class="s">box_url</span><span class="s1">&#39;</span> <span class="o">=&gt;</span> <span class="s2">&quot;</span><span class="s">https://cloud-images.ubuntu.com/vagrant/trusty/current/trusty-server-cloudimg-amd64-vagrant-disk1.box</span><span class="s2">&quot;</span>,
-    <span class="s1">&#39;</span><span class="s">ami</span><span class="s1">&#39;</span> <span class="o">=&gt;</span> <span class="s2">&quot;</span><span class="s">ami-018c9568</span><span class="s2">&quot;</span>,
+  <span class="s1">'</span><span class="s">trusty</span><span class="s1">'</span> <span class="o">=&gt;</span> {
+    <span class="s1">'</span><span class="s">box</span><span class="s1">'</span> <span class="o">=&gt;</span> <span class="s2">"</span><span class="s">canonical-ubuntu-14.04</span><span class="s2">"</span>,
+    <span class="s1">'</span><span class="s">box_url</span><span class="s1">'</span> <span class="o">=&gt;</span> <span class="s2">"</span><span class="s">https://cloud-images.ubuntu.com/vagrant/trusty/current/trusty-server-cloudimg-amd64-vagrant-disk1.box</span><span class="s2">"</span>,
+    <span class="s1">'</span><span class="s">ami</span><span class="s1">'</span> <span class="o">=&gt;</span> <span class="s2">"</span><span class="s">ami-018c9568</span><span class="s2">"</span>,
   },
 }
 
 
-<span class="nv">Vagrant</span>.<span class="nv">configure</span><span class="ss">(</span><span class="s2">&quot;</span><span class="s">2</span><span class="s2">&quot;</span><span class="ss">)</span> <span class="k">do</span> <span class="o">|</span><span class="nv">config</span><span class="o">|</span>
+<span class="nv">Vagrant</span>.<span class="nv">configure</span><span class="ss">(</span><span class="s2">"</span><span class="s">2</span><span class="s2">"</span><span class="ss">)</span> <span class="k">do</span> <span class="o">|</span><span class="nv">config</span><span class="o">|</span>
     <span class="nv">config</span>.<span class="nv">ssh</span>.<span class="nv">forward_agent</span> <span class="o">=</span> <span class="nv">true</span>
 
-    <span class="nv">version</span> <span class="o">=</span> <span class="nv">VERSIONS</span>[<span class="ss">(</span><span class="s2">&quot;</span><span class="s">trusty</span><span class="s2">&quot;</span><span class="ss">)</span>]
+    <span class="nv">version</span> <span class="o">=</span> <span class="nv">VERSIONS</span>[<span class="ss">(</span><span class="s2">"</span><span class="s">trusty</span><span class="s2">"</span><span class="ss">)</span>]
 
-    <span class="nv">config</span>.<span class="nv">vm</span>.<span class="nv">provider</span> <span class="s2">&quot;</span><span class="s">virtualbox</span><span class="s2">&quot;</span> <span class="k">do</span> <span class="o">|</span><span class="nv">v</span>, <span class="nv">override</span><span class="o">|</span>
-      <span class="nv">v</span>.<span class="nv">customize</span> [<span class="s2">&quot;</span><span class="s">modifyvm</span><span class="s2">&quot;</span>, :<span class="nv">id</span>, <span class="s2">&quot;</span><span class="s">--memory</span><span class="s2">&quot;</span>, <span class="nv">ENV</span>[<span class="s1">&#39;</span><span class="s">VM_MEMORY</span><span class="s1">&#39;</span>] <span class="o">||</span> <span class="mi">4096</span>]
-      <span class="nv">v</span>.<span class="nv">customize</span> [<span class="s2">&quot;</span><span class="s">modifyvm</span><span class="s2">&quot;</span>, :<span class="nv">id</span>, <span class="s2">&quot;</span><span class="s">--cpus</span><span class="s2">&quot;</span>, <span class="nv">ENV</span>[<span class="s1">&#39;</span><span class="s">VM_CPUS</span><span class="s1">&#39;</span>] <span class="o">||</span> <span class="mi">2</span>]
+    <span class="nv">config</span>.<span class="nv">vm</span>.<span class="nv">provider</span> <span class="s2">"</span><span class="s">virtualbox</span><span class="s2">"</span> <span class="k">do</span> <span class="o">|</span><span class="nv">v</span>, <span class="nv">override</span><span class="o">|</span>
+      <span class="nv">v</span>.<span class="nv">customize</span> [<span class="s2">"</span><span class="s">modifyvm</span><span class="s2">"</span>, :<span class="nv">id</span>, <span class="s2">"</span><span class="s">--memory</span><span class="s2">"</span>, <span class="nv">ENV</span>[<span class="s1">'</span><span class="s">VM_MEMORY</span><span class="s1">'</span>] <span class="o">||</span> <span class="mi">4096</span>]
+      <span class="nv">v</span>.<span class="nv">customize</span> [<span class="s2">"</span><span class="s">modifyvm</span><span class="s2">"</span>, :<span class="nv">id</span>, <span class="s2">"</span><span class="s">--cpus</span><span class="s2">"</span>, <span class="nv">ENV</span>[<span class="s1">'</span><span class="s">VM_CPUS</span><span class="s1">'</span>] <span class="o">||</span> <span class="mi">2</span>]
 
-      <span class="nv">override</span>.<span class="nv">vm</span>.<span class="nv">network</span> :<span class="nv">private_network</span>, <span class="nv">ip</span>: <span class="s2">&quot;</span><span class="s">192.168.33.10</span><span class="s2">&quot;</span>
-      <span class="nv">override</span>.<span class="nv">vm</span>.<span class="nv">box</span> <span class="o">=</span> <span class="nv">version</span>[<span class="s1">&#39;</span><span class="s">box</span><span class="s1">&#39;</span>]
-      <span class="nv">override</span>.<span class="nv">vm</span>.<span class="nv">box_url</span> <span class="o">=</span> <span class="nv">version</span>[<span class="s1">&#39;</span><span class="s">box_url</span><span class="s1">&#39;</span>]
+      <span class="nv">override</span>.<span class="nv">vm</span>.<span class="nv">network</span> :<span class="nv">private_network</span>, <span class="nv">ip</span>: <span class="s2">"</span><span class="s">192.168.33.10</span><span class="s2">"</span>
+      <span class="nv">override</span>.<span class="nv">vm</span>.<span class="nv">box</span> <span class="o">=</span> <span class="nv">version</span>[<span class="s1">'</span><span class="s">box</span><span class="s1">'</span>]
+      <span class="nv">override</span>.<span class="nv">vm</span>.<span class="nv">box_url</span> <span class="o">=</span> <span class="nv">version</span>[<span class="s1">'</span><span class="s">box_url</span><span class="s1">'</span>]
     <span class="k">end</span>
 
-    <span class="nv">config</span>.<span class="nv">vm</span>.<span class="nv">provision</span> :<span class="nv">shell</span>, :<span class="nv">inline</span> <span class="o">=&gt;</span> <span class="s2">&quot;</span><span class="s">sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 36A1D7869245C8950F966E92D8576A8BA88D21E9</span><span class="s2">&quot;</span>
-    <span class="nv">config</span>.<span class="nv">vm</span>.<span class="nv">provision</span> :<span class="nv">shell</span>, :<span class="nv">inline</span> <span class="o">=&gt;</span> <span class="s2">&quot;</span><span class="s">sudo sh -c &#39;echo deb https://get.docker.io/ubuntu docker main &gt; /etc/apt/sources.list.d/docker.list&#39;</span><span class="s2">&quot;</span>
-    <span class="nv">config</span>.<span class="nv">vm</span>.<span class="nv">provision</span> :<span class="nv">shell</span>, :<span class="nv">inline</span> <span class="o">=&gt;</span> <span class="s2">&quot;</span><span class="s">sudo apt-get update</span><span class="s2">&quot;</span>
-    <span class="nv">config</span>.<span class="nv">vm</span>.<span class="nv">provision</span> :<span class="nv">shell</span>, :<span class="nv">inline</span> <span class="o">=&gt;</span> <span class="s2">&quot;</span><span class="s">sudo apt-get install -y lxc-docker python-pip</span><span class="s2">&quot;</span>
-    <span class="nv">config</span>.<span class="nv">vm</span>.<span class="nv">provision</span> :<span class="nv">shell</span>, :<span class="nv">inline</span> <span class="o">=&gt;</span> <span class="s2">&quot;</span><span class="s">sudo pip install --upgrade pip</span><span class="s2">&quot;</span>
-    <span class="nv">config</span>.<span class="nv">vm</span>.<span class="nv">provision</span> :<span class="nv">shell</span>, :<span class="nv">inline</span> <span class="o">=&gt;</span> <span class="s2">&quot;</span><span class="s">sudo pip install --upgrade docker-compose</span><span class="s2">&quot;</span>
+    <span class="nv">config</span>.<span class="nv">vm</span>.<span class="nv">provision</span> :<span class="nv">shell</span>, :<span class="nv">inline</span> <span class="o">=&gt;</span> <span class="s2">"</span><span class="s">sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 36A1D7869245C8950F966E92D8576A8BA88D21E9</span><span class="s2">"</span>
+    <span class="nv">config</span>.<span class="nv">vm</span>.<span class="nv">provision</span> :<span class="nv">shell</span>, :<span class="nv">inline</span> <span class="o">=&gt;</span> <span class="s2">"</span><span class="s">sudo sh -c 'echo deb https://get.docker.io/ubuntu docker main &gt; /etc/apt/sources.list.d/docker.list'</span><span class="s2">"</span>
+    <span class="nv">config</span>.<span class="nv">vm</span>.<span class="nv">provision</span> :<span class="nv">shell</span>, :<span class="nv">inline</span> <span class="o">=&gt;</span> <span class="s2">"</span><span class="s">sudo apt-get update</span><span class="s2">"</span>
+    <span class="nv">config</span>.<span class="nv">vm</span>.<span class="nv">provision</span> :<span class="nv">shell</span>, :<span class="nv">inline</span> <span class="o">=&gt;</span> <span class="s2">"</span><span class="s">sudo apt-get install -y lxc-docker python-pip</span><span class="s2">"</span>
+    <span class="nv">config</span>.<span class="nv">vm</span>.<span class="nv">provision</span> :<span class="nv">shell</span>, :<span class="nv">inline</span> <span class="o">=&gt;</span> <span class="s2">"</span><span class="s">sudo pip install --upgrade pip</span><span class="s2">"</span>
+    <span class="nv">config</span>.<span class="nv">vm</span>.<span class="nv">provision</span> :<span class="nv">shell</span>, :<span class="nv">inline</span> <span class="o">=&gt;</span> <span class="s2">"</span><span class="s">sudo pip install --upgrade docker-compose</span><span class="s2">"</span>
 
 <span class="k">end</span>
 </code></pre></div>
-
-<h3>more info</h3>
+<h3 id="more-info">more info</h3>
 <p><code>ps aux | grep vagrant</code></p>
 <blockquote>
 <p>nothing to see here but there is still state for machines started...</p>
@@ -403,10 +412,9 @@ vagrant global-status --prune
 rm -rf .vagrant
 rm -rf /home/ubuntu/.vagrant.d
 </code></pre></div>
-
 <p><em>If you use vagrant 1.7 don not be surprised if you see errors related to SSL, 1.6.3 FTW</em></p>
 <p><a href="https://github.com/mitchellh/vagrant-aws">https://github.com/mitchellh/vagrant-aws</a></p>
-<h3>Troubleshooting</h3>
+<h3 id="troubleshooting">Troubleshooting</h3>
 <p><code>vagrant up --provider=aws --debug</code></p>
 <blockquote>
 <p>ERROR: The provider 'aws' could not be found, but was requested to back the machine 'default'. Please use a provider that exists.</p>
@@ -437,7 +445,7 @@ rm -rf /home/ubuntu/.vagrant.d
             <time pubdate="pubdate" datetime="2014-07-16T21:12:00-07:00">Jul 16, 2014</time>
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#virtualization-ref">virtualization</a> 
-            <h4>~1487 words</h4>
+            <h4>~1486 words</h4>
 
         </div>
         </section>

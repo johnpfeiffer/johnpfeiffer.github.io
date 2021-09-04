@@ -61,9 +61,32 @@
 </div>
 
 <div class="row-fluid">
-        <div class="span8 offset2 article-content">
+    <div class="span2 table-of-content">
+        <nav>
+        <h4>Contents</h4>
+        <div class="toc"><span class="toctitle">Table of Contents</span><ul>
+<li><a href="#getting-started-with-alpine-linux-in-docker">Getting started with Alpine Linux in Docker</a></li>
+<li><a href="#basics">Basics</a></li>
+<li><a href="#package-management">Package Management</a></li>
+<li><a href="#networking">Networking</a></li>
+<li><a href="#compiling-c-on-alpine-linux">Compiling C on Alpine Linux</a><ul>
+<li><a href="#hic">hi.c</a></li>
+<li><a href="#compiling">compiling</a></li>
+<li><a href="#incomplete-musl-compiler-on-alpine-linux">Incomplete musl compiler on alpine linux</a></li>
+</ul>
+</li>
+<li><a href="#apk-add-musl-dev-wget-tar-gzip-gcc-make">apk add musl-dev wget tar gzip gcc make</a><ul>
+<li><a href="#compile-go-on-alpine-linux">Compile Go on Alpine Linux</a></li>
+<li><a href="#git-with-alpine">Git with Alpine</a></li>
+</ul>
+</li>
+</ul>
+</div>
+        </nav>
+    </div>
+    <div class="span8 article-content">
 
-            <p>[TOC]</p>
+            
 <p>Alpine Linux is a minimalist secure linux distro.</p>
 <blockquote>
 <p>In security terms less "footprint" often means less vectors of attack and less complexity to analyze for vulnerabilities</p>
@@ -74,17 +97,16 @@
 <li><a href="https://news.ycombinator.com/item?id=10998667">https://news.ycombinator.com/item?id=10998667</a></li>
 <li><a href="https://en.wikipedia.org/wiki/Alpine_Linux">https://en.wikipedia.org/wiki/Alpine_Linux</a></li>
 </ul>
-<h3>Getting started with Alpine Linux in Docker</h3>
+<h3 id="getting-started-with-alpine-linux-in-docker">Getting started with Alpine Linux in Docker</h3>
 <p>This will pull the latest alpine image (around 4MB) and run it in an ephemeral container.</p>
 <p><code>sudo docker run -it --rm alpine /bin/sh</code></p>
 <ul>
 <li><a href="https://hub.docker.com/_/alpine/">https://hub.docker.com/_/alpine/</a></li>
 </ul>
-<h3>Basics</h3>
+<h3 id="basics">Basics</h3>
 <p>Most of the very basic commands are similar to other linux distros like Debian/Ubuntu/Redhat, but of course there are differences ;)</p>
 <div class="highlight"><pre><span></span><code>ls -l /bin/sh
 </code></pre></div>
-
 <blockquote>
 <p>/bin/busybox</p>
 </blockquote>
@@ -94,21 +116,18 @@ vi /etc/passwd
 grep root /etc/passwd
 ls -l /usr/bin /usr/sbin | more
 </code></pre></div>
-
 <blockquote>
 <p>more busybox</p>
 </blockquote>
-<h3>Package Management</h3>
+<h3 id="package-management">Package Management</h3>
 <div class="highlight"><pre><span></span><code>apk update
 apk --help
 </code></pre></div>
-
 <blockquote>
 <p>update the local index for all remote packages, list the options of the package manager</p>
 </blockquote>
 <div class="highlight"><pre><span></span><code>apk info
 </code></pre></div>
-
 <blockquote>
 <p>list all of the packages installed locally</p>
 </blockquote>
@@ -117,7 +136,6 @@ apk search curl | sort
 apk info curl
 apk add curl
 </code></pre></div>
-
 <blockquote>
 <p>search the remote packages for a keyword (unsorted results), get info for a specific package, install a specific package</p>
 </blockquote>
@@ -125,7 +143,7 @@ apk add curl
 <li><a href="http://wiki.alpinelinux.org/wiki/Alpine_Linux_package_management">http://wiki.alpinelinux.org/wiki/Alpine_Linux_package_management</a></li>
 <li><a href="https://pkgs.alpinelinux.org/packages">https://pkgs.alpinelinux.org/packages</a></li>
 </ul>
-<h3>Networking</h3>
+<h3 id="networking">Networking</h3>
 <div class="highlight"><pre><span></span><code>hostname
 cat /etc/resolv.conf
 ifconfig
@@ -134,41 +152,36 @@ netstat -anp
 traceroute
 apk add iptables
 </code></pre></div>
-
-<h3>Compiling C on Alpine Linux</h3>
+<h3 id="compiling-c-on-alpine-linux">Compiling C on Alpine Linux</h3>
 <div class="highlight"><pre><span></span><code>apk add build-base gcc abuild binutils
 </code></pre></div>
-
 <p><em>This should probably be part of a Dockerfile rather than run every time in an ephemeral container</em></p>
 <p><a href="https://wiki.alpinelinux.org/wiki/How_to_get_regular_stuff_working#Compiling_:_a_few_notes_and_a_reminder">https://wiki.alpinelinux.org/wiki/How_to_get_regular_stuff_working#Compiling_:_a_few_notes_and_a_reminder</a></p>
 <p><code>vi hi.c</code></p>
-<h4>hi.c</h4>
+<h4 id="hic">hi.c</h4>
 <div class="highlight"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;stdio.h&gt;</span><span class="cp"></span>
 
 <span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"></span>
 <span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;hi&quot;</span><span class="p">);</span><span class="w"></span>
+<span class="w">  </span><span class="n">printf</span><span class="p">(</span><span class="s">"hi"</span><span class="p">);</span><span class="w"></span>
 <span class="p">}</span><span class="w"></span>
 </code></pre></div>
-
-<h4>compiling</h4>
+<h4 id="compiling">compiling</h4>
 <div class="highlight"><pre><span></span><code>apk add file
 gcc -static hi.c
 chmod +x a.out
 file a.out
 </code></pre></div>
-
 <blockquote>
 <p>The default is a.out: ELF 64-bit LSB executable, x86-64, version 1 (SYSV), statically linked, not stripped</p>
 </blockquote>
 <div class="highlight"><pre><span></span><code>./a.out
 </code></pre></div>
-
 <p><code>hi</code></p>
 <blockquote>
 <p>Note that this was just gcc not musl-gcc :(</p>
 </blockquote>
-<h4>Incomplete musl compiler on alpine linux</h4>
+<h4 id="incomplete-musl-compiler-on-alpine-linux">Incomplete musl compiler on alpine linux</h4>
 <blockquote>
 <p>WARNING: below did not work, TODO: <a href="https://bitbucket.org/GregorR/musl-cross">https://bitbucket.org/GregorR/musl-cross</a></p>
 </blockquote>
@@ -176,15 +189,13 @@ file a.out
 <div class="highlight"><pre><span></span><code>apk update
 apk add wget tar gzip gcc make
 </code></pre></div>
-
-<h1>apk add musl-dev wget tar gzip gcc make</h1>
+<h1 id="apk-add-musl-dev-wget-tar-gzip-gcc-make">apk add musl-dev wget tar gzip gcc make</h1>
 <div class="highlight"><pre><span></span><code>wget --no-check-certificate http://www.musl-libc.org/releases/musl-1.1.15.tar.gz
 tar xf musl-1.1.15.tar.gz
 cd musl-1.1.15
 ./configure
 make install
 </code></pre></div>
-
 <blockquote>
 <p>Now we've installed the musl compiler?</p>
 </blockquote>
@@ -198,26 +209,24 @@ make install
 </ul>
 <p>But maybe because it's already an alpine linux container the gcc already uses musl instead of libc and does not need the musl-gcc wrapper?</p>
 <p><a href="http://www.guidesbyeric.com/statically-link-c-programs-with-musl-gcc">http://www.guidesbyeric.com/statically-link-c-programs-with-musl-gcc</a></p>
-<h3>Compile Go on Alpine Linux</h3>
+<h3 id="compile-go-on-alpine-linux">Compile Go on Alpine Linux</h3>
 <p>Just use the golang image based on alpine linux ;)</p>
 <p><a href="https://github.com/docker-library/docs/tree/master/golang">https://github.com/docker-library/docs/tree/master/golang</a></p>
 <div class="highlight"><pre><span></span><code>docker pull golang:alpine
 docker run -it --rm golang:alpine /bin/sh
 </code></pre></div>
-
 <blockquote>
 <p>Now that we've got the container running we can use the shell</p>
 </blockquote>
 <p><code>vi intro.go</code></p>
 <div class="highlight"><pre><span></span><code><span class="n">package</span> <span class="n">main</span>
 
-<span class="kn">import</span> <span class="s2">&quot;fmt&quot;</span>
+<span class="kn">import</span> <span class="s2">"fmt"</span>
 
 <span class="n">func</span> <span class="n">main</span><span class="p">()</span> <span class="p">{</span>
-  <span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="s2">&quot;hi&quot;</span><span class="p">)</span>
+  <span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="s2">"hi"</span><span class="p">)</span>
 <span class="p">}</span>
 </code></pre></div>
-
 <blockquote>
 <p>To just run the source code <code>go run intro.go</code></p>
 </blockquote>
@@ -227,11 +236,10 @@ go build intro.go
 ls -l
 ./intro
 </code></pre></div>
-
 <p><code>hi</code></p>
 <p>Maybe </p>
 <p><a href="http://dominik.honnef.co/posts/2015/06/go-musl/">http://dominik.honnef.co/posts/2015/06/go-musl/</a> ?</p>
-<h3>Git with Alpine</h3>
+<h3 id="git-with-alpine">Git with Alpine</h3>
 <div class="highlight"><pre><span></span><code>apk update
 apk add --no-cache git
 git --version
@@ -255,7 +263,7 @@ git --version
             <time pubdate="pubdate" datetime="2016-02-28T21:19:00-08:00">Feb 28, 2016</time>
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#linux-ref">linux</a> 
-            <h4>~471 words</h4>
+            <h4>~470 words</h4>
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article"> 
                 <li><a href="/tags.html#alpine-ref">alpine

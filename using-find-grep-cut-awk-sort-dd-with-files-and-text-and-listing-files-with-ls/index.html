@@ -61,27 +61,61 @@
 </div>
 
 <div class="row-fluid">
-        <div class="span8 offset2 article-content">
+    <div class="span2 table-of-content">
+        <nav>
+        <h4>Contents</h4>
+        <div class="toc"><span class="toctitle">Table of Contents</span><ul>
+<li><a href="#create-copy-truncate">create copy truncate</a></li>
+<li><a href="#ls-lists-files-in-a-directory">ls lists files in a directory</a><ul>
+<li><a href="#list-directories">list directories</a></li>
+<li><a href="#counting-the-listings">counting the listings</a></li>
+<li><a href="#sorting-by-size-or-timestamp">sorting by size or timestamp</a></li>
+</ul>
+</li>
+<li><a href="#find">find</a><ul>
+<li><a href="#find-to-list-files">find to list files</a></li>
+<li><a href="#find-a-specific-file-or-types-of-files">find a specific file or types of files</a></li>
+<li><a href="#find-and-exec-to-modify-a-set-of-files">find and exec to modify a set of files</a></li>
+<li><a href="#find-files-by-modified-time">find files by modified time</a></li>
+</ul>
+</li>
+<li><a href="#grep">grep</a><ul>
+<li><a href="#grep-parameters-and-examples-explained">grep parameters and examples explained</a><ul>
+<li><a href="#useful-parameters-for-grep">Useful parameters for grep</a></li>
+<li><a href="#grep-files-without-match">grep files without match</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#cut">cut</a><ul>
+<li><a href="#cut-to-only-display-a-part-of-a-path">cut to only display a part of a path</a></li>
+</ul>
+</li>
+<li><a href="#awk">awk</a></li>
+<li><a href="#sed">sed</a></li>
+<li><a href="#dd">dd</a></li>
+</ul>
+</div>
+        </nav>
+    </div>
+    <div class="span8 article-content">
 
-            <p>[TOC]</p>
+            
 <p>There are amazing linux command line utilities that make finding and manpiulating files very easy</p>
-<h2>create copy truncate</h2>
+<h2 id="create-copy-truncate">create copy truncate</h2>
 <p>Assuming you understand the basics like:</p>
 <div class="highlight"><pre><span></span><code>touch example.txt
 </code></pre></div>
-
 <blockquote>
 <p>make an empty file named file.txt</p>
 </blockquote>
-<div class="highlight"><pre><span></span><code>echo &quot;hi&quot; &gt;&gt; example.txt
+<div class="highlight"><pre><span></span><code>echo "hi" &gt;&gt; example.txt
 </code></pre></div>
-
 <blockquote>
 <p>append the hi content into example.txt, note that a single &gt; will overwrite the contents</p>
 </blockquote>
 <div class="highlight"><pre><span></span><code>cat example.txt | tee -a example2.txt
 </code></pre></div>
-
 <blockquote>
 <ul>
 <li>display the contents of the file to the output console and also pipe the result to the <strong>tee</strong> utility which appends it to another file - tee is better than &gt;&gt; </li>
@@ -90,331 +124,278 @@
 </blockquote>
 <div class="highlight"><pre><span></span><code>:&gt; example.txt
 </code></pre></div>
-
 <blockquote>
 <p>truncate the file without disturbing any existing readers of that file (e.g. zero a log without messing up an applications ability to write to the file)</p>
 </blockquote>
 <div class="highlight"><pre><span></span><code>cp -a example.txt example2.txt
 </code></pre></div>
-
 <blockquote>
 <p>copy archive which preserves timestamp (but will also overwrite the target - in this example probably zero bytes)</p>
 </blockquote>
 <div class="highlight"><pre><span></span><code>rm example.txt
 </code></pre></div>
-
 <blockquote>
 <p>remove a file, -f forces removal without a prompt, -rf to recursively force remove a file or directory <strong>be careful</strong></p>
 </blockquote>
-<h2>ls lists files in a directory</h2>
+<h2 id="ls-lists-files-in-a-directory">ls lists files in a directory</h2>
 <div class="highlight"><pre><span></span><code>ls /etc
 </code></pre></div>
-
 <blockquote>
 <p>list the files and directories in the /etc directory</p>
 </blockquote>
 <div class="highlight"><pre><span></span><code>ls -1
 </code></pre></div>
-
 <blockquote>
 <p>lists just the names (not including hidden .dot files or directories) in the current directory</p>
 </blockquote>
 <div class="highlight"><pre><span></span><code>ls -1a
 </code></pre></div>
-
 <blockquote>
 <p>lists just the names including hidden .dot files</p>
 </blockquote>
 <div class="highlight"><pre><span></span><code>ls -ahl | grep -v IGNORETHIS
 </code></pre></div>
-
 <blockquote>
 <p>exclude lines that match IGNORETHIS</p>
 </blockquote>
 <div class="highlight"><pre><span></span><code>ls -f
 </code></pre></div>
-
 <blockquote>
 <p>unsorted list of files which is the only way to work with directories with a very large number of files</p>
 </blockquote>
-<h3>list directories</h3>
+<h3 id="list-directories">list directories</h3>
 <div class="highlight"><pre><span></span><code>ls -d */
 </code></pre></div>
-
 <blockquote>
 <p>list names of directories in the current directory</p>
 </blockquote>
 <div class="highlight"><pre><span></span><code>ls -1 -d */
 </code></pre></div>
-
 <blockquote>
 <p>using a "numeral one" parameter lists one directory name per line</p>
 </blockquote>
 <div class="highlight"><pre><span></span><code>ls -l -d */
 </code></pre></div>
-
 <blockquote>
 <p>using a "lowercase letter L" parameter lists the extended information (permissions, owner, timestamps)</p>
 </blockquote>
 <div class="highlight"><pre><span></span><code>ls -d ./*/
 </code></pre></div>
-
 <blockquote>
 <p>list names of directories in the current directory</p>
 </blockquote>
 <div class="highlight"><pre><span></span><code>echo */
 </code></pre></div>
-
 <blockquote>
 <p>lists the names of directories in the current directory</p>
 </blockquote>
 <div class="highlight"><pre><span></span><code>find -type d
 </code></pre></div>
-
 <blockquote>
 <p>find recursively starting from the current directory and display the relative path all objects of type directory</p>
 </blockquote>
 <div class="highlight"><pre><span></span><code>find /tmp -maxdepth 1 -type d
 </code></pre></div>
-
 <blockquote>
 <p>find all directories in /tmp up to 1 level deep (/tmp/foo)</p>
 </blockquote>
 <div class="highlight"><pre><span></span><code>find /tmp -maxdepth 2 -type d
 </code></pre></div>
-
 <blockquote>
 <p>find all directories in /tmp up to 2 levels deep (/tmp/foo/bar)</p>
 </blockquote>
-<h3>counting the listings</h3>
+<h3 id="counting-the-listings">counting the listings</h3>
 <div class="highlight"><pre><span></span><code>ls -1 | wc
 </code></pre></div>
-
 <blockquote>
 <p>lists just the names of non hidden files piped to word count, number one looks a lot like lowercase L (sadindeed)</p>
 </blockquote>
 <div class="highlight"><pre><span></span><code>ls -1 | wc -l
 </code></pre></div>
-
 <blockquote>
 <p>list just names and count only the lines (number one, then lowercase L)</p>
 </blockquote>
 <div class="highlight"><pre><span></span><code>ls -ahl | wc -l
 </code></pre></div>
-
 <blockquote>
 <p>counting hidden files BUT directories too</p>
 </blockquote>
-<div class="highlight"><pre><span></span><code><span class="k">for</span> <span class="nv">file</span> <span class="nv">in</span> <span class="o">/</span><span class="nv">PATH</span><span class="o">/</span><span class="nv">foo</span><span class="o">*</span><span class="c1">; do cp &quot;$file&quot; /mnt/BAR/; done</span>
+<div class="highlight"><pre><span></span><code><span class="k">for</span> <span class="nv">file</span> <span class="nv">in</span> <span class="o">/</span><span class="nv">PATH</span><span class="o">/</span><span class="nv">foo</span><span class="o">*</span><span class="c1">; do cp "$file" /mnt/BAR/; done</span>
 </code></pre></div>
-
 <blockquote>
 <p>when there are too many files in a directory: "/bin/cp: Argument list too long"
 a one liner for copying each file as a parameter</p>
 </blockquote>
-<h3>sorting by size or timestamp</h3>
+<h3 id="sorting-by-size-or-timestamp">sorting by size or timestamp</h3>
 <div class="highlight"><pre><span></span><code>ls -Sla
 </code></pre></div>
-
 <blockquote>
 <p>sort by size (largest to smallest with full details displayed, show . hidden files too)</p>
 </blockquote>
 <div class="highlight"><pre><span></span><code>ls -Slar
 </code></pre></div>
-
 <blockquote>
 <p>sort by size (reversed, so smallest to largest with full details displayed, show . hidden files too)</p>
 </blockquote>
 <div class="highlight"><pre><span></span><code>ls -Slarh
 </code></pre></div>
-
 <blockquote>
 <p>sort by size (reversed, so smallest to largest with full details displayed, show . hidden files too, human sizes like MB)</p>
 </blockquote>
 <div class="highlight"><pre><span></span><code>ls -ahtlr
 </code></pre></div>
-
 <blockquote>
 <p>sort by timestamp (reversed so oldest first, show . hidden files too, human sizes like MB)</p>
 </blockquote>
 <div class="highlight"><pre><span></span><code>ls -ahtlr | head -n3
 </code></pre></div>
-
 <blockquote>
 <p>only the 3 oldest lines</p>
 </blockquote>
 <div class="highlight"><pre><span></span><code>ls -la --time-style=full-iso foobar.txt
 </code></pre></div>
-
 <blockquote>
 <p>list the full modified timestamp
 <a href="https://www.gnu.org/software/coreutils/manual/html_node/Formatting-file-timestamps.html">https://www.gnu.org/software/coreutils/manual/html_node/Formatting-file-timestamps.html</a></p>
 </blockquote>
-<h2>find</h2>
+<h2 id="find">find</h2>
 <p>find is better than locate because locate depends on a cron job to index the file system and so may miss recent results</p>
-<h3>find to list files</h3>
+<h3 id="find-to-list-files">find to list files</h3>
 <div class="highlight"><pre><span></span><code>find -type f
 </code></pre></div>
-
 <blockquote>
 <p>find and display the relative path all objects of type file</p>
 </blockquote>
 <div class="highlight"><pre><span></span><code>find /tmp -maxdepth 1 -type f -print | wc -l
 </code></pre></div>
-
 <blockquote>
 <p>wc = count lines = files in the /tmp directory</p>
 </blockquote>
 <div class="highlight"><pre><span></span><code>find -type f -print | wc -l
 </code></pre></div>
-
 <blockquote>
 <p>to get all subdirs too</p>
 </blockquote>
-<h3>find a specific file or types of files</h3>
-<div class="highlight"><pre><span></span><code>find -name &quot;MyCProgram.c&quot;
+<h3 id="find-a-specific-file-or-types-of-files">find a specific file or types of files</h3>
+<div class="highlight"><pre><span></span><code>find -name "MyCProgram.c"
 </code></pre></div>
-
 <blockquote>
 <p>case sensitive, starts in the current directory </p>
 </blockquote>
-<div class="highlight"><pre><span></span><code>find startdirectory -name &#39;partoffileordirname&#39;
+<div class="highlight"><pre><span></span><code>find startdirectory -name 'partoffileordirname'
 </code></pre></div>
-
 <blockquote>
 <p>e.g. find /home/joe -name '.tx'
 which would return txt's as well as txv?'s</p>
 </blockquote>
-<div class="highlight"><pre><span></span><code>find / -iname &quot;MyCProgram.c&quot;
+<div class="highlight"><pre><span></span><code>find / -iname "MyCProgram.c"
 </code></pre></div>
-
 <blockquote>
 <p>case insensitive, starts from root </p>
 </blockquote>
-<div class="highlight"><pre><span></span><code>find -maxdepth 1 -not -iname &quot;MyCProgram.c&quot;
+<div class="highlight"><pre><span></span><code>find -maxdepth 1 -not -iname "MyCProgram.c"
 </code></pre></div>
-
 <blockquote>
 <p>case insensitive, starts from current directory, will search subdirectory(ies) and list all items //that do NOT match the query</p>
 </blockquote>
 <div class="highlight"><pre><span></span><code><span class="nv">find</span> . <span class="o">-</span><span class="nv">type</span> <span class="nv">f</span> <span class="o">-</span><span class="k">exec</span> <span class="nv">ls</span> <span class="o">-</span><span class="nv">s</span> {} \<span class="c1">; | sort -n -r | head -5</span>
 </code></pre></div>
-
 <blockquote>
 <p>the largest 5 files</p>
 </blockquote>
 <div class="highlight"><pre><span></span><code><span class="nv">find</span> . <span class="o">-</span><span class="nv">not</span> <span class="o">-</span><span class="nv">empty</span> <span class="o">-</span><span class="nv">type</span> <span class="nv">f</span> <span class="o">-</span><span class="k">exec</span> <span class="nv">ls</span> <span class="o">-</span><span class="nv">s</span> {} \<span class="c1">; | sort -n | head -5</span>
 </code></pre></div>
-
 <blockquote>
 <p>the smallest not empty 5 files </p>
 </blockquote>
 <div class="highlight"><pre><span></span><code>find . -type d
 </code></pre></div>
-
 <blockquote>
 <p>all directories in the current directory</p>
 </blockquote>
 <div class="highlight"><pre><span></span><code>find . -type f | wc
 </code></pre></div>
-
 <blockquote>
 <p>count the number of files (can recurse subdirectories)</p>
 </blockquote>
-<div class="highlight"><pre><span></span><code><span class="nv">find</span> . <span class="o">-</span><span class="nv">type</span> <span class="nv">f</span> <span class="o">-</span><span class="nv">iname</span> <span class="s1">&#39;</span><span class="s">*.pyc</span><span class="s1">&#39;</span> <span class="o">-</span><span class="k">exec</span> <span class="nv">mv</span> {} <span class="o">/</span><span class="nv">tmp</span><span class="o">/</span><span class="nv">PYC</span><span class="o">/</span> \<span class="c1">;</span>
+<div class="highlight"><pre><span></span><code><span class="nv">find</span> . <span class="o">-</span><span class="nv">type</span> <span class="nv">f</span> <span class="o">-</span><span class="nv">iname</span> <span class="s1">'</span><span class="s">*.pyc</span><span class="s1">'</span> <span class="o">-</span><span class="k">exec</span> <span class="nv">mv</span> {} <span class="o">/</span><span class="nv">tmp</span><span class="o">/</span><span class="nv">PYC</span><span class="o">/</span> \<span class="c1">;</span>
 </code></pre></div>
-
 <blockquote>
 <p>move all .pyc files (start from this directory and indefinitely recurse down)</p>
 </blockquote>
-<div class="highlight"><pre><span></span><code><span class="nv">find</span> . <span class="o">-</span><span class="nv">name</span> <span class="s2">&quot;</span><span class="s">*api*</span><span class="s2">&quot;</span> <span class="o">-</span><span class="k">exec</span> <span class="nv">cat</span> {} \<span class="c1">;</span>
+<div class="highlight"><pre><span></span><code><span class="nv">find</span> . <span class="o">-</span><span class="nv">name</span> <span class="s2">"</span><span class="s">*api*</span><span class="s2">"</span> <span class="o">-</span><span class="k">exec</span> <span class="nv">cat</span> {} \<span class="c1">;</span>
 </code></pre></div>
-
 <blockquote>
 <p>find everything containing api and cat it</p>
 </blockquote>
-<div class="highlight"><pre><span></span><code><span class="nv">find</span> . <span class="o">-</span><span class="nv">type</span> <span class="nv">f</span> <span class="o">-</span><span class="nv">iname</span> <span class="s1">&#39;</span><span class="s">*.yaml</span><span class="s1">&#39;</span> <span class="o">-</span><span class="k">exec</span> <span class="nv">grep</span> <span class="o">--</span><span class="nv">line</span><span class="o">-</span><span class="nv">number</span> <span class="o">--</span><span class="nv">with</span><span class="o">-</span><span class="nv">file</span> <span class="s1">&#39;</span><span class="s">needle</span><span class="s1">&#39;</span> {} \<span class="c1">;</span>
+<div class="highlight"><pre><span></span><code><span class="nv">find</span> . <span class="o">-</span><span class="nv">type</span> <span class="nv">f</span> <span class="o">-</span><span class="nv">iname</span> <span class="s1">'</span><span class="s">*.yaml</span><span class="s1">'</span> <span class="o">-</span><span class="k">exec</span> <span class="nv">grep</span> <span class="o">--</span><span class="nv">line</span><span class="o">-</span><span class="nv">number</span> <span class="o">--</span><span class="nv">with</span><span class="o">-</span><span class="nv">file</span> <span class="s1">'</span><span class="s">needle</span><span class="s1">'</span> {} \<span class="c1">;</span>
 </code></pre></div>
-
 <blockquote>
 <p>search the contents of a specific file extension and output the filename and line number of each match</p>
 </blockquote>
-<h3>find and exec to modify a set of files</h3>
-<div class="highlight"><pre><span></span><code><span class="nv">find</span> . <span class="o">-</span><span class="nv">type</span> <span class="nv">f</span> <span class="o">-</span><span class="nv">name</span> <span class="s2">&quot;</span><span class="s">*api*</span><span class="s2">&quot;</span> <span class="o">-</span><span class="k">exec</span> <span class="nv">cat</span> {} \<span class="c1">; | grep objectid</span>
+<h3 id="find-and-exec-to-modify-a-set-of-files">find and exec to modify a set of files</h3>
+<div class="highlight"><pre><span></span><code><span class="nv">find</span> . <span class="o">-</span><span class="nv">type</span> <span class="nv">f</span> <span class="o">-</span><span class="nv">name</span> <span class="s2">"</span><span class="s">*api*</span><span class="s2">"</span> <span class="o">-</span><span class="k">exec</span> <span class="nv">cat</span> {} \<span class="c1">; | grep objectid</span>
 </code></pre></div>
-
 <blockquote>
 <p>find all files that contain an api and output the contents but filter to only display lines that contain "objectid"</p>
 </blockquote>
 <div class="highlight"><pre><span></span><code><span class="nv">find</span> . <span class="o">-</span><span class="nv">maxdepth</span> <span class="mi">1</span> <span class="o">-</span><span class="nv">type</span> <span class="nv">d</span> <span class="o">-</span><span class="k">exec</span> <span class="nv">du</span> <span class="o">-</span><span class="nv">sh</span> {} \<span class="c1">;</span>
 </code></pre></div>
-
 <blockquote>
 <p>only one level down if it's a directory show the disk usage summary (human sizes)</p>
 </blockquote>
 <div class="highlight"><pre><span></span><code><span class="nv">find</span> <span class="nv">DIR1</span> <span class="nv">DIR2</span> <span class="o">-</span><span class="nv">maxdepth</span> <span class="mi">1</span> <span class="o">-</span><span class="nv">type</span> <span class="nv">f</span> <span class="o">-</span><span class="k">exec</span> <span class="k">basename</span> {} \<span class="c1">; | sort | uniq -d</span>
 </code></pre></div>
-
 <blockquote>
 <p>lists all file names in directories, sorted, show only repeats (aka duplicates)</p>
 </blockquote>
-<div class="highlight"><pre><span></span><code>find . -name &#39;*.txt&#39; -exec sh -c &#39;mv &quot;$0&quot; &quot;<span class="cp">${</span><span class="mi">0</span><span class="o">%.</span><span class="n">txt</span><span class="cp">}</span>.java&quot;&#39; {} \;
+<div class="highlight"><pre><span></span><code>find . -name '*.txt' -exec sh -c 'mv "$0" "<span class="cp">${</span><span class="mi">0</span><span class="o">%.</span><span class="n">txt</span><span class="cp">}</span>.java"' {} \;
 </code></pre></div>
-
 <blockquote>
 <p>find all .txt files and renames them to .java</p>
 </blockquote>
-<div class="highlight"><pre><span></span><code><span class="k">for</span> <span class="nv">f</span> <span class="nv">in</span> <span class="c1">; do mv &quot;$f&quot; &quot;$(echo $f | sed &#39;s/-/\ /g&#39;)&quot;; done find . -type f -iname &quot;.py&quot; | rename s/.py/.py.txt/ .py {} \;</span>
+<div class="highlight"><pre><span></span><code><span class="k">for</span> <span class="nv">f</span> <span class="nv">in</span> <span class="c1">; do mv "$f" "$(echo $f | sed 's/-/\ /g')"; done find . -type f -iname ".py" | rename s/.py/.py.txt/ .py {} \;</span>
 </code></pre></div>
-
 <blockquote>
 <p>only works on the current directory (no recursion?)</p>
 </blockquote>
-<div class="highlight"><pre><span></span><code>find . -type f -iname &#39;.py&#39; | while read filename; do mv -v &quot;<span class="cp">${</span><span class="n">filename</span><span class="cp">}</span>&quot; &quot;echo &quot;<span class="cp">${</span><span class="n">filename</span><span class="cp">}</span>&quot; | sed -e &#39;s/\.py$/\.py.txt/&#39;&quot;; done
+<div class="highlight"><pre><span></span><code>find . -type f -iname '.py' | while read filename; do mv -v "<span class="cp">${</span><span class="n">filename</span><span class="cp">}</span>" "echo "<span class="cp">${</span><span class="n">filename</span><span class="cp">}</span>" | sed -e 's/\.py$/\.py.txt/'"; done
 </code></pre></div>
-
 <blockquote>
 <p>a lot of extra work to achieve a recursive rename from .py to .py.txt</p>
 </blockquote>
-<div class="highlight"><pre><span></span><code><span class="nv">find</span> . <span class="o">-</span><span class="nv">type</span> <span class="nv">f</span> <span class="o">-</span><span class="nv">iname</span> <span class="s2">&quot;</span><span class="s">*.java</span><span class="s2">&quot;</span> <span class="o">-</span><span class="k">exec</span> <span class="nv">grep</span> <span class="o">-</span><span class="nv">Hni</span> <span class="s2">&quot;</span><span class="s">case-insensitive-text</span><span class="s2">&quot;</span> {} \<span class="c1">;</span>
+<div class="highlight"><pre><span></span><code><span class="nv">find</span> . <span class="o">-</span><span class="nv">type</span> <span class="nv">f</span> <span class="o">-</span><span class="nv">iname</span> <span class="s2">"</span><span class="s">*.java</span><span class="s2">"</span> <span class="o">-</span><span class="k">exec</span> <span class="nv">grep</span> <span class="o">-</span><span class="nv">Hni</span> <span class="s2">"</span><span class="s">case-insensitive-text</span><span class="s2">"</span> {} \<span class="c1">;</span>
 </code></pre></div>
-
 <blockquote>
 <p>find java files and return if they contain some text</p>
 </blockquote>
-<div class="highlight"><pre><span></span><code><span class="nv">find</span> . <span class="o">-</span><span class="nv">type</span> <span class="nv">f</span> <span class="o">-</span><span class="nv">iname</span> <span class="s2">&quot;</span><span class="s">*.java</span><span class="s2">&quot;</span> <span class="o">-</span><span class="k">exec</span> <span class="nv">grep</span> <span class="o">-</span><span class="nv">Hn</span> <span class="s2">&quot;</span><span class="s">fileSizeInMB &lt; 100</span><span class="s2">&quot;</span> {} \<span class="c1">;</span>
+<div class="highlight"><pre><span></span><code><span class="nv">find</span> . <span class="o">-</span><span class="nv">type</span> <span class="nv">f</span> <span class="o">-</span><span class="nv">iname</span> <span class="s2">"</span><span class="s">*.java</span><span class="s2">"</span> <span class="o">-</span><span class="k">exec</span> <span class="nv">grep</span> <span class="o">-</span><span class="nv">Hn</span> <span class="s2">"</span><span class="s">fileSizeInMB &lt; 100</span><span class="s2">"</span> {} \<span class="c1">;</span>
 </code></pre></div>
-
 <blockquote>
 <p>find java files and return if they contain some case sensitive text</p>
 </blockquote>
 <div class="highlight"><pre><span></span><code><span class="nv">find</span> . <span class="o">-</span><span class="nv">type</span> <span class="nv">d</span> <span class="o">-</span><span class="nv">name</span> <span class="nv">directoryname</span><span class="o">*</span> <span class="o">-</span><span class="k">exec</span> <span class="nv">ls</span> <span class="o">-</span><span class="nv">ahl</span> {} \<span class="c1">;</span>
 </code></pre></div>
-
 <blockquote>
 <p>find case insensitive directories beginning with "directoryname" and list their contents</p>
 </blockquote>
-<div class="highlight"><pre><span></span><code><span class="n">sudo</span> <span class="n">find</span> <span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">java</span> <span class="o">-</span><span class="n">type</span> <span class="n">f</span> <span class="o">-</span><span class="n">iname</span> <span class="s2">&quot;.txt&quot;</span> <span class="o">-</span><span class="n">exec</span> <span class="n">chown</span> <span class="n">root</span><span class="p">:</span><span class="n">www</span><span class="o">-</span><span class="n">data</span> <span class="p">{}</span> \<span class="p">;</span>
+<div class="highlight"><pre><span></span><code><span class="n">sudo</span> <span class="n">find</span> <span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">java</span> <span class="o">-</span><span class="n">type</span> <span class="n">f</span> <span class="o">-</span><span class="n">iname</span> <span class="s2">".txt"</span> <span class="o">-</span><span class="n">exec</span> <span class="n">chown</span> <span class="n">root</span><span class="p">:</span><span class="n">www</span><span class="o">-</span><span class="n">data</span> <span class="p">{}</span> \<span class="p">;</span>
 </code></pre></div>
-
 <blockquote>
 <p>find case insensitive files ending with ".txt" and change their owner to root and group to  www-data</p>
 </blockquote>
-<div class="highlight"><pre><span></span><code><span class="n">sudo</span> <span class="n">find</span> <span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">java</span> <span class="o">-</span><span class="n">type</span> <span class="n">f</span> <span class="o">-</span><span class="n">iname</span> <span class="s2">&quot;*.txt&quot;</span> <span class="o">-</span><span class="n">exec</span> <span class="n">chmod</span> <span class="mi">640</span> <span class="p">{}</span> \<span class="p">;</span>
+<div class="highlight"><pre><span></span><code><span class="n">sudo</span> <span class="n">find</span> <span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">java</span> <span class="o">-</span><span class="n">type</span> <span class="n">f</span> <span class="o">-</span><span class="n">iname</span> <span class="s2">"*.txt"</span> <span class="o">-</span><span class="n">exec</span> <span class="n">chmod</span> <span class="mi">640</span> <span class="p">{}</span> \<span class="p">;</span>
 </code></pre></div>
-
 <blockquote>
 <p>find case insensitive files ending with ".txt" and change their permissions to 640</p>
 </blockquote>
-<div class="highlight"><pre><span></span><code><span class="n">sudo</span> <span class="n">find</span> <span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">d</span> <span class="o">-</span><span class="n">type</span> <span class="n">d</span> <span class="o">-</span><span class="n">iname</span> <span class="s2">&quot;web*&quot;</span> <span class="o">-</span><span class="n">exec</span> <span class="n">chmod</span> <span class="mi">750</span> <span class="p">{}</span> \<span class="p">;</span>
+<div class="highlight"><pre><span></span><code><span class="n">sudo</span> <span class="n">find</span> <span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">d</span> <span class="o">-</span><span class="n">type</span> <span class="n">d</span> <span class="o">-</span><span class="n">iname</span> <span class="s2">"web*"</span> <span class="o">-</span><span class="n">exec</span> <span class="n">chmod</span> <span class="mi">750</span> <span class="p">{}</span> \<span class="p">;</span>
 </code></pre></div>
-
 <blockquote>
 <p>find case insensitive directories beginning with "web" and change their permissions to 750</p>
 </blockquote>
-<div class="highlight"><pre><span></span><code><span class="nv">find</span> . <span class="o">-</span><span class="nv">type</span> <span class="nv">f</span> <span class="o">-</span><span class="nv">iname</span> <span class="s2">&quot;</span><span class="s">*.sh</span><span class="s2">&quot;</span> <span class="o">-</span><span class="k">exec</span> <span class="nv">mv</span> {} . <span class="s2">&quot;</span><span class="s">;</span><span class="s2">&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="nv">find</span> . <span class="o">-</span><span class="nv">type</span> <span class="nv">f</span> <span class="o">-</span><span class="nv">iname</span> <span class="s2">"</span><span class="s">*.sh</span><span class="s2">"</span> <span class="o">-</span><span class="k">exec</span> <span class="nv">mv</span> {} . <span class="s2">"</span><span class="s">;</span><span class="s2">"</span>
 </code></pre></div>
-
 <blockquote>
 <p>find files ending in .sh and move them into the current directory</p>
 </blockquote>
@@ -425,39 +406,33 @@ which would return txt's as well as txv?'s</p>
 
 <span class="nv">find</span> <span class="o">/</span> <span class="o">-</span><span class="nv">mindepth</span> <span class="mi">3</span> <span class="o">-</span><span class="nv">maxdepth</span> <span class="mi">5</span> <span class="o">-</span><span class="nv">iname</span> <span class="nv">passwd</span>
 </code></pre></div>
-
 <blockquote>
 <p>case insensitive, starts from root, will search subdirectory levels between 2 and 4</p>
 </blockquote>
 <div class="highlight"><pre><span></span><code>find / 3 -maxdepth 5 -iname passwd &amp;
 </code></pre></div>
-
 <blockquote>
 <p>case insensitive, starts from root, will search at most 4 subdir levels, will start in background 
 note that you'll have to press enter once as the text results will scroll to interrupt your 
 bash session ... once the job's done pressing enter will return you to the prompt</p>
 </blockquote>
-<div class="highlight"><pre><span></span><code> <span class="nv">find</span> <span class="o">-</span><span class="nv">iname</span> <span class="s2">&quot;</span><span class="s">MyCProgram.c</span><span class="s2">&quot;</span> <span class="o">-</span><span class="k">exec</span> <span class="nv">md5sum</span> {} \<span class="c1">;</span>
+<div class="highlight"><pre><span></span><code> <span class="nv">find</span> <span class="o">-</span><span class="nv">iname</span> <span class="s2">"</span><span class="s">MyCProgram.c</span><span class="s2">"</span> <span class="o">-</span><span class="k">exec</span> <span class="nv">md5sum</span> {} \<span class="c1">;</span>
 </code></pre></div>
-
 <blockquote>
 <p>interesting use: creating a md5sum of all of the results</p>
 </blockquote>
 <div class="highlight"><pre><span></span><code><span class="nv">find</span> <span class="o">-</span><span class="nv">inum</span> <span class="mi">16187430</span> <span class="o">-</span><span class="k">exec</span> <span class="nv">mv</span> {} <span class="nv">new</span><span class="o">-</span><span class="nv">test</span><span class="o">-</span><span class="nv">file</span><span class="o">-</span><span class="nv">name</span> \<span class="c1">;</span>
 </code></pre></div>
-
 <blockquote>
 <p>interesting - find a file by inode number (ls -i) and then rename/move it</p>
 </blockquote>
 <div class="highlight"><pre><span></span><code>find / -perm 700 -type f
 </code></pre></div>
-
 <blockquote>
 <p>find all files from root below, with permissions set exactly to 700, only regular files (-type f)</p>
 </blockquote>
 <div class="highlight"><pre><span></span><code><span class="nv">find</span> <span class="o">/</span> <span class="o">-</span><span class="nv">perm</span> <span class="mi">700</span> <span class="o">-</span><span class="nv">type</span> <span class="nv">f</span> <span class="o">-</span><span class="k">exec</span> <span class="nv">ls</span> <span class="o">-</span><span class="nv">l</span> {} \<span class="c1">;</span>
 </code></pre></div>
-
 <blockquote>
 <p>while the above just lists the files the below runs an ls -l to see everything about them...</p>
 </blockquote>
@@ -467,47 +442,40 @@ bash session ... once the job's done pressing enter will return you to the promp
 </blockquote>
 <p>search the home directory size equal to 100 MB, use +100MB for greater than and -100MB for less than find ~ -size 100M</p>
 <p><a href="http://www.thegeekstuff.com/2009/03/15-practical-linux-find-command-examples/">http://www.thegeekstuff.com/2009/03/15-practical-linux-find-command-examples/</a></p>
-<h3>find files by modified time</h3>
+<h3 id="find-files-by-modified-time">find files by modified time</h3>
 <p>There is an implied AND operator with find but for OR or NOT...</p>
 <div class="highlight"><pre><span></span><code>find / -mmin -10
 </code></pre></div>
-
 <blockquote>
 <p>something modified 10 minutes ago</p>
 </blockquote>
 <div class="highlight"><pre><span></span><code>find . -mtime 1
 </code></pre></div>
-
 <blockquote>
 <p>find files modified between 24 and 48 hours ago </p>
 </blockquote>
 <div class="highlight"><pre><span></span><code>find . -mtime +1
 </code></pre></div>
-
 <blockquote>
 <p>find files modified more than 48 hours ago</p>
 </blockquote>
 <div class="highlight"><pre><span></span><code>find . -mmin +5 -mmin -10
 </code></pre></div>
-
 <blockquote>
 <p>find files modifed between # 6 and 9 minutes ago</p>
 </blockquote>
 <div class="highlight"><pre><span></span><code>find / -type f -mtime -7 | xargs tar -rf weekly_incremental.tar
 </code></pre></div>
-
 <blockquote>
 <p>find files modified in the last 7 days and create a .tar file from them</p>
 </blockquote>
 <div class="highlight"><pre><span></span><code>find / -name core -delete
 </code></pre></div>
-
 <blockquote>
 <p>same if using Gnu find</p>
 </blockquote>
 <div class="highlight"><pre><span></span><code>find / -user username
 </code></pre></div>
-
 <blockquote>
 <p>find all of the files a user owns..</p>
 </blockquote>
@@ -515,22 +483,19 @@ bash session ... once the job's done pressing enter will return you to the promp
 
 <span class="nv">find</span> <span class="o">/</span> <span class="o">-</span><span class="nv">mtime</span> <span class="mi">9</span> <span class="o">-</span><span class="nv">mtime</span> <span class="o">-</span><span class="mi">10</span>
 </code></pre></div>
-
 <blockquote>
 <p>24 hours</p>
 </blockquote>
-<h2>grep</h2>
+<h2 id="grep">grep</h2>
 <p>grep is an amazing tool for getting efficiently finding text, <a href="http://www.gnu.org/software/grep/manual/grep.html">http://www.gnu.org/software/grep/manual/grep.html</a></p>
-<h3>grep parameters and examples explained</h3>
-<div class="highlight"><pre><span></span><code>cat access.log | grep -v &quot;bingbot&quot;
+<h3 id="grep-parameters-and-examples-explained">grep parameters and examples explained</h3>
+<div class="highlight"><pre><span></span><code>cat access.log | grep -v "bingbot"
 </code></pre></div>
-
 <blockquote>
 <p>exclude from output lines that match bingbot</p>
 </blockquote>
-<div class="highlight"><pre><span></span><code>grep -r -i -w -n -A2 -B1 &#39;hidden&#39; /tmp
+<div class="highlight"><pre><span></span><code>grep -r -i -w -n -A2 -B1 'hidden' /tmp
 </code></pre></div>
-
 <ul>
 <li>search the /tmp directory and subdirectories recursively</li>
 <li>case insensitive</li>
@@ -578,7 +543,7 @@ bash session ... once the job's done pressing enter will return you to the promp
 </tr>
 </tbody>
 </table>
-<h4>Useful parameters for grep</h4>
+<h4 id="useful-parameters-for-grep">Useful parameters for grep</h4>
 <ul>
 <li><code>-v</code> = invert the match so do NOT show lines that match (typically | grep -v 'myexclude')</li>
 <li><code>-x</code> = whole line match only</li>
@@ -597,10 +562,9 @@ pipe to grep and ignore matches of DONOTLIKE, then append output to the newest.m
 </blockquote>
 </li>
 </ul>
-<h4>grep files without match</h4>
-<div class="highlight"><pre><span></span><code>grep -L &#39;foobar&#39; *
+<h4 id="grep-files-without-match">grep files without match</h4>
+<div class="highlight"><pre><span></span><code>grep -L 'foobar' *
 </code></pre></div>
-
 <blockquote>
 <p>--files-without-match , display filenames that do not contain the string foobar</p>
 </blockquote>
@@ -609,16 +573,14 @@ pipe to grep and ignore matches of DONOTLIKE, then append output to the newest.m
 <li><a href="http://www.gnu.org/software/grep/manual/grep.html">http://www.gnu.org/software/grep/manual/grep.html</a></li>
 <li><a href="http://tldp.org/LDP/Bash-Beginners-Guide/html/sect_04_02.html">http://tldp.org/LDP/Bash-Beginners-Guide/html/sect_04_02.html</a></li>
 </ul>
-<h2>cut</h2>
+<h2 id="cut">cut</h2>
 <div class="highlight"><pre><span></span><code>ps auxwwww | grep someappname | tr -s [:space:] | cut -d\  -f11-
 </code></pre></div>
-
 <blockquote>
 <p>filter to only view someappname from all processes (wide) THEN shorten all whitespace to a single space THEN cut delimited by a single space (escaped by the slash) and then only prints all after the 11th field/column</p>
 </blockquote>
-<div class="highlight"><pre><span></span><code>cat sometext.txt | cut -f1 -d&quot;[&quot;
+<div class="highlight"><pre><span></span><code>cat sometext.txt | cut -f1 -d"["
 </code></pre></div>
-
 <blockquote>
 <p>delimiter of square bracket , only take after the first "field" token, so essentially print everything after the first occurence of a left square bracket</p>
 </blockquote>
@@ -626,7 +588,7 @@ pipe to grep and ignore matches of DONOTLIKE, then append output to the newest.m
 <li><a href="http://ss64.com/bash/cut.html">http://ss64.com/bash/cut.html</a></li>
 <li><a href="http://linux.die.net/man/1/cut">http://linux.die.net/man/1/cut</a></li>
 </ul>
-<h3>cut to only display a part of a path</h3>
+<h3 id="cut-to-only-display-a-part-of-a-path">cut to only display a part of a path</h3>
 <div class="highlight"><pre><span></span><code><span class="ch">#!/bin/bash</span>
 <span class="c1"># iterate through the list of subdirectories</span>
 <span class="c1"># cut out each subdirectory name (using forward slash delimiter)</span>
@@ -638,50 +600,44 @@ pipe to grep and ignore matches of DONOTLIKE, then append output to the newest.m
 <span class="k">do</span>
   <span class="k">if</span> <span class="o">[</span> -d <span class="nv">$dir</span> <span class="o">]</span><span class="p">;</span> <span class="k">then</span>
     <span class="nb">echo</span> <span class="nv">$dir</span>
-    <span class="nv">NAME</span><span class="o">=</span><span class="sb">`</span><span class="nb">echo</span> <span class="nv">$dir</span> <span class="p">|</span> cut -d <span class="s2">&quot;/&quot;</span> -f <span class="m">6</span> <span class="sb">`</span>
+    <span class="nv">NAME</span><span class="o">=</span><span class="sb">`</span><span class="nb">echo</span> <span class="nv">$dir</span> <span class="p">|</span> cut -d <span class="s2">"/"</span> -f <span class="m">6</span> <span class="sb">`</span>
     diff <span class="nv">$dir</span>/WEB-INF/app.properties /var/lib/tomcat6/TEMP/<span class="nv">$NAME</span>/WEB-INF/app.properties
   <span class="k">fi</span>
 <span class="k">done</span>
 </code></pre></div>
-
-<h2>awk</h2>
+<h2 id="awk">awk</h2>
 <p>awk to parse columns of data , some overlap with cut</p>
-<div class="highlight"><pre><span></span><code>awk -F&quot;,&quot; &#39;{ print $2 }&#39; results.txt
+<div class="highlight"><pre><span></span><code>awk -F"," '{ print $2 }' results.txt
 </code></pre></div>
-
 <blockquote>
 <p>csv parsing , set the delimiter to a comma and print the second column</p>
 </blockquote>
-<div class="highlight"><pre><span></span><code><span class="x">awk &#39;</span><span class="cp">{</span><span class="err">$</span><span class="m">1</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="o">;</span> <span class="na">print</span> <span class="err">$</span><span class="m">0</span><span class="cp">}</span><span class="x">&#39; results.txt</span>
+<div class="highlight"><pre><span></span><code><span class="x">awk '</span><span class="cp">{</span><span class="err">$</span><span class="m">1</span><span class="o">=</span><span class="s2">""</span><span class="o">;</span> <span class="na">print</span> <span class="err">$</span><span class="m">0</span><span class="cp">}</span><span class="x">' results.txt</span>
 </code></pre></div>
-
 <blockquote>
 <p>assuming space delimited and remove the first column but print all else in results.txt</p>
 </blockquote>
-<div class="highlight"><pre><span></span><code><span class="x">ps aux | grep someappname | awk &#39;</span><span class="cp">{</span><span class="err">$</span><span class="m">1</span><span class="o">=</span><span class="err">$</span><span class="m">2</span><span class="o">=</span><span class="err">$</span><span class="m">3</span><span class="o">=</span><span class="err">$</span><span class="m">4</span><span class="o">=</span><span class="err">$</span><span class="m">5</span><span class="o">=</span><span class="err">$</span><span class="m">6</span><span class="o">=</span><span class="err">$</span><span class="m">7</span><span class="o">=</span><span class="err">$</span><span class="m">8</span><span class="o">=</span><span class="err">$</span><span class="m">9</span><span class="o">=</span><span class="err">$</span><span class="m">10</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="o">;</span> <span class="na">print</span> <span class="err">$</span><span class="m">0</span><span class="cp">}</span><span class="x">&#39;</span>
+<div class="highlight"><pre><span></span><code><span class="x">ps aux | grep someappname | awk '</span><span class="cp">{</span><span class="err">$</span><span class="m">1</span><span class="o">=</span><span class="err">$</span><span class="m">2</span><span class="o">=</span><span class="err">$</span><span class="m">3</span><span class="o">=</span><span class="err">$</span><span class="m">4</span><span class="o">=</span><span class="err">$</span><span class="m">5</span><span class="o">=</span><span class="err">$</span><span class="m">6</span><span class="o">=</span><span class="err">$</span><span class="m">7</span><span class="o">=</span><span class="err">$</span><span class="m">8</span><span class="o">=</span><span class="err">$</span><span class="m">9</span><span class="o">=</span><span class="err">$</span><span class="m">10</span><span class="o">=</span><span class="s2">""</span><span class="o">;</span> <span class="na">print</span> <span class="err">$</span><span class="m">0</span><span class="cp">}</span><span class="x">'</span>
 </code></pre></div>
-
 <blockquote>
 <p>print everything after the nth (10th) column</p>
 </blockquote>
-<div class="highlight"><pre><span></span><code>cat sometext.txt | cut -f1 -d&quot;(&quot;
+<div class="highlight"><pre><span></span><code>cat sometext.txt | cut -f1 -d"("
 </code></pre></div>
-
 <blockquote>
 <p>using cut can be more effective: deleting everything after the first occurence of a left parenthesis</p>
 </blockquote>
-<div class="highlight"><pre><span></span><code><span class="nv">grep</span> <span class="o">-</span><span class="nv">r</span> <span class="s1">&#39;</span><span class="s">beta/dists/precise/main/binary-amd64</span><span class="s1">&#39;</span> <span class="o">|</span> <span class="nv">grep</span> <span class="o">-</span><span class="nv">v</span> <span class="mi">1</span>.<span class="mi">2</span>.<span class="mi">3</span>.<span class="mi">4</span> <span class="o">|</span> <span class="nv">grep</span> <span class="o">-</span><span class="nv">v</span> <span class="nv">AccessDenied</span> <span class="o">|</span> <span class="nv">awk</span> <span class="s1">&#39;</span><span class="s">{print $5}</span><span class="s1">&#39;</span> <span class="o">|</span> <span class="nv">sort</span> <span class="o">-</span><span class="nv">u</span>
+<div class="highlight"><pre><span></span><code><span class="nv">grep</span> <span class="o">-</span><span class="nv">r</span> <span class="s1">'</span><span class="s">beta/dists/precise/main/binary-amd64</span><span class="s1">'</span> <span class="o">|</span> <span class="nv">grep</span> <span class="o">-</span><span class="nv">v</span> <span class="mi">1</span>.<span class="mi">2</span>.<span class="mi">3</span>.<span class="mi">4</span> <span class="o">|</span> <span class="nv">grep</span> <span class="o">-</span><span class="nv">v</span> <span class="nv">AccessDenied</span> <span class="o">|</span> <span class="nv">awk</span> <span class="s1">'</span><span class="s">{print $5}</span><span class="s1">'</span> <span class="o">|</span> <span class="nv">sort</span> <span class="o">-</span><span class="nv">u</span>
 
-<span class="nv">grep</span> <span class="o">--</span><span class="nv">exclude</span><span class="o">-</span><span class="nv">dir</span><span class="o">=</span>.<span class="nv">git</span> <span class="o">-</span><span class="nv">r</span> <span class="s1">&#39;</span><span class="s">foo</span><span class="s1">&#39;</span> .  # <span class="nv">recursively</span> <span class="nv">search</span> <span class="nv">this</span> <span class="nv">directory</span> <span class="k">for</span> <span class="nv">foo</span> <span class="nv">but</span> <span class="nv">ignore</span> <span class="nv">the</span> .<span class="nv">git</span> <span class="nv">directory</span>
+<span class="nv">grep</span> <span class="o">--</span><span class="nv">exclude</span><span class="o">-</span><span class="nv">dir</span><span class="o">=</span>.<span class="nv">git</span> <span class="o">-</span><span class="nv">r</span> <span class="s1">'</span><span class="s">foo</span><span class="s1">'</span> .  # <span class="nv">recursively</span> <span class="nv">search</span> <span class="nv">this</span> <span class="nv">directory</span> <span class="k">for</span> <span class="nv">foo</span> <span class="nv">but</span> <span class="nv">ignore</span> <span class="nv">the</span> .<span class="nv">git</span> <span class="nv">directory</span>
 </code></pre></div>
-
 <blockquote>
 <p>recursive search for a string, pipe the output to exclude lines that contain IP 1.2.3.4 , pipe to exclude AccessDenied, print the 5th column, sort for uniqueness</p>
 </blockquote>
 <p>If the 5th column of results.txt contains numbers then ...</p>
-<div class="highlight"><pre><span></span><code><span class="n">cat</span> <span class="n">results</span><span class="p">.</span><span class="n">txt</span> <span class="p">|</span> <span class="n">awk</span> <span class="s">&#39;{total = total + $5} END{print total}&#39;</span>
+<div class="highlight"><pre><span></span><code><span class="n">cat</span> <span class="n">results</span><span class="p">.</span><span class="n">txt</span> <span class="p">|</span> <span class="n">awk</span> <span class="s">'{total = total + $5} END{print total}'</span>
 
-<span class="n">ls</span> <span class="o">-</span><span class="n">tahl</span> <span class="p">|</span> <span class="n">awk</span> <span class="s">&#39;{print $5,$6,$7,$8}&#39;</span>
+<span class="n">ls</span> <span class="o">-</span><span class="n">tahl</span> <span class="p">|</span> <span class="n">awk</span> <span class="s">'{print $5,$6,$7,$8}'</span>
 
 <span class="n">awk</span> <span class="o">&lt;</span><span class="n">search</span> <span class="n">pattern</span><span class="o">&gt;</span> <span class="p">{</span><span class="o">&lt;</span><span class="n">program</span> <span class="n">actions</span><span class="o">&gt;</span><span class="p">}</span>
 
@@ -694,9 +650,8 @@ pipe to grep and ignore matches of DONOTLIKE, then append output to the newest.m
 <span class="mf">3.9</span><span class="n">K</span> <span class="mi">2009</span><span class="o">-</span><span class="mi">03</span><span class="o">-</span><span class="mi">18</span> <span class="mi">16</span><span class="p">:</span><span class="mi">01</span> <span class="n">mtrac</span><span class="p">.</span><span class="n">ini</span>
 <span class="mf">5.0</span><span class="n">K</span> <span class="mi">2008</span><span class="o">-</span><span class="mi">11</span><span class="o">-</span><span class="mi">25</span> <span class="mi">11</span><span class="p">:</span><span class="mi">50</span> <span class="n">CreateProject</span><span class="p">.</span><span class="n">sh</span>
 
-<span class="n">awk</span> <span class="s">&#39;/2009/ {print $5,$6,$7,$8}&#39;</span> <span class="n">ls_output</span><span class="p">.</span><span class="n">txt</span>
+<span class="n">awk</span> <span class="s">'/2009/ {print $5,$6,$7,$8}'</span> <span class="n">ls_output</span><span class="p">.</span><span class="n">txt</span>
 </code></pre></div>
-
 <blockquote>
 <p>Note that Awk recognizes the field variable $0 as representing the entire line, so this could also be written as:
     awk '/gold/ {print $0}'</p>
@@ -705,25 +660,22 @@ pipe to grep and ignore matches of DONOTLIKE, then append output to the newest.m
 <li><a href="http://www.grymoire.com/Unix/Awk.html">http://www.grymoire.com/Unix/Awk.html</a></li>
 <li><a href="https://www.gnu.org/software/gawk/manual/gawk.html">https://www.gnu.org/software/gawk/manual/gawk.html</a></li>
 </ul>
-<h2>sed</h2>
+<h2 id="sed">sed</h2>
 <p>sed does string substitution</p>
-<div class="highlight"><pre><span></span><code><span class="n">sed</span> <span class="n">regular</span> <span class="n">expression</span> <span class="p">&#39;</span><span class="n">s</span><span class="o">=</span><span class="n">start</span><span class="o">/</span><span class="n">olditem</span><span class="o">/</span><span class="n">newitem</span><span class="o">/</span><span class="n">g</span><span class="o">=</span><span class="k">end</span><span class="p">&#39;</span> <span class="n">filename</span>
+<div class="highlight"><pre><span></span><code><span class="n">sed</span> <span class="n">regular</span> <span class="n">expression</span> <span class="p">'</span><span class="n">s</span><span class="o">=</span><span class="n">start</span><span class="o">/</span><span class="n">olditem</span><span class="o">/</span><span class="n">newitem</span><span class="o">/</span><span class="n">g</span><span class="o">=</span><span class="k">end</span><span class="p">'</span> <span class="n">filename</span>
 
-<span class="n">sed</span> <span class="o">-</span><span class="n">e</span> <span class="p">&#39;</span><span class="n">s</span><span class="o">/</span> <span class="o">/</span><span class="n">\t</span> <span class="o">/</span><span class="n">g</span><span class="p">&#39;</span> <span class="n">email</span><span class="o">-</span><span class="n">backup</span><span class="p">.</span><span class="n">txt</span>
+<span class="n">sed</span> <span class="o">-</span><span class="n">e</span> <span class="p">'</span><span class="n">s</span><span class="o">/</span> <span class="o">/</span><span class="n">\t</span> <span class="o">/</span><span class="n">g</span><span class="p">'</span> <span class="n">email</span><span class="o">-</span><span class="n">backup</span><span class="p">.</span><span class="n">txt</span>
 </code></pre></div>
-
 <blockquote>
 <p>replace a space with a tab</p>
 </blockquote>
-<div class="highlight"><pre><span></span><code>sed -i &#39;s/\x85/.../g&#39; *.md
+<div class="highlight"><pre><span></span><code>sed -i 's/\x85/.../g' *.md
 </code></pre></div>
-
 <blockquote>
 <p>replace a UTF-8 character (in this case the single character horizontal ellipsis) with three dots</p>
 </blockquote>
-<div class="highlight"><pre><span></span><code><span class="n">cat</span> <span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">html</span><span class="o">/</span><span class="n">themes</span><span class="o">/</span><span class="n">bartik</span><span class="o">/</span><span class="n">css</span><span class="o">/</span><span class="n">style</span><span class="o">.</span><span class="n">css</span> <span class="o">|</span> <span class="n">tr</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="s1">&#39;</span><span class="se">\r</span><span class="s1">&#39;</span> <span class="o">|</span> <span class="n">sed</span> <span class="o">-</span><span class="n">e</span> <span class="s1">&#39;s/#site-slogan {</span><span class="se">\r</span><span class="s1">  font-size: 0.929em/#site-slogan {</span><span class="se">\r</span><span class="s1">  font-size: 2.929em/&#39;</span> <span class="o">|</span> <span class="n">tr</span> <span class="s1">&#39;</span><span class="se">\r</span><span class="s1">&#39;</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">&gt;</span> <span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">html</span><span class="o">/</span><span class="n">themes</span><span class="o">/</span><span class="n">bartik</span><span class="o">/</span><span class="n">css</span><span class="o">/</span><span class="n">style</span><span class="o">.</span><span class="n">css</span><span class="o">.</span><span class="n">updated</span>
+<div class="highlight"><pre><span></span><code><span class="n">cat</span> <span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">html</span><span class="o">/</span><span class="n">themes</span><span class="o">/</span><span class="n">bartik</span><span class="o">/</span><span class="n">css</span><span class="o">/</span><span class="n">style</span><span class="o">.</span><span class="n">css</span> <span class="o">|</span> <span class="n">tr</span> <span class="s1">'</span><span class="se">\n</span><span class="s1">'</span> <span class="s1">'</span><span class="se">\r</span><span class="s1">'</span> <span class="o">|</span> <span class="n">sed</span> <span class="o">-</span><span class="n">e</span> <span class="s1">'s/#site-slogan {</span><span class="se">\r</span><span class="s1">  font-size: 0.929em/#site-slogan {</span><span class="se">\r</span><span class="s1">  font-size: 2.929em/'</span> <span class="o">|</span> <span class="n">tr</span> <span class="s1">'</span><span class="se">\r</span><span class="s1">'</span> <span class="s1">'</span><span class="se">\n</span><span class="s1">'</span> <span class="o">&gt;</span> <span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">html</span><span class="o">/</span><span class="n">themes</span><span class="o">/</span><span class="n">bartik</span><span class="o">/</span><span class="n">css</span><span class="o">/</span><span class="n">style</span><span class="o">.</span><span class="n">css</span><span class="o">.</span><span class="n">updated</span>
 </code></pre></div>
-
 <blockquote>
 <p>replace multiline with a newline using tr to translate \n to \r</p>
 </blockquote>
@@ -732,59 +684,51 @@ pipe to grep and ignore matches of DONOTLIKE, then append output to the newest.m
 \<span class="nv">n</span> <span class="o">=</span> <span class="nv">newline</span>
 \<span class="nv">r</span> <span class="o">=</span> <span class="nv">carriage</span> <span class="k">return</span>
 
-<span class="nv">sed</span> <span class="o">-</span><span class="nv">e</span> <span class="s1">&#39;</span><span class="s">s/$/\r/</span><span class="s1">&#39;</span> <span class="nv">inputfile</span> <span class="o">&gt;</span> <span class="nv">outputfile</span>                # <span class="nv">UNIX</span> <span class="nv">to</span> <span class="nv">DOS</span>  <span class="ss">(</span><span class="nv">adding</span> <span class="nv">CRs</span><span class="ss">)</span>
-<span class="nv">sed</span> <span class="o">-</span><span class="nv">e</span> <span class="s1">&#39;</span><span class="s">s/\r$//</span><span class="s1">&#39;</span> <span class="nv">inputfile</span> <span class="o">&gt;</span> <span class="nv">outputfile</span>                # <span class="nv">DOS</span>  <span class="nv">to</span> <span class="nv">UNIX</span> <span class="ss">(</span><span class="nv">removing</span> <span class="nv">CRs</span><span class="ss">)</span>
-<span class="nv">perl</span> <span class="o">-</span><span class="nv">pe</span> <span class="s1">&#39;</span><span class="s">s/\r</span><span class="se">\n</span><span class="s">|</span><span class="se">\n</span><span class="s">|\r/\r</span><span class="se">\n</span><span class="s">/g</span><span class="s1">&#39;</span> <span class="nv">inputfile</span> <span class="o">&gt;</span> <span class="nv">outputfile</span>  # <span class="nv">Convert</span> <span class="nv">to</span> <span class="nv">DOS</span>
-<span class="nv">perl</span> <span class="o">-</span><span class="nv">pe</span> <span class="s1">&#39;</span><span class="s">s/\r</span><span class="se">\n</span><span class="s">|</span><span class="se">\n</span><span class="s">|\r/</span><span class="se">\n</span><span class="s">/g</span><span class="s1">&#39;</span>   <span class="nv">inputfile</span> <span class="o">&gt;</span> <span class="nv">outputfile</span>  # <span class="nv">Convert</span> <span class="nv">to</span> <span class="nv">UNIX</span>
-<span class="nv">perl</span> <span class="o">-</span><span class="nv">pe</span> <span class="s1">&#39;</span><span class="s">s/\r</span><span class="se">\n</span><span class="s">|</span><span class="se">\n</span><span class="s">|\r/\r/g</span><span class="s1">&#39;</span>   <span class="nv">inputfile</span> <span class="o">&gt;</span> <span class="nv">outputfile</span>  # <span class="nv">Convert</span> <span class="nv">to</span> <span class="nv">old</span> <span class="nv">Mac</span>
+<span class="nv">sed</span> <span class="o">-</span><span class="nv">e</span> <span class="s1">'</span><span class="s">s/$/\r/</span><span class="s1">'</span> <span class="nv">inputfile</span> <span class="o">&gt;</span> <span class="nv">outputfile</span>                # <span class="nv">UNIX</span> <span class="nv">to</span> <span class="nv">DOS</span>  <span class="ss">(</span><span class="nv">adding</span> <span class="nv">CRs</span><span class="ss">)</span>
+<span class="nv">sed</span> <span class="o">-</span><span class="nv">e</span> <span class="s1">'</span><span class="s">s/\r$//</span><span class="s1">'</span> <span class="nv">inputfile</span> <span class="o">&gt;</span> <span class="nv">outputfile</span>                # <span class="nv">DOS</span>  <span class="nv">to</span> <span class="nv">UNIX</span> <span class="ss">(</span><span class="nv">removing</span> <span class="nv">CRs</span><span class="ss">)</span>
+<span class="nv">perl</span> <span class="o">-</span><span class="nv">pe</span> <span class="s1">'</span><span class="s">s/\r</span><span class="se">\n</span><span class="s">|</span><span class="se">\n</span><span class="s">|\r/\r</span><span class="se">\n</span><span class="s">/g</span><span class="s1">'</span> <span class="nv">inputfile</span> <span class="o">&gt;</span> <span class="nv">outputfile</span>  # <span class="nv">Convert</span> <span class="nv">to</span> <span class="nv">DOS</span>
+<span class="nv">perl</span> <span class="o">-</span><span class="nv">pe</span> <span class="s1">'</span><span class="s">s/\r</span><span class="se">\n</span><span class="s">|</span><span class="se">\n</span><span class="s">|\r/</span><span class="se">\n</span><span class="s">/g</span><span class="s1">'</span>   <span class="nv">inputfile</span> <span class="o">&gt;</span> <span class="nv">outputfile</span>  # <span class="nv">Convert</span> <span class="nv">to</span> <span class="nv">UNIX</span>
+<span class="nv">perl</span> <span class="o">-</span><span class="nv">pe</span> <span class="s1">'</span><span class="s">s/\r</span><span class="se">\n</span><span class="s">|</span><span class="se">\n</span><span class="s">|\r/\r/g</span><span class="s1">'</span>   <span class="nv">inputfile</span> <span class="o">&gt;</span> <span class="nv">outputfile</span>  # <span class="nv">Convert</span> <span class="nv">to</span> <span class="nv">old</span> <span class="nv">Mac</span>
 </code></pre></div>
-
 <ul>
 <li><a href="http://www.grymoire.com/Unix/Sed.html">http://www.grymoire.com/Unix/Sed.html</a></li>
 <li><a href="https://www.gnu.org/software/sed/manual/sed.txt">https://www.gnu.org/software/sed/manual/sed.txt</a></li>
 </ul>
-<h2>dd</h2>
+<h2 id="dd">dd</h2>
 <p>dd can delete things very quickly (dangerous!)</p>
 <p>But a useful tool for testing upload limits or compression or any other miscellaneous file tasks is to generate a file of a specified length:</p>
 <div class="highlight"><pre><span></span><code><span class="nv">dd</span> <span class="k">if</span><span class="o">=/</span><span class="nv">dev</span><span class="o">/</span><span class="nv">zero</span> <span class="nv">of</span><span class="o">=</span><span class="nv">a</span>.<span class="nv">log</span> <span class="nv">bs</span><span class="o">=</span><span class="mi">1</span><span class="nv">M</span> <span class="nv">count</span><span class="o">=</span><span class="mi">2</span>
 </code></pre></div>
-
 <blockquote>
 <p>zero filled 2MB file</p>
 </blockquote>
 <div class="highlight"><pre><span></span><code><span class="nv">dd</span> <span class="k">if</span><span class="o">=/</span><span class="nv">dev</span><span class="o">/</span><span class="nv">urandom</span> <span class="nv">of</span><span class="o">=</span><span class="k">random</span>.<span class="nv">txt</span> <span class="nv">bs</span><span class="o">=</span><span class="mi">1</span><span class="nv">M</span> <span class="nv">count</span><span class="o">=</span><span class="mi">2</span>
 </code></pre></div>
-
 <blockquote>
 <p>random contents 2MB file</p>
 </blockquote>
 <div class="highlight"><pre><span></span><code><span class="nv">hexdump</span> <span class="k">random</span>.<span class="nv">txt</span> <span class="o">|</span> <span class="nv">head</span>
 </code></pre></div>
-
 <p>Notes about randomness (on linux):</p>
 <div class="highlight"><pre><span></span><code>/dev/urandom
 </code></pre></div>
-
 <blockquote>
 <p>semi-random data generated by a PRNG which is fed by the trickle of real entropy from <code>/dev/random</code> (which blocks until the entropy pool has some randomness)</p>
 </blockquote>
-<div class="highlight"><pre><span></span><code><span class="nv">watch</span> <span class="o">-</span><span class="nv">n</span> <span class="mi">0</span> <span class="s1">&#39;</span><span class="s">cat /proc/sys/kernel/random/entropy_avail</span><span class="s1">&#39;</span>
+<div class="highlight"><pre><span></span><code><span class="nv">watch</span> <span class="o">-</span><span class="nv">n</span> <span class="mi">0</span> <span class="s1">'</span><span class="s">cat /proc/sys/kernel/random/entropy_avail</span><span class="s1">'</span>
 
 <span class="nv">cat</span> <span class="o">/</span><span class="nv">dev</span><span class="o">/</span><span class="k">random</span> <span class="o">&gt;</span> <span class="o">/</span><span class="nv">dev</span><span class="o">/</span><span class="nv">null</span>
 </code></pre></div>
-
 <blockquote>
 <p>Drain the entropy from your system</p>
 </blockquote>
 <div class="highlight"><pre><span></span><code>cpuid | grep -i rand
 </code></pre></div>
-
 <blockquote>
 <p>Look for RDRAND <a href="http://en.wikipedia.org/wiki/RdRand">http://en.wikipedia.org/wiki/RdRand</a></p>
 </blockquote>
 <div class="highlight"><pre><span></span><code>cat /dev/urandom | rngtest -c 1000
 </code></pre></div>
-
 <blockquote>
 <p>how good is your non blocking urandom?</p>
 </blockquote>
@@ -811,7 +755,7 @@ pipe to grep and ignore matches of DONOTLIKE, then append output to the newest.m
             <time pubdate="pubdate" datetime="2011-11-12T02:37:00-08:00">Nov 12, 2011</time>
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#linux-ref">linux</a> 
-            <h4>~2435 words</h4>
+            <h4>~2434 words</h4>
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article"> 
                 <li><a href="/tags.html#awk-ref">awk
