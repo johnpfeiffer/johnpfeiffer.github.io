@@ -127,140 +127,140 @@
 <p>To summarize, it is really common to get some json from somewhere from someone else and want to just peek at one field, update another field, add a key and value, and save the json.</p>
 <p>And that kind of dynamic behavior isn't inherently easy in Go. =[</p>
 <h2 id="example-code-of-marshalling-and-unmarshalling-json-with-go">Example code of Marshalling and Unmarshalling JSON with Go</h2>
-<div class="highlight"><pre><span></span><code><span class="kn">package</span> <span class="nx">main</span>
+<div class="highlight"><pre><span></span><code><span class="kn">package</span><span class="w"> </span><span class="nx">main</span><span class="w"></span>
 
-<span class="kn">import</span> <span class="p">(</span>
-        <span class="s">"encoding/json"</span>
-        <span class="s">"fmt"</span>
-        <span class="s">"io"</span>
-        <span class="s">"io/ioutil"</span>
-        <span class="s">"log"</span>
-        <span class="s">"os"</span>
-<span class="p">)</span>
+<span class="kn">import</span><span class="w"> </span><span class="p">(</span><span class="w"></span>
+<span class="w">        </span><span class="s">"encoding/json"</span><span class="w"></span>
+<span class="w">        </span><span class="s">"fmt"</span><span class="w"></span>
+<span class="w">        </span><span class="s">"io"</span><span class="w"></span>
+<span class="w">        </span><span class="s">"io/ioutil"</span><span class="w"></span>
+<span class="w">        </span><span class="s">"log"</span><span class="w"></span>
+<span class="w">        </span><span class="s">"os"</span><span class="w"></span>
+<span class="p">)</span><span class="w"></span>
 
-<span class="kd">func</span> <span class="nx">logIfError</span><span class="p">(</span><span class="nx">err</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
-        <span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
-                <span class="nx">log</span><span class="p">.</span><span class="nx">Fatal</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span>
-        <span class="p">}</span>
-<span class="p">}</span>
+<span class="kd">func</span><span class="w"> </span><span class="nx">logIfError</span><span class="p">(</span><span class="nx">err</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">                </span><span class="nx">log</span><span class="p">.</span><span class="nx">Fatal</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
 
-<span class="c1">// readFile is a convenience function to read a whole file at once, LOL similar to ioutil.ReadFile()</span>
-<span class="kd">func</span> <span class="nx">readFile</span><span class="p">(</span><span class="nx">f</span> <span class="o">*</span><span class="nx">os</span><span class="p">.</span><span class="nx">File</span><span class="p">)</span> <span class="p">{</span>
-        <span class="kd">var</span> <span class="nx">data</span> <span class="p">=</span> <span class="nb">make</span><span class="p">([]</span><span class="kt">byte</span><span class="p">,</span> <span class="mi">1024</span><span class="p">)</span>
-        <span class="nx">totalBytes</span> <span class="o">:=</span> <span class="mi">0</span>
-        <span class="k">for</span> <span class="p">{</span>
-                <span class="nx">count</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">f</span><span class="p">.</span><span class="nx">Read</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span>
-                <span class="c1">// https://golang.org/pkg/io/ , EOF is an expected error condition</span>
-                <span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="nx">io</span><span class="p">.</span><span class="nx">EOF</span> <span class="p">{</span>
-                        <span class="nx">logIfError</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span>
-                <span class="p">}</span>
-                <span class="c1">// TODO: 0 bytes could be returned when not an EOF</span>
-                <span class="k">if</span> <span class="nx">count</span> <span class="o">==</span> <span class="mi">0</span> <span class="p">{</span>
-                        <span class="k">break</span>
-                <span class="p">}</span>
-                <span class="nx">totalBytes</span> <span class="o">+=</span> <span class="nx">count</span>
-                <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">"Read %d bytes: \n%s\n"</span><span class="p">,</span> <span class="nx">count</span><span class="p">,</span> <span class="nb">string</span><span class="p">(</span><span class="nx">data</span><span class="p">))</span>
-        <span class="p">}</span>
-        <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">"Read %d total bytes from the file\n"</span><span class="p">,</span> <span class="nx">totalBytes</span><span class="p">)</span>
-<span class="p">}</span>
+<span class="c1">// readFile is a convenience function to read a whole file at once, LOL similar to ioutil.ReadFile()</span><span class="w"></span>
+<span class="kd">func</span><span class="w"> </span><span class="nx">readFile</span><span class="p">(</span><span class="nx">f</span><span class="w"> </span><span class="o">*</span><span class="nx">os</span><span class="p">.</span><span class="nx">File</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="kd">var</span><span class="w"> </span><span class="nx">data</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nb">make</span><span class="p">([]</span><span class="kt">byte</span><span class="p">,</span><span class="w"> </span><span class="mi">1024</span><span class="p">)</span><span class="w"></span>
+<span class="w">        </span><span class="nx">totalBytes</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="mi">0</span><span class="w"></span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">                </span><span class="nx">count</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">f</span><span class="p">.</span><span class="nx">Read</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span><span class="w"></span>
+<span class="w">                </span><span class="c1">// https://golang.org/pkg/io/ , EOF is an expected error condition</span><span class="w"></span>
+<span class="w">                </span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="nx">io</span><span class="p">.</span><span class="nx">EOF</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">                        </span><span class="nx">logIfError</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span><span class="w"></span>
+<span class="w">                </span><span class="p">}</span><span class="w"></span>
+<span class="w">                </span><span class="c1">// TODO: 0 bytes could be returned when not an EOF</span><span class="w"></span>
+<span class="w">                </span><span class="k">if</span><span class="w"> </span><span class="nx">count</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">                        </span><span class="k">break</span><span class="w"></span>
+<span class="w">                </span><span class="p">}</span><span class="w"></span>
+<span class="w">                </span><span class="nx">totalBytes</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="nx">count</span><span class="w"></span>
+<span class="w">                </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">"Read %d bytes: \n%s\n"</span><span class="p">,</span><span class="w"> </span><span class="nx">count</span><span class="p">,</span><span class="w"> </span><span class="nb">string</span><span class="p">(</span><span class="nx">data</span><span class="p">))</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="w">        </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">"Read %d total bytes from the file\n"</span><span class="p">,</span><span class="w"> </span><span class="nx">totalBytes</span><span class="p">)</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
 
-<span class="c1">// genericParsing is an example of the empty interface https://blog.golang.org/json-and-go</span>
-<span class="c1">// https://en.wikipedia.org/wiki/JSON</span>
-<span class="kd">func</span> <span class="nx">genericParsing</span><span class="p">(</span><span class="nx">data</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">)</span> <span class="p">{</span>
-        <span class="kd">var</span> <span class="nx">f</span> <span class="kd">interface</span><span class="p">{}</span>
-        <span class="nx">err</span> <span class="o">:=</span> <span class="nx">json</span><span class="p">.</span><span class="nx">Unmarshal</span><span class="p">(</span><span class="nx">data</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">f</span><span class="p">)</span>
-        <span class="nx">logIfError</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span>
+<span class="c1">// genericParsing is an example of the empty interface https://blog.golang.org/json-and-go</span><span class="w"></span>
+<span class="c1">// https://en.wikipedia.org/wiki/JSON</span><span class="w"></span>
+<span class="kd">func</span><span class="w"> </span><span class="nx">genericParsing</span><span class="p">(</span><span class="nx">data</span><span class="w"> </span><span class="p">[]</span><span class="kt">byte</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="kd">var</span><span class="w"> </span><span class="nx">f</span><span class="w"> </span><span class="kd">interface</span><span class="p">{}</span><span class="w"></span>
+<span class="w">        </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">json</span><span class="p">.</span><span class="nx">Unmarshal</span><span class="p">(</span><span class="nx">data</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">f</span><span class="p">)</span><span class="w"></span>
+<span class="w">        </span><span class="nx">logIfError</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span><span class="w"></span>
 
-        <span class="c1">// https://golang.org/doc/effective_go.html#interface_conversions</span>
-        <span class="nx">m</span> <span class="o">:=</span> <span class="nx">f</span><span class="p">.(</span><span class="kd">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kd">interface</span><span class="p">{})</span>
-        <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">"\ngeneric json parsing"</span><span class="p">)</span>
-        <span class="k">for</span> <span class="nx">k</span><span class="p">,</span> <span class="nx">v</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">m</span> <span class="p">{</span>
-                <span class="k">switch</span> <span class="nx">vv</span> <span class="o">:=</span> <span class="nx">v</span><span class="p">.(</span><span class="kd">type</span><span class="p">)</span> <span class="p">{</span>
-                <span class="k">case</span> <span class="kt">string</span><span class="p">:</span>
-                        <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">"  "</span><span class="p">,</span> <span class="nx">k</span><span class="p">,</span> <span class="s">"is string:"</span><span class="p">,</span> <span class="nx">vv</span><span class="p">)</span>
-                <span class="k">case</span> <span class="kt">int</span><span class="p">:</span>
-                        <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">"  "</span><span class="p">,</span> <span class="nx">k</span><span class="p">,</span> <span class="s">"is int:"</span><span class="p">,</span> <span class="nx">vv</span><span class="p">)</span>
-                <span class="k">case</span> <span class="kt">bool</span><span class="p">:</span>
-                        <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">"  "</span><span class="p">,</span> <span class="nx">k</span><span class="p">,</span> <span class="s">"is bool:"</span><span class="p">,</span> <span class="nx">vv</span><span class="p">)</span>
-                <span class="k">case</span> <span class="p">[]</span><span class="kd">interface</span><span class="p">{}:</span>
-                        <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">"  "</span><span class="p">,</span> <span class="nx">k</span><span class="p">,</span> <span class="s">"is an array:"</span><span class="p">)</span>
-                        <span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">u</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">vv</span> <span class="p">{</span>
-                                <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">"    "</span><span class="p">,</span> <span class="nx">u</span><span class="p">)</span>
-                        <span class="p">}</span>
-                <span class="k">default</span><span class="p">:</span>
-                        <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">"  "</span><span class="p">,</span> <span class="nx">k</span><span class="p">,</span> <span class="s">"is of a type I don't know how to handle"</span><span class="p">)</span>
-                        <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">"  but I could have checked another way and found %v is a %T\n"</span><span class="p">,</span> <span class="nx">v</span><span class="p">,</span> <span class="nx">v</span><span class="p">)</span>
-                        <span class="c1">// JSONNumber https://golang.org/pkg/encoding/json/#Decoder.UseNumber</span>
-                        <span class="c1">// http://json.org/ no floats so hinting is appreciated</span>
-                <span class="p">}</span>
-        <span class="p">}</span>
-<span class="p">}</span>
+<span class="w">        </span><span class="c1">// https://golang.org/doc/effective_go.html#interface_conversions</span><span class="w"></span>
+<span class="w">        </span><span class="nx">m</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">f</span><span class="p">.(</span><span class="kd">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kd">interface</span><span class="p">{})</span><span class="w"></span>
+<span class="w">        </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">"\ngeneric json parsing"</span><span class="p">)</span><span class="w"></span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="nx">k</span><span class="p">,</span><span class="w"> </span><span class="nx">v</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">m</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">                </span><span class="k">switch</span><span class="w"> </span><span class="nx">vv</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">v</span><span class="p">.(</span><span class="kd">type</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">                </span><span class="k">case</span><span class="w"> </span><span class="kt">string</span><span class="p">:</span><span class="w"></span>
+<span class="w">                        </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">"  "</span><span class="p">,</span><span class="w"> </span><span class="nx">k</span><span class="p">,</span><span class="w"> </span><span class="s">"is string:"</span><span class="p">,</span><span class="w"> </span><span class="nx">vv</span><span class="p">)</span><span class="w"></span>
+<span class="w">                </span><span class="k">case</span><span class="w"> </span><span class="kt">int</span><span class="p">:</span><span class="w"></span>
+<span class="w">                        </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">"  "</span><span class="p">,</span><span class="w"> </span><span class="nx">k</span><span class="p">,</span><span class="w"> </span><span class="s">"is int:"</span><span class="p">,</span><span class="w"> </span><span class="nx">vv</span><span class="p">)</span><span class="w"></span>
+<span class="w">                </span><span class="k">case</span><span class="w"> </span><span class="kt">bool</span><span class="p">:</span><span class="w"></span>
+<span class="w">                        </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">"  "</span><span class="p">,</span><span class="w"> </span><span class="nx">k</span><span class="p">,</span><span class="w"> </span><span class="s">"is bool:"</span><span class="p">,</span><span class="w"> </span><span class="nx">vv</span><span class="p">)</span><span class="w"></span>
+<span class="w">                </span><span class="k">case</span><span class="w"> </span><span class="p">[]</span><span class="kd">interface</span><span class="p">{}:</span><span class="w"></span>
+<span class="w">                        </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">"  "</span><span class="p">,</span><span class="w"> </span><span class="nx">k</span><span class="p">,</span><span class="w"> </span><span class="s">"is an array:"</span><span class="p">)</span><span class="w"></span>
+<span class="w">                        </span><span class="k">for</span><span class="w"> </span><span class="nx">_</span><span class="p">,</span><span class="w"> </span><span class="nx">u</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">vv</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">                                </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">"    "</span><span class="p">,</span><span class="w"> </span><span class="nx">u</span><span class="p">)</span><span class="w"></span>
+<span class="w">                        </span><span class="p">}</span><span class="w"></span>
+<span class="w">                </span><span class="k">default</span><span class="p">:</span><span class="w"></span>
+<span class="w">                        </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">"  "</span><span class="p">,</span><span class="w"> </span><span class="nx">k</span><span class="p">,</span><span class="w"> </span><span class="s">"is of a type I don't know how to handle"</span><span class="p">)</span><span class="w"></span>
+<span class="w">                        </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">"  but I could have checked another way and found %v is a %T\n"</span><span class="p">,</span><span class="w"> </span><span class="nx">v</span><span class="p">,</span><span class="w"> </span><span class="nx">v</span><span class="p">)</span><span class="w"></span>
+<span class="w">                        </span><span class="c1">// JSONNumber https://golang.org/pkg/encoding/json/#Decoder.UseNumber</span><span class="w"></span>
+<span class="w">                        </span><span class="c1">// http://json.org/ no floats so hinting is appreciated</span><span class="w"></span>
+<span class="w">                </span><span class="p">}</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
 
-<span class="c1">// Assuming top level keys are strings, i.e. NOT [] , https://gobyexample.com/json</span>
-<span class="kd">func</span> <span class="nx">rootStringsOnlyParsing</span><span class="p">(</span><span class="nx">data</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">)</span> <span class="kd">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kd">interface</span><span class="p">{}</span> <span class="p">{</span>
-        <span class="c1">// A map of string to any type https://blog.golang.org/laws-of-reflection , http://research.swtch.com/interfaces</span>
-        <span class="kd">var</span> <span class="nx">datmap</span> <span class="kd">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kd">interface</span><span class="p">{}</span>
-        <span class="nx">e</span> <span class="o">:=</span> <span class="nx">json</span><span class="p">.</span><span class="nx">Unmarshal</span><span class="p">(</span><span class="nx">data</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">datmap</span><span class="p">)</span>
-        <span class="nx">logIfError</span><span class="p">(</span><span class="nx">e</span><span class="p">)</span>
-        <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">"\nKeys are Strings in a Map:"</span><span class="p">,</span> <span class="nx">datmap</span><span class="p">)</span>
-        <span class="k">return</span> <span class="nx">datmap</span>
-<span class="p">}</span>
+<span class="c1">// Assuming top level keys are strings, i.e. NOT [] , https://gobyexample.com/json</span><span class="w"></span>
+<span class="kd">func</span><span class="w"> </span><span class="nx">rootStringsOnlyParsing</span><span class="p">(</span><span class="nx">data</span><span class="w"> </span><span class="p">[]</span><span class="kt">byte</span><span class="p">)</span><span class="w"> </span><span class="kd">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kd">interface</span><span class="p">{}</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="c1">// A map of string to any type https://blog.golang.org/laws-of-reflection , http://research.swtch.com/interfaces</span><span class="w"></span>
+<span class="w">        </span><span class="kd">var</span><span class="w"> </span><span class="nx">datmap</span><span class="w"> </span><span class="kd">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kd">interface</span><span class="p">{}</span><span class="w"></span>
+<span class="w">        </span><span class="nx">e</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">json</span><span class="p">.</span><span class="nx">Unmarshal</span><span class="p">(</span><span class="nx">data</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">datmap</span><span class="p">)</span><span class="w"></span>
+<span class="w">        </span><span class="nx">logIfError</span><span class="p">(</span><span class="nx">e</span><span class="p">)</span><span class="w"></span>
+<span class="w">        </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">"\nKeys are Strings in a Map:"</span><span class="p">,</span><span class="w"> </span><span class="nx">datmap</span><span class="p">)</span><span class="w"></span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nx">datmap</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
 
-<span class="c1">// ExampleSimpleObject must be exported to parse correctly , the fields order here is used by json.Marshal output</span>
-<span class="kd">type</span> <span class="nx">ExampleSimpleObject</span> <span class="kd">struct</span> <span class="p">{</span>
-        <span class="nx">Age</span>  <span class="kt">int</span>    <span class="s">`json:"age"`</span>
-        <span class="nx">Name</span> <span class="kt">string</span> <span class="s">`json:"name"`</span>
-<span class="p">}</span>
+<span class="c1">// ExampleSimpleObject must be exported to parse correctly , the fields order here is used by json.Marshal output</span><span class="w"></span>
+<span class="kd">type</span><span class="w"> </span><span class="nx">ExampleSimpleObject</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="nx">Age</span><span class="w">  </span><span class="kt">int</span><span class="w">    </span><span class="s">`json:"age"`</span><span class="w"></span>
+<span class="w">        </span><span class="nx">Name</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="s">`json:"name"`</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
 
-<span class="c1">// ExampleComplexObject is the magic of auto parsing, if your data never gets corrupted...</span>
-<span class="c1">// helpful understanding of Go and JSON nesting https://eager.io/blog/go-and-json/</span>
-<span class="c1">// hints are very powerful leveraging of Reflection that Go core libraries use for JSON</span>
-<span class="kd">type</span> <span class="nx">ExampleComplexObject</span> <span class="kd">struct</span> <span class="p">{</span>
-        <span class="nx">ArrayOfObjects</span> <span class="p">[]</span><span class="nx">ExampleSimpleObject</span> <span class="s">`json:"jsonArrayOfObjects,omitempty"`</span>
-        <span class="nx">ArrayOfStrings</span> <span class="p">[]</span><span class="kt">string</span>              <span class="s">`json:"jsonArrayOfStrings"`</span>
-        <span class="nx">JSONBoolean</span>    <span class="kt">bool</span>                  <span class="s">`json:"jsonBoolean"`</span>
-        <span class="nx">JSONNumber</span>     <span class="kt">int</span>                   <span class="s">`json:"jsonNumber"`</span>
-        <span class="nx">JSONString</span>     <span class="kt">string</span>                <span class="s">`json:"jsonString, omitempty"`</span>
-        <span class="c1">// jsonArrayOfNumbers is not defined and so is not included in the parsed object</span>
-<span class="p">}</span>
+<span class="c1">// ExampleComplexObject is the magic of auto parsing, if your data never gets corrupted...</span><span class="w"></span>
+<span class="c1">// helpful understanding of Go and JSON nesting https://eager.io/blog/go-and-json/</span><span class="w"></span>
+<span class="c1">// hints are very powerful leveraging of Reflection that Go core libraries use for JSON</span><span class="w"></span>
+<span class="kd">type</span><span class="w"> </span><span class="nx">ExampleComplexObject</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="nx">ArrayOfObjects</span><span class="w"> </span><span class="p">[]</span><span class="nx">ExampleSimpleObject</span><span class="w"> </span><span class="s">`json:"jsonArrayOfObjects,omitempty"`</span><span class="w"></span>
+<span class="w">        </span><span class="nx">ArrayOfStrings</span><span class="w"> </span><span class="p">[]</span><span class="kt">string</span><span class="w">              </span><span class="s">`json:"jsonArrayOfStrings"`</span><span class="w"></span>
+<span class="w">        </span><span class="nx">JSONBoolean</span><span class="w">    </span><span class="kt">bool</span><span class="w">                  </span><span class="s">`json:"jsonBoolean"`</span><span class="w"></span>
+<span class="w">        </span><span class="nx">JSONNumber</span><span class="w">     </span><span class="kt">int</span><span class="w">                   </span><span class="s">`json:"jsonNumber"`</span><span class="w"></span>
+<span class="w">        </span><span class="nx">JSONString</span><span class="w">     </span><span class="kt">string</span><span class="w">                </span><span class="s">`json:"jsonString, omitempty"`</span><span class="w"></span>
+<span class="w">        </span><span class="c1">// jsonArrayOfNumbers is not defined and so is not included in the parsed object</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
 
-<span class="c1">// autoUnmarshal shows Go structs making parsing JSON look easy https://golang.org/pkg/encoding/json/#example_Unmarshal</span>
-<span class="kd">func</span> <span class="nx">autoUnmarshal</span><span class="p">(</span><span class="nx">data</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">)</span> <span class="nx">ExampleComplexObject</span> <span class="p">{</span>
-        <span class="kd">var</span> <span class="nx">ex</span> <span class="nx">ExampleComplexObject</span>
-        <span class="nx">err</span> <span class="o">:=</span> <span class="nx">json</span><span class="p">.</span><span class="nx">Unmarshal</span><span class="p">(</span><span class="nx">data</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">ex</span><span class="p">)</span>
-        <span class="nx">logIfError</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span>
-        <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">"Auto Unmarshal: %+v \n"</span><span class="p">,</span> <span class="nx">ex</span><span class="p">)</span>
-        <span class="k">return</span> <span class="nx">ex</span>
-<span class="p">}</span>
+<span class="c1">// autoUnmarshal shows Go structs making parsing JSON look easy https://golang.org/pkg/encoding/json/#example_Unmarshal</span><span class="w"></span>
+<span class="kd">func</span><span class="w"> </span><span class="nx">autoUnmarshal</span><span class="p">(</span><span class="nx">data</span><span class="w"> </span><span class="p">[]</span><span class="kt">byte</span><span class="p">)</span><span class="w"> </span><span class="nx">ExampleComplexObject</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="kd">var</span><span class="w"> </span><span class="nx">ex</span><span class="w"> </span><span class="nx">ExampleComplexObject</span><span class="w"></span>
+<span class="w">        </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">json</span><span class="p">.</span><span class="nx">Unmarshal</span><span class="p">(</span><span class="nx">data</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">ex</span><span class="p">)</span><span class="w"></span>
+<span class="w">        </span><span class="nx">logIfError</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span><span class="w"></span>
+<span class="w">        </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">"Auto Unmarshal: %+v \n"</span><span class="p">,</span><span class="w"> </span><span class="nx">ex</span><span class="p">)</span><span class="w"></span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nx">ex</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
 
-<span class="c1">// writeJSONFile demonstrates the power of interfaces for shared functionality</span>
-<span class="kd">func</span> <span class="nx">writeJSONFile</span><span class="p">(</span><span class="nx">name</span> <span class="kt">string</span><span class="p">,</span> <span class="nx">thing</span> <span class="kd">interface</span><span class="p">{})</span> <span class="p">{</span>
-        <span class="nx">theJSON</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">json</span><span class="p">.</span><span class="nx">MarshalIndent</span><span class="p">(</span><span class="nx">thing</span><span class="p">,</span> <span class="s">""</span><span class="p">,</span> <span class="s">"  "</span><span class="p">)</span>
-        <span class="nx">logIfError</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span>
-        <span class="nx">err</span> <span class="p">=</span> <span class="nx">ioutil</span><span class="p">.</span><span class="nx">WriteFile</span><span class="p">(</span><span class="nx">name</span><span class="p">,</span> <span class="nx">theJSON</span><span class="p">,</span> <span class="mo">0644</span><span class="p">)</span>
-        <span class="nx">logIfError</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span>
-        <span class="c1">// See the omitted fields with: diff --ignore-all-space types.json output.json</span>
-<span class="p">}</span>
+<span class="c1">// writeJSONFile demonstrates the power of interfaces for shared functionality</span><span class="w"></span>
+<span class="kd">func</span><span class="w"> </span><span class="nx">writeJSONFile</span><span class="p">(</span><span class="nx">name</span><span class="w"> </span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">thing</span><span class="w"> </span><span class="kd">interface</span><span class="p">{})</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="nx">theJSON</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">json</span><span class="p">.</span><span class="nx">MarshalIndent</span><span class="p">(</span><span class="nx">thing</span><span class="p">,</span><span class="w"> </span><span class="s">""</span><span class="p">,</span><span class="w"> </span><span class="s">"  "</span><span class="p">)</span><span class="w"></span>
+<span class="w">        </span><span class="nx">logIfError</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span><span class="w"></span>
+<span class="w">        </span><span class="nx">err</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">ioutil</span><span class="p">.</span><span class="nx">WriteFile</span><span class="p">(</span><span class="nx">name</span><span class="p">,</span><span class="w"> </span><span class="nx">theJSON</span><span class="p">,</span><span class="w"> </span><span class="mo">0644</span><span class="p">)</span><span class="w"></span>
+<span class="w">        </span><span class="nx">logIfError</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span><span class="w"></span>
+<span class="w">        </span><span class="c1">// See the omitted fields with: diff --ignore-all-space types.json output.json</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
 
-<span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
-        <span class="c1">// https://golang.org/pkg/os/</span>
-        <span class="nx">myFile</span><span class="p">,</span> <span class="nx">ferr</span> <span class="o">:=</span> <span class="nx">os</span><span class="p">.</span><span class="nx">Open</span><span class="p">(</span><span class="s">"types.json"</span><span class="p">)</span>
-        <span class="nx">logIfError</span><span class="p">(</span><span class="nx">ferr</span><span class="p">)</span>
-        <span class="nx">readFile</span><span class="p">(</span><span class="nx">myFile</span><span class="p">)</span>
+<span class="kd">func</span><span class="w"> </span><span class="nx">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="c1">// https://golang.org/pkg/os/</span><span class="w"></span>
+<span class="w">        </span><span class="nx">myFile</span><span class="p">,</span><span class="w"> </span><span class="nx">ferr</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">os</span><span class="p">.</span><span class="nx">Open</span><span class="p">(</span><span class="s">"types.json"</span><span class="p">)</span><span class="w"></span>
+<span class="w">        </span><span class="nx">logIfError</span><span class="p">(</span><span class="nx">ferr</span><span class="p">)</span><span class="w"></span>
+<span class="w">        </span><span class="nx">readFile</span><span class="p">(</span><span class="nx">myFile</span><span class="p">)</span><span class="w"></span>
 
-        <span class="c1">// hint: read a file and return a slice of bytes: https://golang.org/pkg/io/ioutil/#ReadFile</span>
-        <span class="nx">data</span><span class="p">,</span> <span class="nx">_</span> <span class="o">:=</span> <span class="nx">ioutil</span><span class="p">.</span><span class="nx">ReadFile</span><span class="p">(</span><span class="s">"types.json"</span><span class="p">)</span>
+<span class="w">        </span><span class="c1">// hint: read a file and return a slice of bytes: https://golang.org/pkg/io/ioutil/#ReadFile</span><span class="w"></span>
+<span class="w">        </span><span class="nx">data</span><span class="p">,</span><span class="w"> </span><span class="nx">_</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">ioutil</span><span class="p">.</span><span class="nx">ReadFile</span><span class="p">(</span><span class="s">"types.json"</span><span class="p">)</span><span class="w"></span>
 
-        <span class="nx">genericParsing</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span>
-        <span class="nx">datamap</span> <span class="o">:=</span> <span class="nx">rootStringsOnlyParsing</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span>
-        <span class="c1">// modifying or adding to a JSON file can be tricky</span>
-        <span class="nx">datamap</span><span class="p">[</span><span class="s">"injectedKey"</span><span class="p">]</span> <span class="p">=</span> <span class="s">"injected value"</span>
-        <span class="nx">writeJSONFile</span><span class="p">(</span><span class="s">"dataMapModified.json"</span><span class="p">,</span> <span class="nx">datamap</span><span class="p">)</span>
+<span class="w">        </span><span class="nx">genericParsing</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span><span class="w"></span>
+<span class="w">        </span><span class="nx">datamap</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">rootStringsOnlyParsing</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span><span class="w"></span>
+<span class="w">        </span><span class="c1">// modifying or adding to a JSON file can be tricky</span><span class="w"></span>
+<span class="w">        </span><span class="nx">datamap</span><span class="p">[</span><span class="s">"injectedKey"</span><span class="p">]</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">"injected value"</span><span class="w"></span>
+<span class="w">        </span><span class="nx">writeJSONFile</span><span class="p">(</span><span class="s">"dataMapModified.json"</span><span class="p">,</span><span class="w"> </span><span class="nx">datamap</span><span class="p">)</span><span class="w"></span>
 
-        <span class="nx">auto</span> <span class="o">:=</span> <span class="nx">autoUnmarshal</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span>
-        <span class="nx">writeJSONFile</span><span class="p">(</span><span class="s">"autoUnmarshalOmits.json"</span><span class="p">,</span> <span class="nx">auto</span><span class="p">)</span>
-        <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">"done"</span><span class="p">)</span>
-<span class="p">}</span>
+<span class="w">        </span><span class="nx">auto</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">autoUnmarshal</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span><span class="w"></span>
+<span class="w">        </span><span class="nx">writeJSONFile</span><span class="p">(</span><span class="s">"autoUnmarshalOmits.json"</span><span class="p">,</span><span class="w"> </span><span class="nx">auto</span><span class="p">)</span><span class="w"></span>
+<span class="w">        </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">"done"</span><span class="p">)</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
 </code></pre></div>
 <ul>
 <li><a href="https://blog.golang.org/json-and-go">https://blog.golang.org/json-and-go</a></li>
@@ -271,10 +271,10 @@
 <li><a href="https://blog.gopheracademy.com/advent-2016/advanced-encoding-decoding/">https://blog.gopheracademy.com/advent-2016/advanced-encoding-decoding/</a></li>
 </ul>
 <h2 id="common-json-gotchas-with-go">Common JSON gotchas with Go</h2>
-<div class="highlight"><pre><span></span><code><span class="kd">type</span> <span class="nx">Oops</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">Name</span> <span class="kt">string</span> <span class="s">`json:"name"`</span>
-    <span class="nx">i</span> <span class="kt">int</span>    <span class="s">`json:"timestamp"`</span>
-<span class="p">}</span>
+<div class="highlight"><pre><span></span><code><span class="kd">type</span><span class="w"> </span><span class="nx">Oops</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nx">Name</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="s">`json:"name"`</span><span class="w"></span>
+<span class="w">    </span><span class="nx">i</span><span class="w"> </span><span class="kt">int</span><span class="w">    </span><span class="s">`json:"timestamp"`</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
 </code></pre></div>
 <blockquote>
 <p>The i int field will not be Marshaled and will therefore not exist in the JSON object</p>

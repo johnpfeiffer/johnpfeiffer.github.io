@@ -97,11 +97,11 @@
 <p>Docker can turn an application/service, it's dependencies, and even the OS level requirements into a single blackbox package (that you can still inspect inside if you really want to).</p>
 <p>One thing I really like is less code.  Seriously.  Configuration over coding (whenever I don't need customization) means far less maintenance and bugs.</p>
 <p>Here's a trivial example of how I can leverage the HAProxy Docker image/container to load balance two web servers. (aka "reverse proxy" <a href="http://en.wikipedia.org/wiki/Reverse_proxy">http://en.wikipedia.org/wiki/Reverse_proxy</a>)</p>
-<div class="highlight"><pre><span></span><code>    <span class="n">client</span> <span class="o">-&gt;</span> <span class="kr">all</span> <span class="n">other</span> <span class="n">sites</span>
-      <span class="o">|</span>
-<span class="n">reverse</span> <span class="n">proxy</span> <span class="p">(</span><span class="n">haproxy</span><span class="p">)</span>
-  <span class="o">/</span>         <span class="err">\</span>
-<span class="n">BackendA</span>  <span class="n">BackendB</span>
+<div class="highlight"><pre><span></span><code><span class="w">    </span><span class="n">client</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="kr">all</span><span class="w"> </span><span class="n">other</span><span class="w"> </span><span class="n">sites</span><span class="w"></span>
+<span class="w">      </span><span class="o">|</span><span class="w"></span>
+<span class="n">reverse</span><span class="w"> </span><span class="n">proxy</span><span class="w"> </span><span class="p">(</span><span class="n">haproxy</span><span class="p">)</span><span class="w"></span>
+<span class="w">  </span><span class="o">/</span><span class="w">         </span><span class="err">\</span><span class="w"></span>
+<span class="n">BackendA</span><span class="w">  </span><span class="n">BackendB</span><span class="w"></span>
 </code></pre></div>
 <blockquote>
 <p>There are new problems that go along with the benefits of any new technology, see the complicated networking/port coordination</p>
@@ -224,39 +224,39 @@ sudo docker run -p <span class="m">8443</span>:8443 --add-host<span class="o">=<
 <div class="highlight"><pre><span></span><code>docker pull nginx:alpine
 </code></pre></div>
 <h4 id="nginxconf">nginx.conf</h4>
-<div class="highlight"><pre><span></span><code><span class="nt">worker_processes</span>  <span class="nt">1</span><span class="o">;</span>
+<div class="highlight"><pre><span></span><code><span class="nt">worker_processes</span><span class="w">  </span><span class="nt">1</span><span class="o">;</span><span class="w"></span>
 
-<span class="nt">events</span> <span class="p">{</span>
-    <span class="err">worker_connections</span>  <span class="err">1024</span><span class="p">;</span>
-<span class="p">}</span>
+<span class="nt">events</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="err">worker_connections</span><span class="w">  </span><span class="err">1024</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
 
-<span class="nt">http</span> <span class="p">{</span>
-    <span class="err">include</span>       <span class="err">mime.types</span><span class="p">;</span>
-    <span class="err">default_type</span>  <span class="err">application/octet-stream</span><span class="p">;</span>
+<span class="nt">http</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="err">include</span><span class="w">       </span><span class="err">mime.types</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="err">default_type</span><span class="w">  </span><span class="err">application/octet-stream</span><span class="p">;</span><span class="w"></span>
 
-    <span class="err">sendfile</span>        <span class="err">on</span><span class="p">;</span>
-    <span class="err">keepalive_timeout</span>  <span class="err">65</span><span class="p">;</span>
+<span class="w">    </span><span class="err">sendfile</span><span class="w">        </span><span class="err">on</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="err">keepalive_timeout</span><span class="w">  </span><span class="err">65</span><span class="p">;</span><span class="w"></span>
 
-    <span class="err">gzip</span>  <span class="err">on</span><span class="p">;</span>
+<span class="w">    </span><span class="err">gzip</span><span class="w">  </span><span class="err">on</span><span class="p">;</span><span class="w"></span>
 
-    <span class="err">server</span> <span class="err">{</span>
-        <span class="err">listen</span>       <span class="err">8080</span><span class="p">;</span>
+<span class="w">    </span><span class="err">server</span><span class="w"> </span><span class="err">{</span><span class="w"></span>
+<span class="w">        </span><span class="err">listen</span><span class="w">       </span><span class="err">8080</span><span class="p">;</span><span class="w"></span>
 
-        <span class="err">location</span> <span class="err">/</span> <span class="err">{</span>
-            <span class="err">resolver</span> <span class="err">8.8.8.8</span><span class="p">;</span>
-            <span class="err">proxy_pass</span> <span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="err">$</span><span class="n">http_host</span><span class="err">$</span><span class="n">uri</span><span class="err">$</span><span class="n">is_args</span><span class="err">$</span><span class="n">args</span><span class="p">;</span>
-        <span class="p">}</span>
+<span class="w">        </span><span class="err">location</span><span class="w"> </span><span class="err">/</span><span class="w"> </span><span class="err">{</span><span class="w"></span>
+<span class="w">            </span><span class="err">resolver</span><span class="w"> </span><span class="err">8.8.8.8</span><span class="p">;</span><span class="w"></span>
+<span class="w">            </span><span class="err">proxy_pass</span><span class="w"> </span><span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="err">$</span><span class="n">http_host</span><span class="err">$</span><span class="n">uri</span><span class="err">$</span><span class="n">is_args</span><span class="err">$</span><span class="n">args</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
 
-        <span class="nt">error_page</span>   <span class="nt">500</span> <span class="nt">502</span> <span class="nt">503</span> <span class="nt">504</span>  <span class="o">/</span><span class="nt">50x</span><span class="p">.</span><span class="nc">html</span><span class="o">;</span>
-        <span class="nt">location</span> <span class="o">=</span> <span class="o">/</span><span class="nt">50x</span><span class="p">.</span><span class="nc">html</span> <span class="p">{</span>
-            <span class="err">root</span>   <span class="err">html</span><span class="p">;</span>
-        <span class="p">}</span>
-    <span class="err">}</span>
-<span class="err">}</span>
+<span class="w">        </span><span class="nt">error_page</span><span class="w">   </span><span class="nt">500</span><span class="w"> </span><span class="nt">502</span><span class="w"> </span><span class="nt">503</span><span class="w"> </span><span class="nt">504</span><span class="w">  </span><span class="o">/</span><span class="nt">50x</span><span class="p">.</span><span class="nc">html</span><span class="o">;</span><span class="w"></span>
+<span class="w">        </span><span class="nt">location</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">/</span><span class="nt">50x</span><span class="p">.</span><span class="nc">html</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="err">root</span><span class="w">   </span><span class="err">html</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="err">}</span><span class="w"></span>
+<span class="err">}</span><span class="w"></span>
 
 
 
-<span class="nt">docker</span> <span class="nt">run</span> <span class="nt">-it</span> <span class="nt">--rm</span> <span class="nt">-p</span> <span class="nt">8080</span><span class="p">:</span><span class="nd">8080</span> <span class="nt">-v</span> <span class="o">/</span><span class="nt">tmp</span><span class="o">/</span><span class="nt">nginx</span><span class="p">.</span><span class="nc">conf</span><span class="o">:/</span><span class="nt">etc</span><span class="o">/</span><span class="nt">nginx</span><span class="o">/</span><span class="nt">nginx</span><span class="p">.</span><span class="nc">conf</span><span class="p">:</span><span class="nd">ro</span> <span class="nt">--name</span> <span class="nt">mynginx</span> <span class="nt">nginx</span><span class="p">:</span><span class="nd">alpine</span>
+<span class="nt">docker</span><span class="w"> </span><span class="nt">run</span><span class="w"> </span><span class="nt">-it</span><span class="w"> </span><span class="nt">--rm</span><span class="w"> </span><span class="nt">-p</span><span class="w"> </span><span class="nt">8080</span><span class="p">:</span><span class="nd">8080</span><span class="w"> </span><span class="nt">-v</span><span class="w"> </span><span class="o">/</span><span class="nt">tmp</span><span class="o">/</span><span class="nt">nginx</span><span class="p">.</span><span class="nc">conf</span><span class="o">:/</span><span class="nt">etc</span><span class="o">/</span><span class="nt">nginx</span><span class="o">/</span><span class="nt">nginx</span><span class="p">.</span><span class="nc">conf</span><span class="p">:</span><span class="nd">ro</span><span class="w"> </span><span class="nt">--name</span><span class="w"> </span><span class="nt">mynginx</span><span class="w"> </span><span class="nt">nginx</span><span class="p">:</span><span class="nd">alpine</span><span class="w"></span>
 </code></pre></div>
 <blockquote>
 <p>bind to port 8080 on the host and run an ephemeral container based on the alpine linux with nginx image that uses the /tmp/nginx config</p>

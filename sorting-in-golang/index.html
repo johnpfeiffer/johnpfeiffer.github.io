@@ -92,62 +92,62 @@
 <p>Golang has made Sorting really easy and efficient. <em>Both in terms of compute and memory</em></p>
 <h2 id="verbose-implementation-of-sorting-with-go-primitives-like-a-map">Verbose implementation of Sorting with Go Primitives like a Map</h2>
 <p>First, if you want to just stick with primitives, you can sort a particular item like this...</p>
-<div class="highlight"><pre><span></span><code><span class="kn">package</span> <span class="nx">main</span>
+<div class="highlight"><pre><span></span><code><span class="kn">package</span><span class="w"> </span><span class="nx">main</span><span class="w"></span>
 
-<span class="kn">import</span> <span class="p">(</span>
-    <span class="s">"fmt"</span>
-    <span class="s">"sort"</span>
-<span class="p">)</span>
+<span class="kn">import</span><span class="w"> </span><span class="p">(</span><span class="w"></span>
+<span class="w">    </span><span class="s">"fmt"</span><span class="w"></span>
+<span class="w">    </span><span class="s">"sort"</span><span class="w"></span>
+<span class="p">)</span><span class="w"></span>
 
-<span class="c1">// Person is defined by name and age</span>
-<span class="kd">type</span> <span class="nx">Person</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">Name</span> <span class="kt">string</span>
-    <span class="nx">Age</span>  <span class="kt">int</span>
-<span class="p">}</span>
+<span class="c1">// Person is defined by name and age</span><span class="w"></span>
+<span class="kd">type</span><span class="w"> </span><span class="nx">Person</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nx">Name</span><span class="w"> </span><span class="kt">string</span><span class="w"></span>
+<span class="w">    </span><span class="nx">Age</span><span class="w">  </span><span class="kt">int</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
 
-<span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
-    <span class="nx">People</span> <span class="o">:=</span> <span class="p">[]</span><span class="nx">Person</span><span class="p">{</span>
-        <span class="p">{</span><span class="nx">Name</span><span class="p">:</span> <span class="s">"Charles"</span><span class="p">,</span> <span class="nx">Age</span><span class="p">:</span> <span class="mi">25</span><span class="p">},</span>
-        <span class="p">{</span><span class="nx">Name</span><span class="p">:</span> <span class="s">"Alice"</span><span class="p">,</span> <span class="nx">Age</span><span class="p">:</span> <span class="mi">25</span><span class="p">},</span>
-        <span class="p">{</span><span class="nx">Name</span><span class="p">:</span> <span class="s">"Bob"</span><span class="p">,</span> <span class="nx">Age</span><span class="p">:</span> <span class="mi">24</span><span class="p">},</span>
-    <span class="p">}</span>
-    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">"Original Listing: %v \n"</span><span class="p">,</span> <span class="nx">People</span><span class="p">)</span>
+<span class="kd">func</span><span class="w"> </span><span class="nx">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nx">People</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="p">[]</span><span class="nx">Person</span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="p">{</span><span class="nx">Name</span><span class="p">:</span><span class="w"> </span><span class="s">"Charles"</span><span class="p">,</span><span class="w"> </span><span class="nx">Age</span><span class="p">:</span><span class="w"> </span><span class="mi">25</span><span class="p">},</span><span class="w"></span>
+<span class="w">        </span><span class="p">{</span><span class="nx">Name</span><span class="p">:</span><span class="w"> </span><span class="s">"Alice"</span><span class="p">,</span><span class="w"> </span><span class="nx">Age</span><span class="p">:</span><span class="w"> </span><span class="mi">25</span><span class="p">},</span><span class="w"></span>
+<span class="w">        </span><span class="p">{</span><span class="nx">Name</span><span class="p">:</span><span class="w"> </span><span class="s">"Bob"</span><span class="p">,</span><span class="w"> </span><span class="nx">Age</span><span class="p">:</span><span class="w"> </span><span class="mi">24</span><span class="p">},</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">"Original Listing: %v \n"</span><span class="p">,</span><span class="w"> </span><span class="nx">People</span><span class="p">)</span><span class="w"></span>
 
-    <span class="c1">// Example of manually sorting using extra primitive data structures</span>
-    <span class="nx">AgeToPeople</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">map</span><span class="p">[</span><span class="kt">int</span><span class="p">][]</span><span class="nx">Person</span><span class="p">)</span>
-    <span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">p</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">People</span> <span class="p">{</span>
-        <span class="c1">// handle the edge case of not yet having a list entry in the map</span>
-        <span class="nx">_</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">AgeToPeople</span><span class="p">[</span><span class="nx">p</span><span class="p">.</span><span class="nx">Age</span><span class="p">]</span>
-        <span class="k">if</span> <span class="p">!</span><span class="nx">ok</span> <span class="p">{</span>
-            <span class="nx">AgeToPeople</span><span class="p">[</span><span class="nx">p</span><span class="p">.</span><span class="nx">Age</span><span class="p">]</span> <span class="p">=</span> <span class="p">[]</span><span class="nx">Person</span><span class="p">{</span><span class="nx">p</span><span class="p">}</span>
-        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-            <span class="nx">temp</span> <span class="o">:=</span> <span class="nx">AgeToPeople</span><span class="p">[</span><span class="nx">p</span><span class="p">.</span><span class="nx">Age</span><span class="p">]</span>
-            <span class="nx">AgeToPeople</span><span class="p">[</span><span class="nx">p</span><span class="p">.</span><span class="nx">Age</span><span class="p">]</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">temp</span><span class="p">,</span> <span class="nx">p</span><span class="p">)</span> <span class="c1">// this maintains the pre-existing order on duplicates</span>
-        <span class="p">}</span>
-    <span class="p">}</span>
+<span class="w">    </span><span class="c1">// Example of manually sorting using extra primitive data structures</span><span class="w"></span>
+<span class="w">    </span><span class="nx">AgeToPeople</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nb">make</span><span class="p">(</span><span class="kd">map</span><span class="p">[</span><span class="kt">int</span><span class="p">][]</span><span class="nx">Person</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="nx">_</span><span class="p">,</span><span class="w"> </span><span class="nx">p</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">People</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="c1">// handle the edge case of not yet having a list entry in the map</span><span class="w"></span>
+<span class="w">        </span><span class="nx">_</span><span class="p">,</span><span class="w"> </span><span class="nx">ok</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">AgeToPeople</span><span class="p">[</span><span class="nx">p</span><span class="p">.</span><span class="nx">Age</span><span class="p">]</span><span class="w"></span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">!</span><span class="nx">ok</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="nx">AgeToPeople</span><span class="p">[</span><span class="nx">p</span><span class="p">.</span><span class="nx">Age</span><span class="p">]</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">[]</span><span class="nx">Person</span><span class="p">{</span><span class="nx">p</span><span class="p">}</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="nx">temp</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">AgeToPeople</span><span class="p">[</span><span class="nx">p</span><span class="p">.</span><span class="nx">Age</span><span class="p">]</span><span class="w"></span>
+<span class="w">            </span><span class="nx">AgeToPeople</span><span class="p">[</span><span class="nx">p</span><span class="p">.</span><span class="nx">Age</span><span class="p">]</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nb">append</span><span class="p">(</span><span class="nx">temp</span><span class="p">,</span><span class="w"> </span><span class="nx">p</span><span class="p">)</span><span class="w"> </span><span class="c1">// this maintains the pre-existing order on duplicates</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
 
-    <span class="c1">// Sort by a property and then dereference the lookup map</span>
-    <span class="c1">// get the unique list of ages (each map key is unique)</span>
-    <span class="kd">var</span> <span class="nx">Ages</span> <span class="p">[]</span><span class="kt">int</span>
-    <span class="k">for</span> <span class="nx">age</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">AgeToPeople</span> <span class="p">{</span>
-        <span class="nx">Ages</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">Ages</span><span class="p">,</span> <span class="nx">age</span><span class="p">)</span>
-    <span class="p">}</span>
+<span class="w">    </span><span class="c1">// Sort by a property and then dereference the lookup map</span><span class="w"></span>
+<span class="w">    </span><span class="c1">// get the unique list of ages (each map key is unique)</span><span class="w"></span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nx">Ages</span><span class="w"> </span><span class="p">[]</span><span class="kt">int</span><span class="w"></span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="nx">age</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">AgeToPeople</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="nx">Ages</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nb">append</span><span class="p">(</span><span class="nx">Ages</span><span class="p">,</span><span class="w"> </span><span class="nx">age</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
 
-    <span class="nx">sort</span><span class="p">.</span><span class="nx">Ints</span><span class="p">(</span><span class="nx">Ages</span><span class="p">)</span>
+<span class="w">    </span><span class="nx">sort</span><span class="p">.</span><span class="nx">Ints</span><span class="p">(</span><span class="nx">Ages</span><span class="p">)</span><span class="w"></span>
 
-    <span class="kd">var</span> <span class="nx">PeopleSortedByAge</span> <span class="p">[]</span><span class="nx">Person</span>
-    <span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">age</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">Ages</span> <span class="p">{</span>
-        <span class="nx">temp</span> <span class="o">:=</span> <span class="nx">AgeToPeople</span><span class="p">[</span><span class="nx">age</span><span class="p">]</span>
-        <span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">p</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">temp</span> <span class="p">{</span>
-            <span class="nx">PeopleSortedByAge</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">PeopleSortedByAge</span><span class="p">,</span> <span class="nx">p</span><span class="p">)</span>
-        <span class="p">}</span>
-    <span class="p">}</span>
-    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">"Sorted by age Listing: %v \n"</span><span class="p">,</span> <span class="nx">PeopleSortedByAge</span><span class="p">)</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nx">PeopleSortedByAge</span><span class="w"> </span><span class="p">[]</span><span class="nx">Person</span><span class="w"></span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="nx">_</span><span class="p">,</span><span class="w"> </span><span class="nx">age</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">Ages</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="nx">temp</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">AgeToPeople</span><span class="p">[</span><span class="nx">age</span><span class="p">]</span><span class="w"></span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="nx">_</span><span class="p">,</span><span class="w"> </span><span class="nx">p</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">temp</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="nx">PeopleSortedByAge</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nb">append</span><span class="p">(</span><span class="nx">PeopleSortedByAge</span><span class="p">,</span><span class="w"> </span><span class="nx">p</span><span class="p">)</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">"Sorted by age Listing: %v \n"</span><span class="p">,</span><span class="w"> </span><span class="nx">PeopleSortedByAge</span><span class="p">)</span><span class="w"></span>
 
-    <span class="c1">// Optionally create a subset of the "lowest N members"</span>
-    <span class="c1">// this could be more efficient if it was applied during the PeopleSortedByAge loop</span>
-    <span class="nx">PeopleSortedByAgeSubset</span> <span class="o">:=</span> <span class="nx">PeopleSortedByAge</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span>
-    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">"Stable Subset of Sorted by age: %v \n"</span><span class="p">,</span> <span class="nx">PeopleSortedByAgeSubset</span><span class="p">)</span>
+<span class="w">    </span><span class="c1">// Optionally create a subset of the "lowest N members"</span><span class="w"></span>
+<span class="w">    </span><span class="c1">// this could be more efficient if it was applied during the PeopleSortedByAge loop</span><span class="w"></span>
+<span class="w">    </span><span class="nx">PeopleSortedByAgeSubset</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">PeopleSortedByAge</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span><span class="w"></span>
+<span class="w">    </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">"Stable Subset of Sorted by age: %v \n"</span><span class="p">,</span><span class="w"> </span><span class="nx">PeopleSortedByAgeSubset</span><span class="p">)</span><span class="w"></span>
 </code></pre></div>
 <blockquote>
 <p>This code is verbose but does provide visibility and control:
@@ -157,29 +157,29 @@ Not modifying the original slice, the exact property used for sorting, explicit 
 <p><em>ok, I am "hand-waving" when we use the built in sorting of Integers but I'm not looking to re-invent the wheel...</em></p>
 <p>To execute (or modify) the code yourself <a href="https://play.golang.org/p/A9IYxubb8yK">https://play.golang.org/p/A9IYxubb8yK</a></p>
 <h2 id="very-easy-and-fast-way-to-sort-in-go">Very easy and fast way to Sort in Go</h2>
-<div class="highlight"><pre><span></span><code><span class="kn">package</span> <span class="nx">main</span>
+<div class="highlight"><pre><span></span><code><span class="kn">package</span><span class="w"> </span><span class="nx">main</span><span class="w"></span>
 
-<span class="kn">import</span> <span class="p">(</span>
-    <span class="s">"fmt"</span>
-    <span class="s">"sort"</span>
-<span class="p">)</span>
+<span class="kn">import</span><span class="w"> </span><span class="p">(</span><span class="w"></span>
+<span class="w">    </span><span class="s">"fmt"</span><span class="w"></span>
+<span class="w">    </span><span class="s">"sort"</span><span class="w"></span>
+<span class="p">)</span><span class="w"></span>
 
-<span class="c1">// Person is defined by name and age</span>
-<span class="kd">type</span> <span class="nx">Person</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">Name</span> <span class="kt">string</span>
-    <span class="nx">Age</span>  <span class="kt">int</span>
-<span class="p">}</span>
+<span class="c1">// Person is defined by name and age</span><span class="w"></span>
+<span class="kd">type</span><span class="w"> </span><span class="nx">Person</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nx">Name</span><span class="w"> </span><span class="kt">string</span><span class="w"></span>
+<span class="w">    </span><span class="nx">Age</span><span class="w">  </span><span class="kt">int</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
 
-<span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
-    <span class="nx">People</span> <span class="o">:=</span> <span class="p">[]</span><span class="nx">Person</span><span class="p">{</span>
-        <span class="p">{</span><span class="nx">Name</span><span class="p">:</span> <span class="s">"Charles"</span><span class="p">,</span> <span class="nx">Age</span><span class="p">:</span> <span class="mi">25</span><span class="p">},</span>
-        <span class="p">{</span><span class="nx">Name</span><span class="p">:</span> <span class="s">"Alice"</span><span class="p">,</span> <span class="nx">Age</span><span class="p">:</span> <span class="mi">25</span><span class="p">},</span>
-        <span class="p">{</span><span class="nx">Name</span><span class="p">:</span> <span class="s">"Bob"</span><span class="p">,</span> <span class="nx">Age</span><span class="p">:</span> <span class="mi">24</span><span class="p">},</span>
-    <span class="p">}</span>
-    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">"Original Listing: %v \n"</span><span class="p">,</span> <span class="nx">People</span><span class="p">)</span>
+<span class="kd">func</span><span class="w"> </span><span class="nx">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nx">People</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="p">[]</span><span class="nx">Person</span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="p">{</span><span class="nx">Name</span><span class="p">:</span><span class="w"> </span><span class="s">"Charles"</span><span class="p">,</span><span class="w"> </span><span class="nx">Age</span><span class="p">:</span><span class="w"> </span><span class="mi">25</span><span class="p">},</span><span class="w"></span>
+<span class="w">        </span><span class="p">{</span><span class="nx">Name</span><span class="p">:</span><span class="w"> </span><span class="s">"Alice"</span><span class="p">,</span><span class="w"> </span><span class="nx">Age</span><span class="p">:</span><span class="w"> </span><span class="mi">25</span><span class="p">},</span><span class="w"></span>
+<span class="w">        </span><span class="p">{</span><span class="nx">Name</span><span class="p">:</span><span class="w"> </span><span class="s">"Bob"</span><span class="p">,</span><span class="w"> </span><span class="nx">Age</span><span class="p">:</span><span class="w"> </span><span class="mi">24</span><span class="p">},</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">"Original Listing: %v \n"</span><span class="p">,</span><span class="w"> </span><span class="nx">People</span><span class="p">)</span><span class="w"></span>
 
-    <span class="nx">sort</span><span class="p">.</span><span class="nx">SliceStable</span><span class="p">(</span><span class="nx">People</span><span class="p">,</span> <span class="kd">func</span><span class="p">(</span><span class="nx">i</span><span class="p">,</span> <span class="nx">j</span> <span class="kt">int</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span> <span class="k">return</span> <span class="nx">People</span><span class="p">[</span><span class="nx">i</span><span class="p">].</span><span class="nx">Age</span> <span class="p">&lt;</span> <span class="nx">People</span><span class="p">[</span><span class="nx">j</span><span class="p">].</span><span class="nx">Age</span> <span class="p">})</span>
-    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">"Original Sorted using BuiltIn SliceStable: %v \n"</span><span class="p">,</span> <span class="nx">People</span><span class="p">)</span>
+<span class="w">    </span><span class="nx">sort</span><span class="p">.</span><span class="nx">SliceStable</span><span class="p">(</span><span class="nx">People</span><span class="p">,</span><span class="w"> </span><span class="kd">func</span><span class="p">(</span><span class="nx">i</span><span class="p">,</span><span class="w"> </span><span class="nx">j</span><span class="w"> </span><span class="kt">int</span><span class="p">)</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="nx">People</span><span class="p">[</span><span class="nx">i</span><span class="p">].</span><span class="nx">Age</span><span class="w"> </span><span class="p">&lt;</span><span class="w"> </span><span class="nx">People</span><span class="p">[</span><span class="nx">j</span><span class="p">].</span><span class="nx">Age</span><span class="w"> </span><span class="p">})</span><span class="w"></span>
+<span class="w">    </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">"Original Sorted using BuiltIn SliceStable: %v \n"</span><span class="p">,</span><span class="w"> </span><span class="nx">People</span><span class="p">)</span><span class="w"></span>
 </code></pre></div>
 <blockquote>
 <p>The anonymous function is passed in as a parameter to define how to compare elements in the slice
@@ -203,56 +203,56 @@ and be aware that the Sort function modifies the original slice</p>
 <li><a href="https://golang.org/pkg/sort/">https://golang.org/pkg/sort/</a></li>
 </ul>
 <p>Thus with a struct definition, then writing a few method definitions, one can sort a collection of objects.</p>
-<div class="highlight"><pre><span></span><code><span class="kn">package</span> <span class="nx">main</span>
+<div class="highlight"><pre><span></span><code><span class="kn">package</span><span class="w"> </span><span class="nx">main</span><span class="w"></span>
 
-<span class="kn">import</span> <span class="p">(</span>
-    <span class="s">"fmt"</span>
-    <span class="s">"sort"</span>
-<span class="p">)</span>
+<span class="kn">import</span><span class="w"> </span><span class="p">(</span><span class="w"></span>
+<span class="w">    </span><span class="s">"fmt"</span><span class="w"></span>
+<span class="w">    </span><span class="s">"sort"</span><span class="w"></span>
+<span class="p">)</span><span class="w"></span>
 
-<span class="c1">// Person is defined by name and age</span>
-<span class="kd">type</span> <span class="nx">Person</span> <span class="kd">struct</span> <span class="p">{</span>
-    <span class="nx">Name</span> <span class="kt">string</span>
-    <span class="nx">Age</span>  <span class="kt">int</span>
-<span class="p">}</span>
+<span class="c1">// Person is defined by name and age</span><span class="w"></span>
+<span class="kd">type</span><span class="w"> </span><span class="nx">Person</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nx">Name</span><span class="w"> </span><span class="kt">string</span><span class="w"></span>
+<span class="w">    </span><span class="nx">Age</span><span class="w">  </span><span class="kt">int</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
 
-<span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
-    <span class="nx">People</span> <span class="o">:=</span> <span class="p">[]</span><span class="nx">Person</span><span class="p">{</span>
-        <span class="p">{</span><span class="nx">Name</span><span class="p">:</span> <span class="s">"Charles"</span><span class="p">,</span> <span class="nx">Age</span><span class="p">:</span> <span class="mi">25</span><span class="p">},</span>
-        <span class="p">{</span><span class="nx">Name</span><span class="p">:</span> <span class="s">"Alice"</span><span class="p">,</span> <span class="nx">Age</span><span class="p">:</span> <span class="mi">25</span><span class="p">},</span>
-        <span class="p">{</span><span class="nx">Name</span><span class="p">:</span> <span class="s">"Bob"</span><span class="p">,</span> <span class="nx">Age</span><span class="p">:</span> <span class="mi">24</span><span class="p">},</span>
-    <span class="p">}</span>
-    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">"Original Listing: %v \n"</span><span class="p">,</span> <span class="nx">People</span><span class="p">)</span>
+<span class="kd">func</span><span class="w"> </span><span class="nx">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nx">People</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="p">[]</span><span class="nx">Person</span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="p">{</span><span class="nx">Name</span><span class="p">:</span><span class="w"> </span><span class="s">"Charles"</span><span class="p">,</span><span class="w"> </span><span class="nx">Age</span><span class="p">:</span><span class="w"> </span><span class="mi">25</span><span class="p">},</span><span class="w"></span>
+<span class="w">        </span><span class="p">{</span><span class="nx">Name</span><span class="p">:</span><span class="w"> </span><span class="s">"Alice"</span><span class="p">,</span><span class="w"> </span><span class="nx">Age</span><span class="p">:</span><span class="w"> </span><span class="mi">25</span><span class="p">},</span><span class="w"></span>
+<span class="w">        </span><span class="p">{</span><span class="nx">Name</span><span class="p">:</span><span class="w"> </span><span class="s">"Bob"</span><span class="p">,</span><span class="w"> </span><span class="nx">Age</span><span class="p">:</span><span class="w"> </span><span class="mi">24</span><span class="p">},</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">"Original Listing: %v \n"</span><span class="p">,</span><span class="w"> </span><span class="nx">People</span><span class="p">)</span><span class="w"></span>
 
-    <span class="nx">sort</span><span class="p">.</span><span class="nx">Sort</span><span class="p">(</span><span class="nx">ByAge</span><span class="p">(</span><span class="nx">People</span><span class="p">))</span>
-    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">"Original Sorted using a Customized Less: %v \n"</span><span class="p">,</span> <span class="nx">People</span><span class="p">)</span>
-<span class="p">}</span>
+<span class="w">    </span><span class="nx">sort</span><span class="p">.</span><span class="nx">Sort</span><span class="p">(</span><span class="nx">ByAge</span><span class="p">(</span><span class="nx">People</span><span class="p">))</span><span class="w"></span>
+<span class="w">    </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">"Original Sorted using a Customized Less: %v \n"</span><span class="p">,</span><span class="w"> </span><span class="nx">People</span><span class="p">)</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
 
-<span class="c1">// ByAge is a list of Persons that can be sorted by age</span>
-<span class="kd">type</span> <span class="nx">ByAge</span> <span class="p">[]</span><span class="nx">Person</span>
+<span class="c1">// ByAge is a list of Persons that can be sorted by age</span><span class="w"></span>
+<span class="kd">type</span><span class="w"> </span><span class="nx">ByAge</span><span class="w"> </span><span class="p">[]</span><span class="nx">Person</span><span class="w"></span>
 
-<span class="c1">// Len implements the interface for Sort</span>
-<span class="kd">func</span> <span class="p">(</span><span class="nx">p</span> <span class="nx">ByAge</span><span class="p">)</span> <span class="nx">Len</span><span class="p">()</span> <span class="kt">int</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="nx">p</span><span class="p">)</span>
-<span class="p">}</span>
+<span class="c1">// Len implements the interface for Sort</span><span class="w"></span>
+<span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">p</span><span class="w"> </span><span class="nx">ByAge</span><span class="p">)</span><span class="w"> </span><span class="nx">Len</span><span class="p">()</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nx">p</span><span class="p">)</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
 
-<span class="c1">// Swap implements the interface for Sort</span>
-<span class="kd">func</span> <span class="p">(</span><span class="nx">p</span> <span class="nx">ByAge</span><span class="p">)</span> <span class="nx">Swap</span><span class="p">(</span><span class="nx">i</span><span class="p">,</span> <span class="nx">j</span> <span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nx">p</span><span class="p">[</span><span class="nx">i</span><span class="p">],</span> <span class="nx">p</span><span class="p">[</span><span class="nx">j</span><span class="p">]</span> <span class="p">=</span> <span class="nx">p</span><span class="p">[</span><span class="nx">j</span><span class="p">],</span> <span class="nx">p</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span>
-<span class="p">}</span>
+<span class="c1">// Swap implements the interface for Sort</span><span class="w"></span>
+<span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">p</span><span class="w"> </span><span class="nx">ByAge</span><span class="p">)</span><span class="w"> </span><span class="nx">Swap</span><span class="p">(</span><span class="nx">i</span><span class="p">,</span><span class="w"> </span><span class="nx">j</span><span class="w"> </span><span class="kt">int</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nx">p</span><span class="p">[</span><span class="nx">i</span><span class="p">],</span><span class="w"> </span><span class="nx">p</span><span class="p">[</span><span class="nx">j</span><span class="p">]</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">p</span><span class="p">[</span><span class="nx">j</span><span class="p">],</span><span class="w"> </span><span class="nx">p</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
 
-<span class="c1">// Less implements the interface for Sort</span>
-<span class="kd">func</span> <span class="p">(</span><span class="nx">p</span> <span class="nx">ByAge</span><span class="p">)</span> <span class="nx">Less</span><span class="p">(</span><span class="nx">i</span><span class="p">,</span> <span class="nx">j</span> <span class="kt">int</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
-    <span class="c1">// customize sorting on age equivalence to use Name too</span>
-    <span class="k">if</span> <span class="nx">p</span><span class="p">[</span><span class="nx">i</span><span class="p">].</span><span class="nx">Age</span> <span class="o">==</span> <span class="nx">p</span><span class="p">[</span><span class="nx">j</span><span class="p">].</span><span class="nx">Age</span> <span class="p">{</span>
-        <span class="k">if</span> <span class="nx">p</span><span class="p">[</span><span class="nx">i</span><span class="p">].</span><span class="nx">Name</span> <span class="o">&lt;=</span> <span class="nx">p</span><span class="p">[</span><span class="nx">j</span><span class="p">].</span><span class="nx">Name</span> <span class="p">{</span>
-            <span class="k">return</span> <span class="kc">true</span>
-        <span class="p">}</span>
-        <span class="k">return</span> <span class="kc">false</span>
-    <span class="p">}</span>
-    <span class="c1">// otherwise ages are not equal, simply use age</span>
-    <span class="k">return</span> <span class="nx">p</span><span class="p">[</span><span class="nx">i</span><span class="p">].</span><span class="nx">Age</span> <span class="p">&lt;</span> <span class="nx">p</span><span class="p">[</span><span class="nx">j</span><span class="p">].</span><span class="nx">Age</span>
-<span class="p">}</span>
+<span class="c1">// Less implements the interface for Sort</span><span class="w"></span>
+<span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">p</span><span class="w"> </span><span class="nx">ByAge</span><span class="p">)</span><span class="w"> </span><span class="nx">Less</span><span class="p">(</span><span class="nx">i</span><span class="p">,</span><span class="w"> </span><span class="nx">j</span><span class="w"> </span><span class="kt">int</span><span class="p">)</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="c1">// customize sorting on age equivalence to use Name too</span><span class="w"></span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">p</span><span class="p">[</span><span class="nx">i</span><span class="p">].</span><span class="nx">Age</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nx">p</span><span class="p">[</span><span class="nx">j</span><span class="p">].</span><span class="nx">Age</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="nx">p</span><span class="p">[</span><span class="nx">i</span><span class="p">].</span><span class="nx">Name</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="nx">p</span><span class="p">[</span><span class="nx">j</span><span class="p">].</span><span class="nx">Name</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">false</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="c1">// otherwise ages are not equal, simply use age</span><span class="w"></span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">p</span><span class="p">[</span><span class="nx">i</span><span class="p">].</span><span class="nx">Age</span><span class="w"> </span><span class="p">&lt;</span><span class="w"> </span><span class="nx">p</span><span class="p">[</span><span class="nx">j</span><span class="p">].</span><span class="nx">Age</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
 </code></pre></div>
 <blockquote>
 <p>This "strategy pattern" allows Golang to provide Sorting as an abstraction</p>
@@ -266,19 +266,19 @@ and be aware that the Sort function modifies the original slice</p>
 <h2 id="sorting-in-reverse">Sorting in Reverse</h2>
 <p>There is a helper function that just reverses the sorting order, so once you can Sort (because you fulfill the Interface), then you can "reverse sort" =)
 <strong>alternatively you could use a for loop and iterate over a sorted slice, starting from index length-1 down to 0</strong></p>
-<div class="highlight"><pre><span></span><code><span class="kn">package</span> <span class="nx">main</span>
+<div class="highlight"><pre><span></span><code><span class="kn">package</span><span class="w"> </span><span class="nx">main</span><span class="w"></span>
 
-<span class="kn">import</span> <span class="p">(</span>
-    <span class="s">"fmt"</span>
-    <span class="s">"sort"</span>
-<span class="p">)</span>
+<span class="kn">import</span><span class="w"> </span><span class="p">(</span><span class="w"></span>
+<span class="w">    </span><span class="s">"fmt"</span><span class="w"></span>
+<span class="w">    </span><span class="s">"sort"</span><span class="w"></span>
+<span class="p">)</span><span class="w"></span>
 
-<span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
-    <span class="nx">a</span> <span class="o">:=</span> <span class="p">[]</span><span class="kt">int</span><span class="p">{</span><span class="mi">4</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">}</span>
-    <span class="c1">// convert a to an IntSlice so it can be Reverse Sorted</span>
-    <span class="nx">sort</span><span class="p">.</span><span class="nx">Sort</span><span class="p">(</span><span class="nx">sort</span><span class="p">.</span><span class="nx">Reverse</span><span class="p">(</span><span class="nx">sort</span><span class="p">.</span><span class="nx">IntSlice</span><span class="p">(</span><span class="nx">a</span><span class="p">)))</span>
-    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">a</span><span class="p">)</span>
-<span class="p">}</span>
+<span class="kd">func</span><span class="w"> </span><span class="nx">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nx">a</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="p">[]</span><span class="kt">int</span><span class="p">{</span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="c1">// convert a to an IntSlice so it can be Reverse Sorted</span><span class="w"></span>
+<span class="w">    </span><span class="nx">sort</span><span class="p">.</span><span class="nx">Sort</span><span class="p">(</span><span class="nx">sort</span><span class="p">.</span><span class="nx">Reverse</span><span class="p">(</span><span class="nx">sort</span><span class="p">.</span><span class="nx">IntSlice</span><span class="p">(</span><span class="nx">a</span><span class="p">)))</span><span class="w"></span>
+<span class="w">    </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">a</span><span class="p">)</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
 </code></pre></div>
 <blockquote>
 <p>Typically this is how to control "ascending" or "descending" sorted order</p>
@@ -290,54 +290,54 @@ and be aware that the Sort function modifies the original slice</p>
 <h2 id="sorting-a-map-in-go">Sorting a Map in Go</h2>
 <h3 id="sorting-a-map-by-keys">Sorting a map by Keys</h3>
 <p>To sort by keys is relatively trivial, for a given map "m" creating a slice and sorting it</p>
-<div class="highlight"><pre><span></span><code><span class="nx">m</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">string</span><span class="p">)</span>
-<span class="nx">m</span><span class="p">[</span><span class="s">"z"</span><span class="p">]</span> <span class="p">=</span> <span class="s">"zebra"</span>
-<span class="nx">m</span><span class="p">[</span><span class="s">"aa"</span><span class="p">]</span> <span class="p">=</span> <span class="s">"Aardvark"</span>
-<span class="nx">m</span><span class="p">[</span><span class="s">"B"</span><span class="p">]</span> <span class="p">=</span> <span class="s">"Bear"</span>
-<span class="nx">m</span><span class="p">[</span><span class="s">"a"</span><span class="p">]</span> <span class="p">=</span> <span class="s">"antelope"</span>
+<div class="highlight"><pre><span></span><code><span class="nx">m</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nb">make</span><span class="p">(</span><span class="kd">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">string</span><span class="p">)</span><span class="w"></span>
+<span class="nx">m</span><span class="p">[</span><span class="s">"z"</span><span class="p">]</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">"zebra"</span><span class="w"></span>
+<span class="nx">m</span><span class="p">[</span><span class="s">"aa"</span><span class="p">]</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">"Aardvark"</span><span class="w"></span>
+<span class="nx">m</span><span class="p">[</span><span class="s">"B"</span><span class="p">]</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">"Bear"</span><span class="w"></span>
+<span class="nx">m</span><span class="p">[</span><span class="s">"a"</span><span class="p">]</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">"antelope"</span><span class="w"></span>
 
-<span class="k">for</span> <span class="nx">k</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">m</span> <span class="p">{</span>
-    <span class="nx">sortedKeys</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">sortedKeys</span><span class="p">,</span> <span class="nx">k</span><span class="p">)</span>
-<span class="p">}</span>
-<span class="nx">sort</span><span class="p">.</span><span class="nx">Strings</span><span class="p">(</span><span class="nx">sortedKeys</span><span class="p">)</span>
+<span class="k">for</span><span class="w"> </span><span class="nx">k</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">m</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nx">sortedKeys</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nb">append</span><span class="p">(</span><span class="nx">sortedKeys</span><span class="p">,</span><span class="w"> </span><span class="nx">k</span><span class="p">)</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+<span class="nx">sort</span><span class="p">.</span><span class="nx">Strings</span><span class="p">(</span><span class="nx">sortedKeys</span><span class="p">)</span><span class="w"></span>
 
-<span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">key</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">sortedKeys</span> <span class="p">{</span>
-    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">"%s %s "</span><span class="p">,</span> <span class="nx">key</span><span class="p">,</span> <span class="nx">m</span><span class="p">[</span><span class="nx">key</span><span class="p">])</span>
-<span class="p">}</span>
+<span class="k">for</span><span class="w"> </span><span class="nx">_</span><span class="p">,</span><span class="w"> </span><span class="nx">key</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">sortedKeys</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">"%s %s "</span><span class="p">,</span><span class="w"> </span><span class="nx">key</span><span class="p">,</span><span class="w"> </span><span class="nx">m</span><span class="p">[</span><span class="nx">key</span><span class="p">])</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
 </code></pre></div>
 <h3 id="sorting-a-map-by-values">Sorting a map by Values</h3>
 <p>Sorting a map by values is a little harder which is likely why a cursory internet search brings up far fewer code snippet examples ;)</p>
-<div class="highlight"><pre><span></span><code><span class="c1">// SortByValue returns the Keys in the sorted order of the Values (does not guarantee Stability)</span>
-<span class="kd">func</span> <span class="nx">SortByValue</span><span class="p">(</span><span class="nx">m</span> <span class="kd">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">string</span><span class="p">)</span> <span class="p">(</span><span class="nx">sortedKeys</span> <span class="p">[]</span><span class="kt">string</span><span class="p">)</span> <span class="p">{</span>
+<div class="highlight"><pre><span></span><code><span class="c1">// SortByValue returns the Keys in the sorted order of the Values (does not guarantee Stability)</span><span class="w"></span>
+<span class="kd">func</span><span class="w"> </span><span class="nx">SortByValue</span><span class="p">(</span><span class="nx">m</span><span class="w"> </span><span class="kd">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="nx">sortedKeys</span><span class="w"> </span><span class="p">[]</span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 
-<span class="c1">// create a reverse lookup mapping that can handle collisions</span>
-<span class="c1">// (duplicates) when the same value has multiple occurrences</span>
-<span class="nx">ValueToKey</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">map</span><span class="p">[</span><span class="kt">string</span><span class="p">][]</span><span class="kt">string</span><span class="p">)</span>
-<span class="k">for</span> <span class="nx">k</span><span class="p">,</span> <span class="nx">v</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">m</span> <span class="p">{</span>
-    <span class="nx">_</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">ValueToKey</span><span class="p">[</span><span class="nx">v</span><span class="p">]</span>
-    <span class="k">if</span> <span class="p">!</span><span class="nx">ok</span> <span class="p">{</span>
-        <span class="nx">ValueToKey</span><span class="p">[</span><span class="nx">v</span><span class="p">]</span> <span class="p">=</span> <span class="p">[]</span><span class="kt">string</span><span class="p">{</span><span class="nx">k</span><span class="p">}</span>
-    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-        <span class="nx">temp</span> <span class="o">:=</span> <span class="nx">ValueToKey</span><span class="p">[</span><span class="nx">v</span><span class="p">]</span>
-        <span class="nx">ValueToKey</span><span class="p">[</span><span class="nx">v</span><span class="p">]</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">temp</span><span class="p">,</span> <span class="nx">k</span><span class="p">)</span>
-    <span class="p">}</span>
-<span class="p">}</span>
+<span class="c1">// create a reverse lookup mapping that can handle collisions</span><span class="w"></span>
+<span class="c1">// (duplicates) when the same value has multiple occurrences</span><span class="w"></span>
+<span class="nx">ValueToKey</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nb">make</span><span class="p">(</span><span class="kd">map</span><span class="p">[</span><span class="kt">string</span><span class="p">][]</span><span class="kt">string</span><span class="p">)</span><span class="w"></span>
+<span class="k">for</span><span class="w"> </span><span class="nx">k</span><span class="p">,</span><span class="w"> </span><span class="nx">v</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">m</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nx">_</span><span class="p">,</span><span class="w"> </span><span class="nx">ok</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">ValueToKey</span><span class="p">[</span><span class="nx">v</span><span class="p">]</span><span class="w"></span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">!</span><span class="nx">ok</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="nx">ValueToKey</span><span class="p">[</span><span class="nx">v</span><span class="p">]</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">[]</span><span class="kt">string</span><span class="p">{</span><span class="nx">k</span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="nx">temp</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">ValueToKey</span><span class="p">[</span><span class="nx">v</span><span class="p">]</span><span class="w"></span>
+<span class="w">        </span><span class="nx">ValueToKey</span><span class="p">[</span><span class="nx">v</span><span class="p">]</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nb">append</span><span class="p">(</span><span class="nx">temp</span><span class="p">,</span><span class="w"> </span><span class="nx">k</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
 
-<span class="c1">// sort the Values</span>
-<span class="kd">var</span> <span class="nx">uniqueValues</span> <span class="p">[]</span><span class="kt">string</span>
-<span class="k">for</span> <span class="nx">v</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">ValueToKey</span> <span class="p">{</span>
-    <span class="nx">uniqueValues</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">uniqueValues</span><span class="p">,</span> <span class="nx">v</span><span class="p">)</span>
-<span class="p">}</span>
-<span class="nx">sort</span><span class="p">.</span><span class="nx">Strings</span><span class="p">(</span><span class="nx">uniqueValues</span><span class="p">)</span>
+<span class="c1">// sort the Values</span><span class="w"></span>
+<span class="kd">var</span><span class="w"> </span><span class="nx">uniqueValues</span><span class="w"> </span><span class="p">[]</span><span class="kt">string</span><span class="w"></span>
+<span class="k">for</span><span class="w"> </span><span class="nx">v</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">ValueToKey</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nx">uniqueValues</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nb">append</span><span class="p">(</span><span class="nx">uniqueValues</span><span class="p">,</span><span class="w"> </span><span class="nx">v</span><span class="p">)</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+<span class="nx">sort</span><span class="p">.</span><span class="nx">Strings</span><span class="p">(</span><span class="nx">uniqueValues</span><span class="p">)</span><span class="w"></span>
 
-<span class="c1">// get the corresponding Keys</span>
-<span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">v</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">uniqueValues</span> <span class="p">{</span>
-    <span class="nx">keys</span> <span class="o">:=</span> <span class="nx">ValueToKey</span><span class="p">[</span><span class="nx">v</span><span class="p">]</span>
-    <span class="nx">sortedKeys</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">sortedKeys</span><span class="p">,</span> <span class="nx">keys</span><span class="o">...</span><span class="p">)</span>
-<span class="p">}</span>
+<span class="c1">// get the corresponding Keys</span><span class="w"></span>
+<span class="k">for</span><span class="w"> </span><span class="nx">_</span><span class="p">,</span><span class="w"> </span><span class="nx">v</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">uniqueValues</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nx">keys</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">ValueToKey</span><span class="p">[</span><span class="nx">v</span><span class="p">]</span><span class="w"></span>
+<span class="w">    </span><span class="nx">sortedKeys</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nb">append</span><span class="p">(</span><span class="nx">sortedKeys</span><span class="p">,</span><span class="w"> </span><span class="nx">keys</span><span class="o">...</span><span class="p">)</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
 
-<span class="k">return</span>
-<span class="p">}</span>
+<span class="k">return</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
 </code></pre></div>
 <blockquote>
 <p>The gotcha is that different Keys could have the same Value</p>

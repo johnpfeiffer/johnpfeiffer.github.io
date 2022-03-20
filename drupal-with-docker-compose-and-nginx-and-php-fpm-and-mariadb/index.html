@@ -118,41 +118,41 @@
 <p>I spent time researching nginx and php-fpm and created a minimal config that worked (two docker commands) based on the slimmer alpine linux docker images. <a href="https://blog.john-pfeiffer.com/nginx-with-docker/">https://blog.john-pfeiffer.com/nginx-with-docker/</a></p>
 <p>This wasn't quite far off from the official Drupal Dockerfile except there are some more OS dependencies like GD and XML so I instead opted to use the official Drupal Docker image. (Non alpine linux so larger size but they've done the work of packaging the complexity and by not customizing it will be easier to update in the future - and avoid a Docker Build entirely!)</p>
 <h3 id="docker-composeyml-for-nginx-and-drupal7-fpm-and-mariadb55">docker-compose.yml for nginx and drupal:7-fpm and mariadb:5.5</h3>
-<div class="highlight"><pre><span></span><code><span class="c1"># https://docs.docker.com/compose/compose-file/</span>
-<span class="c1"># https://docs.docker.com/compose/environment-variables/</span>
-<span class="c1"># https://www.nginx.com/resources/wiki/start/topics/recipes/drupal</span>
+<div class="highlight"><pre><span></span><code><span class="c1"># https://docs.docker.com/compose/compose-file/</span><span class="w"></span>
+<span class="c1"># https://docs.docker.com/compose/environment-variables/</span><span class="w"></span>
+<span class="c1"># https://www.nginx.com/resources/wiki/start/topics/recipes/drupal</span><span class="w"></span>
 
-<span class="n">nginx</span><span class="p">:</span>
-  <span class="n">image</span><span class="p">:</span> <span class="n">nginx</span><span class="p">:</span><span class="n">alpine</span>
-  <span class="n">ports</span><span class="p">:</span>
-    <span class="o">-</span> <span class="s2">"80:80"</span>
-  <span class="n">volumes</span><span class="p">:</span>
-    <span class="o">-</span> <span class="o">./</span><span class="n">nginx</span><span class="o">.</span><span class="n">conf</span><span class="p">:</span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">nginx</span><span class="o">/</span><span class="n">nginx</span><span class="o">.</span><span class="n">conf</span><span class="p">:</span><span class="n">ro</span>
-    <span class="o">-</span> <span class="o">./</span><span class="n">default</span><span class="o">.</span><span class="n">conf</span><span class="p">:</span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">nginx</span><span class="o">/</span><span class="n">conf</span><span class="o">.</span><span class="n">d</span><span class="o">/</span><span class="n">default</span><span class="o">.</span><span class="n">conf</span><span class="p">:</span><span class="n">ro</span>
-    <span class="o">-</span> <span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">html</span><span class="p">:</span><span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">html</span><span class="o">/</span>
-  <span class="n">links</span><span class="p">:</span>
-    <span class="o">-</span> <span class="n">fpm</span>
+<span class="n">nginx</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="n">image</span><span class="p">:</span><span class="w"> </span><span class="n">nginx</span><span class="p">:</span><span class="n">alpine</span><span class="w"></span>
+<span class="w">  </span><span class="n">ports</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="o">-</span><span class="w"> </span><span class="s2">"80:80"</span><span class="w"></span>
+<span class="w">  </span><span class="n">volumes</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="o">-</span><span class="w"> </span><span class="o">./</span><span class="n">nginx</span><span class="o">.</span><span class="n">conf</span><span class="p">:</span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">nginx</span><span class="o">/</span><span class="n">nginx</span><span class="o">.</span><span class="n">conf</span><span class="p">:</span><span class="n">ro</span><span class="w"></span>
+<span class="w">    </span><span class="o">-</span><span class="w"> </span><span class="o">./</span><span class="n">default</span><span class="o">.</span><span class="n">conf</span><span class="p">:</span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">nginx</span><span class="o">/</span><span class="n">conf</span><span class="o">.</span><span class="n">d</span><span class="o">/</span><span class="n">default</span><span class="o">.</span><span class="n">conf</span><span class="p">:</span><span class="n">ro</span><span class="w"></span>
+<span class="w">    </span><span class="o">-</span><span class="w"> </span><span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">html</span><span class="p">:</span><span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">html</span><span class="o">/</span><span class="w"></span>
+<span class="w">  </span><span class="n">links</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="o">-</span><span class="w"> </span><span class="n">fpm</span><span class="w"></span>
 
-<span class="c1"># https://hub.docker.com/_/drupal/</span>
-<span class="n">fpm</span><span class="p">:</span>
-  <span class="n">image</span><span class="p">:</span> <span class="n">drupal</span><span class="p">:</span><span class="mi">7</span><span class="o">-</span><span class="n">fpm</span>
-  <span class="n">ports</span><span class="p">:</span>
-    <span class="o">-</span> <span class="s2">"9000:9000"</span>
-  <span class="n">volumes</span><span class="p">:</span>
-    <span class="o">-</span> <span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">html</span><span class="p">:</span><span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">html</span><span class="o">/</span>
-  <span class="n">links</span><span class="p">:</span>
-    <span class="o">-</span> <span class="n">mysql</span>
+<span class="c1"># https://hub.docker.com/_/drupal/</span><span class="w"></span>
+<span class="n">fpm</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="n">image</span><span class="p">:</span><span class="w"> </span><span class="n">drupal</span><span class="p">:</span><span class="mi">7</span><span class="o">-</span><span class="n">fpm</span><span class="w"></span>
+<span class="w">  </span><span class="n">ports</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="o">-</span><span class="w"> </span><span class="s2">"9000:9000"</span><span class="w"></span>
+<span class="w">  </span><span class="n">volumes</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="o">-</span><span class="w"> </span><span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">html</span><span class="p">:</span><span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">html</span><span class="o">/</span><span class="w"></span>
+<span class="w">  </span><span class="n">links</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="o">-</span><span class="w"> </span><span class="n">mysql</span><span class="w"></span>
 
-<span class="c1"># https://hub.docker.com/_/mariadb/</span>
-<span class="n">mysql</span><span class="p">:</span>
-  <span class="n">image</span><span class="p">:</span> <span class="n">mariadb</span><span class="p">:</span><span class="mf">5.5</span>
-  <span class="n">ports</span><span class="p">:</span>
-    <span class="o">-</span> <span class="s2">"3306:3306"</span>
-  <span class="n">environment</span><span class="p">:</span>
-    <span class="o">-</span> <span class="n">MYSQL_ROOT_PASSWORD</span>
-    <span class="o">-</span> <span class="n">MYSQL_USER</span>
-    <span class="o">-</span> <span class="n">MYSQL_PASSWORD</span>
-    <span class="o">-</span> <span class="n">MYSQL_DATABASE</span>
+<span class="c1"># https://hub.docker.com/_/mariadb/</span><span class="w"></span>
+<span class="n">mysql</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="n">image</span><span class="p">:</span><span class="w"> </span><span class="n">mariadb</span><span class="p">:</span><span class="mf">5.5</span><span class="w"></span>
+<span class="w">  </span><span class="n">ports</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="o">-</span><span class="w"> </span><span class="s2">"3306:3306"</span><span class="w"></span>
+<span class="w">  </span><span class="n">environment</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="o">-</span><span class="w"> </span><span class="n">MYSQL_ROOT_PASSWORD</span><span class="w"></span>
+<span class="w">    </span><span class="o">-</span><span class="w"> </span><span class="n">MYSQL_USER</span><span class="w"></span>
+<span class="w">    </span><span class="o">-</span><span class="w"> </span><span class="n">MYSQL_PASSWORD</span><span class="w"></span>
+<span class="w">    </span><span class="o">-</span><span class="w"> </span><span class="n">MYSQL_DATABASE</span><span class="w"></span>
 </code></pre></div>
 <p>Adding the MariaDB (compatible with MySQL) image/container was fairly straightforward (just reading the docs on how to override and setup the default user and DB via Environment Variables)</p>
 <blockquote>
@@ -180,102 +180,102 @@
 <blockquote>
 <p>A few files and a single command (packer is just a single binary downloaded from hashicorp) I can have another Docker based Drupal host ready (awyeah)</p>
 </blockquote>
-<div class="highlight"><pre><span></span><code><span class="err">{</span>
-  <span class="s2">"_comment"</span><span class="o">:</span> <span class="s2">"https://www.packer.io/docs/builders/digitalocean.html"</span><span class="p">,</span>
-  <span class="s2">"variables"</span><span class="o">:</span> <span class="err">{</span>
-    <span class="s2">"digitalocean_api_token"</span><span class="o">:</span> <span class="s2">"{{env `DIGITALOCEAN_API_TOKEN`}}"</span><span class="p">,</span>
-    <span class="s2">"newuser_name"</span><span class="o">:</span> <span class="s2">"{{env `NEWUSER_NAME`}}"</span><span class="p">,</span>
-    <span class="s2">"newuser_password"</span><span class="o">:</span> <span class="s2">"{{env `NEWUSER_PASSWORD`}}"</span>
-  <span class="err">}</span><span class="p">,</span>
+<div class="highlight"><pre><span></span><code><span class="err">{</span><span class="w"></span>
+<span class="w">  </span><span class="s2">"_comment"</span><span class="o">:</span><span class="w"> </span><span class="s2">"https://www.packer.io/docs/builders/digitalocean.html"</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="s2">"variables"</span><span class="o">:</span><span class="w"> </span><span class="err">{</span><span class="w"></span>
+<span class="w">    </span><span class="s2">"digitalocean_api_token"</span><span class="o">:</span><span class="w"> </span><span class="s2">"{{env `DIGITALOCEAN_API_TOKEN`}}"</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="s2">"newuser_name"</span><span class="o">:</span><span class="w"> </span><span class="s2">"{{env `NEWUSER_NAME`}}"</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="s2">"newuser_password"</span><span class="o">:</span><span class="w"> </span><span class="s2">"{{env `NEWUSER_PASSWORD`}}"</span><span class="w"></span>
+<span class="w">  </span><span class="err">}</span><span class="p">,</span><span class="w"></span>
 
-  <span class="s2">"builders"</span><span class="o">:</span> <span class="err">[{</span>
-    <span class="s2">"type"</span><span class="o">:</span> <span class="s2">"digitalocean"</span><span class="p">,</span>
-    <span class="s2">"api_token"</span><span class="o">:</span> <span class="s2">"{{user `digitalocean_api_token`}}"</span><span class="p">,</span>
-    <span class="s2">"size"</span><span class="o">:</span> <span class="s2">"512mb"</span><span class="p">,</span>
-    <span class="s2">"region"</span><span class="o">:</span> <span class="s2">"lon1"</span><span class="p">,</span>
-    <span class="s2">"image"</span><span class="o">:</span> <span class="s2">"ubuntu-16-04-x64"</span><span class="p">,</span>
-    <span class="s2">"droplet_name"</span><span class="o">:</span> <span class="s2">"drupal-from-packer-{{timestamp}}"</span><span class="p">,</span>
-    <span class="s2">"snapshot_name"</span><span class="o">:</span> <span class="s2">"drupal-from-packer-{{isotime </span><span class="se">\"</span><span class="s2">2006.01.02.030405</span><span class="se">\"</span><span class="s2">}}"</span>
-  <span class="err">}]</span><span class="p">,</span>
+<span class="w">  </span><span class="s2">"builders"</span><span class="o">:</span><span class="w"> </span><span class="err">[{</span><span class="w"></span>
+<span class="w">    </span><span class="s2">"type"</span><span class="o">:</span><span class="w"> </span><span class="s2">"digitalocean"</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="s2">"api_token"</span><span class="o">:</span><span class="w"> </span><span class="s2">"{{user `digitalocean_api_token`}}"</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="s2">"size"</span><span class="o">:</span><span class="w"> </span><span class="s2">"512mb"</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="s2">"region"</span><span class="o">:</span><span class="w"> </span><span class="s2">"lon1"</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="s2">"image"</span><span class="o">:</span><span class="w"> </span><span class="s2">"ubuntu-16-04-x64"</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="s2">"droplet_name"</span><span class="o">:</span><span class="w"> </span><span class="s2">"drupal-from-packer-{{timestamp}}"</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="s2">"snapshot_name"</span><span class="o">:</span><span class="w"> </span><span class="s2">"drupal-from-packer-{{isotime </span><span class="se">\"</span><span class="s2">2006.01.02.030405</span><span class="se">\"</span><span class="s2">}}"</span><span class="w"></span>
+<span class="w">  </span><span class="err">}]</span><span class="p">,</span><span class="w"></span>
 
-  <span class="s2">"provisioners"</span><span class="o">:</span> <span class="err">[</span>
-    <span class="err">{</span>
-      <span class="s2">"type"</span><span class="o">:</span> <span class="s2">"shell"</span><span class="p">,</span>
-      <span class="s2">"inline"</span><span class="o">:</span> <span class="err">[</span>
-        <span class="s2">"ip a"</span><span class="p">,</span>
-        <span class="s2">"curl -s http://checkip.amazonaws.com"</span><span class="p">,</span>
-        <span class="s2">"apt-get update"</span><span class="p">,</span>
-        <span class="s2">"sudo apt-get install -y vim curl wget byobu ntp tar gzip"</span><span class="p">,</span>
-        <span class="s2">"timedatectl set-timezone Etc/UTC"</span><span class="p">,</span>
-        <span class="s2">"cat /etc/timezone"</span><span class="p">,</span>
-        <span class="s2">"date"</span><span class="p">,</span>
-        <span class="s2">"useradd -s /bin/bash -m {{user `newuser_name`}}"</span><span class="p">,</span>
-        <span class="s2">"usermod -a -G admin {{user `newuser_name`}}"</span><span class="p">,</span>
-        <span class="s2">"echo '{{user `newuser_name`}}:{{user `newuser_password`}}'|chpasswd"</span><span class="p">,</span>
-        <span class="s2">"cat /etc/passwd"</span><span class="p">,</span>
-        <span class="s2">"sed -i 's/Port 22/Port 2222/g' /etc/ssh/sshd_config"</span><span class="p">,</span>
-        <span class="s2">"sed -i 's/PermitRootLogin yes/PermitRootLogin no/g' /etc/ssh/sshd_config"</span><span class="p">,</span>
-        <span class="s2">"echo 'PasswordAuthentication no' &gt;&gt; /etc/ssh/sshd_config"</span><span class="p">,</span>
-        <span class="s2">"cat /etc/ssh/sshd_config"</span><span class="p">,</span>
-        <span class="s2">"mkdir -p /home/{{user `newuser_name`}}/.ssh"</span><span class="p">,</span>
-        <span class="s2">"fallocate -l 1G /swapfile"</span><span class="p">,</span>
-        <span class="s2">"chmod 600 /swapfile"</span><span class="p">,</span>
-        <span class="s2">"mkswap /swapfile"</span><span class="p">,</span>
-        <span class="s2">"swapon /swapfile"</span><span class="p">,</span>
-        <span class="s2">"swapon --show"</span><span class="p">,</span>
-        <span class="s2">"free -h"</span><span class="p">,</span>
-        <span class="s2">"echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab"</span><span class="p">,</span>
-        <span class="s2">"echo 'vm.swappiness=10' | sudo tee -a /etc/sysctl.conf"</span><span class="p">,</span>
-        <span class="s2">"echo 'vm.vfs_cache_pressure=50' | sudo tee -a /etc/sysctl.conf"</span>
-      <span class="err">]</span>
-    <span class="err">}</span><span class="p">,</span>
-    <span class="err">{</span>
-      <span class="s2">"type"</span><span class="o">:</span> <span class="s2">"file"</span><span class="p">,</span>
-      <span class="s2">"source"</span><span class="o">:</span> <span class="s2">"authorized_keys"</span><span class="p">,</span>
-      <span class="s2">"destination"</span><span class="o">:</span> <span class="s2">"/home/{{user `newuser_name`}}/.ssh/authorized_keys"</span>
-    <span class="err">}</span><span class="p">,</span>
-    <span class="err">{</span>
-      <span class="s2">"type"</span><span class="o">:</span> <span class="s2">"shell"</span><span class="p">,</span>
-      <span class="s2">"script"</span><span class="o">:</span> <span class="s2">"install-docker.sh"</span>
-    <span class="err">}</span><span class="p">,</span>
-    <span class="err">{</span>
-      <span class="s2">"type"</span><span class="o">:</span> <span class="s2">"file"</span><span class="p">,</span>
-      <span class="s2">"source"</span><span class="o">:</span> <span class="s2">"docker-compose.yml"</span><span class="p">,</span>
-      <span class="s2">"destination"</span><span class="o">:</span> <span class="s2">"/home/{{user `newuser_name`}}/docker-compose.yml"</span>
-    <span class="err">}</span><span class="p">,</span>
-    <span class="err">{</span>
-      <span class="s2">"type"</span><span class="o">:</span> <span class="s2">"shell"</span><span class="p">,</span>
-      <span class="s2">"inline"</span><span class="o">:</span> <span class="err">[</span>
-        <span class="s2">"mkdir -p /var/www/html"</span><span class="p">,</span>
-        <span class="s2">"wget https://bitbucket.org/yourusername/yourrepository/raw/97360be2edd53b93149d750db24f749aebc27988/binaries/drupal-7.50.tar.gz"</span><span class="p">,</span>
-        <span class="s2">"tar xf drupal-7.50.tar.gz --strip-components=1 -C /var/www/html"</span><span class="p">,</span>
-        <span class="s2">"ls -ahl /var/www/html"</span><span class="p">,</span>
-        <span class="s2">"mkdir -p /var/www/html/sites/default/files"</span><span class="p">,</span>
-        <span class="s2">"chmod 777 /var/www/html/sites/default/files"</span><span class="p">,</span>
-        <span class="s2">"cp -a /var/www/html/sites/default/default.settings.php /var/www/html/sites/default/settings.php"</span><span class="p">,</span>
-        <span class="s2">"chmod 777 /var/www/html/sites/default/settings.php"</span>
-      <span class="err">]</span>
-    <span class="err">}</span><span class="p">,</span>
-    <span class="err">{</span>
-      <span class="s2">"type"</span><span class="o">:</span> <span class="s2">"shell"</span><span class="p">,</span>
-      <span class="s2">"inline"</span><span class="o">:</span> <span class="err">[</span>
-        <span class="s2">"apt-get install -y nginx"</span>
-      <span class="err">]</span>
-    <span class="err">}</span><span class="p">,</span>
-    <span class="err">{</span>
-      <span class="s2">"type"</span><span class="o">:</span> <span class="s2">"file"</span><span class="p">,</span>
-      <span class="s2">"source"</span><span class="o">:</span> <span class="s2">"nginx.conf"</span><span class="p">,</span>
-      <span class="s2">"destination"</span><span class="o">:</span> <span class="s2">"/etc/nginx/nginx.conf"</span>
-    <span class="err">}</span><span class="p">,</span>
-    <span class="err">{</span>
-      <span class="s2">"type"</span><span class="o">:</span> <span class="s2">"file"</span><span class="p">,</span>
-      <span class="s2">"source"</span><span class="o">:</span> <span class="s2">"default.conf"</span><span class="p">,</span>
-      <span class="s2">"destination"</span><span class="o">:</span> <span class="s2">"/etc/nginx/conf.d/default.conf"</span>
-    <span class="err">}</span>
+<span class="w">  </span><span class="s2">"provisioners"</span><span class="o">:</span><span class="w"> </span><span class="err">[</span><span class="w"></span>
+<span class="w">    </span><span class="err">{</span><span class="w"></span>
+<span class="w">      </span><span class="s2">"type"</span><span class="o">:</span><span class="w"> </span><span class="s2">"shell"</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="s2">"inline"</span><span class="o">:</span><span class="w"> </span><span class="err">[</span><span class="w"></span>
+<span class="w">        </span><span class="s2">"ip a"</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="s2">"curl -s http://checkip.amazonaws.com"</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="s2">"apt-get update"</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="s2">"sudo apt-get install -y vim curl wget byobu ntp tar gzip"</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="s2">"timedatectl set-timezone Etc/UTC"</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="s2">"cat /etc/timezone"</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="s2">"date"</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="s2">"useradd -s /bin/bash -m {{user `newuser_name`}}"</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="s2">"usermod -a -G admin {{user `newuser_name`}}"</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="s2">"echo '{{user `newuser_name`}}:{{user `newuser_password`}}'|chpasswd"</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="s2">"cat /etc/passwd"</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="s2">"sed -i 's/Port 22/Port 2222/g' /etc/ssh/sshd_config"</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="s2">"sed -i 's/PermitRootLogin yes/PermitRootLogin no/g' /etc/ssh/sshd_config"</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="s2">"echo 'PasswordAuthentication no' &gt;&gt; /etc/ssh/sshd_config"</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="s2">"cat /etc/ssh/sshd_config"</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="s2">"mkdir -p /home/{{user `newuser_name`}}/.ssh"</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="s2">"fallocate -l 1G /swapfile"</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="s2">"chmod 600 /swapfile"</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="s2">"mkswap /swapfile"</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="s2">"swapon /swapfile"</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="s2">"swapon --show"</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="s2">"free -h"</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="s2">"echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab"</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="s2">"echo 'vm.swappiness=10' | sudo tee -a /etc/sysctl.conf"</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="s2">"echo 'vm.vfs_cache_pressure=50' | sudo tee -a /etc/sysctl.conf"</span><span class="w"></span>
+<span class="w">      </span><span class="err">]</span><span class="w"></span>
+<span class="w">    </span><span class="err">}</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="err">{</span><span class="w"></span>
+<span class="w">      </span><span class="s2">"type"</span><span class="o">:</span><span class="w"> </span><span class="s2">"file"</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="s2">"source"</span><span class="o">:</span><span class="w"> </span><span class="s2">"authorized_keys"</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="s2">"destination"</span><span class="o">:</span><span class="w"> </span><span class="s2">"/home/{{user `newuser_name`}}/.ssh/authorized_keys"</span><span class="w"></span>
+<span class="w">    </span><span class="err">}</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="err">{</span><span class="w"></span>
+<span class="w">      </span><span class="s2">"type"</span><span class="o">:</span><span class="w"> </span><span class="s2">"shell"</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="s2">"script"</span><span class="o">:</span><span class="w"> </span><span class="s2">"install-docker.sh"</span><span class="w"></span>
+<span class="w">    </span><span class="err">}</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="err">{</span><span class="w"></span>
+<span class="w">      </span><span class="s2">"type"</span><span class="o">:</span><span class="w"> </span><span class="s2">"file"</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="s2">"source"</span><span class="o">:</span><span class="w"> </span><span class="s2">"docker-compose.yml"</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="s2">"destination"</span><span class="o">:</span><span class="w"> </span><span class="s2">"/home/{{user `newuser_name`}}/docker-compose.yml"</span><span class="w"></span>
+<span class="w">    </span><span class="err">}</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="err">{</span><span class="w"></span>
+<span class="w">      </span><span class="s2">"type"</span><span class="o">:</span><span class="w"> </span><span class="s2">"shell"</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="s2">"inline"</span><span class="o">:</span><span class="w"> </span><span class="err">[</span><span class="w"></span>
+<span class="w">        </span><span class="s2">"mkdir -p /var/www/html"</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="s2">"wget https://bitbucket.org/yourusername/yourrepository/raw/97360be2edd53b93149d750db24f749aebc27988/binaries/drupal-7.50.tar.gz"</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="s2">"tar xf drupal-7.50.tar.gz --strip-components=1 -C /var/www/html"</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="s2">"ls -ahl /var/www/html"</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="s2">"mkdir -p /var/www/html/sites/default/files"</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="s2">"chmod 777 /var/www/html/sites/default/files"</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="s2">"cp -a /var/www/html/sites/default/default.settings.php /var/www/html/sites/default/settings.php"</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="s2">"chmod 777 /var/www/html/sites/default/settings.php"</span><span class="w"></span>
+<span class="w">      </span><span class="err">]</span><span class="w"></span>
+<span class="w">    </span><span class="err">}</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="err">{</span><span class="w"></span>
+<span class="w">      </span><span class="s2">"type"</span><span class="o">:</span><span class="w"> </span><span class="s2">"shell"</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="s2">"inline"</span><span class="o">:</span><span class="w"> </span><span class="err">[</span><span class="w"></span>
+<span class="w">        </span><span class="s2">"apt-get install -y nginx"</span><span class="w"></span>
+<span class="w">      </span><span class="err">]</span><span class="w"></span>
+<span class="w">    </span><span class="err">}</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="err">{</span><span class="w"></span>
+<span class="w">      </span><span class="s2">"type"</span><span class="o">:</span><span class="w"> </span><span class="s2">"file"</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="s2">"source"</span><span class="o">:</span><span class="w"> </span><span class="s2">"nginx.conf"</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="s2">"destination"</span><span class="o">:</span><span class="w"> </span><span class="s2">"/etc/nginx/nginx.conf"</span><span class="w"></span>
+<span class="w">    </span><span class="err">}</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="err">{</span><span class="w"></span>
+<span class="w">      </span><span class="s2">"type"</span><span class="o">:</span><span class="w"> </span><span class="s2">"file"</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="s2">"source"</span><span class="o">:</span><span class="w"> </span><span class="s2">"default.conf"</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="s2">"destination"</span><span class="o">:</span><span class="w"> </span><span class="s2">"/etc/nginx/conf.d/default.conf"</span><span class="w"></span>
+<span class="w">    </span><span class="err">}</span><span class="w"></span>
 
-  <span class="err">]</span>
+<span class="w">  </span><span class="err">]</span><span class="w"></span>
 
-<span class="err">}</span>
+<span class="err">}</span><span class="w"></span>
 </code></pre></div>
 <blockquote>
 <p>HINT: A DigitalOcean 512MB droplet needs swap enabled due to the MySQL/MariaDB memory defaults, otherwise you get strange errors about inode unavailable while starting the MariaDB container</p>
@@ -339,157 +339,157 @@ mysql:
 <div class="highlight"><pre><span></span><code><span class="c1"># slightly modified /etc/nginx/nginx.conf from "apt-get install nginx"</span>
 <span class="c1"># https://www.nginx.com/resources/wiki/start/topics/examples/full/</span>
 
-<span class="k">user</span> <span class="s">www-data</span><span class="p">;</span>
-<span class="k">worker_processes</span> <span class="s">auto</span><span class="p">;</span>
-<span class="k">pid</span> <span class="s">/run/nginx.pid</span><span class="p">;</span>
+<span class="k">user</span><span class="w"> </span><span class="s">www-data</span><span class="p">;</span><span class="w"></span>
+<span class="k">worker_processes</span><span class="w"> </span><span class="s">auto</span><span class="p">;</span><span class="w"></span>
+<span class="k">pid</span><span class="w"> </span><span class="s">/run/nginx.pid</span><span class="p">;</span><span class="w"></span>
 
-<span class="k">events</span> <span class="p">{</span>
-        <span class="kn">worker_connections</span> <span class="mi">768</span><span class="p">;</span>
-        <span class="c1"># multi_accept on;</span>
-<span class="p">}</span>
+<span class="k">events</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="kn">worker_connections</span><span class="w"> </span><span class="mi">768</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="c1"># multi_accept on;</span>
+<span class="p">}</span><span class="w"></span>
 
-<span class="k">http</span> <span class="p">{</span>
+<span class="k">http</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 
-        <span class="kn">sendfile</span> <span class="no">on</span><span class="p">;</span>
-        <span class="kn">tcp_nopush</span> <span class="no">on</span><span class="p">;</span>
-        <span class="kn">tcp_nodelay</span> <span class="no">on</span><span class="p">;</span>
-        <span class="kn">keepalive_timeout</span> <span class="mi">65</span><span class="p">;</span>
-        <span class="kn">types_hash_max_size</span> <span class="mi">2048</span><span class="p">;</span>
-        <span class="kn">server_tokens</span> <span class="no">off</span><span class="p">;</span>
+<span class="w">        </span><span class="kn">sendfile</span><span class="w"> </span><span class="no">on</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="kn">tcp_nopush</span><span class="w"> </span><span class="no">on</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="kn">tcp_nodelay</span><span class="w"> </span><span class="no">on</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="kn">keepalive_timeout</span><span class="w"> </span><span class="mi">65</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="kn">types_hash_max_size</span><span class="w"> </span><span class="mi">2048</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="kn">server_tokens</span><span class="w"> </span><span class="no">off</span><span class="p">;</span><span class="w"></span>
 
-        <span class="kn">include</span> <span class="s">/etc/nginx/mime.types</span><span class="p">;</span>
-        <span class="kn">default_type</span> <span class="s">application/octet-stream</span><span class="p">;</span>
+<span class="w">        </span><span class="kn">include</span><span class="w"> </span><span class="s">/etc/nginx/mime.types</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="kn">default_type</span><span class="w"> </span><span class="s">application/octet-stream</span><span class="p">;</span><span class="w"></span>
 
-        <span class="kn">access_log</span> <span class="s">/var/log/nginx/access.log</span><span class="p">;</span>
-        <span class="kn">error_log</span> <span class="s">/var/log/nginx/error.log</span><span class="p">;</span>
+<span class="w">        </span><span class="kn">access_log</span><span class="w"> </span><span class="s">/var/log/nginx/access.log</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="kn">error_log</span><span class="w"> </span><span class="s">/var/log/nginx/error.log</span><span class="p">;</span><span class="w"></span>
 
-        <span class="kn">gzip</span> <span class="no">on</span><span class="p">;</span>
-        <span class="kn">gzip_disable</span> <span class="s">"msie6"</span><span class="p">;</span>
+<span class="w">        </span><span class="kn">gzip</span><span class="w"> </span><span class="no">on</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="kn">gzip_disable</span><span class="w"> </span><span class="s">"msie6"</span><span class="p">;</span><span class="w"></span>
 
-        <span class="kn">gzip_types</span> <span class="s">text/plain</span> <span class="s">text/css</span> <span class="s">application/json</span> <span class="s">application/javascript</span> <span class="s">text/xml</span> <span class="s">application/xml</span> <span class="s">application/xml+rss</span> <span class="s">text/javascript</span><span class="p">;</span>
+<span class="w">        </span><span class="kn">gzip_types</span><span class="w"> </span><span class="s">text/plain</span><span class="w"> </span><span class="s">text/css</span><span class="w"> </span><span class="s">application/json</span><span class="w"> </span><span class="s">application/javascript</span><span class="w"> </span><span class="s">text/xml</span><span class="w"> </span><span class="s">application/xml</span><span class="w"> </span><span class="s">application/xml+rss</span><span class="w"> </span><span class="s">text/javascript</span><span class="p">;</span><span class="w"></span>
 
-        <span class="kn">include</span> <span class="s">/etc/nginx/conf.d/*.conf</span><span class="p">;</span>
+<span class="w">        </span><span class="kn">include</span><span class="w"> </span><span class="s">/etc/nginx/conf.d/*.conf</span><span class="p">;</span><span class="w"></span>
 
-<span class="p">}</span>
+<span class="p">}</span><span class="w"></span>
 </code></pre></div>
 <h4 id="defaultconf">default.conf</h4>
-<div class="highlight"><pre><span></span><code><span class="k">server</span> <span class="p">{</span>
-    <span class="kn">listen</span>      <span class="mi">80</span><span class="p">;</span>
-    <span class="kn">server_name</span> <span class="s">physicstime.com</span><span class="p">;</span>
-    <span class="kn">root</span> <span class="s">/var/www/html</span><span class="p">;</span> <span class="c1">## &lt;-- Your only path reference.</span>
+<div class="highlight"><pre><span></span><code><span class="k">server</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="kn">listen</span><span class="w">      </span><span class="mi">80</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="kn">server_name</span><span class="w"> </span><span class="s">physicstime.com</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="kn">root</span><span class="w"> </span><span class="s">/var/www/html</span><span class="p">;</span><span class="w"> </span><span class="c1">## &lt;-- Your only path reference.</span>
 
-    <span class="kn">location</span> <span class="p">=</span> <span class="s">/favicon.ico</span> <span class="p">{</span>
-        <span class="kn">log_not_found</span> <span class="no">off</span><span class="p">;</span>
-        <span class="kn">access_log</span> <span class="no">off</span><span class="p">;</span>
-    <span class="p">}</span>
+<span class="w">    </span><span class="kn">location</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">/favicon.ico</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="kn">log_not_found</span><span class="w"> </span><span class="no">off</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="kn">access_log</span><span class="w"> </span><span class="no">off</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
 
-    <span class="kn">location</span> <span class="p">=</span> <span class="s">/robots.txt</span> <span class="p">{</span>
-        <span class="kn">allow</span> <span class="s">all</span><span class="p">;</span>
-        <span class="kn">log_not_found</span> <span class="no">off</span><span class="p">;</span>
-        <span class="kn">access_log</span> <span class="no">off</span><span class="p">;</span>
-    <span class="p">}</span>
+<span class="w">    </span><span class="kn">location</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">/robots.txt</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="kn">allow</span><span class="w"> </span><span class="s">all</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="kn">log_not_found</span><span class="w"> </span><span class="no">off</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="kn">access_log</span><span class="w"> </span><span class="no">off</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
 
-    <span class="c1"># Very rarely should these ever be accessed outside of your lan</span>
-    <span class="kn">location</span> <span class="p">~</span><span class="sr">*</span> <span class="s">\.(txt|log)</span>$ <span class="p">{</span>
-        <span class="kn">deny</span> <span class="s">all</span><span class="p">;</span>
-    <span class="p">}</span>
+<span class="w">    </span><span class="c1"># Very rarely should these ever be accessed outside of your lan</span>
+<span class="w">    </span><span class="kn">location</span><span class="w"> </span><span class="p">~</span><span class="sr">*</span><span class="w"> </span><span class="s">\.(txt|log)</span>$<span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="kn">deny</span><span class="w"> </span><span class="s">all</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
 
-    <span class="kn">location</span> <span class="p">~</span> <span class="sr">\..*/.*\.php$</span> <span class="p">{</span>
-        <span class="kn">return</span> <span class="mi">403</span><span class="p">;</span>
-    <span class="p">}</span>
+<span class="w">    </span><span class="kn">location</span><span class="w"> </span><span class="p">~</span><span class="w"> </span><span class="sr">\..*/.*\.php$</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="kn">return</span><span class="w"> </span><span class="mi">403</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
 
-    <span class="kn">location</span> <span class="p">~</span> <span class="sr">^/sites/.*/private/</span> <span class="p">{</span>
-        <span class="kn">return</span> <span class="mi">403</span><span class="p">;</span>
-    <span class="p">}</span>
+<span class="w">    </span><span class="kn">location</span><span class="w"> </span><span class="p">~</span><span class="w"> </span><span class="sr">^/sites/.*/private/</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="kn">return</span><span class="w"> </span><span class="mi">403</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
 
-    <span class="c1"># Allow "Well-Known URIs" as per RFC 5785</span>
-    <span class="kn">location</span> <span class="p">~</span><span class="sr">*</span> <span class="s">^/.well-known/</span> <span class="p">{</span>
-        <span class="kn">allow</span> <span class="s">all</span><span class="p">;</span>
-    <span class="p">}</span>
+<span class="w">    </span><span class="c1"># Allow "Well-Known URIs" as per RFC 5785</span>
+<span class="w">    </span><span class="kn">location</span><span class="w"> </span><span class="p">~</span><span class="sr">*</span><span class="w"> </span><span class="s">^/.well-known/</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="kn">allow</span><span class="w"> </span><span class="s">all</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
 
-    <span class="c1"># Block access to "hidden" files and directories whose names begin with a</span>
-    <span class="c1"># period. This includes directories used by version control systems such</span>
-    <span class="c1"># as Subversion or Git to store control files.</span>
-    <span class="kn">location</span> <span class="p">~</span> <span class="sr">(^|/)\.</span> <span class="p">{</span>
-        <span class="kn">return</span> <span class="mi">403</span><span class="p">;</span>
-    <span class="p">}</span>
+<span class="w">    </span><span class="c1"># Block access to "hidden" files and directories whose names begin with a</span>
+<span class="w">    </span><span class="c1"># period. This includes directories used by version control systems such</span>
+<span class="w">    </span><span class="c1"># as Subversion or Git to store control files.</span>
+<span class="w">    </span><span class="kn">location</span><span class="w"> </span><span class="p">~</span><span class="w"> </span><span class="sr">(^|/)\.</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="kn">return</span><span class="w"> </span><span class="mi">403</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
 
-    <span class="kn">location</span> <span class="s">/</span> <span class="p">{</span>
-        <span class="c1"># try_files $uri @rewrite; # For Drupal &lt;= 6</span>
-        <span class="kn">try_files</span> <span class="nv">$uri</span> <span class="s">/index.php?</span><span class="nv">$query_string</span><span class="p">;</span> <span class="c1"># For Drupal &gt;= 7</span>
-    <span class="p">}</span>
+<span class="w">    </span><span class="kn">location</span><span class="w"> </span><span class="s">/</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="c1"># try_files $uri @rewrite; # For Drupal &lt;= 6</span>
+<span class="w">        </span><span class="kn">try_files</span><span class="w"> </span><span class="nv">$uri</span><span class="w"> </span><span class="s">/index.php?</span><span class="nv">$query_string</span><span class="p">;</span><span class="w"> </span><span class="c1"># For Drupal &gt;= 7</span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
 
-    <span class="kn">location</span> <span class="s">@rewrite</span> <span class="p">{</span>
-        <span class="kn">rewrite</span> <span class="s">^/(.*)</span>$ <span class="s">/index.php?q=</span><span class="nv">$1</span><span class="p">;</span>
-    <span class="p">}</span>
+<span class="w">    </span><span class="kn">location</span><span class="w"> </span><span class="s">@rewrite</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="kn">rewrite</span><span class="w"> </span><span class="s">^/(.*)</span>$<span class="w"> </span><span class="s">/index.php?q=</span><span class="nv">$1</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
 
-    <span class="c1"># Don't allow direct access to PHP files in the vendor directory.</span>
-    <span class="kn">location</span> <span class="p">~</span> <span class="sr">/vendor/.*\.php$</span> <span class="p">{</span>
-        <span class="kn">deny</span> <span class="s">all</span><span class="p">;</span>
-        <span class="kn">return</span> <span class="mi">404</span><span class="p">;</span>
-    <span class="p">}</span>
+<span class="w">    </span><span class="c1"># Don't allow direct access to PHP files in the vendor directory.</span>
+<span class="w">    </span><span class="kn">location</span><span class="w"> </span><span class="p">~</span><span class="w"> </span><span class="sr">/vendor/.*\.php$</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="kn">deny</span><span class="w"> </span><span class="s">all</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="kn">return</span><span class="w"> </span><span class="mi">404</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
 
-    <span class="c1"># In Drupal 8, we must also match new paths where the '.php' appears in</span>
-    <span class="c1"># the middle, such as update.php/selection. The rule we use is strict,</span>
-    <span class="c1"># and only allows this pattern with the update.php front controller.</span>
-    <span class="c1"># This allows legacy path aliases in the form of</span>
-    <span class="c1"># blog/index.php/legacy-path to continue to route to Drupal nodes. If</span>
-    <span class="c1"># you do not have any paths like that, then you might prefer to use a</span>
-    <span class="c1"># laxer rule, such as:</span>
-    <span class="c1">#   location ~ \.php(/|$) {</span>
-    <span class="c1"># The laxer rule will continue to work if Drupal uses this new URL</span>
-    <span class="c1"># pattern with front controllers other than update.php in a future</span>
-    <span class="c1"># release.</span>
-    <span class="kn">location</span> <span class="p">~</span> <span class="sr">'\.php$|^/update.php'</span> <span class="p">{</span>
-        <span class="kn">fastcgi_split_path_info</span> <span class="s">^(.+?\.php)(|/.*)</span>$<span class="p">;</span>
-        <span class="c1"># Security note: If you're running a version of PHP older than the</span>
-        <span class="c1"># latest 5.3, you should have "cgi.fix_pathinfo = 0;" in php.ini.</span>
-        <span class="c1"># See http://serverfault.com/q/627903/94922 for details.</span>
-        <span class="kn">include</span> <span class="s">fastcgi_params</span><span class="p">;</span>
-        <span class="c1"># Block httpoxy attacks. See https://httpoxy.org/.</span>
-        <span class="kn">fastcgi_param</span> <span class="s">HTTP_PROXY</span> <span class="s">""</span><span class="p">;</span>
-        <span class="kn">fastcgi_param</span> <span class="s">SCRIPT_FILENAME</span> <span class="nv">$document_root$fastcgi_script_name</span><span class="p">;</span>
-        <span class="kn">fastcgi_param</span> <span class="s">PATH_INFO</span> <span class="nv">$fastcgi_path_info</span><span class="p">;</span>
-        <span class="kn">fastcgi_intercept_errors</span> <span class="no">on</span><span class="p">;</span>
-        <span class="c1"># PHP 5 socket location.</span>
-        <span class="c1">#fastcgi_pass unix:/var/run/php5-fpm.sock;</span>
-        <span class="c1"># PHP 7 socket location.</span>
-        <span class="c1"># fastcgi_pass unix:/var/run/php/php7.0-fpm.sock;</span>
+<span class="w">    </span><span class="c1"># In Drupal 8, we must also match new paths where the '.php' appears in</span>
+<span class="w">    </span><span class="c1"># the middle, such as update.php/selection. The rule we use is strict,</span>
+<span class="w">    </span><span class="c1"># and only allows this pattern with the update.php front controller.</span>
+<span class="w">    </span><span class="c1"># This allows legacy path aliases in the form of</span>
+<span class="w">    </span><span class="c1"># blog/index.php/legacy-path to continue to route to Drupal nodes. If</span>
+<span class="w">    </span><span class="c1"># you do not have any paths like that, then you might prefer to use a</span>
+<span class="w">    </span><span class="c1"># laxer rule, such as:</span>
+<span class="w">    </span><span class="c1">#   location ~ \.php(/|$) {</span>
+<span class="w">    </span><span class="c1"># The laxer rule will continue to work if Drupal uses this new URL</span>
+<span class="w">    </span><span class="c1"># pattern with front controllers other than update.php in a future</span>
+<span class="w">    </span><span class="c1"># release.</span>
+<span class="w">    </span><span class="kn">location</span><span class="w"> </span><span class="p">~</span><span class="w"> </span><span class="sr">'\.php$|^/update.php'</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="kn">fastcgi_split_path_info</span><span class="w"> </span><span class="s">^(.+?\.php)(|/.*)</span>$<span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="c1"># Security note: If you're running a version of PHP older than the</span>
+<span class="w">        </span><span class="c1"># latest 5.3, you should have "cgi.fix_pathinfo = 0;" in php.ini.</span>
+<span class="w">        </span><span class="c1"># See http://serverfault.com/q/627903/94922 for details.</span>
+<span class="w">        </span><span class="kn">include</span><span class="w"> </span><span class="s">fastcgi_params</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="c1"># Block httpoxy attacks. See https://httpoxy.org/.</span>
+<span class="w">        </span><span class="kn">fastcgi_param</span><span class="w"> </span><span class="s">HTTP_PROXY</span><span class="w"> </span><span class="s">""</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="kn">fastcgi_param</span><span class="w"> </span><span class="s">SCRIPT_FILENAME</span><span class="w"> </span><span class="nv">$document_root$fastcgi_script_name</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="kn">fastcgi_param</span><span class="w"> </span><span class="s">PATH_INFO</span><span class="w"> </span><span class="nv">$fastcgi_path_info</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="kn">fastcgi_intercept_errors</span><span class="w"> </span><span class="no">on</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="c1"># PHP 5 socket location.</span>
+<span class="w">        </span><span class="c1">#fastcgi_pass unix:/var/run/php5-fpm.sock;</span>
+<span class="w">        </span><span class="c1"># PHP 7 socket location.</span>
+<span class="w">        </span><span class="c1"># fastcgi_pass unix:/var/run/php/php7.0-fpm.sock;</span>
 
-        <span class="kn">fastcgi_pass</span> <span class="n">127.0.0.1</span><span class="p">:</span><span class="mi">9000</span><span class="p">;</span>
-        <span class="c1"># fastcgi_pass fpm:9000;</span>
-    <span class="p">}</span>
+<span class="w">        </span><span class="kn">fastcgi_pass</span><span class="w"> </span><span class="n">127.0.0.1</span><span class="p">:</span><span class="mi">9000</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="c1"># fastcgi_pass fpm:9000;</span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
 
-    <span class="c1"># Fighting with Styles? This little gem is amazing.</span>
-    <span class="c1"># location ~ ^/sites/.*/files/imagecache/ { # For Drupal &lt;= 6</span>
-    <span class="kn">location</span> <span class="p">~</span> <span class="sr">^/sites/.*/files/styles/</span> <span class="p">{</span> <span class="c1"># For Drupal &gt;= 7</span>
-        <span class="kn">try_files</span> <span class="nv">$uri</span> <span class="s">@rewrite</span><span class="p">;</span>
-    <span class="p">}</span>
+<span class="w">    </span><span class="c1"># Fighting with Styles? This little gem is amazing.</span>
+<span class="w">    </span><span class="c1"># location ~ ^/sites/.*/files/imagecache/ { # For Drupal &lt;= 6</span>
+<span class="w">    </span><span class="kn">location</span><span class="w"> </span><span class="p">~</span><span class="w"> </span><span class="sr">^/sites/.*/files/styles/</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="c1"># For Drupal &gt;= 7</span>
+<span class="w">        </span><span class="kn">try_files</span><span class="w"> </span><span class="nv">$uri</span><span class="w"> </span><span class="s">@rewrite</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
 
-    <span class="c1"># Handle private files through Drupal.</span>
-    <span class="kn">location</span> <span class="p">~</span> <span class="sr">^/system/files/</span> <span class="p">{</span> <span class="c1"># For Drupal &gt;= 7</span>
-        <span class="kn">try_files</span> <span class="nv">$uri</span> <span class="s">/index.php?</span><span class="nv">$query_string</span><span class="p">;</span>
-    <span class="p">}</span>
+<span class="w">    </span><span class="c1"># Handle private files through Drupal.</span>
+<span class="w">    </span><span class="kn">location</span><span class="w"> </span><span class="p">~</span><span class="w"> </span><span class="sr">^/system/files/</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="c1"># For Drupal &gt;= 7</span>
+<span class="w">        </span><span class="kn">try_files</span><span class="w"> </span><span class="nv">$uri</span><span class="w"> </span><span class="s">/index.php?</span><span class="nv">$query_string</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
 
-    <span class="c1"># prevent hotlinking</span>
-    <span class="kn">location</span> <span class="p">~</span> <span class="sr">^/sites/.*/files/</span> <span class="p">{</span>
-        <span class="kn">valid_referers</span> <span class="s">none</span> <span class="s">blocked</span> <span class="s">www.physicstime.com</span> <span class="s">physicstime.com</span><span class="p">;</span>
-        <span class="kn">if</span> <span class="s">(</span><span class="nv">$invalid_referer</span><span class="s">)</span> <span class="p">{</span>
-          <span class="kn">return</span> <span class="mi">403</span><span class="p">;</span>
-        <span class="p">}</span>
-    <span class="p">}</span>
+<span class="w">    </span><span class="c1"># prevent hotlinking</span>
+<span class="w">    </span><span class="kn">location</span><span class="w"> </span><span class="p">~</span><span class="w"> </span><span class="sr">^/sites/.*/files/</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="kn">valid_referers</span><span class="w"> </span><span class="s">none</span><span class="w"> </span><span class="s">blocked</span><span class="w"> </span><span class="s">www.physicstime.com</span><span class="w"> </span><span class="s">physicstime.com</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="kn">if</span><span class="w"> </span><span class="s">(</span><span class="nv">$invalid_referer</span><span class="s">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">          </span><span class="kn">return</span><span class="w"> </span><span class="mi">403</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
 
-    <span class="kn">location</span> <span class="p">~</span><span class="sr">*</span> <span class="s">\.(js|css|png|jpg|jpeg|gif|ico)</span>$ <span class="p">{</span>
-        <span class="c1"># prevent hotlinking</span>
-        <span class="kn">valid_referers</span> <span class="s">none</span> <span class="s">blocked</span> <span class="s">www.physicstime.com</span> <span class="s">physicstime.com</span><span class="p">;</span>
-        <span class="kn">if</span> <span class="s">(</span><span class="nv">$invalid_referer</span><span class="s">)</span> <span class="p">{</span>
-          <span class="kn">return</span> <span class="mi">403</span><span class="p">;</span>
-        <span class="p">}</span>
-        <span class="kn">expires</span> <span class="s">max</span><span class="p">;</span>
-        <span class="kn">log_not_found</span> <span class="no">off</span><span class="p">;</span>
-    <span class="p">}</span>
+<span class="w">    </span><span class="kn">location</span><span class="w"> </span><span class="p">~</span><span class="sr">*</span><span class="w"> </span><span class="s">\.(js|css|png|jpg|jpeg|gif|ico)</span>$<span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="c1"># prevent hotlinking</span>
+<span class="w">        </span><span class="kn">valid_referers</span><span class="w"> </span><span class="s">none</span><span class="w"> </span><span class="s">blocked</span><span class="w"> </span><span class="s">www.physicstime.com</span><span class="w"> </span><span class="s">physicstime.com</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="kn">if</span><span class="w"> </span><span class="s">(</span><span class="nv">$invalid_referer</span><span class="s">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">          </span><span class="kn">return</span><span class="w"> </span><span class="mi">403</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="w">        </span><span class="kn">expires</span><span class="w"> </span><span class="s">max</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="kn">log_not_found</span><span class="w"> </span><span class="no">off</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
 
-<span class="p">}</span>
+<span class="p">}</span><span class="w"></span>
 </code></pre></div>
 <blockquote>
 <p>slightly modified from the wonderful reference provided by nginx, mostly the first 3 lines and later the fastcgi_pass</p>
@@ -502,16 +502,16 @@ mysql:
 <p>And for this migration project a MySQL dump, SCP of the existing extra modules, and of course the already uploaded user images/files.</p>
 <p>I'm sure with more tinkering I can overcome the nginx vs www-data user permissions issue but since I time boxed this project I stuck with this compromise which is still much more improved and automated than my previous setup.</p>
 <p>For migrating data there is of course the prerequisite: <code>mysqldump -uroot -p physicstime &gt; backup.sql</code></p>
-<div class="highlight"><pre><span></span><code><span class="n">vi</span> <span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">html</span><span class="o">/</span><span class="n">themes</span><span class="o">/</span><span class="n">bartik</span><span class="o">/</span><span class="n">css</span><span class="o">/</span><span class="n">style</span><span class="o">.</span><span class="n">css</span>
-    <span class="n">font</span><span class="o">-</span><span class="n">size</span><span class="p">:</span> <span class="mf">2.929</span><span class="n">em</span><span class="p">;</span>
+<div class="highlight"><pre><span></span><code><span class="n">vi</span><span class="w"> </span><span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">html</span><span class="o">/</span><span class="n">themes</span><span class="o">/</span><span class="n">bartik</span><span class="o">/</span><span class="n">css</span><span class="o">/</span><span class="n">style</span><span class="o">.</span><span class="n">css</span><span class="w"></span>
+<span class="w">    </span><span class="n">font</span><span class="o">-</span><span class="n">size</span><span class="p">:</span><span class="w"> </span><span class="mf">2.929</span><span class="n">em</span><span class="p">;</span><span class="w"></span>
 
-<span class="n">cat</span> <span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">html</span><span class="o">/</span><span class="n">themes</span><span class="o">/</span><span class="n">bartik</span><span class="o">/</span><span class="n">css</span><span class="o">/</span><span class="n">style</span><span class="o">.</span><span class="n">css</span> <span class="o">|</span> <span class="n">tr</span> <span class="s1">'</span><span class="se">\n</span><span class="s1">'</span> <span class="s1">'</span><span class="se">\r</span><span class="s1">'</span> <span class="o">|</span> <span class="n">sed</span> <span class="o">-</span><span class="n">e</span> <span class="s1">'s/#site-slogan {</span><span class="se">\r</span><span class="s1">  font-size: 0.929em/#site-slogan {</span><span class="se">\r</span><span class="s1">  font-size: 2.929em/'</span> <span class="o">|</span> <span class="n">tr</span> <span class="s1">'</span><span class="se">\r</span><span class="s1">'</span> <span class="s1">'</span><span class="se">\n</span><span class="s1">'</span> <span class="o">&gt;</span> <span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">html</span><span class="o">/</span><span class="n">themes</span><span class="o">/</span><span class="n">bartik</span><span class="o">/</span><span class="n">css</span><span class="o">/</span><span class="n">style</span><span class="o">.</span><span class="n">css</span><span class="o">.</span><span class="n">updated</span>
+<span class="n">cat</span><span class="w"> </span><span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">html</span><span class="o">/</span><span class="n">themes</span><span class="o">/</span><span class="n">bartik</span><span class="o">/</span><span class="n">css</span><span class="o">/</span><span class="n">style</span><span class="o">.</span><span class="n">css</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">tr</span><span class="w"> </span><span class="s1">'</span><span class="se">\n</span><span class="s1">'</span><span class="w"> </span><span class="s1">'</span><span class="se">\r</span><span class="s1">'</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">sed</span><span class="w"> </span><span class="o">-</span><span class="n">e</span><span class="w"> </span><span class="s1">'s/#site-slogan {</span><span class="se">\r</span><span class="s1">  font-size: 0.929em/#site-slogan {</span><span class="se">\r</span><span class="s1">  font-size: 2.929em/'</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">tr</span><span class="w"> </span><span class="s1">'</span><span class="se">\r</span><span class="s1">'</span><span class="w"> </span><span class="s1">'</span><span class="se">\n</span><span class="s1">'</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">html</span><span class="o">/</span><span class="n">themes</span><span class="o">/</span><span class="n">bartik</span><span class="o">/</span><span class="n">css</span><span class="o">/</span><span class="n">style</span><span class="o">.</span><span class="n">css</span><span class="o">.</span><span class="n">updated</span><span class="w"></span>
 </code></pre></div>
 <blockquote>
 <p>customize increased visibility of the #site-slogan { , occasionally needs cache cleared in admin/config/development/performance
 The oneliner is a complicated way of sed replacing two lines at once (tr replaces newlines with \r temporarily)</p>
 </blockquote>
-<div class="highlight"><pre><span></span><code><span class="n">sed</span> <span class="o">-</span><span class="n">i</span> <span class="s1">'s/font-size: 87.5/font-size: 120/'</span> <span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">html</span><span class="o">/</span><span class="n">themes</span><span class="o">/</span><span class="n">bartik</span><span class="o">/</span><span class="n">css</span><span class="o">/</span><span class="n">style</span><span class="o">.</span><span class="n">css</span>
+<div class="highlight"><pre><span></span><code><span class="n">sed</span><span class="w"> </span><span class="o">-</span><span class="n">i</span><span class="w"> </span><span class="s1">'s/font-size: 87.5/font-size: 120/'</span><span class="w"> </span><span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">html</span><span class="o">/</span><span class="n">themes</span><span class="o">/</span><span class="n">bartik</span><span class="o">/</span><span class="n">css</span><span class="o">/</span><span class="n">style</span><span class="o">.</span><span class="n">css</span><span class="w"></span>
 </code></pre></div>
 <blockquote>
 <p>Because the world does not need yet another 10pt font website</p>
@@ -523,40 +523,40 @@ docker-compose up &amp;
 <p>Hint: <code>/etc/hosts</code> locally and use a browser to do initial install.php config before a DNS cutover</p>
 <p>DB connection string requires 172.17.0.1 (the default docker private IP network bridge)</p>
 </blockquote>
-<div class="highlight"><pre><span></span><code><span class="n">root</span><span class="err">@</span><span class="n">physicstime</span><span class="p">:</span><span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">USER</span><span class="o">/</span><span class="n">physicstime</span><span class="o">.</span><span class="n">com</span><span class="c1"># mv files/ /var/www/html/sites/physicstime.com/</span>
-<span class="n">mv</span> <span class="n">all</span> <span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">html</span><span class="o">/</span><span class="n">sites</span><span class="o">/</span>
+<div class="highlight"><pre><span></span><code><span class="n">root</span><span class="err">@</span><span class="n">physicstime</span><span class="p">:</span><span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">USER</span><span class="o">/</span><span class="n">physicstime</span><span class="o">.</span><span class="n">com</span><span class="c1"># mv files/ /var/www/html/sites/physicstime.com/</span><span class="w"></span>
+<span class="n">mv</span><span class="w"> </span><span class="n">all</span><span class="w"> </span><span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">html</span><span class="o">/</span><span class="n">sites</span><span class="o">/</span><span class="w"></span>
 
-<span class="n">ifconfig</span> <span class="o">|</span> <span class="n">grep</span> <span class="n">Bc</span>
-    <span class="mf">172.17</span><span class="o">.</span><span class="mf">0.1</span>
+<span class="n">ifconfig</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">grep</span><span class="w"> </span><span class="n">Bc</span><span class="w"></span>
+<span class="w">    </span><span class="mf">172.17</span><span class="o">.</span><span class="mf">0.1</span><span class="w"></span>
 
-<span class="n">docker</span> <span class="n">run</span> <span class="o">-</span><span class="n">it</span> <span class="o">--</span><span class="n">rm</span> <span class="o">--</span><span class="n">volume</span> <span class="o">/</span><span class="n">opt</span><span class="p">:</span><span class="o">/</span><span class="n">opt</span> <span class="n">mariadb</span><span class="p">:</span><span class="mf">5.5</span> <span class="o">/</span><span class="n">bin</span><span class="o">/</span><span class="n">bash</span>
-    <span class="n">mysql</span> <span class="o">-</span><span class="n">h172</span><span class="o">.</span><span class="mf">17.0</span><span class="o">.</span><span class="mi">1</span> <span class="o">-</span><span class="n">uYOURUSER</span> <span class="o">-</span><span class="n">p</span> <span class="n">physicstime</span>
-        <span class="n">show</span> <span class="n">tables</span><span class="p">;</span>
-        <span class="n">exit</span>
-    <span class="n">mysql</span> <span class="o">-</span><span class="n">h172</span><span class="o">.</span><span class="mf">17.0</span><span class="o">.</span><span class="mi">1</span> <span class="o">-</span><span class="n">uroot</span> <span class="o">-</span><span class="n">p</span> <span class="n">physicstime</span> <span class="o">&lt;</span> <span class="n">backup</span><span class="o">.</span><span class="n">sql</span>
+<span class="n">docker</span><span class="w"> </span><span class="n">run</span><span class="w"> </span><span class="o">-</span><span class="n">it</span><span class="w"> </span><span class="o">--</span><span class="n">rm</span><span class="w"> </span><span class="o">--</span><span class="n">volume</span><span class="w"> </span><span class="o">/</span><span class="n">opt</span><span class="p">:</span><span class="o">/</span><span class="n">opt</span><span class="w"> </span><span class="n">mariadb</span><span class="p">:</span><span class="mf">5.5</span><span class="w"> </span><span class="o">/</span><span class="n">bin</span><span class="o">/</span><span class="n">bash</span><span class="w"></span>
+<span class="w">    </span><span class="n">mysql</span><span class="w"> </span><span class="o">-</span><span class="n">h172</span><span class="o">.</span><span class="mf">17.0</span><span class="o">.</span><span class="mi">1</span><span class="w"> </span><span class="o">-</span><span class="n">uYOURUSER</span><span class="w"> </span><span class="o">-</span><span class="n">p</span><span class="w"> </span><span class="n">physicstime</span><span class="w"></span>
+<span class="w">        </span><span class="n">show</span><span class="w"> </span><span class="n">tables</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="n">exit</span><span class="w"></span>
+<span class="w">    </span><span class="n">mysql</span><span class="w"> </span><span class="o">-</span><span class="n">h172</span><span class="o">.</span><span class="mf">17.0</span><span class="o">.</span><span class="mi">1</span><span class="w"> </span><span class="o">-</span><span class="n">uroot</span><span class="w"> </span><span class="o">-</span><span class="n">p</span><span class="w"> </span><span class="n">physicstime</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">backup</span><span class="o">.</span><span class="n">sql</span><span class="w"></span>
 
-<span class="n">chown</span> <span class="n">root</span><span class="p">:</span><span class="n">root</span> <span class="o">-</span><span class="n">R</span> <span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">html</span><span class="o">/</span><span class="n">sites</span><span class="o">/</span>
-<span class="n">chmod</span> <span class="mi">400</span> <span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">html</span><span class="o">/</span><span class="n">sites</span><span class="o">/</span><span class="n">default</span><span class="o">/</span><span class="n">settings</span><span class="o">.</span><span class="n">php</span>
+<span class="n">chown</span><span class="w"> </span><span class="n">root</span><span class="p">:</span><span class="n">root</span><span class="w"> </span><span class="o">-</span><span class="n">R</span><span class="w"> </span><span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">html</span><span class="o">/</span><span class="n">sites</span><span class="o">/</span><span class="w"></span>
+<span class="n">chmod</span><span class="w"> </span><span class="mi">400</span><span class="w"> </span><span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">html</span><span class="o">/</span><span class="n">sites</span><span class="o">/</span><span class="n">default</span><span class="o">/</span><span class="n">settings</span><span class="o">.</span><span class="n">php</span><span class="w"></span>
 </code></pre></div>
 <blockquote>
 <p>ensure /var/www/html/sites/default/files has the correct permissions, otherwise no CSS for you!</p>
 </blockquote>
-<div class="highlight"><pre><span></span><code><span class="n">docker</span><span class="o">-</span><span class="n">compose</span> <span class="n">stop</span>
-<span class="n">docker</span> <span class="n">ps</span> <span class="o">--</span><span class="n">all</span>
-<span class="n">docker</span><span class="o">-</span><span class="n">compose</span> <span class="n">up</span> <span class="o">&amp;</span>
-<span class="n">docker</span><span class="o">-</span><span class="n">compose</span> <span class="n">logs</span> <span class="o">|&amp;</span> <span class="n">tee</span> <span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="nb">log</span><span class="o">/</span><span class="n">physicstime</span><span class="o">.</span><span class="n">log</span>
-<span class="n">tail</span> <span class="o">-</span><span class="n">f</span> <span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="nb">log</span><span class="o">/</span><span class="n">physicstime</span><span class="o">.</span><span class="n">log</span> <span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="nb">log</span><span class="o">/</span><span class="n">nginx</span><span class="o">/</span><span class="n">access</span><span class="o">.</span><span class="n">log</span>
+<div class="highlight"><pre><span></span><code><span class="n">docker</span><span class="o">-</span><span class="n">compose</span><span class="w"> </span><span class="n">stop</span><span class="w"></span>
+<span class="n">docker</span><span class="w"> </span><span class="n">ps</span><span class="w"> </span><span class="o">--</span><span class="n">all</span><span class="w"></span>
+<span class="n">docker</span><span class="o">-</span><span class="n">compose</span><span class="w"> </span><span class="n">up</span><span class="w"> </span><span class="o">&amp;</span><span class="w"></span>
+<span class="n">docker</span><span class="o">-</span><span class="n">compose</span><span class="w"> </span><span class="n">logs</span><span class="w"> </span><span class="o">|&amp;</span><span class="w"> </span><span class="n">tee</span><span class="w"> </span><span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="nb">log</span><span class="o">/</span><span class="n">physicstime</span><span class="o">.</span><span class="n">log</span><span class="w"></span>
+<span class="n">tail</span><span class="w"> </span><span class="o">-</span><span class="n">f</span><span class="w"> </span><span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="nb">log</span><span class="o">/</span><span class="n">physicstime</span><span class="o">.</span><span class="n">log</span><span class="w"> </span><span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="nb">log</span><span class="o">/</span><span class="n">nginx</span><span class="o">/</span><span class="n">access</span><span class="o">.</span><span class="n">log</span><span class="w"></span>
 </code></pre></div>
 <blockquote>
 <p>This starts it manually and displays any traffic</p>
 </blockquote>
-<div class="highlight"><pre><span></span><code><span class="n">cd</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">init</span><span class="o">.</span><span class="n">d</span><span class="p">;</span> <span class="n">touch</span> <span class="n">physicstime</span><span class="o">.</span><span class="n">sh</span><span class="p">;</span> <span class="n">chmod</span> <span class="o">+</span><span class="n">x</span> <span class="n">physicstime</span><span class="o">.</span><span class="n">sh</span><span class="p">;</span> <span class="n">vi</span> <span class="n">physicstime</span><span class="o">.</span><span class="n">sh</span>
+<div class="highlight"><pre><span></span><code><span class="n">cd</span><span class="w"> </span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">init</span><span class="o">.</span><span class="n">d</span><span class="p">;</span><span class="w"> </span><span class="n">touch</span><span class="w"> </span><span class="n">physicstime</span><span class="o">.</span><span class="n">sh</span><span class="p">;</span><span class="w"> </span><span class="n">chmod</span><span class="w"> </span><span class="o">+</span><span class="n">x</span><span class="w"> </span><span class="n">physicstime</span><span class="o">.</span><span class="n">sh</span><span class="p">;</span><span class="w"> </span><span class="n">vi</span><span class="w"> </span><span class="n">physicstime</span><span class="o">.</span><span class="n">sh</span><span class="w"></span>
 
-    <span class="c1">#!/bin/bash</span>
-    <span class="n">echo</span> <span class="s2">"starting physicstime after boot"</span> <span class="o">&gt;&gt;</span> <span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="nb">log</span><span class="o">/</span><span class="n">physicstime</span><span class="o">.</span><span class="n">log</span>
-    <span class="n">cd</span> <span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">YOURUSER</span><span class="p">;</span> <span class="n">docker</span><span class="o">-</span><span class="n">compose</span> <span class="n">up</span> <span class="o">&amp;</span>
+<span class="w">    </span><span class="c1">#!/bin/bash</span><span class="w"></span>
+<span class="w">    </span><span class="n">echo</span><span class="w"> </span><span class="s2">"starting physicstime after boot"</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="nb">log</span><span class="o">/</span><span class="n">physicstime</span><span class="o">.</span><span class="n">log</span><span class="w"></span>
+<span class="w">    </span><span class="n">cd</span><span class="w"> </span><span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">YOURUSER</span><span class="p">;</span><span class="w"> </span><span class="n">docker</span><span class="o">-</span><span class="n">compose</span><span class="w"> </span><span class="n">up</span><span class="w"> </span><span class="o">&amp;</span><span class="w"></span>
 
-<span class="n">update</span><span class="o">-</span><span class="n">rc</span><span class="o">.</span><span class="n">d</span> <span class="n">physicstime</span><span class="o">.</span><span class="n">sh</span> <span class="n">defaults</span>
+<span class="n">update</span><span class="o">-</span><span class="n">rc</span><span class="o">.</span><span class="n">d</span><span class="w"> </span><span class="n">physicstime</span><span class="o">.</span><span class="n">sh</span><span class="w"> </span><span class="n">defaults</span><span class="w"></span>
 </code></pre></div>
 <blockquote>
 <p>this starts the docker based services automatically on boot (not including extra logging)</p>
