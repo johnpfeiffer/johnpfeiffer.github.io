@@ -152,18 +152,18 @@ Often you can defer that complexity by using Heroku, Google App Engine,  or othe
 <h2 id="write-the-actual-infrastructure-code">Write the actual Infrastructure Code</h2>
 <p>The initial application template creates an empty "class" that represents the "stack", we customize and replace that code with the following...</p>
 <p><strong>lib/infra-stack.ts</strong> has only 2 changes to the default file, the import of S3 and the new Bucket resource "MyExampleBucket"</p>
-<div class="highlight"><pre><span></span><code><span class="k">import</span> <span class="o">*</span> <span class="kr">as</span> <span class="nx">cdk</span> <span class="kr">from</span> <span class="s1">'@aws-cdk/core'</span><span class="p">;</span>
-<span class="k">import</span> <span class="o">*</span> <span class="kr">as</span> <span class="nx">s3</span> <span class="kr">from</span> <span class="s1">'@aws-cdk/aws-s3'</span><span class="p">;</span>
+<div class="highlight"><pre><span></span><code><span class="k">import</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="kr">as</span><span class="w"> </span><span class="nx">cdk</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s1">'@aws-cdk/core'</span><span class="p">;</span><span class="w"></span>
+<span class="k">import</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="kr">as</span><span class="w"> </span><span class="nx">s3</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s1">'@aws-cdk/aws-s3'</span><span class="p">;</span><span class="w"></span>
 
-<span class="k">export</span> <span class="kd">class</span> <span class="nx">InfraStack</span> <span class="k">extends</span> <span class="nx">cdk</span><span class="p">.</span><span class="nx">Stack</span> <span class="p">{</span>
-  <span class="kr">constructor</span><span class="p">(</span><span class="nx">scope</span>: <span class="kt">cdk.Construct</span><span class="p">,</span> <span class="nx">id</span>: <span class="kt">string</span><span class="p">,</span> <span class="nx">props?</span>: <span class="kt">cdk.StackProps</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">super</span><span class="p">(</span><span class="nx">scope</span><span class="p">,</span> <span class="nx">id</span><span class="p">,</span> <span class="nx">props</span><span class="p">);</span>
+<span class="k">export</span><span class="w"> </span><span class="kd">class</span><span class="w"> </span><span class="nx">InfraStack</span><span class="w"> </span><span class="k">extends</span><span class="w"> </span><span class="nx">cdk</span><span class="p">.</span><span class="nx">Stack</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="kr">constructor</span><span class="p">(</span><span class="nx">scope</span><span class="o">:</span><span class="w"> </span><span class="kt">cdk.Construct</span><span class="p">,</span><span class="w"> </span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">props?</span><span class="o">:</span><span class="w"> </span><span class="kt">cdk.StackProps</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">super</span><span class="p">(</span><span class="nx">scope</span><span class="p">,</span><span class="w"> </span><span class="nx">id</span><span class="p">,</span><span class="w"> </span><span class="nx">props</span><span class="p">);</span><span class="w"></span>
 
-    <span class="ow">new</span> <span class="nx">s3</span><span class="p">.</span><span class="nx">Bucket</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="s1">'MyExampleBucket'</span><span class="p">,</span> <span class="p">{</span>
-      <span class="nx">versioned</span>: <span class="kt">true</span>
-    <span class="p">});</span>
-  <span class="p">}</span>
-<span class="p">}</span>
+<span class="w">    </span><span class="ow">new</span><span class="w"> </span><span class="nx">s3</span><span class="p">.</span><span class="nx">Bucket</span><span class="p">(</span><span class="k">this</span><span class="p">,</span><span class="w"> </span><span class="s1">'MyExampleBucket'</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">      </span><span class="nx">versioned</span><span class="o">:</span><span class="w"> </span><span class="kt">true</span><span class="w"></span>
+<span class="w">    </span><span class="p">});</span><span class="w"></span>
+<span class="w">  </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
 </code></pre></div>
 <blockquote>
 <p>The import renames are important to be consistent in subsequent code, so if something is "cdk" then it is cdk.Construct</p>
@@ -214,10 +214,10 @@ arn:aws:cloudformation:us-east-1:409670809604:stack/InfraStack/b5167030-00fb-11e
 </blockquote>
 <h2 id="making-updates-with-cdk">Making updates with CDK</h2>
 <p>A tiny snippet change to allow bucket deletion...</p>
-<div class="highlight"><pre><span></span><code><span class="ow">new</span> <span class="nx">s3</span><span class="p">.</span><span class="nx">Bucket</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="s1">'MyExampleBucket'</span><span class="p">,</span> <span class="p">{</span>
-  <span class="nx">versioned</span>: <span class="kt">true</span><span class="p">,</span>
-  <span class="nx">removalPolicy</span>: <span class="kt">cdk.RemovalPolicy.DESTROY</span>
-<span class="p">});</span>
+<div class="highlight"><pre><span></span><code><span class="ow">new</span><span class="w"> </span><span class="nx">s3</span><span class="p">.</span><span class="nx">Bucket</span><span class="p">(</span><span class="k">this</span><span class="p">,</span><span class="w"> </span><span class="s1">'MyExampleBucket'</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="nx">versioned</span><span class="o">:</span><span class="w"> </span><span class="kt">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nx">removalPolicy</span><span class="o">:</span><span class="w"> </span><span class="kt">cdk.RemovalPolicy.DESTROY</span><span class="w"></span>
+<span class="p">});</span><span class="w"></span>
 </code></pre></div>
 <ul>
 <li><a href="https://docs.aws.amazon.com/cdk/latest/guide/hello_world.html">https://docs.aws.amazon.com/cdk/latest/guide/hello_world.html</a></li>
@@ -323,44 +323,44 @@ InfraStack: creating CloudFormation changeset...
 </ul>
 <p><code>cd cdk-example/infra/</code></p>
 <p>First update <strong>package.json</strong></p>
-<div class="highlight"><pre><span></span><code><span class="s2">"dependencies"</span><span class="o">:</span> <span class="p">{</span>
-  <span class="s2">"@aws-cdk/core"</span><span class="o">:</span> <span class="s2">"*"</span><span class="p">,</span>
-  <span class="s2">"@aws-cdk/aws-s3"</span><span class="o">:</span> <span class="s2">"*"</span><span class="p">,</span>
-  <span class="s2">"@aws-cdk/aws-s3-assets"</span><span class="o">:</span> <span class="s2">"*"</span><span class="p">,</span>
-  <span class="s2">"@aws-cdk/aws-lambda"</span><span class="o">:</span> <span class="s2">"*"</span><span class="p">,</span>
-  <span class="s2">"source-map-support"</span><span class="o">:</span> <span class="s2">"^0.5.16"</span>
-<span class="p">}</span>
+<div class="highlight"><pre><span></span><code><span class="s2">"dependencies"</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="s2">"@aws-cdk/core"</span><span class="o">:</span><span class="w"> </span><span class="s2">"*"</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="s2">"@aws-cdk/aws-s3"</span><span class="o">:</span><span class="w"> </span><span class="s2">"*"</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="s2">"@aws-cdk/aws-s3-assets"</span><span class="o">:</span><span class="w"> </span><span class="s2">"*"</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="s2">"@aws-cdk/aws-lambda"</span><span class="o">:</span><span class="w"> </span><span class="s2">"*"</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="s2">"source-map-support"</span><span class="o">:</span><span class="w"> </span><span class="s2">"^0.5.16"</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
 </code></pre></div>
 <p>Do not forget to <code>npm install</code></p>
 <p>Next update the <strong>lib/infra-stack.ts</strong></p>
 <blockquote>
 <p>Layout the resources from the deepest dependency first, so in this case a place for the golang function to be zipped</p>
 </blockquote>
-<div class="highlight"><pre><span></span><code><span class="k">import</span> <span class="o">*</span> <span class="kr">as</span> <span class="nx">cdk</span> <span class="kr">from</span> <span class="s1">'@aws-cdk/core'</span><span class="p">;</span>
-<span class="k">import</span> <span class="o">*</span> <span class="kr">as</span> <span class="nx">s3</span> <span class="kr">from</span> <span class="s1">'@aws-cdk/aws-s3'</span><span class="p">;</span>
-<span class="k">import</span> <span class="o">*</span> <span class="kr">as</span> <span class="nx">lambda</span> <span class="kr">from</span> <span class="s1">'@aws-cdk/aws-lambda'</span><span class="p">;</span>
-<span class="k">import</span> <span class="nx">assets</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s2">"@aws-cdk/aws-s3-assets"</span><span class="p">)</span>
-<span class="k">import</span> <span class="nx">path</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s2">"path"</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="k">import</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="kr">as</span><span class="w"> </span><span class="nx">cdk</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s1">'@aws-cdk/core'</span><span class="p">;</span><span class="w"></span>
+<span class="k">import</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="kr">as</span><span class="w"> </span><span class="nx">s3</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s1">'@aws-cdk/aws-s3'</span><span class="p">;</span><span class="w"></span>
+<span class="k">import</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="kr">as</span><span class="w"> </span><span class="nx">lambda</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s1">'@aws-cdk/aws-lambda'</span><span class="p">;</span><span class="w"></span>
+<span class="k">import</span><span class="w"> </span><span class="nx">assets</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">require</span><span class="p">(</span><span class="s2">"@aws-cdk/aws-s3-assets"</span><span class="p">)</span><span class="w"></span>
+<span class="k">import</span><span class="w"> </span><span class="nx">path</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">require</span><span class="p">(</span><span class="s2">"path"</span><span class="p">)</span><span class="w"></span>
 
-<span class="k">export</span> <span class="kd">class</span> <span class="nx">InfraStack</span> <span class="k">extends</span> <span class="nx">cdk</span><span class="p">.</span><span class="nx">Stack</span> <span class="p">{</span>
-  <span class="kr">constructor</span><span class="p">(</span><span class="nx">scope</span>: <span class="kt">cdk.Construct</span><span class="p">,</span> <span class="nx">id</span>: <span class="kt">string</span><span class="p">,</span> <span class="nx">props?</span>: <span class="kt">cdk.StackProps</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">super</span><span class="p">(</span><span class="nx">scope</span><span class="p">,</span> <span class="nx">id</span><span class="p">,</span> <span class="nx">props</span><span class="p">);</span>
+<span class="k">export</span><span class="w"> </span><span class="kd">class</span><span class="w"> </span><span class="nx">InfraStack</span><span class="w"> </span><span class="k">extends</span><span class="w"> </span><span class="nx">cdk</span><span class="p">.</span><span class="nx">Stack</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="kr">constructor</span><span class="p">(</span><span class="nx">scope</span><span class="o">:</span><span class="w"> </span><span class="kt">cdk.Construct</span><span class="p">,</span><span class="w"> </span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">props?</span><span class="o">:</span><span class="w"> </span><span class="kt">cdk.StackProps</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">super</span><span class="p">(</span><span class="nx">scope</span><span class="p">,</span><span class="w"> </span><span class="nx">id</span><span class="p">,</span><span class="w"> </span><span class="nx">props</span><span class="p">);</span><span class="w"></span>
 
-    <span class="c1">// Golang binaries must have a place where they are uploaded to s3 as a .zip</span>
-    <span class="kd">const</span> <span class="nx">asset</span> <span class="o">=</span> <span class="ow">new</span> <span class="nx">assets</span><span class="p">.</span><span class="nx">Asset</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="s1">'ExampleFunctionZip'</span><span class="p">,</span> <span class="p">{</span>
-      <span class="nx">path</span>: <span class="kt">path.join</span><span class="p">(</span><span class="nx">__dirname</span><span class="p">,</span> <span class="s1">'../../examplefunction.zip'</span><span class="p">),</span>
-    <span class="p">});</span>
+<span class="w">    </span><span class="c1">// Golang binaries must have a place where they are uploaded to s3 as a .zip</span><span class="w"></span>
+<span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">asset</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">assets</span><span class="p">.</span><span class="nx">Asset</span><span class="p">(</span><span class="k">this</span><span class="p">,</span><span class="w"> </span><span class="s1">'ExampleFunctionZip'</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">      </span><span class="nx">path</span><span class="o">:</span><span class="w"> </span><span class="kt">path.join</span><span class="p">(</span><span class="nx">__dirname</span><span class="p">,</span><span class="w"> </span><span class="s1">'../../examplefunction.zip'</span><span class="p">),</span><span class="w"></span>
+<span class="w">    </span><span class="p">});</span><span class="w"></span>
 
-    <span class="kd">const</span> <span class="nx">handler</span> <span class="o">=</span> <span class="ow">new</span> <span class="nx">lambda</span><span class="p">.</span><span class="nb">Function</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="s2">"ExampleFunction"</span><span class="p">,</span> <span class="p">{</span>
-      <span class="nx">runtime</span>: <span class="kt">lambda.Runtime.GO_1_X</span><span class="p">,</span>
-      <span class="nx">handler</span><span class="o">:</span> <span class="s2">"main"</span><span class="p">,</span>
-      <span class="nx">code</span>: <span class="kt">lambda.Code.fromBucket</span><span class="p">(</span>
-        <span class="nx">asset</span><span class="p">.</span><span class="nx">bucket</span><span class="p">,</span>
-        <span class="nx">asset</span><span class="p">.</span><span class="nx">s3ObjectKey</span>
-      <span class="p">),</span>
-    <span class="p">});</span>
-  <span class="p">}</span>
-<span class="p">}</span>
+<span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">handler</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">lambda</span><span class="p">.</span><span class="nb">Function</span><span class="p">(</span><span class="k">this</span><span class="p">,</span><span class="w"> </span><span class="s2">"ExampleFunction"</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">      </span><span class="nx">runtime</span><span class="o">:</span><span class="w"> </span><span class="kt">lambda.Runtime.GO_1_X</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nx">handler</span><span class="o">:</span><span class="w"> </span><span class="s2">"main"</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nx">code</span><span class="o">:</span><span class="w"> </span><span class="kt">lambda.Code.fromBucket</span><span class="p">(</span><span class="w"></span>
+<span class="w">        </span><span class="nx">asset</span><span class="p">.</span><span class="nx">bucket</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nx">asset</span><span class="p">.</span><span class="nx">s3ObjectKey</span><span class="w"></span>
+<span class="w">      </span><span class="p">),</span><span class="w"></span>
+<span class="w">    </span><span class="p">});</span><span class="w"></span>
+<span class="w">  </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
 </code></pre></div>
 <blockquote>
 <p>This crucial glue code indicates that the Lambda will be named "ExampleFunction", that it will get the binary (zipped) from S3, and that the handler expects to have a binary "main"</p>
@@ -398,48 +398,48 @@ arn:aws:cloudformation:us-east-1:409670809604:stack/InfraStack/248d2960-0104-11e
 <h3 id="cdk-with-an-apigateway-integrated-with-a-go-lambda">CDK with an APIGateway integrated with a Go Lambda</h3>
 <p>Create the APIG and attach it to the Lambda:</p>
 <p>First update <strong>infra/package.json</strong></p>
-<div class="highlight"><pre><span></span><code>  <span class="s2">"dependencies"</span><span class="o">:</span> <span class="p">{</span>
-    <span class="s2">"@aws-cdk/aws-apigateway"</span><span class="o">:</span> <span class="s2">"*"</span><span class="p">,</span>
-    <span class="s2">"@aws-cdk/aws-lambda"</span><span class="o">:</span> <span class="s2">"*"</span><span class="p">,</span>
-    <span class="s2">"@aws-cdk/aws-s3"</span><span class="o">:</span> <span class="s2">"*"</span><span class="p">,</span>
-    <span class="s2">"@aws-cdk/aws-s3-assets"</span><span class="o">:</span> <span class="s2">"*"</span><span class="p">,</span>
-    <span class="s2">"@aws-cdk/core"</span><span class="o">:</span> <span class="s2">"*"</span><span class="p">,</span>
-    <span class="s2">"source-map-support"</span><span class="o">:</span> <span class="s2">"^0.5.16"</span>
-  <span class="p">}</span>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="s2">"dependencies"</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="s2">"@aws-cdk/aws-apigateway"</span><span class="o">:</span><span class="w"> </span><span class="s2">"*"</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="s2">"@aws-cdk/aws-lambda"</span><span class="o">:</span><span class="w"> </span><span class="s2">"*"</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="s2">"@aws-cdk/aws-s3"</span><span class="o">:</span><span class="w"> </span><span class="s2">"*"</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="s2">"@aws-cdk/aws-s3-assets"</span><span class="o">:</span><span class="w"> </span><span class="s2">"*"</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="s2">"@aws-cdk/core"</span><span class="o">:</span><span class="w"> </span><span class="s2">"*"</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="s2">"source-map-support"</span><span class="o">:</span><span class="w"> </span><span class="s2">"^0.5.16"</span><span class="w"></span>
+<span class="w">  </span><span class="p">}</span><span class="w"></span>
 </code></pre></div>
 <p><code>npm install</code></p>
 <p>Define the API Gateway in CDK <em>(only adding a few more lines)</em></p>
 <p><a href="https://docs.aws.amazon.com/cdk/api/latest/docs/aws-apigateway-readme.html#aws-lambda-backed-apis">https://docs.aws.amazon.com/cdk/api/latest/docs/aws-apigateway-readme.html#aws-lambda-backed-apis</a></p>
-<div class="highlight"><pre><span></span><code><span class="k">import</span> <span class="o">*</span> <span class="kr">as</span> <span class="nx">cdk</span> <span class="kr">from</span> <span class="s1">'@aws-cdk/core'</span><span class="p">;</span>
-<span class="k">import</span> <span class="o">*</span> <span class="kr">as</span> <span class="nx">s3</span> <span class="kr">from</span> <span class="s1">'@aws-cdk/aws-s3'</span><span class="p">;</span>
-<span class="k">import</span> <span class="o">*</span> <span class="kr">as</span> <span class="nx">lambda</span> <span class="kr">from</span> <span class="s1">'@aws-cdk/aws-lambda'</span><span class="p">;</span>
-<span class="k">import</span> <span class="nx">assets</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s2">"@aws-cdk/aws-s3-assets"</span><span class="p">)</span>
-<span class="k">import</span> <span class="nx">apigw</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s2">"@aws-cdk/aws-apigateway"</span><span class="p">)</span>
-<span class="k">import</span> <span class="nx">path</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s2">"path"</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="k">import</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="kr">as</span><span class="w"> </span><span class="nx">cdk</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s1">'@aws-cdk/core'</span><span class="p">;</span><span class="w"></span>
+<span class="k">import</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="kr">as</span><span class="w"> </span><span class="nx">s3</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s1">'@aws-cdk/aws-s3'</span><span class="p">;</span><span class="w"></span>
+<span class="k">import</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="kr">as</span><span class="w"> </span><span class="nx">lambda</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s1">'@aws-cdk/aws-lambda'</span><span class="p">;</span><span class="w"></span>
+<span class="k">import</span><span class="w"> </span><span class="nx">assets</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">require</span><span class="p">(</span><span class="s2">"@aws-cdk/aws-s3-assets"</span><span class="p">)</span><span class="w"></span>
+<span class="k">import</span><span class="w"> </span><span class="nx">apigw</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">require</span><span class="p">(</span><span class="s2">"@aws-cdk/aws-apigateway"</span><span class="p">)</span><span class="w"></span>
+<span class="k">import</span><span class="w"> </span><span class="nx">path</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">require</span><span class="p">(</span><span class="s2">"path"</span><span class="p">)</span><span class="w"></span>
 
 
-<span class="k">export</span> <span class="kd">class</span> <span class="nx">InfraStack</span> <span class="k">extends</span> <span class="nx">cdk</span><span class="p">.</span><span class="nx">Stack</span> <span class="p">{</span>
-  <span class="kr">constructor</span><span class="p">(</span><span class="nx">scope</span>: <span class="kt">cdk.Construct</span><span class="p">,</span> <span class="nx">id</span>: <span class="kt">string</span><span class="p">,</span> <span class="nx">props?</span>: <span class="kt">cdk.StackProps</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">super</span><span class="p">(</span><span class="nx">scope</span><span class="p">,</span> <span class="nx">id</span><span class="p">,</span> <span class="nx">props</span><span class="p">);</span>
+<span class="k">export</span><span class="w"> </span><span class="kd">class</span><span class="w"> </span><span class="nx">InfraStack</span><span class="w"> </span><span class="k">extends</span><span class="w"> </span><span class="nx">cdk</span><span class="p">.</span><span class="nx">Stack</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="kr">constructor</span><span class="p">(</span><span class="nx">scope</span><span class="o">:</span><span class="w"> </span><span class="kt">cdk.Construct</span><span class="p">,</span><span class="w"> </span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">props?</span><span class="o">:</span><span class="w"> </span><span class="kt">cdk.StackProps</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">super</span><span class="p">(</span><span class="nx">scope</span><span class="p">,</span><span class="w"> </span><span class="nx">id</span><span class="p">,</span><span class="w"> </span><span class="nx">props</span><span class="p">);</span><span class="w"></span>
 
-    <span class="c1">// Golang binaries must have a place where they are uploaded to s3 as a .zip</span>
-    <span class="kd">const</span> <span class="nx">asset</span> <span class="o">=</span> <span class="ow">new</span> <span class="nx">assets</span><span class="p">.</span><span class="nx">Asset</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="s1">'ExampleFunctionZip'</span><span class="p">,</span> <span class="p">{</span>
-      <span class="nx">path</span>: <span class="kt">path.join</span><span class="p">(</span><span class="nx">__dirname</span><span class="p">,</span> <span class="s1">'../../examplefunction'</span><span class="p">),</span>
-    <span class="p">});</span>
+<span class="w">    </span><span class="c1">// Golang binaries must have a place where they are uploaded to s3 as a .zip</span><span class="w"></span>
+<span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">asset</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">assets</span><span class="p">.</span><span class="nx">Asset</span><span class="p">(</span><span class="k">this</span><span class="p">,</span><span class="w"> </span><span class="s1">'ExampleFunctionZip'</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">      </span><span class="nx">path</span><span class="o">:</span><span class="w"> </span><span class="kt">path.join</span><span class="p">(</span><span class="nx">__dirname</span><span class="p">,</span><span class="w"> </span><span class="s1">'../../examplefunction'</span><span class="p">),</span><span class="w"></span>
+<span class="w">    </span><span class="p">});</span><span class="w"></span>
 
-    <span class="kd">const</span> <span class="nx">myhandler</span> <span class="o">=</span> <span class="ow">new</span> <span class="nx">lambda</span><span class="p">.</span><span class="nb">Function</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="s2">"ExampleFunction"</span><span class="p">,</span> <span class="p">{</span>
-      <span class="nx">runtime</span>: <span class="kt">lambda.Runtime.GO_1_X</span><span class="p">,</span>
-      <span class="nx">handler</span><span class="o">:</span> <span class="s2">"main"</span><span class="p">,</span>
-      <span class="nx">code</span>: <span class="kt">lambda.Code.fromBucket</span><span class="p">(</span>
-        <span class="nx">asset</span><span class="p">.</span><span class="nx">bucket</span><span class="p">,</span>
-        <span class="nx">asset</span><span class="p">.</span><span class="nx">s3ObjectKey</span>
-      <span class="p">),</span>
-    <span class="p">});</span>
+<span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">myhandler</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">lambda</span><span class="p">.</span><span class="nb">Function</span><span class="p">(</span><span class="k">this</span><span class="p">,</span><span class="w"> </span><span class="s2">"ExampleFunction"</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">      </span><span class="nx">runtime</span><span class="o">:</span><span class="w"> </span><span class="kt">lambda.Runtime.GO_1_X</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nx">handler</span><span class="o">:</span><span class="w"> </span><span class="s2">"main"</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nx">code</span><span class="o">:</span><span class="w"> </span><span class="kt">lambda.Code.fromBucket</span><span class="p">(</span><span class="w"></span>
+<span class="w">        </span><span class="nx">asset</span><span class="p">.</span><span class="nx">bucket</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nx">asset</span><span class="p">.</span><span class="nx">s3ObjectKey</span><span class="w"></span>
+<span class="w">      </span><span class="p">),</span><span class="w"></span>
+<span class="w">    </span><span class="p">});</span><span class="w"></span>
 
-    <span class="c1">// all routes (and REST verbs) will pass through to the lambda</span>
-    <span class="kd">const</span> <span class="nx">api</span> <span class="o">=</span> <span class="ow">new</span> <span class="nx">apigw</span><span class="p">.</span><span class="nx">LambdaRestApi</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="s1">'examplefunction'</span><span class="p">,</span> <span class="p">{</span><span class="nx">handler</span>: <span class="kt">myhandler</span><span class="p">});</span>
-  <span class="p">}</span>
-<span class="p">}</span>
+<span class="w">    </span><span class="c1">// all routes (and REST verbs) will pass through to the lambda</span><span class="w"></span>
+<span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">api</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">apigw</span><span class="p">.</span><span class="nx">LambdaRestApi</span><span class="p">(</span><span class="k">this</span><span class="p">,</span><span class="w"> </span><span class="s1">'examplefunction'</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="nx">handler</span><span class="o">:</span><span class="w"> </span><span class="kt">myhandler</span><span class="p">});</span><span class="w"></span>
+<span class="w">  </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
 </code></pre></div>
 <blockquote>
 <p>one gotcha is the ordering of imports, have the "path" one last</p>
