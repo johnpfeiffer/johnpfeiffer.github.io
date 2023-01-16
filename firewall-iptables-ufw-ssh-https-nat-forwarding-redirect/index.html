@@ -143,31 +143,31 @@ Set the default policies to accept all packets</p>
 </blockquote>
 <h3 id="allow-ssh-ping-and-established-but-block-all-by-default">Allow SSH, ping, and Established but block all by default</h3>
 <div class="highlight"><pre><span></span><code><span class="ch">#!/bin/sh</span>
-iptables -I INPUT <span class="m">1</span> -i lo -j ACCEPT
-iptables -I OUTPUT <span class="m">1</span> -o lo -j ACCEPT
-&gt; Always allow the loopback device
+iptables<span class="w"> </span>-I<span class="w"> </span>INPUT<span class="w"> </span><span class="m">1</span><span class="w"> </span>-i<span class="w"> </span>lo<span class="w"> </span>-j<span class="w"> </span>ACCEPT
+iptables<span class="w"> </span>-I<span class="w"> </span>OUTPUT<span class="w"> </span><span class="m">1</span><span class="w"> </span>-o<span class="w"> </span>lo<span class="w"> </span>-j<span class="w"> </span>ACCEPT
+&gt;<span class="w"> </span>Always<span class="w"> </span>allow<span class="w"> </span>the<span class="w"> </span>loopback<span class="w"> </span>device
 
-iptables -A INPUT -p tcp --dport <span class="m">22</span> -j ACCEPT
-iptables -A OUTPUT -p tcp --sport <span class="m">22</span> -j ACCEPT
-&gt; allow SSH server to accept connections
+iptables<span class="w"> </span>-A<span class="w"> </span>INPUT<span class="w"> </span>-p<span class="w"> </span>tcp<span class="w"> </span>--dport<span class="w"> </span><span class="m">22</span><span class="w"> </span>-j<span class="w"> </span>ACCEPT
+iptables<span class="w"> </span>-A<span class="w"> </span>OUTPUT<span class="w"> </span>-p<span class="w"> </span>tcp<span class="w"> </span>--sport<span class="w"> </span><span class="m">22</span><span class="w"> </span>-j<span class="w"> </span>ACCEPT
+&gt;<span class="w"> </span>allow<span class="w"> </span>SSH<span class="w"> </span>server<span class="w"> </span>to<span class="w"> </span>accept<span class="w"> </span>connections
 
-iptables -A INPUT -i eth1 -p tcp --dport <span class="m">22</span> -j ACCEPT
-iptables -A OUTPUT -o eth1 -p tcp --sport <span class="m">22</span> -j ACCEPT
-&gt; ssh server on eth1 on port <span class="m">22</span>
+iptables<span class="w"> </span>-A<span class="w"> </span>INPUT<span class="w"> </span>-i<span class="w"> </span>eth1<span class="w"> </span>-p<span class="w"> </span>tcp<span class="w"> </span>--dport<span class="w"> </span><span class="m">22</span><span class="w"> </span>-j<span class="w"> </span>ACCEPT
+iptables<span class="w"> </span>-A<span class="w"> </span>OUTPUT<span class="w"> </span>-o<span class="w"> </span>eth1<span class="w"> </span>-p<span class="w"> </span>tcp<span class="w"> </span>--sport<span class="w"> </span><span class="m">22</span><span class="w"> </span>-j<span class="w"> </span>ACCEPT
+&gt;<span class="w"> </span>ssh<span class="w"> </span>server<span class="w"> </span>on<span class="w"> </span>eth1<span class="w"> </span>on<span class="w"> </span>port<span class="w"> </span><span class="m">22</span>
 
-iptables -P INPUT DROP
-iptables -P FORWARD DROP
-iptables -P OUTPUT DROP
-&gt; default to block all traffic
+iptables<span class="w"> </span>-P<span class="w"> </span>INPUT<span class="w"> </span>DROP
+iptables<span class="w"> </span>-P<span class="w"> </span>FORWARD<span class="w"> </span>DROP
+iptables<span class="w"> </span>-P<span class="w"> </span>OUTPUT<span class="w"> </span>DROP
+&gt;<span class="w"> </span>default<span class="w"> </span>to<span class="w"> </span>block<span class="w"> </span>all<span class="w"> </span>traffic
 
-iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
-&gt; Accept packets belonging to established and related connections
+iptables<span class="w"> </span>-A<span class="w"> </span>INPUT<span class="w"> </span>-m<span class="w"> </span>state<span class="w"> </span>--state<span class="w"> </span>ESTABLISHED,RELATED<span class="w"> </span>-j<span class="w"> </span>ACCEPT
+&gt;<span class="w"> </span>Accept<span class="w"> </span>packets<span class="w"> </span>belonging<span class="w"> </span>to<span class="w"> </span>established<span class="w"> </span>and<span class="w"> </span>related<span class="w"> </span>connections
 
-iptables -A INPUT -i eth1 -p icmp --icmp-type echo-request -j ACCEPT
-&gt; Allow incoming ping requests from eth1 , echo-request <span class="o">=</span> <span class="m">8</span> <span class="k">in</span> numeric
+iptables<span class="w"> </span>-A<span class="w"> </span>INPUT<span class="w"> </span>-i<span class="w"> </span>eth1<span class="w"> </span>-p<span class="w"> </span>icmp<span class="w"> </span>--icmp-type<span class="w"> </span>echo-request<span class="w"> </span>-j<span class="w"> </span>ACCEPT
+&gt;<span class="w"> </span>Allow<span class="w"> </span>incoming<span class="w"> </span>ping<span class="w"> </span>requests<span class="w"> </span>from<span class="w"> </span>eth1<span class="w"> </span>,<span class="w"> </span>echo-request<span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">8</span><span class="w"> </span><span class="k">in</span><span class="w"> </span>numeric
 
-iptables -A OUTPUT -o eth1 -p icmp --icmp-type echo-reply -j ACCEPT
-&gt; Allow outgoing ping replies to eth1 , <span class="nb">echo</span> <span class="nv">reply</span> <span class="o">=</span> <span class="m">0</span> <span class="k">in</span> numeric
+iptables<span class="w"> </span>-A<span class="w"> </span>OUTPUT<span class="w"> </span>-o<span class="w"> </span>eth1<span class="w"> </span>-p<span class="w"> </span>icmp<span class="w"> </span>--icmp-type<span class="w"> </span>echo-reply<span class="w"> </span>-j<span class="w"> </span>ACCEPT
+&gt;<span class="w"> </span>Allow<span class="w"> </span>outgoing<span class="w"> </span>ping<span class="w"> </span>replies<span class="w"> </span>to<span class="w"> </span>eth1<span class="w"> </span>,<span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="nv">reply</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">0</span><span class="w"> </span><span class="k">in</span><span class="w"> </span>numeric
 </code></pre></div>
 <hr/>
 <div class="highlight"><pre><span></span><code>cat /proc/sys/net/ipv4/ip_forward
@@ -186,77 +186,77 @@ echo 1 &gt; /proc/sys/net/ipv4/ip_forward
 <span class="c1"># or add it to /etc/rc.d/rc.local (which runs once after all other scripts)</span>
 
 <span class="c1"># clear any existing firewall</span>
-iptables -F
-iptables -X
-iptables -F -t mangle
-iptables -F -t nat
-iptables -P INPUT DROP
-iptables -P FORWARD DROP
-iptables -P OUTPUT DROP
+iptables<span class="w"> </span>-F
+iptables<span class="w"> </span>-X
+iptables<span class="w"> </span>-F<span class="w"> </span>-t<span class="w"> </span>mangle
+iptables<span class="w"> </span>-F<span class="w"> </span>-t<span class="w"> </span>nat
+iptables<span class="w"> </span>-P<span class="w"> </span>INPUT<span class="w"> </span>DROP
+iptables<span class="w"> </span>-P<span class="w"> </span>FORWARD<span class="w"> </span>DROP
+iptables<span class="w"> </span>-P<span class="w"> </span>OUTPUT<span class="w"> </span>DROP
 
 <span class="c1"># Protect against SYN flood attacks (see http://cr.yp.to/syncookies.html).</span>
-<span class="nb">echo</span> <span class="m">1</span> &gt; /proc/sys/net/ipv4/tcp_syncookies
+<span class="nb">echo</span><span class="w"> </span><span class="m">1</span><span class="w"> </span>&gt;<span class="w"> </span>/proc/sys/net/ipv4/tcp_syncookies
 
 <span class="c1"># Allow loopback</span>
-iptables -A INPUT -i lo -j ACCEPT
-iptables -A OUTPUT -o lo -j ACCEPT
+iptables<span class="w"> </span>-A<span class="w"> </span>INPUT<span class="w"> </span>-i<span class="w"> </span>lo<span class="w"> </span>-j<span class="w"> </span>ACCEPT
+iptables<span class="w"> </span>-A<span class="w"> </span>OUTPUT<span class="w"> </span>-o<span class="w"> </span>lo<span class="w"> </span>-j<span class="w"> </span>ACCEPT
 
 <span class="c1"># Allow DNS queries</span>
-iptables -A OUTPUT -p udp --dport <span class="m">53</span> -m state --state NEW -j ACCEPT
-iptables -A INPUT -p udp --sport <span class="m">53</span> --dport <span class="m">1024</span>:65535  -m state --state ESTABLISHED -j ACCEPT
+iptables<span class="w"> </span>-A<span class="w"> </span>OUTPUT<span class="w"> </span>-p<span class="w"> </span>udp<span class="w"> </span>--dport<span class="w"> </span><span class="m">53</span><span class="w"> </span>-m<span class="w"> </span>state<span class="w"> </span>--state<span class="w"> </span>NEW<span class="w"> </span>-j<span class="w"> </span>ACCEPT
+iptables<span class="w"> </span>-A<span class="w"> </span>INPUT<span class="w"> </span>-p<span class="w"> </span>udp<span class="w"> </span>--sport<span class="w"> </span><span class="m">53</span><span class="w"> </span>--dport<span class="w"> </span><span class="m">1024</span>:65535<span class="w">  </span>-m<span class="w"> </span>state<span class="w"> </span>--state<span class="w"> </span>ESTABLISHED<span class="w"> </span>-j<span class="w"> </span>ACCEPT
 
 <span class="c1"># Allow NTP (query time server)</span>
-iptables -A INPUT -p udp --dport <span class="m">123</span> -j ACCEPT
-iptables -A OUTPUT -p udp --sport <span class="m">123</span> -j ACCEPT
+iptables<span class="w"> </span>-A<span class="w"> </span>INPUT<span class="w"> </span>-p<span class="w"> </span>udp<span class="w"> </span>--dport<span class="w"> </span><span class="m">123</span><span class="w"> </span>-j<span class="w"> </span>ACCEPT
+iptables<span class="w"> </span>-A<span class="w"> </span>OUTPUT<span class="w"> </span>-p<span class="w"> </span>udp<span class="w"> </span>--sport<span class="w"> </span><span class="m">123</span><span class="w"> </span>-j<span class="w"> </span>ACCEPT
 
 <span class="c1"># Allow SSH on port 22</span>
-iptables -A INPUT -p tcp --dport <span class="m">22</span> -m state --state NEW,ESTABLISHED -j ACCEPT
-iptables -A OUTPUT -p tcp --sport <span class="m">22</span> -m state --state NEW,ESTABLISHED -j ACCEPT
+iptables<span class="w"> </span>-A<span class="w"> </span>INPUT<span class="w"> </span>-p<span class="w"> </span>tcp<span class="w"> </span>--dport<span class="w"> </span><span class="m">22</span><span class="w"> </span>-m<span class="w"> </span>state<span class="w"> </span>--state<span class="w"> </span>NEW,ESTABLISHED<span class="w"> </span>-j<span class="w"> </span>ACCEPT
+iptables<span class="w"> </span>-A<span class="w"> </span>OUTPUT<span class="w"> </span>-p<span class="w"> </span>tcp<span class="w"> </span>--sport<span class="w"> </span><span class="m">22</span><span class="w"> </span>-m<span class="w"> </span>state<span class="w"> </span>--state<span class="w"> </span>NEW,ESTABLISHED<span class="w"> </span>-j<span class="w"> </span>ACCEPT
 
 <span class="c1"># Allow incoming HTTPS</span>
-iptables -A INPUT -p tcp -s <span class="m">0</span>/0 --sport <span class="m">1024</span>:65535 --dport <span class="m">443</span> -m state --state NEW,ESTABLISHED -j ACCEPT
-iptables -A OUTPUT -p tcp -s <span class="m">0</span>/0 --sport <span class="m">443</span> --dport <span class="m">1024</span>:65535 -m state --state ESTABLISHED -j ACCEPT
+iptables<span class="w"> </span>-A<span class="w"> </span>INPUT<span class="w"> </span>-p<span class="w"> </span>tcp<span class="w"> </span>-s<span class="w"> </span><span class="m">0</span>/0<span class="w"> </span>--sport<span class="w"> </span><span class="m">1024</span>:65535<span class="w"> </span>--dport<span class="w"> </span><span class="m">443</span><span class="w"> </span>-m<span class="w"> </span>state<span class="w"> </span>--state<span class="w"> </span>NEW,ESTABLISHED<span class="w"> </span>-j<span class="w"> </span>ACCEPT
+iptables<span class="w"> </span>-A<span class="w"> </span>OUTPUT<span class="w"> </span>-p<span class="w"> </span>tcp<span class="w"> </span>-s<span class="w"> </span><span class="m">0</span>/0<span class="w"> </span>--sport<span class="w"> </span><span class="m">443</span><span class="w"> </span>--dport<span class="w"> </span><span class="m">1024</span>:65535<span class="w"> </span>-m<span class="w"> </span>state<span class="w"> </span>--state<span class="w"> </span>ESTABLISHED<span class="w"> </span>-j<span class="w"> </span>ACCEPT
 
 <span class="c1"># Allow outgoing HTTPS (note state for INPUT is only ESTABLISHED)</span>
-iptables -A OUTPUT -p tcp --dport <span class="m">443</span> -m state --state NEW,ESTABLISHED -j ACCEPT
-iptables -A INPUT -p tcp -s <span class="m">0</span>/0 --sport <span class="m">443</span> --dport <span class="m">1024</span>:65535 -m state --state ESTABLISHED -j ACCEPT
+iptables<span class="w"> </span>-A<span class="w"> </span>OUTPUT<span class="w"> </span>-p<span class="w"> </span>tcp<span class="w"> </span>--dport<span class="w"> </span><span class="m">443</span><span class="w"> </span>-m<span class="w"> </span>state<span class="w"> </span>--state<span class="w"> </span>NEW,ESTABLISHED<span class="w"> </span>-j<span class="w"> </span>ACCEPT
+iptables<span class="w"> </span>-A<span class="w"> </span>INPUT<span class="w"> </span>-p<span class="w"> </span>tcp<span class="w"> </span>-s<span class="w"> </span><span class="m">0</span>/0<span class="w"> </span>--sport<span class="w"> </span><span class="m">443</span><span class="w"> </span>--dport<span class="w"> </span><span class="m">1024</span>:65535<span class="w"> </span>-m<span class="w"> </span>state<span class="w"> </span>--state<span class="w"> </span>ESTABLISHED<span class="w"> </span>-j<span class="w"> </span>ACCEPT
 </code></pre></div>
 <h3 id="web-server">Web Server</h3>
 <div class="highlight"><pre><span></span><code><span class="ch">#!/bin/sh</span>
-iptables -F
-iptables --delete-chain
-iptables -t nat -F
-iptables -t mangle -F
+iptables<span class="w"> </span>-F
+iptables<span class="w"> </span>--delete-chain
+iptables<span class="w"> </span>-t<span class="w"> </span>nat<span class="w"> </span>-F
+iptables<span class="w"> </span>-t<span class="w"> </span>mangle<span class="w"> </span>-F
 
-iptables -P INPUT ACCEPT
-iptables -P FORWARD ACCEPT
-iptables -P OUTPUT ACCEPT
+iptables<span class="w"> </span>-P<span class="w"> </span>INPUT<span class="w"> </span>ACCEPT
+iptables<span class="w"> </span>-P<span class="w"> </span>FORWARD<span class="w"> </span>ACCEPT
+iptables<span class="w"> </span>-P<span class="w"> </span>OUTPUT<span class="w"> </span>ACCEPT
 
 <span class="c1"># LOOPBACK 127.0.0.1</span>
-iptables -I INPUT <span class="m">1</span> -i lo -j ACCEPT
-iptables -I OUTPUT <span class="m">1</span> -o lo -j ACCEPT
+iptables<span class="w"> </span>-I<span class="w"> </span>INPUT<span class="w"> </span><span class="m">1</span><span class="w"> </span>-i<span class="w"> </span>lo<span class="w"> </span>-j<span class="w"> </span>ACCEPT
+iptables<span class="w"> </span>-I<span class="w"> </span>OUTPUT<span class="w"> </span><span class="m">1</span><span class="w"> </span>-o<span class="w"> </span>lo<span class="w"> </span>-j<span class="w"> </span>ACCEPT
 
 <span class="c1"># SSH</span>
-iptables -A INPUT -p tcp --dport <span class="m">22</span> -j ACCEPT
-iptables -A OUTPUT -p tcp --sport <span class="m">22</span> -j ACCEPT
+iptables<span class="w"> </span>-A<span class="w"> </span>INPUT<span class="w"> </span>-p<span class="w"> </span>tcp<span class="w"> </span>--dport<span class="w"> </span><span class="m">22</span><span class="w"> </span>-j<span class="w"> </span>ACCEPT
+iptables<span class="w"> </span>-A<span class="w"> </span>OUTPUT<span class="w"> </span>-p<span class="w"> </span>tcp<span class="w"> </span>--sport<span class="w"> </span><span class="m">22</span><span class="w"> </span>-j<span class="w"> </span>ACCEPT
 
 <span class="c1"># NTP</span>
-iptables -A INPUT -p udp --dport <span class="m">123</span> -j ACCEPT
-iptables -A OUTPUT -p udp --sport <span class="m">123</span> -j ACCEPT
+iptables<span class="w"> </span>-A<span class="w"> </span>INPUT<span class="w"> </span>-p<span class="w"> </span>udp<span class="w"> </span>--dport<span class="w"> </span><span class="m">123</span><span class="w"> </span>-j<span class="w"> </span>ACCEPT
+iptables<span class="w"> </span>-A<span class="w"> </span>OUTPUT<span class="w"> </span>-p<span class="w"> </span>udp<span class="w"> </span>--sport<span class="w"> </span><span class="m">123</span><span class="w"> </span>-j<span class="w"> </span>ACCEPT
 
 <span class="c1"># DNS</span>
-iptables -A OUTPUT -p udp --dport <span class="m">53</span> -m state --state NEW -j ACCEPT
-iptables -A INPUT -p udp --sport <span class="m">53</span> --dport <span class="m">1024</span>:65535  -m state --state ESTABLISHED -j ACCEPT
+iptables<span class="w"> </span>-A<span class="w"> </span>OUTPUT<span class="w"> </span>-p<span class="w"> </span>udp<span class="w"> </span>--dport<span class="w"> </span><span class="m">53</span><span class="w"> </span>-m<span class="w"> </span>state<span class="w"> </span>--state<span class="w"> </span>NEW<span class="w"> </span>-j<span class="w"> </span>ACCEPT
+iptables<span class="w"> </span>-A<span class="w"> </span>INPUT<span class="w"> </span>-p<span class="w"> </span>udp<span class="w"> </span>--sport<span class="w"> </span><span class="m">53</span><span class="w"> </span>--dport<span class="w"> </span><span class="m">1024</span>:65535<span class="w">  </span>-m<span class="w"> </span>state<span class="w"> </span>--state<span class="w"> </span>ESTABLISHED<span class="w"> </span>-j<span class="w"> </span>ACCEPT
 
 <span class="c1"># HTTP</span>
-iptables -A INPUT -p tcp --dport <span class="m">80</span> -j ACCEPT
-iptables -A OUTPUT -p tcp --sport <span class="m">80</span> -j ACCEPT
+iptables<span class="w"> </span>-A<span class="w"> </span>INPUT<span class="w"> </span>-p<span class="w"> </span>tcp<span class="w"> </span>--dport<span class="w"> </span><span class="m">80</span><span class="w"> </span>-j<span class="w"> </span>ACCEPT
+iptables<span class="w"> </span>-A<span class="w"> </span>OUTPUT<span class="w"> </span>-p<span class="w"> </span>tcp<span class="w"> </span>--sport<span class="w"> </span><span class="m">80</span><span class="w"> </span>-j<span class="w"> </span>ACCEPT
 
 
 <span class="c1"># DROP ALL UNDEFINED PACKETS</span>
-iptables -P INPUT DROP
-iptables -P FORWARD DROP
-iptables -P OUTPUT DROP
+iptables<span class="w"> </span>-P<span class="w"> </span>INPUT<span class="w"> </span>DROP
+iptables<span class="w"> </span>-P<span class="w"> </span>FORWARD<span class="w"> </span>DROP
+iptables<span class="w"> </span>-P<span class="w"> </span>OUTPUT<span class="w"> </span>DROP
 
 <span class="c1"># PING</span>
 <span class="c1"># iptables -A INPUT -p icmp -m limit --limit 6/second -j ACCEPT</span>
@@ -265,28 +265,28 @@ iptables -P OUTPUT DROP
 <h3 id="web-and-xmpp-server">Web and XMPP Server</h3>
 <p><code>vi /etc/iptables.rules.xmpp</code></p>
 <div class="highlight"><pre><span></span><code>*filter
-:INPUT DROP <span class="o">[</span><span class="m">3</span>:572<span class="o">]</span>
-:FORWARD DROP <span class="o">[</span><span class="m">0</span>:0<span class="o">]</span>
-:OUTPUT ACCEPT <span class="o">[</span><span class="m">10</span>:1744<span class="o">]</span>
--A INPUT -i lo -j ACCEPT
--A INPUT -p tcp -m tcp ! --tcp-flags FIN,SYN,RST,ACK SYN -m state --state NEW -j DROP
--A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
--A INPUT -p tcp -m tcp --dport <span class="m">22</span> -m state --state NEW -j ACCEPT
--A INPUT -p tcp -m tcp --dport <span class="m">80</span> -m state --state NEW -j ACCEPT
--A INPUT -p udp -m udp --dport <span class="m">161</span> -m state --state NEW -j ACCEPT
--A INPUT -p tcp -m tcp --dport <span class="m">443</span> -m state --state NEW -j ACCEPT
--A INPUT -p tcp -m tcp --dport <span class="m">5222</span> -m state --state NEW -j ACCEPT
--A INPUT -p tcp -m tcp --dport <span class="m">5223</span> -m state --state NEW -j ACCEPT
--A INPUT -p udp -m udp --dport <span class="m">137</span> -j ACCEPT
--A INPUT -p udp -m udp --dport <span class="m">138</span> -j ACCEPT
--A INPUT -p icmp -m icmp --icmp-type <span class="m">8</span> -j ACCEPT
--A INPUT -p icmp -m icmp --icmp-type <span class="m">11</span> -j ACCEPT
--A OUTPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
--A OUTPUT -o lo -j ACCEPT
--A OUTPUT -p tcp -m tcp --dport <span class="m">22</span> -m state --state NEW -j ACCEPT
--A OUTPUT -p udp -m udp --dport <span class="m">53</span> -m state --state NEW -j ACCEPT
--A OUTPUT -p udp -m udp --sport <span class="m">161</span> -m state --state NEW -j ACCEPT
--A OUTPUT -m state --state NEW -j LOG
+:INPUT<span class="w"> </span>DROP<span class="w"> </span><span class="o">[</span><span class="m">3</span>:572<span class="o">]</span>
+:FORWARD<span class="w"> </span>DROP<span class="w"> </span><span class="o">[</span><span class="m">0</span>:0<span class="o">]</span>
+:OUTPUT<span class="w"> </span>ACCEPT<span class="w"> </span><span class="o">[</span><span class="m">10</span>:1744<span class="o">]</span>
+-A<span class="w"> </span>INPUT<span class="w"> </span>-i<span class="w"> </span>lo<span class="w"> </span>-j<span class="w"> </span>ACCEPT
+-A<span class="w"> </span>INPUT<span class="w"> </span>-p<span class="w"> </span>tcp<span class="w"> </span>-m<span class="w"> </span>tcp<span class="w"> </span>!<span class="w"> </span>--tcp-flags<span class="w"> </span>FIN,SYN,RST,ACK<span class="w"> </span>SYN<span class="w"> </span>-m<span class="w"> </span>state<span class="w"> </span>--state<span class="w"> </span>NEW<span class="w"> </span>-j<span class="w"> </span>DROP
+-A<span class="w"> </span>INPUT<span class="w"> </span>-m<span class="w"> </span>state<span class="w"> </span>--state<span class="w"> </span>RELATED,ESTABLISHED<span class="w"> </span>-j<span class="w"> </span>ACCEPT
+-A<span class="w"> </span>INPUT<span class="w"> </span>-p<span class="w"> </span>tcp<span class="w"> </span>-m<span class="w"> </span>tcp<span class="w"> </span>--dport<span class="w"> </span><span class="m">22</span><span class="w"> </span>-m<span class="w"> </span>state<span class="w"> </span>--state<span class="w"> </span>NEW<span class="w"> </span>-j<span class="w"> </span>ACCEPT
+-A<span class="w"> </span>INPUT<span class="w"> </span>-p<span class="w"> </span>tcp<span class="w"> </span>-m<span class="w"> </span>tcp<span class="w"> </span>--dport<span class="w"> </span><span class="m">80</span><span class="w"> </span>-m<span class="w"> </span>state<span class="w"> </span>--state<span class="w"> </span>NEW<span class="w"> </span>-j<span class="w"> </span>ACCEPT
+-A<span class="w"> </span>INPUT<span class="w"> </span>-p<span class="w"> </span>udp<span class="w"> </span>-m<span class="w"> </span>udp<span class="w"> </span>--dport<span class="w"> </span><span class="m">161</span><span class="w"> </span>-m<span class="w"> </span>state<span class="w"> </span>--state<span class="w"> </span>NEW<span class="w"> </span>-j<span class="w"> </span>ACCEPT
+-A<span class="w"> </span>INPUT<span class="w"> </span>-p<span class="w"> </span>tcp<span class="w"> </span>-m<span class="w"> </span>tcp<span class="w"> </span>--dport<span class="w"> </span><span class="m">443</span><span class="w"> </span>-m<span class="w"> </span>state<span class="w"> </span>--state<span class="w"> </span>NEW<span class="w"> </span>-j<span class="w"> </span>ACCEPT
+-A<span class="w"> </span>INPUT<span class="w"> </span>-p<span class="w"> </span>tcp<span class="w"> </span>-m<span class="w"> </span>tcp<span class="w"> </span>--dport<span class="w"> </span><span class="m">5222</span><span class="w"> </span>-m<span class="w"> </span>state<span class="w"> </span>--state<span class="w"> </span>NEW<span class="w"> </span>-j<span class="w"> </span>ACCEPT
+-A<span class="w"> </span>INPUT<span class="w"> </span>-p<span class="w"> </span>tcp<span class="w"> </span>-m<span class="w"> </span>tcp<span class="w"> </span>--dport<span class="w"> </span><span class="m">5223</span><span class="w"> </span>-m<span class="w"> </span>state<span class="w"> </span>--state<span class="w"> </span>NEW<span class="w"> </span>-j<span class="w"> </span>ACCEPT
+-A<span class="w"> </span>INPUT<span class="w"> </span>-p<span class="w"> </span>udp<span class="w"> </span>-m<span class="w"> </span>udp<span class="w"> </span>--dport<span class="w"> </span><span class="m">137</span><span class="w"> </span>-j<span class="w"> </span>ACCEPT
+-A<span class="w"> </span>INPUT<span class="w"> </span>-p<span class="w"> </span>udp<span class="w"> </span>-m<span class="w"> </span>udp<span class="w"> </span>--dport<span class="w"> </span><span class="m">138</span><span class="w"> </span>-j<span class="w"> </span>ACCEPT
+-A<span class="w"> </span>INPUT<span class="w"> </span>-p<span class="w"> </span>icmp<span class="w"> </span>-m<span class="w"> </span>icmp<span class="w"> </span>--icmp-type<span class="w"> </span><span class="m">8</span><span class="w"> </span>-j<span class="w"> </span>ACCEPT
+-A<span class="w"> </span>INPUT<span class="w"> </span>-p<span class="w"> </span>icmp<span class="w"> </span>-m<span class="w"> </span>icmp<span class="w"> </span>--icmp-type<span class="w"> </span><span class="m">11</span><span class="w"> </span>-j<span class="w"> </span>ACCEPT
+-A<span class="w"> </span>OUTPUT<span class="w"> </span>-m<span class="w"> </span>state<span class="w"> </span>--state<span class="w"> </span>RELATED,ESTABLISHED<span class="w"> </span>-j<span class="w"> </span>ACCEPT
+-A<span class="w"> </span>OUTPUT<span class="w"> </span>-o<span class="w"> </span>lo<span class="w"> </span>-j<span class="w"> </span>ACCEPT
+-A<span class="w"> </span>OUTPUT<span class="w"> </span>-p<span class="w"> </span>tcp<span class="w"> </span>-m<span class="w"> </span>tcp<span class="w"> </span>--dport<span class="w"> </span><span class="m">22</span><span class="w"> </span>-m<span class="w"> </span>state<span class="w"> </span>--state<span class="w"> </span>NEW<span class="w"> </span>-j<span class="w"> </span>ACCEPT
+-A<span class="w"> </span>OUTPUT<span class="w"> </span>-p<span class="w"> </span>udp<span class="w"> </span>-m<span class="w"> </span>udp<span class="w"> </span>--dport<span class="w"> </span><span class="m">53</span><span class="w"> </span>-m<span class="w"> </span>state<span class="w"> </span>--state<span class="w"> </span>NEW<span class="w"> </span>-j<span class="w"> </span>ACCEPT
+-A<span class="w"> </span>OUTPUT<span class="w"> </span>-p<span class="w"> </span>udp<span class="w"> </span>-m<span class="w"> </span>udp<span class="w"> </span>--sport<span class="w"> </span><span class="m">161</span><span class="w"> </span>-m<span class="w"> </span>state<span class="w"> </span>--state<span class="w"> </span>NEW<span class="w"> </span>-j<span class="w"> </span>ACCEPT
+-A<span class="w"> </span>OUTPUT<span class="w"> </span>-m<span class="w"> </span>state<span class="w"> </span>--state<span class="w"> </span>NEW<span class="w"> </span>-j<span class="w"> </span>LOG
 COMMIT
 </code></pre></div>
 <p><code>iptables-restore &lt; /etc/iptables.rules.xmpp</code></p>
@@ -302,8 +302,8 @@ COMMIT
 <span class="normal">7</span>
 <span class="normal">8</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="ch">#!/bin/bash</span>
 <span class="c1"># ntpdate port 123</span>
-iptables -A INPUT -p udp --dport <span class="m">123</span> -j ACCEPT
-iptables -A OUTPUT -p udp --sport <span class="m">123</span> -j ACCEPT
+iptables<span class="w"> </span>-A<span class="w"> </span>INPUT<span class="w"> </span>-p<span class="w"> </span>udp<span class="w"> </span>--dport<span class="w"> </span><span class="m">123</span><span class="w"> </span>-j<span class="w"> </span>ACCEPT
+iptables<span class="w"> </span>-A<span class="w"> </span>OUTPUT<span class="w"> </span>-p<span class="w"> </span>udp<span class="w"> </span>--sport<span class="w"> </span><span class="m">123</span><span class="w"> </span>-j<span class="w"> </span>ACCEPT
 
 <span class="c1"># variation where rules are inserted as first items in the Tables</span>
 <span class="c1"># iptables -I INPUT 1 -p udp --dport 123 -j ACCEPT</span>
@@ -312,16 +312,16 @@ iptables -A OUTPUT -p udp --sport <span class="m">123</span> -j ACCEPT
 <blockquote>
 <p>Installing NTP...</p>
 </blockquote>
-<div class="highlight"><pre><span></span><code><span class="nv">sudo</span><span class="w"> </span><span class="nv">apt</span><span class="o">-</span><span class="nv">get</span><span class="w"> </span><span class="nv">install</span><span class="w"> </span><span class="nv">ntp</span><span class="w"></span>
-<span class="nv">nano</span><span class="w"> </span><span class="o">/</span><span class="nv">etc</span><span class="o">/</span><span class="nv">ntp</span>.<span class="nv">conf</span><span class="w"></span>
-<span class="nv">server</span><span class="w"> </span><span class="nv">ntp</span>.<span class="nv">ubuntu</span>.<span class="nv">com</span><span class="w"></span>
-<span class="nv">server</span><span class="w"> </span><span class="nv">pool</span>.<span class="nv">ntp</span>.<span class="nv">org</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="nv">sudo</span><span class="w"> </span><span class="nv">apt</span><span class="o">-</span><span class="nv">get</span><span class="w"> </span><span class="nv">install</span><span class="w"> </span><span class="nv">ntp</span>
+<span class="nv">nano</span><span class="w"> </span><span class="o">/</span><span class="nv">etc</span><span class="o">/</span><span class="nv">ntp</span>.<span class="nv">conf</span>
+<span class="nv">server</span><span class="w"> </span><span class="nv">ntp</span>.<span class="nv">ubuntu</span>.<span class="nv">com</span>
+<span class="nv">server</span><span class="w"> </span><span class="nv">pool</span>.<span class="nv">ntp</span>.<span class="nv">org</span>
 
-<span class="o">/</span><span class="nv">etc</span><span class="o">/</span><span class="nv">init</span>.<span class="nv">d</span><span class="o">/</span><span class="nv">ntp</span><span class="w"> </span><span class="nv">restart</span><span class="w"></span>
-<span class="nv">ls</span><span class="w"> </span><span class="o">-</span><span class="nv">ahl</span><span class="w"> </span><span class="o">/</span><span class="nv">etc</span><span class="o">/</span><span class="nv">cron</span>.<span class="nv">daily</span><span class="w">   </span><span class="o">&gt;</span><span class="w"> </span><span class="nv">verify</span><span class="w"> </span><span class="nv">that</span><span class="w"> </span><span class="nv">ntp</span><span class="w"> </span><span class="nv">is</span><span class="w"> </span><span class="o">+</span><span class="nv">x</span><span class="w"> </span><span class="nv">executable</span><span class="w"></span>
-<span class="nv">ntpq</span><span class="w"> </span><span class="o">-</span><span class="nv">p</span><span class="w">                   </span><span class="o">&gt;</span><span class="w"> </span><span class="nv">verify</span><span class="w"> </span><span class="nv">the</span><span class="w"> </span><span class="nv">service</span><span class="w"> </span><span class="nv">is</span><span class="w"> </span><span class="nv">working</span><span class="w"></span>
+<span class="o">/</span><span class="nv">etc</span><span class="o">/</span><span class="nv">init</span>.<span class="nv">d</span><span class="o">/</span><span class="nv">ntp</span><span class="w"> </span><span class="nv">restart</span>
+<span class="nv">ls</span><span class="w"> </span><span class="o">-</span><span class="nv">ahl</span><span class="w"> </span><span class="o">/</span><span class="nv">etc</span><span class="o">/</span><span class="nv">cron</span>.<span class="nv">daily</span><span class="w">   </span><span class="o">&gt;</span><span class="w"> </span><span class="nv">verify</span><span class="w"> </span><span class="nv">that</span><span class="w"> </span><span class="nv">ntp</span><span class="w"> </span><span class="nv">is</span><span class="w"> </span><span class="o">+</span><span class="nv">x</span><span class="w"> </span><span class="nv">executable</span>
+<span class="nv">ntpq</span><span class="w"> </span><span class="o">-</span><span class="nv">p</span><span class="w">                   </span><span class="o">&gt;</span><span class="w"> </span><span class="nv">verify</span><span class="w"> </span><span class="nv">the</span><span class="w"> </span><span class="nv">service</span><span class="w"> </span><span class="nv">is</span><span class="w"> </span><span class="nv">working</span>
 
-<span class="o">&gt;</span><span class="w"> </span><span class="nv">MANUAL</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nv">ntpdate</span><span class="w"> </span><span class="nv">pool</span>.<span class="nv">ntp</span>.<span class="nv">org</span><span class="w"> </span><span class="nv">will</span><span class="w"> </span><span class="nv">now</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="nv">socket</span><span class="w"> </span><span class="mi">123</span><span class="w"> </span><span class="nv">is</span><span class="w"> </span><span class="nv">in</span><span class="w"> </span><span class="nv">use</span><span class="w"></span>
+<span class="o">&gt;</span><span class="w"> </span><span class="nv">MANUAL</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nv">ntpdate</span><span class="w"> </span><span class="nv">pool</span>.<span class="nv">ntp</span>.<span class="nv">org</span><span class="w"> </span><span class="nv">will</span><span class="w"> </span><span class="nv">now</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="nv">socket</span><span class="w"> </span><span class="mi">123</span><span class="w"> </span><span class="nv">is</span><span class="w"> </span><span class="nv">in</span><span class="w"> </span><span class="nv">use</span>
 </code></pre></div>
 <hr/>
 <h3 id="nat-forwarding">NAT forwarding</h3>
@@ -336,14 +336,14 @@ iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
 </blockquote>
 <hr/>
 <h3 id="cifs">CIFS</h3>
-<div class="highlight"><pre><span></span><code><span class="nv">iptables</span><span class="w"> </span><span class="o">-</span><span class="nv">A</span><span class="w"> </span><span class="nv">INPUT</span><span class="w"> </span><span class="o">-</span><span class="nv">p</span><span class="w"> </span><span class="nv">tcp</span><span class="w"> </span><span class="o">-</span><span class="nv">s</span><span class="w"> </span><span class="mi">10</span>.<span class="mi">10</span>.<span class="mi">10</span>.<span class="mi">250</span><span class="w"> </span><span class="o">--</span><span class="nv">sport</span><span class="w"> </span><span class="mi">445</span><span class="w"> </span><span class="o">-</span><span class="nv">d</span><span class="w"> </span><span class="mi">0</span><span class="o">/</span><span class="mi">0</span><span class="w"> </span><span class="o">-</span><span class="nv">j</span><span class="w"> </span><span class="nv">ACCEPT</span><span class="w"></span>
-<span class="nv">iptables</span><span class="w"> </span><span class="o">-</span><span class="nv">A</span><span class="w"> </span><span class="nv">OUTPUT</span><span class="w"> </span><span class="o">-</span><span class="nv">p</span><span class="w"> </span><span class="nv">tcp</span><span class="w"> </span><span class="o">-</span><span class="nv">s</span><span class="w"> </span><span class="mi">0</span><span class="o">/</span><span class="mi">0</span><span class="w"> </span><span class="o">--</span><span class="nv">sport</span><span class="w"> </span><span class="mi">1024</span>:<span class="mi">65535</span><span class="w"> </span><span class="o">-</span><span class="nv">d</span><span class="w"> </span><span class="mi">10</span>.<span class="mi">10</span>.<span class="mi">10</span>.<span class="mi">250</span><span class="w"> </span><span class="o">--</span><span class="nv">dport</span><span class="w"> </span><span class="mi">445</span><span class="w"> </span><span class="o">-</span><span class="nv">m</span><span class="w"> </span><span class="nv">state</span><span class="w"> </span><span class="o">--</span><span class="nv">state</span><span class="w"> </span><span class="nv">NEW</span>,<span class="nv">ESTABLISHED</span><span class="w"> </span><span class="o">-</span><span class="nv">j</span><span class="w"> </span><span class="nv">ACCEPT</span><span class="w"></span>
-<span class="o">&gt;</span><span class="w"> </span><span class="nv">CIFS</span><span class="w"> </span><span class="nv">has</span><span class="w"> </span><span class="nv">been</span><span class="w"> </span><span class="nv">simplified</span><span class="w"> </span><span class="nv">to</span><span class="w"> </span><span class="nv">just</span><span class="w"> </span><span class="nv">use</span><span class="w"> </span><span class="mi">445</span><span class="w"> </span><span class="nv">TCP</span><span class="w"> </span><span class="nv">first</span>...<span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="nv">iptables</span><span class="w"> </span><span class="o">-</span><span class="nv">A</span><span class="w"> </span><span class="nv">INPUT</span><span class="w"> </span><span class="o">-</span><span class="nv">p</span><span class="w"> </span><span class="nv">tcp</span><span class="w"> </span><span class="o">-</span><span class="nv">s</span><span class="w"> </span><span class="mi">10</span>.<span class="mi">10</span>.<span class="mi">10</span>.<span class="mi">250</span><span class="w"> </span><span class="o">--</span><span class="nv">sport</span><span class="w"> </span><span class="mi">445</span><span class="w"> </span><span class="o">-</span><span class="nv">d</span><span class="w"> </span><span class="mi">0</span><span class="o">/</span><span class="mi">0</span><span class="w"> </span><span class="o">-</span><span class="nv">j</span><span class="w"> </span><span class="nv">ACCEPT</span>
+<span class="nv">iptables</span><span class="w"> </span><span class="o">-</span><span class="nv">A</span><span class="w"> </span><span class="nv">OUTPUT</span><span class="w"> </span><span class="o">-</span><span class="nv">p</span><span class="w"> </span><span class="nv">tcp</span><span class="w"> </span><span class="o">-</span><span class="nv">s</span><span class="w"> </span><span class="mi">0</span><span class="o">/</span><span class="mi">0</span><span class="w"> </span><span class="o">--</span><span class="nv">sport</span><span class="w"> </span><span class="mi">1024</span>:<span class="mi">65535</span><span class="w"> </span><span class="o">-</span><span class="nv">d</span><span class="w"> </span><span class="mi">10</span>.<span class="mi">10</span>.<span class="mi">10</span>.<span class="mi">250</span><span class="w"> </span><span class="o">--</span><span class="nv">dport</span><span class="w"> </span><span class="mi">445</span><span class="w"> </span><span class="o">-</span><span class="nv">m</span><span class="w"> </span><span class="nv">state</span><span class="w"> </span><span class="o">--</span><span class="nv">state</span><span class="w"> </span><span class="nv">NEW</span>,<span class="nv">ESTABLISHED</span><span class="w"> </span><span class="o">-</span><span class="nv">j</span><span class="w"> </span><span class="nv">ACCEPT</span>
+<span class="o">&gt;</span><span class="w"> </span><span class="nv">CIFS</span><span class="w"> </span><span class="nv">has</span><span class="w"> </span><span class="nv">been</span><span class="w"> </span><span class="nv">simplified</span><span class="w"> </span><span class="nv">to</span><span class="w"> </span><span class="nv">just</span><span class="w"> </span><span class="nv">use</span><span class="w"> </span><span class="mi">445</span><span class="w"> </span><span class="nv">TCP</span><span class="w"> </span><span class="nv">first</span>...
 
-<span class="nv">netbios</span><span class="o">-</span><span class="nv">ns</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">137</span><span class="o">/</span><span class="nv">tcp</span><span class="w"> </span>#<span class="w"> </span><span class="nv">NETBIOS</span><span class="w"> </span><span class="nv">Name</span><span class="w"> </span><span class="nv">Service</span><span class="w"></span>
-<span class="nv">netbios</span><span class="o">-</span><span class="nv">dgm</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">138</span><span class="o">/</span><span class="nv">tcp</span><span class="w"> </span>#<span class="w"> </span><span class="nv">NETBIOS</span><span class="w"> </span><span class="nv">Datagram</span><span class="w"> </span><span class="nv">Service</span><span class="w"></span>
-<span class="nv">netbios</span><span class="o">-</span><span class="nv">ssn</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">139</span><span class="o">/</span><span class="nv">tcp</span><span class="w"> </span>#<span class="w"> </span><span class="nv">NETBIOS</span><span class="w"> </span><span class="nv">session</span><span class="w"> </span><span class="nv">service</span><span class="w"></span>
-<span class="nv">microsoft</span><span class="o">-</span><span class="nv">ds</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">445</span><span class="o">/</span><span class="nv">tcp</span><span class="w"> </span>#<span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="nv">you</span><span class="w"> </span><span class="nv">are</span><span class="w"> </span><span class="nv">using</span><span class="w"> </span><span class="nv">Active</span><span class="w"> </span><span class="nv">Directory</span><span class="w"></span>
+<span class="nv">netbios</span><span class="o">-</span><span class="nv">ns</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">137</span><span class="o">/</span><span class="nv">tcp</span><span class="w"> </span>#<span class="w"> </span><span class="nv">NETBIOS</span><span class="w"> </span><span class="nv">Name</span><span class="w"> </span><span class="nv">Service</span>
+<span class="nv">netbios</span><span class="o">-</span><span class="nv">dgm</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">138</span><span class="o">/</span><span class="nv">tcp</span><span class="w"> </span>#<span class="w"> </span><span class="nv">NETBIOS</span><span class="w"> </span><span class="nv">Datagram</span><span class="w"> </span><span class="nv">Service</span>
+<span class="nv">netbios</span><span class="o">-</span><span class="nv">ssn</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">139</span><span class="o">/</span><span class="nv">tcp</span><span class="w"> </span>#<span class="w"> </span><span class="nv">NETBIOS</span><span class="w"> </span><span class="nv">session</span><span class="w"> </span><span class="nv">service</span>
+<span class="nv">microsoft</span><span class="o">-</span><span class="nv">ds</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">445</span><span class="o">/</span><span class="nv">tcp</span><span class="w"> </span>#<span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="nv">you</span><span class="w"> </span><span class="nv">are</span><span class="w"> </span><span class="nv">using</span><span class="w"> </span><span class="nv">Active</span><span class="w"> </span><span class="nv">Directory</span>
 </code></pre></div>
 <h3 id="allow-ad-lookups-ldapldaps">Allow AD Lookups LDAP/LDAPS</h3>
 <div class="highlight"><pre><span></span><code>iptables -A INPUT -p tcp -s 0/0 --sport 1024:65535 --dport 389 -m state --state NEW,ESTABLISHED -j ACCEPT
@@ -401,9 +401,9 @@ ufw status verbose
 <blockquote>
 <p>Allowing 22 (SSH) and 443 (HTTPS) and denying all other incoming and outgoing traffic</p>
 </blockquote>
-<div class="highlight"><pre><span></span><code><span class="nv">ufw</span><span class="w"> </span><span class="nv">delete</span><span class="w"> </span><span class="nv">allow</span><span class="w"> </span><span class="mi">443</span><span class="w"></span>
-<span class="nv">ufw</span><span class="w"> </span><span class="k">show</span><span class="w"> </span><span class="nv">raw</span><span class="w"></span>
-<span class="nv">ufw</span><span class="w"> </span><span class="nv">disable</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="nv">ufw</span><span class="w"> </span><span class="nv">delete</span><span class="w"> </span><span class="nv">allow</span><span class="w"> </span><span class="mi">443</span>
+<span class="nv">ufw</span><span class="w"> </span><span class="k">show</span><span class="w"> </span><span class="nv">raw</span>
+<span class="nv">ufw</span><span class="w"> </span><span class="nv">disable</span>
 </code></pre></div>
 <blockquote>
 <p>removing a rule is as simple as prefixing the allow or deny command with delete

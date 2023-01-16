@@ -99,36 +99,36 @@ But with the evolution of dev-ops, web scale, microservices, containers, etc. it
 <h2 id="consul-cluster-using-docker">Consul Cluster using Docker</h2>
 <p>Following the straightforward work from this Docker Image we can run a cluster on a single machine:</p>
 <p><a href="https://hub.docker.com/r/progrium/consul/">https://hub.docker.com/r/progrium/consul/</a></p>
-<div class="highlight"><pre><span></span><code>sudo su
-docker run -d --name node1 -h node1 progrium/consul -server -bootstrap-expect <span class="m">3</span>
-<span class="nv">JOIN_IP</span><span class="o">=</span><span class="s2">"</span><span class="k">$(</span>docker inspect -f <span class="s1">'{{.NetworkSettings.IPAddress}}'</span> node1<span class="k">)</span><span class="s2">"</span>
-docker run -d --name node2 -h node2 progrium/consul -server -join <span class="nv">$JOIN_IP</span>
-docker run -d --name node3 -h node3 progrium/consul -server -join <span class="nv">$JOIN_IP</span>
-docker run -d -p <span class="m">8400</span>:8400 -p <span class="m">8500</span>:8500 -p <span class="m">8600</span>:53/udp --name node4 -h node4 progrium/consul -join <span class="nv">$JOIN_IP</span>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>su
+docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span>--name<span class="w"> </span>node1<span class="w"> </span>-h<span class="w"> </span>node1<span class="w"> </span>progrium/consul<span class="w"> </span>-server<span class="w"> </span>-bootstrap-expect<span class="w"> </span><span class="m">3</span>
+<span class="nv">JOIN_IP</span><span class="o">=</span><span class="s2">"</span><span class="k">$(</span>docker<span class="w"> </span>inspect<span class="w"> </span>-f<span class="w"> </span><span class="s1">'{{.NetworkSettings.IPAddress}}'</span><span class="w"> </span>node1<span class="k">)</span><span class="s2">"</span>
+docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span>--name<span class="w"> </span>node2<span class="w"> </span>-h<span class="w"> </span>node2<span class="w"> </span>progrium/consul<span class="w"> </span>-server<span class="w"> </span>-join<span class="w"> </span><span class="nv">$JOIN_IP</span>
+docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span>--name<span class="w"> </span>node3<span class="w"> </span>-h<span class="w"> </span>node3<span class="w"> </span>progrium/consul<span class="w"> </span>-server<span class="w"> </span>-join<span class="w"> </span><span class="nv">$JOIN_IP</span>
+docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span>-p<span class="w"> </span><span class="m">8400</span>:8400<span class="w"> </span>-p<span class="w"> </span><span class="m">8500</span>:8500<span class="w"> </span>-p<span class="w"> </span><span class="m">8600</span>:53/udp<span class="w"> </span>--name<span class="w"> </span>node4<span class="w"> </span>-h<span class="w"> </span>node4<span class="w"> </span>progrium/consul<span class="w"> </span>-join<span class="w"> </span><span class="nv">$JOIN_IP</span>
 </code></pre></div>
 <blockquote>
 <p>The second 2 nodes join the first one in the cluster by using the inspected IP Address,
 the last container is a consul agent (not in the quorum) but has public ports for interactivity</p>
 </blockquote>
-<div class="highlight"><pre><span></span><code>curl localhost:8500/v1/catalog/nodes
-    <span class="o">[{</span><span class="s2">"Node"</span>:<span class="s2">"node1"</span>,<span class="s2">"Address"</span>:<span class="s2">"172.17.0.2"</span><span class="o">}</span>,<span class="o">{</span><span class="s2">"Node"</span>:<span class="s2">"node2"</span>,<span class="s2">"Address"</span>:<span class="s2">"172.17.0.3"</span><span class="o">}</span>,
-    <span class="o">{</span><span class="s2">"Node"</span>:<span class="s2">"node3"</span>,<span class="s2">"Address"</span>:<span class="s2">"172.17.0.4"</span><span class="o">}</span>,<span class="o">{</span><span class="s2">"Node"</span>:<span class="s2">"node4"</span>,<span class="s2">"Address"</span>:<span class="s2">"172.17.0.5"</span><span class="o">}]</span>
-dig @0.0.0.0 -p <span class="m">8600</span> node1.node.consul
-    <span class="p">;;</span> QUESTION SECTION:
-    <span class="p">;</span>node1.node.consul.     IN  ANY
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>localhost:8500/v1/catalog/nodes
+<span class="w">    </span><span class="o">[{</span><span class="s2">"Node"</span>:<span class="s2">"node1"</span>,<span class="s2">"Address"</span>:<span class="s2">"172.17.0.2"</span><span class="o">}</span>,<span class="o">{</span><span class="s2">"Node"</span>:<span class="s2">"node2"</span>,<span class="s2">"Address"</span>:<span class="s2">"172.17.0.3"</span><span class="o">}</span>,
+<span class="w">    </span><span class="o">{</span><span class="s2">"Node"</span>:<span class="s2">"node3"</span>,<span class="s2">"Address"</span>:<span class="s2">"172.17.0.4"</span><span class="o">}</span>,<span class="o">{</span><span class="s2">"Node"</span>:<span class="s2">"node4"</span>,<span class="s2">"Address"</span>:<span class="s2">"172.17.0.5"</span><span class="o">}]</span>
+dig<span class="w"> </span>@0.0.0.0<span class="w"> </span>-p<span class="w"> </span><span class="m">8600</span><span class="w"> </span>node1.node.consul
+<span class="w">    </span><span class="p">;;</span><span class="w"> </span>QUESTION<span class="w"> </span>SECTION:
+<span class="w">    </span><span class="p">;</span>node1.node.consul.<span class="w">     </span>IN<span class="w">  </span>ANY
 
-    <span class="p">;;</span> ANSWER SECTION:
-    node1.node.consul.  <span class="m">0</span>   IN  A   <span class="m">172</span>.17.0.2
+<span class="w">    </span><span class="p">;;</span><span class="w"> </span>ANSWER<span class="w"> </span>SECTION:
+<span class="w">    </span>node1.node.consul.<span class="w">  </span><span class="m">0</span><span class="w">   </span>IN<span class="w">  </span>A<span class="w">   </span><span class="m">172</span>.17.0.2
 </code></pre></div>
 <blockquote>
 <p>REST API call to the list of nodes, then DNS client to get the Record for the first node</p>
 </blockquote>
-<div class="highlight"><pre><span></span><code>curl http://localhost:8500/v1/status/leader
-    <span class="s2">"172.17.0.2:8300"</span>
-curl http://localhost:8500/v1/status/peers
-    <span class="o">[</span><span class="s2">"172.17.0.2:8300"</span>,<span class="s2">"172.17.0.3:8300"</span>,<span class="s2">"172.17.0.4:8300"</span><span class="o">]</span>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>http://localhost:8500/v1/status/leader
+<span class="w">    </span><span class="s2">"172.17.0.2:8300"</span>
+curl<span class="w"> </span>http://localhost:8500/v1/status/peers
+<span class="w">    </span><span class="o">[</span><span class="s2">"172.17.0.2:8300"</span>,<span class="s2">"172.17.0.3:8300"</span>,<span class="s2">"172.17.0.4:8300"</span><span class="o">]</span>
 
-curl http://localhost:8500/v1/health/node/node1
+curl<span class="w"> </span>http://localhost:8500/v1/health/node/node1
 </code></pre></div>
 <blockquote>
 <p>some more REST calls about the basic nodes, RAFT leadership and peers, and node health</p>
@@ -167,24 +167,24 @@ curl http://localhost:8500/v1/status/peers
 <p>Creating and running a very simplistic golang web server (assuming you have go installed ;) , <code>go run web.go</code>
 <a href="https://blog.john-pfeiffer.com/go-programming-intro-with-vs-code-and-arrays-slices-functions-and-testing/">https://blog.john-pfeiffer.com/go-programming-intro-with-vs-code-and-arrays-slices-functions-and-testing/</a>
 (though you could also use nginx in docker)</p>
-<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="p">(</span><span class="w"></span>
-<span class="w">    </span><span class="s">"fmt"</span><span class="w"></span>
-<span class="w">    </span><span class="s">"net/http"</span><span class="w"></span>
-<span class="p">)</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="p">(</span>
+<span class="w">    </span><span class="s">"fmt"</span>
+<span class="w">    </span><span class="s">"net/http"</span>
+<span class="p">)</span>
 
-<span class="kd">func</span><span class="w"> </span><span class="nx">myHandler</span><span class="p">(</span><span class="nx">w</span><span class="w"> </span><span class="nx">http</span><span class="p">.</span><span class="nx">ResponseWriter</span><span class="p">,</span><span class="w"> </span><span class="nx">r</span><span class="w"> </span><span class="o">*</span><span class="nx">http</span><span class="p">.</span><span class="nx">Request</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Fprintf</span><span class="p">(</span><span class="nx">w</span><span class="p">,</span><span class="w"> </span><span class="s">"hi\n"</span><span class="p">)</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="kd">func</span><span class="w"> </span><span class="nx">myHandler</span><span class="p">(</span><span class="nx">w</span><span class="w"> </span><span class="nx">http</span><span class="p">.</span><span class="nx">ResponseWriter</span><span class="p">,</span><span class="w"> </span><span class="nx">r</span><span class="w"> </span><span class="o">*</span><span class="nx">http</span><span class="p">.</span><span class="nx">Request</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Fprintf</span><span class="p">(</span><span class="nx">w</span><span class="p">,</span><span class="w"> </span><span class="s">"hi\n"</span><span class="p">)</span>
+<span class="p">}</span>
 
-<span class="kd">func</span><span class="w"> </span><span class="nx">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="nx">http</span><span class="p">.</span><span class="nx">HandleFunc</span><span class="p">(</span><span class="s">"/"</span><span class="p">,</span><span class="w"> </span><span class="nx">myHandler</span><span class="p">)</span><span class="w"></span>
-<span class="w">    </span><span class="nx">http</span><span class="p">.</span><span class="nx">ListenAndServe</span><span class="p">(</span><span class="s">":8080"</span><span class="p">,</span><span class="w"> </span><span class="kc">nil</span><span class="p">)</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="kd">func</span><span class="w"> </span><span class="nx">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">http</span><span class="p">.</span><span class="nx">HandleFunc</span><span class="p">(</span><span class="s">"/"</span><span class="p">,</span><span class="w"> </span><span class="nx">myHandler</span><span class="p">)</span>
+<span class="w">    </span><span class="nx">http</span><span class="p">.</span><span class="nx">ListenAndServe</span><span class="p">(</span><span class="s">":8080"</span><span class="p">,</span><span class="w"> </span><span class="kc">nil</span><span class="p">)</span>
+<span class="p">}</span>
 </code></pre></div>
 <p>From the previous steps we should have an Agent where we can register the new web service...</p>
 <div class="highlight"><pre><span></span><code><span class="ch">#!/bin/bash</span>
 
-curl --header <span class="s2">"content-type: application/json"</span> -X PUT -d<span class="s1">'{</span>
+curl<span class="w"> </span>--header<span class="w"> </span><span class="s2">"content-type: application/json"</span><span class="w"> </span>-X<span class="w"> </span>PUT<span class="w"> </span>-d<span class="s1">'{</span>
 <span class="s1">  "ID": "web1",</span>
 <span class="s1">  "Name": "web",</span>
 <span class="s1">  "Tags": [</span>
@@ -199,7 +199,7 @@ curl --header <span class="s2">"content-type: application/json"</span> -X PUT -d
 <span class="s1">    "Interval": "10s",</span>
 <span class="s1">    "TTL": "15s"</span>
 <span class="s1">  }</span>
-<span class="s1">}'</span> http://localhost:8500/v1/agent/service/register
+<span class="s1">}'</span><span class="w"> </span>http://localhost:8500/v1/agent/service/register
 </code></pre></div>
 <p>In order to verify the new service is registered (besides the 200 response code)</p>
 <div class="highlight"><pre><span></span><code>curl http://localhost:8500/v1/catalog/services
@@ -211,16 +211,16 @@ curl http://localhost:8500/v1/health/service/web
 </blockquote>
 <p>So many more things can be done with <a href="https://www.consul.io/docs/agent/http/agent.html#agent_service_register">https://www.consul.io/docs/agent/http/agent.html#agent_service_register</a></p>
 <p>Stopping the web server (control + C) and checking that Consul has noticed Status is critical |o/</p>
-<div class="highlight"><pre><span></span><code>curl http://localhost:8500/v1/health/checks/web
-    <span class="o">[{</span><span class="s2">"Node"</span>:<span class="s2">"node4"</span>,<span class="s2">"CheckID"</span>:<span class="s2">"service:web1"</span>,<span class="s2">"Name"</span>:<span class="s2">"Service 'web' check"</span>,<span class="s2">"Status"</span>:<span class="s2">"critical"</span>,<span class="s2">"Notes"</span>:<span class="s2">""</span>,<span class="s2">"Output"</span>:<span class="s2">"TTL expired"</span>,<span class="s2">"ServiceID"</span>:<span class="s2">"web1"</span>,<span class="s2">"ServiceName"</span>:<span class="s2">"web"</span><span class="o">}]</span>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>http://localhost:8500/v1/health/checks/web
+<span class="w">    </span><span class="o">[{</span><span class="s2">"Node"</span>:<span class="s2">"node4"</span>,<span class="s2">"CheckID"</span>:<span class="s2">"service:web1"</span>,<span class="s2">"Name"</span>:<span class="s2">"Service 'web' check"</span>,<span class="s2">"Status"</span>:<span class="s2">"critical"</span>,<span class="s2">"Notes"</span>:<span class="s2">""</span>,<span class="s2">"Output"</span>:<span class="s2">"TTL expired"</span>,<span class="s2">"ServiceID"</span>:<span class="s2">"web1"</span>,<span class="s2">"ServiceName"</span>:<span class="s2">"web"</span><span class="o">}]</span>
 </code></pre></div>
 <p>Starting the web server again and check</p>
-<div class="highlight"><pre><span></span><code>curl http://localhost:8500/v1/health/service/web
-    <span class="o">[{</span><span class="s2">"Node"</span>:<span class="o">{</span><span class="s2">"Node"</span>:<span class="s2">"node4"</span>,<span class="s2">"Address"</span>:<span class="s2">"172.17.0.5"</span><span class="o">}</span>,
-    <span class="s2">"Service"</span>:<span class="o">{</span><span class="s2">"ID"</span>:<span class="s2">"web1"</span>,<span class="s2">"Service"</span>:<span class="s2">"web"</span>,<span class="s2">"Tags"</span>:<span class="o">[</span><span class="s2">"master"</span>,<span class="s2">"v1"</span><span class="o">]</span>,<span class="s2">"Address"</span>:<span class="s2">"127.0.0.1"</span>,<span class="s2">"Port"</span>:8080<span class="o">}</span>,
-    <span class="s2">"Checks"</span>:<span class="o">[{</span><span class="s2">"Node"</span>:<span class="s2">"node4"</span>,<span class="s2">"CheckID"</span>:<span class="s2">"service:web1"</span>,<span class="s2">"Name"</span>:<span class="s2">"Service 'web'check"</span>,<span class="s2">"Status"</span>:<span class="s2">"critical"</span>,
-        <span class="s2">"Notes"</span>:<span class="s2">""</span>,<span class="s2">"Output"</span>:<span class="s2">"TTL expired"</span>,<span class="s2">"ServiceID"</span>:<span class="s2">"web1"</span>,<span class="s2">"ServiceName"</span>:<span class="s2">"web"</span><span class="o">}</span>,
-    <span class="o">{</span><span class="s2">"Node"</span>:<span class="s2">"node4"</span>,<span class="s2">"CheckID"</span>:<span class="s2">"serfHealth"</span>,<span class="s2">"Name"</span>:<span class="s2">"Serf Health Status"</span>,<span class="s2">"Status"</span>:<span class="s2">"passing"</span>,<span class="s2">"Notes"</span>:<span class="s2">""</span>,<span class="s2">"Output"</span>:<span class="s2">"Agent alive and reachable"</span>,<span class="s2">"ServiceID"</span>:<span class="s2">""</span>,<span class="s2">"ServiceName"</span>:<span class="s2">""</span><span class="o">}]}]</span>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>http://localhost:8500/v1/health/service/web
+<span class="w">    </span><span class="o">[{</span><span class="s2">"Node"</span>:<span class="o">{</span><span class="s2">"Node"</span>:<span class="s2">"node4"</span>,<span class="s2">"Address"</span>:<span class="s2">"172.17.0.5"</span><span class="o">}</span>,
+<span class="w">    </span><span class="s2">"Service"</span>:<span class="o">{</span><span class="s2">"ID"</span>:<span class="s2">"web1"</span>,<span class="s2">"Service"</span>:<span class="s2">"web"</span>,<span class="s2">"Tags"</span>:<span class="o">[</span><span class="s2">"master"</span>,<span class="s2">"v1"</span><span class="o">]</span>,<span class="s2">"Address"</span>:<span class="s2">"127.0.0.1"</span>,<span class="s2">"Port"</span>:8080<span class="o">}</span>,
+<span class="w">    </span><span class="s2">"Checks"</span>:<span class="o">[{</span><span class="s2">"Node"</span>:<span class="s2">"node4"</span>,<span class="s2">"CheckID"</span>:<span class="s2">"service:web1"</span>,<span class="s2">"Name"</span>:<span class="s2">"Service 'web'check"</span>,<span class="s2">"Status"</span>:<span class="s2">"critical"</span>,
+<span class="w">        </span><span class="s2">"Notes"</span>:<span class="s2">""</span>,<span class="s2">"Output"</span>:<span class="s2">"TTL expired"</span>,<span class="s2">"ServiceID"</span>:<span class="s2">"web1"</span>,<span class="s2">"ServiceName"</span>:<span class="s2">"web"</span><span class="o">}</span>,
+<span class="w">    </span><span class="o">{</span><span class="s2">"Node"</span>:<span class="s2">"node4"</span>,<span class="s2">"CheckID"</span>:<span class="s2">"serfHealth"</span>,<span class="s2">"Name"</span>:<span class="s2">"Serf Health Status"</span>,<span class="s2">"Status"</span>:<span class="s2">"passing"</span>,<span class="s2">"Notes"</span>:<span class="s2">""</span>,<span class="s2">"Output"</span>:<span class="s2">"Agent alive and reachable"</span>,<span class="s2">"ServiceID"</span>:<span class="s2">""</span>,<span class="s2">"ServiceName"</span>:<span class="s2">""</span><span class="o">}]}]</span>
 </code></pre></div>
 <h3 id="redis-in-containers-as-another-service">Redis in Containers as another Service</h3>
 <div class="highlight"><pre><span></span><code>docker run --rm -it -p 0.0.0.0:6379:6379 --name redis redis:alpine
