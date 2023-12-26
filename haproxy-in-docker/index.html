@@ -110,35 +110,35 @@
 <div class="highlight"><pre><span></span><code>sudo docker pull haproxy:1.5
 </code></pre></div>
 <h4 id="some-backend-web-servers">Some backend web servers</h4>
-<div class="highlight"><pre><span></span><code>mkdir -p /tmp/BackendA
-echo "foo" &gt; /tmp/BackendA/foo.txt
-cd /tmp/BackendA
-python -m SimpleHTTPServer 8000 &amp;
+<div class="highlight"><pre><span></span><code><span class="nx">mkdir</span><span class="w"> </span><span class="o">-</span><span class="nx">p</span><span class="w"> </span><span class="o">/</span><span class="nx">tmp</span><span class="o">/</span><span class="nx">BackendA</span>
+<span class="nx">echo</span><span class="w"> </span><span class="s">"foo"</span><span class="w"> </span><span class="p">&gt;</span><span class="w"> </span><span class="o">/</span><span class="nx">tmp</span><span class="o">/</span><span class="nx">BackendA</span><span class="o">/</span><span class="nx">foo</span><span class="p">.</span><span class="nx">txt</span>
+<span class="nx">cd</span><span class="w"> </span><span class="o">/</span><span class="nx">tmp</span><span class="o">/</span><span class="nx">BackendA</span>
+<span class="nx">python</span><span class="w"> </span><span class="o">-</span><span class="nx">m</span><span class="w"> </span><span class="nx">SimpleHTTPServer</span><span class="w"> </span><span class="mi">8000</span><span class="w"> </span><span class="o">&amp;</span>
 
-mkdir -p /tmp/BackendB
-echo "bar" &gt; /tmp/BackendB/bar.txt
-cd /tmp/BackendB
-python -m SimpleHTTPServer 8001 &amp;
+<span class="nx">mkdir</span><span class="w"> </span><span class="o">-</span><span class="nx">p</span><span class="w"> </span><span class="o">/</span><span class="nx">tmp</span><span class="o">/</span><span class="nx">BackendB</span>
+<span class="nx">echo</span><span class="w"> </span><span class="s">"bar"</span><span class="w"> </span><span class="p">&gt;</span><span class="w"> </span><span class="o">/</span><span class="nx">tmp</span><span class="o">/</span><span class="nx">BackendB</span><span class="o">/</span><span class="nx">bar</span><span class="p">.</span><span class="nx">txt</span>
+<span class="nx">cd</span><span class="w"> </span><span class="o">/</span><span class="nx">tmp</span><span class="o">/</span><span class="nx">BackendB</span>
+<span class="nx">python</span><span class="w"> </span><span class="o">-</span><span class="nx">m</span><span class="w"> </span><span class="nx">SimpleHTTPServer</span><span class="w"> </span><span class="mi">8001</span><span class="w"> </span><span class="o">&amp;</span>
 </code></pre></div>
 <blockquote>
 <p>Clearly a trivial example (more likely two remote hosts in logical/geographic disparate areas if aiming for High Availability, or at least on different hosts to scale with more resources)</p>
 </blockquote>
 <h3 id="optmydatahaproxycfg">/opt/mydata/haproxy.cfg</h3>
-<div class="highlight"><pre><span></span><code><span class="nv">global</span>
-<span class="w">        </span><span class="nv">debug</span>
+<div class="highlight"><pre><span></span><code>global
+        debug
 
-<span class="nv">defaults</span>
-<span class="w">        </span><span class="nv">log</span><span class="w"> </span><span class="nv">global</span>
-<span class="w">        </span><span class="nv">mode</span><span class="w">    </span><span class="nv">http</span>
-<span class="w">        </span><span class="nb">timeout</span><span class="w"> </span><span class="k">connect</span><span class="w"> </span><span class="mi">5000</span>
-<span class="w">        </span><span class="nb">timeout</span><span class="w"> </span><span class="nv">client</span><span class="w"> </span><span class="mi">5000</span>
-<span class="w">        </span><span class="nb">timeout</span><span class="w"> </span><span class="nv">server</span><span class="w"> </span><span class="mi">5000</span>
+defaults
+        log global
+        mode    http
+        timeout connect 5000
+        timeout client 5000
+        timeout server 5000
 
-<span class="nv">listen</span><span class="w"> </span><span class="nv">http_proxy</span><span class="w"> </span>:<span class="mi">8443</span>
-<span class="w">        </span><span class="nv">mode</span><span class="w"> </span><span class="nv">tcp</span>
-<span class="w">        </span><span class="nv">balance</span><span class="w"> </span><span class="nv">roundrobin</span>
-<span class="w">        </span><span class="nv">server</span><span class="w"> </span><span class="nv">srv1</span><span class="w"> </span><span class="nv">docker</span>:<span class="mi">8000</span><span class="w"> </span><span class="nv">check</span>
-<span class="w">        </span><span class="nv">server</span><span class="w"> </span><span class="nv">srv2</span><span class="w"> </span><span class="nv">docker</span>:<span class="mi">8001</span><span class="w"> </span><span class="nv">check</span>
+listen http_proxy :8443
+        mode tcp
+        balance roundrobin
+        server srv1 docker:8000 check
+        server srv2 docker:8001 check
 </code></pre></div>
 <h3 id="start-haproxysh">start haproxy.sh</h3>
 <div class="highlight"><pre><span></span><code><span class="ch">#!/bin/bash</span>
@@ -193,70 +193,70 @@ sudo<span class="w"> </span>docker<span class="w"> </span>run<span class="w"> </
 <div class="highlight"><pre><span></span><code>sudo docker rm -f myhaproxy
 </code></pre></div>
 <h4 id="optmydatahaproxycfg_1">/opt/mydata/haproxy.cfg</h4>
-<div class="highlight"><pre><span></span><code><span class="nv">global</span>
-<span class="w">    </span><span class="nv">debug</span>
+<div class="highlight"><pre><span></span><code>global
+    debug
 
-<span class="nv">defaults</span>
-<span class="w">    </span><span class="nv">log</span><span class="w"> </span><span class="nv">global</span>
-<span class="w">    </span><span class="nv">mode</span><span class="w">    </span><span class="nv">http</span>
-<span class="w">    </span><span class="nb">timeout</span><span class="w"> </span><span class="k">connect</span><span class="w"> </span><span class="mi">5000</span>
-<span class="w">    </span><span class="nb">timeout</span><span class="w"> </span><span class="nv">client</span><span class="w"> </span><span class="mi">5000</span>
-<span class="w">    </span><span class="nb">timeout</span><span class="w"> </span><span class="nv">server</span><span class="w"> </span><span class="mi">5000</span>
+defaults
+    log global
+    mode    http
+    timeout connect 5000
+    timeout client 5000
+    timeout server 5000
 
-<span class="nv">listen</span><span class="w"> </span><span class="nv">http_proxy</span><span class="w"> </span>:<span class="mi">8443</span>
-<span class="w">    </span><span class="nv">mode</span><span class="w"> </span><span class="nv">tcp</span>
-<span class="w">    </span><span class="nv">balance</span><span class="w"> </span><span class="nv">roundrobin</span>
-<span class="w">    </span><span class="nv">server</span><span class="w"> </span><span class="nv">srv1</span><span class="w"> </span><span class="nv">docker</span>:<span class="mi">8000</span><span class="w"> </span><span class="nv">check</span>
-<span class="w">    </span><span class="nv">server</span><span class="w"> </span><span class="nv">srv2</span><span class="w"> </span><span class="nv">docker</span>:<span class="mi">8001</span><span class="w"> </span><span class="nv">check</span>
+listen http_proxy :8443
+    mode tcp
+    balance roundrobin
+    server srv1 docker:8000 check
+    server srv2 docker:8001 check
 
-#<span class="w"> </span><span class="nv">optional</span><span class="w"> </span><span class="nv">section</span><span class="w"> </span><span class="nv">to</span><span class="w"> </span><span class="nv">enable</span><span class="w"> </span><span class="nv">statistics</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="nv">haproxy</span><span class="w"> </span><span class="nv">protected</span><span class="w"> </span><span class="nv">by</span><span class="w"> </span><span class="nv">basic</span><span class="w"> </span><span class="nv">auth</span><span class="w"> </span><span class="ss">(</span><span class="nv">replace</span><span class="w"> </span><span class="nv">with</span><span class="w"> </span><span class="nv">your</span><span class="w"> </span><span class="nv">own</span><span class="w"> </span><span class="nv">user</span><span class="w"> </span><span class="nv">and</span><span class="w"> </span><span class="nv">password</span><span class="ss">)</span>
-<span class="nv">listen</span><span class="w"> </span><span class="nv">stats</span><span class="w"> </span>:<span class="mi">1936</span>
-<span class="w">    </span><span class="nv">stats</span><span class="w"> </span><span class="nv">enable</span>
-<span class="w">    </span><span class="nv">stats</span><span class="w"> </span><span class="nv">uri</span><span class="w"> </span><span class="o">/</span>
-<span class="w">    </span><span class="nv">stats</span><span class="w"> </span><span class="nv">realm</span><span class="w"> </span><span class="nv">HAProxyStatistics</span>
-<span class="w">    </span><span class="nv">stats</span><span class="w"> </span><span class="nv">auth</span><span class="w"> </span><span class="nv">user</span>:<span class="nv">password</span>
+<span class="gh">#</span> optional section to enable statistics for haproxy protected by basic auth (replace with your own user and password)
+listen stats :1936
+    stats enable
+    stats uri /
+    stats realm HAProxyStatistics
+    stats auth user:password
 
 
-.<span class="o">/</span><span class="nv">start</span><span class="o">-</span><span class="nv">haproxy</span>.<span class="nv">sh</span>
+./start-haproxy.sh
 </code></pre></div>
 <h3 id="nginx-forward-proxy">nginx forward proxy</h3>
 <p>client -&gt; forward proxy (nginx) -&gt; all other sites</p>
 <div class="highlight"><pre><span></span><code>docker pull nginx:alpine
 </code></pre></div>
 <h4 id="nginxconf">nginx.conf</h4>
-<div class="highlight"><pre><span></span><code><span class="nt">worker_processes</span><span class="w">  </span><span class="nt">1</span><span class="o">;</span>
+<div class="highlight"><pre><span></span><code><span class="nx">worker_processes</span><span class="w">  </span><span class="mi">1</span><span class="p">;</span>
 
-<span class="nt">events</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="err">worker_connections</span><span class="w">  </span><span class="err">1024</span><span class="p">;</span>
+<span class="nx">events</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">worker_connections</span><span class="w">  </span><span class="mi">1024</span><span class="p">;</span>
 <span class="p">}</span>
 
-<span class="nt">http</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="err">include</span><span class="w">       </span><span class="err">mime.types</span><span class="p">;</span>
-<span class="w">    </span><span class="err">default_type</span><span class="w">  </span><span class="err">application/octet-stream</span><span class="p">;</span>
+<span class="nx">http</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">include</span><span class="w">       </span><span class="nx">mime</span><span class="p">.</span><span class="nx">types</span><span class="p">;</span>
+<span class="w">    </span><span class="nx">default_type</span><span class="w">  </span><span class="nx">application</span><span class="o">/</span><span class="nx">octet</span><span class="o">-</span><span class="nx">stream</span><span class="p">;</span>
 
-<span class="w">    </span><span class="err">sendfile</span><span class="w">        </span><span class="err">on</span><span class="p">;</span>
-<span class="w">    </span><span class="err">keepalive_timeout</span><span class="w">  </span><span class="err">65</span><span class="p">;</span>
+<span class="w">    </span><span class="nx">sendfile</span><span class="w">        </span><span class="nx">on</span><span class="p">;</span>
+<span class="w">    </span><span class="nx">keepalive_timeout</span><span class="w">  </span><span class="mi">65</span><span class="p">;</span>
 
-<span class="w">    </span><span class="err">gzip</span><span class="w">  </span><span class="err">on</span><span class="p">;</span>
+<span class="w">    </span><span class="nx">gzip</span><span class="w">  </span><span class="nx">on</span><span class="p">;</span>
 
-<span class="w">    </span><span class="err">server</span><span class="w"> </span><span class="err">{</span>
-<span class="w">        </span><span class="err">listen</span><span class="w">       </span><span class="err">8080</span><span class="p">;</span>
+<span class="w">    </span><span class="nx">server</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">listen</span><span class="w">       </span><span class="mi">8080</span><span class="p">;</span>
 
-<span class="w">        </span><span class="err">location</span><span class="w"> </span><span class="err">/</span><span class="w"> </span><span class="err">{</span>
-<span class="w">            </span><span class="err">resolver</span><span class="w"> </span><span class="err">8.8.8.8</span><span class="p">;</span>
-<span class="w">            </span><span class="err">proxy_pass</span><span class="w"> </span><span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="err">$</span><span class="n">http_host</span><span class="err">$</span><span class="n">uri</span><span class="err">$</span><span class="n">is_args</span><span class="err">$</span><span class="n">args</span><span class="p">;</span>
+<span class="w">        </span><span class="nx">location</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nx">resolver</span><span class="w"> </span><span class="m m-Double">8.8.8.8</span><span class="p">;</span>
+<span class="w">            </span><span class="nx">proxy_pass</span><span class="w"> </span><span class="nx">http</span><span class="p">:</span><span class="c1">//$http_host$uri$is_args$args;</span>
 <span class="w">        </span><span class="p">}</span>
 
-<span class="w">        </span><span class="nt">error_page</span><span class="w">   </span><span class="nt">500</span><span class="w"> </span><span class="nt">502</span><span class="w"> </span><span class="nt">503</span><span class="w"> </span><span class="nt">504</span><span class="w">  </span><span class="o">/</span><span class="nt">50x</span><span class="p">.</span><span class="nc">html</span><span class="o">;</span>
-<span class="w">        </span><span class="nt">location</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">/</span><span class="nt">50x</span><span class="p">.</span><span class="nc">html</span><span class="w"> </span><span class="p">{</span>
-<span class="w">            </span><span class="err">root</span><span class="w">   </span><span class="err">html</span><span class="p">;</span>
+<span class="w">        </span><span class="nx">error_page</span><span class="w">   </span><span class="mi">500</span><span class="w"> </span><span class="mi">502</span><span class="w"> </span><span class="mi">503</span><span class="w"> </span><span class="mi">504</span><span class="w">  </span><span class="o">/</span><span class="mi">50</span><span class="nx">x</span><span class="p">.</span><span class="nx">html</span><span class="p">;</span>
+<span class="w">        </span><span class="nx">location</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="o">/</span><span class="mi">50</span><span class="nx">x</span><span class="p">.</span><span class="nx">html</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nx">root</span><span class="w">   </span><span class="nx">html</span><span class="p">;</span>
 <span class="w">        </span><span class="p">}</span>
-<span class="w">    </span><span class="err">}</span>
-<span class="err">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
 
 
 
-<span class="nt">docker</span><span class="w"> </span><span class="nt">run</span><span class="w"> </span><span class="nt">-it</span><span class="w"> </span><span class="nt">--rm</span><span class="w"> </span><span class="nt">-p</span><span class="w"> </span><span class="nt">8080</span><span class="p">:</span><span class="nd">8080</span><span class="w"> </span><span class="nt">-v</span><span class="w"> </span><span class="o">/</span><span class="nt">tmp</span><span class="o">/</span><span class="nt">nginx</span><span class="p">.</span><span class="nc">conf</span><span class="o">:/</span><span class="nt">etc</span><span class="o">/</span><span class="nt">nginx</span><span class="o">/</span><span class="nt">nginx</span><span class="p">.</span><span class="nc">conf</span><span class="p">:</span><span class="nd">ro</span><span class="w"> </span><span class="nt">--name</span><span class="w"> </span><span class="nt">mynginx</span><span class="w"> </span><span class="nt">nginx</span><span class="p">:</span><span class="nd">alpine</span>
+<span class="nx">docker</span><span class="w"> </span><span class="nx">run</span><span class="w"> </span><span class="o">-</span><span class="nx">it</span><span class="w"> </span><span class="o">--</span><span class="nx">rm</span><span class="w"> </span><span class="o">-</span><span class="nx">p</span><span class="w"> </span><span class="mi">8080</span><span class="p">:</span><span class="mi">8080</span><span class="w"> </span><span class="o">-</span><span class="nx">v</span><span class="w"> </span><span class="o">/</span><span class="nx">tmp</span><span class="o">/</span><span class="nx">nginx</span><span class="p">.</span><span class="nx">conf</span><span class="p">:</span><span class="o">/</span><span class="nx">etc</span><span class="o">/</span><span class="nx">nginx</span><span class="o">/</span><span class="nx">nginx</span><span class="p">.</span><span class="nx">conf</span><span class="p">:</span><span class="nx">ro</span><span class="w"> </span><span class="o">--</span><span class="nx">name</span><span class="w"> </span><span class="nx">mynginx</span><span class="w"> </span><span class="nx">nginx</span><span class="p">:</span><span class="nx">alpine</span>
 </code></pre></div>
 <blockquote>
 <p>bind to port 8080 on the host and run an ephemeral container based on the alpine linux with nginx image that uses the /tmp/nginx config</p>
@@ -271,7 +271,7 @@ sudo<span class="w"> </span>docker<span class="w"> </span>run<span class="w"> </
 <p>NOTE: this does not support HTTPS <a href="http://forum.nginx.org/read.php?2,15124,15256#msg-15256">http://forum.nginx.org/read.php?2,15124,15256#msg-15256</a> </p>
 <p>Attempting https://example.com will return "CONNECT example.com:443 HTTP/1.1" 400 173 "-" "-"  and the browser will show "Server not found"</p>
 </blockquote>
-<p><strong> Warning </strong> do not use <em>http_proxy=http://127.0.0.1:8080</em> as that will fail =[</p>
+<p>** Warning ** do not use <em>http_proxy=http://127.0.0.1:8080</em> as that will fail =[</p>
 <p>You can permanently set the environment proxy with export http_proxy=127.0.0.1:8080</p>
 <h3 id="haproxy-as-a-limited-outbound-proxy">HAProxy as a limited outbound proxy</h3>
 <div class="highlight"><pre><span></span><code>sudo docker pull haproxy:1.6-alpine
@@ -289,22 +289,22 @@ sudo<span class="w"> </span>docker<span class="w"> </span>run<span class="w"> </
 <blockquote>
 <p>The logging probably does not work =(</p>
 </blockquote>
-<div class="highlight"><pre><span></span><code><span class="nv">global</span>
-<span class="w">        </span><span class="nv">debug</span>
-<span class="w">        </span><span class="nv">log</span><span class="w"> </span><span class="o">/</span><span class="nv">dev</span><span class="o">/</span><span class="nv">log</span><span class="w"> </span><span class="nv">local0</span><span class="w"> </span><span class="nv">info</span>
+<div class="highlight"><pre><span></span><code>global
+        debug
+        log /dev/log local0 info
 
-<span class="nv">defaults</span>
-<span class="w">        </span><span class="nv">mode</span><span class="w"> </span><span class="nv">http</span>
-<span class="w">        </span><span class="nb">timeout</span><span class="w"> </span><span class="k">connect</span><span class="w"> </span><span class="mi">5</span><span class="nv">s</span>
-<span class="w">        </span><span class="nb">timeout</span><span class="w"> </span><span class="nv">client</span><span class="w"> </span><span class="mi">5</span><span class="nv">s</span>
-<span class="w">        </span><span class="nb">timeout</span><span class="w"> </span><span class="nv">server</span><span class="w"> </span><span class="mi">5</span><span class="nv">s</span>
+defaults
+        mode http
+        timeout connect 5s
+        timeout client 5s
+        timeout server 5s
 
-<span class="nv">frontend</span><span class="w"> </span><span class="nv">myfrontend</span>
-<span class="w">        </span><span class="nv">bind</span><span class="w"> </span><span class="o">*</span>:<span class="mi">8443</span>
-<span class="w">        </span><span class="nv">default_backend</span><span class="w"> </span><span class="nv">mybackend</span>
+frontend myfrontend
+        bind *:8443
+        default_backend mybackend
 
-<span class="nv">backend</span><span class="w"> </span><span class="nv">mybackend</span>
-<span class="w">        </span><span class="nv">server</span><span class="w"> </span><span class="nv">s1</span><span class="w"> </span><span class="nv">example</span>.<span class="nv">com</span>:<span class="mi">443</span><span class="w"> </span><span class="nv">ssl</span><span class="w"> </span><span class="nv">verify</span><span class="w"> </span><span class="nv">none</span>
+backend mybackend
+        server s1 example.com:443 ssl verify none
 </code></pre></div>
 <h4 id="starting-the-haproxy-docker-container">starting the haproxy docker container</h4>
 <div class="highlight"><pre><span></span><code>docker run -p 8443:8443 --rm -it -v /home/admin/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro -v /dev/log:/dev/log --name myhaproxy haproxy:1.6-alpine
