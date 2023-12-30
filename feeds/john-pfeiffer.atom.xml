@@ -269,7 +269,7 @@ This is what goes in your circleCI config&lt;/p&gt;
 &lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="nt"&gt;build&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
 &lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="nt"&gt;working_directory&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;~/repo&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="c1"&gt;# the circleCI default for where code is checked out to in the docker build container&lt;/span&gt;
 &lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="nt"&gt;docker&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
-&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="p p-Indicator"&gt;-&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;image&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;circleci/golang:1.16&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="c1"&gt;# https://hub.docker.com/r/circleci/golang/ , https://hub.docker.com/_/golang?tab=description&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="p p-Indicator"&gt;-&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;image&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;cimg/go:1.21.4&lt;/span&gt;
 &lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="nt"&gt;steps&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
 &lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="p p-Indicator"&gt;-&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l l-Scalar l-Scalar-Plain"&gt;checkout&lt;/span&gt;
 &lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="p p-Indicator"&gt;-&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;run&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
@@ -280,11 +280,11 @@ This is what goes in your circleCI config&lt;/p&gt;
 &lt;h3 id="double-checking-your-golang-version"&gt;Double checking your Golang Version&lt;/h3&gt;
 &lt;p&gt;The wonderful thing about Docker is the extra transparency. In this case we might want to double check the version of Golang that is being used by the build agent.&lt;/p&gt;
 &lt;p&gt;You can download and execute the same environment locally:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;docker&lt;span class="w"&gt; &lt;/span&gt;run&lt;span class="w"&gt; &lt;/span&gt;--rm&lt;span class="w"&gt; &lt;/span&gt;-it&lt;span class="w"&gt; &lt;/span&gt;circleci/golang:1.16
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;docker&lt;span class="w"&gt; &lt;/span&gt;run&lt;span class="w"&gt; &lt;/span&gt;--rm&lt;span class="w"&gt; &lt;/span&gt;-it&lt;span class="w"&gt; &lt;/span&gt;circleci/golang:1.21.4
 go&lt;span class="w"&gt; &lt;/span&gt;version
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 &lt;blockquote&gt;
-&lt;p&gt;go version go1.16.3 linux/amd64&lt;/p&gt;
+&lt;p&gt;go version go1.21.4 linux/amd64&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;a href="https://hub.docker.com/r/circleci/golang/"&gt;https://hub.docker.com/r/circleci/golang/&lt;/a&gt;&lt;/li&gt;
@@ -316,14 +316,24 @@ go&lt;span class="w"&gt; &lt;/span&gt;version
 &lt;p&gt;In that detailed output UI, to Rerun a build, choose the "Rerun" button from the beginning (or from a failed step)&lt;/p&gt;
 &lt;p&gt;&lt;em&gt;Flaky tests aka intermittent failures is not resolved by re-running your build/tests all the time ;p&lt;/em&gt;&lt;/p&gt;
 &lt;h3 id="specific-project-settings-in-circleci"&gt;Specific Project Settings in CircleCI&lt;/h3&gt;
+&lt;p&gt;Deploy Keys (specific to a repo) are a better security practice - read below on how to configure your poject to use them =)&lt;/p&gt;
 &lt;p&gt;In the CircleCI UI, for a given Project, the three little dots will allow you to choose how to configure the project&lt;/p&gt;
 &lt;p&gt;&lt;a href="https://app.circleci.com/settings/project/github/johnpfeiffer/stringsmoar"&gt;https://app.circleci.com/settings/project/github/johnpfeiffer/stringsmoar&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;The one annoying thing is that if you remove your 3rd party access creds in GitHub it's a pain to reconnect CircleCI&lt;/p&gt;
-&lt;p&gt;In the CircleCI configuration for a Project you should see a listing of SSH keys, you have to remove the old "deployment key" there (which means CircleCI can no longer access github), unfollow the project, and then re-follow the project &lt;em&gt;(which will then have CircleCI use your initial OAuth authorization to generate a new SSH deployment key in GitHub).&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;In the CircleCI configuration for a Project you should see a listing of SSH keys
+you have to remove (delete) the old "deployment key" there (which means CircleCI can no longer access github)
+then choose to re-add a deployment key (if you are signed into CircleCI with GitHub this will automatically generate it)&lt;/p&gt;
+&lt;p&gt;Or unfollow the project, and then re-follow the project &lt;em&gt;(which will then have CircleCI use your initial OAuth authorization to generate a new SSH deployment key in GitHub).&lt;/em&gt;&lt;/p&gt;
 &lt;p&gt;Afterward you should see a new SSH key that CircleCI created in Github for this Project &lt;em&gt;(the UI's both show the sha of the key but one is sha256 and the other is not)&lt;/em&gt;&lt;/p&gt;
 &lt;ul&gt;
+&lt;li&gt;&lt;a href="https://circleci.com/docs/github-integration/#deploy-keys-and-user-keys"&gt;https://circleci.com/docs/github-integration/#deploy-keys-and-user-keys&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href="https://discuss.circleci.com/t/solved-permission-denied-publickey/19562"&gt;https://discuss.circleci.com/t/solved-permission-denied-publickey/19562&lt;/a&gt; &lt;em&gt;(someone else had the same problem and documented their solution)&lt;/em&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href="https://docs.github.com/en/authentication/connecting-to-github-with-ssh/managing-deploy-keys#deploy-keys"&gt;https://docs.github.com/en/authentication/connecting-to-github-with-ssh/managing-deploy-keys#deploy-keys&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
 &lt;li&gt;&lt;a href="https://github.com/johnpfeiffer/stringsmoar/settings/keys"&gt;https://github.com/johnpfeiffer/stringsmoar/settings/keys&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href="https://discuss.circleci.com/t/solved-permission-denied-publickey/19562"&gt;https://discuss.circleci.com/t/solved-permission-denied-publickey/19562&lt;/a&gt; &lt;em&gt;(someone else had the same problem and documented their solution)&lt;/em&gt;&lt;/li&gt;
 &lt;/ul&gt;
 &lt;h3 id="picking-the-size-of-your-build-executor"&gt;Picking the size of your build executor&lt;/h3&gt;
 &lt;p&gt;By default CircleCI will choose executor size of "medium", if you want to save (free) credits then for smaller projects use "small" &lt;em&gt;(or conversely if you need more cpu/ram choose a larger size)&lt;/em&gt;&lt;/p&gt;

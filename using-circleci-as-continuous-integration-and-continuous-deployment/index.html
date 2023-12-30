@@ -137,7 +137,7 @@
 <span class="w">  </span><span class="nt">build</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">working_directory</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">~/repo</span><span class="w"> </span><span class="c1"># the circleCI default for where code is checked out to in the docker build container</span>
 <span class="w">  </span><span class="nt">docker</span><span class="p">:</span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">circleci/golang:1.16</span><span class="w"> </span><span class="c1"># https://hub.docker.com/r/circleci/golang/ , https://hub.docker.com/_/golang?tab=description</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cimg/go:1.21.4</span>
 <span class="w">  </span><span class="nt">steps</span><span class="p">:</span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">checkout</span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">run</span><span class="p">:</span>
@@ -148,11 +148,11 @@
 <h3 id="double-checking-your-golang-version">Double checking your Golang Version</h3>
 <p>The wonderful thing about Docker is the extra transparency. In this case we might want to double check the version of Golang that is being used by the build agent.</p>
 <p>You can download and execute the same environment locally:</p>
-<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>-it<span class="w"> </span>circleci/golang:1.16
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>-it<span class="w"> </span>circleci/golang:1.21.4
 go<span class="w"> </span>version
 </code></pre></div>
 <blockquote>
-<p>go version go1.16.3 linux/amd64</p>
+<p>go version go1.21.4 linux/amd64</p>
 </blockquote>
 <ul>
 <li><a href="https://hub.docker.com/r/circleci/golang/">https://hub.docker.com/r/circleci/golang/</a></li>
@@ -184,14 +184,24 @@ go<span class="w"> </span>version
 <p>In that detailed output UI, to Rerun a build, choose the "Rerun" button from the beginning (or from a failed step)</p>
 <p><em>Flaky tests aka intermittent failures is not resolved by re-running your build/tests all the time ;p</em></p>
 <h3 id="specific-project-settings-in-circleci">Specific Project Settings in CircleCI</h3>
+<p>Deploy Keys (specific to a repo) are a better security practice - read below on how to configure your poject to use them =)</p>
 <p>In the CircleCI UI, for a given Project, the three little dots will allow you to choose how to configure the project</p>
 <p><a href="https://app.circleci.com/settings/project/github/johnpfeiffer/stringsmoar">https://app.circleci.com/settings/project/github/johnpfeiffer/stringsmoar</a></p>
 <p>The one annoying thing is that if you remove your 3rd party access creds in GitHub it's a pain to reconnect CircleCI</p>
-<p>In the CircleCI configuration for a Project you should see a listing of SSH keys, you have to remove the old "deployment key" there (which means CircleCI can no longer access github), unfollow the project, and then re-follow the project <em>(which will then have CircleCI use your initial OAuth authorization to generate a new SSH deployment key in GitHub).</em></p>
+<p>In the CircleCI configuration for a Project you should see a listing of SSH keys
+you have to remove (delete) the old "deployment key" there (which means CircleCI can no longer access github)
+then choose to re-add a deployment key (if you are signed into CircleCI with GitHub this will automatically generate it)</p>
+<p>Or unfollow the project, and then re-follow the project <em>(which will then have CircleCI use your initial OAuth authorization to generate a new SSH deployment key in GitHub).</em></p>
 <p>Afterward you should see a new SSH key that CircleCI created in Github for this Project <em>(the UI's both show the sha of the key but one is sha256 and the other is not)</em></p>
 <ul>
+<li><a href="https://circleci.com/docs/github-integration/#deploy-keys-and-user-keys">https://circleci.com/docs/github-integration/#deploy-keys-and-user-keys</a></li>
+<li>
+<p><a href="https://discuss.circleci.com/t/solved-permission-denied-publickey/19562">https://discuss.circleci.com/t/solved-permission-denied-publickey/19562</a> <em>(someone else had the same problem and documented their solution)</em></p>
+</li>
+<li>
+<p><a href="https://docs.github.com/en/authentication/connecting-to-github-with-ssh/managing-deploy-keys#deploy-keys">https://docs.github.com/en/authentication/connecting-to-github-with-ssh/managing-deploy-keys#deploy-keys</a></p>
+</li>
 <li><a href="https://github.com/johnpfeiffer/stringsmoar/settings/keys">https://github.com/johnpfeiffer/stringsmoar/settings/keys</a></li>
-<li><a href="https://discuss.circleci.com/t/solved-permission-denied-publickey/19562">https://discuss.circleci.com/t/solved-permission-denied-publickey/19562</a> <em>(someone else had the same problem and documented their solution)</em></li>
 </ul>
 <h3 id="picking-the-size-of-your-build-executor">Picking the size of your build executor</h3>
 <p>By default CircleCI will choose executor size of "medium", if you want to save (free) credits then for smaller projects use "small" <em>(or conversely if you need more cpu/ram choose a larger size)</em></p>
@@ -279,7 +289,7 @@ go<span class="w"> </span>version
             <time pubdate="pubdate" datetime="2021-04-14T20:43:00-07:00">Apr 14, 2021</time>
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#build-CI-CD-devops-ref">build-CI-CD-devops</a> 
-            <h4>~1330 words</h4>
+            <h4>~1374 words</h4>
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article"> 
                 <li><a href="/tags.html#ci-ref">ci
