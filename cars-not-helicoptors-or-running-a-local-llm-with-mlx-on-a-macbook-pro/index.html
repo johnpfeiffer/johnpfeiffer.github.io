@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en-US">
+    <head>
+        <meta charset="utf-8"> 
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="author" content="john pfeiffer" />
+        <meta name="copyright" content="john pfeiffer" />
+
+<meta name="keywords" content="ai, llm, mlx, ai, " />
+        <title>Cars not Helicoptors, or running a local LLM with MLX on a Macbook Pro  · johnpfeiffer
+</title>
+        <!--link href="https://cdn-images.mailchimp.com/embedcode/slim-081711.css" rel="stylesheet" type="text/css"-->
+        <!--link href="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css" rel="stylesheet"-->
+        <link href="https://blog.john-pfeiffer.com/theme/css/bootstrap-combined.min.css" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="https://blog.john-pfeiffer.com/theme/css/style.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="https://blog.john-pfeiffer.com/theme/css/solarizedlight.css" media="screen">
+        <link rel="shortcut icon" href="https://blog.john-pfeiffer.com/theme/images/favicon.ico" type="image/x-icon" />
+        <link rel="apple-touch-icon" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon.png" />
+        <link rel="apple-touch-icon" sizes="57x57" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-57x57.png" />
+        <link rel="apple-touch-icon" sizes="72x72" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-72x72.png" />
+        <link rel="apple-touch-icon" sizes="114x114" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-114x114.png" />
+        <link rel="apple-touch-icon" sizes="144x144" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-144x144.png" />
+        <link rel="icon" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-144x144.png" />
+    </head>
+    <body>
+	<div id="content-sans-footer">
+        <div class="dropdown-backdrop">
+
+			<div class="navbar navbar-static-top">
+				<div class="navbar-inner">
+					<div class="container">
+						<a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+							<span class="icon-bar"></span>
+							<span class="icon-bar"></span>
+							<span class="icon-bar"></span>
+						</a>
+						<a class="brand" href="https://blog.john-pfeiffer.com/"><span class=site-name>johnpfeiffer</span></a>
+						<div class="nav-collapse collapse">
+							<ul class="nav pull-right top-menu">
+								<li ><a href="https://blog.john-pfeiffer.com">Home</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/engineering-people-managers/">Engineering (People) Managers</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/john-likes/">John Likes</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/software-engineer-favorites/">Software Engineer Favorites</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/categories.html">Categories</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/tags.html">Tags</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/archives.html">Archives</a></li>
+								<li><form class="navbar-search" action="https://blog.john-pfeiffer.com/search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="container-fluid">
+			<div class="row-fluid">
+				<div class="span1"></div>
+				<div class="span10">
+<article>
+<div class="row-fluid">
+    <header class="page_header span10 offset2">
+    <h1><a href="https://blog.john-pfeiffer.com/cars-not-helicoptors-or-running-a-local-llm-with-mlx-on-a-macbook-pro/"> Cars not Helicoptors, or running a local LLM with MLX on a Macbook Pro  </a></h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+    <div class="span2 table-of-content">
+        <nav>
+        <h4>Contents</h4>
+        <div class="toc">
+<ul>
+<li><a href="#everything-looks-like-a-nail">Everything looks like a nail</a></li>
+<li><a href="#how-they-work-together">How they work together</a><ul>
+<li><a href="#inevitable-and-resilient">Inevitable and Resilient</a></li>
+</ul>
+</li>
+<li><a href="#hands-on-with-mlx-install">Hands On with MLX - install</a><ul>
+<li><a href="#run-that-llm-with-mlx">Run that LLM with MLX</a></li>
+</ul>
+</li>
+<li><a href="#next-level-is-a-script">Next Level is a Script</a></li>
+<li><a href="#todo">TODO</a></li>
+<li><a href="#troubleshooting">Troubleshooting</a><ul>
+<li><a href="#where-is-that-installed">Where is that installed?</a></li>
+<li><a href="#cleanup">Cleanup</a></li>
+</ul>
+</li>
+<li><a href="#references">References</a></li>
+</ul>
+</div>
+        </nav>
+    </div>
+    <div class="span8 article-content">
+
+            
+<h1 id="everything-looks-like-a-nail">Everything looks like a nail</h1>
+<p>For Large Language Models (LLMs), Frontier aka "State of the Art" (SOTA) Models provided by big vendors like OpenAI and Anthropic and Google continue to add capabilities at a wondrous rate. Yet there's a very strong case for running LLMs locally, much like every smart phone provides a powerful computer your pocket.</p>
+<p>As an example: helicopters can cover in 15 minutes what takes 2 hours by car, but the overhead and extra considerations (fuel, pilots, landings, weather sensitivity, etc.) makes them wildly impractical for routine tasks like picking up kids from school. </p>
+<p><em>(Though those new drones can carry pretty heavy loads ;)</em></p>
+<p>Given English has ~170,000 words but the average working vocabulary is 30,000 words, and  specific domains like "email" (Hello! Best Regards,) are even more narrow and formulaic...
+Do you need a model trained on the entirety of human knowledge with latency from expensive GPU clusters?</p>
+<p>Writing code, due to its utilitarian nature, has even more structure and repetition and 
+rules - especially if it's type-checked and compiled.</p>
+<h1 id="how-they-work-together">How they work together</h1>
+<p>In software, experienced engineers propose and design the architecture, whereas less experienced people do the (simpler parts) of implementation - specialization based on skill and scope. Frontier models can design and orchestrate, handle the unusual, while local models do specific, simple things well.</p>
+<h2 id="inevitable-and-resilient">Inevitable and Resilient</h2>
+<p>In 2020 an LLM was a research project and by 2024 it's running on your laptop (or smartphone!). Hardware gets better and costs go down which induces "Jevons Paradox"; as people adapt they'll use LLM inference non-stop.</p>
+<p>Moreover, users (and businesses!) dependent to always having AI will balk at "cloud outages" or "AI outages" - thus a real need and demand for local LLMs.</p>
+<p>(Have you ever seen people struggling without phone reception ;)</p>
+<p>And I didn't even trot out the privacy and security arguments...</p>
+<p>We don't use Helicoptors for everything, use the right tool for the job.</p>
+<h1 id="hands-on-with-mlx-install">Hands On with MLX - install</h1>
+<p>Apple silicon architecture of "unified memory" is convenient for those trying out "Local LLMs" - and not buying a dedicated server with a GPU.</p>
+<div class="highlight"><pre><span></span><code>brew<span class="w"> </span>install<span class="w"> </span>uv
+uv<span class="w"> </span>--version
+mkdir<span class="w"> </span>llm-demo
+<span class="nb">cd</span><span class="w"> </span>llm-demo
+
+uv<span class="w"> </span>venv
+
+<span class="c1">## this installs mlx as it's a dependency of mlx-lm</span>
+uv<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>mlx-lm
+
+<span class="c1">## optional sanity checks - using explicit calls with the local uv</span>
+uv<span class="w"> </span>pip<span class="w"> </span>list
+uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>-c<span class="w"> </span><span class="s2">"import mlx; import mlx.core as mx; print('mlx ok', mx.__version__)"</span>
+uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>-c<span class="w"> </span><span class="s2">"import mlx_lm; print('mlx_lm ok')"</span>
+</code></pre></div>
+<h2 id="run-that-llm-with-mlx">Run that LLM with MLX</h2>
+<p>The following command will both download the model and then load it into memory along with sending it the prompt:</p>
+<p><code>uv run mlx_lm.generate --model mlx-community/Meta-Llama-3.1-8B-Instruct-4bit \
+  --prompt "tell me a joke"</code></p>
+<blockquote>
+<p>A man walked into a library and asked the librarian, "Do you have any books on Pavlov's dogs and Schrödinger's cat?" The librarian replied, "That rings a bell but I'm not sure if they're here or not."</p>
+<p>Prompt: 47 tokens, 68.789 tokens-per-sec
+  Generation: 100 tokens, 30.293 tokens-per-sec
+  Peak memory: 4.647 GB</p>
+</blockquote>
+<p>A token is a part of word - and this is plenty fast enough to not wait while each word of the joke is printed slowly.</p>
+<p>Let's examine where the "open weight" downloaded model is:</p>
+<p><code>du -sh ~/.cache/huggingface/hub/models--mlx-community--Meta-Llama-3.1-8B-Instruct-4bit</code></p>
+<blockquote>
+<p>4.2G  models--mlx-community--Meta-Llama-3.1-8B-Instruct-4bit</p>
+</blockquote>
+<h1 id="next-level-is-a-script">Next Level is a Script</h1>
+<p>create the wrapper script "llm-demo/mychat.py"
+    :::python
+    import sys
+    from mlx_lm import load, generate</p>
+<div class="highlight"><pre><span></span><code><span class="k">if</span><span class="w"> </span><span class="n">len</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">2</span><span class="p">:</span>
+<span class="w">    </span><span class="nb">print</span><span class="p">(</span><span class="s2">"Usage: python mychat.py 'your prompt here'"</span><span class="p">)</span>
+<span class="w">    </span><span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="n">model</span><span class="p">,</span><span class="w"> </span><span class="n">tokenizer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">load</span><span class="p">(</span><span class="s2">"mlx-community/Meta-Llama-3.1-8B-Instruct-4bit"</span><span class="p">)</span>
+<span class="n">prompt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">" "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+<span class="n">response</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">generate</span><span class="p">(</span><span class="n">model</span><span class="p">,</span><span class="w"> </span><span class="n">tokenizer</span><span class="p">,</span><span class="w"> </span><span class="n">prompt</span><span class="o">=</span><span class="n">prompt</span><span class="p">,</span><span class="w"> </span><span class="n">max_tokens</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+</code></pre></div>
+<p><em>assuming you are re-using the "llm-demo" directory and all the pre-requisite UV and venv setup</em></p>
+<p>source .venv/bin/activate</p>
+<p>Create the pyproject.toml and ensure the mlx-lm dependency is added:</p>
+<div class="highlight"><pre><span></span><code>uv init --bare
+uv add mlx-lm
+</code></pre></div>
+<p><code>python mychat.py "tell me a joke"</code></p>
+<blockquote>
+<p>You may notice it </p>
+</blockquote>
+<h1 id="todo">TODO</h1>
+<p>Describe how to fix the LLM running on until abruptly terminating at the max token count:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mlx_lm</span><span class="w"> </span><span class="kn">import</span> <span class="n">load</span><span class="p">,</span> <span class="n">generate</span>
+
+<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"Usage: python mychat.py 'your prompt here'"</span><span class="p">)</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="n">model</span><span class="p">,</span> <span class="n">tokenizer</span> <span class="o">=</span> <span class="n">load</span><span class="p">(</span><span class="s2">"mlx-community/Meta-Llama-3.1-8B-Instruct-4bit"</span><span class="p">)</span>
+<span class="n">user_prompt</span> <span class="o">=</span> <span class="s2">" "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+
+<span class="c1"># Format with chat template</span>
+<span class="n">messages</span> <span class="o">=</span> <span class="p">[{</span><span class="s2">"role"</span><span class="p">:</span> <span class="s2">"user"</span><span class="p">,</span> <span class="s2">"content"</span><span class="p">:</span> <span class="n">user_prompt</span><span class="p">}]</span>
+<span class="n">prompt</span> <span class="o">=</span> <span class="n">tokenizer</span><span class="o">.</span><span class="n">apply_chat_template</span><span class="p">(</span><span class="n">messages</span><span class="p">,</span> <span class="n">tokenize</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">add_generation_prompt</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="n">response</span> <span class="o">=</span> <span class="n">generate</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">tokenizer</span><span class="p">,</span> <span class="n">prompt</span><span class="o">=</span><span class="n">prompt</span><span class="p">,</span> <span class="n">max_tokens</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+</code></pre></div>
+<p>Also, describe how max tokens can help avoid context overload (and local LLM RAM overload)</p>
+<p>monitor memory pressure with top or activity monitor</p>
+<h1 id="troubleshooting">Troubleshooting</h1>
+<h2 id="where-is-that-installed">Where is that installed?</h2>
+<p>A python uv gotcha - do not move (or copy) the .venv directory since it includes absolute folder paths - instead use the uv commands for each new project.</p>
+<p>UV is awesomely fast - one reason is it uses a cache, here's how to audit how many python versions UV installed/knows:</p>
+<p><code>ls -ahl ~/.local/share/uv/python/</code></p>
+<p>And in case you installed uv with both "install.sh" and homebrew...</p>
+<p><code>which -a uv</code></p>
+<div class="highlight"><pre><span></span><code>/opt/homebrew/bin/uv
+~/.local/bin/uv
+</code></pre></div>
+<h2 id="cleanup">Cleanup</h2>
+<p>To find previously download local models which are large files</p>
+<div class="highlight"><pre><span></span><code>find<span class="w"> </span>~<span class="w"> </span>-type<span class="w"> </span>f<span class="w"> </span>-size<span class="w"> </span>+1G<span class="w"> </span><span class="m">2</span>&gt;/dev/null
+ls<span class="w"> </span>-ahl<span class="w"> </span>~/.cache/huggingface/
+ls<span class="w"> </span>-ahl<span class="w"> </span>~/.cache/huggingface/hub
+rm<span class="w"> </span>-rf<span class="w"> </span>~/.cache/huggingface/hub/models--mlx-community--Meta-Llama-3...
+</code></pre></div>
+<p>Or maybe you want to clean up a global pip install of MLX</p>
+<div class="highlight"><pre><span></span><code>pip3<span class="w"> </span>list
+brew<span class="w"> </span>uninstall<span class="w"> </span>mlx
+</code></pre></div>
+<p>foo</p>
+<div class="highlight"><pre><span></span><code><span class="n">brew</span> <span class="n">install</span> <span class="n">uv</span>
+<span class="n">uv</span> <span class="o">--</span><span class="n">version</span>
+<span class="n">which</span> <span class="o">-</span><span class="n">a</span> <span class="n">uv</span>
+
+<span class="n">mkdir</span> <span class="o">./</span><span class="n">llm</span><span class="o">-</span><span class="n">demo</span>
+<span class="n">uv</span> <span class="n">init</span> <span class="o">--</span><span class="n">bare</span>
+<span class="n">uv</span> <span class="n">venv</span> <span class="o">--</span><span class="n">clear</span>
+<span class="n">source</span> <span class="o">.</span><span class="n">venv</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">activate</span>
+<span class="n">uv</span> <span class="n">pip</span> <span class="n">install</span> <span class="n">mlx</span> <span class="n">mlx</span><span class="o">-</span><span class="n">lm</span>
+<span class="n">uv</span> <span class="n">pip</span> <span class="nb">list</span>
+
+<span class="n">uv</span> <span class="n">run</span> <span class="n">python</span> <span class="o">-</span><span class="n">c</span> <span class="s2">"import mlx; import mlx.core as mx; print('mlx ok', mx.__version__)"</span>
+<span class="n">uv</span> <span class="n">run</span> <span class="n">python</span> <span class="o">-</span><span class="n">c</span> <span class="s2">"import mlx_lm; print('mlx_lm ok')"</span>
+</code></pre></div>
+<h1 id="references">References</h1>
+<p><a href="https://github.com/ml-explore/mlx">https://github.com/ml-explore/mlx</a></p>
+<p><a href="https://www.apple.com/newsroom/2023/10/apple-unveils-m3-m3-pro-and-m3-max-the-most-advanced-chips-for-a-personal-computer/">https://www.apple.com/newsroom/2023/10/apple-unveils-m3-m3-pro-and-m3-max-the-most-advanced-chips-for-a-personal-computer/</a></p>
+<p><strong>Addendum:</strong></p>
+<p><a href="https://machinelearning.apple.com/research/exploring-llms-mlx-m5">https://machinelearning.apple.com/research/exploring-llms-mlx-m5</a></p>
+            <aside>
+            <hr/>
+            <nav>
+            <ul class="articles_timeline">
+ 
+                <li class="previous_article">« <a href="https://blog.john-pfeiffer.com/react-javascript-intro/" title="Previous: React Javascript Intro">React Javascript Intro</a></li>
+ 
+                <li class="next_article"><a href="https://blog.john-pfeiffer.com/intro-to-mcp-give-your-llm-tools-with-model-context-protocol/" title="Next: Intro to MCP - give your LLM tools with model context protocol">Intro to MCP - give your LLM tools with model context protocol</a> »</li>
+            </ul>
+            </nav>
+            </aside>
+        </div>
+        <section>
+        <div class="span2" style="float:right;font-size:0.9em;">
+ 
+            <h4>Published</h4>
+            <time pubdate="pubdate" datetime="2024-11-23T19:21:00-08:00">Nov 23, 2024</time>
+            <h4>Category</h4>
+            <a class="category-link" href="/categories.html#ai-ref">ai</a> 
+            <h4>~863 words</h4>
+            <h4>Tags</h4>
+            <ul class="list-of-tags tags-in-article"> 
+                <li><a href="/tags.html#ai-ref">ai
+                    <span>2</span>
+</a></li>
+                <li><a href="/tags.html#llm-ref">llm
+                    <span>2</span>
+</a></li>
+                <li><a href="/tags.html#mlx-ref">mlx
+                    <span>1</span>
+</a></li>
+            </ul>
+
+        </div>
+        </section>
+</div>
+</article>
+				</div>
+				<div class="span1"></div>
+			</div>
+		</div>
+    </div>
+<footer>
+<div id="footer">
+    <ul class="footer-content">
+    </ul>
+</div>
+</footer>            <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+    </body>
+</html>
