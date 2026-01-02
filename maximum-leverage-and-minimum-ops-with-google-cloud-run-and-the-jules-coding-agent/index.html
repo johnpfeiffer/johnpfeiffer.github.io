@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en-US">
+    <head>
+        <meta charset="utf-8"> 
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="author" content="john pfeiffer" />
+        <meta name="copyright" content="john pfeiffer" />
+
+<meta name="keywords" content="github, google cloud run, ci, cd, deployment, ai, agent, build-CI-CD-devops, " />
+        <title>Maximum leverage and Minimum Ops with Google Cloud Run and the Jules Coding Agent  · johnpfeiffer
+</title>
+        <!--link href="https://cdn-images.mailchimp.com/embedcode/slim-081711.css" rel="stylesheet" type="text/css"-->
+        <!--link href="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css" rel="stylesheet"-->
+        <link href="https://blog.john-pfeiffer.com/theme/css/bootstrap-combined.min.css" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="https://blog.john-pfeiffer.com/theme/css/style.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="https://blog.john-pfeiffer.com/theme/css/solarizedlight.css" media="screen">
+        <link rel="shortcut icon" href="https://blog.john-pfeiffer.com/theme/images/favicon.ico" type="image/x-icon" />
+        <link rel="apple-touch-icon" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon.png" />
+        <link rel="apple-touch-icon" sizes="57x57" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-57x57.png" />
+        <link rel="apple-touch-icon" sizes="72x72" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-72x72.png" />
+        <link rel="apple-touch-icon" sizes="114x114" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-114x114.png" />
+        <link rel="apple-touch-icon" sizes="144x144" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-144x144.png" />
+        <link rel="icon" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-144x144.png" />
+    </head>
+    <body>
+	<div id="content-sans-footer">
+        <div class="dropdown-backdrop">
+
+			<div class="navbar navbar-static-top">
+				<div class="navbar-inner">
+					<div class="container">
+						<a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+							<span class="icon-bar"></span>
+							<span class="icon-bar"></span>
+							<span class="icon-bar"></span>
+						</a>
+						<a class="brand" href="https://blog.john-pfeiffer.com/"><span class=site-name>johnpfeiffer</span></a>
+						<div class="nav-collapse collapse">
+							<ul class="nav pull-right top-menu">
+								<li ><a href="https://blog.john-pfeiffer.com">Home</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/engineering-people-managers/">Engineering (People) Managers</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/john-likes/">John Likes</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/software-engineer-favorites/">Software Engineer Favorites</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/categories.html">Categories</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/tags.html">Tags</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/archives.html">Archives</a></li>
+								<li><form class="navbar-search" action="https://blog.john-pfeiffer.com/search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="container-fluid">
+			<div class="row-fluid">
+				<div class="span1"></div>
+				<div class="span10">
+<article>
+<div class="row-fluid">
+    <header class="page_header span10 offset2">
+    <h1><a href="https://blog.john-pfeiffer.com/maximum-leverage-and-minimum-ops-with-google-cloud-run-and-the-jules-coding-agent/"> Maximum leverage and Minimum Ops with Google Cloud Run and the Jules Coding Agent  </a></h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+    <div class="span2 table-of-content">
+        <nav>
+        <h4>Contents</h4>
+        <div class="toc">
+<ul>
+<li><a href="#why-software-agents-are-eating-the-world">Why Software Agents are Eating the World</a><ul>
+<li><a href="#personal-goal-of-efficiency">Personal Goal of Efficiency</a></li>
+</ul>
+</li>
+<li><a href="#another-day-another-cloud">Another day another cloud</a><ul>
+<li><a href="#different-day-same-code">Different day same Code</a></li>
+<li><a href="#google-is-project-centric">Google is project-centric</a></li>
+<li><a href="#configuration">Configuration</a></li>
+<li><a href="#checking-on-builds">Checking on Builds</a></li>
+<li><a href="#cleanup-artifact-registry">Cleanup Artifact Registry</a></li>
+</ul>
+</li>
+<li><a href="#agentic-coding-with-google-jules">Agentic Coding with Google Jules</a><ul>
+<li><a href="#watching-an-agentic-task-in-progress">Watching an agentic task in progress</a></li>
+<li><a href="#iterating-on-the-pull-request">Iterating on the Pull Request</a></li>
+<li><a href="#gotchas-with-agents">Gotchas with Agents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+        </nav>
+    </div>
+    <div class="span8 article-content">
+
+            
+<h1 id="why-software-agents-are-eating-the-world">Why Software Agents are Eating the World</h1>
+<p>Software scales to infinity and prints money the whole way.</p>
+<p>Once the cost of distribution went to zero the dominant constraint on growth stopped being infrastructure and became people: how fast could humans design, write, deploy (and maintain!) software.</p>
+<p>Over 30+ years, to get increasing leverage (less humans!) and take advantage of economic specialization...</p>
+<ul>
+<li>Self-hosted physical servers became leasing space and energy/cooling with colocation</li>
+<li>"Colos" physical servers became leasing virtual machines</li>
+<li>Overprovisioned VMs became renting "cloud servers"</li>
+<li>Cloud services became pay by the millisecond "serverless"</li>
+</ul>
+<p>A remaining bottleneck: humans to write and maintain the code.</p>
+<blockquote>
+<p>LLM Coding Agents is "software that writes software"</p>
+</blockquote>
+<h2 id="personal-goal-of-efficiency">Personal Goal of Efficiency</h2>
+<p>Physical wires and failing components, maintaining operating systems (security!), copying files and manually checking if the software even works at all... and even yak shaving down the rabbit hole of code syntax, dependency updates, edge cases, and content typos</p>
+<p>Try it for yourself: tell an LLM what you want and asynchronously it comes back (like any remote virtual colleague) with the changes - approve and voila it's live in seconds.</p>
+<h1 id="another-day-another-cloud">Another day another cloud</h1>
+<p>Since "Google App Engine" charges for "Artifact Registry" which shouldn't be a big deal but for the "Developer who just wants to run code" it feels like extra overhead and cost</p>
+<p>Google Cloud Run "free tier" is ridiculously confusing to calculate (charged by the millisecond) but should "just run".</p>
+<p>So here's how to setup a golang web server automatically built and deployed from each GitHub commit.</p>
+<p><em>Note: apparently Cloud Run also uses Artifact Registry to automatically leverage a Docker image that presumably if deployed enough times could go beyond the free tier :(</em></p>
+<h2 id="different-day-same-code">Different day same Code</h2>
+<p>If the web server starts automatically on port 8080 then it is "Cloud Run Compatible"</p>
+<p><a href="https://github.com/johnpfeiffer/aws-go-lambda">https://github.com/johnpfeiffer/aws-go-lambda</a></p>
+<p><em>Their official example https://github.com/GoogleCloudPlatform/cloud-run-microservice-template-go</em></p>
+<h2 id="google-is-project-centric">Google is project-centric</h2>
+<p>Then navigate to a project (or make a new one)</p>
+<p><a href="https://console.cloud.google.com/run/overview?project=go-cache">https://console.cloud.google.com/run/overview?project=go-cache</a></p>
+<p>"Deploy a web service" -&gt; Connect repository</p>
+<h2 id="configuration">Configuration</h2>
+<p>GitHub: "Continuously deploy from a repository (source or function)"
+<em>(this works for languages supported by Google)</em></p>
+<p>Cloud Build: Can deploy from GitHub repositories.</p>
+<p>"Set up with Cloud Build" (button)</p>
+<p>Source repository: GitHub</p>
+<ul>
+<li>Currently not authenticated, Authenticate<blockquote>
+<p>You will be asked to authorize the Google Cloud Build GitHub App to access your GitHub Account to proceed. </p>
+</blockquote>
+</li>
+<li>
+<ul>
+<li>creates a pop up (check your blockers!): "Authorize Google Cloud Build"</li>
+</ul>
+</li>
+</ul>
+<p>Repository: Manage connected repositories</p>
+<ul>
+<li>creates a pop up to GitHub (simplified integration and authentication/authorization)</li>
+<li>
+<ul>
+<li>Only select repositories (choose from the dropdown)</li>
+</ul>
+</li>
+<li>
+<ul>
+<li>
+<ul>
+<li>legalese checkbox</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p><strong>Build Configuration</strong></p>
+<p>Branch: ^main$</p>
+<p>Build Type: Go (or Node.js, Python, Java, .NET, Ruby, PHP)</p>
+<p><em>nothing special for Build context, Entrypoint, or Function target (The name of the exported function to be invoked, leave blank if the source repository is a web server.)</em></p>
+<p>Service name: go-cache</p>
+<p>Region: us-west2 <em>(tier2 is cheaper than tier1)</em></p>
+<p>Authentication: Public <em>(unless you have something specific in mind)</em></p>
+<p>Billing: Request-based, Charged only when processing requests. CPU is limited outside of requests.</p>
+<p>Service scaling: Minimum number of instances = 0 , Maximum number of instances = 1</p>
+<p><strong>very important to set these values to 0 and 1 to stay in the free tier</strong></p>
+<p>"Edit Container" has the opportunity to change things or add a variable/secret - ignore for now</p>
+<p><strong>Create (button)</strong></p>
+<p><a href="https://docs.cloud.google.com/run/docs/continuous-deployment#existing-service">https://docs.cloud.google.com/run/docs/continuous-deployment#existing-service</a></p>
+<h2 id="checking-on-builds">Checking on Builds</h2>
+<p>When builds are occurring (or failing) </p>
+<p><a href="https://console.cloud.google.com/cloud-build/">https://console.cloud.google.com/cloud-build/</a></p>
+<h2 id="cleanup-artifact-registry">Cleanup Artifact Registry</h2>
+<p>You can search and find amid the 100s of services the one that sometimes invisibly goes over a free tier...</p>
+<p><a href="https://console.cloud.google.com/artifacts/">https://console.cloud.google.com/artifacts/</a></p>
+<p>Click on "cloud-run-source-deploy" and click in until you get to something like "Digests for aws-go-lambda/go-cache"</p>
+<p>Choose an old deploy as a checkbox and then at the top click Delete</p>
+<blockquote>
+<p>Are you sure you want to delete...</p>
+</blockquote>
+<p><em>hopefully this keeps me under the free tier limit</em></p>
+<h1 id="agentic-coding-with-google-jules">Agentic Coding with Google Jules</h1>
+<p>Google "Gemini" (https://gemini.google.com) is the LLM chat application</p>
+<p><em>Useful for general questions including about technology terms, architecture options, code snippets, troubleshooting, etc.</em></p>
+<blockquote>
+<p>...you have encountered the very real friction of Google Cloud's IAM system firsthand. What should feel like a single, simple action often requires a complex combination of permissions... the single App Engine Deployer role is not sufficient for a complete developer workflow, and it does not cover administrative tasks or broader access needs</p>
+</blockquote>
+<p>"Agentic Coding" is where the LLM agent takes instructions in english and modifies the code.</p>
+<p><strong><a href="https://jules.google.com/">https://jules.google.com/</a></strong></p>
+<p><em>Google account as before, Sign in, accept all the terms and conditions of this experimental AI software</em></p>
+<p>Has a purple octopus logo</p>
+<p>Choose a Repo from the dropdown (top center) -&gt; "Configure repo access"</p>
+<ul>
+<li>opens a new tab (window?) in GitHub for "Google Labs Jules"</li>
+<li>Repository access: Only select repositories (choose the ones the agent can work on)</li>
+</ul>
+<p>"Save" (button)</p>
+<blockquote>
+<p>Successfully authenticated with GitHub!</p>
+</blockquote>
+<p><em><a href="https://github.com/settings/installations">https://github.com/settings/installations</a> is where GitHub lists integrated Applications</em></p>
+<p>Choose the repo (i.e. johnpfeiffer/aws-go-lambda)</p>
+<p>Give Jules the instructions in the text box (not on the bottom right you can choose a mode like "interactive plan" or "review" - or just <strong>"Start"</strong>)</p>
+<p><em>These tasks run in an isolated sandbox hosted by Google</em></p>
+<h2 id="watching-an-agentic-task-in-progress">Watching an agentic task in progress</h2>
+<p>On the left (expand/collapse) side panel you can see how many "daily sessions" you have left.</p>
+<p>Clicking on a session gives you all the details:</p>
+<ul>
+<li>how the agent broke the instructions down into a plan</li>
+<li>it runs <code>go test -v</code> on its own</li>
+<li>sends a (draft) pull request to the code repository</li>
+</ul>
+<p><em>there is a "View PR" button</em></p>
+<p><a href="https://github.com/johnpfeiffer/aws-go-lambda/pull/1">https://github.com/johnpfeiffer/aws-go-lambda/pull/1</a></p>
+<h2 id="iterating-on-the-pull-request">Iterating on the Pull Request</h2>
+<p>Leaving a comment on the pull request will feedback to Jules (yay for all the permissions) who then automatically resumes the session.</p>
+<blockquote>
+<p>I have received the PR comments and am processing them.</p>
+<p>Ready for review </p>
+</blockquote>
+<p><em>the usual GitHub pull request merge process</em></p>
+<h2 id="gotchas-with-agents">Gotchas with Agents</h2>
+<p>All of this leverage shifts the bottleneck from "programmer" to "good ideas and ability to review changes". Yet this new technology brings new challenges...</p>
+<p>Lots of posts on the internet but in case you wanted to "hear it here first":</p>
+<ul>
+<li>sounds confident even when wrong or has mistakes</li>
+<li>often imports random libraries or calls external APIs</li>
+<li>deletes tests</li>
+<li>modifies code and says "done"... but the code does not work, is not done</li>
+<li>mediocre code quality that is either one large ball of mud or a tangle of tiny functions</li>
+<li>unnecessarily over-engineered code and abstractions</li>
+</ul>
+<p>Mitigations</p>
+<ul>
+<li>read and review critically</li>
+<li>have specifications, documentation, and anchors</li>
+<li>tell it build as simple as possible and not to call external APIs</li>
+<li>give it boundary instructions: that it cannot modify or delete tests</li>
+<li>give it examples of expected input and output</li>
+<li>give it explicit instructions on the level of modularity ("make this 3 functions")</li>
+</ul>
+            <aside>
+            <hr/>
+            <nav>
+            <ul class="articles_timeline">
+ 
+                <li class="previous_article">« <a href="https://blog.john-pfeiffer.com/cars-not-helicopters-or-running-a-local-llm-with-mlx-on-a-macbook-pro/" title="Previous: Cars not helicopters, or running a local LLM with MLX on a Macbook Pro">Cars not helicopters, or running a local LLM with MLX on a Macbook Pro</a></li>
+ 
+                <li class="next_article"><a href="https://blog.john-pfeiffer.com/intro-to-mcp-give-your-llm-tools-with-model-context-protocol/" title="Next: Intro to MCP - give your LLM tools with model context protocol">Intro to MCP - give your LLM tools with model context protocol</a> »</li>
+            </ul>
+            </nav>
+            </aside>
+        </div>
+        <section>
+        <div class="span2" style="float:right;font-size:0.9em;">
+ 
+            <h4>Published</h4>
+            <time pubdate="pubdate" datetime="2025-06-07T06:07:00-07:00">Jun 7, 2025</time>
+            <h4>Category</h4>
+            <a class="category-link" href="/categories.html#build-CI-CD-devops-ref">build-CI-CD-devops</a> 
+            <h4>~1085 words</h4>
+            <h4>Tags</h4>
+            <ul class="list-of-tags tags-in-article"> 
+                <li><a href="/tags.html#agent-ref">agent
+                    <span>1</span>
+</a></li>
+                <li><a href="/tags.html#ai-ref">ai
+                    <span>3</span>
+</a></li>
+                <li><a href="/tags.html#cd-ref">cd
+                    <span>3</span>
+</a></li>
+                <li><a href="/tags.html#ci-ref">ci
+                    <span>5</span>
+</a></li>
+                <li><a href="/tags.html#deployment-ref">deployment
+                    <span>3</span>
+</a></li>
+                <li><a href="/tags.html#github-ref">github
+                    <span>2</span>
+</a></li>
+                <li><a href="/tags.html#google-cloud-run-ref">google cloud run
+                    <span>1</span>
+</a></li>
+            </ul>
+
+        </div>
+        </section>
+</div>
+</article>
+				</div>
+				<div class="span1"></div>
+			</div>
+		</div>
+    </div>
+<footer>
+<div id="footer">
+    <ul class="footer-content">
+    </ul>
+</div>
+</footer>            <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+    </body>
+</html>
