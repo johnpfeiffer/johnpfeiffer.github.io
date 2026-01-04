@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en-US">
+    <head>
+        <meta charset="utf-8"> 
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="author" content="john pfeiffer" />
+        <meta name="copyright" content="john pfeiffer" />
+
+<meta name="keywords" content="windows, wince, programming, " />
+        <title>Windows Programming in WinCE on an HP IPAQ - 365 project day twenty three  · johnpfeiffer
+</title>
+        <!--link href="https://cdn-images.mailchimp.com/embedcode/slim-081711.css" rel="stylesheet" type="text/css"-->
+        <!--link href="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css" rel="stylesheet"-->
+        <link href="https://blog.john-pfeiffer.com/theme/css/bootstrap-combined.min.css" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="https://blog.john-pfeiffer.com/theme/css/style.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="https://blog.john-pfeiffer.com/theme/css/solarizedlight.css" media="screen">
+        <link rel="shortcut icon" href="https://blog.john-pfeiffer.com/theme/images/favicon.ico" type="image/x-icon" />
+        <link rel="apple-touch-icon" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon.png" />
+        <link rel="apple-touch-icon" sizes="57x57" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-57x57.png" />
+        <link rel="apple-touch-icon" sizes="72x72" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-72x72.png" />
+        <link rel="apple-touch-icon" sizes="114x114" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-114x114.png" />
+        <link rel="apple-touch-icon" sizes="144x144" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-144x144.png" />
+        <link rel="icon" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-144x144.png" />
+    </head>
+    <body>
+	<div id="content-sans-footer">
+        <div class="dropdown-backdrop">
+
+			<div class="navbar navbar-static-top">
+				<div class="navbar-inner">
+					<div class="container">
+						<a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+							<span class="icon-bar"></span>
+							<span class="icon-bar"></span>
+							<span class="icon-bar"></span>
+						</a>
+						<a class="brand" href="https://blog.john-pfeiffer.com/"><span class=site-name>johnpfeiffer</span></a>
+						<div class="nav-collapse collapse">
+							<ul class="nav pull-right top-menu">
+								<li ><a href="https://blog.john-pfeiffer.com">Home</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/engineering-people-managers/">Engineering (People) Managers</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/john-likes/">John Likes</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/software-engineer-favorites/">Software Engineer Favorites</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/categories.html">Categories</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/tags.html">Tags</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/archives.html">Archives</a></li>
+								<li><form class="navbar-search" action="https://blog.john-pfeiffer.com/search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="container-fluid">
+			<div class="row-fluid">
+				<div class="span1"></div>
+				<div class="span10">
+<article>
+<div class="row-fluid">
+    <header class="page_header span10 offset2">
+    <h1><a href="https://blog.john-pfeiffer.com/windows-programming-in-wince-on-an-hp-ipaq-365-project-day-twenty-three/"> Windows Programming in WinCE on an HP IPAQ - 365 project day twenty three  </a></h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+        <div class="span8 offset2 article-content">
+
+            <p>As the number of portable computers (we might call them mobile phones or smart phones or pda's etc.) explodes they need software. </p>
+<p>One thing Microsoft got right is that Windows CE, the stripped down version of Windows for Mobile Devices, uses most of the same basic programming platform/language as "normal" desktop windows programming. </p>
+<p>The following is a very interesting learning experience I've had (and a useful way to pass otherwise idle waiting time in the "Tube") programming Windows Applications in WinCE.</p>
+<hr>
+<p>The first thing you need is a WinCE compiler - my choice was pocketgcc (even though it hasn't been updated since 2003), because a port of GCC to WinCE means a stable tool that I already know (sorta) how to use. http://pocketgcc.sourceforge.net/ http://kittyandbear.net/john/c-programming-guides/pocketgcc.zip The next hurdle after downloading and copying them onto my device (HP Ipaq) and double tapping (clicking) to install them was to use the CMD to cd \pgcc </p>
+<hr>
+<p>Then I used a text editor (either Word or pocketnotepad) to create a batch file (yes, technically I suppose a batch file is a program too!) with the following cryptic lines... </p>
+<p>'''
+\pgcc\cc1plus \pgcc\source-code.txt -o \pgcc\cwms.s -I \pgcc\include -include \pgcc\fixincl.h -fms-extensions \pgcc\as \pgcc\cwms.s -o \pgcc\cwmo.o \pgcc\ld \pgcc\cwmo.o -o \pgcc\cwme.exe -L \pgcc\lib -l cpplib -l corelibc -l coredll -l aygshell -l runtime -l portlib 
+'''</p>
+<p>The cc1plus.exe (compiler?) outputs the assembly code file but also includes the "fixincl.h" file and use the -fms-extensions option (no, I haven't actually yet learned exactly why). </p>
+<p>The as.exe program turns the assembly into object code. </p>
+<p>Finally the loader turns the object code into an executable with the appropriate libraries. </p>
+<p>The following source code should look very familiar to my earlier Windows Programming examples. </p>
+<p>I've added comments here that are not in my "production" IPAQ environment source code because the screen is too small with lots of scrolling already... </p>
+<hr>
+<div class="highlight"><pre><span></span><code><span class="cp">#define WIN32_LEAN_AND_MEAN</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;windows.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;windowsx.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;commctrl.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;aygshell.h&gt;</span>
+<span class="cp">#define  IDC_ExitButton 40099</span>
+<span class="cm">/* the IDC object requires a number, I just give them high unused ones */</span>
+
+<span class="cm">/* the above includes are a bit of a mystery to me but the program</span>
+<span class="cm">doesn&#39;t work without them and I figure they must be specific to WinCE */</span>
+
+<span class="cm">/* instead of function stubs, main, then function declarations I do them</span>
+<span class="cm">all before main() ... but of course I have to remember to always declare</span>
+<span class="cm">before using... so do as I say: always declare functions (and then remember</span>
+<span class="cm">to update them and the stub), not as I do... */</span>
+
+<span class="n">VOID</span><span class="w"> </span><span class="n">APIENTRY</span><span class="w"> </span><span class="n">HandlePaint</span><span class="p">(</span><span class="w">  </span><span class="n">HWND</span><span class="w"> </span><span class="n">hwnd</span><span class="w">  </span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="n">HDC</span><span class="w"> </span><span class="n">hdc</span><span class="p">;</span><span class="w">            </span><span class="cm">/* handle to device context */</span>
+<span class="w">    </span><span class="n">PAINTSTRUCT</span><span class="w"> </span><span class="n">ps</span><span class="p">;</span><span class="w">     </span>
+<span class="w">    </span><span class="n">RECT</span><span class="w"> </span><span class="n">rc</span><span class="p">;</span><span class="w">            </span><span class="cm">/* rectangle structure */</span>
+<span class="w">    </span><span class="n">TCHAR</span><span class="w"> </span><span class="n">tszOut</span><span class="p">[]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">TEXT</span><span class="p">(</span><span class="s">&quot;hello!&quot;</span><span class="p">);</span>
+
+<span class="w">    </span><span class="n">hdc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">BeginPaint</span><span class="p">(</span><span class="n">hwnd</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">ps</span><span class="p">);</span>
+
+<span class="w">    </span><span class="n">GetClientRect</span><span class="w"> </span><span class="p">(</span><span class="n">hwnd</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="n">LPRECT</span><span class="p">)</span><span class="o">&amp;</span><span class="n">rc</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* the cryptic stuff below outputs a text string in a rectangle */</span>
+<span class="w">    </span><span class="n">DrawText</span><span class="w"> </span><span class="p">(</span><span class="n">hdc</span><span class="p">,</span>
+<span class="w">        </span><span class="n">tszOut</span><span class="p">,</span>
+<span class="w">        </span><span class="n">_tcslen</span><span class="p">(</span><span class="n">tszOut</span><span class="p">),</span>
+<span class="w">        </span><span class="p">(</span><span class="n">LPRECT</span><span class="p">)</span><span class="o">&amp;</span><span class="n">rc</span><span class="p">,</span>
+<span class="w">        </span><span class="n">DT_VCENTER</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">DT_CENTER</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">DT_SINGLELINE</span><span class="p">);</span>
+<span class="w">    </span><span class="n">EndPaint</span><span class="p">(</span><span class="n">hwnd</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">ps</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="cm">/* below is the most important function after main() where the &quot;large windows </span>
+<span class="cm">switch&quot; figures out what the user has done and responds */</span>
+
+<span class="n">LRESULT</span><span class="w"> </span><span class="n">CALLBACK</span><span class="w"> </span><span class="n">MenuWndProc</span><span class="p">(</span><span class="w"> </span>
+<span class="w">    </span><span class="n">HWND</span><span class="w"> </span><span class="n">hwnd</span><span class="p">,</span><span class="w"> </span><span class="n">UINT</span><span class="w"> </span><span class="n">message</span><span class="p">,</span><span class="w"> </span>
+<span class="w">    </span><span class="n">WPARAM</span><span class="w"> </span><span class="n">wParam</span><span class="p">,</span><span class="w"> </span><span class="n">LPARAM</span><span class="w"> </span><span class="n">lParam</span><span class="w"> </span><span class="p">)</span><span class="w">  </span><span class="cm">/* w &amp; l param&#39;s are extra data like x,y */</span>
+<span class="p">{</span><span class="w">  </span>
+<span class="w">    </span><span class="k">switch</span><span class="w"> </span><span class="p">(</span><span class="n">message</span><span class="p">)</span><span class="w">              </span>
+<span class="w">    </span><span class="p">{</span><span class="w">   </span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="no">WM_COMMAND</span><span class="p">:</span><span class="w">            </span><span class="cm">/* there&#39;s a command from the user */</span>
+<span class="w">        </span><span class="k">switch</span><span class="p">(</span><span class="n">LOWORD</span><span class="p">(</span><span class="n">wParam</span><span class="p">))</span><span class="w">      </span><span class="cm">/* to find out what command */</span>
+<span class="w">        </span><span class="p">{</span><span class="w">   </span><span class="k">case</span><span class="w"> </span><span class="no">IDC_ExitButton</span><span class="p">:</span><span class="w">    </span><span class="cm">/* the user pressed the button */</span><span class="w">   </span>
+<span class="w">                </span><span class="n">PostQuitMessage</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+<span class="w">            </span><span class="k">break</span><span class="p">;</span>
+<span class="w">            </span><span class="k">default</span><span class="o">:</span>
+<span class="w">            </span><span class="k">break</span><span class="p">;</span><span class="w">        </span>
+<span class="w">        </span><span class="p">}</span><span class="w">     </span>
+<span class="w">    </span><span class="k">break</span><span class="p">;</span><span class="w">  </span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="no">WM_DESTROY</span><span class="p">:</span><span class="w"> </span>
+<span class="w">        </span><span class="n">PostQuitMessage</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span><span class="w"> </span><span class="cm">/* closes the program */</span>
+<span class="w">    </span><span class="k">break</span><span class="p">;</span><span class="w">   </span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="no">WM_PAINT</span><span class="p">:</span>
+<span class="w">        </span><span class="n">HandlePaint</span><span class="p">(</span><span class="n">hwnd</span><span class="p">);</span><span class="w">  </span><span class="cm">/* calls a &quot;modular&quot; drawing function */</span>
+<span class="w">    </span><span class="k">break</span><span class="p">;</span><span class="w">    </span>
+
+<span class="w">    </span><span class="k">default</span><span class="o">:</span><span class="w">      </span>
+<span class="w">       </span><span class="k">return</span><span class="w"> </span><span class="n">DefWindowProc</span><span class="p">(</span><span class="n">hwnd</span><span class="p">,</span><span class="w"> </span><span class="n">message</span><span class="p">,</span><span class="w"> </span><span class="n">wParam</span><span class="p">,</span><span class="w"> </span><span class="n">lParam</span><span class="p">);</span>
+<span class="w">    </span><span class="k">break</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span><span class="w"> </span>
+
+
+<span class="kt">int</span><span class="w"> </span><span class="n">APIENTRY</span><span class="w"> </span><span class="n">WinMain</span><span class="p">(</span>
+<span class="w">    </span><span class="n">HINSTANCE</span><span class="w"> </span><span class="n">hInstance</span><span class="p">,</span>
+<span class="w">    </span><span class="n">HINSTANCE</span><span class="w"> </span><span class="n">hPrevInstance</span><span class="p">,</span>
+<span class="w">    </span><span class="n">LPTSTR</span><span class="w"> </span><span class="n">lpCmdLine</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">ncmdshow</span><span class="w"> </span><span class="p">)</span>
+<span class="p">{</span><span class="w"> </span>
+<span class="w">    </span><span class="n">HWND</span><span class="w"> </span><span class="n">hwnd</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span><span class="w">  </span>
+<span class="w">    </span><span class="n">HWND</span><span class="w"> </span><span class="n">ExitButton</span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span><span class="w">      </span><span class="cm">/* a handle to our button &quot;window&quot; */</span>
+<span class="w">    </span><span class="n">MSG</span><span class="w"> </span><span class="n">msg</span><span class="p">;</span><span class="w">   </span>
+<span class="w">    </span><span class="n">WNDCLASS</span><span class="w"> </span><span class="n">wc</span><span class="p">;</span>
+<span class="w">    </span><span class="n">HMENU</span><span class="w"> </span><span class="n">hMenu</span><span class="p">;</span>
+
+<span class="w">    </span><span class="n">wc</span><span class="p">.</span><span class="n">style</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">CS_HREDRAW</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">CS_VREDRAW</span><span class="p">;</span><span class="w"> </span>
+<span class="w">    </span><span class="n">wc</span><span class="p">.</span><span class="n">lpfnWndProc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">WNDPROC</span><span class="p">)</span><span class="n">MenuWndProc</span><span class="p">;</span><span class="w"> </span>
+<span class="w">    </span><span class="n">wc</span><span class="p">.</span><span class="n">cbClsExtra</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="n">wc</span><span class="p">.</span><span class="n">cbWndExtra</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="n">wc</span><span class="p">.</span><span class="n">hInstance</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">hInstance</span><span class="p">;</span>
+<span class="w">    </span><span class="n">wc</span><span class="p">.</span><span class="n">hIcon</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="n">wc</span><span class="p">.</span><span class="n">hCursor</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="n">wc</span><span class="p">.</span><span class="n">hbrBackground</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">HBRUSH</span><span class="p">)</span><span class="w"> </span><span class="n">GetStockObject</span><span class="p">(</span><span class="n">WHITE_BRUSH</span><span class="p">);</span>
+<span class="w">    </span><span class="n">wc</span><span class="p">.</span><span class="n">lpszMenuName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span>
+<span class="w">    </span><span class="n">wc</span><span class="p">.</span><span class="n">lpszClassName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">LPTSTR</span><span class="p">)</span><span class="w"> </span><span class="sa">L</span><span class="s">&quot;Menu App&quot;</span><span class="p">;</span><span class="w">  </span>
+<span class="w">    </span><span class="cm">/* WinCE seems to require strings cast as LONG? */</span>
+
+<span class="w">    </span><span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="w">  </span><span class="n">RegisterClass</span><span class="w"> </span><span class="p">(</span><span class="o">&amp;</span><span class="n">wc</span><span class="p">))</span>
+<span class="w">    </span><span class="p">{</span><span class="w"> </span>
+<span class="w">        </span><span class="n">MessageBox</span><span class="p">(</span><span class="nb">NULL</span><span class="p">,</span><span class="w"> </span><span class="n">TEXT</span><span class="p">(</span><span class="s">&quot;errors &quot;</span><span class="p">),</span>
+<span class="w">        </span><span class="sa">L</span><span class="s">&quot;IMPORTANT&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">MB_OK</span><span class="p">);</span><span class="w"> </span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="cm">/* the size and placement of our program window */</span>
+<span class="w">    </span><span class="n">hwnd</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">CreateWindow</span><span class="w"> </span><span class="p">(</span><span class="sa">L</span><span class="s">&quot;Menu App&quot;</span><span class="p">,</span><span class="w"> </span><span class="sa">L</span><span class="s">&quot;2nd prog hello&quot;</span><span class="p">,</span><span class="w"> </span>
+<span class="w">        </span><span class="n">WS_VISIBLE</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">30</span><span class="p">,</span><span class="w"> </span><span class="mi">200</span><span class="p">,</span><span class="w"> </span><span class="mi">150</span><span class="p">,</span>
+<span class="w">        </span><span class="p">(</span><span class="n">HWND</span><span class="p">)</span><span class="nb">NULL</span><span class="p">,</span><span class="w"> </span><span class="nb">NULL</span><span class="p">,</span><span class="w"> </span><span class="n">hInstance</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="n">LPSTR</span><span class="p">)</span><span class="nb">NULL</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/* the size and placement of our button child of hwnd &quot;window&quot; */</span>
+<span class="w">    </span><span class="n">ExitButton</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">CreateWindow</span><span class="p">(</span><span class="w"> </span>
+<span class="w">        </span><span class="sa">L</span><span class="s">&quot;BUTTON&quot;</span><span class="p">,</span><span class="w"> </span><span class="sa">L</span><span class="s">&quot;quit&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">WS_CHILD</span><span class="w"> </span><span class="o">|</span><span class="w"> </span>
+<span class="w">        </span><span class="n">WS_VISIBLE</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">BS_PUSHBUTTON</span><span class="p">,</span><span class="w"> </span>
+<span class="w">        </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">30</span><span class="p">,</span><span class="mi">100</span><span class="p">,</span><span class="mi">100</span><span class="p">,</span><span class="w"> </span><span class="n">hwnd</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="n">HMENU</span><span class="p">)</span><span class="n">IDC_ExitButton</span><span class="p">,</span><span class="w"> </span>
+<span class="w">        </span><span class="n">hInstance</span><span class="p">,</span><span class="w"> </span><span class="nb">NULL</span><span class="p">);</span>
+
+<span class="w">    </span><span class="n">ShowWindow</span><span class="p">(</span><span class="n">hwnd</span><span class="p">,</span><span class="w"> </span><span class="n">ncmdshow</span><span class="p">);</span><span class="w"> </span>
+<span class="w">    </span><span class="n">UpdateWindow</span><span class="p">(</span><span class="n">hwnd</span><span class="p">);</span>
+
+<span class="w">    </span><span class="k">while</span><span class="p">(</span><span class="n">GetMessage</span><span class="p">(</span><span class="o">&amp;</span><span class="n">msg</span><span class="p">,</span><span class="w"> </span><span class="nb">NULL</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">))</span><span class="w">  </span>
+<span class="w">    </span><span class="p">{</span><span class="w">      </span>
+<span class="w">        </span><span class="n">TranslateMessage</span><span class="p">(</span><span class="o">&amp;</span><span class="n">msg</span><span class="p">);</span><span class="w">               </span>
+<span class="w">        </span><span class="n">DispatchMessage</span><span class="p">(</span><span class="o">&amp;</span><span class="n">msg</span><span class="p">);</span><span class="w"> </span>
+<span class="w">    </span><span class="p">}</span><span class="w">   </span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">msg</span><span class="p">.</span><span class="n">wParam</span><span class="p">;</span>
+
+<span class="p">}</span><span class="w"> </span><span class="cm">/* end WinMain */</span>
+</code></pre></div>
+            <aside>
+            <hr/>
+            <nav>
+            <ul class="articles_timeline">
+ 
+                <li class="previous_article">« <a href="https://blog.john-pfeiffer.com/vbscript-windows-shell-script-programming-for-loop-365-programming-project-day-twenty-three/" title="Previous: VBScript Windows Shell Script (Programming) For Loop: 365 programming project day twenty three">VBScript Windows Shell Script (Programming) For Loop: 365 programming project day twenty three</a></li>
+ 
+                <li class="next_article"><a href="https://blog.john-pfeiffer.com/javascript-on-ms-crm-forms-365-programming-project-day-twenty-four/" title="Next: Javascript on MS CRM Forms: 365 programming project day twenty-four">Javascript on MS CRM Forms: 365 programming project day twenty-four</a> »</li>
+            </ul>
+            </nav>
+            </aside>
+        </div>
+        <section>
+        <div class="span2" style="float:right;font-size:0.9em;">
+ 
+            <h4>Published</h4>
+            <time pubdate="pubdate" datetime="2010-01-23T01:26:00-08:00">Jan 23, 2010</time>
+            <h4>Category</h4>
+            <a class="category-link" href="/categories.html#programming-ref">programming</a> 
+            <h4>~672 words</h4>
+            <h4>Tags</h4>
+            <ul class="list-of-tags tags-in-article"> 
+                <li><a href="/tags.html#wince-ref">wince
+                    <span>1</span>
+</a></li>
+                <li><a href="/tags.html#windows-ref">windows
+                    <span>8</span>
+</a></li>
+            </ul>
+
+        </div>
+        </section>
+</div>
+</article>
+				</div>
+				<div class="span1"></div>
+			</div>
+		</div>
+    </div>
+<footer>
+<div id="footer">
+    <ul class="footer-content">
+    </ul>
+</div>
+</footer>            <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+    </body>
+</html>

@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en-US">
+    <head>
+        <meta charset="utf-8"> 
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="author" content="john pfeiffer" />
+        <meta name="copyright" content="john pfeiffer" />
+
+<meta name="keywords" content="react, javascript, js, material-ui, sso, oauth, programming, " />
+        <title>React with Material-UI and Google SSO  · johnpfeiffer
+</title>
+        <!--link href="https://cdn-images.mailchimp.com/embedcode/slim-081711.css" rel="stylesheet" type="text/css"-->
+        <!--link href="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css" rel="stylesheet"-->
+        <link href="https://blog.john-pfeiffer.com/theme/css/bootstrap-combined.min.css" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="https://blog.john-pfeiffer.com/theme/css/style.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="https://blog.john-pfeiffer.com/theme/css/solarizedlight.css" media="screen">
+        <link rel="shortcut icon" href="https://blog.john-pfeiffer.com/theme/images/favicon.ico" type="image/x-icon" />
+        <link rel="apple-touch-icon" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon.png" />
+        <link rel="apple-touch-icon" sizes="57x57" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-57x57.png" />
+        <link rel="apple-touch-icon" sizes="72x72" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-72x72.png" />
+        <link rel="apple-touch-icon" sizes="114x114" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-114x114.png" />
+        <link rel="apple-touch-icon" sizes="144x144" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-144x144.png" />
+        <link rel="icon" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-144x144.png" />
+    </head>
+    <body>
+	<div id="content-sans-footer">
+        <div class="dropdown-backdrop">
+
+			<div class="navbar navbar-static-top">
+				<div class="navbar-inner">
+					<div class="container">
+						<a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+							<span class="icon-bar"></span>
+							<span class="icon-bar"></span>
+							<span class="icon-bar"></span>
+						</a>
+						<a class="brand" href="https://blog.john-pfeiffer.com/"><span class=site-name>johnpfeiffer</span></a>
+						<div class="nav-collapse collapse">
+							<ul class="nav pull-right top-menu">
+								<li ><a href="https://blog.john-pfeiffer.com">Home</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/engineering-people-managers/">Engineering (People) Managers</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/john-likes/">John Likes</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/software-engineer-favorites/">Software Engineer Favorites</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/categories.html">Categories</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/tags.html">Tags</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/archives.html">Archives</a></li>
+								<li><form class="navbar-search" action="https://blog.john-pfeiffer.com/search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="container-fluid">
+			<div class="row-fluid">
+				<div class="span1"></div>
+				<div class="span10">
+<article>
+<div class="row-fluid">
+    <header class="page_header span10 offset2">
+    <h1><a href="https://blog.john-pfeiffer.com/react-with-material-ui-and-google-sso/"> React with Material-UI and Google SSO  </a></h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+    <div class="span2 table-of-content">
+        <nav>
+        <h4>Contents</h4>
+        <div class="toc">
+<ul>
+<li><a href="#history-of-style">History of Style</a><ul>
+<li><a href="#material-ui-for-styling">Material UI for Styling</a><ul>
+<li><a href="#a-simple-react-and-mui-code-example">A simple React and MUI code example</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#google-single-sign-on">Google Single Sign On</a><ul>
+<li><a href="#create-a-google-oauth-client">Create a Google OAuth Client</a></li>
+<li><a href="#environment-variable">Environment Variable</a><ul>
+<li><a href="#load-the-google-identity-services-script">Load the Google Identity Services Script</a></li>
+</ul>
+</li>
+<li><a href="#google-sign-in-component">Google Sign-In Component</a><ul>
+<li><a href="#using-the-sign-in-component">Using the Sign-In Component</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#listing-all-the-files-and-a-diagram">Listing all the files and a diagram</a><ul>
+<li><a href="#important-caveats">Important Caveats</a></li>
+<li><a href="#bonus-backend-golang-code">Bonus Backend Golang Code</a></li>
+</ul>
+</li>
+</ul>
+</div>
+        </nav>
+    </div>
+    <div class="span8 article-content">
+
+            
+<p>tldr: React + Vite + MUI + simple Google sign-in for rapid building</p>
+<p>React is almost a defacto standard for responsive frontend applications, so it can be helpful to layer on a few more "standard choices" to simplify building apps for production.</p>
+<p><em>if you need a more basic react intro see my previous post <a href="https://blog.john-pfeiffer.com/react-javascript-intro/">https://blog.john-pfeiffer.com/react-javascript-intro/</a></em></p>
+<h1 id="history-of-style">History of Style</h1>
+<p>As HTML took over the world, the need became obvious for separating out the "styling" of the presentation and content. Thus CSS was created, though it took awhile to become a fully adopted and usable standard (due to interests that would have preferred a private single browser definition and control).</p>
+<p><a href="https://en.wikipedia.org/wiki/CSS">https://en.wikipedia.org/wiki/CSS</a></p>
+<p>ascii diagram:</p>
+<div class="highlight"><pre><span></span><code>┌─────────────────────────────────────────────────────────────┐
+│  SOURCE CODE FILES (what you write)                         │
+│                                                             │
+│   index.html          style.css                             │
+│   ┌───────────┐       ┌──────────────────┐                  │
+│   │ &lt;h1&gt;      │       │ h1 {             │                  │
+│   │ &lt;p&gt;       │       │   color: blue;   │                  │
+│   │ &lt;button&gt;  │       │ }                │                  │
+│   └───────────┘       └──────────────────┘                  │
+│         │                     │                             │
+│         └──────────┬──────────┘                             │
+│                    ▼                                        │
+│              ┌───────────┐                                  │
+│              │  Browser  │                                  │
+│              └─────┬─────┘                                  │
+│                    ▼                                        │
+│   ┌─────────────────────────────────────────────────────┐   │
+│   │  DOM (Document Object Model) - what the browser     │   │
+│   │  builds in memory, combining structure + style      │   │
+│   │                                                     │   │
+│   │  document                                           │   │
+│   │    └── html                                         │   │
+│   │          └── body                                   │   │
+│   │                ├── h1 (color: blue)                 │   │
+│   │                ├── p                                │   │
+│   │                └── button                           │   │
+│   └─────────────────────────────────────────────────────┘   │
+│                    │                                        │
+│                    ▼                                        │
+│            What you see on screen                           │
+└─────────────────────────────────────────────────────────────┘
+</code></pre></div>
+<p>As an application grows, or if you are not keen on customizing every detail of the style, it can become overwhelming managing a lot of CSS files (and which setting overrides which thing).</p>
+<h2 id="material-ui-for-styling">Material UI for Styling</h2>
+<p>Material UI (MUI) provides pre-built components that look decent out of the box and handle responsive design, accessibility, and theming.</p>
+<p>It is a framework that generates both HTML and CSS for you - so it is simple, but opinionated.</p>
+<p>To add Material UI dependencies to an existing React project:</p>
+<div class="highlight"><pre><span></span><code>npm<span class="w"> </span>install<span class="w"> </span>@mui/material<span class="w"> </span>@emotion/react<span class="w"> </span>@emotion/styled
+</code></pre></div>
+<p><a href="https://mui.com/material-ui/getting-started/">https://mui.com/material-ui/getting-started/</a></p>
+<details>
+<summary>example package.json</summary>
+<div class="highlight"><pre><span></span><code><span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"material-ui-example"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"private"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"version"</span><span class="p">:</span><span class="w"> </span><span class="s2">"1.0.0"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"module"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"scripts"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">"dev"</span><span class="p">:</span><span class="w"> </span><span class="s2">"vite"</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"build"</span><span class="p">:</span><span class="w"> </span><span class="s2">"vite build"</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"preview"</span><span class="p">:</span><span class="w"> </span><span class="s2">"vite preview"</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">"dependencies"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">"@emotion/react"</span><span class="p">:</span><span class="w"> </span><span class="s2">"^11.14.0"</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"@emotion/styled"</span><span class="p">:</span><span class="w"> </span><span class="s2">"^11.14.1"</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"@mui/material"</span><span class="p">:</span><span class="w"> </span><span class="s2">"^7.3.6"</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"react"</span><span class="p">:</span><span class="w"> </span><span class="s2">"^18.2.0"</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"react-dom"</span><span class="p">:</span><span class="w"> </span><span class="s2">"^18.2.0"</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"react-router-dom"</span><span class="p">:</span><span class="w"> </span><span class="s2">"^6.20.0"</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">"devDependencies"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">"@types/react"</span><span class="p">:</span><span class="w"> </span><span class="s2">"^18.2.0"</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"@types/react-dom"</span><span class="p">:</span><span class="w"> </span><span class="s2">"^18.2.0"</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"@vitejs/plugin-react"</span><span class="p">:</span><span class="w"> </span><span class="s2">"^4.2.0"</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"vite"</span><span class="p">:</span><span class="w"> </span><span class="s2">"^7.1.3"</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+</code></pre></div>
+</details>
+<h3 id="a-simple-react-and-mui-code-example">A simple React and MUI code example</h3>
+<p><strong>App.jsx</strong></p>
+<div class="highlight"><pre><span></span><code><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">useState</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s1">'react'</span><span class="p">;</span>
+<span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">Button</span><span class="p">,</span><span class="w"> </span><span class="nx">Box</span><span class="p">,</span><span class="w"> </span><span class="nx">Typography</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s1">'@mui/material'</span><span class="p">;</span>
+
+<span class="kd">const</span><span class="w"> </span><span class="nx">content</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span>
+<span class="w">  </span><span class="p">[</span><span class="s2">"hello world"</span><span class="p">,</span><span class="w"> </span><span class="s2">"more content on line 2"</span><span class="p">],</span>
+<span class="w">  </span><span class="p">[</span><span class="s2">"github.com/mui has more info"</span><span class="p">]</span>
+<span class="p">];</span>
+
+<span class="kd">function</span><span class="w"> </span><span class="nx">App</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="p">[</span><span class="nx">activeContentIndex</span><span class="p">,</span><span class="w"> </span><span class="nx">setActiveContentIndex</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">useState</span><span class="p">(</span><span class="mf">0</span><span class="p">);</span>
+
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="p">(</span>
+<span class="w">        </span><span class="o">&lt;</span><span class="nx">Box</span><span class="w"> </span><span class="nx">sx</span><span class="o">=</span><span class="p">{{</span><span class="w"> </span><span class="nx">p</span><span class="o">:</span><span class="w"> </span><span class="mf">2</span><span class="w"> </span><span class="p">}}</span><span class="o">&gt;</span>
+<span class="w">            </span><span class="o">&lt;</span><span class="nx">Box</span><span class="w"> </span><span class="nx">sx</span><span class="o">=</span><span class="p">{{</span><span class="w"> </span><span class="nx">mb</span><span class="o">:</span><span class="w"> </span><span class="mf">2</span><span class="w"> </span><span class="p">}}</span><span class="o">&gt;</span>
+<span class="w">                </span><span class="o">&lt;</span><span class="nx">Button</span><span class="w"> </span><span class="nx">onClick</span><span class="o">=</span><span class="p">{()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">setActiveContentIndex</span><span class="p">(</span><span class="mf">0</span><span class="p">)}</span><span class="o">&gt;</span><span class="nx">View</span><span class="w"> </span><span class="mf">1</span><span class="o">&lt;</span><span class="err">/Button&gt;</span>
+<span class="w">                </span><span class="o">&lt;</span><span class="nx">Button</span><span class="w"> </span><span class="nx">onClick</span><span class="o">=</span><span class="p">{()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">setActiveContentIndex</span><span class="p">(</span><span class="mf">1</span><span class="p">)}</span><span class="o">&gt;</span><span class="nx">View</span><span class="w"> </span><span class="mf">2</span><span class="o">&lt;</span><span class="err">/Button&gt;</span>
+<span class="w">            </span><span class="o">&lt;</span><span class="err">/Box&gt;</span>
+<span class="w">            </span><span class="o">&lt;</span><span class="nx">div</span><span class="o">&gt;</span>
+<span class="w">                </span><span class="p">{</span><span class="nx">content</span><span class="p">[</span><span class="nx">activeContentIndex</span><span class="p">].</span><span class="nx">map</span><span class="p">((</span><span class="nx">line</span><span class="p">,</span><span class="w"> </span><span class="nx">i</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">(</span>
+<span class="w">                    </span><span class="o">&lt;</span><span class="nx">Typography</span><span class="w"> </span><span class="nx">key</span><span class="o">=</span><span class="p">{</span><span class="nx">i</span><span class="p">}</span><span class="w"> </span><span class="nx">paragraph</span><span class="o">&gt;</span><span class="p">{</span><span class="nx">line</span><span class="p">}</span><span class="o">&lt;</span><span class="err">/Typography&gt;</span>
+<span class="w">                </span><span class="p">))}</span>
+<span class="w">            </span><span class="o">&lt;</span><span class="err">/div&gt;</span>
+<span class="w">        </span><span class="o">&lt;</span><span class="err">/Box&gt;</span>
+<span class="w">    </span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">export</span><span class="w"> </span><span class="k">default</span><span class="w"> </span><span class="nx">App</span><span class="p">;</span>
+</code></pre></div>
+<ul>
+<li>Box is a Material-UI generic wrapper: a <code>&lt;div&gt;</code> that accepts the sx property</li>
+<li>sx is a Material-UI shorthand for a property</li>
+<li>
+<ul>
+<li>p = padding, all sides, 2 x 8px = 16px</li>
+</ul>
+</li>
+<li>
+<ul>
+<li>m = margin-bottom, 2 x 8px = 16px</li>
+</ul>
+</li>
+<li>Button has Material Design ripple effect, hover states, and theming</li>
+<li>Typography applies Material Design font family, sizes, and spacing and renders as <code>&lt;p&gt;</code> by default</li>
+</ul>
+<blockquote>
+<p>There is no longer <code>App.css</code> and <code>index.css</code> since MUI is handling all the styling.</p>
+</blockquote>
+<p>Thus your React framework code is now React + Material-UI, effectively a "Domain Specific Language" that quickly builds and renders frontend apps.</p>
+<hr/>
+<h1 id="google-single-sign-on">Google Single Sign On</h1>
+<p>There are quite a few options for security, and identity (followed by authentication and authorization), and if you attempt to write it all yourself you can inadvertantly create a security issue.</p>
+<p>One of the most popular Identity Providers to leverage is Google (due to gmail and youtube and large consumer reach).</p>
+<p>For simple apps where your users will already have a Google Account, here is an easy way to have them verify their identity with Google and then share their email address with your application.</p>
+<p>This allows for a "frontend only" app to have personalization, and is an important pre-requisite when added to a backend.</p>
+<h2 id="create-a-google-oauth-client">Create a Google OAuth Client</h2>
+<p>For an existing (or new) <strong>Google Cloud Project</strong>, start the flow with the OAuth Consent</p>
+<blockquote>
+<p>Requests user consent so your app can access the user's data</p>
+</blockquote>
+<ol>
+<li>Create https://console.cloud.google.com/auth/overview/create</li>
+<li>fill out the questionnaire about the Application and intended use (starting with Internal or Test users is simplest)</li>
+<li>fill in contact email address, and "terms and conditions"</li>
+<li>"OAuth configuration created"</li>
+<li>Create  OAuth client (button)</li>
+<li>Application type: web application</li>
+<li>Add <code>http://localhost:5173</code> to Authorized JavaScript origins (for local dev)</li>
+<li>if you know it already you can add the domain where your production React App runs (i.e. https://yourusername.github.io/)</li>
+<li>Create (button)</li>
+<li>Copy the Client ID - this is what you put in your environment variables or code</li>
+</ol>
+<p>i.e. really-long-random-numbers-and-characters.apps.googleusercontent.com</p>
+<p><em>Note that this client ID is a public facing configuration value (ends up in JS code visible in the browser dev tools)</em></p>
+<h2 id="environment-variable">Environment Variable</h2>
+<p>Using an Environment variable allows setting a different value for Development, Staging, and Production.</p>
+<p>Create the file <code>.env</code> in your project root with the following in it:</p>
+<div class="highlight"><pre><span></span><code>VITE_GOOGLE_CLIENT_ID=your-client-id-here.apps.googleusercontent.com
+</code></pre></div>
+<p><em>(Also make sure you add <code>.env</code> to your <code>.gitignore</code> ;)</em></p>
+<p>Make sure you also set the value in your build process (or via integration with a hosting provider like AWS Amplify or Cloudflare ) that creates the final bundle </p>
+<h3 id="load-the-google-identity-services-script">Load the Google Identity Services Script</h3>
+<p><strong>index.html</strong></p>
+<div class="highlight"><pre><span></span><code><span class="cp">&lt;!DOCTYPE html&gt;</span>
+<span class="p">&lt;</span><span class="nt">html</span> <span class="na">lang</span><span class="o">=</span><span class="s">"en"</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">head</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">meta</span> <span class="na">charset</span><span class="o">=</span><span class="s">"UTF-8"</span> <span class="p">/&gt;</span>
+  <span class="p">&lt;</span><span class="nt">meta</span> <span class="na">name</span><span class="o">=</span><span class="s">"viewport"</span> <span class="na">content</span><span class="o">=</span><span class="s">"width=device-width, initial-scale=1.0"</span> <span class="p">/&gt;</span>
+  <span class="p">&lt;</span><span class="nt">title</span><span class="p">&gt;</span>My SSO App<span class="p">&lt;/</span><span class="nt">title</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">script</span> <span class="na">src</span><span class="o">=</span><span class="s">"https://accounts.google.com/gsi/client"</span> <span class="na">async</span> <span class="na">defer</span><span class="p">&gt;&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">head</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">body</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">noscript</span><span class="p">&gt;</span>You need to enable JavaScript to run this app.<span class="p">&lt;/</span><span class="nt">noscript</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">div</span> <span class="na">id</span><span class="o">=</span><span class="s">"root"</span><span class="p">&gt;&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">script</span> <span class="na">type</span><span class="o">=</span><span class="s">"module"</span> <span class="na">src</span><span class="o">=</span><span class="s">"/src/main.jsx"</span><span class="p">&gt;&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">body</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">html</span><span class="p">&gt;</span>
+</code></pre></div>
+<h2 id="google-sign-in-component">Google Sign-In Component</h2>
+<p><strong>GoogleSignIn.jsx</strong></p>
+<div class="highlight"><pre><span></span><code><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">useEffect</span><span class="p">,</span><span class="w"> </span><span class="nx">useRef</span><span class="p">,</span><span class="w"> </span><span class="nx">useState</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">"react"</span><span class="p">;</span>
+
+<span class="k">export</span><span class="w"> </span><span class="k">default</span><span class="w"> </span><span class="kd">function</span><span class="w"> </span><span class="nx">GoogleSignIn</span><span class="p">({</span><span class="w"> </span><span class="nx">onAuth</span><span class="w"> </span><span class="p">})</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="p">[</span><span class="nx">gsiReady</span><span class="p">,</span><span class="w"> </span><span class="nx">setGsiReady</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">useState</span><span class="p">(</span><span class="kc">false</span><span class="p">);</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="p">[</span><span class="nx">authStatus</span><span class="p">,</span><span class="w"> </span><span class="nx">setAuthStatus</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">useState</span><span class="p">(</span><span class="kc">null</span><span class="p">);</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">googleButtonRef</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">useRef</span><span class="p">(</span><span class="kc">null</span><span class="p">);</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">renderedRef</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">useRef</span><span class="p">(</span><span class="kc">false</span><span class="p">);</span>
+
+<span class="w">  </span><span class="nx">useEffect</span><span class="p">(()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">clientId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">import</span><span class="p">.</span><span class="nx">meta</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">VITE_GOOGLE_CLIENT_ID</span><span class="p">;</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="nx">clientId</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nx">setAuthStatus</span><span class="p">({</span><span class="w"> </span><span class="nx">ok</span><span class="o">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"> </span><span class="nx">message</span><span class="o">:</span><span class="w"> </span><span class="s2">"Missing VITE_GOOGLE_CLIENT_ID"</span><span class="w"> </span><span class="p">});</span>
+<span class="w">      </span><span class="k">return</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">handleCredentialResponse</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="nx">response</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nx">setAuthStatus</span><span class="p">({</span><span class="w"> </span><span class="nx">ok</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="nx">token</span><span class="o">:</span><span class="w"> </span><span class="nx">response</span><span class="p">.</span><span class="nx">credential</span><span class="w"> </span><span class="p">});</span>
+<span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">onAuth</span><span class="p">)</span><span class="w"> </span><span class="nx">onAuth</span><span class="p">(</span><span class="nx">response</span><span class="p">.</span><span class="nx">credential</span><span class="p">);</span>
+<span class="w">    </span><span class="p">};</span>
+
+<span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">tryRender</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="kd">const</span><span class="w"> </span><span class="nx">g</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">window</span><span class="p">.</span><span class="nx">google</span><span class="p">;</span>
+<span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="nx">g</span><span class="o">?</span><span class="p">.</span><span class="nx">accounts</span><span class="o">?</span><span class="p">.</span><span class="nx">id</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="o">!</span><span class="nx">googleButtonRef</span><span class="p">.</span><span class="nx">current</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">requestAnimationFrame</span><span class="p">(</span><span class="nx">tryRender</span><span class="p">);</span>
+<span class="w">        </span><span class="k">return</span><span class="p">;</span>
+<span class="w">      </span><span class="p">}</span>
+
+<span class="w">      </span><span class="nx">setGsiReady</span><span class="p">(</span><span class="kc">true</span><span class="p">);</span>
+
+<span class="w">      </span><span class="c1">// Prevent double-render (React 18 StrictMode calls useEffect twice)</span>
+<span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">renderedRef</span><span class="p">.</span><span class="nx">current</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="p">;</span>
+<span class="w">      </span><span class="nx">renderedRef</span><span class="p">.</span><span class="nx">current</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span>
+
+<span class="w">      </span><span class="nx">g</span><span class="p">.</span><span class="nx">accounts</span><span class="p">.</span><span class="nx">id</span><span class="p">.</span><span class="nx">initialize</span><span class="p">({</span>
+<span class="w">        </span><span class="nx">client_id</span><span class="o">:</span><span class="w"> </span><span class="nx">clientId</span><span class="p">,</span>
+<span class="w">        </span><span class="nx">callback</span><span class="o">:</span><span class="w"> </span><span class="nx">handleCredentialResponse</span><span class="p">,</span>
+<span class="w">      </span><span class="p">});</span>
+
+<span class="w">      </span><span class="nx">googleButtonRef</span><span class="p">.</span><span class="nx">current</span><span class="p">.</span><span class="nx">innerHTML</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">""</span><span class="p">;</span>
+
+<span class="w">      </span><span class="nx">g</span><span class="p">.</span><span class="nx">accounts</span><span class="p">.</span><span class="nx">id</span><span class="p">.</span><span class="nx">renderButton</span><span class="p">(</span><span class="nx">googleButtonRef</span><span class="p">.</span><span class="nx">current</span><span class="p">,</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">theme</span><span class="o">:</span><span class="w"> </span><span class="s2">"outline"</span><span class="p">,</span>
+<span class="w">        </span><span class="nx">size</span><span class="o">:</span><span class="w"> </span><span class="s2">"large"</span><span class="p">,</span>
+<span class="w">        </span><span class="nx">text</span><span class="o">:</span><span class="w"> </span><span class="s2">"signin_with"</span><span class="p">,</span>
+<span class="w">      </span><span class="p">});</span>
+<span class="w">    </span><span class="p">};</span>
+
+<span class="w">    </span><span class="nx">tryRender</span><span class="p">();</span>
+<span class="w">  </span><span class="p">},</span><span class="w"> </span><span class="p">[</span><span class="nx">onAuth</span><span class="p">]);</span>
+
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="p">(</span>
+<span class="w">    </span><span class="o">&lt;</span><span class="nx">div</span><span class="o">&gt;</span>
+<span class="w">      </span><span class="o">&lt;</span><span class="nx">div</span><span class="w"> </span><span class="nx">ref</span><span class="o">=</span><span class="p">{</span><span class="nx">googleButtonRef</span><span class="p">}</span><span class="w"> </span><span class="o">/&gt;</span>
+<span class="w">      </span><span class="p">{</span><span class="o">!</span><span class="nx">gsiReady</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="o">&lt;</span><span class="nx">div</span><span class="o">&gt;</span><span class="nx">Loading</span><span class="w"> </span><span class="nx">Google</span><span class="w"> </span><span class="nx">Sign</span><span class="o">-</span><span class="nx">In</span><span class="p">...</span><span class="o">&lt;</span><span class="err">/div&gt;}</span>
+<span class="w">      </span><span class="p">{</span><span class="nx">authStatus</span><span class="o">?</span><span class="p">.</span><span class="nx">ok</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="kc">false</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="o">&lt;</span><span class="nx">div</span><span class="w"> </span><span class="nx">style</span><span class="o">=</span><span class="p">{{</span><span class="nx">color</span><span class="o">:</span><span class="w"> </span><span class="s1">'red'</span><span class="p">}}</span><span class="o">&gt;</span><span class="p">{</span><span class="nx">authStatus</span><span class="p">.</span><span class="nx">message</span><span class="p">}</span><span class="o">&lt;</span><span class="err">/div&gt;}</span>
+<span class="w">    </span><span class="o">&lt;</span><span class="err">/div&gt;</span>
+<span class="w">  </span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+<h3 id="using-the-sign-in-component">Using the Sign-In Component</h3>
+<p><strong>App.jsx</strong></p>
+<div class="highlight"><pre><span></span><code><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">useState</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s1">'react'</span><span class="p">;</span>
+<span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">Container</span><span class="p">,</span><span class="w"> </span><span class="nx">Paper</span><span class="p">,</span><span class="w"> </span><span class="nx">Typography</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s1">'@mui/material'</span><span class="p">;</span>
+<span class="k">import</span><span class="w"> </span><span class="nx">GoogleSignIn</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s1">'./GoogleSignIn'</span><span class="p">;</span>
+
+<span class="kd">function</span><span class="w"> </span><span class="nx">App</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="p">[</span><span class="nx">user</span><span class="p">,</span><span class="w"> </span><span class="nx">setUser</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">useState</span><span class="p">(</span><span class="kc">null</span><span class="p">);</span>
+
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">handleAuth</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="nx">credential</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// The credential is a JWT - decode the payload to get user info</span>
+<span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">payload</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">JSON</span><span class="p">.</span><span class="nx">parse</span><span class="p">(</span><span class="nx">atob</span><span class="p">(</span><span class="nx">credential</span><span class="p">.</span><span class="nx">split</span><span class="p">(</span><span class="s1">'.'</span><span class="p">)[</span><span class="mf">1</span><span class="p">]));</span>
+<span class="w">    </span><span class="nx">setUser</span><span class="p">(</span><span class="nx">payload</span><span class="p">);</span>
+<span class="w">  </span><span class="p">};</span>
+
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="p">(</span>
+<span class="w">    </span><span class="o">&lt;</span><span class="nx">Container</span><span class="w"> </span><span class="nx">maxWidth</span><span class="o">=</span><span class="s2">"sm"</span><span class="w"> </span><span class="nx">sx</span><span class="o">=</span><span class="p">{{</span><span class="w"> </span><span class="nx">mt</span><span class="o">:</span><span class="w"> </span><span class="mf">4</span><span class="w"> </span><span class="p">}}</span><span class="o">&gt;</span>
+<span class="w">      </span><span class="o">&lt;</span><span class="nx">Paper</span><span class="w"> </span><span class="nx">elevation</span><span class="o">=</span><span class="p">{</span><span class="mf">2</span><span class="p">}</span><span class="w"> </span><span class="nx">sx</span><span class="o">=</span><span class="p">{{</span><span class="w"> </span><span class="nx">p</span><span class="o">:</span><span class="w"> </span><span class="mf">3</span><span class="w"> </span><span class="p">}}</span><span class="o">&gt;</span>
+<span class="w">        </span><span class="p">{</span><span class="nx">user</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="p">(</span>
+<span class="w">          </span><span class="o">&lt;</span><span class="nx">div</span><span class="o">&gt;</span>
+<span class="w">            </span><span class="o">&lt;</span><span class="nx">Typography</span><span class="w"> </span><span class="nx">variant</span><span class="o">=</span><span class="s2">"h6"</span><span class="o">&gt;</span><span class="nx">Welcome</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="nx">user</span><span class="p">.</span><span class="nx">name</span><span class="p">}</span><span class="o">&lt;</span><span class="err">/Typography&gt;</span>
+<span class="w">            </span><span class="o">&lt;</span><span class="nx">Typography</span><span class="w"> </span><span class="nx">color</span><span class="o">=</span><span class="s2">"text.secondary"</span><span class="o">&gt;</span><span class="p">{</span><span class="nx">user</span><span class="p">.</span><span class="nx">email</span><span class="p">}</span><span class="o">&lt;</span><span class="err">/Typography&gt;</span>
+<span class="w">          </span><span class="o">&lt;</span><span class="err">/div&gt;</span>
+<span class="w">        </span><span class="p">)</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="p">(</span>
+<span class="w">          </span><span class="o">&lt;</span><span class="nx">GoogleSignIn</span><span class="w"> </span><span class="nx">onAuth</span><span class="o">=</span><span class="p">{</span><span class="nx">handleAuth</span><span class="p">}</span><span class="w"> </span><span class="o">/&gt;</span>
+<span class="w">        </span><span class="p">)}</span>
+<span class="w">      </span><span class="o">&lt;</span><span class="err">/Paper&gt;</span>
+<span class="w">    </span><span class="o">&lt;</span><span class="err">/Container&gt;</span>
+<span class="w">  </span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">export</span><span class="w"> </span><span class="k">default</span><span class="w"> </span><span class="nx">App</span><span class="p">;</span>
+</code></pre></div>
+<p>The JWT payload from Google includes: <code>email</code>, <code>name</code>, <code>picture</code>, <code>sub</code> (unique user ID), and expiration info.</p>
+<hr/>
+<h1 id="listing-all-the-files-and-a-diagram">Listing all the files and a diagram</h1>
+<p>Final folder structure:</p>
+<div class="highlight"><pre><span></span><code><span class="nx">my</span><span class="o">-</span><span class="nx">app</span><span class="o">/</span>
+<span class="w">    </span><span class="p">.</span><span class="nx">env</span><span class="w">                 </span><span class="p">(</span><span class="nx">VITE_GOOGLE_CLIENT_ID</span><span class="p">=</span><span class="o">...</span><span class="p">)</span>
+<span class="w">    </span><span class="p">.</span><span class="nx">gitignore</span><span class="w">           </span><span class="p">(</span><span class="nx">include</span><span class="w"> </span><span class="p">.</span><span class="nx">env</span><span class="p">)</span>
+<span class="w">    </span><span class="nx">index</span><span class="p">.</span><span class="nx">html</span><span class="w">           </span><span class="p">(</span><span class="nx">includes</span><span class="w"> </span><span class="nx">gsi</span><span class="w"> </span><span class="nx">script</span><span class="p">)</span>
+<span class="w">    </span><span class="kn">package</span><span class="p">.</span><span class="nx">json</span>
+<span class="w">    </span><span class="nx">src</span><span class="o">/</span>
+<span class="w">        </span><span class="nx">main</span><span class="p">.</span><span class="nx">jsx</span>
+<span class="w">        </span><span class="nx">App</span><span class="p">.</span><span class="nx">jsx</span>
+<span class="w">        </span><span class="nx">GoogleSignIn</span><span class="p">.</span><span class="nx">jsx</span>
+</code></pre></div>
+<p><em>For deployment, remember to add your production domain to the Google OAuth credentials Authorized JavaScript origins.</em></p>
+<div class="highlight"><pre><span></span><code>┌─────────────────────────────────────────────────────────────────────┐
+│  GOOGLE SSO (Client-Side Only)                                      │
+│                                                                     │
+│                                                                     │
+│   ┌──────────┐                              ┌──────────────────┐    │
+│   │  Browser │                              │  Google Servers  │    │
+│   └────┬─────┘                              └────────┬─────────┘    │
+│        │                                             │              │
+│        │  1. Page loads GSI script                   │              │
+│        │────────────────────────────────────────────&gt;│              │
+│        │&lt;────────────────────────────────────────────│              │
+│        │                                             │              │
+│        │  2. User clicks "Sign in with Google"       │              │
+│        │────────────────────────────────────────────&gt;│              │
+│        │                                             │              │
+│        │         ┌─────────────────────┐             │              │
+│        │         │  Google login popup │             │              │
+│        │         │  - enter email      │             │              │
+│        │         │  - enter password   │             │              │
+│        │         │  - consent screen   │             │              │
+│        │         └─────────────────────┘             │              │
+│        │                                             │              │
+│        │  3. Google returns JWT credential           │              │
+│        │&lt;────────────────────────────────────────────│              │
+│        │                                             │              │
+│        │                                                            │
+│        ▼                                                            │
+│   ┌─────────────────────────────────────────┐                       │
+│   │  JWT Payload (decoded in browser by javascript)                 │
+│   │                                         │                       │
+│   │  {                                      │                       │
+│   │    "sub": "1234567890",  ← unique ID    │                       │
+│   │    "email": "user@gmail.com",           │                       │
+│   │    "name": "John Smith",                │                       │
+│   │    "picture": "https://...",            │                       │
+│   │    "exp": 1234567890                    │                       │
+│   │  }                                      │                       │
+│   └─────────────────────────────────────────┘                       │
+│                                                                     │
+│                                                                     │
+└─────────────────────────────────────────────────────────────────────┘
+</code></pre></div>
+<h2 id="important-caveats">Important Caveats</h2>
+<p>This all depends on trusting the javascript provided by google and their servers - they are responsible for the complexities of passwords, 2-factor-authentication, etc. </p>
+<p>This post uses Google Identity Services to get an ID token directly in the browser (no redirect URI required).</p>
+<p>If you use "OAuth authorization code flow", you must configure redirect URIs and handle the code exchange on a backend.</p>
+<p>Importantly: if you have any backend/API you should send the Google ID token to the backend and have code to truly verify it (signature + issuer + audience + expiry).</p>
+<h2 id="bonus-backend-golang-code">Bonus Backend Golang Code</h2>
+<div class="highlight"><pre><span></span><code><span class="kn">package</span><span class="w"> </span><span class="nx">main</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="p">(</span>
+<span class="w">    </span><span class="s">"context"</span>
+<span class="w">    </span><span class="s">"encoding/json"</span>
+<span class="w">    </span><span class="s">"log"</span>
+<span class="w">    </span><span class="s">"net/http"</span>
+
+<span class="w">    </span><span class="s">"google.golang.org/api/idtoken"</span>
+<span class="p">)</span>
+
+<span class="kd">type</span><span class="w"> </span><span class="nx">googleAuthReq</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">IDToken</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="s">`json:"id_token"`</span>
+<span class="p">}</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="nx">handleGoogleAuth</span><span class="p">(</span><span class="nx">w</span><span class="w"> </span><span class="nx">http</span><span class="p">.</span><span class="nx">ResponseWriter</span><span class="p">,</span><span class="w"> </span><span class="nx">r</span><span class="w"> </span><span class="o">*</span><span class="nx">http</span><span class="p">.</span><span class="nx">Request</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nx">req</span><span class="w"> </span><span class="nx">googleAuthReq</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">json</span><span class="p">.</span><span class="nx">NewDecoder</span><span class="p">(</span><span class="nx">r</span><span class="p">.</span><span class="nx">Body</span><span class="p">).</span><span class="nx">Decode</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">req</span><span class="p">);</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">http</span><span class="p">.</span><span class="nx">Error</span><span class="p">(</span><span class="nx">w</span><span class="p">,</span><span class="w"> </span><span class="s">"Invalid request"</span><span class="p">,</span><span class="w"> </span><span class="nx">http</span><span class="p">.</span><span class="nx">StatusBadRequest</span><span class="p">)</span>
+<span class="w">        </span><span class="k">return</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="nx">clientID</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="s">"your-client-id-here.apps.googleusercontent.com"</span>
+<span class="w">    </span><span class="nx">ctx</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Background</span><span class="p">()</span>
+<span class="w">    </span><span class="nx">payload</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">idtoken</span><span class="p">.</span><span class="nx">Validate</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">req</span><span class="p">.</span><span class="nx">IDToken</span><span class="p">,</span><span class="w"> </span><span class="nx">clientID</span><span class="p">)</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">http</span><span class="p">.</span><span class="nx">Error</span><span class="p">(</span><span class="nx">w</span><span class="p">,</span><span class="w"> </span><span class="s">"Invalid ID token"</span><span class="p">,</span><span class="w"> </span><span class="nx">http</span><span class="p">.</span><span class="nx">StatusUnauthorized</span><span class="p">)</span>
+<span class="w">        </span><span class="k">return</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="c1">// payload.Claims contains "email", "email_verified", "name", etc.</span>
+<span class="w">    </span><span class="nx">email</span><span class="p">,</span><span class="w"> </span><span class="nx">_</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">payload</span><span class="p">.</span><span class="nx">Claims</span><span class="p">[</span><span class="s">"email"</span><span class="p">].(</span><span class="kt">string</span><span class="p">)</span>
+<span class="w">    </span><span class="nx">emailVerified</span><span class="p">,</span><span class="w"> </span><span class="nx">_</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">payload</span><span class="p">.</span><span class="nx">Claims</span><span class="p">[</span><span class="s">"email_verified"</span><span class="p">].(</span><span class="kt">bool</span><span class="p">)</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">email</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s">""</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="p">!</span><span class="nx">emailVerified</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">http</span><span class="p">.</span><span class="nx">Error</span><span class="p">(</span><span class="nx">w</span><span class="p">,</span><span class="w"> </span><span class="s">"Invalid email or email not verified"</span><span class="p">,</span><span class="w"> </span><span class="nx">http</span><span class="p">.</span><span class="nx">StatusUnauthorized</span><span class="p">)</span>
+<span class="w">        </span><span class="k">return</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="nx">w</span><span class="p">.</span><span class="nx">Header</span><span class="p">().</span><span class="nx">Set</span><span class="p">(</span><span class="s">"Content-Type"</span><span class="p">,</span><span class="w"> </span><span class="s">"application/json"</span><span class="p">)</span>
+<span class="w">    </span><span class="nx">json</span><span class="p">.</span><span class="nx">NewEncoder</span><span class="p">(</span><span class="nx">w</span><span class="p">).</span><span class="nx">Encode</span><span class="p">(</span><span class="nx">payload</span><span class="p">.</span><span class="nx">Claims</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="nx">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">mux</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">http</span><span class="p">.</span><span class="nx">NewServeMux</span><span class="p">()</span>
+<span class="w">    </span><span class="nx">mux</span><span class="p">.</span><span class="nx">HandleFunc</span><span class="p">(</span><span class="s">"/{path...}"</span><span class="p">,</span><span class="w"> </span><span class="nx">handleGoogleAuth</span><span class="p">)</span>
+<span class="w">    </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">http</span><span class="p">.</span><span class="nx">ListenAndServe</span><span class="p">(</span><span class="s">":8080"</span><span class="p">,</span><span class="w"> </span><span class="nx">mux</span><span class="p">)</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">log</span><span class="p">.</span><span class="nx">Fatalf</span><span class="p">(</span><span class="s">"failed to start server: %v"</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="p">)</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><code>curl -X POST http://localhost:8080/ -H "Content-Type: application/json" --data '{"id_token":"foobar"}'</code></p>
+            <aside>
+            <hr/>
+            <nav>
+            <ul class="articles_timeline">
+ 
+                <li class="previous_article">« <a href="https://blog.john-pfeiffer.com/react-javascript-intro/" title="Previous: React Javascript Intro">React Javascript Intro</a></li>
+ 
+                <li class="next_article"><a href="https://blog.john-pfeiffer.com/cars-not-helicopters-or-running-a-local-llm-with-mlx-on-a-macbook-pro/" title="Next: Cars not helicopters, or running a local LLM with MLX on a Macbook Pro">Cars not helicopters, or running a local LLM with MLX on a Macbook Pro</a> »</li>
+            </ul>
+            </nav>
+            </aside>
+        </div>
+        <section>
+        <div class="span2" style="float:right;font-size:0.9em;">
+ 
+            <h4>Published</h4>
+            <time pubdate="pubdate" datetime="2024-09-07T12:34:00-07:00">Sep 7, 2024</time>
+            <h4>Category</h4>
+            <a class="category-link" href="/categories.html#programming-ref">programming</a> 
+            <h4>~1562 words</h4>
+            <h4>Tags</h4>
+            <ul class="list-of-tags tags-in-article"> 
+                <li><a href="/tags.html#javascript-ref">javascript
+                    <span>7</span>
+</a></li>
+                <li><a href="/tags.html#js-ref">js
+                    <span>2</span>
+</a></li>
+                <li><a href="/tags.html#material-ui-ref">material-ui
+                    <span>1</span>
+</a></li>
+                <li><a href="/tags.html#oauth-ref">oauth
+                    <span>1</span>
+</a></li>
+                <li><a href="/tags.html#react-ref">react
+                    <span>2</span>
+</a></li>
+                <li><a href="/tags.html#sso-ref">sso
+                    <span>2</span>
+</a></li>
+            </ul>
+
+        </div>
+        </section>
+</div>
+</article>
+				</div>
+				<div class="span1"></div>
+			</div>
+		</div>
+    </div>
+<footer>
+<div id="footer">
+    <ul class="footer-content">
+    </ul>
+</div>
+</footer>            <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+    </body>
+</html>
