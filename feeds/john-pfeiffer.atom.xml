@@ -382,7 +382,273 @@
 &lt;li&gt;give it explicit instructions on the level of modularity ("make this 3 functions")&lt;/li&gt;
 &lt;/ul&gt;
 &lt;h2 id="what-does-it-all-mean"&gt;What does it all mean&lt;/h2&gt;
-&lt;p&gt;Even with software writing software there is actually an increasing need for human intent, and managing of complexity (including ensuring generated code is readable, modular, testable, etc.)&lt;/p&gt;</content><category term="build-CI-CD-devops"></category><category term="github"></category><category term="google cloud run"></category><category term="ci"></category><category term="cd"></category><category term="deployment"></category><category term="ai"></category><category term="agent"></category></entry><entry><title>Cars not helicopters, or running a local LLM with MLX on a Macbook Pro</title><link href="https://blog.john-pfeiffer.com/cars-not-helicopters-or-running-a-local-llm-with-mlx-on-a-macbook-pro/" rel="alternate"></link><published>2024-11-23T19:21:00-08:00</published><updated>2024-11-23T19:21:00-08:00</updated><author><name>john pfeiffer</name></author><id>tag:blog.john-pfeiffer.com,2024-11-23:/cars-not-helicopters-or-running-a-local-llm-with-mlx-on-a-macbook-pro/</id><summary type="html">
+&lt;p&gt;Even with software writing software there is actually an increasing need for human intent, and managing of complexity (including ensuring generated code is readable, modular, testable, etc.)&lt;/p&gt;</content><category term="build-CI-CD-devops"></category><category term="github"></category><category term="google cloud run"></category><category term="ci"></category><category term="cd"></category><category term="deployment"></category><category term="ai"></category><category term="agent"></category></entry><entry><title>Building a desktop app with Golang and Wails</title><link href="https://blog.john-pfeiffer.com/building-a-desktop-app-with-golang-and-wails/" rel="alternate"></link><published>2025-04-06T10:10:00-07:00</published><updated>2025-04-06T10:10:00-07:00</updated><author><name>john pfeiffer</name></author><id>tag:blog.john-pfeiffer.com,2025-04-06:/building-a-desktop-app-with-golang-and-wails/</id><summary type="html">
+&lt;p&gt;tldr: a Golang native desktop app using Wails (Go backend + React frontend = single binary)&lt;/p&gt;
+&lt;h1 id="why-this-tech-stack-and-why-a-desktop-app"&gt;Why this tech stack and why a desktop app?&lt;/h1&gt;
+&lt;p&gt;Desktop apps provide privacy for the persistence layer, and bypass the "where is it hosted" challenges.&lt;/p&gt;
+&lt;p&gt;This is a simple and practical way to leverage some great …&lt;/p&gt;</summary><content type="html">
+&lt;p&gt;tldr: a Golang native desktop app using Wails (Go backend + React frontend = single binary)&lt;/p&gt;
+&lt;h1 id="why-this-tech-stack-and-why-a-desktop-app"&gt;Why this tech stack and why a desktop app?&lt;/h1&gt;
+&lt;p&gt;Desktop apps provide privacy for the persistence layer, and bypass the "where is it hosted" challenges.&lt;/p&gt;
+&lt;p&gt;This is a simple and practical way to leverage some great backend + frontend technologies.&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;If you need a more basic react intro see my previous post https://blog.john-pfeiffer.com/react-javascript-intro/&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;The key insight: Go methods with exported (capitalized) names get auto generated as JavaScript/TypeScript bindings. You call Go functions from React as if they were local async functions.&lt;/p&gt;
+&lt;h2 id="why-wails"&gt;Why Wails&lt;/h2&gt;
+&lt;p&gt;Wails uses the operating system's native webview (WebKit on macOS, WebView2 on Windows, WebKitGTK on Linux) so the resulting binary is ~10MB and uses a fraction of the memory.&lt;/p&gt;
+&lt;p&gt;As a comparison to a very popular technology, electron bundles an entire Chromium browser into your app - which is why a "hello world" Electron app is ~150MB and idles at 100MB+ of RAM.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;┌─────────────────────────────────────────────────────────────┐
+│  WAILS APPLICATION                                          │
+│                                                             │
+│   Go Backend              React Frontend                    │
+│   ┌───────────┐           ┌──────────────────┐              │
+│   │ app.go    │◄─────────►│ App.tsx          │              │
+│   │ (structs  │  bindings │ (components,     │              │
+│   │  &amp;amp; methods│  ───────► │  hooks, UI)      │              │
+│   │  &amp;amp; stdlib)│           │                  │              │
+│   └───────────┘           └──────────────────┘              │
+│         │                         │                         │
+│         └──────────┬──────────────┘                         │
+│                    ▼                                        │
+│         ┌────────────────────┐                              │
+│         │  Native WebView    │                              │
+│         │  (WebKit on macOS) │                              │
+│         └────────────────────┘                              │
+│                    │                                        │
+│                    ▼                                        │
+│            Single Binary (~10MB)                            │
+└─────────────────────────────────────────────────────────────┘
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h2 id="why-golang"&gt;Why golang&lt;/h2&gt;
+&lt;p&gt;Golang is a remarkably performant language but it still automatically handles memory management (with garbage collection)&lt;/p&gt;
+&lt;p&gt;Golang builds to a single binary&lt;/p&gt;
+&lt;h1 id="pre-requisites"&gt;Pre-requisites&lt;/h1&gt;
+&lt;p&gt;&lt;em&gt;the assumption here is MacOS...&lt;/em&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Golang: https://go.dev/doc/install&lt;/li&gt;
+&lt;li&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;brew install golang&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;which go; go version&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;echo 'export PATH="$PATH:$(go env GOPATH)/bin"' &amp;gt;&amp;gt; ~/.zshrc&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;em&gt;because "GOPATH/bin" is the default destination for &lt;code&gt;go install&lt;/code&gt; - now making tools runnable&lt;/em&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;NPM: https://nodejs.org/en/download/&lt;/li&gt;
+&lt;li&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;brew install node&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;which npm; npm --version; node --version&lt;/code&gt; &lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="installing-wails"&gt;Installing Wails&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;Wails framework: https://wails.io/docs/gettingstarted/installation/&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;code&gt;go install github.com/wailsapp/wails/v2/cmd/wails@latest&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;ls $(go env GOPATH)/bin&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;wails version&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Troubleshooting Wails&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;wails doctor&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;This checks Go version, node/npm, and platform-specific dependencies (on macOS you need Xcode command line tools)&lt;/p&gt;
+&lt;h1 id="simplest-start-with-wails"&gt;Simplest start with Wails&lt;/h1&gt;
+&lt;p&gt;&lt;code&gt;wails init -l&lt;/code&gt; &lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;list the different types of wails default project layouts&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;Plain HTML/JS/CSS              plain
+React + Vite                   react
+React + Vite (Typescript)      react-ts
+Svelte + Vite                  svelte
+Vanilla + Vite                 vanilla
+Vue + Vite                     vue
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;&lt;em&gt;for security reasons it is simplest to avoid 3rd party templates unless you've vetted them thoroughly&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;I'll use "React + Vite (Typescript)": &lt;code&gt;wails init -n myapp -t react-ts&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;Run the interactive developer view of the Application (it's responsive to rebuilding for changes): &lt;code&gt;wails dev&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;Executing:&lt;span class="w"&gt; &lt;/span&gt;go&lt;span class="w"&gt; &lt;/span&gt;mod&lt;span class="w"&gt; &lt;/span&gt;tidy
+&lt;span class="w"&gt;  &lt;/span&gt;•&lt;span class="w"&gt; &lt;/span&gt;Generating&lt;span class="w"&gt; &lt;/span&gt;bindings:&lt;span class="w"&gt; &lt;/span&gt;Done.
+&lt;span class="w"&gt;  &lt;/span&gt;•&lt;span class="w"&gt; &lt;/span&gt;Installing&lt;span class="w"&gt; &lt;/span&gt;frontend&lt;span class="w"&gt; &lt;/span&gt;dependencies:&lt;span class="w"&gt; &lt;/span&gt;Done.
+&lt;span class="w"&gt;  &lt;/span&gt;•&lt;span class="w"&gt; &lt;/span&gt;Compiling&lt;span class="w"&gt; &lt;/span&gt;frontend:&lt;span class="w"&gt; &lt;/span&gt;Done.
+&lt;span class="w"&gt;  &lt;/span&gt;...
+&lt;span class="sb"&gt;````&lt;/span&gt;
+
+In&lt;span class="w"&gt; &lt;/span&gt;about&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;10&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;seconds&lt;span class="w"&gt; &lt;/span&gt;you&lt;span class="w"&gt; &lt;/span&gt;have&lt;span class="w"&gt; &lt;/span&gt;your&lt;span class="w"&gt; &lt;/span&gt;example&lt;span class="w"&gt; &lt;/span&gt;native&lt;span class="w"&gt; &lt;/span&gt;desktop&lt;span class="w"&gt; &lt;/span&gt;app&lt;span class="w"&gt; &lt;/span&gt;running&lt;span class="w"&gt; &lt;/span&gt;locally.
+
+&lt;span class="c1"&gt;## Privacy checks in the configuration files&lt;/span&gt;
+
+&lt;span class="sb"&gt;`&lt;/span&gt;wails.json&lt;span class="sb"&gt;`&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;contains&lt;span class="w"&gt; &lt;/span&gt;the&lt;span class="w"&gt; &lt;/span&gt;application&lt;span class="w"&gt; &lt;/span&gt;name&lt;span class="w"&gt; &lt;/span&gt;-&lt;span class="w"&gt; &lt;/span&gt;and&lt;span class="w"&gt; &lt;/span&gt;your&lt;span class="w"&gt; &lt;/span&gt;**email&lt;span class="w"&gt; &lt;/span&gt;address**,&lt;span class="w"&gt; &lt;/span&gt;so&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;do&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;not&lt;span class="w"&gt; &lt;/span&gt;send&lt;span class="w"&gt; &lt;/span&gt;that&lt;span class="w"&gt; &lt;/span&gt;to&lt;span class="w"&gt; &lt;/span&gt;a&lt;span class="w"&gt; &lt;/span&gt;git&lt;span class="w"&gt; &lt;/span&gt;public&lt;span class="w"&gt; &lt;/span&gt;repo&lt;span class="w"&gt; &lt;/span&gt;unless&lt;span class="w"&gt; &lt;/span&gt;you&lt;span class="s1"&gt;'re ready for it&lt;/span&gt;
+
+&lt;span class="s1"&gt;Also, the name "myapp" will show up in a bunch of places so if you change/update the name, look for&lt;/span&gt;
+
+&lt;span class="s1"&gt;```shell&lt;/span&gt;
+&lt;span class="s1"&gt;grep -r '&lt;/span&gt;chat-explorer&lt;span class="err"&gt;'&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;.
+&lt;span class="w"&gt;    &lt;/span&gt;./go.mod
+&lt;span class="w"&gt;    &lt;/span&gt;./wails.json
+&lt;span class="w"&gt;    &lt;/span&gt;./frontend/index.html
+&lt;span class="w"&gt;    &lt;/span&gt;./app.go
+&lt;span class="w"&gt;    &lt;/span&gt;/main.go
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;hr/&gt;
+&lt;h1 id="explaining-the-file-structure"&gt;Explaining the File Structure&lt;/h1&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;myapp/
+├── build/
+│   ├── appicon.png
+│   ├── darwin/
+│   │   ├── Info.plist
+│   │   └── Info.dev.plist
+│   └── windows/
+├── frontend/
+│   ├── src/
+│   │   ├── App.tsx
+│   │   ├── main.tsx
+│   │   ├── App.css
+│   │   └── style.css
+│   ├── wailsjs/
+│   │   ├── go/main/App.ts    &amp;lt;- auto-generated bindings
+│   │   └── runtime/
+│   ├── index.html
+│   ├── package.json
+│   └── tsconfig.json
+├── app.go                    &amp;lt;- your Go application logic
+├── main.go                   &amp;lt;- entrypoint
+├── go.mod
+├── go.sum
+└── wails.json
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;There are two halves to understand: the Go backend and the React frontend.&lt;/p&gt;
+&lt;h2 id="the-golang-backend"&gt;The Golang Backend&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;main.go&lt;/strong&gt; is the entrypoint for starting the application&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="kn"&gt;package&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;main&lt;/span&gt;
+
+&lt;span class="kn"&gt;import&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="s"&gt;"embed"&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="s"&gt;"github.com/wailsapp/wails/v2"&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="s"&gt;"github.com/wailsapp/wails/v2/pkg/options"&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="s"&gt;"github.com/wailsapp/wails/v2/pkg/options/assetserver"&lt;/span&gt;
+&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="c1"&gt;//go:embed all:frontend/dist&lt;/span&gt;
+&lt;span class="kd"&gt;var&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;assets&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;embed&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;FS&lt;/span&gt;
+
+&lt;span class="kd"&gt;func&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;main&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="nx"&gt;app&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;:=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;NewApp&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="nx"&gt;err&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;:=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;wails&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;Run&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="nx"&gt;options&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;App&lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="nx"&gt;Title&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="s"&gt;"myapp"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="nx"&gt;Width&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="mi"&gt;1024&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="nx"&gt;Height&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;768&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="nx"&gt;AssetServer&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="nx"&gt;assetserver&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;Options&lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;
+&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="nx"&gt;Assets&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;assets&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="p"&gt;},&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="nx"&gt;BackgroundColour&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="nx"&gt;options&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;RGBA&lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="nx"&gt;R&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;27&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;G&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;38&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;B&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;54&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;A&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;},&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="nx"&gt;OnStartup&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="nx"&gt;app&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;startup&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="nx"&gt;Bind&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;[]&lt;/span&gt;&lt;span class="kd"&gt;interface&lt;/span&gt;&lt;span class="p"&gt;{}{&lt;/span&gt;
+&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="nx"&gt;app&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="p"&gt;},&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="p"&gt;})&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="k"&gt;if&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;err&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;!=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kc"&gt;nil&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="nb"&gt;println&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;"Error:"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;err&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;Error&lt;/span&gt;&lt;span class="p"&gt;())&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;&lt;code&gt;//go:embed all:frontend/dist&lt;/code&gt; is a directive doing something clever: embedding the entire compiled frontend into the Go binary at build time, no separate files to distribute!&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;Bind: []interface{}{ app,&lt;/code&gt; is the connection between "Go Exported Methods" and the Javascript/React&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;app.go&lt;/strong&gt; is the place for application logic (usually just high level, using /models or other places to get all of the details)&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="kn"&gt;package&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;main&lt;/span&gt;
+
+&lt;span class="kn"&gt;import&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s"&gt;"context"&lt;/span&gt;
+
+&lt;span class="kd"&gt;type&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;App&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kd"&gt;struct&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="nx"&gt;ctx&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;context&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;Context&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+
+&lt;span class="kd"&gt;func&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;NewApp&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="nx"&gt;App&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="k"&gt;return&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="nx"&gt;App&lt;/span&gt;&lt;span class="p"&gt;{}&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+
+&lt;span class="kd"&gt;func&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;a&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="nx"&gt;App&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;startup&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;ctx&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;context&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;Context&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="nx"&gt;a&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;ctx&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;ctx&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+
+&lt;span class="kd"&gt;func&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;a&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="nx"&gt;App&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;Greet&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;name&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kt"&gt;string&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kt"&gt;string&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="k"&gt;return&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s"&gt;"Hello "&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;name&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s"&gt;", welcome to Wails!"&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;The magic: every exported method on a bound struct (in this case "App") automatically gets a TypeScript binding generated in frontend/wailsjs/go/main/App.ts&lt;/p&gt;
+&lt;h2 id="the-react-frontend"&gt;The React Frontend&lt;/h2&gt;
+&lt;p&gt;Your usual &lt;strong&gt;frontend/index.html&lt;/strong&gt; has &lt;code&gt;&amp;lt;script src="./src/main.tsx" type="module"&amp;gt;&amp;lt;/script&amp;gt;&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;frontend/src/main.tsx&lt;/strong&gt; is the entrypoint for starting the application - nothing surprising here:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;import&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;React&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kr"&gt;from&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s1"&gt;'react'&lt;/span&gt;
+&lt;span class="k"&gt;import&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="nx"&gt;createRoot&lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kr"&gt;from&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s1"&gt;'react-dom/client'&lt;/span&gt;
+&lt;span class="k"&gt;import&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s1"&gt;'./style.css'&lt;/span&gt;
+&lt;span class="k"&gt;import&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;App&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kr"&gt;from&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s1"&gt;'./App'&lt;/span&gt;
+
+&lt;span class="kd"&gt;const&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;container&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nb"&gt;document&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;getElementById&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;'root'&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="kd"&gt;const&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;root&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;createRoot&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;container&lt;/span&gt;&lt;span class="o"&gt;!&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="nx"&gt;root&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;render&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="nx"&gt;React&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;StrictMode&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="nx"&gt;App&lt;/span&gt;&lt;span class="o"&gt;/&amp;gt;&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="err"&gt;/React.StrictMode&amp;gt;&lt;/span&gt;
+&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;&lt;strong&gt;frontend/src/App.tsx&lt;/strong&gt; is the bridge to the backend Golang Greet function:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;import&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;useState&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kr"&gt;from&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s1"&gt;'react'&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="k"&gt;import&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;Greet&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kr"&gt;from&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s1"&gt;'../wailsjs/go/main/App'&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+
+&lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;App&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="kd"&gt;const&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="nx"&gt;name&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;setName&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;useState&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;''&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="kd"&gt;const&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="nx"&gt;result&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;setResult&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;useState&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;''&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="kd"&gt;const&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;greet&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;=&amp;gt;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;Greet&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;name&lt;/span&gt;&lt;span class="p"&gt;).&lt;/span&gt;&lt;span class="nx"&gt;then&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;setResult&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="k"&gt;return&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="nx"&gt;div&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&lt;/span&gt;
+&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="nx"&gt;input&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;onChange&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="p"&gt;{(&lt;/span&gt;&lt;span class="nx"&gt;e&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;=&amp;gt;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;setName&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;e&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;target&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;value&lt;/span&gt;&lt;span class="p"&gt;)}&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;/&amp;gt;&lt;/span&gt;
+&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="nx"&gt;button&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;onClick&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="nx"&gt;greet&lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&lt;/span&gt;&lt;span class="nx"&gt;Greet&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="err"&gt;/button&amp;gt;&lt;/span&gt;
+&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="nx"&gt;p&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="nx"&gt;result&lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="err"&gt;/p&amp;gt;&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="err"&gt;/div&amp;gt;&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+
+&lt;span class="k"&gt;export&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;default&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;App&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Note that the Greet function is a Promise, the call to the backend is async&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Now explore adding your own function that returns a map like &lt;code&gt;func (a *App) GetCurrentTime() map[string]string {&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;In the frontend you'd use it with&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="k"&gt;import&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;GetCurrentTime&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kr"&gt;from&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s1"&gt;'../wailsjs/go/main/App'&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+
+&lt;span class="c1"&gt;// later in a component...&lt;/span&gt;
+&lt;span class="kd"&gt;const&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="nx"&gt;info&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;setInfo&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;useState&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="nx"&gt;Record&lt;/span&gt;&lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="kt"&gt;string&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kt"&gt;string&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&amp;gt;&lt;/span&gt;&lt;span class="p"&gt;({});&lt;/span&gt;
+&lt;span class="nx"&gt;useEffect&lt;/span&gt;&lt;span class="p"&gt;(()&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;=&amp;gt;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="nx"&gt;GetCurrentTime&lt;/span&gt;&lt;span class="p"&gt;().&lt;/span&gt;&lt;span class="nx"&gt;then&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;setInfo&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;span class="p"&gt;},&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;[]);&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h1 id="build-and-distribute"&gt;Build and Distribute&lt;/h1&gt;
+&lt;p&gt;&lt;code&gt;wails build&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;There are more instructions you'd need to follow about all the details of Windows, MacOS, etc.&lt;/p&gt;
+&lt;h1 id="conclusion"&gt;Conclusion&lt;/h1&gt;
+&lt;p&gt;These are well known concepts of frontend (react) and backend (golang) so you can focus on your domain problems and features.&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;Using these standard technologies also makes it very easy to leverage AI/LLMs to write the code&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;Stable building blocks and not re-inventing the wheel allows you to ship faster (and deliver value!)&lt;/p&gt;</content><category term="programming"></category><category term="go"></category><category term="golang"></category><category term="react"></category><category term="javascript"></category><category term="js"></category><category term="typescript"></category><category term="desktop"></category></entry><entry><title>Cars not helicopters, or running a local LLM with MLX on a Macbook Pro</title><link href="https://blog.john-pfeiffer.com/cars-not-helicopters-or-running-a-local-llm-with-mlx-on-a-macbook-pro/" rel="alternate"></link><published>2024-11-23T19:21:00-08:00</published><updated>2024-11-23T19:21:00-08:00</updated><author><name>john pfeiffer</name></author><id>tag:blog.john-pfeiffer.com,2024-11-23:/cars-not-helicopters-or-running-a-local-llm-with-mlx-on-a-macbook-pro/</id><summary type="html">
 &lt;h1 id="everything-looks-like-a-nail"&gt;Everything looks like a nail&lt;/h1&gt;
 &lt;p&gt;For Large Language Models (LLMs), Frontier aka "State of the Art" (SOTA) Models provided by big vendors like OpenAI and Anthropic and Google continue to add capabilities at a wondrous rate. Yet there's a very strong case for running LLMs locally, much like every smart …&lt;/p&gt;</summary><content type="html">
 &lt;h1 id="everything-looks-like-a-nail"&gt;Everything looks like a nail&lt;/h1&gt;
@@ -19934,27 +20200,4 @@ in 3A)&lt;/p&gt;
 &lt;p&gt;You should now see: &lt;strong&gt;https://mailserver.example.com:4430&lt;/strong&gt;&lt;/p&gt;
 &lt;p&gt;Note that you won't be able to click OK (because Outlook detects that unpermitted colon) but hit Cancel a bunch of times and open up Outlook to try connecting to your Exchange Server!&lt;/p&gt;
 &lt;p&gt;PLEASE NOTE: first ensure that you can get RPC over HTTP working with the default port 443 (e.g. no colons needed) BEFORE trying a non standard port as it is a little tricky to remember the certificate, the firewall port forwarding (if you need to), etc.&lt;/p&gt;
-&lt;p&gt;ALSO, remember that to do this you've already changed your Exchange Mail Server IIS SSL port to the non standard 4430 AND you've fixed any firewall forwarding for your server so that 4430 goes to your mail server...&lt;/p&gt;</content><category term="it"></category><category term="Microsoft"></category><category term="Exchange Server"></category><category term="SSL"></category></entry><entry><title>The Magical Million 3 helicopters scratchcard scam</title><link href="https://blog.john-pfeiffer.com/the-magical-million-3-helicopters-scratchcard-scam/" rel="alternate"></link><published>2010-06-13T11:25:00-07:00</published><updated>2010-06-13T11:25:00-07:00</updated><author><name>john pfeiffer</name></author><id>tag:blog.john-pfeiffer.com,2010-06-13:/the-magical-million-3-helicopters-scratchcard-scam/</id><summary type="html">&lt;p&gt;The Magical Million scratch card scam...&lt;/p&gt;
-&lt;p&gt;Magazines and newspapers get money from advertisers, some of which run contests and promotions.&lt;/p&gt;
-&lt;p&gt;I was not surprised to see that Rupert Murdoch's "Times" had scratch cards for the Magical Million from PurelyCreative.com&lt;/p&gt;
-&lt;p&gt;Considering the fake news from Fox, it's no surprise there's …&lt;/p&gt;</summary><content type="html">&lt;p&gt;The Magical Million scratch card scam...&lt;/p&gt;
-&lt;p&gt;Magazines and newspapers get money from advertisers, some of which run contests and promotions.&lt;/p&gt;
-&lt;p&gt;I was not surprised to see that Rupert Murdoch's "Times" had scratch cards for the Magical Million from PurelyCreative.com&lt;/p&gt;
-&lt;p&gt;Considering the fake news from Fox, it's no surprise there's a long standing fake contest advertised in Murdoch's paper.&lt;/p&gt;
-&lt;p&gt;A scatch card says "3 identical symbols - you can claim a GUARANTEED CASH PAYOUT".&lt;/p&gt;
-&lt;p&gt;So our three helicopters... &lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;by calling the £1.50 per minute premium number (or premium text messages) you can find out how much you've won... &lt;/li&gt;
-&lt;li&gt;which you then send by post (including a return stamp) and wait months. &lt;/li&gt;
-&lt;li&gt;When you chase them up many times in many months you might receive your £10 award (in vouchers?!?!), or then again you might not&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;Greed. Something for nothing. You're luckier than everyone else...&lt;/p&gt;
-&lt;p&gt;If you are silly enough to insist on "playing" (because you already are a winner), then hopefully you'll recycle the scratch card and go buy a lottery ticket.&lt;/p&gt;
-&lt;p&gt;Consider that £9 buys a lot of fun for a homeless person in your neighborhood, or supports your local charity (RSPCA, Red Cross, etc.)&lt;/p&gt;
-&lt;p&gt;These companies are the lowest level of legal scam possible (eventually they graduate into selling derivatives, junk bonds, or insurance); if you are using a computer and the internet to read about this scam then you should be too smart to fall for it.&lt;/p&gt;
-&lt;p&gt;Oh, do you want some "research", try &lt;a href="http://blogs.mirror.co.uk/investigations/2010/01/watchdog-takes-scratchcard-fir.html"&gt;http://blogs.mirror.co.uk/investigations/2010/01/watchdog-takes-scratchcard-fir.html&lt;/a&gt;&lt;/p&gt;
-&lt;p&gt;Original link is too old for the Mirror to keep around so some updated ones:&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;a href="http://www.bbc.com/news/uk-19993931"&gt;http://www.bbc.com/news/uk-19993931&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href="http://www.mirror.co.uk/news/uk-news/king-scam-mail-conmen-adrian-3719698"&gt;http://www.mirror.co.uk/news/uk-news/king-scam-mail-conmen-adrian-3719698&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;</content><category term="puzzles"></category><category term="scam"></category></entry></feed>
+&lt;p&gt;ALSO, remember that to do this you've already changed your Exchange Mail Server IIS SSL port to the non standard 4430 AND you've fixed any firewall forwarding for your server so that 4430 goes to your mail server...&lt;/p&gt;</content><category term="it"></category><category term="Microsoft"></category><category term="Exchange Server"></category><category term="SSL"></category></entry></feed>

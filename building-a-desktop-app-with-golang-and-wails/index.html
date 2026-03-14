@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en-US">
+    <head>
+        <meta charset="utf-8"> 
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="author" content="john pfeiffer" />
+        <meta name="copyright" content="john pfeiffer" />
+
+<meta name="keywords" content="go, golang, react, javascript, js, typescript, desktop, programming, " />
+        <title>Building a desktop app with Golang and Wails  · johnpfeiffer
+</title>
+        <!--link href="https://cdn-images.mailchimp.com/embedcode/slim-081711.css" rel="stylesheet" type="text/css"-->
+        <!--link href="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css" rel="stylesheet"-->
+        <link href="https://blog.john-pfeiffer.com/theme/css/bootstrap-combined.min.css" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="https://blog.john-pfeiffer.com/theme/css/style.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="https://blog.john-pfeiffer.com/theme/css/solarizedlight.css" media="screen">
+        <link rel="shortcut icon" href="https://blog.john-pfeiffer.com/theme/images/favicon.ico" type="image/x-icon" />
+        <link rel="apple-touch-icon" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon.png" />
+        <link rel="apple-touch-icon" sizes="57x57" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-57x57.png" />
+        <link rel="apple-touch-icon" sizes="72x72" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-72x72.png" />
+        <link rel="apple-touch-icon" sizes="114x114" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-114x114.png" />
+        <link rel="apple-touch-icon" sizes="144x144" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-144x144.png" />
+        <link rel="icon" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-144x144.png" />
+    </head>
+    <body>
+	<div id="content-sans-footer">
+        <div class="dropdown-backdrop">
+
+			<div class="navbar navbar-static-top">
+				<div class="navbar-inner">
+					<div class="container">
+						<a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+							<span class="icon-bar"></span>
+							<span class="icon-bar"></span>
+							<span class="icon-bar"></span>
+						</a>
+						<a class="brand" href="https://blog.john-pfeiffer.com/"><span class=site-name>johnpfeiffer</span></a>
+						<div class="nav-collapse collapse">
+							<ul class="nav pull-right top-menu">
+								<li ><a href="https://blog.john-pfeiffer.com">Home</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/engineering-people-managers/">Engineering (People) Managers</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/john-likes/">John Likes</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/software-engineer-favorites/">Software Engineer Favorites</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/categories.html">Categories</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/tags.html">Tags</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/archives.html">Archives</a></li>
+								<li><form class="navbar-search" action="https://blog.john-pfeiffer.com/search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="container-fluid">
+			<div class="row-fluid">
+				<div class="span1"></div>
+				<div class="span10">
+<article>
+<div class="row-fluid">
+    <header class="page_header span10 offset2">
+    <h1><a href="https://blog.john-pfeiffer.com/building-a-desktop-app-with-golang-and-wails/"> Building a desktop app with Golang and Wails  </a></h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+    <div class="span2 table-of-content">
+        <nav>
+        <h4>Contents</h4>
+        <div class="toc">
+<ul>
+<li><a href="#why-this-tech-stack-and-why-a-desktop-app">Why this tech stack and why a desktop app?</a><ul>
+<li><a href="#why-wails">Why Wails</a></li>
+<li><a href="#why-golang">Why golang</a></li>
+</ul>
+</li>
+<li><a href="#pre-requisites">Pre-requisites</a><ul>
+<li><a href="#installing-wails">Installing Wails</a></li>
+</ul>
+</li>
+<li><a href="#simplest-start-with-wails">Simplest start with Wails</a></li>
+<li><a href="#explaining-the-file-structure">Explaining the File Structure</a><ul>
+<li><a href="#the-golang-backend">The Golang Backend</a></li>
+<li><a href="#the-react-frontend">The React Frontend</a></li>
+</ul>
+</li>
+<li><a href="#build-and-distribute">Build and Distribute</a></li>
+<li><a href="#conclusion">Conclusion</a></li>
+</ul>
+</div>
+        </nav>
+    </div>
+    <div class="span8 article-content">
+
+            
+<p>tldr: a Golang native desktop app using Wails (Go backend + React frontend = single binary)</p>
+<h1 id="why-this-tech-stack-and-why-a-desktop-app">Why this tech stack and why a desktop app?</h1>
+<p>Desktop apps provide privacy for the persistence layer, and bypass the "where is it hosted" challenges.</p>
+<p>This is a simple and practical way to leverage some great backend + frontend technologies.</p>
+<p><em>If you need a more basic react intro see my previous post https://blog.john-pfeiffer.com/react-javascript-intro/</em></p>
+<p>The key insight: Go methods with exported (capitalized) names get auto generated as JavaScript/TypeScript bindings. You call Go functions from React as if they were local async functions.</p>
+<h2 id="why-wails">Why Wails</h2>
+<p>Wails uses the operating system's native webview (WebKit on macOS, WebView2 on Windows, WebKitGTK on Linux) so the resulting binary is ~10MB and uses a fraction of the memory.</p>
+<p>As a comparison to a very popular technology, electron bundles an entire Chromium browser into your app - which is why a "hello world" Electron app is ~150MB and idles at 100MB+ of RAM.</p>
+<div class="highlight"><pre><span></span><code>┌─────────────────────────────────────────────────────────────┐
+│  WAILS APPLICATION                                          │
+│                                                             │
+│   Go Backend              React Frontend                    │
+│   ┌───────────┐           ┌──────────────────┐              │
+│   │ app.go    │◄─────────►│ App.tsx          │              │
+│   │ (structs  │  bindings │ (components,     │              │
+│   │  &amp; methods│  ───────► │  hooks, UI)      │              │
+│   │  &amp; stdlib)│           │                  │              │
+│   └───────────┘           └──────────────────┘              │
+│         │                         │                         │
+│         └──────────┬──────────────┘                         │
+│                    ▼                                        │
+│         ┌────────────────────┐                              │
+│         │  Native WebView    │                              │
+│         │  (WebKit on macOS) │                              │
+│         └────────────────────┘                              │
+│                    │                                        │
+│                    ▼                                        │
+│            Single Binary (~10MB)                            │
+└─────────────────────────────────────────────────────────────┘
+</code></pre></div>
+<h2 id="why-golang">Why golang</h2>
+<p>Golang is a remarkably performant language but it still automatically handles memory management (with garbage collection)</p>
+<p>Golang builds to a single binary</p>
+<h1 id="pre-requisites">Pre-requisites</h1>
+<p><em>the assumption here is MacOS...</em></p>
+<ul>
+<li>Golang: https://go.dev/doc/install</li>
+<li>
+<ul>
+<li><code>brew install golang</code></li>
+</ul>
+</li>
+<li>
+<ul>
+<li><code>which go; go version</code></li>
+</ul>
+</li>
+<li>
+<ul>
+<li><code>echo 'export PATH="$PATH:$(go env GOPATH)/bin"' &gt;&gt; ~/.zshrc</code></li>
+</ul>
+</li>
+</ul>
+<p><em>because "GOPATH/bin" is the default destination for <code>go install</code> - now making tools runnable</em></p>
+<ul>
+<li>NPM: https://nodejs.org/en/download/</li>
+<li>
+<ul>
+<li><code>brew install node</code></li>
+</ul>
+</li>
+<li>
+<ul>
+<li><code>which npm; npm --version; node --version</code> </li>
+</ul>
+</li>
+</ul>
+<h2 id="installing-wails">Installing Wails</h2>
+<ul>
+<li>Wails framework: https://wails.io/docs/gettingstarted/installation/</li>
+</ul>
+<p><code>go install github.com/wailsapp/wails/v2/cmd/wails@latest</code></p>
+<p><code>ls $(go env GOPATH)/bin</code></p>
+<p><code>wails version</code></p>
+<p><strong>Troubleshooting Wails</strong></p>
+<p><code>wails doctor</code></p>
+<p>This checks Go version, node/npm, and platform-specific dependencies (on macOS you need Xcode command line tools)</p>
+<h1 id="simplest-start-with-wails">Simplest start with Wails</h1>
+<p><code>wails init -l</code> </p>
+<blockquote>
+<p>list the different types of wails default project layouts</p>
+</blockquote>
+<div class="highlight"><pre><span></span><code>Plain HTML/JS/CSS              plain
+React + Vite                   react
+React + Vite (Typescript)      react-ts
+Svelte + Vite                  svelte
+Vanilla + Vite                 vanilla
+Vue + Vite                     vue
+</code></pre></div>
+<p><em>for security reasons it is simplest to avoid 3rd party templates unless you've vetted them thoroughly</em></p>
+<p>I'll use "React + Vite (Typescript)": <code>wails init -n myapp -t react-ts</code></p>
+<p>Run the interactive developer view of the Application (it's responsive to rebuilding for changes): <code>wails dev</code></p>
+<div class="highlight"><pre><span></span><code>Executing:<span class="w"> </span>go<span class="w"> </span>mod<span class="w"> </span>tidy
+<span class="w">  </span>•<span class="w"> </span>Generating<span class="w"> </span>bindings:<span class="w"> </span>Done.
+<span class="w">  </span>•<span class="w"> </span>Installing<span class="w"> </span>frontend<span class="w"> </span>dependencies:<span class="w"> </span>Done.
+<span class="w">  </span>•<span class="w"> </span>Compiling<span class="w"> </span>frontend:<span class="w"> </span>Done.
+<span class="w">  </span>...
+<span class="sb">````</span>
+
+In<span class="w"> </span>about<span class="w"> </span><span class="m">10</span><span class="w"> </span>seconds<span class="w"> </span>you<span class="w"> </span>have<span class="w"> </span>your<span class="w"> </span>example<span class="w"> </span>native<span class="w"> </span>desktop<span class="w"> </span>app<span class="w"> </span>running<span class="w"> </span>locally.
+
+<span class="c1">## Privacy checks in the configuration files</span>
+
+<span class="sb">`</span>wails.json<span class="sb">`</span><span class="w"> </span>contains<span class="w"> </span>the<span class="w"> </span>application<span class="w"> </span>name<span class="w"> </span>-<span class="w"> </span>and<span class="w"> </span>your<span class="w"> </span>**email<span class="w"> </span>address**,<span class="w"> </span>so<span class="w"> </span><span class="k">do</span><span class="w"> </span>not<span class="w"> </span>send<span class="w"> </span>that<span class="w"> </span>to<span class="w"> </span>a<span class="w"> </span>git<span class="w"> </span>public<span class="w"> </span>repo<span class="w"> </span>unless<span class="w"> </span>you<span class="s1">'re ready for it</span>
+
+<span class="s1">Also, the name "myapp" will show up in a bunch of places so if you change/update the name, look for</span>
+
+<span class="s1">```shell</span>
+<span class="s1">grep -r '</span>chat-explorer<span class="err">'</span><span class="w"> </span>.
+<span class="w">    </span>./go.mod
+<span class="w">    </span>./wails.json
+<span class="w">    </span>./frontend/index.html
+<span class="w">    </span>./app.go
+<span class="w">    </span>/main.go
+</code></pre></div>
+<hr/>
+<h1 id="explaining-the-file-structure">Explaining the File Structure</h1>
+<div class="highlight"><pre><span></span><code>myapp/
+├── build/
+│   ├── appicon.png
+│   ├── darwin/
+│   │   ├── Info.plist
+│   │   └── Info.dev.plist
+│   └── windows/
+├── frontend/
+│   ├── src/
+│   │   ├── App.tsx
+│   │   ├── main.tsx
+│   │   ├── App.css
+│   │   └── style.css
+│   ├── wailsjs/
+│   │   ├── go/main/App.ts    &lt;- auto-generated bindings
+│   │   └── runtime/
+│   ├── index.html
+│   ├── package.json
+│   └── tsconfig.json
+├── app.go                    &lt;- your Go application logic
+├── main.go                   &lt;- entrypoint
+├── go.mod
+├── go.sum
+└── wails.json
+</code></pre></div>
+<p>There are two halves to understand: the Go backend and the React frontend.</p>
+<h2 id="the-golang-backend">The Golang Backend</h2>
+<p><strong>main.go</strong> is the entrypoint for starting the application</p>
+<div class="highlight"><pre><span></span><code><span class="kn">package</span><span class="w"> </span><span class="nx">main</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="p">(</span>
+<span class="w">    </span><span class="s">"embed"</span>
+<span class="w">    </span><span class="s">"github.com/wailsapp/wails/v2"</span>
+<span class="w">    </span><span class="s">"github.com/wailsapp/wails/v2/pkg/options"</span>
+<span class="w">    </span><span class="s">"github.com/wailsapp/wails/v2/pkg/options/assetserver"</span>
+<span class="p">)</span>
+
+<span class="c1">//go:embed all:frontend/dist</span>
+<span class="kd">var</span><span class="w"> </span><span class="nx">assets</span><span class="w"> </span><span class="nx">embed</span><span class="p">.</span><span class="nx">FS</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="nx">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">app</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">NewApp</span><span class="p">()</span>
+
+<span class="w">    </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">wails</span><span class="p">.</span><span class="nx">Run</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">options</span><span class="p">.</span><span class="nx">App</span><span class="p">{</span>
+<span class="w">        </span><span class="nx">Title</span><span class="p">:</span><span class="w">  </span><span class="s">"myapp"</span><span class="p">,</span>
+<span class="w">        </span><span class="nx">Width</span><span class="p">:</span><span class="w">  </span><span class="mi">1024</span><span class="p">,</span>
+<span class="w">        </span><span class="nx">Height</span><span class="p">:</span><span class="w"> </span><span class="mi">768</span><span class="p">,</span>
+<span class="w">        </span><span class="nx">AssetServer</span><span class="p">:</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">assetserver</span><span class="p">.</span><span class="nx">Options</span><span class="p">{</span>
+<span class="w">            </span><span class="nx">Assets</span><span class="p">:</span><span class="w"> </span><span class="nx">assets</span><span class="p">,</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="nx">BackgroundColour</span><span class="p">:</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">options</span><span class="p">.</span><span class="nx">RGBA</span><span class="p">{</span><span class="nx">R</span><span class="p">:</span><span class="w"> </span><span class="mi">27</span><span class="p">,</span><span class="w"> </span><span class="nx">G</span><span class="p">:</span><span class="w"> </span><span class="mi">38</span><span class="p">,</span><span class="w"> </span><span class="nx">B</span><span class="p">:</span><span class="w"> </span><span class="mi">54</span><span class="p">,</span><span class="w"> </span><span class="nx">A</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">},</span>
+<span class="w">        </span><span class="nx">OnStartup</span><span class="p">:</span><span class="w">        </span><span class="nx">app</span><span class="p">.</span><span class="nx">startup</span><span class="p">,</span>
+<span class="w">        </span><span class="nx">Bind</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="kd">interface</span><span class="p">{}{</span>
+<span class="w">            </span><span class="nx">app</span><span class="p">,</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">    </span><span class="p">})</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nb">println</span><span class="p">(</span><span class="s">"Error:"</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="p">.</span><span class="nx">Error</span><span class="p">())</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><code>//go:embed all:frontend/dist</code> is a directive doing something clever: embedding the entire compiled frontend into the Go binary at build time, no separate files to distribute!</p>
+<p><code>Bind: []interface{}{ app,</code> is the connection between "Go Exported Methods" and the Javascript/React</p>
+<p><strong>app.go</strong> is the place for application logic (usually just high level, using /models or other places to get all of the details)</p>
+<div class="highlight"><pre><span></span><code><span class="kn">package</span><span class="w"> </span><span class="nx">main</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="s">"context"</span>
+
+<span class="kd">type</span><span class="w"> </span><span class="nx">App</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span>
+<span class="p">}</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="nx">NewApp</span><span class="p">()</span><span class="w"> </span><span class="o">*</span><span class="nx">App</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">App</span><span class="p">{}</span>
+<span class="p">}</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">a</span><span class="w"> </span><span class="o">*</span><span class="nx">App</span><span class="p">)</span><span class="w"> </span><span class="nx">startup</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">a</span><span class="p">.</span><span class="nx">ctx</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">ctx</span>
+<span class="p">}</span>
+
+<span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">a</span><span class="w"> </span><span class="o">*</span><span class="nx">App</span><span class="p">)</span><span class="w"> </span><span class="nx">Greet</span><span class="p">(</span><span class="nx">name</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="s">"Hello "</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nx">name</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">", welcome to Wails!"</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>The magic: every exported method on a bound struct (in this case "App") automatically gets a TypeScript binding generated in frontend/wailsjs/go/main/App.ts</p>
+<h2 id="the-react-frontend">The React Frontend</h2>
+<p>Your usual <strong>frontend/index.html</strong> has <code>&lt;script src="./src/main.tsx" type="module"&gt;&lt;/script&gt;</code></p>
+<p><strong>frontend/src/main.tsx</strong> is the entrypoint for starting the application - nothing surprising here:</p>
+<div class="highlight"><pre><span></span><code><span class="k">import</span><span class="w"> </span><span class="nx">React</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s1">'react'</span>
+<span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="nx">createRoot</span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s1">'react-dom/client'</span>
+<span class="k">import</span><span class="w"> </span><span class="s1">'./style.css'</span>
+<span class="k">import</span><span class="w"> </span><span class="nx">App</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s1">'./App'</span>
+
+<span class="kd">const</span><span class="w"> </span><span class="nx">container</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="s1">'root'</span><span class="p">)</span>
+
+<span class="kd">const</span><span class="w"> </span><span class="nx">root</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">createRoot</span><span class="p">(</span><span class="nx">container</span><span class="o">!</span><span class="p">)</span>
+
+<span class="nx">root</span><span class="p">.</span><span class="nx">render</span><span class="p">(</span>
+<span class="w">    </span><span class="o">&lt;</span><span class="nx">React</span><span class="p">.</span><span class="nx">StrictMode</span><span class="o">&gt;</span>
+<span class="w">        </span><span class="o">&lt;</span><span class="nx">App</span><span class="o">/&gt;</span>
+<span class="w">    </span><span class="o">&lt;</span><span class="err">/React.StrictMode&gt;</span>
+<span class="p">)</span>
+</code></pre></div>
+<p><strong>frontend/src/App.tsx</strong> is the bridge to the backend Golang Greet function:</p>
+<div class="highlight"><pre><span></span><code><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">useState</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s1">'react'</span><span class="p">;</span>
+<span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">Greet</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s1">'../wailsjs/go/main/App'</span><span class="p">;</span>
+
+<span class="kd">function</span><span class="w"> </span><span class="nx">App</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="p">[</span><span class="nx">name</span><span class="p">,</span><span class="w"> </span><span class="nx">setName</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">useState</span><span class="p">(</span><span class="s1">''</span><span class="p">);</span>
+<span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="p">[</span><span class="nx">result</span><span class="p">,</span><span class="w"> </span><span class="nx">setResult</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">useState</span><span class="p">(</span><span class="s1">''</span><span class="p">);</span>
+
+<span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">greet</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">Greet</span><span class="p">(</span><span class="nx">name</span><span class="p">).</span><span class="nx">then</span><span class="p">(</span><span class="nx">setResult</span><span class="p">);</span>
+
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="p">(</span>
+<span class="w">        </span><span class="o">&lt;</span><span class="nx">div</span><span class="o">&gt;</span>
+<span class="w">            </span><span class="o">&lt;</span><span class="nx">input</span><span class="w"> </span><span class="nx">onChange</span><span class="o">=</span><span class="p">{(</span><span class="nx">e</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">setName</span><span class="p">(</span><span class="nx">e</span><span class="p">.</span><span class="nx">target</span><span class="p">.</span><span class="nx">value</span><span class="p">)}</span><span class="w"> </span><span class="o">/&gt;</span>
+<span class="w">            </span><span class="o">&lt;</span><span class="nx">button</span><span class="w"> </span><span class="nx">onClick</span><span class="o">=</span><span class="p">{</span><span class="nx">greet</span><span class="p">}</span><span class="o">&gt;</span><span class="nx">Greet</span><span class="o">&lt;</span><span class="err">/button&gt;</span>
+<span class="w">            </span><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span><span class="p">{</span><span class="nx">result</span><span class="p">}</span><span class="o">&lt;</span><span class="err">/p&gt;</span>
+<span class="w">        </span><span class="o">&lt;</span><span class="err">/div&gt;</span>
+<span class="w">    </span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">export</span><span class="w"> </span><span class="k">default</span><span class="w"> </span><span class="nx">App</span><span class="p">;</span>
+</code></pre></div>
+<blockquote>
+<p>Note that the Greet function is a Promise, the call to the backend is async</p>
+</blockquote>
+<p>Now explore adding your own function that returns a map like <code>func (a *App) GetCurrentTime() map[string]string {</code></p>
+<p>In the frontend you'd use it with</p>
+<div class="highlight"><pre><span></span><code><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">GetCurrentTime</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s1">'../wailsjs/go/main/App'</span><span class="p">;</span>
+
+<span class="c1">// later in a component...</span>
+<span class="kd">const</span><span class="w"> </span><span class="p">[</span><span class="nx">info</span><span class="p">,</span><span class="w"> </span><span class="nx">setInfo</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">useState</span><span class="o">&lt;</span><span class="nx">Record</span><span class="o">&lt;</span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="kt">string</span><span class="o">&gt;&gt;</span><span class="p">({});</span>
+<span class="nx">useEffect</span><span class="p">(()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">GetCurrentTime</span><span class="p">().</span><span class="nx">then</span><span class="p">(</span><span class="nx">setInfo</span><span class="p">);</span>
+<span class="p">},</span><span class="w"> </span><span class="p">[]);</span>
+</code></pre></div>
+<h1 id="build-and-distribute">Build and Distribute</h1>
+<p><code>wails build</code></p>
+<p>There are more instructions you'd need to follow about all the details of Windows, MacOS, etc.</p>
+<h1 id="conclusion">Conclusion</h1>
+<p>These are well known concepts of frontend (react) and backend (golang) so you can focus on your domain problems and features.</p>
+<p><em>Using these standard technologies also makes it very easy to leverage AI/LLMs to write the code</em></p>
+<p>Stable building blocks and not re-inventing the wheel allows you to ship faster (and deliver value!)</p>
+            <aside>
+            <hr/>
+            <nav>
+            <ul class="articles_timeline">
+ 
+                <li class="previous_article">« <a href="https://blog.john-pfeiffer.com/cars-not-helicopters-or-running-a-local-llm-with-mlx-on-a-macbook-pro/" title="Previous: Cars not helicopters, or running a local LLM with MLX on a Macbook Pro">Cars not helicopters, or running a local LLM with MLX on a Macbook Pro</a></li>
+ 
+                <li class="next_article"><a href="https://blog.john-pfeiffer.com/maximum-leverage-and-minimum-ops-with-google-cloud-run-and-the-jules-coding-agent/" title="Next: Maximum leverage and Minimum Ops with Google Cloud Run and the Jules Coding Agent">Maximum leverage and Minimum Ops with Google Cloud Run and the Jules Coding Agent</a> »</li>
+            </ul>
+            </nav>
+            </aside>
+        </div>
+        <section>
+        <div class="span2" style="float:right;font-size:0.9em;">
+ 
+            <h4>Published</h4>
+            <time pubdate="pubdate" datetime="2025-04-06T10:10:00-07:00">Apr 6, 2025</time>
+            <h4>Category</h4>
+            <a class="category-link" href="/categories.html#programming-ref">programming</a> 
+            <h4>~1012 words</h4>
+            <h4>Tags</h4>
+            <ul class="list-of-tags tags-in-article"> 
+                <li><a href="/tags.html#desktop-ref">desktop
+                    <span>1</span>
+</a></li>
+                <li><a href="/tags.html#go-ref">go
+                    <span>17</span>
+</a></li>
+                <li><a href="/tags.html#golang-ref">golang
+                    <span>17</span>
+</a></li>
+                <li><a href="/tags.html#javascript-ref">javascript
+                    <span>8</span>
+</a></li>
+                <li><a href="/tags.html#js-ref">js
+                    <span>3</span>
+</a></li>
+                <li><a href="/tags.html#react-ref">react
+                    <span>3</span>
+</a></li>
+                <li><a href="/tags.html#typescript-ref">typescript
+                    <span>1</span>
+</a></li>
+            </ul>
+
+        </div>
+        </section>
+</div>
+</article>
+				</div>
+				<div class="span1"></div>
+			</div>
+		</div>
+    </div>
+<footer>
+<div id="footer">
+    <ul class="footer-content">
+    </ul>
+</div>
+</footer>            <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+    </body>
+</html>
