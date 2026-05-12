@@ -91,6 +91,13 @@
 </li>
 <li><a href="#what-next">What Next?</a></li>
 <li><a href="#references">References</a></li>
+<li><a href="#image-addendum">Image Addendum</a><ul>
+<li><a href="#pre-requisites">Pre-Requisites</a></li>
+<li><a href="#describe-an-image">Describe an Image</a></li>
+<li><a href="#generate-an-image">Generate an Image</a></li>
+<li><a href="#more-image-resources">More Image Resources</a></li>
+</ul>
+</li>
 </ul>
 </div>
         </nav>
@@ -268,6 +275,111 @@ brew<span class="w"> </span>uninstall<span class="w"> </span>mlx
 </blockquote>
 <p><strong>Addendum:</strong></p>
 <p><a href="https://machinelearning.apple.com/research/exploring-llms-mlx-m5">https://machinelearning.apple.com/research/exploring-llms-mlx-m5</a></p>
+<h1 id="image-addendum">Image Addendum</h1>
+<p><em>Added in 2026</em></p>
+<p>Running an image model locally is possible - though it is more rare to find the conversions of models to MLX.</p>
+<h2 id="pre-requisites">Pre-Requisites</h2>
+<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>venv
+uv<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>mlx-lm<span class="w"> </span>mlx-vlm<span class="w"> </span>mflux
+uv<span class="w"> </span>pip<span class="w"> </span>list
+uv<span class="w"> </span>init
+uv<span class="w"> </span>sync
+<span class="nb">source</span><span class="w"> </span>.venv/bin/activate
+</code></pre></div>
+<p><em>if you want to double check the dependencies</em></p>
+<div class="highlight"><pre><span></span><code><span class="p p-Indicator">[</span><span class="nv">project</span><span class="p p-Indicator">]</span>
+<span class="l l-Scalar l-Scalar-Plain">name = "images"</span>
+<span class="l l-Scalar l-Scalar-Plain">version = "0.1.0"</span>
+<span class="l l-Scalar l-Scalar-Plain">requires-python = "&gt;=3.13"</span>
+<span class="l l-Scalar l-Scalar-Plain">dependencies = [</span>
+<span class="w">    </span><span class="l l-Scalar l-Scalar-Plain">"mflux&gt;=0.17.5",</span>
+<span class="w">    </span><span class="l l-Scalar l-Scalar-Plain">"mlx-lm&gt;=0.31.1",</span>
+<span class="w">    </span><span class="l l-Scalar l-Scalar-Plain">"mlx-vlm&gt;=0.4.4",</span>
+<span class="l l-Scalar l-Scalar-Plain">]</span>
+</code></pre></div>
+<h2 id="describe-an-image">Describe an Image</h2>
+<p>Given an existing image the "multi-modal" LLM will generate a text description:</p>
+<div class="highlight"><pre><span></span><code>mlx_vlm.generate<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--model<span class="w"> </span>mlx-community/gemma-4-e4b-it-4bit<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--max-tokens<span class="w"> </span><span class="m">500</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--temperature<span class="w"> </span><span class="m">0</span>.0<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--prompt<span class="w"> </span><span class="s2">"Describe this image."</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--image<span class="w"> </span>./IMG_4370.jpg
+</code></pre></div>
+<p><strong>Generated description</strong></p>
+<div class="highlight"><pre><span></span><code><span class="n">Files</span><span class="o">:</span><span class="w"> </span><span class="o">[</span><span class="k">'</span><span class="o">./</span><span class="nn">IMG_4370</span><span class="p">.</span><span class="n">jpg'</span><span class="o">]</span>
+
+<span class="n">Prompt</span><span class="o">:</span><span class="w"> </span><span class="o">&lt;</span><span class="n">bos</span><span class="o">&gt;&lt;|</span><span class="n">turn</span><span class="o">&gt;</span><span class="n">user</span>
+<span class="o">&lt;|</span><span class="n">image</span><span class="o">|&gt;</span><span class="n">Describe</span><span class="w"> </span><span class="n">this</span><span class="w"> </span><span class="n">image</span><span class="o">.&lt;</span><span class="n">turn</span><span class="o">|&gt;</span>
+<span class="o">&lt;|</span><span class="n">turn</span><span class="o">&gt;</span><span class="n">model</span>
+
+<span class="n">This</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">close</span><span class="o">-</span><span class="n">up</span><span class="o">,</span><span class="w"> </span><span class="n">outdoor</span><span class="w"> </span><span class="n">photograph</span><span class="w"> </span><span class="k">of</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">fluffy</span><span class="w"> </span><span class="n">white</span><span class="w"> </span><span class="n">dog</span><span class="o">,</span><span class="w"> </span><span class="n">likely</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">young</span><span class="w"> </span><span class="n">puppy</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">breed</span><span class="w"> </span><span class="k">with</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">very</span><span class="w"> </span><span class="n">thick</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">coat</span><span class="o">.</span>
+
+<span class="n">Here's</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">detailed</span><span class="w"> </span><span class="n">description</span><span class="o">:</span>
+
+<span class="o">*</span><span class="w">   </span><span class="o">**</span><span class="n">Subject</span><span class="o">:**</span><span class="w"> </span><span class="n">The</span><span class="w"> </span><span class="n">main</span><span class="w"> </span><span class="n">subject</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">dog</span><span class="o">,</span><span class="w"> </span><span class="n">which</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">facing</span><span class="w"> </span><span class="n">left</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">profile</span><span class="o">.</span><span class="w"> </span><span class="n">It</span><span class="w"> </span><span class="n">has</span><span class="w"> </span><span class="n">an</span><span class="w"> </span><span class="n">abundance</span><span class="w"> </span><span class="k">of</span><span class="w"> </span><span class="n">thick</span><span class="o">,</span><span class="w"> </span><span class="n">creamy</span><span class="w"> </span><span class="n">white</span><span class="w"> </span><span class="n">fur</span><span class="o">,</span><span class="w"> </span><span class="n">giving</span><span class="w"> </span><span class="n">it</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">very</span><span class="w"> </span><span class="n">soft</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="n">fluffy</span><span class="w"> </span><span class="n">appearance</span><span class="o">.</span>
+<span class="o">*</span><span class="w">   </span><span class="o">**</span><span class="n">Head</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="n">Face</span><span class="o">:**</span><span class="w"> </span><span class="n">The</span><span class="w"> </span><span class="n">dog's</span><span class="w"> </span><span class="n">head</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">prominent</span><span class="o">.</span><span class="w"> </span><span class="n">Its</span><span class="w"> </span><span class="n">eyes</span><span class="w"> </span><span class="n">are</span><span class="w"> </span><span class="n">visible</span><span class="o">,</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">visible</span><span class="w"> </span><span class="n">eye</span><span class="w"> </span><span class="n">appears</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="n">be</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">bluish</span><span class="o">-</span><span class="n">gray</span><span class="w"> </span><span class="n">color</span><span class="o">.</span><span class="w"> </span><span class="n">The</span><span class="w"> </span><span class="n">muzzle</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">relatively</span><span class="w"> </span><span class="n">short</span><span class="o">,</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">dog's</span><span class="w"> </span><span class="n">expression</span><span class="w"> </span><span class="n">seems</span><span class="w"> </span><span class="n">gentle</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="n">curious</span><span class="o">.</span>
+<span class="o">*</span><span class="w">   </span><span class="o">**</span><span class="n">Coat</span><span class="o">:**</span><span class="w"> </span><span class="n">The</span><span class="w"> </span><span class="n">fur</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">incredibly</span><span class="w"> </span><span class="n">dense</span><span class="o">,</span><span class="w"> </span><span class="n">particularly</span><span class="w"> </span><span class="n">around</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">neck</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="n">body</span><span class="o">,</span><span class="w"> </span><span class="n">creating</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">voluminous</span><span class="w"> </span><span class="n">cloud</span><span class="o">-</span><span class="n">like</span><span class="w"> </span><span class="n">effect</span><span class="o">.</span><span class="w"> </span><span class="n">The</span><span class="w"> </span><span class="n">fur</span><span class="w"> </span><span class="n">on</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">neck</span><span class="w"> </span><span class="n">forms</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">noticeable</span><span class="w"> </span><span class="n">ruff</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="n">collar</span><span class="o">.</span>
+<span class="o">*</span><span class="w">   </span><span class="o">**</span><span class="n">Foreground</span><span class="w"> </span><span class="n">Detail</span><span class="o">:**</span><span class="w"> </span><span class="n">In</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">bottom</span><span class="w"> </span><span class="n">left</span><span class="w"> </span><span class="n">corner</span><span class="o">,</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">human</span><span class="w"> </span><span class="n">hand</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">partially</span><span class="w"> </span><span class="n">visible</span><span class="o">,</span><span class="w"> </span><span class="n">reaching</span><span class="w"> </span><span class="n">up</span><span class="w"> </span><span class="n">toward</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">dog</span><span class="o">,</span><span class="w"> </span><span class="n">suggesting</span><span class="w"> </span><span class="n">interaction</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="n">affection</span><span class="w"> </span><span class="n">between</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">owner</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">pet</span><span class="o">.</span>
+<span class="o">*</span><span class="w">   </span><span class="o">**</span><span class="n">Background</span><span class="o">:**</span><span class="w"> </span><span class="n">The</span><span class="w"> </span><span class="n">background</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">slightly</span><span class="w"> </span><span class="n">blurred</span><span class="w"> </span><span class="n">but</span><span class="w"> </span><span class="n">suggests</span><span class="w"> </span><span class="n">an</span><span class="w"> </span><span class="n">outdoor</span><span class="w"> </span><span class="n">setting</span><span class="o">.</span><span class="w"> </span><span class="n">There</span><span class="w"> </span><span class="n">are</span><span class="w"> </span><span class="n">patches</span><span class="w"> </span><span class="k">of</span><span class="w"> </span><span class="n">dirt</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="n">gravel</span><span class="w"> </span><span class="n">on</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">ground</span><span class="o">,</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">upper</span><span class="w"> </span><span class="n">right</span><span class="o">,</span><span class="w"> </span><span class="n">there</span><span class="w"> </span><span class="n">are</span><span class="w"> </span><span class="n">some</span><span class="w"> </span><span class="n">darker</span><span class="w"> </span><span class="n">elements</span><span class="o">,</span><span class="w"> </span><span class="n">possibly</span><span class="w"> </span><span class="n">including</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">piece</span><span class="w"> </span><span class="k">of</span><span class="w"> </span><span class="n">debris</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">structure</span><span class="o">.</span>
+
+<span class="n">Overall</span><span class="o">,</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">image</span><span class="w"> </span><span class="n">conveys</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">feeling</span><span class="w"> </span><span class="k">of</span><span class="w"> </span><span class="n">softness</span><span class="o">,</span><span class="w"> </span><span class="n">innocence</span><span class="o">,</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="n">warmth</span><span class="w"> </span><span class="n">due</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">dog's</span><span class="w"> </span><span class="n">beautiful</span><span class="w"> </span><span class="n">coat</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">gentle</span><span class="w"> </span><span class="n">interaction</span><span class="w"> </span><span class="n">suggested</span><span class="w"> </span><span class="n">by</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">hand</span><span class="o">.</span>
+<span class="o">==========</span>
+<span class="n">Prompt</span><span class="o">:</span><span class="w"> </span><span class="mi">281</span><span class="w"> </span><span class="n">tokens</span><span class="o">,</span><span class="w"> </span><span class="mi">230</span><span class="o">.</span><span class="mi">428</span><span class="w"> </span><span class="n">tokens</span><span class="o">-</span><span class="n">per</span><span class="o">-</span><span class="n">sec</span>
+<span class="n">Generation</span><span class="o">:</span><span class="w"> </span><span class="mi">288</span><span class="w"> </span><span class="n">tokens</span><span class="o">,</span><span class="w"> </span><span class="mi">41</span><span class="o">.</span><span class="mi">667</span><span class="w"> </span><span class="n">tokens</span><span class="o">-</span><span class="n">per</span><span class="o">-</span><span class="n">sec</span>
+<span class="n">Peak</span><span class="w"> </span><span class="n">memory</span><span class="o">:</span><span class="w"> </span><span class="mi">6</span><span class="o">.</span><span class="mi">117</span><span class="w"> </span><span class="n">GB</span>
+</code></pre></div>
+<ul>
+<li><a href="https://github.com/Blaizzy/mlx-vlm">https://github.com/Blaizzy/mlx-vlm</a></li>
+<li><a href="https://deepmind.google/models/gemma/gemma-4/">https://deepmind.google/models/gemma/gemma-4/</a></li>
+<li><a href="https://huggingface.co/blog/gemma4">https://huggingface.co/blog/gemma4</a></li>
+</ul>
+<h2 id="generate-an-image">Generate an Image</h2>
+<p>Using the very powerful and fast "Flux2" family of models, and the MFLUX open source tool:</p>
+<div class="highlight"><pre><span></span><code>mflux-generate-flux2<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--model<span class="w"> </span>RunPod/FLUX.2-klein-4B-mflux-4bit<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--prompt<span class="w"> </span><span class="s2">"A ghibli-style scene of a cat and a robot pair-programming on a laptop in a tiny attic office"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--width<span class="w"> </span><span class="m">1024</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--height<span class="w"> </span><span class="m">1024</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--steps<span class="w"> </span><span class="m">4</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--seed<span class="w"> </span><span class="m">42</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--output<span class="w"> </span>output.png
+<span class="sb">```</span>bash
+
+!<span class="o">[</span>Flux2<span class="w"> </span>Klein<span class="w"> </span>generated<span class="w"> </span>with<span class="w"> </span>MFLUX<span class="o">](</span>../images/mlx-mflux-generate.png<span class="o">)</span>
+
+-<span class="w"> </span>&lt;https://github.com/filipstrand/mflux/tree/main/src/mflux/models/flux2/cli&gt;
+-<span class="w"> </span>&lt;https://github.com/filipstrand/mflux/blob/main/src/mflux/cli/parser/parsers.py&gt;
+
+
+<span class="c1">### Edit from an initial reference image</span>
+
+You<span class="w"> </span>can<span class="w"> </span>provide<span class="w"> </span>an<span class="w"> </span>input<span class="w"> </span>image<span class="w"> </span>and<span class="w"> </span>prompt<span class="w"> </span>the<span class="w"> </span>model<span class="w"> </span>to<span class="w"> </span>modify<span class="w"> </span>it
+
+<span class="sb">```</span>bash
+<span class="nv">MODEL</span><span class="o">=</span><span class="s1">'RunPod/FLUX.2-klein-4B-mflux-4bit'</span>
+mflux-generate-flux2-edit<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--model<span class="w"> </span><span class="s2">"</span><span class="nv">$MODEL</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--image-path<span class="w"> </span>IMG_4370.jpg<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--prompt<span class="w"> </span><span class="s2">"Change it to a puppy in the night"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--steps<span class="w"> </span><span class="m">4</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--seed<span class="w"> </span><span class="m">42</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--output<span class="w"> </span>edit-output.png
+</code></pre></div>
+<p><em>Note this may take a few minutes and at least 12GB of RAM</em></p>
+<p><img alt="Flux2 Klein edited with MFLUX" src="../images/mlx-mflux-edit.png"/></p>
+<h2 id="more-image-resources">More Image Resources</h2>
+<p><a href="https://huggingface.co/black-forest-labs/FLUX.2-klein-4B">https://huggingface.co/black-forest-labs/FLUX.2-klein-4B</a> - Klein 4 Billion parameters is the fast distilled model</p>
+<ul>
+<li><a href="https://bfl.ai/blog/flux2-klein-towards-interactive-visual-intelligence">https://bfl.ai/blog/flux2-klein-towards-interactive-visual-intelligence</a></li>
+</ul>
+<p>Quantized and MLX specific (aka runs fast on apple silicon): <a href="https://huggingface.co/Runpod/FLUX.2-klein-4B-mflux-4bit">https://huggingface.co/Runpod/FLUX.2-klein-4B-mflux-4bit</a></p>
+<p>More details on the image model family from Black Forest Labs:</p>
+<ul>
+<li><a href="https://bfl.ai/models/flux-2-klein">https://bfl.ai/models/flux-2-klein</a></li>
+<li><a href="https://github.com/black-forest-labs/flux2">https://github.com/black-forest-labs/flux2</a></li>
+<li><a href="https://playground.bfl.ai/image/generate">https://playground.bfl.ai/image/generate</a></li>
+</ul>
             <aside>
             <hr/>
             <nav>
@@ -287,7 +399,7 @@ brew<span class="w"> </span>uninstall<span class="w"> </span>mlx
             <time pubdate="pubdate" datetime="2024-11-23T19:21:00-08:00">Nov 23, 2024</time>
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#ai-ref">ai</a> 
-            <h4>~1204 words</h4>
+            <h4>~1687 words</h4>
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article"> 
                 <li><a href="/tags.html#ai-ref">ai
