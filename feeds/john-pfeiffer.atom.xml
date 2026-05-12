@@ -295,8 +295,8 @@
 &lt;/ul&gt;
 &lt;h2 id="installing-dependencies"&gt;Installing Dependencies&lt;/h2&gt;
 &lt;p&gt;It is simpler to have the first cell install all the dependencies needed for the rest of the notebook.&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;!pip install -q --upgrade transformers diffusers accelerate bitsandbytes sentencepiece&lt;/code&gt;&lt;/p&gt;
-&lt;p&gt;&lt;em&gt;not pinning the dependencies to a specific version means something could break at some point in the future&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;!pip install -q --upgrade transformers==4.56.2 diffusers==0.36.0 accelerate bitsandbytes sentencepiece&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;I had to pin to specific dependencies to make both image generation examples work =|&lt;/em&gt;&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;diffusers: provides the image-generation pipeline and FLUX classes&lt;/li&gt;
 &lt;li&gt;accelerate: handles device placement, device_map="auto", CPU/GPU dispatch&lt;/li&gt;
@@ -327,7 +327,6 @@
 &lt;span class="n"&gt;gpu&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;Tesla&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;T4&lt;/span&gt;
 &lt;span class="n"&gt;vram&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;total&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;GB&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mf"&gt;14.56&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;&lt;em&gt;re-ran this in 2026 - with newer dependencies it still works =)&lt;/em&gt;&lt;/p&gt;
 &lt;h2 id="login"&gt;Login&lt;/h2&gt;
 &lt;p&gt;The second "code cell" is a good place to get authentication out of the way for the rest of the notebook:&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;google.colab&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;userdata&lt;/span&gt;
@@ -451,13 +450,14 @@
 &lt;span class="n"&gt;peak&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;GB&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mf"&gt;13.7&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 &lt;blockquote&gt;
-&lt;p&gt;Like a limbo, fitting under the 15GB cap&lt;/p&gt;
+&lt;p&gt;Like Limbo, barely fitting under the limit of 15GB, wait actually 14.5GB!&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;h2 id="pipeline"&gt;Pipeline&lt;/h2&gt;
 &lt;p&gt;Now creating the pipeline, and explicitly passing our previous step quantized text encoder...&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;CLIP text encoder (~250MB, visual-semantic alignment)&lt;/li&gt;
-&lt;li&gt;FLUX transformer (23.8GB, the actual image generator)&lt;/li&gt;
+&lt;li&gt;text_encoder_2 (quantized down to ~7GB)&lt;/li&gt;
+&lt;li&gt;FLUX transformer (23.8G reduced to ~6GB, the actual image generator)&lt;/li&gt;
 &lt;li&gt;VAE (~170MB, decodes the result into a visible image)&lt;/li&gt;
 &lt;li&gt;tokenizers and scheduler config&lt;/li&gt;
 &lt;/ul&gt;
@@ -489,7 +489,7 @@ peak GB: 13.99
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 &lt;h3 id="image-generation-success"&gt;Image Generation - Success&lt;/h3&gt;
 &lt;p&gt;All the previous cells led up to this generation of a higher quality image in seconds.&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="n"&gt;prompt&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s2"&gt;"A cartoon cat and a cartoon robot working side by side writing code"&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="n"&gt;prompt&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s2"&gt;"A ghibli-style scene of a cat and a robot pair-programming on a laptop in a tiny attic office"&lt;/span&gt;
 
 &lt;span class="k"&gt;with&lt;/span&gt; &lt;span class="n"&gt;torch&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;inference_mode&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
     &lt;span class="n"&gt;image&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;pipe&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;
@@ -534,7 +534,6 @@ peak GB: 13.99
 Tried to allocate 128.00 MiB. GPU 0 has a total capacity of 14.56 GiB of which 111.81 MiB is free.
 Including non-PyTorch memory, this process has 14.45 GiB memory in use. 
 Of the allocated memory 14.25 GiB is allocated by PyTorch, and 60.81 MiB is reserved by PyTorch but unallocated. &lt;/p&gt;
-&lt;p&gt;If reserved but unallocated memory is large try setting PYTORCH_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;h1 id="manual-cleanup"&gt;Manual Cleanup&lt;/h1&gt;
 &lt;p&gt;Usually you'd "restart session", and hopefully the model weights are cached on disk (~/.cache/huggingface/).&lt;/p&gt;
@@ -542,6 +541,9 @@ Of the allocated memory 14.25 GiB is allocated by PyTorch, and 60.81 MiB is rese
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;gc&lt;/span&gt;
 
 &lt;span class="k"&gt;del&lt;/span&gt; &lt;span class="n"&gt;pipe&lt;/span&gt;                &lt;span class="c1"&gt;# delete the pipeline object&lt;/span&gt;
+&lt;span class="c1"&gt;# del text_encoder_2&lt;/span&gt;
+&lt;span class="c1"&gt;# del transformer&lt;/span&gt;
+
 &lt;span class="n"&gt;gc&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;collect&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;            &lt;span class="c1"&gt;# Python garbage collection&lt;/span&gt;
 &lt;span class="n"&gt;torch&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;cuda&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;empty_cache&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;  &lt;span class="c1"&gt;# release GPU memory back to CUDA&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;

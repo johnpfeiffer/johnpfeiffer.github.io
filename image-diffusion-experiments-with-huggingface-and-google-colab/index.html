@@ -168,8 +168,8 @@
 </ul>
 <h2 id="installing-dependencies">Installing Dependencies</h2>
 <p>It is simpler to have the first cell install all the dependencies needed for the rest of the notebook.</p>
-<p><code>!pip install -q --upgrade transformers diffusers accelerate bitsandbytes sentencepiece</code></p>
-<p><em>not pinning the dependencies to a specific version means something could break at some point in the future</em></p>
+<p><code>!pip install -q --upgrade transformers==4.56.2 diffusers==0.36.0 accelerate bitsandbytes sentencepiece</code></p>
+<p><em>I had to pin to specific dependencies to make both image generation examples work =|</em></p>
 <ul>
 <li>diffusers: provides the image-generation pipeline and FLUX classes</li>
 <li>accelerate: handles device placement, device_map="auto", CPU/GPU dispatch</li>
@@ -200,7 +200,6 @@
 <span class="n">gpu</span><span class="o">:</span><span class="w"> </span><span class="n">Tesla</span><span class="w"> </span><span class="n">T4</span>
 <span class="n">vram</span><span class="w"> </span><span class="n">total</span><span class="w"> </span><span class="n">GB</span><span class="o">:</span><span class="w"> </span><span class="mf">14.56</span>
 </code></pre></div>
-<p><em>re-ran this in 2026 - with newer dependencies it still works =)</em></p>
 <h2 id="login">Login</h2>
 <p>The second "code cell" is a good place to get authentication out of the way for the rest of the notebook:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">google.colab</span> <span class="kn">import</span> <span class="n">userdata</span>
@@ -324,13 +323,14 @@
 <span class="n">peak</span><span class="w"> </span><span class="n">GB</span><span class="p">:</span><span class="w"> </span><span class="mf">13.7</span>
 </code></pre></div>
 <blockquote>
-<p>Like a limbo, fitting under the 15GB cap</p>
+<p>Like Limbo, barely fitting under the limit of 15GB, wait actually 14.5GB!</p>
 </blockquote>
 <h2 id="pipeline">Pipeline</h2>
 <p>Now creating the pipeline, and explicitly passing our previous step quantized text encoder...</p>
 <ul>
 <li>CLIP text encoder (~250MB, visual-semantic alignment)</li>
-<li>FLUX transformer (23.8GB, the actual image generator)</li>
+<li>text_encoder_2 (quantized down to ~7GB)</li>
+<li>FLUX transformer (23.8G reduced to ~6GB, the actual image generator)</li>
 <li>VAE (~170MB, decodes the result into a visible image)</li>
 <li>tokenizers and scheduler config</li>
 </ul>
@@ -362,7 +362,7 @@ peak GB: 13.99
 </code></pre></div>
 <h3 id="image-generation-success">Image Generation - Success</h3>
 <p>All the previous cells led up to this generation of a higher quality image in seconds.</p>
-<div class="highlight"><pre><span></span><code><span class="n">prompt</span> <span class="o">=</span> <span class="s2">"A cartoon cat and a cartoon robot working side by side writing code"</span>
+<div class="highlight"><pre><span></span><code><span class="n">prompt</span> <span class="o">=</span> <span class="s2">"A ghibli-style scene of a cat and a robot pair-programming on a laptop in a tiny attic office"</span>
 
 <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">inference_mode</span><span class="p">():</span>
     <span class="n">image</span> <span class="o">=</span> <span class="n">pipe</span><span class="p">(</span>
@@ -407,7 +407,6 @@ peak GB: 13.99
 Tried to allocate 128.00 MiB. GPU 0 has a total capacity of 14.56 GiB of which 111.81 MiB is free.
 Including non-PyTorch memory, this process has 14.45 GiB memory in use. 
 Of the allocated memory 14.25 GiB is allocated by PyTorch, and 60.81 MiB is reserved by PyTorch but unallocated. </p>
-<p>If reserved but unallocated memory is large try setting PYTORCH_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)</p>
 </blockquote>
 <h1 id="manual-cleanup">Manual Cleanup</h1>
 <p>Usually you'd "restart session", and hopefully the model weights are cached on disk (~/.cache/huggingface/).</p>
@@ -415,6 +414,9 @@ Of the allocated memory 14.25 GiB is allocated by PyTorch, and 60.81 MiB is rese
 <div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">gc</span>
 
 <span class="k">del</span> <span class="n">pipe</span>                <span class="c1"># delete the pipeline object</span>
+<span class="c1"># del text_encoder_2</span>
+<span class="c1"># del transformer</span>
+
 <span class="n">gc</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>            <span class="c1"># Python garbage collection</span>
 <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">empty_cache</span><span class="p">()</span>  <span class="c1"># release GPU memory back to CUDA</span>
 </code></pre></div>
@@ -505,7 +507,7 @@ Layers stay where they're placed.</p>
             <time pubdate="pubdate" datetime="2025-12-20T09:42:00-08:00">Dec 20, 2025</time>
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#ai-ref">ai</a> 
-            <h4>~1950 words</h4>
+            <h4>~1938 words</h4>
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article"> 
                 <li><a href="/tags.html#ai-ref">ai
