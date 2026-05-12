@@ -232,7 +232,387 @@
 &lt;li&gt;detailed specs and tests allow for very easy reverse-engineering and building by AI agents&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;Avoid the "Lethal Trifecta" &lt;a href="https://simonwillison.net/2025/Jun/16/the-lethal-trifecta/"&gt;https://simonwillison.net/2025/Jun/16/the-lethal-trifecta/&lt;/a&gt;&lt;/p&gt;
-&lt;p&gt;Have lots of fun, experiment with everything =)&lt;/p&gt;</content><category term="leadership"/><category term="ai"/><category term="career"/><category term="engineering"/><category term="management"/><category term="leadership"/><category term="navigating change"/></entry><entry><title>Intro to MCP - give your LLM tools with model context protocol</title><link href="https://blog.john-pfeiffer.com/intro-to-mcp-give-your-llm-tools-with-model-context-protocol/" rel="alternate"/><published>2025-07-27T19:20:00-07:00</published><updated>2025-07-27T19:20:00-07:00</updated><author><name>john pfeiffer</name></author><id>tag:blog.john-pfeiffer.com,2025-07-27:/intro-to-mcp-give-your-llm-tools-with-model-context-protocol/</id><summary type="html">
+&lt;p&gt;Have lots of fun, experiment with everything =)&lt;/p&gt;</content><category term="leadership"/><category term="ai"/><category term="career"/><category term="engineering"/><category term="management"/><category term="leadership"/><category term="navigating change"/></entry><entry><title>Image Diffusion experiments with HuggingFace and Google Colab</title><link href="https://blog.john-pfeiffer.com/image-diffusion-experiments-with-huggingface-and-google-colab/" rel="alternate"/><published>2025-12-20T09:42:00-08:00</published><updated>2025-12-20T09:42:00-08:00</updated><author><name>john pfeiffer</name></author><id>tag:blog.john-pfeiffer.com,2025-12-20:/image-diffusion-experiments-with-huggingface-and-google-colab/</id><summary type="html">
+&lt;p&gt;Having the whole environment in the cloud can simplify setup and the hardware you need to experiment and learn.&lt;/p&gt;
+&lt;p&gt;There are many ways to utilize AI/LLMs for different kinds of tasks, and accordingly a variety of types of AI models.&lt;/p&gt;
+&lt;h1 id="pre-requisite-setup-with-google-colab"&gt;Pre-Requisite Setup with Google Colab&lt;/h1&gt;
+&lt;p&gt;Working with models using …&lt;/p&gt;</summary><content type="html">
+&lt;p&gt;Having the whole environment in the cloud can simplify setup and the hardware you need to experiment and learn.&lt;/p&gt;
+&lt;p&gt;There are many ways to utilize AI/LLMs for different kinds of tasks, and accordingly a variety of types of AI models.&lt;/p&gt;
+&lt;h1 id="pre-requisite-setup-with-google-colab"&gt;Pre-Requisite Setup with Google Colab&lt;/h1&gt;
+&lt;p&gt;Working with models using free (for now) access to an NVIDIA T4&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;create a free google account&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://colab.research.google.com/"&gt;https://colab.research.google.com/&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Next to "Connect" (arrow down) -&amp;gt; Change runtime type (to T4)
+- more info on the NVIDIA T4 GPU: &lt;a href="https://www.nvidia.com/en-us/data-center/tesla-t4/"&gt;https://www.nvidia.com/en-us/data-center/tesla-t4/&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;Resources offered free of charge are not guaranteed. At your current usage level, this runtime may last up to 5 hours.&lt;/em&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;This is an ephemeral environment - it starts with a clean slate and after "disconnect and delete" all data, packages, and code will be deleted&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h1 id="connect-and-code-cells"&gt;Connect and Code Cells&lt;/h1&gt;
+&lt;p&gt;Click on &lt;strong&gt;Connect T4&lt;/strong&gt; &lt;/p&gt;
+&lt;p&gt;&lt;em&gt;the Resources tab on the right will show you the available and used system RAM (12.7GB), GPU RAM (15GB), and Disk space (112GB)&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;There is an existing "code cell" where you can paste the following trivial "code" and press the play (execute) button to see the output&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="n"&gt;seconds_in_a_day&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;24&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="mi"&gt;60&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="mi"&gt;60&lt;/span&gt;
+&lt;span class="n"&gt;seconds_in_a_day&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;&lt;code&gt;86400&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Cell output is displayed below the commands/code&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;code&gt;!nvidia-smi&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;the &lt;strong&gt;!&lt;/strong&gt; runs a shell command - in this case using a CLI utility to detect the NVIDIA GPU&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;The UI makes it easy to add more with "+ Code", and every code cell shares the same state (dependencies, credentials, etc.)&lt;/p&gt;
+&lt;p&gt;Here is an optional initial diagnostic to inspect the base environment:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;torch&lt;/span&gt;
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;google.protobuf&lt;/span&gt;
+
+&lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;"torch:"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;torch&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;__version__&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;"cuda:"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;torch&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;version&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;cuda&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;"protobuf:"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;google&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;protobuf&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;__version__&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;"gpu:"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;torch&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;cuda&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;get_device_name&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="n"&gt;torch&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mf"&gt;2.10&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="o"&gt;+&lt;/span&gt;&lt;span class="n"&gt;cu128&lt;/span&gt;
+&lt;span class="n"&gt;cuda&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mf"&gt;12.8&lt;/span&gt;
+&lt;span class="n"&gt;protobuf&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mf"&gt;5.29&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="mi"&gt;6&lt;/span&gt;
+&lt;span class="n"&gt;gpu&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;Tesla&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;T4&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h2 id="huggingface-api-token-as-a-colab-secret"&gt;HuggingFace API Token as a Colab Secret&lt;/h2&gt;
+&lt;p&gt;Create a free HuggingFace account on https://huggingface.co&lt;/p&gt;
+&lt;p&gt;(Profile image) -&amp;gt; Settings -&amp;gt; Access Tokens (on the left) -&amp;gt; "Create new token" button &lt;/p&gt;
+&lt;p&gt;&lt;a href="https://huggingface.co/settings/tokens"&gt;https://huggingface.co/settings/tokens&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Token type: "Write"&lt;/p&gt;
+&lt;p&gt;Save the secret API token someplace safe.&lt;/p&gt;
+&lt;p&gt;Then back in Colab &lt;a href="https://colab.research.google.com/"&gt;https://colab.research.google.com/&lt;/a&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;On the left press the &lt;strong&gt;"Key" icon&lt;/strong&gt; on the side panel to the left, and "Add new secret"&lt;/li&gt;
+&lt;li&gt;Name: HF_TOKEN&lt;/li&gt;
+&lt;li&gt;Value: (paste your huggingface api token here)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="installing-dependencies"&gt;Installing Dependencies&lt;/h2&gt;
+&lt;p&gt;It is simpler to have the first cell install all the dependencies needed for the rest of the notebook.&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;!pip install -q --upgrade transformers diffusers accelerate bitsandbytes sentencepiece&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;not pinning the dependencies to a specific version means something could break at some point in the future&lt;/em&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;diffusers: provides the image-generation pipeline and FLUX classes&lt;/li&gt;
+&lt;li&gt;accelerate: handles device placement, device_map="auto", CPU/GPU dispatch&lt;/li&gt;
+&lt;li&gt;bitsandbytes: provides quantization so the T5 encoder and FLUX transformer have a chance of fitting on the T4&lt;/li&gt;
+&lt;li&gt;sentencepiece: for T5-family tokenization aka "prompt text into tokens"&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;em&gt;do not upgrade the core environmenet dependencies like: torch, cuda, protobuf, numpy, requests, fsspec&lt;/em&gt;&lt;/p&gt;
+&lt;h3 id="optional-sanity-check"&gt;Optional Sanity Check&lt;/h3&gt;
+&lt;p&gt;If you really want to see the versions of everything you can create a cell with this code:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;torch&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="nn"&gt;transformers&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="nn"&gt;accelerate&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="nn"&gt;bitsandbytes&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt; &lt;span class="nn"&gt;diffusers&lt;/span&gt;
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;google.protobuf&lt;/span&gt;
+
+&lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;"transformers:"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;transformers&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;__version__&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;"accelerate:"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;accelerate&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;__version__&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;"bitsandbytes:"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;bitsandbytes&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;__version__&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;"diffusers:"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;diffusers&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;__version__&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;"protobuf:"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;google&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;protobuf&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;__version__&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="n"&gt;torch&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;cuda&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;is_available&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
+    &lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;"gpu:"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;torch&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;cuda&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;get_device_name&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+    &lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;"vram total GB:"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nb"&gt;round&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;torch&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;cuda&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;get_device_properties&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;total_memory&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt; &lt;span class="mi"&gt;1024&lt;/span&gt;&lt;span class="o"&gt;**&lt;/span&gt;&lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="n"&gt;transformers&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mf"&gt;4.56&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;
+&lt;span class="n"&gt;accelerate&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mf"&gt;1.13&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;
+&lt;span class="n"&gt;bitsandbytes&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mf"&gt;0.49&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;
+&lt;span class="n"&gt;diffusers&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mf"&gt;0.36&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;
+&lt;span class="n"&gt;protobuf&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mf"&gt;5.29&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="mi"&gt;6&lt;/span&gt;
+&lt;span class="n"&gt;gpu&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;Tesla&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;T4&lt;/span&gt;
+&lt;span class="n"&gt;vram&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;total&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;GB&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mf"&gt;14.56&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;&lt;em&gt;re-ran this in 2026 - with newer dependencies it still works =)&lt;/em&gt;&lt;/p&gt;
+&lt;h2 id="login"&gt;Login&lt;/h2&gt;
+&lt;p&gt;The second "code cell" is a good place to get authentication out of the way for the rest of the notebook:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;google.colab&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;userdata&lt;/span&gt;
+&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;huggingface_hub&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;login&lt;/span&gt;
+
+&lt;span class="n"&gt;hf_token&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;userdata&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;get&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;'HF_TOKEN'&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="n"&gt;login&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;hf_token&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;add_to_git_credential&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="kc"&gt;True&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h1 id="creating-an-image"&gt;Creating an Image&lt;/h1&gt;
+&lt;p&gt;Running the following code will produce a lot of progress bars as the model is downloaded and about 8GB of GPU RAM is utilized to generate an okay smaller cartoon image:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;IPython.display&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;display&lt;/span&gt;
+&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;diffusers&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;AutoPipelineForText2Image&lt;/span&gt;
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;torch&lt;/span&gt;
+
+&lt;span class="n"&gt;pipe&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;AutoPipelineForText2Image&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;from_pretrained&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;"stabilityai/sdxl-turbo"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;torch_dtype&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;torch&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;float16&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;variant&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;"fp16"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="n"&gt;pipe&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;to&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;"cuda"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="n"&gt;prompt&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s2"&gt;"A ghibli-style scene of a cat and a robot pair-programming on a laptop in a tiny attic office"&lt;/span&gt;
+&lt;span class="n"&gt;image&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;pipe&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;prompt&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;prompt&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;num_inference_steps&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;guidance_scale&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mf"&gt;0.0&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;images&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+&lt;span class="n"&gt;display&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;image&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;&lt;em&gt;be prepared to wait as it can take 5 minutes, and the 512x512 limitation is a limitation of "turbo"&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img alt="StabilityAI SDXL model image" src="../images/diffusion-example-stabilityai-sdxl-turbo.png"/&gt;&lt;/p&gt;
+&lt;h1 id="complexity-and-quantization"&gt;Complexity and Quantization&lt;/h1&gt;
+&lt;p&gt;The power of the notebook approach is to be able to experiment quickly and see results.&lt;/p&gt;
+&lt;p&gt;Some open weight models still require accepting some extra legal terms =(&lt;/p&gt;
+&lt;p&gt;Go to &lt;a href="https://huggingface.co/black-forest-labs/FLUX.1-schnell"&gt;https://huggingface.co/black-forest-labs/FLUX.1-schnell&lt;/a&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;"You need to agree to share your contact information to access this model"&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Once you click, then the UI updates with "Gated model: You have been granted access to this model"&lt;/p&gt;
+&lt;p&gt;Consider this a new experiment that needs a lot of memory:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;"restart session"&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Re-run the Login cell&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Re-run the Dependencies cell&lt;/strong&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;Below we will add a new series of new cells in your notebook.&lt;/p&gt;
+&lt;h2 id="imports"&gt;Imports&lt;/h2&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="n"&gt;model_id&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s2"&gt;"black-forest-labs/FLUX.1-schnell"&lt;/span&gt;
+
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;os&lt;/span&gt;
+&lt;span class="n"&gt;os&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;environ&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="s2"&gt;"PYTORCH_CUDA_ALLOC_CONF"&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s2"&gt;"expandable_segments:True"&lt;/span&gt;
+
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;torch&lt;/span&gt;
+&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;IPython.display&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;display&lt;/span&gt;
+
+&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;transformers&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;T5EncoderModel&lt;/span&gt;
+&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;transformers&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;BitsAndBytesConfig&lt;/span&gt; &lt;span class="k"&gt;as&lt;/span&gt; &lt;span class="n"&gt;TransformersBitsAndBytesConfig&lt;/span&gt;
+
+&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;diffusers&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;FluxPipeline&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;FluxTransformer2DModel&lt;/span&gt;
+&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;diffusers&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;BitsAndBytesConfig&lt;/span&gt; &lt;span class="k"&gt;as&lt;/span&gt; &lt;span class="n"&gt;DiffusersBitsAndBytesConfig&lt;/span&gt;
+
+&lt;span class="n"&gt;torch&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;cuda&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;empty_cache&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+&lt;span class="n"&gt;torch&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;cuda&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;reset_peak_memory_stats&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h2 id="quantizing-text-encoder-2"&gt;Quantizing - Text Encoder 2&lt;/h2&gt;
+&lt;p&gt;First we are "quantizing" or reducing the size for an acceptable degradation in quality.&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://developer.nvidia.com/blog/model-quantization-concepts-methods-and-why-it-matters/"&gt;https://developer.nvidia.com/blog/model-quantization-concepts-methods-and-why-it-matters/&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;This step can take 5 minutes (mostly waiting for downloads from HuggingFace to Google Colab).&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;T5-XXL is the large text encoder (~9.5GB) that understands complex prompts. Quantizing it to 8-bit cuts memory roughly in half so it fits on the T4.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;    &lt;span class="c1"&gt;# T5 text encoder 8-bit — supports CPU offloading: use TRANSFORMERS BitsAndBytesConfig&lt;/span&gt;
+&lt;span class="n"&gt;text_encoder_2&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;T5EncoderModel&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;from_pretrained&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;
+    &lt;span class="n"&gt;model_id&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="n"&gt;subfolder&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;"text_encoder_2"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="n"&gt;quantization_config&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;TransformersBitsAndBytesConfig&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;
+        &lt;span class="n"&gt;load_in_8bit&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="kc"&gt;True&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+        &lt;span class="n"&gt;llm_int8_enable_fp32_cpu_offload&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="kc"&gt;True&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="p"&gt;),&lt;/span&gt;
+    &lt;span class="n"&gt;torch_dtype&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;torch&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;float16&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="n"&gt;device_map&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;"auto"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="n"&gt;low_cpu_mem_usage&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="kc"&gt;True&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;"T5 loaded"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;"device map:"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;text_encoder_2&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;hf_device_map&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;"allocated GB:"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nb"&gt;round&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;torch&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;cuda&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;memory_allocated&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt; &lt;span class="mi"&gt;1024&lt;/span&gt;&lt;span class="o"&gt;**&lt;/span&gt;&lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+&lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;"reserved GB:"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nb"&gt;round&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;torch&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;cuda&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;memory_reserved&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt; &lt;span class="mi"&gt;1024&lt;/span&gt;&lt;span class="o"&gt;**&lt;/span&gt;&lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+&lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;"peak GB:"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nb"&gt;round&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;torch&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;cuda&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;max_memory_allocated&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt; &lt;span class="mi"&gt;1024&lt;/span&gt;&lt;span class="o"&gt;**&lt;/span&gt;&lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="n"&gt;T5&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;loaded&lt;/span&gt;
+&lt;span class="n"&gt;device&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;map&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="s1"&gt;''&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;span class="n"&gt;allocated&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;GB&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mf"&gt;7.37&lt;/span&gt;
+&lt;span class="n"&gt;reserved&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;GB&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mf"&gt;7.8&lt;/span&gt;
+&lt;span class="n"&gt;peak&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;GB&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mf"&gt;7.45&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;"device map {'': 0} means all layers loaded onto GPU (device 0)&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id="quantizing-transformer-model"&gt;Quantizing - Transformer Model&lt;/h2&gt;
+&lt;p&gt;This step can take 10 minutes: &lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;downloading 23GB of weights&lt;/li&gt;
+&lt;li&gt;quantizing it down to 4bit (~6GB = a lot less memory)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;em&gt;In HuggingFace, FluxTransformer2DModel is the python class for the FLUX.1 family&lt;/em&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://huggingface.co/docs/diffusers/api/models/flux_transformer#fluxtransformer2dmodel"&gt;https://huggingface.co/docs/diffusers/api/models/flux_transformer#fluxtransformer2dmodel&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://huggingface.co/black-forest-labs/FLUX.1-schnell"&gt;https://huggingface.co/black-forest-labs/FLUX.1-schnell&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://bfl.ai/blog/24-08-01-bfl"&gt;https://bfl.ai/blog/24-08-01-bfl&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="n"&gt;transformer&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;FluxTransformer2DModel&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;from_pretrained&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;
+    &lt;span class="n"&gt;model_id&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="n"&gt;subfolder&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;"transformer"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="n"&gt;quantization_config&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;DiffusersBitsAndBytesConfig&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;
+        &lt;span class="n"&gt;load_in_4bit&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="kc"&gt;True&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+        &lt;span class="n"&gt;bnb_4bit_quant_type&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;"nf4"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+        &lt;span class="n"&gt;bnb_4bit_compute_dtype&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;torch&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;float16&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="p"&gt;),&lt;/span&gt;
+    &lt;span class="n"&gt;torch_dtype&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;torch&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;float16&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;"Transformer loaded"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;"device map:"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;transformer&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;hf_device_map&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;"allocated GB:"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nb"&gt;round&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;torch&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;cuda&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;memory_allocated&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt; &lt;span class="mi"&gt;1024&lt;/span&gt;&lt;span class="o"&gt;**&lt;/span&gt;&lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+&lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;"reserved GB:"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nb"&gt;round&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;torch&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;cuda&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;memory_reserved&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt; &lt;span class="mi"&gt;1024&lt;/span&gt;&lt;span class="o"&gt;**&lt;/span&gt;&lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+&lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;"peak GB:"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nb"&gt;round&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;torch&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;cuda&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;max_memory_allocated&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt; &lt;span class="mi"&gt;1024&lt;/span&gt;&lt;span class="o"&gt;**&lt;/span&gt;&lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="n"&gt;Transformer&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;loaded&lt;/span&gt;
+&lt;span class="n"&gt;allocated&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;GB&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mf"&gt;13.61&lt;/span&gt;
+&lt;span class="n"&gt;reserved&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;GB&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mf"&gt;13.68&lt;/span&gt;
+&lt;span class="n"&gt;peak&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;GB&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mf"&gt;13.7&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Like a limbo, fitting under the 15GB cap&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id="pipeline"&gt;Pipeline&lt;/h2&gt;
+&lt;p&gt;Now creating the pipeline, and explicitly passing our previous step quantized text encoder...&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;CLIP text encoder (~250MB, visual-semantic alignment)&lt;/li&gt;
+&lt;li&gt;FLUX transformer (23.8GB, the actual image generator)&lt;/li&gt;
+&lt;li&gt;VAE (~170MB, decodes the result into a visible image)&lt;/li&gt;
+&lt;li&gt;tokenizers and scheduler config&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;em&gt;This step is relatively quick as it is just assembling the pieces and one last memory check...&lt;/em&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="n"&gt;pipe&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;FluxPipeline&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;from_pretrained&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;
+    &lt;span class="n"&gt;model_id&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="n"&gt;text_encoder_2&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;text_encoder_2&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="n"&gt;transformer&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;transformer&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="n"&gt;torch_dtype&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;torch&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;float16&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="n"&gt;device_map&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;"balanced"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="n"&gt;pipe&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;vae&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;enable_slicing&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+&lt;span class="n"&gt;pipe&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;vae&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;enable_tiling&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+
+&lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;"Pipeline ready"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;"allocated GB:"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nb"&gt;round&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;torch&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;cuda&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;memory_allocated&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt; &lt;span class="mi"&gt;1024&lt;/span&gt;&lt;span class="o"&gt;**&lt;/span&gt;&lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+&lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;"reserved GB:"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nb"&gt;round&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;torch&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;cuda&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;memory_reserved&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt; &lt;span class="mi"&gt;1024&lt;/span&gt;&lt;span class="o"&gt;**&lt;/span&gt;&lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+&lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;"peak GB:"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nb"&gt;round&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;torch&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;cuda&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;max_memory_allocated&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt; &lt;span class="mi"&gt;1024&lt;/span&gt;&lt;span class="o"&gt;**&lt;/span&gt;&lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;ul&gt;
+&lt;li&gt;slicing: for a batch of images, decodes them one at a time instead of all at once&lt;/li&gt;
+&lt;li&gt;tiling: splits the image into overlapping tiles and decodes each tile separately instead of the full image at once&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;Pipeline ready
+allocated GB: 13.99
+reserved GB: 14.02
+peak GB: 13.99
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h3 id="image-generation-success"&gt;Image Generation - Success&lt;/h3&gt;
+&lt;p&gt;All the previous cells led up to this generation of a higher quality image in seconds.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="n"&gt;prompt&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s2"&gt;"A cartoon cat and a cartoon robot working side by side writing code"&lt;/span&gt;
+
+&lt;span class="k"&gt;with&lt;/span&gt; &lt;span class="n"&gt;torch&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;inference_mode&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
+    &lt;span class="n"&gt;image&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;pipe&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;
+        &lt;span class="n"&gt;prompt&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;prompt&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+        &lt;span class="n"&gt;num_inference_steps&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+        &lt;span class="n"&gt;guidance_scale&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mf"&gt;0.0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+        &lt;span class="n"&gt;height&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mi"&gt;384&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+        &lt;span class="n"&gt;width&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mi"&gt;384&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+        &lt;span class="n"&gt;max_sequence_length&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mi"&gt;128&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;images&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+
+&lt;span class="n"&gt;display&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;image&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+
+&lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;"allocated GB:"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nb"&gt;round&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;torch&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;cuda&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;memory_allocated&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt; &lt;span class="mi"&gt;1024&lt;/span&gt;&lt;span class="o"&gt;**&lt;/span&gt;&lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+&lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;"reserved GB:"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nb"&gt;round&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;torch&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;cuda&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;memory_reserved&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt; &lt;span class="mi"&gt;1024&lt;/span&gt;&lt;span class="o"&gt;**&lt;/span&gt;&lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+&lt;span class="nb"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;"peak GB:"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nb"&gt;round&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;torch&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;cuda&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;max_memory_allocated&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="o"&gt;/&lt;/span&gt; &lt;span class="mi"&gt;1024&lt;/span&gt;&lt;span class="o"&gt;**&lt;/span&gt;&lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;peak GB: 14.34&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;img alt="Flux1 Schnell quantized image" src="../images/diffusion-example-flux1-schnell-quantized.png"/&gt;&lt;/p&gt;
+&lt;h3 id="moar-image-fail"&gt;Moar Image - Fail&lt;/h3&gt;
+&lt;p&gt;Attempting a larger, 512x512 image takes more memory...&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="n"&gt;prompt&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s2"&gt;"A cozy watercolor-style scene of a cartoon cat and a cartoon robot pair-programming on a laptop in a tiny attic office"&lt;/span&gt;
+
+&lt;span class="n"&gt;torch&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;cuda&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;reset_peak_memory_stats&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+
+&lt;span class="k"&gt;with&lt;/span&gt; &lt;span class="n"&gt;torch&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;inference_mode&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
+    &lt;span class="n"&gt;image&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;pipe&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;
+        &lt;span class="n"&gt;prompt&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="n"&gt;prompt&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+        &lt;span class="n"&gt;num_inference_steps&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+        &lt;span class="n"&gt;guidance_scale&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mf"&gt;0.0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+        &lt;span class="n"&gt;height&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mi"&gt;512&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+        &lt;span class="n"&gt;width&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mi"&gt;512&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+        &lt;span class="n"&gt;max_sequence_length&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mi"&gt;128&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;images&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+
+&lt;span class="n"&gt;display&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;image&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;OutOfMemoryError: CUDA out of memory.&lt;/strong&gt;
+Tried to allocate 128.00 MiB. GPU 0 has a total capacity of 14.56 GiB of which 111.81 MiB is free.
+Including non-PyTorch memory, this process has 14.45 GiB memory in use. 
+Of the allocated memory 14.25 GiB is allocated by PyTorch, and 60.81 MiB is reserved by PyTorch but unallocated. &lt;/p&gt;
+&lt;p&gt;If reserved but unallocated memory is large try setting PYTORCH_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h1 id="manual-cleanup"&gt;Manual Cleanup&lt;/h1&gt;
+&lt;p&gt;Usually you'd "restart session", and hopefully the model weights are cached on disk (~/.cache/huggingface/).&lt;/p&gt;
+&lt;p&gt;If you really need something you can sometimes get rid of the pipeline and regenerate it:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;gc&lt;/span&gt;
+
+&lt;span class="k"&gt;del&lt;/span&gt; &lt;span class="n"&gt;pipe&lt;/span&gt;                &lt;span class="c1"&gt;# delete the pipeline object&lt;/span&gt;
+&lt;span class="n"&gt;gc&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;collect&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;            &lt;span class="c1"&gt;# Python garbage collection&lt;/span&gt;
+&lt;span class="n"&gt;torch&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;cuda&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;empty_cache&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;  &lt;span class="c1"&gt;# release GPU memory back to CUDA&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Re-run your &lt;strong&gt;Pipeline&lt;/strong&gt; cell:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;Pipeline ready
+allocated GB: 14.25
+reserved GB: 14.31
+peak GB: 14.35
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;You will often find the memory is not really released - you really do have to &lt;strong&gt;restart session&lt;/strong&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr/&gt;
+&lt;h2 id="addendum-explaining-files"&gt;Addendum - Explaining Files&lt;/h2&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;em&gt;Downloading (incomplete total...):  30% 2.85G/9.52G [00:48&amp;lt;01:29, 74.5MB/s]&lt;/em&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;strong&gt;FLUX.1-schnell&lt;/strong&gt; is a "distilled model" - created from a larger model &lt;a href="https://en.wikipedia.org/wiki/Knowledge_distillation"&gt;https://en.wikipedia.org/wiki/Knowledge_distillation&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Fetching 2 files (9.52GB download)&lt;/strong&gt;: The T5-XXL model that turns your text prompt into "dense vector representation" that guides image generation.&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;Full precision would be ~18GB; but instead using the smaller fp16 variant, which then gets further compressed to 8-bit by BitsAndBytesConfig as it loads.&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;config.json&lt;/strong&gt; (782 bytes): The T5-XXL architecture definition — number of layers, hidden dimensions, attention heads. Tells PyTorch what shape to build before loading weights into it.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;model.safetensors.index.json&lt;/strong&gt; (19.9k): A map of "layer name to which shard file it lives in." The T5 weights are split across multiple .safetensors files; this index tells the loader which files to fetch and where each tensor goes.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;model_index.json&lt;/strong&gt; (536 bytes): The pipeline manifest — lists every component (scheduler, tokenizer, tokenizer_2, text_encoder, text_encoder_2, transformer, vae) and which class/subfolder each one uses. This is how diffusers knows what to assemble.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Downloading 23.8GB&lt;/strong&gt; The FLUX transformer itself — the 12 billion parameter diffusion transformer that actually generates the image.&lt;/p&gt;
+&lt;p&gt;In the "text_encoder" area is CLIP , &lt;a href="https://openai.com/index/clip/"&gt;https://openai.com/index/clip/&lt;/a&gt; , which was trained on millions of image-caption pairs, so its mapping of text and images into the same mathematical space can be used to help the transformer to go from "prompt text" to "generally what the image should look like".&lt;/p&gt;
+&lt;h2 id="addendum-memory-strategies"&gt;Addendum - Memory Strategies&lt;/h2&gt;
+&lt;p&gt;With limited memory space you may need more tricks than just quantization...&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;enable_model_cpu_offload()&lt;/strong&gt; is dynamic&lt;/p&gt;
+&lt;p&gt;During inference:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;move T5 to GPU: encode text, then back to the CPU&lt;/li&gt;
+&lt;li&gt;move CLIP to GPU: encode text, then back to the CPU&lt;/li&gt;
+&lt;li&gt;move transformer to GPU: denoise, then back to the CPU&lt;/li&gt;
+&lt;li&gt;move VAE to GPU: decode&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;a href="https://huggingface.co/blog/sd3#dropping-the-t5-text-encoder-during-inference"&gt;https://huggingface.co/blog/sd3#dropping-the-t5-text-encoder-during-inference&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;For &lt;strong&gt;device_map="balanced"&lt;/strong&gt;, static placement, distributes evenly across devices. Layers stay where they're placed.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;GPU (14.56 GB)                    CPU
+┌─────────────────────┐          ┌──────────────────┐
+│ T5 encoder (8-bit)  │          │                  │
+│ all blocks 0-23     │          │                  │
+│ ~7.4 GB             │          │                  │
+├─────────────────────┤          │                  │
+│ FLUX transformer    │          │                  │
+│ (4-bit NF4, ~6 GB)  │          │                  │
+├─────────────────────┤          ├──────────────────┤
+│ CLIP + VAE          │          │ overflow layers  │
+│ ~0.4 GB             │          │ from "balanced"  │
+└─────────────────────┘          └──────────────────┘
+      ~14 GB                        minimal
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;For &lt;strong&gt;device_map="auto"&lt;/strong&gt;  it is static placement at load time, fills GPU first, spills overflow to CPU.
+Layers stay where they're placed.&lt;/p&gt;
+&lt;h1 id="troubleshooting"&gt;Troubleshooting&lt;/h1&gt;
+&lt;p&gt;When things go wrong the cell response color will be red and the result will contain some error message info...&lt;/p&gt;
+&lt;h2 id="python-dependency-hell"&gt;Python Dependency Hell&lt;/h2&gt;
+&lt;p&gt;There are least four packages (transformers, diffusers, bitsandbytes, accelerate) that are tightly coupled but release independently.&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;If you get a DryRunError() error then you may have stale dependencies and should try "Restart the Runtime" and try re-installing all the dependencies&lt;/em&gt;&lt;/p&gt;
+&lt;h3 id="out-of-memory"&gt;Out of Memory&lt;/h3&gt;
+&lt;p&gt;When you OOM, you can't just fix the code and re-run. You have to restart the runtime.&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;GPU 0 has a total capacity of 14.56 GiB of which 9.81 MiB is free&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;It might need re-download everything =(&lt;/p&gt;
+&lt;p&gt;After the restart, remember to re-run each cell that you want to load into the global shared state. &lt;/p&gt;
+&lt;p&gt;(green checkmark next to the cell number)&lt;/p&gt;
+&lt;p&gt;If you're lucky then maybe some of the models got cached on disk; if you have a cell with an experiment that you don't need you can just ignore it.&lt;/p&gt;
+&lt;h3 id="authentication"&gt;Authentication&lt;/h3&gt;
+&lt;p&gt;&lt;strong&gt;403 Authentication&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;Ensure you have executed your "HuggingFace credentials" cell.&lt;/p&gt;
+&lt;p&gt;Also, you may need to consent to extra terms in HuggingFace to download some specific models.&lt;/p&gt;</content><category term="ai"/><category term="ai"/><category term="diffusion"/><category term="google colab"/><category term="huggingface"/></entry><entry><title>Intro to MCP - give your LLM tools with model context protocol</title><link href="https://blog.john-pfeiffer.com/intro-to-mcp-give-your-llm-tools-with-model-context-protocol/" rel="alternate"/><published>2025-07-27T19:20:00-07:00</published><updated>2025-07-27T19:20:00-07:00</updated><author><name>john pfeiffer</name></author><id>tag:blog.john-pfeiffer.com,2025-07-27:/intro-to-mcp-give-your-llm-tools-with-model-context-protocol/</id><summary type="html">
 &lt;h1 id="why-is-weather-so-hard"&gt;Why is weather so hard?&lt;/h1&gt;
 &lt;p&gt;Let's start with a problem...&lt;/p&gt;
 &lt;p&gt;&lt;em&gt;(rather than technology looking for a problem ;)&lt;/em&gt;&lt;/p&gt;
@@ -20710,125 +21090,4 @@ Also you can set the default format to Full HTML
 &lt;h3 id="3-column-css-example"&gt;3 column css example&lt;/h3&gt;
 &lt;div class="field field-name-body field-type-text-with-summary field-label-hidden"&gt;
 &lt;html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml"&gt;&lt;head&gt;&lt;style type="text/css"&gt;/* required to kill off any extra "helpful" browser padding  */html, body {  margin: 0;   padding: 0;  height: 99%;} #container{    min-height: 100%;    height: 100%;    margin:0;     border: 1px solid green;}#column1 {    float: left;         width: 33%;  height: 100%;           /* full length column */ position: relative;   border: 1px solid red;}#column2 {  float: left;    /* wraps the div around the left of the prev object */   width: 34%;  height: 100%;    position: relative;   border: 1px solid yellow;}#column3 {   float: right;    width: 33%;  margin-left: -1%;   /* prevent the right column from being pushed down! */   height: 100%;    position: relative;   border: 1px solid blue;  overflow: hidden;}&lt;/style&gt;&lt;/head&gt;&lt;body&gt; &lt;div id="container"&gt; &lt;div id="column1"&gt;         left left left left left left left left left left left left      &lt;/div&gt; &lt;div id="column2"&gt;             center center center     &lt;/div&gt; &lt;div id="column3"&gt;         right right right right right right right right right        &lt;/div&gt;&lt;/div&gt;&lt;!-- end div container --&gt;&lt;/body&gt;&lt;/html&gt;
-&lt;/div&gt;</content><category term="programming"/><category term="css"/></entry><entry><title>Tiny Core Linux with Linksys Wireless Card - no CD required installation</title><link href="https://blog.john-pfeiffer.com/tiny-core-linux-with-linksys-wireless-card-no-cd-required-installation/" rel="alternate"/><published>2010-08-04T01:52:00-07:00</published><updated>2010-08-04T01:52:00-07:00</updated><author><name>john pfeiffer</name></author><id>tag:blog.john-pfeiffer.com,2010-08-04:/tiny-core-linux-with-linksys-wireless-card-no-cd-required-installation/</id><summary type="html">
-&lt;p&gt;Tiny Core Linux is fast and works great... but it does take some effort to get setup... &lt;/p&gt;
-&lt;p&gt;Here's how I got my Linksys wpc54g (v3) pci wireless card working with WPA - and I didn't burn a tiny core cd!&lt;/p&gt;
-&lt;p&gt;You can't repartition a hard drive while actually using it so …&lt;/p&gt;</summary><content type="html">
-&lt;p&gt;Tiny Core Linux is fast and works great... but it does take some effort to get setup... &lt;/p&gt;
-&lt;p&gt;Here's how I got my Linksys wpc54g (v3) pci wireless card working with WPA - and I didn't burn a tiny core cd!&lt;/p&gt;
-&lt;p&gt;You can't repartition a hard drive while actually using it so you'll most likely need GParted (ie from SystemRescueCD bootable cd) so that you can repartition / (root) and resize to have a spare linux partition... AND use:&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;mke2fs -t ext3 /dev/hda3&lt;/code&gt;&lt;/p&gt;
-&lt;blockquote&gt;
-&lt;p&gt;(or wherever it is...)
-hda3 = third partition on the first hard drive, you may need to use &lt;code&gt;fdisk -l&lt;/code&gt;
-or Start -&amp;gt; Control Panel -&amp;gt; Administrative Tools -&amp;gt; Computer Management -&amp;gt; Disk Management&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;h3 id="prerequisites"&gt;Prerequisites&lt;/h3&gt;
-&lt;ul&gt;
-&lt;li&gt;grub bootloader installed (preferrably to the MBR)  &lt;/li&gt;
-&lt;li&gt;tinycore.iso (cd image of tiny core installation/live cd)  &lt;/li&gt;
-&lt;li&gt;uniextract or isobuster (to open files from iso's)  &lt;/li&gt;
-&lt;li&gt;ext2fsd (winxp application that allows copying files in/out of an ext2/ext3 partition)&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;&lt;em&gt;tcz&lt;/em&gt; files from an FTP repository listed in the section "Install on a Hard Drive Without Being Connected to the Internet" from  &lt;a href="http://wiki.tinycorelinux.net/wiki:start#installing"&gt;http://wiki.tinycorelinux.net/wiki:start#installing&lt;/a&gt;&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;wireless-2.6.29.1-tinycore.tcz  &lt;/li&gt;
-&lt;li&gt;wireless_tools.tcz  &lt;/li&gt;
-&lt;li&gt;wpa_supplicant.tcz  &lt;/li&gt;
-&lt;li&gt;b43-fwcutter.tcz  &lt;/li&gt;
-&lt;li&gt;open-ssl-0.9.8m.tcz&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h3 id="getting-the-pieces-ready"&gt;Getting the pieces ready&lt;/h3&gt;
-&lt;ol&gt;
-&lt;li&gt;Extract the files from the &lt;strong&gt;tinycore.iso&lt;/strong&gt; (using IsoBuster or UniExtract)...&lt;br/&gt;
-OR if you have linux: &lt;code&gt;mount -o loop /path-to-iso/image-filename.iso /mnt/custom&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;We only need the &lt;strong&gt;bzImage&lt;/strong&gt; and &lt;strong&gt;tinycore.gz&lt;/strong&gt; files... &lt;blockquote&gt;
-&lt;p&gt;CAPITAL I ON THE bzImage!&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;/li&gt;
-&lt;li&gt;USING Ext2 Volume Manager (ext2fsd) ... browse to your linux partition and create the following folder: &lt;strong&gt;/boot/tinycore&lt;/strong&gt;&lt;/li&gt;
-&lt;li&gt;Copy the "bzimage" and "tinycore.gz" files into the linux partition &lt;strong&gt;/boot/tinycore folder&lt;/strong&gt;&lt;/li&gt;
-&lt;li&gt;Also create the following text file: &lt;strong&gt;/tce/onboot.lst&lt;/strong&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="n"&gt;wireless&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mf"&gt;2.6&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="mf"&gt;29.1&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;tinycore&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;tcz&lt;/span&gt;
-&lt;span class="n"&gt;wireless_tools&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;tcz&lt;/span&gt;
-&lt;span class="n"&gt;b43&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;fwcutter&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;tcz&lt;/span&gt;
-&lt;span class="n"&gt;openssl&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mf"&gt;0.9&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="mi"&gt;8&lt;/span&gt;&lt;span class="n"&gt;m&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;tcz&lt;/span&gt;
-&lt;span class="n"&gt;wpa_supplicant&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;tcz&lt;/span&gt;
-&lt;span class="n"&gt;nano&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;tcz&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-&lt;/li&gt;
-&lt;/ol&gt;
-&lt;blockquote&gt;
-&lt;p&gt;BE CAREFUL TO NOT HAVE ANY MISSPELLINGS OR EXTRA SPACES&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;p&gt;Finally, create the directory /tce/optional and copy the above .tcz files into it.&lt;/p&gt;
-&lt;p&gt;&lt;em&gt;TinyCore uses /tce/mydata.tgz to store your files in the /home and /opt directories. (Therefore you could sneak something in if you wanted to...?)&lt;/em&gt;&lt;/p&gt;
-&lt;p&gt;&lt;em&gt;ALSO, it uses .ashrc (e.g. not BASH command prompt) so any aliases are in /tce/mydata.tgz -&amp;gt; home/tc/.ashrc&lt;/em&gt;&lt;/p&gt;
-&lt;h3 id="modify-your-grub-legacy-menu"&gt;Modify your Grub (legacy) menu&lt;/h3&gt;
-&lt;p&gt;&lt;strong&gt;menu.lst&lt;/strong&gt;&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;title tinycore  
-root (hd0,2)  
-kernel /boot/tinycore/bzimage  
-initrd /boot/tinycore/tinycore.gz
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-&lt;h3 id="oh-wait-wifi-drivers"&gt;Oh Wait, Wifi Drivers!&lt;/h3&gt;
-&lt;p&gt;BUT my wifi depends on this Linksys wpc54g (v3) pci wireless card AND wpa encryption...&lt;/p&gt;
-&lt;p&gt;So I've got &lt;strong&gt;wl_apsta.o&lt;/strong&gt; from my previous debian kernel 2.6.26 (with all of the linux-header and make and compiling commands to get that binary...)&lt;/p&gt;
-&lt;p&gt;Without the correct fw5 (b43 firmware) &lt;code&gt;dmesg&lt;/code&gt; will contain:&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;b43-phy0 ERROR: firmware file "b43/ucode5.fw"
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-&lt;blockquote&gt;
-&lt;p&gt;kernel firmware unhappy with wrong linksys driver&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;p&gt;COPY &lt;strong&gt;wl_apsta.o&lt;/strong&gt; into &lt;strong&gt;/mnt/hda3/tce&lt;/strong&gt; (with EXT2FSD or usb stick or whatever)&lt;/p&gt;
-&lt;p&gt;&lt;em&gt;Rather than hack into my-data.tgz we'll wait until we've booted into Tiny Core...&lt;/em&gt;&lt;/p&gt;
-&lt;h3 id="booting-into-tiny-core-linux"&gt;Booting into Tiny Core Linux&lt;/h3&gt;
-&lt;p&gt;BOOTING INTO TINY CORE IS VERY FAST... (fingers crossed about everything before)&lt;/p&gt;
-&lt;p&gt;Right Click -&amp;gt; Control Panel or a funny icon in the middle with screwdriver = Control Panel&lt;/p&gt;
-&lt;p&gt;First check that our "onboot.lst" hack worked: Apps Audit -&amp;gt; OnBoot -&amp;gt; Maintenance&lt;/p&gt;
-&lt;p&gt;&lt;em&gt;(could also use: nano /mnt/hda3/tce/onboot.lst)&lt;/em&gt;&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;WHEN YOU CHOOSE TO SAVE/BACKUP&lt;/strong&gt; (or when prompted when closing to Save a Backup)  &lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;mydata.tgz&lt;/strong&gt; is created and it includes any modifications to &lt;strong&gt;/opt/bootlocal.sh&lt;/strong&gt;&lt;/p&gt;
-&lt;p&gt;since things put in the &lt;strong&gt;bootlocal.sh&lt;/strong&gt; script are run as root... my wifi hack works...&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;nano bootlocal.sh&lt;/code&gt;&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;mkdir /lib/firmware  
-b43-fwcutter -w /lib/firmware /mnt/hda3/tce/wl_apsta.o  
-wpa_supplicant -B -iwlan0 -c/mnt/hda3/tce/wpa_supplicant.conf  
-udhcpc -H hostname -b -i wlan0
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;the /lib/firmware directory is necessary for the kernel to get the new drivers  &lt;/p&gt;
-&lt;p&gt;the b43-fwcutter firmware cutter gets the drivers to the directory  &lt;/p&gt;
-&lt;p&gt;wpa_supplicant starts in the background using wlan0 and the config file wpa_supplicant.conf&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;wpa_passphrase ssid-network-name &amp;gt; wpa_supplicant.conf&lt;/code&gt;&lt;/p&gt;
-&lt;blockquote&gt;
-&lt;p&gt;prompts for the wireless network password, after you type it in press enter&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;p&gt;udhcpc is busybox's dhcp client using "hostname", in the background on wlan0&lt;/p&gt;
-&lt;p&gt;An alternative configuration in bootlocal.sh for a static ip would be...&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;ifconfig wlan0 10.0.0.99 netmask 255.255.255.0 up  
-route add default gw 10.0.0.138  
-echo "nameserver 10.0.0.138" &amp;gt; /etc/resolv.conf
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-&lt;h3 id="verify-after-reboot"&gt;Verify after reboot&lt;/h3&gt;
-&lt;p&gt;AFTER I REBOOTED ifconfig wlan0 //shows me my ip address  &lt;/p&gt;
-&lt;p&gt;&lt;code&gt;ping 10.0.0.138&lt;/code&gt; and &lt;code&gt;ping http://kittyandbear.net&lt;/code&gt;&lt;/p&gt;
-&lt;blockquote&gt;
-&lt;p&gt;ALL OK!&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;h3 id="adding-a-browser-to-tiny-core-linux"&gt;Adding a browser to Tiny Core Linux&lt;/h3&gt;
-&lt;p&gt;Of course, now I have to install a browser...&lt;/p&gt;
-&lt;p&gt;Since tinycore works from the core image and with then added modifications to be as lean and fast as possible you really need to explicitly choose what you want on your hard drive AND what you want started at boot time.&lt;/p&gt;
-&lt;ol&gt;
-&lt;li&gt;Right Click -&amp;gt; AppsBrowser or funny icon on the bottom right (gears)&lt;/li&gt;
-&lt;li&gt;File -&amp;gt; Install Local Extension (anything on your hard drive but not in onboot.lst)  &lt;/li&gt;
-&lt;li&gt;By default it lists your TCE/optional directory, double click on the one you want...
-(If it isn't onboot and it isn't "installed" by above then it's not on your tinycore yet!)&lt;/li&gt;
-&lt;/ol&gt;
-&lt;p&gt;OR File -&amp;gt; AppsBrowser ... when you choose to install something from the "repository" be prepared to wait for about 5 minutes for it to load the hundreds of packages...&lt;/p&gt;
-&lt;h3 id="miscellaneous-tiny-core-linux-notes"&gt;Miscellaneous Tiny Core Linux Notes&lt;/h3&gt;
-&lt;p&gt;Right Click -&amp;gt; Shells -&amp;gt; Shell Dark or funny icon on the bottom left (terminal with prompt)&lt;/p&gt;
-&lt;p&gt;Right Click -&amp;gt; Control Panel -&amp;gt; System Stats OR funny icon in the middle with screwdriver = Panel -&amp;gt; System Stats&lt;/p&gt;
-&lt;p&gt;dmesg TAB shows you the b43 stuff  &lt;/p&gt;
-&lt;p&gt;cpu is cpu type  &lt;/p&gt;
-&lt;p&gt;mem is RAM free  &lt;/p&gt;
-&lt;p&gt;net is network devices installed...&lt;/p&gt;
-&lt;p&gt;loadkmap &amp;lt; /usr/share/kmap/uk.kmap&lt;/p&gt;</content><category term="linux"/><category term="linux"/><category term="tiny core linux"/></entry></feed>
+&lt;/div&gt;</content><category term="programming"/><category term="css"/></entry></feed>

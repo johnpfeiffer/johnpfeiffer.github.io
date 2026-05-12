@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en-US">
+    <head>
+        <meta charset="utf-8"> 
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="author" content="john pfeiffer" />
+        <meta name="copyright" content="john pfeiffer" />
+
+<meta name="keywords" content="ai, diffusion, google colab, huggingface, ai, " />
+        <title>Image Diffusion experiments with HuggingFace and Google Colab  · johnpfeiffer
+</title>
+        <!--link href="https://cdn-images.mailchimp.com/embedcode/slim-081711.css" rel="stylesheet" type="text/css"-->
+        <!--link href="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css" rel="stylesheet"-->
+        <link href="https://blog.john-pfeiffer.com/theme/css/bootstrap-combined.min.css" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="https://blog.john-pfeiffer.com/theme/css/style.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="https://blog.john-pfeiffer.com/theme/css/solarizedlight.css" media="screen">
+        <link rel="shortcut icon" href="https://blog.john-pfeiffer.com/theme/images/favicon.ico" type="image/x-icon" />
+        <link rel="apple-touch-icon" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon.png" />
+        <link rel="apple-touch-icon" sizes="57x57" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-57x57.png" />
+        <link rel="apple-touch-icon" sizes="72x72" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-72x72.png" />
+        <link rel="apple-touch-icon" sizes="114x114" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-114x114.png" />
+        <link rel="apple-touch-icon" sizes="144x144" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-144x144.png" />
+        <link rel="icon" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-144x144.png" />
+    </head>
+    <body>
+	<div id="content-sans-footer">
+        <div class="dropdown-backdrop">
+
+			<div class="navbar navbar-static-top">
+				<div class="navbar-inner">
+					<div class="container">
+						<a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+							<span class="icon-bar"></span>
+							<span class="icon-bar"></span>
+							<span class="icon-bar"></span>
+						</a>
+						<a class="brand" href="https://blog.john-pfeiffer.com/"><span class=site-name>johnpfeiffer</span></a>
+						<div class="nav-collapse collapse">
+							<ul class="nav pull-right top-menu">
+								<li ><a href="https://blog.john-pfeiffer.com">Home</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/engineering-people-managers/">Engineering (People) Managers</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/john-likes/">John Likes</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/software-engineer-favorites/">Software Engineer Favorites</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/categories.html">Categories</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/tags.html">Tags</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/archives.html">Archives</a></li>
+								<li><form class="navbar-search" action="https://blog.john-pfeiffer.com/search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="container-fluid">
+			<div class="row-fluid">
+				<div class="span1"></div>
+				<div class="span10">
+<article>
+<div class="row-fluid">
+    <header class="page_header span10 offset2">
+    <h1><a href="https://blog.john-pfeiffer.com/image-diffusion-experiments-with-huggingface-and-google-colab/"> Image Diffusion experiments with HuggingFace and Google Colab  </a></h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+    <div class="span2 table-of-content">
+        <nav>
+        <h4>Contents</h4>
+        <div class="toc">
+<ul>
+<li><a href="#pre-requisite-setup-with-google-colab">Pre-Requisite Setup with Google Colab</a></li>
+<li><a href="#connect-and-code-cells">Connect and Code Cells</a><ul>
+<li><a href="#huggingface-api-token-as-a-colab-secret">HuggingFace API Token as a Colab Secret</a></li>
+<li><a href="#installing-dependencies">Installing Dependencies</a><ul>
+<li><a href="#optional-sanity-check">Optional Sanity Check</a></li>
+</ul>
+</li>
+<li><a href="#login">Login</a></li>
+</ul>
+</li>
+<li><a href="#creating-an-image">Creating an Image</a></li>
+<li><a href="#complexity-and-quantization">Complexity and Quantization</a><ul>
+<li><a href="#imports">Imports</a></li>
+<li><a href="#quantizing-text-encoder-2">Quantizing - Text Encoder 2</a></li>
+<li><a href="#quantizing-transformer-model">Quantizing - Transformer Model</a></li>
+<li><a href="#pipeline">Pipeline</a><ul>
+<li><a href="#image-generation-success">Image Generation - Success</a></li>
+<li><a href="#moar-image-fail">Moar Image - Fail</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#manual-cleanup">Manual Cleanup</a><ul>
+<li><a href="#addendum-explaining-files">Addendum - Explaining Files</a></li>
+<li><a href="#addendum-memory-strategies">Addendum - Memory Strategies</a></li>
+</ul>
+</li>
+<li><a href="#troubleshooting">Troubleshooting</a><ul>
+<li><a href="#python-dependency-hell">Python Dependency Hell</a><ul>
+<li><a href="#out-of-memory">Out of Memory</a></li>
+<li><a href="#authentication">Authentication</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+        </nav>
+    </div>
+    <div class="span8 article-content">
+
+            
+<p>Having the whole environment in the cloud can simplify setup and the hardware you need to experiment and learn.</p>
+<p>There are many ways to utilize AI/LLMs for different kinds of tasks, and accordingly a variety of types of AI models.</p>
+<h1 id="pre-requisite-setup-with-google-colab">Pre-Requisite Setup with Google Colab</h1>
+<p>Working with models using free (for now) access to an NVIDIA T4</p>
+<ul>
+<li>create a free google account</li>
+<li><a href="https://colab.research.google.com/">https://colab.research.google.com/</a></li>
+</ul>
+<p>Next to "Connect" (arrow down) -&gt; Change runtime type (to T4)
+- more info on the NVIDIA T4 GPU: <a href="https://www.nvidia.com/en-us/data-center/tesla-t4/">https://www.nvidia.com/en-us/data-center/tesla-t4/</a></p>
+<p><em>Resources offered free of charge are not guaranteed. At your current usage level, this runtime may last up to 5 hours.</em></p>
+<blockquote>
+<p>This is an ephemeral environment - it starts with a clean slate and after "disconnect and delete" all data, packages, and code will be deleted</p>
+</blockquote>
+<h1 id="connect-and-code-cells">Connect and Code Cells</h1>
+<p>Click on <strong>Connect T4</strong> </p>
+<p><em>the Resources tab on the right will show you the available and used system RAM (12.7GB), GPU RAM (15GB), and Disk space (112GB)</em></p>
+<p>There is an existing "code cell" where you can paste the following trivial "code" and press the play (execute) button to see the output</p>
+<div class="highlight"><pre><span></span><code><span class="n">seconds_in_a_day</span> <span class="o">=</span> <span class="mi">24</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">60</span>
+<span class="n">seconds_in_a_day</span>
+</code></pre></div>
+<p><code>86400</code></p>
+<blockquote>
+<p>Cell output is displayed below the commands/code</p>
+</blockquote>
+<p><code>!nvidia-smi</code></p>
+<blockquote>
+<p>the <strong>!</strong> runs a shell command - in this case using a CLI utility to detect the NVIDIA GPU</p>
+</blockquote>
+<p>The UI makes it easy to add more with "+ Code", and every code cell shares the same state (dependencies, credentials, etc.)</p>
+<p>Here is an optional initial diagnostic to inspect the base environment:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">import</span> <span class="nn">google.protobuf</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">"torch:"</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"cuda:"</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">version</span><span class="o">.</span><span class="n">cuda</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"protobuf:"</span><span class="p">,</span> <span class="n">google</span><span class="o">.</span><span class="n">protobuf</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"gpu:"</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">get_device_name</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="n">torch</span><span class="o">:</span><span class="w"> </span><span class="mf">2.10</span><span class="o">.</span><span class="mi">0</span><span class="o">+</span><span class="n">cu128</span>
+<span class="n">cuda</span><span class="o">:</span><span class="w"> </span><span class="mf">12.8</span>
+<span class="n">protobuf</span><span class="o">:</span><span class="w"> </span><span class="mf">5.29</span><span class="o">.</span><span class="mi">6</span>
+<span class="n">gpu</span><span class="o">:</span><span class="w"> </span><span class="n">Tesla</span><span class="w"> </span><span class="n">T4</span>
+</code></pre></div>
+<h2 id="huggingface-api-token-as-a-colab-secret">HuggingFace API Token as a Colab Secret</h2>
+<p>Create a free HuggingFace account on https://huggingface.co</p>
+<p>(Profile image) -&gt; Settings -&gt; Access Tokens (on the left) -&gt; "Create new token" button </p>
+<p><a href="https://huggingface.co/settings/tokens">https://huggingface.co/settings/tokens</a></p>
+<p>Token type: "Write"</p>
+<p>Save the secret API token someplace safe.</p>
+<p>Then back in Colab <a href="https://colab.research.google.com/">https://colab.research.google.com/</a></p>
+<ul>
+<li>On the left press the <strong>"Key" icon</strong> on the side panel to the left, and "Add new secret"</li>
+<li>Name: HF_TOKEN</li>
+<li>Value: (paste your huggingface api token here)</li>
+</ul>
+<h2 id="installing-dependencies">Installing Dependencies</h2>
+<p>It is simpler to have the first cell install all the dependencies needed for the rest of the notebook.</p>
+<p><code>!pip install -q --upgrade transformers diffusers accelerate bitsandbytes sentencepiece</code></p>
+<p><em>not pinning the dependencies to a specific version means something could break at some point in the future</em></p>
+<ul>
+<li>diffusers: provides the image-generation pipeline and FLUX classes</li>
+<li>accelerate: handles device placement, device_map="auto", CPU/GPU dispatch</li>
+<li>bitsandbytes: provides quantization so the T5 encoder and FLUX transformer have a chance of fitting on the T4</li>
+<li>sentencepiece: for T5-family tokenization aka "prompt text into tokens"</li>
+</ul>
+<p><em>do not upgrade the core environmenet dependencies like: torch, cuda, protobuf, numpy, requests, fsspec</em></p>
+<h3 id="optional-sanity-check">Optional Sanity Check</h3>
+<p>If you really want to see the versions of everything you can create a cell with this code:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">torch</span><span class="o">,</span> <span class="nn">transformers</span><span class="o">,</span> <span class="nn">accelerate</span><span class="o">,</span> <span class="nn">bitsandbytes</span><span class="o">,</span> <span class="nn">diffusers</span>
+<span class="kn">import</span> <span class="nn">google.protobuf</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">"transformers:"</span><span class="p">,</span> <span class="n">transformers</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"accelerate:"</span><span class="p">,</span> <span class="n">accelerate</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"bitsandbytes:"</span><span class="p">,</span> <span class="n">bitsandbytes</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"diffusers:"</span><span class="p">,</span> <span class="n">diffusers</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"protobuf:"</span><span class="p">,</span> <span class="n">google</span><span class="o">.</span><span class="n">protobuf</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">():</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"gpu:"</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">get_device_name</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"vram total GB:"</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">get_device_properties</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">total_memory</span> <span class="o">/</span> <span class="mi">1024</span><span class="o">**</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="n">transformers</span><span class="o">:</span><span class="w"> </span><span class="mf">4.56</span><span class="o">.</span><span class="mi">2</span>
+<span class="n">accelerate</span><span class="o">:</span><span class="w"> </span><span class="mf">1.13</span><span class="o">.</span><span class="mi">0</span>
+<span class="n">bitsandbytes</span><span class="o">:</span><span class="w"> </span><span class="mf">0.49</span><span class="o">.</span><span class="mi">2</span>
+<span class="n">diffusers</span><span class="o">:</span><span class="w"> </span><span class="mf">0.36</span><span class="o">.</span><span class="mi">0</span>
+<span class="n">protobuf</span><span class="o">:</span><span class="w"> </span><span class="mf">5.29</span><span class="o">.</span><span class="mi">6</span>
+<span class="n">gpu</span><span class="o">:</span><span class="w"> </span><span class="n">Tesla</span><span class="w"> </span><span class="n">T4</span>
+<span class="n">vram</span><span class="w"> </span><span class="n">total</span><span class="w"> </span><span class="n">GB</span><span class="o">:</span><span class="w"> </span><span class="mf">14.56</span>
+</code></pre></div>
+<p><em>re-ran this in 2026 - with newer dependencies it still works =)</em></p>
+<h2 id="login">Login</h2>
+<p>The second "code cell" is a good place to get authentication out of the way for the rest of the notebook:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">google.colab</span> <span class="kn">import</span> <span class="n">userdata</span>
+<span class="kn">from</span> <span class="nn">huggingface_hub</span> <span class="kn">import</span> <span class="n">login</span>
+
+<span class="n">hf_token</span> <span class="o">=</span> <span class="n">userdata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'HF_TOKEN'</span><span class="p">)</span>
+<span class="n">login</span><span class="p">(</span><span class="n">hf_token</span><span class="p">,</span> <span class="n">add_to_git_credential</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</code></pre></div>
+<h1 id="creating-an-image">Creating an Image</h1>
+<p>Running the following code will produce a lot of progress bars as the model is downloaded and about 8GB of GPU RAM is utilized to generate an okay smaller cartoon image:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">display</span>
+<span class="kn">from</span> <span class="nn">diffusers</span> <span class="kn">import</span> <span class="n">AutoPipelineForText2Image</span>
+<span class="kn">import</span> <span class="nn">torch</span>
+
+<span class="n">pipe</span> <span class="o">=</span> <span class="n">AutoPipelineForText2Image</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="s2">"stabilityai/sdxl-turbo"</span><span class="p">,</span> <span class="n">torch_dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float16</span><span class="p">,</span> <span class="n">variant</span><span class="o">=</span><span class="s2">"fp16"</span><span class="p">)</span>
+<span class="n">pipe</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">"cuda"</span><span class="p">)</span>
+<span class="n">prompt</span> <span class="o">=</span> <span class="s2">"A ghibli-style scene of a cat and a robot pair-programming on a laptop in a tiny attic office"</span>
+<span class="n">image</span> <span class="o">=</span> <span class="n">pipe</span><span class="p">(</span><span class="n">prompt</span><span class="o">=</span><span class="n">prompt</span><span class="p">,</span> <span class="n">num_inference_steps</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">guidance_scale</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span><span class="o">.</span><span class="n">images</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">display</span><span class="p">(</span><span class="n">image</span><span class="p">)</span>
+</code></pre></div>
+<p><em>be prepared to wait as it can take 5 minutes, and the 512x512 limitation is a limitation of "turbo"</em></p>
+<p><img alt="StabilityAI SDXL model image" src="../images/diffusion-example-stabilityai-sdxl-turbo.png"/></p>
+<h1 id="complexity-and-quantization">Complexity and Quantization</h1>
+<p>The power of the notebook approach is to be able to experiment quickly and see results.</p>
+<p>Some open weight models still require accepting some extra legal terms =(</p>
+<p>Go to <a href="https://huggingface.co/black-forest-labs/FLUX.1-schnell">https://huggingface.co/black-forest-labs/FLUX.1-schnell</a></p>
+<blockquote>
+<p>"You need to agree to share your contact information to access this model"</p>
+</blockquote>
+<p>Once you click, then the UI updates with "Gated model: You have been granted access to this model"</p>
+<p>Consider this a new experiment that needs a lot of memory:</p>
+<ol>
+<li><strong>"restart session"</strong></li>
+<li><strong>Re-run the Login cell</strong></li>
+<li><strong>Re-run the Dependencies cell</strong></li>
+</ol>
+<p>Below we will add a new series of new cells in your notebook.</p>
+<h2 id="imports">Imports</h2>
+<div class="highlight"><pre><span></span><code><span class="n">model_id</span> <span class="o">=</span> <span class="s2">"black-forest-labs/FLUX.1-schnell"</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">"PYTORCH_CUDA_ALLOC_CONF"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"expandable_segments:True"</span>
+
+<span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">display</span>
+
+<span class="kn">from</span> <span class="nn">transformers</span> <span class="kn">import</span> <span class="n">T5EncoderModel</span>
+<span class="kn">from</span> <span class="nn">transformers</span> <span class="kn">import</span> <span class="n">BitsAndBytesConfig</span> <span class="k">as</span> <span class="n">TransformersBitsAndBytesConfig</span>
+
+<span class="kn">from</span> <span class="nn">diffusers</span> <span class="kn">import</span> <span class="n">FluxPipeline</span><span class="p">,</span> <span class="n">FluxTransformer2DModel</span>
+<span class="kn">from</span> <span class="nn">diffusers</span> <span class="kn">import</span> <span class="n">BitsAndBytesConfig</span> <span class="k">as</span> <span class="n">DiffusersBitsAndBytesConfig</span>
+
+<span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">empty_cache</span><span class="p">()</span>
+<span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">reset_peak_memory_stats</span><span class="p">()</span>
+</code></pre></div>
+<h2 id="quantizing-text-encoder-2">Quantizing - Text Encoder 2</h2>
+<p>First we are "quantizing" or reducing the size for an acceptable degradation in quality.</p>
+<p><a href="https://developer.nvidia.com/blog/model-quantization-concepts-methods-and-why-it-matters/">https://developer.nvidia.com/blog/model-quantization-concepts-methods-and-why-it-matters/</a></p>
+<p><em>This step can take 5 minutes (mostly waiting for downloads from HuggingFace to Google Colab).</em></p>
+<p>T5-XXL is the large text encoder (~9.5GB) that understands complex prompts. Quantizing it to 8-bit cuts memory roughly in half so it fits on the T4.</p>
+<div class="highlight"><pre><span></span><code>    <span class="c1"># T5 text encoder 8-bit — supports CPU offloading: use TRANSFORMERS BitsAndBytesConfig</span>
+<span class="n">text_encoder_2</span> <span class="o">=</span> <span class="n">T5EncoderModel</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span>
+    <span class="n">model_id</span><span class="p">,</span>
+    <span class="n">subfolder</span><span class="o">=</span><span class="s2">"text_encoder_2"</span><span class="p">,</span>
+    <span class="n">quantization_config</span><span class="o">=</span><span class="n">TransformersBitsAndBytesConfig</span><span class="p">(</span>
+        <span class="n">load_in_8bit</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">llm_int8_enable_fp32_cpu_offload</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">),</span>
+    <span class="n">torch_dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float16</span><span class="p">,</span>
+    <span class="n">device_map</span><span class="o">=</span><span class="s2">"auto"</span><span class="p">,</span>
+    <span class="n">low_cpu_mem_usage</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">"T5 loaded"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"device map:"</span><span class="p">,</span> <span class="n">text_encoder_2</span><span class="o">.</span><span class="n">hf_device_map</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"allocated GB:"</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">memory_allocated</span><span class="p">()</span> <span class="o">/</span> <span class="mi">1024</span><span class="o">**</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"reserved GB:"</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">memory_reserved</span><span class="p">()</span> <span class="o">/</span> <span class="mi">1024</span><span class="o">**</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"peak GB:"</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">max_memory_allocated</span><span class="p">()</span> <span class="o">/</span> <span class="mi">1024</span><span class="o">**</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="n">T5</span><span class="w"> </span><span class="n">loaded</span>
+<span class="n">device</span><span class="w"> </span><span class="n">map</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="s1">''</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">}</span>
+<span class="n">allocated</span><span class="w"> </span><span class="n">GB</span><span class="p">:</span><span class="w"> </span><span class="mf">7.37</span>
+<span class="n">reserved</span><span class="w"> </span><span class="n">GB</span><span class="p">:</span><span class="w"> </span><span class="mf">7.8</span>
+<span class="n">peak</span><span class="w"> </span><span class="n">GB</span><span class="p">:</span><span class="w"> </span><span class="mf">7.45</span>
+</code></pre></div>
+<blockquote>
+<p>"device map {'': 0} means all layers loaded onto GPU (device 0)</p>
+</blockquote>
+<h2 id="quantizing-transformer-model">Quantizing - Transformer Model</h2>
+<p>This step can take 10 minutes: </p>
+<ul>
+<li>downloading 23GB of weights</li>
+<li>quantizing it down to 4bit (~6GB = a lot less memory)</li>
+</ul>
+<p><em>In HuggingFace, FluxTransformer2DModel is the python class for the FLUX.1 family</em></p>
+<ul>
+<li><a href="https://huggingface.co/docs/diffusers/api/models/flux_transformer#fluxtransformer2dmodel">https://huggingface.co/docs/diffusers/api/models/flux_transformer#fluxtransformer2dmodel</a></li>
+<li><a href="https://huggingface.co/black-forest-labs/FLUX.1-schnell">https://huggingface.co/black-forest-labs/FLUX.1-schnell</a></li>
+<li><a href="https://bfl.ai/blog/24-08-01-bfl">https://bfl.ai/blog/24-08-01-bfl</a></li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="n">transformer</span> <span class="o">=</span> <span class="n">FluxTransformer2DModel</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span>
+    <span class="n">model_id</span><span class="p">,</span>
+    <span class="n">subfolder</span><span class="o">=</span><span class="s2">"transformer"</span><span class="p">,</span>
+    <span class="n">quantization_config</span><span class="o">=</span><span class="n">DiffusersBitsAndBytesConfig</span><span class="p">(</span>
+        <span class="n">load_in_4bit</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">bnb_4bit_quant_type</span><span class="o">=</span><span class="s2">"nf4"</span><span class="p">,</span>
+        <span class="n">bnb_4bit_compute_dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float16</span><span class="p">,</span>
+    <span class="p">),</span>
+    <span class="n">torch_dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float16</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Transformer loaded"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"device map:"</span><span class="p">,</span> <span class="n">transformer</span><span class="o">.</span><span class="n">hf_device_map</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"allocated GB:"</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">memory_allocated</span><span class="p">()</span> <span class="o">/</span> <span class="mi">1024</span><span class="o">**</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"reserved GB:"</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">memory_reserved</span><span class="p">()</span> <span class="o">/</span> <span class="mi">1024</span><span class="o">**</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"peak GB:"</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">max_memory_allocated</span><span class="p">()</span> <span class="o">/</span> <span class="mi">1024</span><span class="o">**</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="n">Transformer</span><span class="w"> </span><span class="n">loaded</span>
+<span class="n">allocated</span><span class="w"> </span><span class="n">GB</span><span class="p">:</span><span class="w"> </span><span class="mf">13.61</span>
+<span class="n">reserved</span><span class="w"> </span><span class="n">GB</span><span class="p">:</span><span class="w"> </span><span class="mf">13.68</span>
+<span class="n">peak</span><span class="w"> </span><span class="n">GB</span><span class="p">:</span><span class="w"> </span><span class="mf">13.7</span>
+</code></pre></div>
+<blockquote>
+<p>Like a limbo, fitting under the 15GB cap</p>
+</blockquote>
+<h2 id="pipeline">Pipeline</h2>
+<p>Now creating the pipeline, and explicitly passing our previous step quantized text encoder...</p>
+<ul>
+<li>CLIP text encoder (~250MB, visual-semantic alignment)</li>
+<li>FLUX transformer (23.8GB, the actual image generator)</li>
+<li>VAE (~170MB, decodes the result into a visible image)</li>
+<li>tokenizers and scheduler config</li>
+</ul>
+<p><em>This step is relatively quick as it is just assembling the pieces and one last memory check...</em></p>
+<div class="highlight"><pre><span></span><code><span class="n">pipe</span> <span class="o">=</span> <span class="n">FluxPipeline</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span>
+    <span class="n">model_id</span><span class="p">,</span>
+    <span class="n">text_encoder_2</span><span class="o">=</span><span class="n">text_encoder_2</span><span class="p">,</span>
+    <span class="n">transformer</span><span class="o">=</span><span class="n">transformer</span><span class="p">,</span>
+    <span class="n">torch_dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float16</span><span class="p">,</span>
+    <span class="n">device_map</span><span class="o">=</span><span class="s2">"balanced"</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">pipe</span><span class="o">.</span><span class="n">vae</span><span class="o">.</span><span class="n">enable_slicing</span><span class="p">()</span>
+<span class="n">pipe</span><span class="o">.</span><span class="n">vae</span><span class="o">.</span><span class="n">enable_tiling</span><span class="p">()</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Pipeline ready"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"allocated GB:"</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">memory_allocated</span><span class="p">()</span> <span class="o">/</span> <span class="mi">1024</span><span class="o">**</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"reserved GB:"</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">memory_reserved</span><span class="p">()</span> <span class="o">/</span> <span class="mi">1024</span><span class="o">**</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"peak GB:"</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">max_memory_allocated</span><span class="p">()</span> <span class="o">/</span> <span class="mi">1024</span><span class="o">**</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+</code></pre></div>
+<ul>
+<li>slicing: for a batch of images, decodes them one at a time instead of all at once</li>
+<li>tiling: splits the image into overlapping tiles and decodes each tile separately instead of the full image at once</li>
+</ul>
+<div class="highlight"><pre><span></span><code>Pipeline ready
+allocated GB: 13.99
+reserved GB: 14.02
+peak GB: 13.99
+</code></pre></div>
+<h3 id="image-generation-success">Image Generation - Success</h3>
+<p>All the previous cells led up to this generation of a higher quality image in seconds.</p>
+<div class="highlight"><pre><span></span><code><span class="n">prompt</span> <span class="o">=</span> <span class="s2">"A cartoon cat and a cartoon robot working side by side writing code"</span>
+
+<span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">inference_mode</span><span class="p">():</span>
+    <span class="n">image</span> <span class="o">=</span> <span class="n">pipe</span><span class="p">(</span>
+        <span class="n">prompt</span><span class="o">=</span><span class="n">prompt</span><span class="p">,</span>
+        <span class="n">num_inference_steps</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+        <span class="n">guidance_scale</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+        <span class="n">height</span><span class="o">=</span><span class="mi">384</span><span class="p">,</span>
+        <span class="n">width</span><span class="o">=</span><span class="mi">384</span><span class="p">,</span>
+        <span class="n">max_sequence_length</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">images</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+<span class="n">display</span><span class="p">(</span><span class="n">image</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">"allocated GB:"</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">memory_allocated</span><span class="p">()</span> <span class="o">/</span> <span class="mi">1024</span><span class="o">**</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"reserved GB:"</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">memory_reserved</span><span class="p">()</span> <span class="o">/</span> <span class="mi">1024</span><span class="o">**</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"peak GB:"</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">max_memory_allocated</span><span class="p">()</span> <span class="o">/</span> <span class="mi">1024</span><span class="o">**</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+</code></pre></div>
+<blockquote>
+<p>peak GB: 14.34</p>
+</blockquote>
+<p><img alt="Flux1 Schnell quantized image" src="../images/diffusion-example-flux1-schnell-quantized.png"/></p>
+<h3 id="moar-image-fail">Moar Image - Fail</h3>
+<p>Attempting a larger, 512x512 image takes more memory...</p>
+<div class="highlight"><pre><span></span><code><span class="n">prompt</span> <span class="o">=</span> <span class="s2">"A cozy watercolor-style scene of a cartoon cat and a cartoon robot pair-programming on a laptop in a tiny attic office"</span>
+
+<span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">reset_peak_memory_stats</span><span class="p">()</span>
+
+<span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">inference_mode</span><span class="p">():</span>
+    <span class="n">image</span> <span class="o">=</span> <span class="n">pipe</span><span class="p">(</span>
+        <span class="n">prompt</span><span class="o">=</span><span class="n">prompt</span><span class="p">,</span>
+        <span class="n">num_inference_steps</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+        <span class="n">guidance_scale</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+        <span class="n">height</span><span class="o">=</span><span class="mi">512</span><span class="p">,</span>
+        <span class="n">width</span><span class="o">=</span><span class="mi">512</span><span class="p">,</span>
+        <span class="n">max_sequence_length</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">images</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+<span class="n">display</span><span class="p">(</span><span class="n">image</span><span class="p">)</span>
+</code></pre></div>
+<blockquote>
+<p><strong>OutOfMemoryError: CUDA out of memory.</strong>
+Tried to allocate 128.00 MiB. GPU 0 has a total capacity of 14.56 GiB of which 111.81 MiB is free.
+Including non-PyTorch memory, this process has 14.45 GiB memory in use. 
+Of the allocated memory 14.25 GiB is allocated by PyTorch, and 60.81 MiB is reserved by PyTorch but unallocated. </p>
+<p>If reserved but unallocated memory is large try setting PYTORCH_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)</p>
+</blockquote>
+<h1 id="manual-cleanup">Manual Cleanup</h1>
+<p>Usually you'd "restart session", and hopefully the model weights are cached on disk (~/.cache/huggingface/).</p>
+<p>If you really need something you can sometimes get rid of the pipeline and regenerate it:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">gc</span>
+
+<span class="k">del</span> <span class="n">pipe</span>                <span class="c1"># delete the pipeline object</span>
+<span class="n">gc</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>            <span class="c1"># Python garbage collection</span>
+<span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">empty_cache</span><span class="p">()</span>  <span class="c1"># release GPU memory back to CUDA</span>
+</code></pre></div>
+<p>Re-run your <strong>Pipeline</strong> cell:</p>
+<div class="highlight"><pre><span></span><code>Pipeline ready
+allocated GB: 14.25
+reserved GB: 14.31
+peak GB: 14.35
+</code></pre></div>
+<blockquote>
+<p>You will often find the memory is not really released - you really do have to <strong>restart session</strong></p>
+</blockquote>
+<hr/>
+<h2 id="addendum-explaining-files">Addendum - Explaining Files</h2>
+<blockquote>
+<p><em>Downloading (incomplete total...):  30% 2.85G/9.52G [00:48&lt;01:29, 74.5MB/s]</em></p>
+</blockquote>
+<p><strong>FLUX.1-schnell</strong> is a "distilled model" - created from a larger model <a href="https://en.wikipedia.org/wiki/Knowledge_distillation">https://en.wikipedia.org/wiki/Knowledge_distillation</a></p>
+<p><strong>Fetching 2 files (9.52GB download)</strong>: The T5-XXL model that turns your text prompt into "dense vector representation" that guides image generation.</p>
+<p><em>Full precision would be ~18GB; but instead using the smaller fp16 variant, which then gets further compressed to 8-bit by BitsAndBytesConfig as it loads.</em></p>
+<p><strong>config.json</strong> (782 bytes): The T5-XXL architecture definition — number of layers, hidden dimensions, attention heads. Tells PyTorch what shape to build before loading weights into it.</p>
+<p><strong>model.safetensors.index.json</strong> (19.9k): A map of "layer name to which shard file it lives in." The T5 weights are split across multiple .safetensors files; this index tells the loader which files to fetch and where each tensor goes.</p>
+<p><strong>model_index.json</strong> (536 bytes): The pipeline manifest — lists every component (scheduler, tokenizer, tokenizer_2, text_encoder, text_encoder_2, transformer, vae) and which class/subfolder each one uses. This is how diffusers knows what to assemble.</p>
+<p><strong>Downloading 23.8GB</strong> The FLUX transformer itself — the 12 billion parameter diffusion transformer that actually generates the image.</p>
+<p>In the "text_encoder" area is CLIP , <a href="https://openai.com/index/clip/">https://openai.com/index/clip/</a> , which was trained on millions of image-caption pairs, so its mapping of text and images into the same mathematical space can be used to help the transformer to go from "prompt text" to "generally what the image should look like".</p>
+<h2 id="addendum-memory-strategies">Addendum - Memory Strategies</h2>
+<p>With limited memory space you may need more tricks than just quantization...</p>
+<p><strong>enable_model_cpu_offload()</strong> is dynamic</p>
+<p>During inference:</p>
+<ul>
+<li>move T5 to GPU: encode text, then back to the CPU</li>
+<li>move CLIP to GPU: encode text, then back to the CPU</li>
+<li>move transformer to GPU: denoise, then back to the CPU</li>
+<li>move VAE to GPU: decode</li>
+</ul>
+<p><a href="https://huggingface.co/blog/sd3#dropping-the-t5-text-encoder-during-inference">https://huggingface.co/blog/sd3#dropping-the-t5-text-encoder-during-inference</a></p>
+<p>For <strong>device_map="balanced"</strong>, static placement, distributes evenly across devices. Layers stay where they're placed.</p>
+<div class="highlight"><pre><span></span><code>GPU (14.56 GB)                    CPU
+┌─────────────────────┐          ┌──────────────────┐
+│ T5 encoder (8-bit)  │          │                  │
+│ all blocks 0-23     │          │                  │
+│ ~7.4 GB             │          │                  │
+├─────────────────────┤          │                  │
+│ FLUX transformer    │          │                  │
+│ (4-bit NF4, ~6 GB)  │          │                  │
+├─────────────────────┤          ├──────────────────┤
+│ CLIP + VAE          │          │ overflow layers  │
+│ ~0.4 GB             │          │ from "balanced"  │
+└─────────────────────┘          └──────────────────┘
+      ~14 GB                        minimal
+</code></pre></div>
+<p>For <strong>device_map="auto"</strong>  it is static placement at load time, fills GPU first, spills overflow to CPU.
+Layers stay where they're placed.</p>
+<h1 id="troubleshooting">Troubleshooting</h1>
+<p>When things go wrong the cell response color will be red and the result will contain some error message info...</p>
+<h2 id="python-dependency-hell">Python Dependency Hell</h2>
+<p>There are least four packages (transformers, diffusers, bitsandbytes, accelerate) that are tightly coupled but release independently.</p>
+<p><em>If you get a DryRunError() error then you may have stale dependencies and should try "Restart the Runtime" and try re-installing all the dependencies</em></p>
+<h3 id="out-of-memory">Out of Memory</h3>
+<p>When you OOM, you can't just fix the code and re-run. You have to restart the runtime.</p>
+<blockquote>
+<p>GPU 0 has a total capacity of 14.56 GiB of which 9.81 MiB is free</p>
+</blockquote>
+<p>It might need re-download everything =(</p>
+<p>After the restart, remember to re-run each cell that you want to load into the global shared state. </p>
+<p>(green checkmark next to the cell number)</p>
+<p>If you're lucky then maybe some of the models got cached on disk; if you have a cell with an experiment that you don't need you can just ignore it.</p>
+<h3 id="authentication">Authentication</h3>
+<p><strong>403 Authentication</strong></p>
+<p>Ensure you have executed your "HuggingFace credentials" cell.</p>
+<p>Also, you may need to consent to extra terms in HuggingFace to download some specific models.</p>
+            <aside>
+            <hr/>
+            <nav>
+            <ul class="articles_timeline">
+ 
+                <li class="previous_article">« <a href="https://blog.john-pfeiffer.com/intro-to-mcp-give-your-llm-tools-with-model-context-protocol/" title="Previous: Intro to MCP - give your LLM tools with model context protocol">Intro to MCP - give your LLM tools with model context protocol</a></li>
+ 
+                <li class="next_article"><a href="https://blog.john-pfeiffer.com/pragmatic-summit-nobody-has-the-answers-on-ai/" title="Next: Pragmatic Summit - Nobody has the Answers on AI">Pragmatic Summit - Nobody has the Answers on AI</a> »</li>
+            </ul>
+            </nav>
+            </aside>
+        </div>
+        <section>
+        <div class="span2" style="float:right;font-size:0.9em;">
+ 
+            <h4>Published</h4>
+            <time pubdate="pubdate" datetime="2025-12-20T09:42:00-08:00">Dec 20, 2025</time>
+            <h4>Category</h4>
+            <a class="category-link" href="/categories.html#ai-ref">ai</a> 
+            <h4>~1950 words</h4>
+            <h4>Tags</h4>
+            <ul class="list-of-tags tags-in-article"> 
+                <li><a href="/tags.html#ai-ref">ai
+                    <span>8</span>
+</a></li>
+                <li><a href="/tags.html#diffusion-ref">diffusion
+                    <span>1</span>
+</a></li>
+                <li><a href="/tags.html#google-colab-ref">google colab
+                    <span>1</span>
+</a></li>
+                <li><a href="/tags.html#huggingface-ref">huggingface
+                    <span>1</span>
+</a></li>
+            </ul>
+
+        </div>
+        </section>
+</div>
+</article>
+				</div>
+				<div class="span1"></div>
+			</div>
+		</div>
+    </div>
+<footer>
+<div id="footer">
+    <ul class="footer-content">
+    </ul>
+</div>
+</footer>            <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+    </body>
+</html>
