@@ -68,10 +68,8 @@
         <h4>Contents</h4>
         <div class="toc">
 <ul>
-<li><a href="#good-old-c">Good old C</a><ul>
-<li><a href="#ascii-diagrams">ASCII Diagrams</a></li>
-</ul>
-</li>
+<li><a href="#high-level-diagram-in-ascii">High Level Diagram in ASCII</a></li>
+<li><a href="#good-old-c">Good old C</a></li>
 <li><a href="#firecrawl">Firecrawl</a></li>
 <li><a href="#firecrawl-scrape-a-single-page">firecrawl scrape a single page</a></li>
 <li><a href="#known-limitations">Known Limitations</a></li>
@@ -85,6 +83,20 @@
 <p>The internet and HTTP has had an "agent" concept long before AI. <a href="https://www.rfc-editor.org/rfc/rfc9110.html#name-user-agent">https://www.rfc-editor.org/rfc/rfc9110.html#name-user-agent</a></p>
 <p>Connecting to a server (with TCP) underpins FTP and HTTP; a simple client can download resources.</p>
 <p>Sometimes they are commonly called a "scraper" or "crawler", I can remember one of my first joys in coding was writing a "download a page" program.</p>
+<h1 id="high-level-diagram-in-ascii">High Level Diagram in ASCII</h1>
+<p>This utility will query a DNS server to convert the domain name into an IP address: <code>dig example.com</code></p>
+<div class="highlight"><pre><span></span><code>;; ANSWER SECTION:
+example.com.        159 IN  A   172.66.147.243
+</code></pre></div>
+<p><strong>Client Server Interactions</strong></p>
+<div class="highlight"><pre><span></span><code><span class="n">CLIENT</span><span class="w">                                  </span><span class="p">[</span><span class="n">DNS</span><span class="w"> </span><span class="n">SERVER</span><span class="p">]</span>
+<span class="w">  </span><span class="o">|</span><span class="w">   </span><span class="n">What</span><span class="w"> </span><span class="n">IP</span><span class="w"> </span><span class="n">Address</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">example</span><span class="p">.</span><span class="n">com</span><span class="w"> </span><span class="o">-&gt;</span><span class="w">    </span><span class="o">|</span>
+<span class="w">  </span><span class="o">|</span><span class="w">     </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">example</span><span class="p">.</span><span class="n">com</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"172.66.147.243"</span><span class="w">  </span><span class="o">|</span>
+<span class="w">  </span><span class="o">|</span>
+<span class="w">  </span><span class="o">|</span><span class="w">      </span><span class="n">TCP</span><span class="w"> </span><span class="n">connect</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="mf">172.66.147.243</span><span class="w"> </span><span class="o">-&gt;</span><span class="w">            </span><span class="o">|</span><span class="w"> </span><span class="p">[</span><span class="n">WEB</span><span class="w"> </span><span class="n">SERVER</span><span class="w"> </span><span class="n">at</span><span class="w"> </span><span class="mf">172.66.147.243</span><span class="p">]</span>
+<span class="w">  </span><span class="o">|</span><span class="w">      </span><span class="n">HTTP</span><span class="w"> </span><span class="n">GET</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">Host</span><span class="o">:</span><span class="w"> </span><span class="n">example</span><span class="p">.</span><span class="n">com</span><span class="w">  </span><span class="o">-&gt;</span><span class="w">            </span><span class="o">|</span>
+<span class="w">  </span><span class="o">|</span><span class="w">     </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">HTTP</span><span class="w"> </span><span class="mi">200</span><span class="w"> </span><span class="n">OK</span><span class="p">,</span><span class="w"> </span><span class="n">response</span><span class="o">:</span><span class="w"> </span><span class="n">headers</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">HTML</span><span class="w">     </span><span class="o">|</span>
+</code></pre></div>
 <h1 id="good-old-c">Good old C</h1>
 <div class="highlight"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;stdio.h&gt;</span><span class="c1">       // printf, perror</span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;string.h&gt;</span><span class="c1">      // memset, memcpy</span>
@@ -142,29 +154,15 @@
 <li>Python (thank you BeautifulSoup4 and Requests <a href="https://requests.readthedocs.io/en/latest/">https://requests.readthedocs.io/en/latest/</a>)</li>
 <li>Golang <a href="https://pkg.go.dev/net/http">https://pkg.go.dev/net/http</a></li>
 </ul>
+<p><em>Slowly providing examples: <a href="https://github.com/johnpfeiffer/web-scrapers">https://github.com/johnpfeiffer/web-scrapers</a></em></p>
 <p>And of course there are some excellent dedicated tools:</p>
 <ul>
 <li><strong>curl</strong> <a href="https://curl.se/docs/tutorial.html">https://curl.se/docs/tutorial.html</a> <code>curl -H "Host: example.com" 172.66.147.243:80</code></li>
 <li><strong>wget</strong> <a href="https://www.gnu.org/software/wget/manual/wget.html">https://www.gnu.org/software/wget/manual/wget.html</a> </li>
 </ul>
-<h2 id="ascii-diagrams">ASCII Diagrams</h2>
-<p>This utility will convert the domain name into an IP address: <code>dig example.com</code></p>
-<div class="highlight"><pre><span></span><code>;; ANSWER SECTION:
-example.com.        159 IN  A   172.66.147.243
-</code></pre></div>
-<p><strong>Client Server Interactions</strong></p>
-<div class="highlight"><pre><span></span><code><span class="n">CLIENT</span><span class="w">                                  </span><span class="p">[</span><span class="n">DNS</span><span class="w"> </span><span class="n">SERVER</span><span class="p">]</span>
-<span class="w">  </span><span class="o">|</span><span class="w">   </span><span class="n">What</span><span class="w"> </span><span class="n">IP</span><span class="w"> </span><span class="n">Address</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">example</span><span class="p">.</span><span class="n">com</span><span class="w"> </span><span class="o">-&gt;</span><span class="w">    </span><span class="o">|</span>
-<span class="w">  </span><span class="o">|</span><span class="w">     </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">example</span><span class="p">.</span><span class="n">com</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"172.66.147.243"</span><span class="w">  </span><span class="o">|</span>
-<span class="w">  </span><span class="o">|</span>
-<span class="w">  </span><span class="o">|</span><span class="w">      </span><span class="n">TCP</span><span class="w"> </span><span class="n">connect</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="mf">172.66.147.243</span><span class="w"> </span><span class="o">-&gt;</span><span class="w">            </span><span class="o">|</span><span class="w"> </span><span class="p">[</span><span class="n">WEB</span><span class="w"> </span><span class="n">SERVER</span><span class="w"> </span><span class="n">at</span><span class="w"> </span><span class="mf">172.66.147.243</span><span class="p">]</span>
-<span class="w">  </span><span class="o">|</span><span class="w">      </span><span class="n">HTTP</span><span class="w"> </span><span class="n">GET</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">Host</span><span class="o">:</span><span class="w"> </span><span class="n">example</span><span class="p">.</span><span class="n">com</span><span class="w">  </span><span class="o">-&gt;</span><span class="w">            </span><span class="o">|</span><span class="w"> </span>
-<span class="w">  </span><span class="o">|</span><span class="w">     </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">HTTP</span><span class="w"> </span><span class="mi">200</span><span class="w"> </span><span class="n">OK</span><span class="p">,</span><span class="w"> </span><span class="n">response</span><span class="o">:</span><span class="w"> </span><span class="n">headers</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">HTML</span><span class="w">     </span><span class="o">|</span>
-</code></pre></div>
 <hr/>
 <h1 id="firecrawl">Firecrawl</h1>
-<p>New kid on the block: firecrawl</p>
-<p>You can download the open source project and run it locally with docker <a href="https://github.com/firecrawl/firecrawl">https://github.com/firecrawl/firecrawl</a></p>
+<p>There is a new cool kid on the block, an open source project, you can even run it locally with docker <a href="https://github.com/firecrawl/firecrawl">https://github.com/firecrawl/firecrawl</a></p>
 <div class="highlight"><pre><span></span><code>Firecrawl API
 Redis
 Postgres / queue backing store
@@ -255,7 +253,7 @@ LOGGING_LEVEL=INFO
             <time pubdate="pubdate" datetime="2025-01-11T11:11:00-08:00">Jan 11, 2025</time>
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#programming-ref">programming</a> 
-            <h4>~559 words</h4>
+            <h4>~573 words</h4>
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article"> 
                 <li><a href="/tags.html#c-ref">c
