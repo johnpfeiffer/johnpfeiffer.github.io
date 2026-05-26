@@ -113,12 +113,12 @@
 <li>LLM: stochastic highest probability token generator</li>
 <li>MCP is the new "model context protocol" for allowing an LLM (Large Language Model) to connect externally</li>
 </ul>
-<p>If you need further background: My previous article more focused on (local) LLMs and MCP:</p>
+<p>If you need further background: My previous articles more focused on (local) LLMs and MCP:</p>
 <ul>
 <li>
 <p><a href="https://blog.john-pfeiffer.com/cars-not-helicopters-or-running-a-local-llm-with-mlx-on-a-macbook-pro/">https://blog.john-pfeiffer.com/cars-not-helicopters-or-running-a-local-llm-with-mlx-on-a-macbook-pro/</a>
-<code>uv venv; uv pip install mlx-lm; \
-  uv run mlx_lm.generate --model mlx-community/Meta-Llama-3.1-8B-Instruct-4bit --prompt "tell me a joke"</code></p>
+<code>uv venv; uv pip install mlx-lm;</code>
+<code>uv run mlx_lm.generate --model mlx-community/Meta-Llama-3.1-8B-Instruct-4bit --prompt "tell me a joke"</code></p>
 </li>
 <li>
 <p><a href="https://blog.john-pfeiffer.com/intro-to-mcp-give-your-llm-tools-with-model-context-protocol/">https://blog.john-pfeiffer.com/intro-to-mcp-give-your-llm-tools-with-model-context-protocol/</a></p>
@@ -130,17 +130,18 @@
 <p><code>source .venv/bin/activate; python 01-chat-loop.py</code></p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">mlx_lm</span> <span class="kn">import</span> <span class="n">load</span><span class="p">,</span> <span class="n">generate</span>
 
+
 <span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
     <span class="n">model</span><span class="p">,</span> <span class="n">tokenizer</span> <span class="o">=</span> <span class="n">load</span><span class="p">(</span><span class="s2">"mlx-community/Meta-Llama-3.1-8B-Instruct-4bit"</span><span class="p">)</span>
     <span class="n">system_message</span> <span class="o">=</span> <span class="s2">"You are a helpful, concise Assistant"</span>
     <span class="n">messages</span> <span class="o">=</span> <span class="p">[{</span><span class="s2">"role"</span><span class="p">:</span> <span class="s2">"system"</span><span class="p">,</span> <span class="s2">"content"</span><span class="p">:</span> <span class="n">system_message</span><span class="p">}]</span>
-    <span class="n">run</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">tokenizer</span><span class="p">,</span> <span class="n">messages</span><span class="p">,</span> <span class="n">get_user_message</span><span class="p">)</span>
+    <span class="n">run</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">tokenizer</span><span class="p">,</span> <span class="n">messages</span><span class="p">)</span>
 
 
- <span class="c1"># run loops getting the user message and displaying the LLM response</span>
-<span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">tokenizer</span><span class="p">,</span> <span class="n">messages</span><span class="p">,</span> <span class="n">get_msg_fn</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">tokenizer</span><span class="p">,</span> <span class="n">messages</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">""" run loops getting the user message and displaying the LLM response"""</span>
     <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
-        <span class="n">user_input</span><span class="p">,</span> <span class="n">ok</span> <span class="o">=</span> <span class="n">get_msg_fn</span><span class="p">()</span>
+        <span class="n">user_input</span><span class="p">,</span> <span class="n">ok</span> <span class="o">=</span> <span class="n">get_user_message</span><span class="p">()</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">ok</span><span class="p">:</span>
             <span class="k">break</span>
 
@@ -179,10 +180,10 @@
 <p>Yes! Give the LLM a "tool".</p>
 <p>An AI agent is software that is looping with repeated calls to an LLM until it achieves a goal.</p>
 <p><em>Many other definitions of AI agents are out there - feel free to pick your favorite ;)</em></p>
-<p>"tool use" is a more lightweight way of giving an LLM (AI agent) access to external or recent information. Just like giving a tool to a human, this provides the LLM incredible leverage.</p>
+<p>"Tool use" is a more lightweight way of giving an AI agent access to external or recent information. Just like giving a tool to a human, this provides the LLM incredible leverage.</p>
 <h2 id="tool-definition">Tool Definition</h2>
 <p>The technical specification definition of a "Tool" is quite small and simple, and it's mostly english:</p>
-<p><strong>Name</strong>: a unique identifier for the tool</p>
+<p><strong>Name</strong>: a unique identifier for the tool,</p>
 <p><strong>Description</strong>: a natural language explanation of what the tool does, its primary purpose, any important capabilities, and potentially its limitations</p>
 <p><strong>Input Schema</strong>: JSON object defining the expected (required and optional) parameters</p>
 <h3 id="example-tool-read-file">Example Tool - Read File</h3>
@@ -200,17 +201,14 @@
 <span class="w">    </span><span class="p">},</span>
 <span class="w">    </span><span class="s">"required"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s">"file_path"</span><span class="p">],</span>
 </code></pre></div>
-<blockquote>
-<p>It is required to provide a file path for the tool to read a file =)</p>
-</blockquote>
-<p>The most complicated part is being very specific in JSON about exactly what is being sent to the tool.</p>
 <p><em>Note in developer jargon, tool calling for LLMs is often called "function-calling"</em></p>
 <h1 id="mvp-agent-with-a-tool">MVP Agent with a Tool</h1>
 <blockquote>
-<p>generate_response() is the new function abstracting away the complexity of tool calls</p>
+<p>The complexity of tool calls expands from the simpler "user input to LLM and response", with a more complex system prompt</p>
 </blockquote>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">json</span>
 <span class="kn">from</span> <span class="nn">mlx_lm</span> <span class="kn">import</span> <span class="n">load</span><span class="p">,</span> <span class="n">generate</span>
+
 
 <span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
     <span class="n">model</span><span class="p">,</span> <span class="n">tokenizer</span> <span class="o">=</span> <span class="n">load</span><span class="p">(</span><span class="s2">"mlx-community/Meta-Llama-3.1-8B-Instruct-4bit"</span><span class="p">)</span>
@@ -224,20 +222,20 @@
 <span class="s2">    When you do NOT need a tool, respond in plain text. Never output JSON unless you are calling a tool."""</span>
 
     <span class="n">messages</span> <span class="o">=</span> <span class="p">[{</span><span class="s2">"role"</span><span class="p">:</span> <span class="s2">"system"</span><span class="p">,</span> <span class="s2">"content"</span><span class="p">:</span> <span class="n">system_message</span><span class="p">}]</span>
-    <span class="n">run</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">tokenizer</span><span class="p">,</span> <span class="n">messages</span><span class="p">,</span> <span class="n">get_user_message</span><span class="p">)</span>
+    <span class="n">run</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">tokenizer</span><span class="p">,</span> <span class="n">messages</span><span class="p">)</span>
 
 
- <span class="c1"># run loops getting the user message and displaying the LLM response</span>
-<span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">tokenizer</span><span class="p">,</span> <span class="n">messages</span><span class="p">,</span> <span class="n">get_msg_fn</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">tokenizer</span><span class="p">,</span> <span class="n">messages</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">""" run loops getting the user message and displaying the LLM response"""</span>
     <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
-        <span class="n">user_input</span><span class="p">,</span> <span class="n">ok</span> <span class="o">=</span> <span class="n">get_msg_fn</span><span class="p">()</span>
+        <span class="n">user_input</span><span class="p">,</span> <span class="n">ok</span> <span class="o">=</span> <span class="n">get_user_message</span><span class="p">()</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">ok</span><span class="p">:</span>
             <span class="k">break</span>
 
         <span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">"role"</span><span class="p">:</span> <span class="s2">"user"</span><span class="p">,</span> <span class="s2">"content"</span><span class="p">:</span> <span class="n">user_input</span><span class="p">})</span>
         <span class="n">user_prompt</span> <span class="o">=</span> <span class="n">tokenizer</span><span class="o">.</span><span class="n">apply_chat_template</span><span class="p">(</span><span class="n">messages</span><span class="p">,</span> <span class="n">tokenize</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">add_generation_prompt</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">tools</span><span class="o">=</span><span class="n">TOOLS</span><span class="p">)</span>
 
-        <span class="c1"># dedicated helper function to handle tool calling complexity</span>
+    <span class="c1"># dedicated helper function to handle tool calling complexity</span>
         <span class="n">response</span> <span class="o">=</span> <span class="n">generate_response</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">tokenizer</span><span class="p">,</span> <span class="n">messages</span><span class="p">,</span> <span class="n">user_prompt</span><span class="p">)</span>
 
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Assistant: </span><span class="si">{</span><span class="n">response</span><span class="si">}</span><span class="se">\n</span><span class="s2">"</span><span class="p">)</span>
@@ -256,9 +254,9 @@
 
 
 <span class="k">def</span> <span class="nf">generate_response</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">tokenizer</span><span class="p">,</span> <span class="n">messages</span><span class="p">,</span> <span class="n">user_prompt</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""generate_response checks if the LLM believes the User query may need a tool call, if the first LLM response is not JSON just ignore"""</span>
     <span class="n">response</span> <span class="o">=</span> <span class="n">generate</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">tokenizer</span><span class="p">,</span> <span class="n">prompt</span><span class="o">=</span><span class="n">user_prompt</span><span class="p">,</span> <span class="n">max_tokens</span><span class="o">=</span><span class="mi">10000</span><span class="p">)</span>
 
-    <span class="c1"># Check if the LLM believes the User query may need a tool call, if the first LLM response is not JSON just ignore</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">response_as_json</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">response_as_json</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"name"</span><span class="p">)</span> <span class="o">==</span> <span class="s2">"read_file"</span><span class="p">:</span>
@@ -311,6 +309,7 @@
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
     <span class="n">main</span><span class="p">()</span>
 </code></pre></div>
+<p><em>TOOLS is messy to be compatible with the many every changing specifications</em></p>
 <h2 id="chatting-with-tool-power">Chatting with tool power</h2>
 <div class="highlight"><pre><span></span><code><span class="n">You</span><span class="w"> </span><span class="p">(</span><span class="n">provide</span><span class="w"> </span><span class="n">input</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="n">type</span><span class="w"> </span><span class="n">quit</span><span class="p">):</span><span class="w"> </span><span class="n">tell</span><span class="w"> </span><span class="n">me</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">joke</span><span class="w">                                                                         </span>
 
@@ -329,7 +328,7 @@
 <li>The LLM response indicates in a JSON format which tool with which parameter(s)</li>
 <li>The harness/code executes on the tool call request</li>
 <li>The tool/function output is then sent to the LLM</li>
-<li>The LLMs final response integrates the user request, the tool output, and the enhanced LLM response</li>
+<li>The LLMs final response integrates an LLM answer based on both the user request and the tool output</li>
 </ol>
 <blockquote>
 <p>You can have multiple tools, and multiple sub loops to process the tool calls sequentially or even in parallel!</p>
@@ -339,7 +338,7 @@
 <span class="w"> </span><span class="n">_</span><span class="o">/|</span><span class="n">___</span><span class="o">|</span><span class="err">\</span><span class="n">_</span>
 </code></pre></div>
 <h1 id="lack-of-standards">Lack of Standards</h1>
-<p><strong>This is a rapidly evolving area of technology. Tool specifications are different for every model</strong></p>
+<p><strong>This is a rapidly evolving area of technology. Tool specifications are different for every model...</strong></p>
 <p>The "check if the LLM response is JSON with a key 'name'" is my hack to work around a lack of standards:</p>
 <ul>
 <li>
@@ -356,19 +355,18 @@
 <li>
 <p>Gemini: inspect <strong>content parts</strong> that have a function_call object  <a href="https://ai.google.dev/gemini-api/docs/function-calling">https://ai.google.dev/gemini-api/docs/function-calling</a></p>
 </li>
-<li>
-<p>MLX indicate "tool call format is model specific" <a href="https://github.com/ml-explore/mlx-lm/blob/main/mlx_lm/examples/tool_use.py">https://github.com/ml-explore/mlx-lm/blob/main/mlx_lm/examples/tool_use.py</a></p>
-</li>
-<li>
-<p>The open source "OpenCode" repo deliberately handles each separately: <a href="https://github.com/anomalyco/opencode/tree/dev/packages/llm/src/protocols">https://github.com/anomalyco/opencode/tree/dev/packages/llm/src/protocols</a></p>
-</li>
+</ul>
+<p>How frameworks handle this:</p>
+<ul>
+<li>MLX indicate "tool call format is model specific" <a href="https://github.com/ml-explore/mlx-lm/blob/main/mlx_lm/examples/tool_use.py">https://github.com/ml-explore/mlx-lm/blob/main/mlx_lm/examples/tool_use.py</a></li>
+<li>The open source "OpenCode" repo deliberately handles each separately: <a href="https://github.com/anomalyco/opencode/tree/dev/packages/llm/src/protocols">https://github.com/anomalyco/opencode/tree/dev/packages/llm/src/protocols</a></li>
 </ul>
 <p><strong>MCP as a standard</strong> pushes LLM vendors to provide a compatible developer experience:</p>
 <ul>
 <li><a href="https://modelcontextprotocol.io/specification/2025-06-18/server/tools">https://modelcontextprotocol.io/specification/2025-06-18/server/tools</a></li>
 </ul>
 <h2 id="2026-addendum">2026 Addendum</h2>
-<p>The well crafted open source agent harness "Pi" handles the problem elegantly (if you directly support multiple AI vendors you will need the Adapter Pattern):</p>
+<p>The well crafted open source agent harness "Pi" handles the problem elegantly (supporting multiple AI vendors via the Adapter Pattern):</p>
 <ul>
 <li><a href="https://pi.dev/">https://pi.dev/</a></li>
 <li>
@@ -414,7 +412,7 @@
             <time pubdate="pubdate" datetime="2025-08-30T18:18:00-07:00">Aug 30, 2025</time>
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#ai-ref">ai</a> 
-            <h4>~1382 words</h4>
+            <h4>~1366 words</h4>
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article"> 
                 <li><a href="/tags.html#agents-ref">agents
