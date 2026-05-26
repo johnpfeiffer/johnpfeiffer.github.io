@@ -82,11 +82,15 @@
 <li><a href="#the-tool-calling-flow">The Tool Calling Flow</a></li>
 </ul>
 </li>
-<li><a href="#lack-of-standards">Lack of Standards</a><ul>
-<li><a href="#2026-addendum">2026 Addendum</a></li>
+<li><a href="#lack-of-standards">Lack of Standards</a></li>
+<li><a href="#more-resources">More Resources</a></li>
+<li><a href="#2026-addendum">2026 Addendum</a><ul>
+<li><a href="#brittle-so-use-sdks">Brittle - so use SDKs</a><ul>
+<li><a href="#mlx-gemma4-with-tool-calling">MLX Gemma4 with tool calling</a></li>
 </ul>
 </li>
-<li><a href="#more-resources">More Resources</a></li>
+</ul>
+</li>
 </ul>
 </div>
         </nav>
@@ -365,20 +369,6 @@
 <ul>
 <li><a href="https://modelcontextprotocol.io/specification/2025-06-18/server/tools">https://modelcontextprotocol.io/specification/2025-06-18/server/tools</a></li>
 </ul>
-<h2 id="2026-addendum">2026 Addendum</h2>
-<p>The well crafted open source agent harness "Pi" handles the problem elegantly (supporting multiple AI vendors via the Adapter Pattern):</p>
-<ul>
-<li><a href="https://pi.dev/">https://pi.dev/</a></li>
-<li>
-<p><a href="https://formulae.brew.sh/formula/pi-coding-agent">https://formulae.brew.sh/formula/pi-coding-agent</a></p>
-</li>
-<li>
-<p><a href="https://github.com/earendil-works/pi/blob/main/packages/agent/src/agent-loop.ts#L202">https://github.com/earendil-works/pi/blob/main/packages/agent/src/agent-loop.ts#L202</a></p>
-</li>
-<li>
-<p><a href="https://github.com/earendil-works/pi/blob/main/packages/ai/src/providers/openai-responses-shared.ts#L90">https://github.com/earendil-works/pi/blob/main/packages/ai/src/providers/openai-responses-shared.ts#L90</a></p>
-</li>
-</ul>
 <h1 id="more-resources">More Resources</h1>
 <ul>
 <li>
@@ -393,6 +383,188 @@
 </ul>
 </li>
 </ul>
+<h1 id="2026-addendum">2026 Addendum</h1>
+<p>The well crafted open source agent harness "Pi" handles the problem elegantly (supporting multiple AI vendors via the Adapter Pattern):</p>
+<ul>
+<li><a href="https://pi.dev/">https://pi.dev/</a></li>
+<li>
+<p><a href="https://formulae.brew.sh/formula/pi-coding-agent">https://formulae.brew.sh/formula/pi-coding-agent</a></p>
+</li>
+<li>
+<p><a href="https://github.com/earendil-works/pi/blob/main/packages/agent/src/agent-loop.ts#L202">https://github.com/earendil-works/pi/blob/main/packages/agent/src/agent-loop.ts#L202</a></p>
+</li>
+<li>
+<p><a href="https://github.com/earendil-works/pi/blob/main/packages/ai/src/providers/openai-responses-shared.ts#L90">https://github.com/earendil-works/pi/blob/main/packages/ai/src/providers/openai-responses-shared.ts#L90</a></p>
+</li>
+</ul>
+<h2 id="brittle-so-use-sdks">Brittle - so use SDKs</h2>
+<p>It's a difficult challenge to work with each different vendor's raw model expectations, hence SDKs ;p</p>
+<ul>
+<li><a href="https://pypi.org/project/openai/">https://pypi.org/project/openai/</a></li>
+<li><a href="https://pypi.org/project/anthropic/">https://pypi.org/project/anthropic/</a></li>
+<li><a href="https://pypi.org/project/google-genai/">https://pypi.org/project/google-genai/</a></li>
+</ul>
+<p>Below is the raw agent tool loop adapted for the local Google model Gemma4. Notably it has "thinking traces" that mlx-lm==0.31.2 does not (yet) remove.</p>
+<div class="highlight"><pre><span></span><code><span class="n">Assistant</span><span class="o">:</span><span class="w"> </span><span class="o">&lt;|</span><span class="k">channel</span><span class="o">&gt;</span><span class="n">thought</span>
+<span class="n">The</span><span class="w"> </span><span class="k">user</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="n">asking</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">joke</span><span class="p">.</span><span class="w"> </span><span class="n">This</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="k">general</span><span class="w"> </span><span class="n">knowledge</span><span class="w"> </span><span class="n">request</span><span class="w"> </span><span class="n">that</span><span class="w"> </span><span class="n">does</span><span class="w"> </span><span class="k">not</span><span class="w"> </span><span class="k">require</span><span class="w"> </span><span class="k">any</span><span class="w"> </span><span class="n">tools</span><span class="w"> </span><span class="p">(</span><span class="k">like</span><span class="w"> </span><span class="n n-Quoted">`read_file`</span><span class="p">).</span><span class="w"> </span><span class="n">I</span><span class="w"> </span><span class="n">should</span><span class="w"> </span><span class="n">respond</span><span class="w"> </span><span class="k">with</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">joke</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">plain</span><span class="w"> </span><span class="kt">text</span><span class="p">.</span><span class="o">&lt;</span><span class="k">channel</span><span class="o">|&gt;</span>
+<span class="n">Why</span><span class="w"> </span><span class="n">don</span><span class="s1">'t scientists trust atoms?</span>
+<span class="s1">Because they make up everything!</span>
+</code></pre></div>
+<p><strong>Success via contortions to parse &lt;|tool_call&gt;</strong>...</p>
+<div class="highlight"><pre><span></span><code><span class="n">You</span><span class="w"> </span><span class="p">(</span><span class="n">provide</span><span class="w"> </span><span class="n">input</span><span class="w"> </span><span class="k">or</span><span class="w"> </span><span class="k">type</span><span class="w"> </span><span class="n">quit</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="n">summarize</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="k">file</span><span class="w"> </span><span class="mi">02</span><span class="o">-</span><span class="n">chat</span><span class="o">-</span><span class="k">loop</span><span class="o">-</span><span class="k">with</span><span class="o">-</span><span class="k">read</span><span class="o">-</span><span class="k">file</span><span class="o">-</span><span class="n">tool</span><span class="p">.</span><span class="n">py</span>
+
+<span class="n">Assistant</span><span class="o">:</span><span class="w"> </span><span class="o">&lt;|</span><span class="k">channel</span><span class="o">&gt;</span><span class="n">thought</span>
+<span class="n">The</span><span class="w"> </span><span class="k">user</span><span class="w"> </span><span class="n">wants</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">summary</span><span class="w"> </span><span class="k">of</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">Python</span><span class="w"> </span><span class="k">file</span><span class="w"> </span><span class="n n-Quoted">`02-chat-loop-with-read-file-tool.py`</span><span class="p">.</span>
+<span class="n">I</span><span class="w"> </span><span class="n">have</span><span class="w"> </span><span class="n">successfully</span><span class="w"> </span><span class="k">read</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="k">file</span><span class="w"> </span><span class="n">content</span><span class="p">.</span>
+<span class="n">Now</span><span class="w"> </span><span class="n">I</span><span class="w"> </span><span class="n">need</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="n">summarize</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="k">code</span><span class="p">.</span>
+
+<span class="n">The</span><span class="w"> </span><span class="k">code</span><span class="w"> </span><span class="n">implements</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">chat</span><span class="w"> </span><span class="k">loop</span><span class="w"> </span><span class="n">application</span><span class="w"> </span><span class="n">that</span><span class="w"> </span><span class="n">uses</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">large</span><span class="w"> </span><span class="k">language</span><span class="w"> </span><span class="n">model</span><span class="w"> </span><span class="p">(</span><span class="n">LLM</span><span class="p">)</span><span class="w"> </span><span class="k">and</span><span class="w"> </span><span class="n">includes</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n n-Quoted">`read_file`</span><span class="w"> </span><span class="n">tool</span><span class="p">.</span>
+<span class="p">...</span>
+</code></pre></div>
+<h3 id="mlx-gemma4-with-tool-calling">MLX Gemma4 with tool calling</h3>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">from</span> <span class="nn">mlx_lm</span> <span class="kn">import</span> <span class="n">load</span><span class="p">,</span> <span class="n">generate</span>
+
+<span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="n">model</span><span class="p">,</span> <span class="n">tokenizer</span> <span class="o">=</span> <span class="n">load</span><span class="p">(</span><span class="s2">"mlx-community/gemma-4-e4b-it-4bit"</span><span class="p">)</span>
+    <span class="n">system_message</span> <span class="o">=</span> <span class="s2">"""You are a helpful, concise Assistant.</span>
+<span class="s2">    You have access to a read_file tool, but ONLY use them when the user's request REQUIRES one.</span>
+<span class="s2">    MOST messages need NO tool call. Just reply in plain text.</span>
+<span class="s2">    DO NOT call a tool for:</span>
+<span class="s2">    - Greetings, chitchat, or general questions</span>
+<span class="s2">    - Questions you already know the answer to</span>
+<span class="s2">    ONLY call a tool when you literally cannot answer without it.</span>
+<span class="s2">    When you do NOT need a tool, respond in plain text. Never output JSON unless you are calling a tool."""</span>
+    <span class="n">messages</span> <span class="o">=</span> <span class="p">[{</span><span class="s2">"role"</span><span class="p">:</span> <span class="s2">"system"</span><span class="p">,</span> <span class="s2">"content"</span><span class="p">:</span> <span class="n">system_message</span><span class="p">}]</span>
+    <span class="n">run</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">tokenizer</span><span class="p">,</span> <span class="n">messages</span><span class="p">,</span> <span class="n">get_user_message</span><span class="p">)</span>
+
+
+ <span class="c1"># run loops getting the user message and displaying the LLM response</span>
+<span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">tokenizer</span><span class="p">,</span> <span class="n">messages</span><span class="p">,</span> <span class="n">get_msg_fn</span><span class="p">):</span>
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">user_input</span><span class="p">,</span> <span class="n">ok</span> <span class="o">=</span> <span class="n">get_msg_fn</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">ok</span><span class="p">:</span>
+            <span class="k">break</span>
+
+        <span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">"role"</span><span class="p">:</span> <span class="s2">"user"</span><span class="p">,</span> <span class="s2">"content"</span><span class="p">:</span> <span class="n">user_input</span><span class="p">})</span>
+        <span class="n">user_prompt</span> <span class="o">=</span> <span class="n">tokenizer</span><span class="o">.</span><span class="n">apply_chat_template</span><span class="p">(</span><span class="n">messages</span><span class="p">,</span> <span class="n">tokenize</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">add_generation_prompt</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">tools</span><span class="o">=</span><span class="n">TOOLS</span><span class="p">)</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="n">generate_response</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">tokenizer</span><span class="p">,</span> <span class="n">messages</span><span class="p">,</span> <span class="n">user_prompt</span><span class="p">)</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Assistant: </span><span class="si">{</span><span class="n">response</span><span class="si">}</span><span class="se">\n</span><span class="s2">"</span><span class="p">)</span>
+        <span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">"role"</span><span class="p">:</span> <span class="s2">"assistant"</span><span class="p">,</span> <span class="s2">"content"</span><span class="p">:</span> <span class="n">response</span><span class="p">})</span>
+
+
+<span class="k">def</span> <span class="nf">get_user_message</span><span class="p">():</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">user_input</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s2">"You (provide input or type quit): "</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">user_input</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">"exit"</span><span class="p">,</span> <span class="s2">"quit"</span><span class="p">}:</span>
+            <span class="k">return</span> <span class="s2">""</span><span class="p">,</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="n">user_input</span><span class="p">,</span> <span class="kc">True</span>
+    <span class="k">except</span> <span class="p">(</span><span class="ne">EOFError</span><span class="p">,</span> <span class="ne">KeyboardInterrupt</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">()</span>
+        <span class="k">return</span> <span class="s2">""</span><span class="p">,</span> <span class="kc">False</span>
+
+
+<span class="k">def</span> <span class="nf">generate_response</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">tokenizer</span><span class="p">,</span> <span class="n">messages</span><span class="p">,</span> <span class="n">user_prompt</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""generate_response checks if the LLM believes the User query may need a tool call, if the first LLM response is not JSON just ignore"""</span>
+
+    <span class="n">response</span> <span class="o">=</span> <span class="n">generate</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">tokenizer</span><span class="p">,</span> <span class="n">prompt</span><span class="o">=</span><span class="n">user_prompt</span><span class="p">,</span> <span class="n">max_tokens</span><span class="o">=</span><span class="mi">10000</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s2">"&lt;|tool_call&gt;"</span> <span class="ow">in</span> <span class="n">response</span><span class="p">:</span>
+            <span class="n">response_as_json</span> <span class="o">=</span> <span class="n">parse_gemma_tool_call</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">response_as_json</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">response_as_json</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"name"</span><span class="p">)</span> <span class="o">==</span> <span class="s2">"read_file"</span><span class="p">:</span>
+            <span class="n">tool_input</span> <span class="o">=</span> <span class="n">response_as_json</span><span class="p">[</span><span class="s2">"parameters"</span><span class="p">]</span>
+            <span class="n">tool_result</span> <span class="o">=</span> <span class="n">read_file</span><span class="p">(</span><span class="n">tool_input</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"file_path"</span><span class="p">)</span> <span class="ow">or</span> <span class="n">tool_input</span><span class="p">[</span><span class="s2">"filename"</span><span class="p">])</span>
+
+            <span class="c1"># prepare_gemma_tool_call_result follows the format https://ai.google.dev/gemini-api/docs/function-calling</span>
+            <span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">"role"</span><span class="p">:</span> <span class="s2">"assistant"</span><span class="p">,</span> <span class="s2">"content"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+            <span class="s2">"tool_calls"</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">{</span>
+                <span class="s2">"id"</span><span class="p">:</span> <span class="s2">"read_file_1"</span><span class="p">,</span>
+                <span class="s2">"function"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">"name"</span><span class="p">:</span> <span class="s2">"read_file"</span><span class="p">,</span>
+                    <span class="s2">"arguments"</span><span class="p">:</span> <span class="n">response_as_json</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"parameters"</span><span class="p">),</span>
+                <span class="p">},</span>
+            <span class="p">}</span>
+            <span class="p">],</span>
+            <span class="p">})</span>
+
+            <span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+                <span class="s2">"role"</span><span class="p">:</span> <span class="s2">"tool"</span><span class="p">,</span>
+                <span class="s2">"name"</span><span class="p">:</span> <span class="s2">"read_file"</span><span class="p">,</span>
+                <span class="s2">"content"</span><span class="p">:</span> <span class="n">tool_result</span><span class="p">,</span>
+                <span class="s2">"tool_call_id"</span><span class="p">:</span> <span class="s2">"read_file_1"</span><span class="p">,</span>
+            <span class="p">})</span>
+
+            <span class="c1"># create a user friendly response based on the tool call result</span>
+            <span class="n">prompt</span> <span class="o">=</span> <span class="n">tokenizer</span><span class="o">.</span><span class="n">apply_chat_template</span><span class="p">(</span><span class="n">messages</span><span class="p">,</span> <span class="n">tokenize</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">add_generation_prompt</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="n">generate</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">tokenizer</span><span class="p">,</span> <span class="n">prompt</span><span class="o">=</span><span class="n">prompt</span><span class="p">,</span> <span class="n">max_tokens</span><span class="o">=</span><span class="mi">10000</span><span class="p">)</span>
+
+    <span class="k">except</span> <span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">JSONDecodeError</span><span class="p">,</span> <span class="ne">KeyError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">):</span>
+        <span class="k">pass</span>
+    <span class="k">return</span> <span class="n">response</span>
+
+
+<span class="k">def</span> <span class="nf">parse_gemma_tool_call</span><span class="p">(</span><span class="n">response</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""parse_gemma_tool_call skips past the THINKING and handles strings like &lt;|tool_call&gt;call:read_file{file_path:&lt;|"|&gt;FILENAME&lt;|"|&gt;}&lt;tool_call|&gt;"""</span>
+    <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">after_thought</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s2">"&lt;channel|&gt;"</span><span class="p">)</span>
+    <span class="c1"># print("DEBUG", after_thought)</span>
+    <span class="n">tool_call</span> <span class="o">=</span> <span class="n">between</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="s2">"&lt;|tool_call&gt;"</span><span class="p">,</span> <span class="s2">"&lt;tool_call|&gt;"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">tool_call</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"call:"</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{}</span>
+
+    <span class="n">name</span> <span class="o">=</span> <span class="n">between</span><span class="p">(</span><span class="n">tool_call</span><span class="p">,</span> <span class="s2">"call:"</span><span class="p">,</span> <span class="s2">"{"</span><span class="p">)</span>
+    <span class="c1"># hack way assuming a single parameter but could be file_path or filepath or filename or...</span>
+    <span class="n">filepath</span> <span class="o">=</span> <span class="n">between</span><span class="p">(</span><span class="n">tool_call</span><span class="p">,</span> <span class="s1">':&lt;|"|&gt;'</span><span class="p">,</span> <span class="s1">'&lt;|"|&gt;}'</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">"name"</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span> <span class="s2">"parameters"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"file_path"</span><span class="p">:</span> <span class="n">filepath</span><span class="p">}}</span>
+
+
+<span class="k">def</span> <span class="nf">between</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">):</span>
+    <span class="n">before</span><span class="p">,</span> <span class="n">found_left</span><span class="p">,</span> <span class="n">after_left</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="n">left</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">found_left</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Missing left delimiter: </span><span class="si">{</span><span class="n">left</span><span class="si">!r}</span><span class="s2">"</span><span class="p">)</span>
+
+    <span class="n">middle</span><span class="p">,</span> <span class="n">found_right</span><span class="p">,</span> <span class="n">after</span> <span class="o">=</span> <span class="n">after_left</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="n">right</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">found_right</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Missing right delimiter: </span><span class="si">{</span><span class="n">right</span><span class="si">!r}</span><span class="s2">"</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">middle</span>
+
+
+<span class="k">def</span> <span class="nf">read_file</span><span class="p">(</span><span class="n">file_path</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="s2">"r"</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">"Error reading file: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">"</span>
+
+
+<span class="n">TOOLS</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">{</span>
+        <span class="s2">"type"</span><span class="p">:</span> <span class="s2">"function"</span><span class="p">,</span>
+        <span class="s2">"name"</span><span class="p">:</span> <span class="s2">"read_file"</span><span class="p">,</span>
+    <span class="s2">"function"</span><span class="p">:</span> <span class="s2">"read_file"</span><span class="p">,</span>
+        <span class="s2">"description"</span><span class="p">:</span> <span class="s2">"Read the contents of a given file path. Use this to see everything in a file. Do not use this with directory names."</span><span class="p">,</span>
+        <span class="s2">"inputSchema"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"type"</span><span class="p">:</span> <span class="s2">"object"</span><span class="p">,</span>
+            <span class="s2">"properties"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">"file_path"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">"type"</span><span class="p">:</span> <span class="s2">"string"</span><span class="p">,</span>
+                    <span class="s2">"description"</span><span class="p">:</span> <span class="s2">"The path of the file to read"</span><span class="p">,</span>
+                <span class="p">},</span>
+            <span class="p">},</span>
+            <span class="s2">"required"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"file_path"</span><span class="p">],</span>
+        <span class="p">},</span>
+    <span class="p">},</span>
+<span class="p">]</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</code></pre></div>
             <aside>
             <hr/>
             <nav>
@@ -412,7 +584,7 @@
             <time pubdate="pubdate" datetime="2025-08-30T18:18:00-07:00">Aug 30, 2025</time>
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#ai-ref">ai</a> 
-            <h4>~1366 words</h4>
+            <h4>~1957 words</h4>
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article"> 
                 <li><a href="/tags.html#agents-ref">agents
