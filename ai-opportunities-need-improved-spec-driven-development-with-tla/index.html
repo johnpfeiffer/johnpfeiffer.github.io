@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en-US">
+    <head>
+        <meta charset="utf-8"> 
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="author" content="john pfeiffer" />
+        <meta name="copyright" content="john pfeiffer" />
+
+<meta name="keywords" content="ai, llm, qa, tla, sdd, ai, " />
+        <title>AI opportunities need improved Spec Driven Development with TLA+  · johnpfeiffer
+</title>
+        <!--link href="https://cdn-images.mailchimp.com/embedcode/slim-081711.css" rel="stylesheet" type="text/css"-->
+        <!--link href="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css" rel="stylesheet"-->
+        <link href="https://blog.john-pfeiffer.com/theme/css/bootstrap-combined.min.css" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="https://blog.john-pfeiffer.com/theme/css/style.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="https://blog.john-pfeiffer.com/theme/css/solarizedlight.css" media="screen">
+        <link rel="shortcut icon" href="https://blog.john-pfeiffer.com/theme/images/favicon.ico" type="image/x-icon" />
+        <link rel="apple-touch-icon" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon.png" />
+        <link rel="apple-touch-icon" sizes="57x57" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-57x57.png" />
+        <link rel="apple-touch-icon" sizes="72x72" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-72x72.png" />
+        <link rel="apple-touch-icon" sizes="114x114" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-114x114.png" />
+        <link rel="apple-touch-icon" sizes="144x144" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-144x144.png" />
+        <link rel="icon" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-144x144.png" />
+    </head>
+    <body>
+	<div id="content-sans-footer">
+        <div class="dropdown-backdrop">
+
+			<div class="navbar navbar-static-top">
+				<div class="navbar-inner">
+					<div class="container">
+						<a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+							<span class="icon-bar"></span>
+							<span class="icon-bar"></span>
+							<span class="icon-bar"></span>
+						</a>
+						<a class="brand" href="https://blog.john-pfeiffer.com/"><span class=site-name>johnpfeiffer</span></a>
+						<div class="nav-collapse collapse">
+							<ul class="nav pull-right top-menu">
+								<li ><a href="https://blog.john-pfeiffer.com">Home</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/engineering-people-managers/">Engineering (People) Managers</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/john-likes/">John Likes</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/software-engineer-favorites/">Software Engineer Favorites</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/categories.html">Categories</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/tags.html">Tags</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/archives.html">Archives</a></li>
+								<li><form class="navbar-search" action="https://blog.john-pfeiffer.com/search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="container-fluid">
+			<div class="row-fluid">
+				<div class="span1"></div>
+				<div class="span10">
+<article>
+<div class="row-fluid">
+    <header class="page_header span10 offset2">
+    <h1><a href="https://blog.john-pfeiffer.com/ai-opportunities-need-improved-spec-driven-development-with-tla/"> AI opportunities need improved Spec Driven Development with TLA+  </a></h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+    <div class="span2 table-of-content">
+        <nav>
+        <h4>Contents</h4>
+        <div class="toc">
+<ul>
+<li><a href="#ambiguity-in-the-era-of-ai">Ambiguity in the Era of AI</a></li>
+<li><a href="#spec-driven-design">Spec Driven Design</a><ul>
+<li><a href="#sdd-gaps">SDD Gaps</a></li>
+</ul>
+</li>
+<li><a href="#human-intent-matters">Human Intent Matters</a><ul>
+<li><a href="#imperative-vs-declarative">Imperative vs Declarative</a></li>
+</ul>
+</li>
+<li><a href="#an-evening-with-tla">An evening with TLA+</a><ul>
+<li><a href="#learning-to-harness-the-invariant-approach">Learning to harness the invariant approach</a><ul>
+<li><a href="#multiple-fixes-governance">Multiple Fixes - governance</a></li>
+</ul>
+</li>
+<li><a href="#learning-about-weakness">Learning about Weakness</a><ul>
+<li><a href="#breaking-bad">Breaking Bad</a></li>
+<li><a href="#checking-the-spec-enforcing-invariants">Checking the spec - enforcing invariants</a></li>
+<li><a href="#the-fix-ask-an-llm">The fix - ask an LLM</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+        </nav>
+    </div>
+    <div class="span8 article-content">
+
+            
+<h1 id="ambiguity-in-the-era-of-ai">Ambiguity in the Era of AI</h1>
+<blockquote>
+<p>"Record who fed her cat food"</p>
+</blockquote>
+<p><em>Is it a human eating cat food, or is it a human feeding a cat? Record with video, or write it down?</em></p>
+<p>English is infamously imprecise - which is a challenge when writing software requirements.</p>
+<p>Throughout my software career, I've lived through so many telephone games:</p>
+<blockquote>
+<p>Customer/User -&gt; Support -&gt; Product Manager -&gt; Engineer</p>
+</blockquote>
+<p>LLMs are not a silver bullet, they amplify existing systems.</p>
+<p>Ambiguity and imprecision become an LLM over-engineered ProductRequirementDocument (so many paragraphs of such long sentences, absolutely!), followed by AI Agents that auto-generate an exponential number of (obfuscated, contradictory) JIRA tickets.</p>
+<p>A waste of time, tokens (dollars!) - and worse, finite human attention.</p>
+<p><strong>Using an electric car, to pull a combustion engine, that is pulling a wooden cart... with a horse sitting in the cart.</strong></p>
+<h1 id="spec-driven-design">Spec Driven Design</h1>
+<p>An increasingly popular approach to constrain and leverage LLMs in code generation is to be more precise in specifying what we want: <a href="https://martinfowler.com/articles/exploring-gen-ai/sdd-3-tools.html">https://martinfowler.com/articles/exploring-gen-ai/sdd-3-tools.html</a></p>
+<p>This practical application has strong foundations in computer science theory:</p>
+<p><a href="https://en.wikipedia.org/wiki/Claude_Shannon#Information_theory">Shannon's "information theory"</a> and <a href="https://en.wikipedia.org/wiki/Richard_Hamming#Bell_Laboratories">Hamming codes</a> provide precise terminology and clear thought allowing mathemtical quantification of signal-to-noise ratios and error rates in communication.</p>
+<p><img alt="Shannon Weaver Model of Communication" src="../images/shannon-weaver-model-of-communication.png"/></p>
+<h2 id="sdd-gaps">SDD Gaps</h2>
+<p>Spec-Driven Design does not have a mechanism to distill english into unambiguous precision, nor does it have a method of enforcing behavior/implementation.</p>
+<p>Practically: copy pasting the each absurdly wrong auto-generated jira ticket (ok - your Agent has MCP so it ingests them automatically) will never be "correct", it will not deliver value, and worst of all... </p>
+<p>Building the wrong thing quickly will waste everyone's time and patience.</p>
+<p>Cue super hero: <a href="https://en.wikipedia.org/wiki/Leslie_Lamport"><em>Leslie Lamport (Turing Award Winner and creator of TLA+)</em></a></p>
+<blockquote>
+<p>One reason for modeling a system is to check if it does what we want it to</p>
+</blockquote>
+<p>What if you time-traveled decades before LLMs and created a precise language that provides deterministic strong guarantees about software?</p>
+<h1 id="human-intent-matters">Human Intent Matters</h1>
+<p>Now that (with LLMs and coding agents) writing and changing code is easy, let's tackle the really hard part: writing specifications.</p>
+<p>Extracting the correct invariants takes deep focus - but it is truly the unique human role to provide intent.</p>
+<p>Here's what invariants look like for a real project — a "software professional personality" quiz game I'm building:</p>
+<div class="highlight"><pre><span></span><code><span class="nx">INV</span><span class="o">-</span><span class="mi">001</span><span class="p">:</span><span class="w"> </span><span class="nx">There</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="nx">at</span><span class="w"> </span><span class="nx">least</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="nx">personality</span><span class="w"> </span><span class="k">type</span>
+<span class="nx">INV</span><span class="o">-</span><span class="mi">002</span><span class="p">:</span><span class="w"> </span><span class="nx">Every</span><span class="w"> </span><span class="nx">personality</span><span class="w"> </span><span class="k">type</span><span class="w"> </span><span class="nx">has</span><span class="w"> </span><span class="nx">at</span><span class="w"> </span><span class="nx">least</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="nx">source</span><span class="w"> </span><span class="nx">link</span>
+<span class="nx">INV</span><span class="o">-</span><span class="mi">003</span><span class="p">:</span><span class="w"> </span><span class="nx">Each</span><span class="w"> </span><span class="nx">question</span><span class="w"> </span><span class="nx">has</span><span class="w"> </span><span class="nx">at</span><span class="w"> </span><span class="nx">least</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="nx">answer</span>
+<span class="nx">INV</span><span class="o">-</span><span class="mi">004</span><span class="p">:</span><span class="w"> </span><span class="nx">Each</span><span class="w"> </span><span class="nx">question</span><span class="w"> </span><span class="nx">references</span><span class="w"> </span><span class="nx">a</span><span class="w"> </span><span class="nx">source</span>
+<span class="nx">INV</span><span class="o">-</span><span class="mi">005</span><span class="p">:</span><span class="w"> </span><span class="nx">Every</span><span class="w"> </span><span class="nx">question</span><span class="w"> </span><span class="nx">modifies</span><span class="w"> </span><span class="nx">at</span><span class="w"> </span><span class="nx">least</span><span class="w"> </span><span class="nx">one</span><span class="w"> </span><span class="nx">score</span>
+<span class="nx">INV</span><span class="o">-</span><span class="mi">006</span><span class="p">:</span><span class="w"> </span><span class="nx">Each</span><span class="w"> </span><span class="nx">personality</span><span class="w"> </span><span class="k">type</span><span class="w"> </span><span class="nx">must</span><span class="w"> </span><span class="nx">be</span><span class="w"> </span><span class="nx">reachable</span>
+</code></pre></div>
+<p>These can be verified across all possible states, and the last one is critical: ensuring there is a path of answers that can lead to every personality type.</p>
+<h2 id="imperative-vs-declarative">Imperative vs Declarative</h2>
+<p>Infrastructure as Code (IaaC) already went through a similar process of shifting from a series of How steps to simply stating "it is this".</p>
+<p><strong>Imperative</strong>: "Start a server, run updates, install the firewall, install the nginx webserver, copy configuration..."</p>
+<p><strong>Declarative</strong>: "A server exists with a single network port exposed, running a webserver configured via nginx.conf"</p>
+<p>Applying this declarative mindset to an improved Specification workflow:</p>
+<ul>
+<li>Humans state the invariants</li>
+<li>Software (LLMs) translate english invariants into a formal specification</li>
+<li>A deterministic model checker verifies the specification for logical correctness</li>
+<li>then leverage the best of Spec-Driven Development to write an implementation and execution plan</li>
+<li>Agentic coding (with harness and skills) implement</li>
+<li>[Verify via automated tests and auditing log statements]</li>
+</ul>
+<h1 id="an-evening-with-tla">An evening with TLA+</h1>
+<p>I've wanted to learn TLA+ for years but got stuck on academic formalism, the dense mathematical syntax, and the complex toolchain.</p>
+<p>This time I paired with an LLM: learning and building, up and running in an hour.</p>
+<p>I gave Claude my six English invariants and asked it to generate a TLA+ specification, absolutely!</p>
+<p>Codex parsed the spec and even ran the model checker for me. Success!</p>
+<h2 id="learning-to-harness-the-invariant-approach">Learning to harness the invariant approach</h2>
+<p>** AI Over-Engineering** happened: the eager LLM generated a spec with sixteen constants including Bayesian posterior probabilities, expected information gain calculations, and an adaptive question engine. Features I hadn't really specified yet.</p>
+<p>It's a QA best practice, especially with new tools/techniques, to deliberately break something and see the expected failure. This helps avoid vacuous or tautology tests - things that do nothing but "pass/succeed".</p>
+<p>(Thanks to an LLM suggestion of exactly where/what to change)... I changed the test data so a question contributed zero points to any score, INV-005 says every question must modify at least one score, so this should have failed.</p>
+<div class="highlight"><pre><span></span><code>Finished computing initial states: 0 distinct states generated
+Model checking completed. No error has been found.
+✔ Success
+</code></pre></div>
+<p><strong>Zero states generated - no error has been found</strong> - subtle and silent failures are gotchas when working with LLMs.</p>
+<h3 id="multiple-fixes-governance">Multiple Fixes - governance</h3>
+<p>I added three rules to my AGENTS.md to strengthen governance and enforce simplicity:</p>
+<div class="highlight"><pre><span></span><code><span class="mf">1.</span><span class="w"> </span><span class="n">Every</span><span class="w"> </span><span class="n">predicate</span><span class="w"> </span><span class="n">in</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">TLA</span><span class="o">+</span><span class="w"> </span><span class="n">spec</span><span class="w"> </span><span class="n">traces</span><span class="w"> </span><span class="kr">to</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">numbered</span><span class="w"> </span><span class="n">INV</span><span class="o">-</span><span class="n">xxx</span><span class="w"> </span><span class="n">in</span><span class="w"> </span><span class="n">INVARIANTS</span><span class="mf">.</span><span class="n">md</span><span class="mf">.</span><span class="w"> </span><span class="n">No</span><span class="w"> </span><span class="n">extra</span><span class="w"> </span><span class="n">predicates</span><span class="mf">.</span>
+<span class="mf">2.</span><span class="w"> </span><span class="n">The</span><span class="w"> </span><span class="n">model</span><span class="w"> </span><span class="n">file</span><span class="w"> </span><span class="kr">cont</span><span class="n">ains</span><span class="w"> </span><span class="kr">on</span><span class="n">ly</span><span class="w"> </span><span class="n">literal</span><span class="w"> </span><span class="n">test</span><span class="w"> </span><span class="kd">data</span><span class="mf">.</span>
+<span class="w">   </span><span class="kr">If</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="nb">val</span><span class="n">ue</span><span class="w"> </span><span class="n">depends</span><span class="w"> </span><span class="kr">on</span><span class="w"> </span><span class="n">other</span><span class="w"> </span><span class="n">constants</span><span class="p">,</span><span class="w"> </span><span class="kd">def</span><span class="n">ine</span><span class="w"> </span><span class="n">it</span><span class="w"> </span><span class="n">as</span><span class="w"> </span><span class="n">an</span><span class="w"> </span><span class="n">operator</span><span class="w"> </span><span class="n">in</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">spec</span><span class="p">,</span><span class="w"> </span><span class="ow">not</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">constant</span><span class="w"> </span><span class="n">in</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">model</span><span class="mf">.</span>
+<span class="mf">3.</span><span class="w"> </span><span class="n">A</span><span class="w"> </span><span class="n">TLC</span><span class="w"> </span><span class="kr">run</span><span class="w"> </span><span class="n">that</span><span class="w"> </span><span class="n">generates</span><span class="w"> </span><span class="mf">0</span><span class="w"> </span><span class="n">states</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">failure</span><span class="mf">.</span><span class="w"> </span><span class="n">Report</span><span class="w"> </span><span class="n">it</span><span class="w"> </span><span class="n">as</span><span class="w"> </span><span class="n">an</span><span class="w"> </span><span class="n">error</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="n">diagnose</span><span class="mf">.</span>
+</code></pre></div>
+<p>The AI re-read the rules, looked at its own output, and flagged itself:</p>
+<blockquote>
+<p>"The TLA+ model file is not literal-only. CReachableOutcomes == CPersonalities is a derived value, not literal model data."</p>
+</blockquote>
+<p>After the LLM cleaned up and regenerated the TLA files, the model shrank to pure literals.</p>
+<p>Then to deliberately break it I zeroed out all scores for one question and re-ran:</p>
+<p><code>uv run tla tlc RandsPersonalityGameInvariantCheck.tla</code></p>
+<blockquote>
+<p><strong>The invariant of INV005 is equal to FALSE</strong></p>
+</blockquote>
+<p>So I successfully forced an error - and revealed a design bug.</p>
+<h2 id="learning-about-weakness">Learning about Weakness</h2>
+<blockquote>
+<p>INV-005: Every question modifies at least one score</p>
+</blockquote>
+<p>Thinking through what's wrong with the logical model I read the "test cases" and realized that if the first question's score was very high for a personality, then following questions that only changed the score a tiny bit would never alter the final outcome.</p>
+<p>The user would (unwittingly) answer a lot of questions for no appreciable difference.</p>
+<p>So I had to improve my spec</p>
+<div class="highlight"><pre><span></span><code><span class="nx">INV</span><span class="o">-</span><span class="mi">005</span><span class="p">:</span><span class="w"> </span><span class="nx">Every</span><span class="w"> </span><span class="nx">question</span><span class="w"> </span><span class="nx">can</span><span class="w"> </span><span class="nx">change</span><span class="w"> </span><span class="nx">the</span><span class="w"> </span><span class="nx">outcome</span>
+<span class="nx">For</span><span class="w"> </span><span class="nx">each</span><span class="w"> </span><span class="nx">question</span><span class="p">,</span><span class="w"> </span><span class="nx">there</span><span class="w"> </span><span class="nx">exist</span><span class="w"> </span><span class="nx">answer</span><span class="w"> </span><span class="nx">choices</span><span class="w"> </span><span class="nx">that</span><span class="w"> </span><span class="nx">produce</span><span class="w"> </span><span class="nx">different</span><span class="w"> </span><span class="k">final</span><span class="w"> </span><span class="nx">personality</span><span class="w"> </span><span class="nx">types</span><span class="p">.</span>
+<span class="err">````</span>
+
+<span class="err">#</span><span class="w"> </span><span class="nx">Summary</span>
+
+<span class="nx">TLA</span><span class="o">+</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="nx">a</span><span class="w"> </span><span class="nx">powerful</span><span class="w"> </span><span class="nx">tool</span><span class="w"> </span><span class="nx">that</span><span class="w"> </span><span class="nx">gives</span><span class="w"> </span><span class="nx">you</span><span class="w"> </span><span class="nx">more</span><span class="w"> </span><span class="nx">predictability</span><span class="w"> </span><span class="k">and</span><span class="w"> </span><span class="nx">certainty</span><span class="p">,</span><span class="w"> </span><span class="nx">before</span><span class="w"> </span><span class="nx">you</span><span class="w"> </span><span class="nx">unleash</span><span class="w"> </span><span class="nx">the</span><span class="w"> </span><span class="nx">chaos</span><span class="w"> </span><span class="nx">of</span><span class="w"> </span><span class="nx">LLMs</span><span class="p">.</span>
+
+<span class="nx">LLMs</span><span class="w"> </span><span class="s">"raise the floor"</span><span class="w"> </span><span class="nx">so</span><span class="w"> </span><span class="nx">you</span><span class="w"> </span><span class="nx">can</span><span class="w"> </span><span class="nx">use</span><span class="w"> </span><span class="nx">invariants</span><span class="p">,</span><span class="w"> </span><span class="k">not</span><span class="w"> </span><span class="nx">just</span><span class="w"> </span><span class="nx">generate</span><span class="w"> </span><span class="nx">confident</span><span class="w"> </span><span class="nx">slop</span><span class="p">.</span><span class="w"> </span><span class="nx">The</span><span class="w"> </span><span class="nx">system</span><span class="w"> </span><span class="nx">should</span><span class="w"> </span><span class="nx">leverage</span><span class="w"> </span><span class="nx">information</span><span class="w"> </span><span class="nx">theory</span><span class="p">,</span><span class="w"> </span><span class="k">not</span><span class="w"> </span><span class="nx">be</span><span class="w"> </span><span class="nx">a</span><span class="w"> </span><span class="nx">victim</span><span class="w"> </span><span class="nx">of</span><span class="w"> </span><span class="nx">the</span><span class="w"> </span><span class="nx">noise</span><span class="p">.</span>
+
+<span class="nx">And</span><span class="w"> </span><span class="nx">LLMs</span><span class="w"> </span><span class="nx">are</span><span class="w"> </span><span class="k">not</span><span class="w"> </span><span class="nx">only</span><span class="w"> </span><span class="nx">translators</span><span class="p">,</span><span class="w"> </span><span class="nx">they</span><span class="w"> </span><span class="nx">are</span><span class="w"> </span><span class="nx">tutors</span><span class="w"> </span><span class="nx">to</span><span class="w"> </span><span class="nx">help</span><span class="w"> </span><span class="nx">you</span><span class="w"> </span><span class="nx">improve</span><span class="w"> </span><span class="nx">on</span><span class="w"> </span><span class="nx">the</span><span class="w"> </span><span class="nx">unique</span><span class="w"> </span><span class="nx">human</span><span class="w"> </span><span class="nx">role</span><span class="w"> </span><span class="nx">of</span><span class="w"> </span><span class="nx">specifying</span><span class="w"> </span><span class="nx">the</span><span class="w"> </span><span class="nx">Intent</span><span class="p">.</span>
+
+<span class="nx">Of</span><span class="w"> </span><span class="nx">course</span><span class="p">,</span><span class="w"> </span><span class="nx">also</span><span class="w"> </span><span class="s">"trust but verify"</span><span class="p">:</span><span class="w"> </span><span class="nx">Nothing</span><span class="w"> </span><span class="nx">tested</span><span class="w"> </span><span class="nx">so</span><span class="w"> </span><span class="nx">no</span><span class="w"> </span><span class="nx">errors</span><span class="w"> </span><span class="nx">found</span><span class="p">.</span><span class="w"> </span><span class="nx">Reward</span><span class="w"> </span><span class="nx">hacking</span><span class="p">.</span><span class="w"> </span><span class="nx">Over</span><span class="o">-</span><span class="nx">engineering</span><span class="p">.</span><span class="w"> </span><span class="nx">This</span><span class="w"> </span><span class="nx">all</span><span class="w"> </span><span class="nx">means</span><span class="w"> </span><span class="nx">the</span><span class="w"> </span><span class="nx">human</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="nx">ultimately</span><span class="w"> </span><span class="nx">the</span><span class="w"> </span><span class="nx">judge</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nx">less</span><span class="w"> </span><span class="nx">time</span><span class="w"> </span><span class="nx">spent</span><span class="w"> </span><span class="nx">on</span><span class="w"> </span><span class="nx">the</span><span class="w"> </span><span class="nx">How</span><span class="w"> </span><span class="k">and</span><span class="w"> </span><span class="nx">more</span><span class="w"> </span><span class="nx">on</span><span class="w"> </span><span class="s">"is this the right What"</span><span class="p">?</span>
+
+
+<span class="err">#</span><span class="w"> </span><span class="nx">Appendix</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nx">Learning</span><span class="w"> </span><span class="nx">TLA</span><span class="o">+</span>
+
+<span class="err">##</span><span class="w"> </span><span class="nx">Background</span><span class="w"> </span><span class="nx">on</span><span class="w"> </span><span class="nx">TLA</span><span class="o">+</span>
+
+<span class="s">"Temporal Logic of Actions"</span><span class="p">,</span><span class="w"> </span><span class="nx">TLA</span><span class="o">+</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="nx">a</span><span class="w"> </span><span class="p">(</span><span class="nx">formal</span><span class="w"> </span><span class="nx">specification</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="nx">language</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="nx">modeling</span><span class="w"> </span><span class="nx">software</span><span class="p">,</span><span class="w"> </span><span class="nx">based</span><span class="w"> </span><span class="nx">on</span><span class="w"> </span><span class="nx">temporal</span><span class="w"> </span><span class="nx">logic</span><span class="w"> </span><span class="k">and</span><span class="w"> </span><span class="nx">set</span><span class="w"> </span><span class="nx">theory</span><span class="p">.</span>
+
+<span class="o">-</span><span class="w"> </span><span class="p">&lt;</span><span class="nx">https</span><span class="p">:</span><span class="c1">//lamport.azurewebsites.net/tla/high-level-view.html&gt;</span>
+<span class="o">-</span><span class="w"> </span><span class="p">&lt;</span><span class="nx">https</span><span class="p">:</span><span class="c1">//www.wired.com/2013/01/code-bugs-programming-why-we-need-specs/&gt;</span>
+
+<span class="nx">Basically</span><span class="p">:</span><span class="w"> </span><span class="nx">Initial</span><span class="w"> </span><span class="nx">states</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="nx">Allowed</span><span class="w"> </span><span class="nx">transitions</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="nx">Properties</span><span class="w"> </span><span class="nx">to</span><span class="w"> </span><span class="nx">verify</span>
+
+<span class="nx">It</span><span class="w"> </span><span class="nx">lets</span><span class="w"> </span><span class="nx">you</span><span class="w"> </span><span class="nx">describe</span><span class="p">:</span>
+
+<span class="o">-</span><span class="w"> </span><span class="nx">States</span><span class="w"> </span><span class="nx">of</span><span class="w"> </span><span class="nx">a</span><span class="w"> </span><span class="nx">system</span>
+<span class="o">-</span><span class="w"> </span><span class="nx">Transitions</span><span class="w"> </span><span class="nx">between</span><span class="w"> </span><span class="nx">states</span>
+<span class="o">-</span><span class="w"> </span><span class="nx">Safety</span><span class="w"> </span><span class="nx">properties</span><span class="w"> </span><span class="p">(</span><span class="s">"nothing bad happens"</span><span class="p">)</span>
+<span class="o">-</span><span class="w"> </span><span class="nx">Liveness</span><span class="w"> </span><span class="nx">properties</span><span class="w"> </span><span class="p">(</span><span class="s">"something good eventually happens"</span><span class="p">)</span>
+
+<span class="nx">Tools</span><span class="w"> </span><span class="nx">can</span><span class="w"> </span><span class="k">then</span><span class="w"> </span><span class="nx">check</span><span class="w"> </span><span class="nx">the</span><span class="w"> </span><span class="nx">specification</span><span class="w"> </span><span class="k">and</span><span class="w"> </span><span class="nx">mathematically</span><span class="w"> </span><span class="nx">verify</span><span class="w"> </span><span class="nx">its</span><span class="w"> </span><span class="nx">properties</span><span class="p">.</span>
+
+<span class="nx">TLA</span><span class="o">+</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="nx">used</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="nx">industry</span><span class="w"> </span><span class="nx">by</span><span class="w"> </span><span class="nx">AWS</span><span class="p">,</span><span class="w"> </span><span class="nx">Microsoft</span><span class="p">,</span><span class="w"> </span><span class="k">and</span><span class="w"> </span><span class="nx">other</span><span class="w"> </span><span class="nx">places</span><span class="w"> </span><span class="nx">requiring</span><span class="w"> </span><span class="nx">extreme</span><span class="w"> </span><span class="nx">reliability</span><span class="p">.</span>
+
+<span class="o">*</span><span class="nx">It</span><span class="err">’</span><span class="nx">s</span><span class="w"> </span><span class="nx">especially</span><span class="w"> </span><span class="nx">popular</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="nx">consensus</span><span class="w"> </span><span class="nx">algorithms</span><span class="p">,</span><span class="w"> </span><span class="nx">distributed</span><span class="w"> </span><span class="nx">protocols</span><span class="p">,</span><span class="w"> </span><span class="nx">locking</span><span class="w"> </span><span class="nx">systems</span><span class="p">,</span><span class="w"> </span><span class="nx">etc</span><span class="p">.</span><span class="o">*</span>
+
+<span class="o">-</span><span class="w"> </span><span class="p">&lt;</span><span class="nx">https</span><span class="p">:</span><span class="c1">//lamport.azurewebsites.net/tla/industrial-use.html&gt;</span>
+<span class="o">-</span><span class="w"> </span><span class="p">&lt;</span><span class="nx">https</span><span class="p">:</span><span class="c1">//lamport.azurewebsites.net/tla/formal-methods-amazon.pdf&gt;</span>
+<span class="o">-</span><span class="w"> </span><span class="p">&lt;</span><span class="nx">https</span><span class="p">:</span><span class="c1">//cacm.acm.org/research/how-amazon-web-services-uses-formal-methods/&gt;</span>
+<span class="o">-</span><span class="w"> </span><span class="p">&lt;</span><span class="nx">https</span><span class="p">:</span><span class="c1">//conf.tlapl.us/2019/yannickwelsch/&gt; (Elasticsearch)</span>
+
+
+<span class="err">##</span><span class="w"> </span><span class="nx">Writing</span><span class="w"> </span><span class="nx">a</span><span class="w"> </span><span class="nx">simple</span><span class="w"> </span><span class="nx">spec</span>
+
+<span class="nx">What</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="nx">you</span><span class="w"> </span><span class="nx">wanted</span><span class="w"> </span><span class="nx">to</span><span class="w"> </span><span class="nx">ensure</span><span class="w"> </span><span class="nx">a</span><span class="w"> </span><span class="nx">bank</span><span class="w"> </span><span class="nx">account</span><span class="w"> </span><span class="nx">never</span><span class="w"> </span><span class="nx">went</span><span class="w"> </span><span class="nx">below</span><span class="w"> </span><span class="mi">0</span><span class="o">...</span>
+
+<span class="err">```</span><span class="nx">tla</span>
+<span class="o">----</span><span class="w"> </span><span class="nx">MODULE</span><span class="w"> </span><span class="nx">BankAccount</span><span class="w"> </span><span class="o">----</span>
+<span class="nx">EXTENDS</span><span class="w"> </span><span class="nx">Naturals</span>
+<span class="nx">VARIABLES</span><span class="w"> </span><span class="nx">balance</span>
+
+<span class="nx">Init</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nx">balance</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">0</span>
+<span class="nx">Next</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nx">UNCHANGED</span><span class="w"> </span><span class="nx">balance</span>
+<span class="nx">INV001</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nx">balance</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="mi">0</span>
+<span class="o">====</span>
+</code></pre></div>
+<ul>
+<li>"Naturals" is the library for numbers</li>
+<li>Initially balance is 0</li>
+<li>Next state is to do nothing</li>
+<li>The invariant is the balance has to be non-negative</li>
+</ul>
+<h3 id="breaking-bad">Breaking Bad</h3>
+<p>Hey, a feature request: Decrement the bank account...</p>
+<div class="highlight"><pre><span></span><code><span class="o">----</span> <span class="kr">MODULE</span> <span class="n">BankAccount</span> <span class="o">----</span>
+<span class="n">EXTENDS</span> <span class="n">Naturals</span>
+<span class="n">VARIABLES</span> <span class="n">balance</span>
+
+<span class="n">Init</span> <span class="o">==</span> <span class="n">balance</span> <span class="o">=</span> <span class="mi">0</span>
+
+<span class="n">Decrement</span> <span class="o">==</span> <span class="n">balance</span><span class="err">'</span> <span class="o">=</span> <span class="n">balance</span> <span class="o">-</span> <span class="mi">1</span>
+<span class="n">Next</span> <span class="o">==</span> <span class="n">Decrement</span>
+
+<span class="n">INV001</span> <span class="o">==</span> <span class="n">balance</span> <span class="o">&gt;=</span> <span class="mi">0</span>
+<span class="o">====</span>
+</code></pre></div>
+<p><strong>Decrement</strong> describes that <strong>balance'</strong> has the new state.</p>
+<p>And when Next occurs, we decrement: is the Invariant still true?</p>
+<h3 id="checking-the-spec-enforcing-invariants">Checking the spec - enforcing invariants</h3>
+<blockquote>
+<p><a href="https://projects.csail.mit.edu/gsb/old-archive/gsb-archive/gsb2000-02-11.html">Please excuse the yak shaving...</a></p>
+</blockquote>
+<p><a href="https://seths.blog/2005/03/dont_shave_that/">https://seths.blog/2005/03/dont_shave_that/</a></p>
+<p>Tooling: <strong>TLC is a Model checker</strong></p>
+<div class="highlight"><pre><span></span><code>brew<span class="w"> </span>install<span class="w"> </span>openjdk
+
+
+java<span class="w"> </span>-version
+
+uv<span class="w"> </span>init<span class="w"> </span>--bare
+uv<span class="w"> </span>add<span class="w"> </span>--dev<span class="w"> </span>tlaplus-cli
+uv<span class="w"> </span>run<span class="w"> </span>tla<span class="w"> </span>--version
+uv<span class="w"> </span>run<span class="w"> </span>tla<span class="w"> </span>tools<span class="w"> </span>install
+
+<span class="nb">export</span><span class="w"> </span><span class="nv">PATH</span><span class="o">=</span><span class="s2">"/opt/homebrew/opt/openjdk/bin:</span><span class="nv">$PATH</span><span class="s2">"</span>
+uv<span class="w"> </span>run<span class="w"> </span>tla<span class="w"> </span>check-java
+</code></pre></div>
+<p>So after all that...</p>
+<p><strong>BankAccount.cfg</strong></p>
+<div class="highlight"><pre><span></span><code><span class="nv">INIT</span><span class="w"> </span><span class="nv">Init</span>
+<span class="k">NEXT</span><span class="w"> </span><span class="k">Next</span>
+<span class="nv">INVARIANT</span><span class="w"> </span><span class="nv">INV001</span>
+</code></pre></div>
+<p><code>uv run tla tlc BankAccount.tla</code></p>
+<div class="highlight"><pre><span></span><code><span class="n">Running</span><span class="w"> </span><span class="n">TLC</span><span class="w"> </span><span class="p">(</span><span class="n">TLC2</span><span class="w"> </span><span class="n">Version</span><span class="w"> </span><span class="mf">2.19</span><span class="w"> </span><span class="n">of</span><span class="w"> </span><span class="mi">08</span><span class="w"> </span><span class="n">August</span><span class="w"> </span><span class="mi">2024</span><span class="w"> </span><span class="p">(</span><span class="n">rev</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span><span class="n">a47802</span><span class="p">))</span><span class="w"> </span><span class="n">on</span><span class="w"> </span><span class="n">BankAccount</span><span class="o">.</span><span class="n">tla</span><span class="w"> </span><span class="o">...</span>
+<span class="n">Starting</span><span class="w"> </span><span class="n">SANY</span><span class="o">...</span>
+<span class="n">Parsing</span><span class="w"> </span><span class="n">file</span><span class="w"> </span><span class="o">/</span><span class="n">Users</span><span class="o">/.../</span><span class="n">BankAccount</span><span class="o">.</span><span class="n">tla</span>
+<span class="n">Semantic</span><span class="w"> </span><span class="n">processing</span><span class="w"> </span><span class="n">of</span><span class="w"> </span><span class="n">module</span><span class="w"> </span><span class="n">Naturals</span>
+<span class="n">Semantic</span><span class="w"> </span><span class="n">processing</span><span class="w"> </span><span class="n">of</span><span class="w"> </span><span class="n">module</span><span class="w"> </span><span class="n">BankAccount</span>
+<span class="n">SANY</span><span class="w"> </span><span class="n">finished</span><span class="o">.</span>
+<span class="n">Finished</span><span class="w"> </span><span class="n">computing</span><span class="w"> </span><span class="n">initial</span><span class="w"> </span><span class="n">states</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="n">distinct</span><span class="w"> </span><span class="n">state</span><span class="w"> </span><span class="n">generated</span>
+<span class="n">Invariant</span><span class="w"> </span><span class="n">INV001</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="n">violated</span><span class="o">.</span>
+
+
+<span class="n">Finished</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="mi">245</span><span class="n">ms</span>
+<span class="err">✖</span><span class="w"> </span><span class="n">Error</span><span class="p">:</span><span class="w"> </span><span class="n">Model</span><span class="w"> </span><span class="n">checking</span><span class="w"> </span><span class="n">failed</span><span class="w"> </span><span class="n">with</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="n">error</span><span class="p">(</span><span class="n">s</span><span class="p">)</span><span class="o">.</span>
+</code></pre></div>
+<blockquote>
+<p>The human has to think logically about happened</p>
+</blockquote>
+<p><em>JAVA_HOME=/opt/homebrew/opt/openjdk uv run tla check-java</em>
+<em>(~/.zprofile or ~/.bashrc) export PATH="/opt/homebrew/opt/openjdk/bin:$PATH"</em></p>
+<h3 id="the-fix-ask-an-llm">The fix - ask an LLM</h3>
+<p>Paste the spec and the TLC error into your favorite LLM and ask for the simplest fix.</p>
+<div class="highlight"><pre><span></span><code><span class="o">----</span> <span class="kr">MODULE</span> <span class="n">BankAccount</span> <span class="o">----</span>
+<span class="n">EXTENDS</span> <span class="n">Naturals</span>
+<span class="n">VARIABLES</span> <span class="n">balance</span>
+
+<span class="n">Init</span> <span class="o">==</span> <span class="n">balance</span> <span class="o">=</span> <span class="mi">0</span>
+
+
+<span class="n">Decrement</span> <span class="o">==</span> <span class="n">balance</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="o">/</span><span class="err">\</span> <span class="n">balance</span><span class="err">'</span> <span class="o">=</span> <span class="n">balance</span> <span class="o">-</span> <span class="mi">1</span>
+<span class="n">Next</span> <span class="o">==</span> <span class="n">Decrement</span> <span class="err">\</span><span class="o">/</span> <span class="n">UNCHANGED</span> <span class="n">balance</span>
+
+<span class="n">INV001</span> <span class="o">==</span> <span class="n">balance</span> <span class="o">&gt;=</span> <span class="mi">0</span>
+<span class="o">====</span>
+</code></pre></div>
+<ul>
+<li>A logical AND is represented with <code>/\</code> so the balance has to be greater than 0 AND then subtract</li>
+<li>A logical OR is represented with <code>\/</code> so the Next step will either decrement or not change the balance</li>
+</ul>
+<p>Therefore we have fixed our model to not decrement when the balance is 0.</p>
+            <aside>
+            <hr/>
+            <nav>
+            <ul class="articles_timeline">
+ 
+                <li class="previous_article">« <a href="https://blog.john-pfeiffer.com/ai-natives-do-not-question-the-gifts-from-the-gods/" title="Previous: AI Natives do not question the gifts from the gods">AI Natives do not question the gifts from the gods</a></li>
+            </ul>
+            </nav>
+            </aside>
+        </div>
+        <section>
+        <div class="span2" style="float:right;font-size:0.9em;">
+ 
+            <h4>Published</h4>
+            <time pubdate="pubdate" datetime="2026-05-02T12:33:00-07:00">May 2, 2026</time>
+            <h4>Category</h4>
+            <a class="category-link" href="/categories.html#ai-ref">ai</a> 
+            <h4>~1582 words</h4>
+            <h4>Tags</h4>
+            <ul class="list-of-tags tags-in-article"> 
+                <li><a href="/tags.html#ai-ref">ai
+                    <span>10</span>
+</a></li>
+                <li><a href="/tags.html#llm-ref">llm
+                    <span>4</span>
+</a></li>
+                <li><a href="/tags.html#qa-ref">qa
+                    <span>2</span>
+</a></li>
+                <li><a href="/tags.html#sdd-ref">sdd
+                    <span>1</span>
+</a></li>
+                <li><a href="/tags.html#tla-ref">tla
+                    <span>1</span>
+</a></li>
+            </ul>
+
+        </div>
+        </section>
+</div>
+</article>
+				</div>
+				<div class="span1"></div>
+			</div>
+		</div>
+    </div>
+<footer>
+<div id="footer">
+    <ul class="footer-content">
+    </ul>
+</div>
+</footer>            <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+    </body>
+</html>
