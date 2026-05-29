@@ -82,7 +82,13 @@
 <li><a href="#multiple-fixes-governance">Multiple Fixes - governance</a></li>
 </ul>
 </li>
-<li><a href="#learning-about-weakness">Learning about Weakness</a><ul>
+<li><a href="#learning-about-weakness">Learning about Weakness</a></li>
+</ul>
+</li>
+<li><a href="#summary">Summary</a></li>
+<li><a href="#appendix-learning-tla">Appendix - Learning TLA+</a><ul>
+<li><a href="#background-on-tla">Background on TLA+</a></li>
+<li><a href="#writing-a-simple-spec">Writing a simple spec</a><ul>
 <li><a href="#breaking-bad">Breaking Bad</a></li>
 <li><a href="#checking-the-spec-enforcing-invariants">Checking the spec - enforcing invariants</a></li>
 <li><a href="#the-fix-ask-an-llm">The fix - ask an LLM</a></li>
@@ -156,7 +162,7 @@
 <p>I gave Claude my six English invariants and asked it to generate a TLA+ specification, absolutely!</p>
 <p>Codex parsed the spec and even ran the model checker for me. Success!</p>
 <h2 id="learning-to-harness-the-invariant-approach">Learning to harness the invariant approach</h2>
-<p>** AI Over-Engineering** happened: the eager LLM generated a spec with sixteen constants including Bayesian posterior probabilities, expected information gain calculations, and an adaptive question engine. Features I hadn't really specified yet.</p>
+<p><strong>AI Over-Engineering</strong> happened: the eager LLM generated a spec with sixteen constants including Bayesian posterior probabilities, expected information gain calculations, and an adaptive question engine. Features I hadn't really specified yet.</p>
 <p>It's a QA best practice, especially with new tools/techniques, to deliberately break something and see the expected failure. This helps avoid vacuous or tautology tests - things that do nothing but "pass/succeed".</p>
 <p>(Thanks to an LLM suggestion of exactly where/what to change)... I changed the test data so a question contributed zero points to any score, INV-005 says every question must modify at least one score, so this should have failed.</p>
 <div class="highlight"><pre><span></span><code>Finished computing initial states: 0 distinct states generated
@@ -191,61 +197,45 @@ Model checking completed. No error has been found.
 <p>So I had to improve my spec</p>
 <div class="highlight"><pre><span></span><code><span class="nx">INV</span><span class="o">-</span><span class="mi">005</span><span class="p">:</span><span class="w"> </span><span class="nx">Every</span><span class="w"> </span><span class="nx">question</span><span class="w"> </span><span class="nx">can</span><span class="w"> </span><span class="nx">change</span><span class="w"> </span><span class="nx">the</span><span class="w"> </span><span class="nx">outcome</span>
 <span class="nx">For</span><span class="w"> </span><span class="nx">each</span><span class="w"> </span><span class="nx">question</span><span class="p">,</span><span class="w"> </span><span class="nx">there</span><span class="w"> </span><span class="nx">exist</span><span class="w"> </span><span class="nx">answer</span><span class="w"> </span><span class="nx">choices</span><span class="w"> </span><span class="nx">that</span><span class="w"> </span><span class="nx">produce</span><span class="w"> </span><span class="nx">different</span><span class="w"> </span><span class="k">final</span><span class="w"> </span><span class="nx">personality</span><span class="w"> </span><span class="nx">types</span><span class="p">.</span>
-<span class="err">````</span>
+</code></pre></div>
+<h1 id="summary">Summary</h1>
+<p>TLA+ is a powerful tool that gives you more predictability and certainty, before you unleash the chaos of LLMs.</p>
+<p>LLMs "raise the floor" so anyone can use invariants to build reliable systems (instead of leaping headfirst into vibe coding an unmaintainable buggy mess). The system should leverage information theory, not be a victim of the noise.</p>
+<p>And LLMs are not only translators, they are tutors to help you improve on the unique human role of specifying the Intent.</p>
+<p>Of course, also "trust but verify": Nothing tested so no errors found. Reward hacking. Over-engineering. This all means the human is ultimately the judge - less time spent on the How and more on "is this the right What"?</p>
+<h1 id="appendix-learning-tla">Appendix - Learning TLA+</h1>
+<h2 id="background-on-tla">Background on TLA+</h2>
+<p>"Temporal Logic of Actions", TLA+ is a (formal specification ) language for modeling software, based on temporal logic and set theory.</p>
+<ul>
+<li><a href="https://lamport.azurewebsites.net/tla/high-level-view.html">https://lamport.azurewebsites.net/tla/high-level-view.html</a></li>
+<li><a href="https://www.wired.com/2013/01/code-bugs-programming-why-we-need-specs/">https://www.wired.com/2013/01/code-bugs-programming-why-we-need-specs/</a></li>
+</ul>
+<p>Basically: Initial states -&gt; Allowed transitions -&gt; Properties to verify</p>
+<p>It lets you describe:</p>
+<ul>
+<li>States of a system</li>
+<li>Transitions between states</li>
+<li>Safety properties ("nothing bad happens")</li>
+<li>Liveness properties ("something good eventually happens")</li>
+</ul>
+<p>Tools can then check the specification and mathematically verify its properties.</p>
+<p>TLA+ is used in industry by AWS, Microsoft, and other places requiring extreme reliability.</p>
+<p><em>It’s especially popular for consensus algorithms, distributed protocols, locking systems, etc.</em></p>
+<ul>
+<li><a href="https://lamport.azurewebsites.net/tla/industrial-use.html">https://lamport.azurewebsites.net/tla/industrial-use.html</a></li>
+<li><a href="https://lamport.azurewebsites.net/tla/formal-methods-amazon.pdf">https://lamport.azurewebsites.net/tla/formal-methods-amazon.pdf</a></li>
+<li><a href="https://cacm.acm.org/research/how-amazon-web-services-uses-formal-methods/">https://cacm.acm.org/research/how-amazon-web-services-uses-formal-methods/</a></li>
+<li><a href="https://conf.tlapl.us/2019/yannickwelsch/">https://conf.tlapl.us/2019/yannickwelsch/</a> (Elasticsearch)</li>
+</ul>
+<h2 id="writing-a-simple-spec">Writing a simple spec</h2>
+<p>What if you wanted to ensure a bank account never went below 0...</p>
+<div class="highlight"><pre><span></span><code><span class="o">----</span> <span class="kr">MODULE</span> <span class="n">BankAccount</span> <span class="o">----</span>
+<span class="n">EXTENDS</span> <span class="n">Naturals</span>
+<span class="n">VARIABLES</span> <span class="n">balance</span>
 
-<span class="err">#</span><span class="w"> </span><span class="nx">Summary</span>
-
-<span class="nx">TLA</span><span class="o">+</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="nx">a</span><span class="w"> </span><span class="nx">powerful</span><span class="w"> </span><span class="nx">tool</span><span class="w"> </span><span class="nx">that</span><span class="w"> </span><span class="nx">gives</span><span class="w"> </span><span class="nx">you</span><span class="w"> </span><span class="nx">more</span><span class="w"> </span><span class="nx">predictability</span><span class="w"> </span><span class="k">and</span><span class="w"> </span><span class="nx">certainty</span><span class="p">,</span><span class="w"> </span><span class="nx">before</span><span class="w"> </span><span class="nx">you</span><span class="w"> </span><span class="nx">unleash</span><span class="w"> </span><span class="nx">the</span><span class="w"> </span><span class="nx">chaos</span><span class="w"> </span><span class="nx">of</span><span class="w"> </span><span class="nx">LLMs</span><span class="p">.</span>
-
-<span class="nx">LLMs</span><span class="w"> </span><span class="s">"raise the floor"</span><span class="w"> </span><span class="nx">so</span><span class="w"> </span><span class="nx">you</span><span class="w"> </span><span class="nx">can</span><span class="w"> </span><span class="nx">use</span><span class="w"> </span><span class="nx">invariants</span><span class="p">,</span><span class="w"> </span><span class="k">not</span><span class="w"> </span><span class="nx">just</span><span class="w"> </span><span class="nx">generate</span><span class="w"> </span><span class="nx">confident</span><span class="w"> </span><span class="nx">slop</span><span class="p">.</span><span class="w"> </span><span class="nx">The</span><span class="w"> </span><span class="nx">system</span><span class="w"> </span><span class="nx">should</span><span class="w"> </span><span class="nx">leverage</span><span class="w"> </span><span class="nx">information</span><span class="w"> </span><span class="nx">theory</span><span class="p">,</span><span class="w"> </span><span class="k">not</span><span class="w"> </span><span class="nx">be</span><span class="w"> </span><span class="nx">a</span><span class="w"> </span><span class="nx">victim</span><span class="w"> </span><span class="nx">of</span><span class="w"> </span><span class="nx">the</span><span class="w"> </span><span class="nx">noise</span><span class="p">.</span>
-
-<span class="nx">And</span><span class="w"> </span><span class="nx">LLMs</span><span class="w"> </span><span class="nx">are</span><span class="w"> </span><span class="k">not</span><span class="w"> </span><span class="nx">only</span><span class="w"> </span><span class="nx">translators</span><span class="p">,</span><span class="w"> </span><span class="nx">they</span><span class="w"> </span><span class="nx">are</span><span class="w"> </span><span class="nx">tutors</span><span class="w"> </span><span class="nx">to</span><span class="w"> </span><span class="nx">help</span><span class="w"> </span><span class="nx">you</span><span class="w"> </span><span class="nx">improve</span><span class="w"> </span><span class="nx">on</span><span class="w"> </span><span class="nx">the</span><span class="w"> </span><span class="nx">unique</span><span class="w"> </span><span class="nx">human</span><span class="w"> </span><span class="nx">role</span><span class="w"> </span><span class="nx">of</span><span class="w"> </span><span class="nx">specifying</span><span class="w"> </span><span class="nx">the</span><span class="w"> </span><span class="nx">Intent</span><span class="p">.</span>
-
-<span class="nx">Of</span><span class="w"> </span><span class="nx">course</span><span class="p">,</span><span class="w"> </span><span class="nx">also</span><span class="w"> </span><span class="s">"trust but verify"</span><span class="p">:</span><span class="w"> </span><span class="nx">Nothing</span><span class="w"> </span><span class="nx">tested</span><span class="w"> </span><span class="nx">so</span><span class="w"> </span><span class="nx">no</span><span class="w"> </span><span class="nx">errors</span><span class="w"> </span><span class="nx">found</span><span class="p">.</span><span class="w"> </span><span class="nx">Reward</span><span class="w"> </span><span class="nx">hacking</span><span class="p">.</span><span class="w"> </span><span class="nx">Over</span><span class="o">-</span><span class="nx">engineering</span><span class="p">.</span><span class="w"> </span><span class="nx">This</span><span class="w"> </span><span class="nx">all</span><span class="w"> </span><span class="nx">means</span><span class="w"> </span><span class="nx">the</span><span class="w"> </span><span class="nx">human</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="nx">ultimately</span><span class="w"> </span><span class="nx">the</span><span class="w"> </span><span class="nx">judge</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nx">less</span><span class="w"> </span><span class="nx">time</span><span class="w"> </span><span class="nx">spent</span><span class="w"> </span><span class="nx">on</span><span class="w"> </span><span class="nx">the</span><span class="w"> </span><span class="nx">How</span><span class="w"> </span><span class="k">and</span><span class="w"> </span><span class="nx">more</span><span class="w"> </span><span class="nx">on</span><span class="w"> </span><span class="s">"is this the right What"</span><span class="p">?</span>
-
-
-<span class="err">#</span><span class="w"> </span><span class="nx">Appendix</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nx">Learning</span><span class="w"> </span><span class="nx">TLA</span><span class="o">+</span>
-
-<span class="err">##</span><span class="w"> </span><span class="nx">Background</span><span class="w"> </span><span class="nx">on</span><span class="w"> </span><span class="nx">TLA</span><span class="o">+</span>
-
-<span class="s">"Temporal Logic of Actions"</span><span class="p">,</span><span class="w"> </span><span class="nx">TLA</span><span class="o">+</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="nx">a</span><span class="w"> </span><span class="p">(</span><span class="nx">formal</span><span class="w"> </span><span class="nx">specification</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="nx">language</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="nx">modeling</span><span class="w"> </span><span class="nx">software</span><span class="p">,</span><span class="w"> </span><span class="nx">based</span><span class="w"> </span><span class="nx">on</span><span class="w"> </span><span class="nx">temporal</span><span class="w"> </span><span class="nx">logic</span><span class="w"> </span><span class="k">and</span><span class="w"> </span><span class="nx">set</span><span class="w"> </span><span class="nx">theory</span><span class="p">.</span>
-
-<span class="o">-</span><span class="w"> </span><span class="p">&lt;</span><span class="nx">https</span><span class="p">:</span><span class="c1">//lamport.azurewebsites.net/tla/high-level-view.html&gt;</span>
-<span class="o">-</span><span class="w"> </span><span class="p">&lt;</span><span class="nx">https</span><span class="p">:</span><span class="c1">//www.wired.com/2013/01/code-bugs-programming-why-we-need-specs/&gt;</span>
-
-<span class="nx">Basically</span><span class="p">:</span><span class="w"> </span><span class="nx">Initial</span><span class="w"> </span><span class="nx">states</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="nx">Allowed</span><span class="w"> </span><span class="nx">transitions</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="nx">Properties</span><span class="w"> </span><span class="nx">to</span><span class="w"> </span><span class="nx">verify</span>
-
-<span class="nx">It</span><span class="w"> </span><span class="nx">lets</span><span class="w"> </span><span class="nx">you</span><span class="w"> </span><span class="nx">describe</span><span class="p">:</span>
-
-<span class="o">-</span><span class="w"> </span><span class="nx">States</span><span class="w"> </span><span class="nx">of</span><span class="w"> </span><span class="nx">a</span><span class="w"> </span><span class="nx">system</span>
-<span class="o">-</span><span class="w"> </span><span class="nx">Transitions</span><span class="w"> </span><span class="nx">between</span><span class="w"> </span><span class="nx">states</span>
-<span class="o">-</span><span class="w"> </span><span class="nx">Safety</span><span class="w"> </span><span class="nx">properties</span><span class="w"> </span><span class="p">(</span><span class="s">"nothing bad happens"</span><span class="p">)</span>
-<span class="o">-</span><span class="w"> </span><span class="nx">Liveness</span><span class="w"> </span><span class="nx">properties</span><span class="w"> </span><span class="p">(</span><span class="s">"something good eventually happens"</span><span class="p">)</span>
-
-<span class="nx">Tools</span><span class="w"> </span><span class="nx">can</span><span class="w"> </span><span class="k">then</span><span class="w"> </span><span class="nx">check</span><span class="w"> </span><span class="nx">the</span><span class="w"> </span><span class="nx">specification</span><span class="w"> </span><span class="k">and</span><span class="w"> </span><span class="nx">mathematically</span><span class="w"> </span><span class="nx">verify</span><span class="w"> </span><span class="nx">its</span><span class="w"> </span><span class="nx">properties</span><span class="p">.</span>
-
-<span class="nx">TLA</span><span class="o">+</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="nx">used</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="nx">industry</span><span class="w"> </span><span class="nx">by</span><span class="w"> </span><span class="nx">AWS</span><span class="p">,</span><span class="w"> </span><span class="nx">Microsoft</span><span class="p">,</span><span class="w"> </span><span class="k">and</span><span class="w"> </span><span class="nx">other</span><span class="w"> </span><span class="nx">places</span><span class="w"> </span><span class="nx">requiring</span><span class="w"> </span><span class="nx">extreme</span><span class="w"> </span><span class="nx">reliability</span><span class="p">.</span>
-
-<span class="o">*</span><span class="nx">It</span><span class="err">’</span><span class="nx">s</span><span class="w"> </span><span class="nx">especially</span><span class="w"> </span><span class="nx">popular</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="nx">consensus</span><span class="w"> </span><span class="nx">algorithms</span><span class="p">,</span><span class="w"> </span><span class="nx">distributed</span><span class="w"> </span><span class="nx">protocols</span><span class="p">,</span><span class="w"> </span><span class="nx">locking</span><span class="w"> </span><span class="nx">systems</span><span class="p">,</span><span class="w"> </span><span class="nx">etc</span><span class="p">.</span><span class="o">*</span>
-
-<span class="o">-</span><span class="w"> </span><span class="p">&lt;</span><span class="nx">https</span><span class="p">:</span><span class="c1">//lamport.azurewebsites.net/tla/industrial-use.html&gt;</span>
-<span class="o">-</span><span class="w"> </span><span class="p">&lt;</span><span class="nx">https</span><span class="p">:</span><span class="c1">//lamport.azurewebsites.net/tla/formal-methods-amazon.pdf&gt;</span>
-<span class="o">-</span><span class="w"> </span><span class="p">&lt;</span><span class="nx">https</span><span class="p">:</span><span class="c1">//cacm.acm.org/research/how-amazon-web-services-uses-formal-methods/&gt;</span>
-<span class="o">-</span><span class="w"> </span><span class="p">&lt;</span><span class="nx">https</span><span class="p">:</span><span class="c1">//conf.tlapl.us/2019/yannickwelsch/&gt; (Elasticsearch)</span>
-
-
-<span class="err">##</span><span class="w"> </span><span class="nx">Writing</span><span class="w"> </span><span class="nx">a</span><span class="w"> </span><span class="nx">simple</span><span class="w"> </span><span class="nx">spec</span>
-
-<span class="nx">What</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="nx">you</span><span class="w"> </span><span class="nx">wanted</span><span class="w"> </span><span class="nx">to</span><span class="w"> </span><span class="nx">ensure</span><span class="w"> </span><span class="nx">a</span><span class="w"> </span><span class="nx">bank</span><span class="w"> </span><span class="nx">account</span><span class="w"> </span><span class="nx">never</span><span class="w"> </span><span class="nx">went</span><span class="w"> </span><span class="nx">below</span><span class="w"> </span><span class="mi">0</span><span class="o">...</span>
-
-<span class="err">```</span><span class="nx">tla</span>
-<span class="o">----</span><span class="w"> </span><span class="nx">MODULE</span><span class="w"> </span><span class="nx">BankAccount</span><span class="w"> </span><span class="o">----</span>
-<span class="nx">EXTENDS</span><span class="w"> </span><span class="nx">Naturals</span>
-<span class="nx">VARIABLES</span><span class="w"> </span><span class="nx">balance</span>
-
-<span class="nx">Init</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nx">balance</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">0</span>
-<span class="nx">Next</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nx">UNCHANGED</span><span class="w"> </span><span class="nx">balance</span>
-<span class="nx">INV001</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nx">balance</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="mi">0</span>
+<span class="n">Init</span> <span class="o">==</span> <span class="n">balance</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">Next</span> <span class="o">==</span> <span class="n">UNCHANGED</span> <span class="n">balance</span>
+<span class="n">INV001</span> <span class="o">==</span> <span class="n">balance</span> <span class="o">&gt;=</span> <span class="mi">0</span>
 <span class="o">====</span>
 </code></pre></div>
 <ul>
@@ -351,7 +341,7 @@ uv<span class="w"> </span>run<span class="w"> </span>tla<span class="w"> </span>
             <time pubdate="pubdate" datetime="2026-05-02T12:33:00-07:00">May 2, 2026</time>
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#ai-ref">ai</a> 
-            <h4>~1582 words</h4>
+            <h4>~1591 words</h4>
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article"> 
                 <li><a href="/tags.html#ai-ref">ai
