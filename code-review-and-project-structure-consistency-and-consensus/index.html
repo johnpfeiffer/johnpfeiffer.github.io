@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en-US">
+    <head>
+        <meta charset="utf-8"> 
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="author" content="john pfeiffer" />
+        <meta name="copyright" content="john pfeiffer" />
+
+<meta name="keywords" content="management, manager, code review, architecture, leadership, " />
+        <title>Code Review and Project Structure - Consistency and Consensus  · johnpfeiffer
+</title>
+        <!--link href="https://cdn-images.mailchimp.com/embedcode/slim-081711.css" rel="stylesheet" type="text/css"-->
+        <!--link href="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css" rel="stylesheet"-->
+        <link href="https://blog.john-pfeiffer.com/theme/css/bootstrap-combined.min.css" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="https://blog.john-pfeiffer.com/theme/css/style.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="https://blog.john-pfeiffer.com/theme/css/solarizedlight.css" media="screen">
+        <link rel="shortcut icon" href="https://blog.john-pfeiffer.com/theme/images/favicon.ico" type="image/x-icon" />
+        <link rel="apple-touch-icon" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon.png" />
+        <link rel="apple-touch-icon" sizes="57x57" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-57x57.png" />
+        <link rel="apple-touch-icon" sizes="72x72" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-72x72.png" />
+        <link rel="apple-touch-icon" sizes="114x114" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-114x114.png" />
+        <link rel="apple-touch-icon" sizes="144x144" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-144x144.png" />
+        <link rel="icon" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-144x144.png" />
+    </head>
+    <body>
+	<div id="content-sans-footer">
+        <div class="dropdown-backdrop">
+
+			<div class="navbar navbar-static-top">
+				<div class="navbar-inner">
+					<div class="container">
+						<a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+							<span class="icon-bar"></span>
+							<span class="icon-bar"></span>
+							<span class="icon-bar"></span>
+						</a>
+						<a class="brand" href="https://blog.john-pfeiffer.com/"><span class=site-name>johnpfeiffer</span></a>
+						<div class="nav-collapse collapse">
+							<ul class="nav pull-right top-menu">
+								<li ><a href="https://blog.john-pfeiffer.com">Home</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/engineering-people-managers/">Engineering (People) Managers</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/john-likes/">John Likes</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/software-engineer-favorites/">Software Engineer Favorites</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/categories.html">Categories</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/tags.html">Tags</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/archives.html">Archives</a></li>
+								<li><form class="navbar-search" action="https://blog.john-pfeiffer.com/search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="container-fluid">
+			<div class="row-fluid">
+				<div class="span1"></div>
+				<div class="span10">
+<article>
+<div class="row-fluid">
+    <header class="page_header span10 offset2">
+    <h1><a href="https://blog.john-pfeiffer.com/code-review-and-project-structure-consistency-and-consensus/"> Code Review and Project Structure - Consistency and Consensus  </a></h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+    <div class="span2 table-of-content">
+        <nav>
+        <h4>Contents</h4>
+        <div class="toc">
+<ul>
+<li><a href="#managers-own-shared-processes">Managers Own Shared Processes</a><ul>
+<li><a href="#code-review">Code Review</a></li>
+</ul>
+</li>
+<li><a href="#a-philosophical-question-why-review">A philosophical question - Why Review</a><ul>
+<li><a href="#separation-of-concerns">Separation of concerns</a></li>
+<li><a href="#some-successful-strategies">Some Successful Strategies</a></li>
+<li><a href="#communication">Communication</a></li>
+</ul>
+</li>
+<li><a href="#template-for-doing-a-code-review">Template for Doing a Code Review</a><ul>
+<li><a href="#a-guide-for-doing-a-review">A guide for doing a review</a><ul>
+<li><a href="#priority-order">Priority order</a></li>
+<li><a href="#pragmatism">Pragmatism</a></li>
+<li><a href="#correctness-and-safety">Correctness and safety</a></li>
+<li><a href="#maintainability">Maintainability</a></li>
+</ul>
+</li>
+<li><a href="#shorthand-list-of-concepts-to-suggest">Shorthand list of Concepts to Suggest</a><ul>
+<li><a href="#example-format-for-review-comments">Example format for review comments</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#code-project-layout">Code Project Layout</a><ul>
+<li><a href="#hexagonal-architecture">Hexagonal Architecture</a></li>
+<li><a href="#concrete-project-layout-in-go">Concrete Project Layout in Go</a></li>
+</ul>
+</li>
+<li><a href="#more-resources">More Resources</a></li>
+</ul>
+</div>
+        </nav>
+    </div>
+    <div class="span8 article-content">
+
+            
+<h1 id="managers-own-shared-processes">Managers Own Shared Processes</h1>
+<p>Messy, ambiguous, intersections of people and technology is exactly the domain of a great Engineering Manager. Caring about how people work together, understanding the organization as a system, and prioritizing business outcomes.</p>
+<p>It may take experience and serious people skills to understand the technical domain and get consensus, buy-in, and even "disagree and commit".</p>
+<h2 id="code-review">Code Review</h2>
+<p>Code Review Guidelines assist a team to focus on solving the hard problems instead of side quests and possible distraction in Pull Request Reviews.</p>
+<p>Codebases transition ownership between individuals and teams over time, having a shared understanding and approach makes all of our work easier.</p>
+<p>Creating a new project should be low friction and easily and automatically leverage existing tools (e.g. CI/CD).</p>
+<p>Also, Code Review can not only be a silent inefficiency in people hours, but could be a real bottleneck in your SDLC and release frequency.</p>
+<ul>
+<li>Your <em>goal</em> is reduced friction and increased value delivery</li>
+<li>Your <em>output</em> is an authoritative documented process</li>
+</ul>
+<p><em>Leverage delegation to the people most invested and experienced, and have a schedule/process for revision and improvements =)</em></p>
+<p>One thing I've found really helps is "standing on the shoulders of giants": prior art and approaches rather than re-inventing the wheel.</p>
+<p>As an example, Golang is a pragmatic production language: <code>gofmt</code> as a built in tool and concept standardizes the style removing a whole class of discussions ("tabs vs spaces").</p>
+<h1 id="a-philosophical-question-why-review">A philosophical question - Why Review</h1>
+<blockquote>
+<p>Why do we do Pull Request Reviews?</p>
+</blockquote>
+<p>I ask many engineers this in 1:1s, some of the most common (and good) answers:</p>
+<ul>
+<li>to find bugs</li>
+<li>to prevent issues in production</li>
+<li>to call out missing test coverage</li>
+<li>to raise concerns about coding patterns</li>
+<li>to have consistent coding style</li>
+<li>to educate others on best practices</li>
+<li>shared understanding of the codebases</li>
+</ul>
+<p>I somewhat cheekily provide my zinger: <strong>"To merge the code and ship something valuable"</strong></p>
+<p>When there is a bug affecting a User, or some incredibly valuable feature that needs to go out, we should consider the goal of our org/group.</p>
+<h2 id="separation-of-concerns">Separation of concerns</h2>
+<p>Overloading the Review process may mean we lose sight of our true goal, or that the review burden becomes so high people instinctively do less or do it begrudgingly.</p>
+<ul>
+<li>we need automated tests (dev, staging, synthetic for production) to verify correctness</li>
+<li>we use observability to monitor production - the "unknown unknowns"</li>
+<li>we can and should use tools like <strong>linters</strong> for automatically enforcing shared code style</li>
+<li>we can use pair programming or lunch and learns or dedicated study time to learn codebases and coding patterns</li>
+</ul>
+<p>Our work is to help others get their work done.</p>
+<h2 id="some-successful-strategies">Some Successful Strategies</h2>
+<p>There are a number of things I've learned (thank you all previous co-workers and the internet!) and used successfully:</p>
+<ul>
+<li>Small Pull Requests: less to review so better focus, less change <strong>usually</strong> means less risk</li>
+<li>
+<ul>
+<li><a href="https://robertheaton.com/2015/10/26/why-and-how-to-make-smaller-pull-requests/">https://robertheaton.com/2015/10/26/why-and-how-to-make-smaller-pull-requests/</a></li>
+</ul>
+</li>
+<li>TestDrivenDevelopment: "Red" is first only add tests that fail, "Green" is doing the minimum code changes to make the tests pass</li>
+<li>Heuristics for Quickly Scanning: <a href="https://robertheaton.com/2014/06/20/code-review-without-your-eyes/">https://robertheaton.com/2014/06/20/code-review-without-your-eyes/</a></li>
+<li>Sandi Metz on "code smells" <a href="https://www.youtube.com/watch?v=MksJTtt7jS4&amp;t=93s">https://www.youtube.com/watch?v=MksJTtt7jS4&amp;t=93s</a></li>
+</ul>
+<h2 id="communication">Communication</h2>
+<p>Given that our goal is to unblock a team mate from shipping something valuable for the Users/Customers/Company, it's worthwhile to ensure our interactions are truly helpful.</p>
+<p>The core of it is: clarity is kindness, recognize you are communicating with another being, not just "fixing a code problem".</p>
+<p>I have found the following articles to do a great job and defer to them:</p>
+<ul>
+<li><a href="https://web.archive.org/web/20200111065923/https://www.alexandra-hill.com/2018/06/25/the-art-of-giving-and-receiving-code-reviews/">Alex Hill's Giving and Receiving Code Reviews</a></li>
+<li><a href="https://web.hypothes.is/blog/code-review-in-remote-teams/">https://web.hypothes.is/blog/code-review-in-remote-teams/</a></li>
+<li><a href="https://github.com/google/eng-practices/blob/master/review/reviewer/comments.md">https://github.com/google/eng-practices/blob/master/review/reviewer/comments.md</a></li>
+</ul>
+<h1 id="template-for-doing-a-code-review">Template for Doing a Code Review</h1>
+<p>Here's Google's, but read onward for my take ;)</p>
+<ul>
+<li>
+<p><a href="https://github.com/google/eng-practices/blob/master/review/reviewer/looking-for.md">https://github.com/google/eng-practices/blob/master/review/reviewer/looking-for.md</a></p>
+</li>
+<li>
+<p><a href="https://talks.golang.org/2014/names.slide">https://talks.golang.org/2014/names.slide</a></p>
+</li>
+<li><a href="https://dave.cheney.net/practical-go/presentations/qcon-china.html#_avoid_package_names_like_base_common_or_util">https://dave.cheney.net/practical-go/presentations/qcon-china.html#_avoid_package_names_like_base_common_or_util</a></li>
+</ul>
+<h2 id="a-guide-for-doing-a-review">A guide for doing a review</h2>
+<ol>
+<li>Scan for structure, areas of interest, obvious/large concerns (i.e. separation of Infra and Domain)</li>
+<li>Consider intent, confirm source of truth and canonical documents</li>
+<li>Is this a moment to escalate, or "end early and reframe"?</li>
+<li>Spend X minutes writing review comments</li>
+<li>Pause: double check prioritization, Communicating well </li>
+<li>Spend X minutes writing review comments</li>
+<li>Decision: do you approve or just directly notify the author you have done a review</li>
+</ol>
+<h3 id="priority-order">Priority order</h3>
+<ul>
+<li>Understood intent?</li>
+<li>Correctness/security/operational risks?</li>
+<li>Context needed before requiring changes?</li>
+<li>Maintainability/readability/test improvements?</li>
+</ul>
+<h3 id="pragmatism">Pragmatism</h3>
+<ul>
+<li>avoid comments/suggestions that lead to rewriting everything</li>
+<li>avoid over-indexing on style</li>
+<li>identify the smallest safe fix</li>
+<li>ask whether context changes the decision</li>
+</ul>
+<h3 id="correctness-and-safety">Correctness and safety</h3>
+<ul>
+<li>Edge cases</li>
+<li>Error handling</li>
+<li>Auth/authz</li>
+<li>Nil/Null/zero-value behavior</li>
+<li>Ordering assumptions and logical dependency</li>
+<li>Production operability</li>
+<li>Timeouts</li>
+<li>Data races</li>
+<li>Cancellation, Clean Exits, and Partial failures</li>
+<li>Retries and Idempotence</li>
+<li>Backpressure</li>
+<li>Observability</li>
+<li>Data consistency, Transaction boundaries, Atomicity</li>
+</ul>
+<h3 id="maintainability">Maintainability</h3>
+<ul>
+<li>Separation of concerns</li>
+<li>Cohesion</li>
+<li>Locality of behavior</li>
+<li>Interface size</li>
+<li>Readability</li>
+<li>YAGNI / over-abstraction</li>
+</ul>
+<h2 id="shorthand-list-of-concepts-to-suggest">Shorthand list of Concepts to Suggest</h2>
+<ul>
+<li>deterministic, least surprise</li>
+<li>idempotent, copy vs dependency/mutation</li>
+<li>boundary, contract, pipeline, modeling (OO and “semantics”), impedance mismatch</li>
+<li>modular, decompose</li>
+<li>locality, cohesion</li>
+<li>encapsulation, abstraction, distraction by details</li>
+<li>open-close principle, ripple effect</li>
+<li>composition</li>
+<li>KISS, DRY (rule of 3 or 5?)</li>
+<li>single responsibility, separation of concerns</li>
+<li>least privilege, conservative defaults, god object</li>
+<li>nil and null and zero values</li>
+<li>fail fast, “outdent”</li>
+<li>atomic/transactions - cancellation/failure mode, partial, split brain</li>
+<li>race condition, out of order</li>
+<li>unbounded growth/exploding work</li>
+<li>readability, YAGNI, prefer explicit</li>
+<li>observability, logging/debugging, causality</li>
+<li>TestDrivenDesign (TDD) and BehaviorDrivenDevelopment (BDD)</li>
+</ul>
+<h3 id="example-format-for-review-comments">Example format for review comments</h3>
+<div class="highlight"><pre><span></span><code>Blocking (correctness): no test coverage
+Suggestion: have a clear set of test cases focused on happy path and critical edge cases, consider TDD
+</code></pre></div>
+<div class="highlight"><pre><span></span><code>Non-Blocking (observability): no log statements
+Suggestion: a few log statements of concrete progress in the workflow and safe-to-log Identifiers will make any future debugging a lot easier 
+</code></pre></div>
+<h1 id="code-project-layout">Code Project Layout</h1>
+<blockquote>
+<p>What goes Where?</p>
+</blockquote>
+<p>A complement or almost pre-cursor to code review is which files go in which places in a code repository.</p>
+<p>A manager can and should facilitate the understanding and standardization of common structure(s) that clarify and speed things up.  </p>
+<p><strong>Principles</strong></p>
+<ul>
+<li>Should follow a convention</li>
+<li>Should be easy to read and understand</li>
+<li>Should be easy to maintain</li>
+<li>
+<ul>
+<li>including easy to test (i.e. empirically prove correctness, confidence of expected behavior in production)</li>
+</ul>
+</li>
+<li>Should be re-usable</li>
+</ul>
+<h2 id="hexagonal-architecture">Hexagonal Architecture</h2>
+<p>Where something goes should not be arbitrary, it should have a <strong>Why</strong>.</p>
+<p>Having a well reasoned theory behind the file layout approach helps guide all the numerous decisions in a logical and consistent way.</p>
+<p>Consider the benefits of this framing <a href="https://en.wikipedia.org/wiki/Hexagonal_architecture_(software)">https://en.wikipedia.org/wiki/Hexagonal_architecture_(software)</a></p>
+<blockquote>
+<p>Applications work like this: Events arrive from the outside world. The transformer converts it into a usable procedure call or message and passes it to the application. The application is blissfully ignorant of the nature of the input device </p>
+</blockquote>
+<ul>
+<li><em><a href="https://wiki.c2.com/?HexagonalArchitecture">https://wiki.c2.com/?HexagonalArchitecture</a> (Alistair Cockburn)</em></li>
+</ul>
+<div class="highlight"><pre><span></span><code>        [UI]        [CLI]        [Database]        [Email]        [Logging]
+          \           |              |               |              /
+           \          |              |               |             /
+            v         v              v               v            v
+
+      +----------------------------------------------------------------+
+      |                            FRAMEWORK                           |
+      |  HTTP, routing, persistence libraries, queues, SDKs, vendors    |
+      |                                                                |
+      |   +--------------------------------------------------------+   |
+      |   |                      APPLICATION                       |   |
+      |   |        use cases, commands, workflows, orchestration    |   |
+      |   |                                                        |   |
+      |   |   +------------------------------------------------+   |   |
+      |   |   |                     DOMAIN                     |   |   |
+      |   |   |       entities, value objects, domain logic     |   |   |
+      |   |   |                                                |   |   |
+      |   |   |        +------------------------------+        |   |   |
+      |   |   |        |         CORE DOMAIN          |        |   |   |
+      |   |   |        |   key business rules         |        |   |   |
+      |   |   |        |   invariants                 |        |   |   |
+      |   |   |        +------------------------------+        |   |   |
+      |   |   +------------------------------------------------+   |   |
+      |   +--------------------------------------------------------+   |
+      +----------------------------------------------------------------+
+
+             adapters talk inward through ports / interfaces
+</code></pre></div>
+<p>If you’re just writing a one-off script with 3 files, maybe your project/repo can be "flat" - but the general consensus is that this is not good for anything of complexity.</p>
+<h2 id="concrete-project-layout-in-go">Concrete Project Layout in Go</h2>
+<p>Top-level directories:</p>
+<ul>
+<li><code>cmd</code> (for your binaries) </li>
+<li><code>pkg</code> (for your packages)</li>
+<li><code>clients</code> (for external dependencies)</li>
+</ul>
+<blockquote>
+<p>Group by context, not generic functionality.</p>
+</blockquote>
+<ul>
+<li>Mocks: shared subpackage</li>
+</ul>
+<p>All other project files (fixtures, resources, docs, Docker, etc) in the root dir of your project.</p>
+<p>The <code>main</code> package initialises and ties everything together.</p>
+<p><em>Avoid global scope and init()</em></p>
+<ul>
+<li>
+<p><a href="https://www.youtube.com/watch?v=oL6JBUk6tj0&amp;t=681s">GopherCon 2018 - How do you structure your Go Apps by Kat Zien</a></p>
+</li>
+<li>
+<p><a href="https://youtu.be/3gQa1LWwuzk?si=RiyzUL_37Vn9D2DH&amp;t=503">GoLab 2018 - DataDog Project layout patterns in Go by Massimiliano Pippi</a></p>
+</li>
+<li>
+<p>A standard/template people can leverage: <strong><a href="https://github.com/golang-standards/project-layout">https://github.com/golang-standards/project-layout</a></strong></p>
+</li>
+</ul>
+<h1 id="more-resources">More Resources</h1>
+<ul>
+<li><a href="https://www.educative.io/blog/how-to-build-maintainable-web-apps-with-hexagonal-architecture">https://www.educative.io/blog/how-to-build-maintainable-web-apps-with-hexagonal-architecture</a></li>
+</ul>
+            <aside>
+            <hr/>
+            <nav>
+            <ul class="articles_timeline">
+ 
+                <li class="previous_article">« <a href="https://blog.john-pfeiffer.com/monkeys-stealing-spoons-why-managers-struggle-and-what-to-do-about-it/" title="Previous: Monkeys Stealing Spoons - Why managers struggle and what to do about it">Monkeys Stealing Spoons - Why managers struggle and what to do about it</a></li>
+ 
+                <li class="next_article"><a href="https://blog.john-pfeiffer.com/front-line-manager-or-director-managing-people-managers/" title="Next: Front Line Manager or Director - Managing People Managers">Front Line Manager or Director - Managing People Managers</a> »</li>
+            </ul>
+            </nav>
+            </aside>
+        </div>
+        <section>
+        <div class="span2" style="float:right;font-size:0.9em;">
+ 
+            <h4>Published</h4>
+            <time pubdate="pubdate" datetime="2022-06-04T11:22:00-07:00">Jun 4, 2022</time>
+            <h4>Category</h4>
+            <a class="category-link" href="/categories.html#leadership-ref">leadership</a> 
+            <h4>~1215 words</h4>
+            <h4>Tags</h4>
+            <ul class="list-of-tags tags-in-article"> 
+                <li><a href="/tags.html#architecture-ref">architecture
+                    <span>2</span>
+</a></li>
+                <li><a href="/tags.html#code-review-ref">code review
+                    <span>1</span>
+</a></li>
+                <li><a href="/tags.html#management-ref">management
+                    <span>15</span>
+</a></li>
+                <li><a href="/tags.html#manager-ref">manager
+                    <span>2</span>
+</a></li>
+            </ul>
+
+        </div>
+        </section>
+</div>
+</article>
+				</div>
+				<div class="span1"></div>
+			</div>
+		</div>
+    </div>
+<footer>
+<div id="footer">
+    <ul class="footer-content">
+    </ul>
+</div>
+</footer>            <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+    </body>
+</html>
