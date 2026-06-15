@@ -68,7 +68,11 @@
         <h4>Contents</h4>
         <div class="toc">
 <ul>
-<li><a href="#create-copy-truncate">create copy truncate</a></li>
+<li><a href="#create-copy-truncate">create copy truncate</a><ul>
+<li><a href="#long-prompts-and-eof">long prompts and EOF</a></li>
+<li><a href="#for-loops">for loops</a></li>
+</ul>
+</li>
 <li><a href="#ls-lists-files-in-a-directory">ls lists files in a directory</a><ul>
 <li><a href="#list-directories">list directories</a></li>
 <li><a href="#counting-the-listings">counting the listings</a></li>
@@ -83,11 +87,9 @@
 </ul>
 </li>
 <li><a href="#grep">grep</a><ul>
-<li><a href="#grep-parameters-and-examples-explained">grep parameters and examples explained</a><ul>
+<li><a href="#grep-parameters-and-examples-explained">grep parameters and examples explained</a></li>
 <li><a href="#useful-parameters-for-grep">Useful parameters for grep</a></li>
 <li><a href="#grep-files-without-match">grep files without match</a></li>
-</ul>
-</li>
 </ul>
 </li>
 <li><a href="#cut">cut</a><ul>
@@ -105,7 +107,7 @@
 
             
 <p>There are amazing linux command line utilities that make finding and manpiulating files very easy</p>
-<h2 id="create-copy-truncate">create copy truncate</h2>
+<h1 id="create-copy-truncate">create copy truncate</h1>
 <p>Assuming you understand the basics like:</p>
 <div class="highlight"><pre><span></span><code>touch example.txt
 </code></pre></div>
@@ -140,7 +142,25 @@
 <blockquote>
 <p>remove a file, -f forces removal without a prompt, -rf to recursively force remove a file or directory <strong>be careful</strong></p>
 </blockquote>
-<h2 id="ls-lists-files-in-a-directory">ls lists files in a directory</h2>
+<h2 id="long-prompts-and-eof">long prompts and EOF</h2>
+<div class="highlight"><pre><span></span><code>printf '%s\n\n' "$(cat &lt;&lt;'EOF'
+dquote cmdsubst heredoc&gt; first
+dquote cmdsubst heredoc&gt; second
+dquote cmdsubst heredoc&gt; third
+dquote cmdsubst heredoc&gt; EOF
+dquote cmdsubst&gt; )"
+
+first
+second
+third
+</code></pre></div>
+<h2 id="for-loops">for loops</h2>
+<div class="highlight"><pre><span></span><code><span class="k">for</span><span class="w"> </span><span class="nv">k</span><span class="w"> </span><span class="nv">in</span><span class="w"> </span>$<span class="ss">(</span><span class="nv">ls</span><span class="w"> </span><span class="o">-</span><span class="mi">1</span><span class="ss">)</span><span class="c1">; do echo "$k"; done</span>
+</code></pre></div>
+<blockquote>
+<p>for each file in the shell expansion of listing filenames, echo the filename (until done)</p>
+</blockquote>
+<h1 id="ls-lists-files-in-a-directory">ls lists files in a directory</h1>
 <div class="highlight"><pre><span></span><code>ls /etc
 </code></pre></div>
 <blockquote>
@@ -166,7 +186,7 @@
 <blockquote>
 <p>unsorted list of files which is the only way to work with directories with a very large number of files</p>
 </blockquote>
-<h3 id="list-directories">list directories</h3>
+<h2 id="list-directories">list directories</h2>
 <div class="highlight"><pre><span></span><code>ls -d */
 </code></pre></div>
 <blockquote>
@@ -207,7 +227,7 @@
 <blockquote>
 <p>find all directories in /tmp up to 2 levels deep (/tmp/foo/bar)</p>
 </blockquote>
-<h3 id="counting-the-listings">counting the listings</h3>
+<h2 id="counting-the-listings">counting the listings</h2>
 <div class="highlight"><pre><span></span><code>ls -1 | wc
 </code></pre></div>
 <blockquote>
@@ -229,7 +249,7 @@
 <p>when there are too many files in a directory: "/bin/cp: Argument list too long"
 a one liner for copying each file as a parameter</p>
 </blockquote>
-<h3 id="sorting-by-size-or-timestamp">sorting by size or timestamp</h3>
+<h2 id="sorting-by-size-or-timestamp">sorting by size or timestamp</h2>
 <div class="highlight"><pre><span></span><code>ls -Sla
 </code></pre></div>
 <blockquote>
@@ -261,10 +281,15 @@ a one liner for copying each file as a parameter</p>
 <p>list the full modified timestamp
 <a href="https://www.gnu.org/software/coreutils/manual/html_node/Formatting-file-timestamps.html">https://www.gnu.org/software/coreutils/manual/html_node/Formatting-file-timestamps.html</a></p>
 </blockquote>
-<h2 id="find">find</h2>
+<h1 id="find">find</h1>
 <p>find is better than locate because locate depends on a cron job to index the file system and so may miss recent results</p>
-<h3 id="find-to-list-files">find to list files</h3>
-<div class="highlight"><pre><span></span><code><span class="nx">find</span><span class="w"> </span><span class="o">-</span><span class="k">type</span><span class="w"> </span><span class="nx">f</span>
+<div class="highlight"><pre><span></span><code>find . -iname '*needle*'
+</code></pre></div>
+<blockquote>
+<p>find from this directory onwards case insentive matches of contains needle</p>
+</blockquote>
+<h2 id="find-to-list-files">find to list files</h2>
+<div class="highlight"><pre><span></span><code><span class="nx">find</span><span class="w"> </span><span class="p">.</span><span class="w"> </span><span class="o">-</span><span class="k">type</span><span class="w"> </span><span class="nx">f</span>
 </code></pre></div>
 <blockquote>
 <p>find and display the relative path all objects of type file</p>
@@ -274,22 +299,21 @@ a one liner for copying each file as a parameter</p>
 <blockquote>
 <p>wc = count lines = files in the /tmp directory</p>
 </blockquote>
-<div class="highlight"><pre><span></span><code><span class="nx">find</span><span class="w"> </span><span class="o">-</span><span class="k">type</span><span class="w"> </span><span class="nx">f</span><span class="w"> </span><span class="o">-</span><span class="nx">print</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nx">wc</span><span class="w"> </span><span class="o">-</span><span class="nx">l</span>
+<div class="highlight"><pre><span></span><code><span class="nx">find</span><span class="w"> </span><span class="p">.</span><span class="w"> </span><span class="o">-</span><span class="k">type</span><span class="w"> </span><span class="nx">f</span><span class="w"> </span><span class="o">-</span><span class="nx">print</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nx">wc</span><span class="w"> </span><span class="o">-</span><span class="nx">l</span>
 </code></pre></div>
 <blockquote>
 <p>to get all subdirs too</p>
 </blockquote>
-<h3 id="find-a-specific-file-or-types-of-files">find a specific file or types of files</h3>
-<div class="highlight"><pre><span></span><code>find -name "MyCProgram.c"
+<h2 id="find-a-specific-file-or-types-of-files">find a specific file or types of files</h2>
+<div class="highlight"><pre><span></span><code>find . -name "MyCProgram.c"
 </code></pre></div>
 <blockquote>
 <p>case sensitive, starts in the current directory </p>
 </blockquote>
-<div class="highlight"><pre><span></span><code>find startdirectory -name 'partoffileordirname'
+<div class="highlight"><pre><span></span><code>find startdirectory -name 'exactname'
 </code></pre></div>
 <blockquote>
-<p>e.g. find /home/joe -name '.tx'
-which would return txt's as well as txv?'s</p>
+<p>e.g. from the startdirectory only the exact match</p>
 </blockquote>
 <div class="highlight"><pre><span></span><code>find / -iname "MyCProgram.c"
 </code></pre></div>
@@ -336,7 +360,7 @@ which would return txt's as well as txv?'s</p>
 <blockquote>
 <p>search the contents of a specific file extension and output the filename and line number of each match</p>
 </blockquote>
-<h3 id="find-and-exec-to-modify-a-set-of-files">find and exec to modify a set of files</h3>
+<h2 id="find-and-exec-to-modify-a-set-of-files">find and exec to modify a set of files</h2>
 <div class="highlight"><pre><span></span><code><span class="nx">find</span><span class="w"> </span><span class="p">.</span><span class="w"> </span><span class="o">-</span><span class="k">type</span><span class="w"> </span><span class="nx">f</span><span class="w"> </span><span class="o">-</span><span class="nx">name</span><span class="w"> </span><span class="s">"*api*"</span><span class="w"> </span><span class="o">-</span><span class="nx">exec</span><span class="w"> </span><span class="nx">cat</span><span class="w"> </span><span class="p">{}</span><span class="w"> </span><span class="err">\</span><span class="p">;</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nx">grep</span><span class="w"> </span><span class="nx">objectid</span>
 </code></pre></div>
 <blockquote>
@@ -439,13 +463,13 @@ bash session ... once the job's done pressing enter will return you to the promp
 <blockquote>
 <p>while the above just lists the files the below runs an ls -l to see everything about them...</p>
 </blockquote>
-<p>RUN "man find" IF YOU NEED TO FIND SOMETHING SPECIFIC ABOUT FILES AND PERMISSIONS</p>
+<p>*RUN "man find" IF YOU NEED TO FIND SOMETHING SPECIFIC ABOUT FILES AND PERMISSIONS</p>
 <blockquote>
 <p>any files newer than the one given find -newer file-i-made-yesterday</p>
 </blockquote>
 <p>search the home directory size equal to 100 MB, use +100MB for greater than and -100MB for less than find ~ -size 100M</p>
-<p><a href="http://www.thegeekstuff.com/2009/03/15-practical-linux-find-command-examples/">http://www.thegeekstuff.com/2009/03/15-practical-linux-find-command-examples/</a></p>
-<h3 id="find-files-by-modified-time">find files by modified time</h3>
+<p><a href="https://www.thegeekstuff.com/2009/03/15-practical-linux-find-command-examples/">https://www.thegeekstuff.com/2009/03/15-practical-linux-find-command-examples/</a></p>
+<h2 id="find-files-by-modified-time">find files by modified time</h2>
 <p>There is an implied AND operator with find but for OR or NOT...</p>
 <div class="highlight"><pre><span></span><code>find / -mmin -10
 </code></pre></div>
@@ -489,9 +513,9 @@ bash session ... once the job's done pressing enter will return you to the promp
 <blockquote>
 <p>24 hours</p>
 </blockquote>
-<h2 id="grep">grep</h2>
+<h1 id="grep">grep</h1>
 <p>grep is an amazing tool for getting efficiently finding text, <a href="http://www.gnu.org/software/grep/manual/grep.html">http://www.gnu.org/software/grep/manual/grep.html</a></p>
-<h3 id="grep-parameters-and-examples-explained">grep parameters and examples explained</h3>
+<h2 id="grep-parameters-and-examples-explained">grep parameters and examples explained</h2>
 <div class="highlight"><pre><span></span><code>cat access.log | grep -v "bingbot"
 </code></pre></div>
 <blockquote>
@@ -546,7 +570,7 @@ bash session ... once the job's done pressing enter will return you to the promp
 </tr>
 </tbody>
 </table>
-<h4 id="useful-parameters-for-grep">Useful parameters for grep</h4>
+<h2 id="useful-parameters-for-grep">Useful parameters for grep</h2>
 <ul>
 <li><code>-v</code> = invert the match so do NOT show lines that match (typically | grep -v 'myexclude')</li>
 <li><code>-x</code> = whole line match only</li>
@@ -565,7 +589,7 @@ pipe to grep and ignore matches of DONOTLIKE, then append output to the newest.m
 </blockquote>
 </li>
 </ul>
-<h4 id="grep-files-without-match">grep files without match</h4>
+<h2 id="grep-files-without-match">grep files without match</h2>
 <div class="highlight"><pre><span></span><code>grep -L 'foobar' *
 </code></pre></div>
 <blockquote>
@@ -576,7 +600,7 @@ pipe to grep and ignore matches of DONOTLIKE, then append output to the newest.m
 <li><a href="http://www.gnu.org/software/grep/manual/grep.html">http://www.gnu.org/software/grep/manual/grep.html</a></li>
 <li><a href="http://tldp.org/LDP/Bash-Beginners-Guide/html/sect_04_02.html">http://tldp.org/LDP/Bash-Beginners-Guide/html/sect_04_02.html</a></li>
 </ul>
-<h2 id="cut">cut</h2>
+<h1 id="cut">cut</h1>
 <div class="highlight"><pre><span></span><code>ps auxwwww | grep someappname | tr -s [:space:] | cut -d\  -f11-
 </code></pre></div>
 <blockquote>
@@ -591,7 +615,7 @@ pipe to grep and ignore matches of DONOTLIKE, then append output to the newest.m
 <li><a href="http://ss64.com/bash/cut.html">http://ss64.com/bash/cut.html</a></li>
 <li><a href="http://linux.die.net/man/1/cut">http://linux.die.net/man/1/cut</a></li>
 </ul>
-<h3 id="cut-to-only-display-a-part-of-a-path">cut to only display a part of a path</h3>
+<h2 id="cut-to-only-display-a-part-of-a-path">cut to only display a part of a path</h2>
 <div class="highlight"><pre><span></span><code><span class="ch">#!/bin/bash</span>
 <span class="c1"># iterate through the list of subdirectories</span>
 <span class="c1"># cut out each subdirectory name (using forward slash delimiter)</span>
@@ -608,7 +632,7 @@ pipe to grep and ignore matches of DONOTLIKE, then append output to the newest.m
 <span class="w">  </span><span class="k">fi</span>
 <span class="k">done</span>
 </code></pre></div>
-<h2 id="awk">awk</h2>
+<h1 id="awk">awk</h1>
 <p>awk to parse columns of data , some overlap with cut</p>
 <div class="highlight"><pre><span></span><code>awk -F"," '{ print $2 }' results.txt
 </code></pre></div>
@@ -663,7 +687,7 @@ pipe to grep and ignore matches of DONOTLIKE, then append output to the newest.m
 <li><a href="http://www.grymoire.com/Unix/Awk.html">http://www.grymoire.com/Unix/Awk.html</a></li>
 <li><a href="https://www.gnu.org/software/gawk/manual/gawk.html">https://www.gnu.org/software/gawk/manual/gawk.html</a></li>
 </ul>
-<h2 id="sed">sed</h2>
+<h1 id="sed">sed</h1>
 <p>sed does string substitution</p>
 <div class="highlight"><pre><span></span><code><span class="n">sed</span><span class="w"> </span><span class="n">regular</span><span class="w"> </span><span class="n">expression</span><span class="w"> </span><span class="p">'</span><span class="n">s</span><span class="o">=</span><span class="n">start</span><span class="o">/</span><span class="n">olditem</span><span class="o">/</span><span class="n">newitem</span><span class="o">/</span><span class="n">g</span><span class="o">=</span><span class="k">end</span><span class="p">'</span><span class="w"> </span><span class="n">filename</span>
 
@@ -697,8 +721,8 @@ pipe to grep and ignore matches of DONOTLIKE, then append output to the newest.m
 <li><a href="http://www.grymoire.com/Unix/Sed.html">http://www.grymoire.com/Unix/Sed.html</a></li>
 <li><a href="https://www.gnu.org/software/sed/manual/sed.txt">https://www.gnu.org/software/sed/manual/sed.txt</a></li>
 </ul>
-<h2 id="dd">dd</h2>
-<p>dd can delete things very quickly (dangerous!)</p>
+<h1 id="dd">dd</h1>
+<p>dd can delete things very quickly (<strong>dangerous!</strong>)</p>
 <p>But a useful tool for testing upload limits or compression or any other miscellaneous file tasks is to generate a file of a specified length:</p>
 <div class="highlight"><pre><span></span><code><span class="nv">dd</span><span class="w"> </span><span class="k">if</span><span class="o">=/</span><span class="nv">dev</span><span class="o">/</span><span class="nv">zero</span><span class="w"> </span><span class="nv">of</span><span class="o">=</span><span class="nv">a</span>.<span class="nv">log</span><span class="w"> </span><span class="nv">bs</span><span class="o">=</span><span class="mi">1</span><span class="nv">M</span><span class="w"> </span><span class="nv">count</span><span class="o">=</span><span class="mi">2</span>
 </code></pre></div>
@@ -737,7 +761,7 @@ cat /dev/random &gt; /dev/null
 </blockquote>
 <ul>
 <li><a href="https://en.wikipedia.org/wiki//dev/random">https://en.wikipedia.org/wiki//dev/random</a></li>
-<li><a href="http://linuxcommand.org/man_pages/rngtest1.html">http://linuxcommand.org/man_pages/rngtest1.html</a></li>
+<li><a href="https://linuxcommand.org/man_pages/rngtest1.html">https://linuxcommand.org/man_pages/rngtest1.html</a></li>
 </ul>
             <aside>
             <hr/>
@@ -758,7 +782,7 @@ cat /dev/random &gt; /dev/null
             <time pubdate="pubdate" datetime="2011-11-12T02:37:00-08:00">Nov 12, 2011</time>
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#linux-ref">linux</a> 
-            <h4>~2434 words</h4>
+            <h4>~2498 words</h4>
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article"> 
                 <li><a href="/tags.html#awk-ref">awk
