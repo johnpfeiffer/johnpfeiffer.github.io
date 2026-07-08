@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en-US">
+    <head>
+        <meta charset="utf-8"> 
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="author" content="john pfeiffer" />
+        <meta name="copyright" content="john pfeiffer" />
+
+<meta name="keywords" content="ai, agent, factory, railway, ai, " />
+        <title>A coding agent in the cloud with Factory and Railway  · johnpfeiffer
+</title>
+        <!--link href="https://cdn-images.mailchimp.com/embedcode/slim-081711.css" rel="stylesheet" type="text/css"-->
+        <!--link href="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css" rel="stylesheet"-->
+        <link href="https://blog.john-pfeiffer.com/theme/css/bootstrap-combined.min.css" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="https://blog.john-pfeiffer.com/theme/css/style.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="https://blog.john-pfeiffer.com/theme/css/solarizedlight.css" media="screen">
+        <link rel="shortcut icon" href="https://blog.john-pfeiffer.com/theme/images/favicon.ico" type="image/x-icon" />
+        <link rel="apple-touch-icon" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon.png" />
+        <link rel="apple-touch-icon" sizes="57x57" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-57x57.png" />
+        <link rel="apple-touch-icon" sizes="72x72" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-72x72.png" />
+        <link rel="apple-touch-icon" sizes="114x114" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-114x114.png" />
+        <link rel="apple-touch-icon" sizes="144x144" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-144x144.png" />
+        <link rel="icon" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-144x144.png" />
+    </head>
+    <body>
+	<div id="content-sans-footer">
+        <div class="dropdown-backdrop">
+
+			<div class="navbar navbar-static-top">
+				<div class="navbar-inner">
+					<div class="container">
+						<a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+							<span class="icon-bar"></span>
+							<span class="icon-bar"></span>
+							<span class="icon-bar"></span>
+						</a>
+						<a class="brand" href="https://blog.john-pfeiffer.com/"><span class=site-name>johnpfeiffer</span></a>
+						<div class="nav-collapse collapse">
+							<ul class="nav pull-right top-menu">
+								<li ><a href="https://blog.john-pfeiffer.com">Home</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/engineering-people-managers/">Engineering (People) Managers</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/john-likes/">John Likes</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/software-engineer-favorites/">Software Engineer Favorites</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/categories.html">Categories</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/tags.html">Tags</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/archives.html">Archives</a></li>
+								<li><form class="navbar-search" action="https://blog.john-pfeiffer.com/search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="container-fluid">
+			<div class="row-fluid">
+				<div class="span1"></div>
+				<div class="span10">
+<article>
+<div class="row-fluid">
+    <header class="page_header span10 offset2">
+    <h1><a href="https://blog.john-pfeiffer.com/a-coding-agent-in-the-cloud-with-factory-and-railway/"> A coding agent in the cloud with Factory and Railway  </a></h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+    <div class="span2 table-of-content">
+        <nav>
+        <h4>Contents</h4>
+        <div class="toc">
+<ul>
+<li><a href="#untether-your-coding-from-your-laptop">Untether your coding from your Laptop</a></li>
+<li><a href="#high-level-overview">High Level Overview</a><ul>
+<li><a href="#pre-requisite-a-separate-github-account">Pre-requisite - a separate GitHub account</a><ul>
+<li><a href="#agent-access-with-personal-access-tokens">Agent Access with Personal Access Tokens</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#factory-droid-as-the-coding-agent">Factory Droid as the Coding Agent</a></li>
+<li><a href="#hosting-with-railway">Hosting with Railway</a><ul>
+<li><a href="#new-project-and-service">New Project and Service</a><ul>
+<li><a href="#environment-variables">Environment Variables</a></li>
+<li><a href="#railway-cli">Railway CLI</a></li>
+</ul>
+</li>
+<li><a href="#add-a-volume">Add a Volume</a></li>
+<li><a href="#ephemeral-by-default">Ephemeral by default</a></li>
+</ul>
+</li>
+<li><a href="#the-shim-script-to-make-it-work">The shim script to make it work</a></li>
+<li><a href="#under-the-hood">Under the hood</a></li>
+<li><a href="#factory-ui">Factory UI</a><ul>
+<li><a href="#prompt-to-code">Prompt to Code</a></li>
+</ul>
+</li>
+<li><a href="#references">References</a></li>
+</ul>
+</div>
+        </nav>
+    </div>
+    <div class="span8 article-content">
+
+            
+<h1 id="untether-your-coding-from-your-laptop">Untether your coding from your Laptop</h1>
+<p>My "coding with AI" progression is likely similar to your own:</p>
+<ul>
+<li>(2022) "legacy coding" =]</li>
+<li>(2023) ChatGPT assisted "copy-paste" coding  </li>
+<li>(2024) GitHub Copilot tab-completion coding</li>
+<li>(2025) Coding agents in the terminal: Claude Code and OpenAI Codex</li>
+<li>(2026) <strong>YOU ARE HERE</strong></li>
+</ul>
+<blockquote>
+<p>We've all walked around holding our laptop with the lid half-closed, to give our coding agent just a few more minutes</p>
+</blockquote>
+<p>When I found myself trying to type in a prompt at a stop-light while driving, I knew I had to upgrade to a better approach.</p>
+<p>Here's a fast way to build a simple, always-on, coding agent in the cloud: 1 Dockerfile + 1 startup script + 2 Environment variables.</p>
+<blockquote>
+<p>With this one step, human attention becomes the bottleneck</p>
+</blockquote>
+<h1 id="high-level-overview">High Level Overview</h1>
+<blockquote>
+<p>Hosting environment + Coding Agent + API Keys</p>
+</blockquote>
+<p>A coding agent is just a software program that repeatedly calls an LLM, has a "harness" to use the command line and tools, and writes/edits (text) code files.</p>
+<p><a href="https://blog.john-pfeiffer.com/ai-with-agents-aka-llms-with-tools/">https://blog.john-pfeiffer.com/ai-with-agents-aka-llms-with-tools/</a></p>
+<h2 id="pre-requisite-a-separate-github-account">Pre-requisite - a separate GitHub account</h2>
+<p>For the security best practice of "least privilege" and isolation I created a separate GitHub account for my coding agent(s).</p>
+<p>The agent's github account is invited as a Collaborator to GitHub Repositories, and contributes via Pull Requests.</p>
+<p>This creates clarity and audit trails of code authorship - including commit messages.</p>
+<blockquote>
+<p>The human reviews, approves, and merges Pull Requests</p>
+</blockquote>
+<h3 id="agent-access-with-personal-access-tokens">Agent Access with Personal Access Tokens</h3>
+<p>The most painful part of many projects can be getting permissions correct. =|</p>
+<p>When logged into your Agent's GitHub account:</p>
+<p>GitHub -&gt; Settings -&gt; Developer settings (all the way on the bottom left) -&gt; Personal access tokens -&gt; Tokens (classic)</p>
+<p>Permissions:</p>
+<ul>
+<li>repo <em>(the token has full read/write to every repo the account can see)</em></li>
+<li>admin:org -&gt; read:org <em>(gh CLI expects it for org membership lookups)</em></li>
+</ul>
+<p>Save the key in a password manager - it may look like <code>ghp_...</code></p>
+<p><strong>Gotcha</strong>: <em>do not use the newer tokens with fine grained access control because of a limitation for outside collaborators on a repo.</em></p>
+<p><a href="https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#fine-grained-personal-access-tokens-limitations">https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#fine-grained-personal-access-tokens-limitations</a></p>
+<p><em>Or create an Organization, add your agents to your organization, manage their access to repositories that way.</em></p>
+<h1 id="factory-droid-as-the-coding-agent">Factory Droid as the Coding Agent</h1>
+<p>Factory is a startup that built their own agent and "cloud factory", and I'm leveraging their off-the-shelf capabilities that handle:</p>
+<ul>
+<li>the coding agent (harness)</li>
+<li>subscription plan for a LLM</li>
+<li>a dashboard UI to organize the prompts and history</li>
+<li>a relay/tunnel to stay connected to a container containing the coding agent</li>
+<li><em>manage multiple agents across multiple computers, including the option for a long running "mission" - out of scope for this post</em></li>
+</ul>
+<p>After creating the account, the next step is to create an API key.</p>
+<p><em>optionally you can install the droid coding agent locally onto your computer and experiment with it</em></p>
+<p>Use <a href="https://app.factory.ai/settings/api-keys">https://app.factory.ai/settings/api-keys</a> or in the Factory UI, bottom left corner, click on YOUR USERNAME -&gt; Settings -&gt; API Keys -&gt; CREATE KEY</p>
+<div class="highlight"><pre><span></span><code><span class="n">Key</span><span class="w"> </span><span class="nl">Name:</span><span class="w"> </span><span class="n">droid</span><span class="o">-</span><span class="n">registration</span>
+<span class="nl">Expiration:</span><span class="w"> </span><span class="n">SELECT</span><span class="o">-</span><span class="n">A</span><span class="o">-</span><span class="n">DATE</span>
+</code></pre></div>
+<p><em>Via the CLI <a href="https://docs.factory.ai/api-reference/service-accounts/create-a-service-account-api-key">https://docs.factory.ai/api-reference/service-accounts/create-a-service-account-api-key</a></em></p>
+<p>Save the key in a password manager - it looks like <code>fk-...</code></p>
+<p>Rather than pay for Factory's managed compute/machine, and for more visibility and control, you can bring your own hosting: <a href="https://docs.factory.ai/cli/features/droid-computers-byom">https://docs.factory.ai/cli/features/droid-computers-byom</a></p>
+<p><em>I received a year's worth of credits for Railway and Factory as part of my subscription to the podcast and substack Lenny's Product Pass, my documented approach would cost $25 a month</em></p>
+<h1 id="hosting-with-railway">Hosting with Railway</h1>
+<p>A newish hosting company is <strong><a href="https://docs.railway.com/builds/dockerfiles">Railway</a></strong> who offer integration from GitHub commit to live deployment in production.</p>
+<p>The perfect place to provide an isolated environment with CPU and RAM, local disk, and network.</p>
+<p>Use the simplest infrastructure-as-code: a tiny GitHub repo with a Dockerfile, <a href="https://github.com/johnpfeiffer/railway-factory-agent">https://github.com/johnpfeiffer/railway-factory-agent</a></p>
+<details>
+Debian + GitHub CLI + Droid
+
+`Dockerfile`
+
+
+<div class="highlight"><pre><span></span><code>FROM<span class="w"> </span>debian:trixie-slim
+
+RUN<span class="w"> </span>apt-get<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>bash<span class="w"> </span>curl<span class="w"> </span>wget<span class="w"> </span>git<span class="w"> </span>ca-certificates<span class="w"> </span>jq<span class="w"> </span>procps<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>python3<span class="w"> </span>python3-pip<span class="w"> </span>python3-venv<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>nodejs<span class="w"> </span>npm<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>build-essential<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>ripgrep<span class="w"> </span>fd-find<span class="w"> </span>tree<span class="w"> </span>unzip<span class="w"> </span>zip<span class="w"> </span>sqlite3<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span><span class="o">&amp;&amp;</span><span class="w"> </span>rm<span class="w"> </span>-rf<span class="w"> </span>/var/lib/apt/lists/*
+
+<span class="c1"># Droid CLI https://docs.factory.ai/reference/cli-reference</span>
+RUN<span class="w"> </span>curl<span class="w"> </span>-fsSL<span class="w"> </span>https://app.factory.ai/cli<span class="w"> </span><span class="p">|</span><span class="w"> </span>sh<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span><span class="o">&amp;&amp;</span><span class="w"> </span>/root/.local/bin/droid<span class="w"> </span>--version
+ENV<span class="w"> </span><span class="nv">PATH</span><span class="o">=</span><span class="s2">"/root/.local/bin:</span><span class="si">${</span><span class="nv">PATH</span><span class="si">}</span><span class="s2">"</span>
+
+<span class="c1"># GitHub CLI https://github.com/cli/cli/blob/trunk/docs/install_linux.md#debian</span>
+RUN<span class="w"> </span>mkdir<span class="w"> </span>-p<span class="w"> </span>-m<span class="w"> </span><span class="m">755</span><span class="w"> </span>/etc/apt/keyrings<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span><span class="o">&amp;&amp;</span><span class="w"> </span>wget<span class="w"> </span>-nv<span class="w"> </span>-O<span class="w"> </span>/etc/apt/keyrings/githubcli-archive-keyring.gpg<span class="w"> </span>https://cli.github.com/packages/githubcli-archive-keyring.gpg<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span><span class="o">&amp;&amp;</span><span class="w"> </span>chmod<span class="w"> </span>go+r<span class="w"> </span>/etc/apt/keyrings/githubcli-archive-keyring.gpg<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="s2">"deb [arch=</span><span class="k">$(</span>dpkg<span class="w"> </span>--print-architecture<span class="k">)</span><span class="s2"> signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main"</span><span class="w"> </span>&gt;<span class="w"> </span>/etc/apt/sources.list.d/github-cli.list<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span><span class="o">&amp;&amp;</span><span class="w"> </span>apt-get<span class="w"> </span>update<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span><span class="o">&amp;&amp;</span><span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>gh<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span><span class="o">&amp;&amp;</span><span class="w"> </span>rm<span class="w"> </span>-rf<span class="w"> </span>/var/lib/apt/lists/*<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span><span class="o">&amp;&amp;</span><span class="w"> </span>gh<span class="w"> </span>--version
+
+WORKDIR<span class="w"> </span>/workspace
+
+COPY<span class="w"> </span>connect-droid.sh<span class="w"> </span>/usr/local/bin/connect-droid.sh
+RUN<span class="w"> </span>chmod<span class="w"> </span>+x<span class="w"> </span>/usr/local/bin/connect-droid.sh
+
+ENV<span class="w"> </span><span class="nv">DROID_COMPUTER_NAME</span><span class="o">=</span>railway-agent
+
+CMD<span class="w"> </span><span class="o">[</span><span class="s2">"bash"</span>,<span class="w"> </span><span class="s2">"-c"</span>,<span class="w"> </span><span class="s2">"echo \"debian trixie started </span><span class="k">$(</span>date<span class="w"> </span>-Is<span class="k">)</span><span class="s2">\"; exec connect-droid.sh"</span><span class="o">]</span><span class="w">  </span>
+</code></pre></div>
+
+
+
+Docker's a familiar foundation <https: blog.john-pfeiffer.com="" docker-intro-install-run-and-port-forward=""></https:>
+</details>
+<h2 id="new-project-and-service">New Project and Service</h2>
+<p><em>Assuming you have created a Railway account etc.</em></p>
+<p><a href="https://railway.com/new/github">https://railway.com/new/github</a> , or use the UI with "Start a New project" -&gt; GitHub -&gt; Configure GitHub App</p>
+<p>A popup: Install Railway App</p>
+<p><em>Where do you want to install Railway App?</em></p>
+<p>(Login if necessary to GitHub) Your-GitHub-Username  "Configure"</p>
+<p>GitHub.com "Confirm access" - Signed in as Your-GitHub-Username</p>
+<p>The initial Integration (Applications) into GitHub is one step.</p>
+<p><em>The principle of "least privilege" says to only give access to repos that are triggering Railway build and deploy...</em></p>
+<p>Repository access -&gt; Only select repositories</p>
+<p>I chose my dedicated repo... click on "johnpfeiffer/railway-factory-agent"</p>
+<p>The UI shows you: "Building (00:01)" , clicking on it gives you details and the ability to "View logs" (Build Logs and Deploy Logs)</p>
+<p><a href="https://docs.railway.com/services">https://docs.railway.com/services</a></p>
+<h3 id="environment-variables">Environment Variables</h3>
+<p>As it builds use the UI to manually set the following Environment variables:</p>
+<div class="highlight"><pre><span></span><code>FACTORY_API_KEY
+AGENT_GH_TOKEN
+</code></pre></div>
+<p>Set AGENT_GH_TOKEN to be the github classic PAT for your Agent's GitHub account.</p>
+<p><strong>Railway has a default GH_TOKEN environment variable in the container</strong> that assumes from the github repository owner. I do not want my agent using that GitHub, so the script overrides it.</p>
+<p>Press the big purple "DEPLOY" button to apply changes (it will terminate any previous container and re-build and re-deploy).</p>
+<h3 id="railway-cli">Railway CLI</h3>
+<p>If you prefer using the CLI to manage everything - especially once you have the github integration and repo permissions configured...</p>
+<details>
+
+`brew install railway` , <https: cli="" docs.railway.com=""> 
+
+**Make sure you are in the github repo that triggers this project and service**
+
+`cd railway-factory-agent`
+
+Setup the project...
+
+<div class="highlight"><pre><span></span><code>railway<span class="w"> </span>login<span class="w"> </span>--browserless
+railway<span class="w"> </span>whoami
+railway<span class="w"> </span>list
+railway<span class="w"> </span>init
+<span class="w">  </span>Select<span class="w"> </span>a<span class="w"> </span>workspace
+<span class="w">  </span>Project<span class="w"> </span>Name<span class="w"> </span>MYEXAMPLE
+<span class="w">    </span>Created<span class="w"> </span>project<span class="w"> </span>MYEXAMPLE<span class="w"> </span>on<span class="w"> </span>My<span class="w"> </span>Projects<span class="w">  </span>
+</code></pre></div>
+
+
+
+Link the project...
+
+<div class="highlight"><pre><span></span><code>railway<span class="w"> </span>link
+&gt;<span class="w"> </span>Select<span class="w"> </span>a<span class="w"> </span>workspace<span class="w"> </span>My<span class="w"> </span>Projects
+&gt;<span class="w"> </span>Select<span class="w"> </span>a<span class="w"> </span>project<span class="w"> </span>MYEXAMPLE
+&gt;<span class="w"> </span>Select<span class="w"> </span>an<span class="w"> </span>environment<span class="w"> </span>production
+
+Project<span class="w"> </span>factory-example<span class="w"> </span>linked<span class="w"> </span>successfully!<span class="w"> </span>🎉
+</code></pre></div>
+
+
+
+Setup the service...
+
+<div class="highlight"><pre><span></span><code><span class="n">railway</span><span class="w"> </span><span class="n">add</span><span class="w"> </span><span class="o">--</span><span class="n">repo</span><span class="w"> </span><span class="n">johnpfeiffer</span><span class="o">/</span><span class="n">railway</span><span class="o">-</span><span class="n">factory</span><span class="o">-</span><span class="n">agent</span>
+<span class="w">    </span><span class="o">&gt;</span><span class="w"> </span><span class="n">What</span><span class="w"> </span><span class="n">do</span><span class="w"> </span><span class="n">you</span><span class="w"> </span><span class="n">need</span><span class="err">?</span><span class="w"> </span><span class="n">GitHub</span><span class="w"> </span><span class="n">Repo</span>
+<span class="w">    </span><span class="o">&gt;</span><span class="w"> </span><span class="n">Enter</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">repo</span><span class="w"> </span><span class="n">johnpfeiffer</span><span class="o">/</span><span class="n">railway</span><span class="o">-</span><span class="n">factory</span><span class="o">-</span><span class="n">agent</span>
+<span class="w">    </span><span class="o">&gt;</span><span class="w"> </span><span class="n">Enter</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">variable</span><span class="w"> </span><span class="o">&lt;</span><span class="n">esc</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">skip</span><span class="o">&gt;</span><span class="w"> </span><span class="n">FACTORY_API_KEY</span><span class="o">=</span><span class="n">fk</span><span class="o">-...</span>
+<span class="w">    </span><span class="o">&gt;</span><span class="w"> </span><span class="n">Enter</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">variable</span><span class="w"> </span><span class="o">&lt;</span><span class="n">esc</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">skip</span><span class="o">&gt;</span><span class="w"> </span><span class="n">AGENT_GH_TOKEN</span><span class="o">=...</span>
+<span class="w">    </span><span class="o">&gt;</span><span class="w"> </span><span class="n">Enter</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">variable</span><span class="w"> </span><span class="o">&lt;</span><span class="n">esc</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">skip</span><span class="o">&gt;</span><span class="w"> </span><span class="n">DROID_COMPUTER_NAME</span><span class="o">=</span><span class="n">railway</span><span class="o">-</span><span class="n">agent</span>
+<span class="w">    </span><span class="err">?</span><span class="w"> </span><span class="n">Enter</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">variable</span><span class="w"> </span><span class="o">&lt;</span><span class="n">esc</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">skip</span><span class="o">&gt;</span><span class="w"> </span><span class="o">&lt;</span><span class="n">cancelled</span><span class="o">&gt;</span><span class="w">    </span>
+<span class="n">Enter</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">service</span><span class="w"> </span><span class="n">name</span><span class="w"> </span><span class="n">factory</span><span class="o">-</span><span class="n">agent</span>
+</code></pre></div>
+
+
+
+*I keep getting "Unauthorized. Please run `railway login` again." so hopefully you have better luck*
+</https:></details>
+<h2 id="add-a-volume">Add a Volume</h2>
+<p>In the UI right click near your service to "Add New Service" -&gt; Volume</p>
+<p><em>clearly a lot of future interesting options here with Database, Function, etc.</em></p>
+<p>The Railway <a href="https://docs.railway.com/volumes">Volume</a> to the service with <strong>mount path <code>/root/.factory</code></strong>.</p>
+<p>This persists the machine's identity and registration across resuming connection and redeploys; re-registration a harmless no-op.</p>
+<p>Without it, every fresh container has an empty <code>~/.factory</code> and tries to re-claim the same name, producing the error:</p>
+<blockquote>
+<p>Computer with name "MYAGENT" already exists</p>
+</blockquote>
+<p>Click on the Purple button "Deploy" - it will</p>
+<h2 id="ephemeral-by-default">Ephemeral by default</h2>
+<p>A key concept is that this is ephemeral and uses infrastructure as code to deploy.</p>
+<p>So there's no "pause" - you "remove" a container and it is gone. Only what was in a mounted volume is persisted.</p>
+<p><em>Sometimes you have to use the Factory UI to also delete the Droid Computer to reset state and re-sync things.</em></p>
+<h1 id="the-shim-script-to-make-it-work">The shim script to make it work</h1>
+<p>A few things have to happen to make everything work, so on deploy and start the container runs <code>connect-droid.sh</code>:</p>
+<ol>
+<li>Ensures the droid binary is in the PATH</li>
+<li>Ensures the Factory API key is set</li>
+<li>Ensures the Railway default <code>GH_TOKEN</code> environment variable is overridden with the Agent's GitHub (PAT) Token.</li>
+<li>Sets the computer name (which propagates to Factory)</li>
+<li><em>some debugging commands for the logs ;)</em></li>
+<li><code>droid computer register "$COMPUTER_NAME" -y || true</code> - the droid CLI connects with the API key to Factory for "bring your own machine"</li>
+<li><code>droid daemon --remote-access</code> runs in the foreground as the container's main process - and connects to Factory's central relay</li>
+</ol>
+<p><em>Note that the GH_TOKEN which is used by the <code>gh</code> command line tool should be the agent's token, <code>AGENT_GH_TOKEN</code></em></p>
+<details>
+<div class="highlight"><pre><span></span><code><span class="ch">#!/bin/bash</span>
+<span class="nb">set</span><span class="w"> </span>-uo<span class="w"> </span>pipefail
+
+<span class="c1"># droid is installed here; ensure it's on PATH regardless of how we're invoked</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">PATH</span><span class="o">=</span><span class="s2">"/root/.local/bin:</span><span class="si">${</span><span class="nv">PATH</span><span class="si">}</span><span class="s2">"</span>
+
+<span class="k">if</span><span class="w"> </span><span class="o">[</span><span class="w"> </span>-z<span class="w"> </span><span class="s2">"</span><span class="si">${</span><span class="nv">FACTORY_API_KEY</span><span class="k">:-</span><span class="si">}</span><span class="s2">"</span><span class="w"> </span><span class="o">]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">  </span><span class="nb">echo</span><span class="w"> </span><span class="s2">"ERROR: FACTORY_API_KEY is not set (generate at https://app.factory.ai/settings/api-keys)"</span><span class="w"> </span>&gt;<span class="p">&amp;</span><span class="m">2</span>
+<span class="w">  </span><span class="nb">exit</span><span class="w"> </span><span class="m">1</span>
+<span class="k">fi</span>
+
+<span class="k">if</span><span class="w"> </span><span class="o">[</span><span class="w"> </span>-n<span class="w"> </span><span class="s2">"</span><span class="si">${</span><span class="nv">AGENT_GH_TOKEN</span><span class="k">:-</span><span class="si">}</span><span class="s2">"</span><span class="w"> </span><span class="o">]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">  </span><span class="nb">export</span><span class="w"> </span><span class="nv">GH_TOKEN</span><span class="o">=</span><span class="s2">"</span><span class="nv">$AGENT_GH_TOKEN</span><span class="s2">"</span>
+<span class="w">  </span>gh<span class="w"> </span>auth<span class="w"> </span>status<span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nb">true</span>
+<span class="k">fi</span>
+
+<span class="c1"># name this Droid Computer (defaults to the container hostname)</span>
+<span class="nv">COMPUTER_NAME</span><span class="o">=</span><span class="s2">"</span><span class="si">${</span><span class="nv">DROID_COMPUTER_NAME</span><span class="k">:-$(</span>hostname<span class="k">)</span><span class="si">}</span><span class="s2">"</span>
+
+<span class="nb">echo</span><span class="w"> </span><span class="nv">$COMPUTER_NAME</span>
+
+which<span class="w"> </span>droid
+
+droid<span class="w"> </span>computer<span class="w"> </span>register<span class="w"> </span><span class="s2">"</span><span class="nv">$COMPUTER_NAME</span><span class="s2">"</span><span class="w"> </span>-y<span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nb">true</span>
+
+<span class="c1"># Connect to Factory's relay so this machine is reachable as a Droid Computer</span>
+droid<span class="w"> </span>daemon<span class="w"> </span>--remote-access
+</code></pre></div>
+</details>
+<h1 id="under-the-hood">Under the hood</h1>
+<p>The container running in Railway (aka Factory BYOM) connects out to Factory's relay (<code>relay.factory.ai</code>) when you run <code>droid daemon --remote-access</code>, so <strong>no inbound ports are required</strong>.</p>
+<div class="highlight"><pre><span></span><code><span class="err">╭───────────────────────────────────────────────╮</span><span class="w">       </span><span class="err">╭──────────────────╮</span>
+<span class="err">│</span><span class="w"> </span><span class="n">Railway</span><span class="w"> </span><span class="n">container</span><span class="w"> </span><span class="p">(</span><span class="n">Debian</span><span class="p">,</span><span class="w"> </span><span class="n">headless</span><span class="p">,</span><span class="w"> </span><span class="n">no</span><span class="w"> </span><span class="n">TTY</span><span class="p">)</span><span class="w">  </span><span class="err">│</span><span class="w">       </span><span class="err">│</span><span class="w"> </span><span class="n">Factory</span><span class="w">          </span><span class="err">│</span>
+<span class="err">│</span><span class="w">                                               </span><span class="err">│</span><span class="w">       </span><span class="err">│</span><span class="w">                  </span><span class="err">│</span>
+<span class="err">│</span><span class="w">  </span><span class="n">FACTORY_API_KEY</span><span class="w"> </span><span class="err">──▶</span><span class="w"> </span><span class="n">authenticate</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">Factory</span><span class="w">  </span><span class="err">│</span><span class="w">       </span><span class="err">│</span><span class="w">                  </span><span class="err">│</span>
+<span class="err">│</span><span class="w">  </span><span class="n">droid</span><span class="w"> </span><span class="n">computer</span><span class="w"> </span><span class="n">register</span><span class="w"> </span><span class="n">factory</span><span class="o">-</span><span class="n">droid</span><span class="o">-</span><span class="n">agent</span><span class="w">  </span><span class="err">│──────▶│</span><span class="w"> </span><span class="n">relay</span><span class="p">.</span><span class="n">factory</span><span class="p">.</span><span class="n">ai</span><span class="w"> </span><span class="err">│</span>
+<span class="err">│</span><span class="w">  </span><span class="n">droid</span><span class="w"> </span><span class="n">daemon</span><span class="w"> </span><span class="o">--</span><span class="n">remote</span><span class="o">-</span><span class="n">access</span><span class="w"> </span><span class="err">────────────────│──────▶│</span><span class="w"> </span><span class="p">(</span><span class="n">outbound</span><span class="w"> </span><span class="n">only</span><span class="p">)</span><span class="w">  </span><span class="err">│</span>
+<span class="err">│</span><span class="w">                                               </span><span class="err">│</span><span class="w">       </span><span class="err">│</span><span class="w">                  </span><span class="err">│</span>
+<span class="err">│</span><span class="w">  </span><span class="o">/</span><span class="n">root</span><span class="o">/</span><span class="p">.</span><span class="n">factory</span><span class="w">  </span><span class="err">◀──</span><span class="w"> </span><span class="n">persisted</span><span class="w"> </span><span class="n">on</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">Volume</span><span class="w">    </span><span class="err">│</span><span class="w">       </span><span class="err">╰──────────────────╯</span>
+<span class="err">╰───────────────────────────────────────────────╯</span>
+</code></pre></div>
+<p>You can use Railway's SSH or Console to have a (root) shell into the container: <code>ls -ahl /root/.factory</code></p>
+<h1 id="factory-ui">Factory UI</h1>
+<p>To double check that your deployment is working, log into Factory <a href="https://app.factory.ai/sessions">https://app.factory.ai/sessions</a></p>
+<p>At the Bottom left corner, click on YOUR USERNAME -&gt; Settings -&gt; Droid Computers</p>
+<p>YOUR COMPUTERS</p>
+<p>Machines you have registered to use with Droid. See the BYOM guide to register another machine.</p>
+<p>ACTIONS -&gt; Go to Dashboard</p>
+<div class="highlight"><pre><span></span><code>Daemon
+Version: 0.162.1
+</code></pre></div>
+<p><em>Note that instead of updating the agent and modifying state, I would recommend one-click and redeploying the Railway container</em></p>
+<h2 id="prompt-to-code">Prompt to Code</h2>
+<p>It is a simple chat web UI - in the center you can select a computer (i.e. <code>railway-agent</code>)</p>
+<p>Select your model. I have found using the open weight (only uses .55x quota) <strong>(Droid Core) GLM 5.2 at reasoning level "max" and "Auto High" autonomy</strong> to be very effective.</p>
+<p>Give it a prompt:</p>
+<blockquote>
+<p>Clone the repo https://github.com/johnpfeiffer/railway-factory-agent and tell me what it does</p>
+</blockquote>
+<p>The droid coding agent will use the <code>gh</code> command line tool and take care of the rest.</p>
+<p>Use the browser on your phone to login to https://app.factory.ai/ - continue the conversation and have it work for a few minutes or an hour.</p>
+<p>Specifically ask it for Pull Requests - then use the GitHub mobile app to Review and Approve. =)</p>
+<h1 id="references">References</h1>
+<p>My previous posts on the topic of agents in the cloud:</p>
+<ul>
+<li><a href="https://blog.john-pfeiffer.com/what-a-security-hackathon-taught-me-about-agents-in-the-cloud/">https://blog.john-pfeiffer.com/what-a-security-hackathon-taught-me-about-agents-in-the-cloud/</a></li>
+<li><a href="https://blog.john-pfeiffer.com/maximum-leverage-and-minimum-ops-with-google-cloud-run-and-the-jules-coding-agent/">https://blog.john-pfeiffer.com/maximum-leverage-and-minimum-ops-with-google-cloud-run-and-the-jules-coding-agent/</a></li>
+</ul>
+<p>Factory's older documentation on an even more granular do-it-yourself approach <a href="https://docs.factory.ai/guides/building/droid-vps-setup">https://docs.factory.ai/guides/building/droid-vps-setup</a></p>
+<p>As a further aside, you can Bring Your Own Key (for your preferred LLM vendor/provider) <a href="https://docs.factory.ai/cli/byok/">https://docs.factory.ai/cli/byok/</a></p>
+            <aside>
+            <hr/>
+            <nav>
+            <ul class="articles_timeline">
+ 
+                <li class="previous_article">« <a href="https://blog.john-pfeiffer.com/ai-opportunities-need-improved-spec-driven-development-with-tla/" title="Previous: AI opportunities need improved Spec Driven Development with TLA+">AI opportunities need improved Spec Driven Development with TLA+</a></li>
+            </ul>
+            </nav>
+            </aside>
+        </div>
+        <section>
+        <div class="span2" style="float:right;font-size:0.9em;">
+ 
+            <h4>Published</h4>
+            <time pubdate="pubdate" datetime="2026-06-22T09:10:00-07:00">Jun 22, 2026</time>
+            <h4>Category</h4>
+            <a class="category-link" href="/categories.html#ai-ref">ai</a> 
+            <h4>~1760 words</h4>
+            <h4>Tags</h4>
+            <ul class="list-of-tags tags-in-article"> 
+                <li><a href="/tags.html#agent-ref">agent
+                    <span>2</span>
+</a></li>
+                <li><a href="/tags.html#ai-ref">ai
+                    <span>11</span>
+</a></li>
+                <li><a href="/tags.html#factory-ref">factory
+                    <span>1</span>
+</a></li>
+                <li><a href="/tags.html#railway-ref">railway
+                    <span>1</span>
+</a></li>
+            </ul>
+
+        </div>
+        </section>
+</div>
+</article>
+				</div>
+				<div class="span1"></div>
+			</div>
+		</div>
+    </div>
+<footer>
+<div id="footer">
+    <ul class="footer-content">
+    </ul>
+</div>
+</footer>            <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+    </body>
+</html>
