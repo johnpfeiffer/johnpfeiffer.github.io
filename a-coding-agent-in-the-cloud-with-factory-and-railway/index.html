@@ -73,6 +73,7 @@
 </ul>
 </li>
 <li><a href="#high-level-overview">High Level Overview</a><ul>
+<li><a href="#under-the-hood">Under the hood</a></li>
 <li><a href="#pre-requisite-a-separate-github-account">Pre-requisite - a separate GitHub account</a><ul>
 <li><a href="#agent-access-with-personal-access-tokens">Agent Access with Personal Access Tokens</a></li>
 </ul>
@@ -91,7 +92,6 @@
 </ul>
 </li>
 <li><a href="#the-shim-script-to-make-it-work">The shim script to make it work</a></li>
-<li><a href="#under-the-hood">Under the hood</a></li>
 <li><a href="#factory-ui">Factory UI</a><ul>
 <li><a href="#factory-quota-usage">Factory Quota Usage</a></li>
 </ul>
@@ -141,6 +141,19 @@
 <p>A coding agent is just a software program that repeatedly calls an LLM, has a "harness" to use the command line and tools, and writes/edits (text) code files.</p>
 <p><a href="https://blog.john-pfeiffer.com/ai-with-agents-aka-llms-with-tools/">https://blog.john-pfeiffer.com/ai-with-agents-aka-llms-with-tools/</a></p>
 <p>Consider this an ephemeral work environment. The only tools provided are those in the Docker container, or what the agent downloads and installs.</p>
+<h2 id="under-the-hood">Under the hood</h2>
+<p>The container running in Railway (aka Factory BYOM) connects out to Factory's relay (<code>relay.factory.ai</code>) when you run <code>droid daemon --remote-access</code>, so <strong>no inbound ports are required</strong>.</p>
+<div class="highlight"><pre><span></span><code><span class="err">╭──────────────────────────────────────────────╮</span><span class="w">     </span><span class="err">╭──────────────────╮</span>
+<span class="err">│</span><span class="w"> </span><span class="n">Railway</span><span class="w"> </span><span class="n">container</span><span class="w"> </span><span class="p">(</span><span class="n">Debian</span><span class="p">,</span><span class="w"> </span><span class="n">headless</span><span class="p">,</span><span class="w"> </span><span class="n">no</span><span class="w"> </span><span class="n">TTY</span><span class="p">)</span><span class="w"> </span><span class="err">│</span><span class="w">     </span><span class="err">│</span><span class="w"> </span><span class="n">Factory</span><span class="w">          </span><span class="err">│</span>
+<span class="err">│</span><span class="w">                                              </span><span class="err">│</span><span class="w">     </span><span class="err">│</span><span class="w">                  </span><span class="err">│</span>
+<span class="err">│</span><span class="w">  </span><span class="n">FACTORY_API_KEY</span><span class="w"> </span><span class="err">──▶</span><span class="w"> </span><span class="n">authenticate</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">Factory</span><span class="w"> </span><span class="err">│</span><span class="w">     </span><span class="err">│</span><span class="w">                  </span><span class="err">│</span>
+<span class="err">│</span><span class="w">  </span><span class="n">droid</span><span class="w"> </span><span class="n">computer</span><span class="w"> </span><span class="n">register</span><span class="w"> </span><span class="n">factory</span><span class="o">-</span><span class="n">droid</span><span class="o">-</span><span class="n">agent</span><span class="w"> </span><span class="err">│────▶│</span><span class="w"> </span><span class="n">relay</span><span class="p">.</span><span class="n">factory</span><span class="p">.</span><span class="n">ai</span><span class="w"> </span><span class="err">│</span>
+<span class="err">│</span><span class="w">  </span><span class="n">droid</span><span class="w"> </span><span class="n">daemon</span><span class="w"> </span><span class="o">--</span><span class="n">remote</span><span class="o">-</span><span class="n">access</span><span class="w"> </span><span class="err">───────────────│────▶│</span><span class="w"> </span><span class="p">(</span><span class="n">outbound</span><span class="w"> </span><span class="n">only</span><span class="p">)</span><span class="w">  </span><span class="err">│</span>
+<span class="err">│</span><span class="w">                                              </span><span class="err">│</span><span class="w">     </span><span class="err">│</span><span class="w">                  </span><span class="err">│</span>
+<span class="err">│</span><span class="w">  </span><span class="o">/</span><span class="n">root</span><span class="o">/</span><span class="p">.</span><span class="n">factory</span><span class="w">  </span><span class="err">◀──</span><span class="w"> </span><span class="n">persisted</span><span class="w"> </span><span class="n">on</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">Volume</span><span class="w">   </span><span class="err">│</span><span class="w">     </span><span class="err">╰──────────────────╯</span>
+<span class="err">╰──────────────────────────────────────────────╯</span>
+</code></pre></div>
+<p>You can use Railway's SSH or Console to have a (root) shell into the container and interact/observe, like: <code>ls -ahl /root/.factory</code></p>
 <h2 id="pre-requisite-a-separate-github-account">Pre-requisite - a separate GitHub account</h2>
 <p>For the security best practice of "least privilege" and isolation I created a separate GitHub account for my coding agent(s).</p>
 <p>The agent's github account is invited as a Collaborator to GitHub Repositories, and contributes via Pull Requests.</p>
@@ -358,19 +371,6 @@ droid<span class="w"> </span>computer<span class="w"> </span>register<span class
 droid<span class="w"> </span>daemon<span class="w"> </span>--remote-access
 </code></pre></div>
 </details>
-<h1 id="under-the-hood">Under the hood</h1>
-<p>The container running in Railway (aka Factory BYOM) connects out to Factory's relay (<code>relay.factory.ai</code>) when you run <code>droid daemon --remote-access</code>, so <strong>no inbound ports are required</strong>.</p>
-<div class="highlight"><pre><span></span><code><span class="err">╭───────────────────────────────────────────────╮</span><span class="w">       </span><span class="err">╭──────────────────╮</span>
-<span class="err">│</span><span class="w"> </span><span class="n">Railway</span><span class="w"> </span><span class="n">container</span><span class="w"> </span><span class="p">(</span><span class="n">Debian</span><span class="p">,</span><span class="w"> </span><span class="n">headless</span><span class="p">,</span><span class="w"> </span><span class="n">no</span><span class="w"> </span><span class="n">TTY</span><span class="p">)</span><span class="w">  </span><span class="err">│</span><span class="w">       </span><span class="err">│</span><span class="w"> </span><span class="n">Factory</span><span class="w">          </span><span class="err">│</span>
-<span class="err">│</span><span class="w">                                               </span><span class="err">│</span><span class="w">       </span><span class="err">│</span><span class="w">                  </span><span class="err">│</span>
-<span class="err">│</span><span class="w">  </span><span class="n">FACTORY_API_KEY</span><span class="w"> </span><span class="err">──▶</span><span class="w"> </span><span class="n">authenticate</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">Factory</span><span class="w">  </span><span class="err">│</span><span class="w">       </span><span class="err">│</span><span class="w">                  </span><span class="err">│</span>
-<span class="err">│</span><span class="w">  </span><span class="n">droid</span><span class="w"> </span><span class="n">computer</span><span class="w"> </span><span class="n">register</span><span class="w"> </span><span class="n">factory</span><span class="o">-</span><span class="n">droid</span><span class="o">-</span><span class="n">agent</span><span class="w">  </span><span class="err">│──────▶│</span><span class="w"> </span><span class="n">relay</span><span class="p">.</span><span class="n">factory</span><span class="p">.</span><span class="n">ai</span><span class="w"> </span><span class="err">│</span>
-<span class="err">│</span><span class="w">  </span><span class="n">droid</span><span class="w"> </span><span class="n">daemon</span><span class="w"> </span><span class="o">--</span><span class="n">remote</span><span class="o">-</span><span class="n">access</span><span class="w"> </span><span class="err">────────────────│──────▶│</span><span class="w"> </span><span class="p">(</span><span class="n">outbound</span><span class="w"> </span><span class="n">only</span><span class="p">)</span><span class="w">  </span><span class="err">│</span>
-<span class="err">│</span><span class="w">                                               </span><span class="err">│</span><span class="w">       </span><span class="err">│</span><span class="w">                  </span><span class="err">│</span>
-<span class="err">│</span><span class="w">  </span><span class="o">/</span><span class="n">root</span><span class="o">/</span><span class="p">.</span><span class="n">factory</span><span class="w">  </span><span class="err">◀──</span><span class="w"> </span><span class="n">persisted</span><span class="w"> </span><span class="n">on</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">Volume</span><span class="w">    </span><span class="err">│</span><span class="w">       </span><span class="err">╰──────────────────╯</span>
-<span class="err">╰───────────────────────────────────────────────╯</span>
-</code></pre></div>
-<p>You can use Railway's SSH or Console to have a (root) shell into the container: <code>ls -ahl /root/.factory</code></p>
 <h1 id="factory-ui">Factory UI</h1>
 <p>To double check that your deployment is working, log into Factory <a href="https://app.factory.ai/sessions">https://app.factory.ai/sessions</a></p>
 <p>At the Bottom left corner, click on YOUR USERNAME -&gt; Settings -&gt; Droid Computers</p>
@@ -386,7 +386,14 @@ Version: 0.162.1
 <p>You can see your Factory usage limits, the now-familiar rolling "5 hour" window, weekly limit, and Monthly.</p>
 <p>Factory -&gt; Settings -&gt; Usage</p>
 <h1 id="use-your-creativity">Use your Creativity</h1>
-<p>More than coding, you can ask the agent to summarize a website, download things, install packages, analyze data.</p>
+<p>More than coding, you can ask/prompt the agent to:</p>
+<ul>
+<li>list the files in the container</li>
+<li>analyze the last 10 git commits of a repo that was cloned</li>
+<li>install new tools and packages to experiment with </li>
+<li>summarize a website "Summarize the top 20 main themes from the comments, prioritizing them by uniqueness"</li>
+<li>download and analyze data</li>
+</ul>
 <p>From this foundation, the next step is multiple hosted agents - each one working in parallel on an assignment. Different roles like Code Reviewer, Security Auditor, etc.</p>
 <h1 id="references">References</h1>
 <p>My previous posts on the topic of agents in the cloud:</p>
@@ -413,7 +420,7 @@ Version: 0.162.1
             <time pubdate="pubdate" datetime="2026-06-22T09:10:00-07:00">Jun 22, 2026</time>
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#ai-ref">ai</a> 
-            <h4>~1926 words</h4>
+            <h4>~1966 words</h4>
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article"> 
                 <li><a href="/tags.html#agent-ref">agent
