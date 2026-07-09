@@ -74,7 +74,7 @@
 </li>
 <li><a href="#high-level-overview">High Level Overview</a><ul>
 <li><a href="#under-the-hood">Under the hood</a></li>
-<li><a href="#pre-requisite-a-separate-github-account">Pre-requisite - a separate GitHub account</a><ul>
+<li><a href="#security-via-a-separate-github-account">Security via a separate GitHub account</a><ul>
 <li><a href="#agent-access-with-personal-access-tokens">Agent Access with Personal Access Tokens</a></li>
 </ul>
 </li>
@@ -144,17 +144,20 @@
 <h2 id="under-the-hood">Under the hood</h2>
 <p>The container running in Railway (aka Factory BYOM) connects out to Factory's relay (<code>relay.factory.ai</code>) when you run <code>droid daemon --remote-access</code>, so <strong>no inbound ports are required</strong>.</p>
 <div class="highlight"><pre><span></span><code><span class="err">╭──────────────────────────────────────────────╮</span><span class="w">     </span><span class="err">╭──────────────────╮</span>
-<span class="err">│</span><span class="w"> </span><span class="n">Railway</span><span class="w"> </span><span class="n">container</span><span class="w"> </span><span class="p">(</span><span class="n">Debian</span><span class="p">,</span><span class="w"> </span><span class="n">headless</span><span class="p">,</span><span class="w"> </span><span class="n">no</span><span class="w"> </span><span class="n">TTY</span><span class="p">)</span><span class="w"> </span><span class="err">│</span><span class="w">     </span><span class="err">│</span><span class="w"> </span><span class="n">Factory</span><span class="w">          </span><span class="err">│</span>
+<span class="err">│</span><span class="w"> </span><span class="n">Railway</span><span class="w"> </span><span class="n">container</span><span class="w"> </span><span class="p">(</span><span class="n">Debian</span><span class="p">,</span><span class="w"> </span><span class="n">headless</span><span class="p">,</span><span class="w"> </span><span class="k">no</span><span class="w"> </span><span class="n">TTY</span><span class="p">)</span><span class="w"> </span><span class="err">│</span><span class="w">     </span><span class="err">│</span><span class="w"> </span><span class="n">Factory</span><span class="w">          </span><span class="err">│</span>
 <span class="err">│</span><span class="w">                                              </span><span class="err">│</span><span class="w">     </span><span class="err">│</span><span class="w">                  </span><span class="err">│</span>
-<span class="err">│</span><span class="w">  </span><span class="n">FACTORY_API_KEY</span><span class="w"> </span><span class="err">──▶</span><span class="w"> </span><span class="n">authenticate</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">Factory</span><span class="w"> </span><span class="err">│</span><span class="w">     </span><span class="err">│</span><span class="w">                  </span><span class="err">│</span>
+<span class="err">│</span><span class="w">  </span><span class="n">FACTORY_API_KEY</span><span class="w"> </span><span class="err">──▶</span><span class="w"> </span><span class="n">authenticate</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="n">Factory</span><span class="w"> </span><span class="err">│</span><span class="w">     </span><span class="err">│</span><span class="w">                  </span><span class="err">│</span>
 <span class="err">│</span><span class="w">  </span><span class="n">droid</span><span class="w"> </span><span class="n">computer</span><span class="w"> </span><span class="n">register</span><span class="w"> </span><span class="n">factory</span><span class="o">-</span><span class="n">droid</span><span class="o">-</span><span class="n">agent</span><span class="w"> </span><span class="err">│────▶│</span><span class="w"> </span><span class="n">relay</span><span class="p">.</span><span class="n">factory</span><span class="p">.</span><span class="n">ai</span><span class="w"> </span><span class="err">│</span>
-<span class="err">│</span><span class="w">  </span><span class="n">droid</span><span class="w"> </span><span class="n">daemon</span><span class="w"> </span><span class="o">--</span><span class="n">remote</span><span class="o">-</span><span class="n">access</span><span class="w"> </span><span class="err">───────────────│────▶│</span><span class="w"> </span><span class="p">(</span><span class="n">outbound</span><span class="w"> </span><span class="n">only</span><span class="p">)</span><span class="w">  </span><span class="err">│</span>
+<span class="err">│</span><span class="w">  </span><span class="n">droid</span><span class="w"> </span><span class="n">daemon</span><span class="w"> </span><span class="o">--</span><span class="n">remote</span><span class="o">-</span><span class="n">access</span><span class="w"> </span><span class="err">───────────────│────▶│</span><span class="w"> </span><span class="p">(</span><span class="n">outbound</span><span class="w"> </span><span class="k">only</span><span class="p">)</span><span class="w">  </span><span class="err">│</span>
 <span class="err">│</span><span class="w">                                              </span><span class="err">│</span><span class="w">     </span><span class="err">│</span><span class="w">                  </span><span class="err">│</span>
-<span class="err">│</span><span class="w">  </span><span class="o">/</span><span class="n">root</span><span class="o">/</span><span class="p">.</span><span class="n">factory</span><span class="w">  </span><span class="err">◀──</span><span class="w"> </span><span class="n">persisted</span><span class="w"> </span><span class="n">on</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">Volume</span><span class="w">   </span><span class="err">│</span><span class="w">     </span><span class="err">╰──────────────────╯</span>
+<span class="err">│</span><span class="w">  </span><span class="o">/</span><span class="n">root</span><span class="o">/</span><span class="p">.</span><span class="n">factory</span><span class="w">  </span><span class="err">◀──</span><span class="w"> </span><span class="n">persisted</span><span class="w"> </span><span class="k">on</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">Volume</span><span class="w">   </span><span class="err">│</span><span class="w">     </span><span class="err">╰──────────────────╯</span>
 <span class="err">╰──────────────────────────────────────────────╯</span>
+
+
+<span class="w">                        </span><span class="o">[</span><span class="n">GitHub</span><span class="o">]</span>
 </code></pre></div>
 <p>You can use Railway's SSH or Console to have a (root) shell into the container and interact/observe, like: <code>ls -ahl /root/.factory</code></p>
-<h2 id="pre-requisite-a-separate-github-account">Pre-requisite - a separate GitHub account</h2>
+<h2 id="security-via-a-separate-github-account">Security via a separate GitHub account</h2>
 <p>For the security best practice of "least privilege" and isolation I created a separate GitHub account for my coding agent(s).</p>
 <p>The agent's github account is invited as a Collaborator to GitHub Repositories, and contributes via Pull Requests.</p>
 <p>This creates clarity and audit trails of code authorship - including commit messages.</p>
@@ -174,7 +177,7 @@
 <p>Save the key in a password manager - it may look like <code>ghp_...</code></p>
 <p><strong>Gotcha</strong>: <em>do not use the newer tokens with fine grained access control because of a limitation for outside collaborators on a repo.</em></p>
 <p><a href="https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#fine-grained-personal-access-tokens-limitations">https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#fine-grained-personal-access-tokens-limitations</a></p>
-<p><em>Or create an Organization, add your agents to your organization, manage their access to repositories that way.</em></p>
+<p><em>Or, if you want to stick with fine grained tokens: create an Organization, add your agents to your organization, manage their access to repositories that way.</em></p>
 <h1 id="factory-droid-as-the-coding-agent">Factory Droid as the Coding Agent</h1>
 <p>Factory is a startup that built their own agent and "cloud factory", and I'm leveraging their off-the-shelf capabilities that handle:</p>
 <ul>
@@ -199,9 +202,7 @@
 <p>The perfect place to provide an isolated environment with CPU and RAM, local disk, and network.</p>
 <p>Use the simplest infrastructure-as-code: a tiny GitHub repo with a Dockerfile, <a href="https://github.com/johnpfeiffer/railway-factory-agent">https://github.com/johnpfeiffer/railway-factory-agent</a></p>
 <details>
-Debian + GitHub CLI + Droid
-
-`Dockerfile`
+Dockerfile: Debian + GitHub CLI + Droid
 
 
 <div class="highlight"><pre><span></span><code>FROM<span class="w"> </span>debian:trixie-slim
@@ -214,11 +215,6 @@ RUN<span class="w"> </span>apt-get<span class="w"> </span>update<span class="w">
 <span class="w">    </span>ripgrep<span class="w"> </span>fd-find<span class="w"> </span>tree<span class="w"> </span>unzip<span class="w"> </span>zip<span class="w"> </span>sqlite3<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span><span class="o">&amp;&amp;</span><span class="w"> </span>rm<span class="w"> </span>-rf<span class="w"> </span>/var/lib/apt/lists/*
 
-<span class="c1"># Droid CLI https://docs.factory.ai/reference/cli-reference</span>
-RUN<span class="w"> </span>curl<span class="w"> </span>-fsSL<span class="w"> </span>https://app.factory.ai/cli<span class="w"> </span><span class="p">|</span><span class="w"> </span>sh<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span><span class="o">&amp;&amp;</span><span class="w"> </span>/root/.local/bin/droid<span class="w"> </span>--version
-ENV<span class="w"> </span><span class="nv">PATH</span><span class="o">=</span><span class="s2">"/root/.local/bin:</span><span class="si">${</span><span class="nv">PATH</span><span class="si">}</span><span class="s2">"</span>
-
 <span class="c1"># GitHub CLI https://github.com/cli/cli/blob/trunk/docs/install_linux.md#debian</span>
 RUN<span class="w"> </span>mkdir<span class="w"> </span>-p<span class="w"> </span>-m<span class="w"> </span><span class="m">755</span><span class="w"> </span>/etc/apt/keyrings<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span><span class="o">&amp;&amp;</span><span class="w"> </span>wget<span class="w"> </span>-nv<span class="w"> </span>-O<span class="w"> </span>/etc/apt/keyrings/githubcli-archive-keyring.gpg<span class="w"> </span>https://cli.github.com/packages/githubcli-archive-keyring.gpg<span class="w"> </span><span class="se">\</span>
@@ -228,6 +224,11 @@ RUN<span class="w"> </span>mkdir<span class="w"> </span>-p<span class="w"> </spa
 <span class="w">  </span><span class="o">&amp;&amp;</span><span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>gh<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span><span class="o">&amp;&amp;</span><span class="w"> </span>rm<span class="w"> </span>-rf<span class="w"> </span>/var/lib/apt/lists/*<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span><span class="o">&amp;&amp;</span><span class="w"> </span>gh<span class="w"> </span>--version
+
+<span class="c1"># Droid CLI https://docs.factory.ai/reference/cli-reference</span>
+RUN<span class="w"> </span>curl<span class="w"> </span>-fsSL<span class="w"> </span>https://app.factory.ai/cli<span class="w"> </span><span class="p">|</span><span class="w"> </span>sh<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span><span class="o">&amp;&amp;</span><span class="w"> </span>/root/.local/bin/droid<span class="w"> </span>--version
+ENV<span class="w"> </span><span class="nv">PATH</span><span class="o">=</span><span class="s2">"/root/.local/bin:</span><span class="si">${</span><span class="nv">PATH</span><span class="si">}</span><span class="s2">"</span>
 
 WORKDIR<span class="w"> </span>/workspace
 
@@ -241,7 +242,8 @@ CMD<span class="w"> </span><span class="o">[</span><span class="s2">"bash"</span
 
 
 
-Docker's a familiar foundation <https: blog.john-pfeiffer.com="" docker-intro-install-run-and-port-forward=""></https:>
+Docker's a familiar foundation https://blog.john-pfeiffer.com/docker-intro-install-run-and-port-forward/
+
 </details>
 <h2 id="new-project-and-service">New Project and Service</h2>
 <p><em>Assuming you have created a Railway account etc.</em></p>
@@ -420,7 +422,7 @@ Version: 0.162.1
             <time pubdate="pubdate" datetime="2026-06-22T09:10:00-07:00">Jun 22, 2026</time>
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#ai-ref">ai</a> 
-            <h4>~1966 words</h4>
+            <h4>~1978 words</h4>
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article"> 
                 <li><a href="/tags.html#agent-ref">agent
