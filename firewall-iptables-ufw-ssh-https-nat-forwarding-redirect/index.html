@@ -74,8 +74,11 @@
 <li><a href="#clean-out-the-old-iptables-very-insecure-settings">Clean out the old iptables - very insecure settings</a></li>
 <li><a href="#allow-ssh-ping-and-established-but-block-all-by-default">Allow SSH, ping, and Established but block all by default</a></li>
 <li><a href="#bash-script-to-set-iptables-during-initd">bash script to set iptables during init.d</a></li>
-<li><a href="#web-server">Web Server</a></li>
+<li><a href="#example-web-server-firewall-config">Example Web Server Firewall Config</a></li>
 <li><a href="#web-and-xmpp-server">Web and XMPP Server</a></li>
+</ul>
+</li>
+<li><a href="#more-protocols-and-configs">More protocols and configs</a><ul>
 <li><a href="#ntp">NTP</a></li>
 <li><a href="#nat-forwarding">NAT forwarding</a></li>
 <li><a href="#cifs">CIFS</a></li>
@@ -99,37 +102,45 @@
 <div class="highlight"><pre><span></span><code>which iptables
 sudo /sbin/iptables --version
 </code></pre></div>
-<h2 id="most-common-commands">Most common commands</h2>
+<h1 id="most-common-commands">Most common commands</h1>
+<p>The most frequent thing you will probably do is examine the current configuration:</p>
 <div class="highlight"><pre><span></span><code>iptables -nvL
 </code></pre></div>
 <blockquote>
 <p>output the rules in the default "FILTER" table (INPUT, OUTPUT) in numeric , verbose, List all rules</p>
 </blockquote>
-<p><a href="http://ipset.netfilter.org/iptables.man.html">http://ipset.netfilter.org/iptables.man.html</a></p>
+<p><a href="https://ipset.netfilter.org/iptables.man.html">https://ipset.netfilter.org/iptables.man.html</a></p>
 <div class="highlight"><pre><span></span><code>iptables -nvL --line-numbers
 </code></pre></div>
 <blockquote>
 <p>numeric so no hostname lookups, verbose, List the rules in the chain</p>
 </blockquote>
-<h2 id="interactive-commands">Interactive commands</h2>
+<h1 id="interactive-commands">Interactive commands</h1>
 <div class="highlight"><pre><span></span><code>iptables -D INPUT 5
 </code></pre></div>
 <blockquote>
 <p>delete the 5th line</p>
 </blockquote>
-<p><em>don't forget chmod +x firewall-script-filename.sh and /sbin/service iptables save</em></p>
-<h3 id="iptables-allow-ping-with-a-ratelimit">iptables allow ping with a ratelimit</h3>
-<div class="highlight"><pre><span></span><code><span class="nx">iptables</span><span class="w"> </span><span class="o">-</span><span class="nx">A</span><span class="w"> </span><span class="nx">INPUT</span><span class="w"> </span><span class="o">-</span><span class="nx">p</span><span class="w"> </span><span class="nx">icmp</span><span class="w"> </span><span class="o">-</span><span class="nx">m</span><span class="w"> </span><span class="nx">limit</span><span class="w"> </span><span class="o">--</span><span class="nx">limit</span><span class="w"> </span><span class="mi">10</span><span class="o">/</span><span class="nx">second</span><span class="w"> </span><span class="o">-</span><span class="nx">j</span><span class="w"> </span><span class="nx">ACCEPT</span>
-<span class="nx">iptables</span><span class="w"> </span><span class="o">-</span><span class="nx">A</span><span class="w"> </span><span class="nx">OUPUT</span><span class="w"> </span><span class="o">-</span><span class="nx">p</span><span class="w"> </span><span class="nx">icmp</span><span class="w"> </span><span class="o">-</span><span class="nx">j</span><span class="w"> </span><span class="nx">ACCEPT</span>
-<span class="p">&gt;</span><span class="w"> </span><span class="nx">allow</span><span class="w"> </span><span class="mi">10</span><span class="w"> </span><span class="nx">inbound</span><span class="w"> </span><span class="nx">icmp</span><span class="w"> </span><span class="nx">packets</span><span class="w"> </span><span class="p">(</span><span class="k">not</span><span class="w"> </span><span class="nx">tcp</span><span class="w"> </span><span class="nx">nor</span><span class="w"> </span><span class="nx">udp</span><span class="p">)</span><span class="w"> </span><span class="nx">per</span><span class="w"> </span><span class="nx">second</span><span class="w"> </span><span class="k">and</span><span class="w"> </span><span class="nx">allow</span><span class="w"> </span><span class="nx">all</span><span class="w"> </span><span class="nx">icmp</span><span class="w"> </span><span class="nx">traffic</span><span class="w"> </span><span class="nx">outbound</span>
-
-<span class="nx">iptables</span><span class="w"> </span><span class="o">-</span><span class="nx">A</span><span class="w"> </span><span class="nx">INPUT</span><span class="w"> </span><span class="o">-</span><span class="nx">p</span><span class="w"> </span><span class="nx">icmp</span><span class="w"> </span><span class="o">--</span><span class="nx">icmp</span><span class="o">-</span><span class="k">type</span><span class="w"> </span><span class="nx">echo</span><span class="o">-</span><span class="nx">request</span><span class="w"> </span><span class="o">-</span><span class="nx">j</span><span class="w"> </span><span class="nx">ACCEPT</span>
-<span class="p">&gt;</span><span class="w"> </span><span class="nx">echo</span><span class="o">-</span><span class="nx">request</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">8</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="nx">numeric</span>
-
-<span class="nx">iptables</span><span class="w"> </span><span class="o">-</span><span class="nx">A</span><span class="w"> </span><span class="nx">OUTPUT</span><span class="w"> </span><span class="o">-</span><span class="nx">p</span><span class="w"> </span><span class="nx">icmp</span><span class="w"> </span><span class="o">--</span><span class="nx">icmp</span><span class="o">-</span><span class="k">type</span><span class="w"> </span><span class="nx">echo</span><span class="o">-</span><span class="nx">reply</span><span class="w"> </span><span class="o">-</span><span class="nx">j</span><span class="w"> </span><span class="nx">ACCEPT</span>
-<span class="p">&gt;</span><span class="w"> </span><span class="nx">Allow</span><span class="w"> </span><span class="nx">outgoing</span><span class="w"> </span><span class="nx">ping</span><span class="w"> </span><span class="nx">replies</span><span class="p">,</span><span class="w"> </span><span class="nx">echo</span><span class="w"> </span><span class="nx">reply</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="nx">numeric</span>
+<p><em>don't forget <code>chmod +x firewall-script-filename.sh</code> and <code>/sbin/service iptables save</code></em></p>
+<h2 id="iptables-allow-ping-with-a-ratelimit">iptables allow ping with a ratelimit</h2>
+<div class="highlight"><pre><span></span><code>iptables -A INPUT -p icmp -m limit --limit 10/second -j ACCEPT
+iptables -A OUPUT -p icmp -j ACCEPT
 </code></pre></div>
-<h3 id="clean-out-the-old-iptables-very-insecure-settings">Clean out the old iptables - very insecure settings</h3>
+<blockquote>
+<p>allow 10 inbound icmp packets (not tcp nor udp) per second and allow all icmp traffic outbound</p>
+</blockquote>
+<div class="highlight"><pre><span></span><code><span class="nx">iptables</span><span class="w"> </span><span class="o">-</span><span class="nx">A</span><span class="w"> </span><span class="nx">INPUT</span><span class="w"> </span><span class="o">-</span><span class="nx">p</span><span class="w"> </span><span class="nx">icmp</span><span class="w"> </span><span class="o">--</span><span class="nx">icmp</span><span class="o">-</span><span class="k">type</span><span class="w"> </span><span class="nx">echo</span><span class="o">-</span><span class="nx">request</span><span class="w"> </span><span class="o">-</span><span class="nx">j</span><span class="w"> </span><span class="nx">ACCEPT</span>
+</code></pre></div>
+<blockquote>
+<p>echo-request = 8 in numeric</p>
+</blockquote>
+<div class="highlight"><pre><span></span><code><span class="nx">iptables</span><span class="w"> </span><span class="o">-</span><span class="nx">A</span><span class="w"> </span><span class="nx">OUTPUT</span><span class="w"> </span><span class="o">-</span><span class="nx">p</span><span class="w"> </span><span class="nx">icmp</span><span class="w"> </span><span class="o">--</span><span class="nx">icmp</span><span class="o">-</span><span class="k">type</span><span class="w"> </span><span class="nx">echo</span><span class="o">-</span><span class="nx">reply</span><span class="w"> </span><span class="o">-</span><span class="nx">j</span><span class="w"> </span><span class="nx">ACCEPT</span>
+</code></pre></div>
+<blockquote>
+<p>Allow outgoing ping replies, echo reply = 0 in numeric</p>
+</blockquote>
+<h2 id="clean-out-the-old-iptables-very-insecure-settings">Clean out the old iptables - very insecure settings</h2>
+<p>The following resets the system to accept all traffic:</p>
 <div class="highlight"><pre><span></span><code>iptables -F
 iptables --delete-chain
 iptables -t nat -F
@@ -143,33 +154,34 @@ iptables -P OUTPUT ACCEPT
 <p>Flush out all of the iptables and delete all of the chains (including the nat and mangle tables)
 Set the default policies to accept all packets</p>
 </blockquote>
-<h3 id="allow-ssh-ping-and-established-but-block-all-by-default">Allow SSH, ping, and Established but block all by default</h3>
-<div class="highlight"><pre><span></span><code><span class="ch">#!/bin/sh</span>
-iptables<span class="w"> </span>-I<span class="w"> </span>INPUT<span class="w"> </span><span class="m">1</span><span class="w"> </span>-i<span class="w"> </span>lo<span class="w"> </span>-j<span class="w"> </span>ACCEPT
-iptables<span class="w"> </span>-I<span class="w"> </span>OUTPUT<span class="w"> </span><span class="m">1</span><span class="w"> </span>-o<span class="w"> </span>lo<span class="w"> </span>-j<span class="w"> </span>ACCEPT
-&gt;<span class="w"> </span>Always<span class="w"> </span>allow<span class="w"> </span>the<span class="w"> </span>loopback<span class="w"> </span>device
+<h2 id="allow-ssh-ping-and-established-but-block-all-by-default">Allow SSH, ping, and Established but block all by default</h2>
+<div class="highlight"><pre><span></span><code><span class="w">    </span><span class="c1">#!/bin/sh</span>
 
-iptables<span class="w"> </span>-A<span class="w"> </span>INPUT<span class="w"> </span>-p<span class="w"> </span>tcp<span class="w"> </span>--dport<span class="w"> </span><span class="m">22</span><span class="w"> </span>-j<span class="w"> </span>ACCEPT
-iptables<span class="w"> </span>-A<span class="w"> </span>OUTPUT<span class="w"> </span>-p<span class="w"> </span>tcp<span class="w"> </span>--sport<span class="w"> </span><span class="m">22</span><span class="w"> </span>-j<span class="w"> </span>ACCEPT
-&gt;<span class="w"> </span>allow<span class="w"> </span>SSH<span class="w"> </span>server<span class="w"> </span>to<span class="w"> </span>accept<span class="w"> </span>connections
+<span class="w">    </span><span class="c1"># Always allow the loopback device</span>
+<span class="w">    </span>iptables<span class="w"> </span>-I<span class="w"> </span>INPUT<span class="w"> </span><span class="m">1</span><span class="w"> </span>-i<span class="w"> </span>lo<span class="w"> </span>-j<span class="w"> </span>ACCEPT
+<span class="w">    </span>iptables<span class="w"> </span>-I<span class="w"> </span>OUTPUT<span class="w"> </span><span class="m">1</span><span class="w"> </span>-o<span class="w"> </span>lo<span class="w"> </span>-j<span class="w"> </span>ACCEPT
 
-iptables<span class="w"> </span>-A<span class="w"> </span>INPUT<span class="w"> </span>-i<span class="w"> </span>eth1<span class="w"> </span>-p<span class="w"> </span>tcp<span class="w"> </span>--dport<span class="w"> </span><span class="m">22</span><span class="w"> </span>-j<span class="w"> </span>ACCEPT
-iptables<span class="w"> </span>-A<span class="w"> </span>OUTPUT<span class="w"> </span>-o<span class="w"> </span>eth1<span class="w"> </span>-p<span class="w"> </span>tcp<span class="w"> </span>--sport<span class="w"> </span><span class="m">22</span><span class="w"> </span>-j<span class="w"> </span>ACCEPT
-&gt;<span class="w"> </span>ssh<span class="w"> </span>server<span class="w"> </span>on<span class="w"> </span>eth1<span class="w"> </span>on<span class="w"> </span>port<span class="w"> </span><span class="m">22</span>
+<span class="w">    </span><span class="c1"># allow SSH server to accept connections</span>
+<span class="w">    </span>iptables<span class="w"> </span>-A<span class="w"> </span>INPUT<span class="w"> </span>-p<span class="w"> </span>tcp<span class="w"> </span>--dport<span class="w"> </span><span class="m">22</span><span class="w"> </span>-j<span class="w"> </span>ACCEPT
+<span class="w">    </span>iptables<span class="w"> </span>-A<span class="w"> </span>OUTPUT<span class="w"> </span>-p<span class="w"> </span>tcp<span class="w"> </span>--sport<span class="w"> </span><span class="m">22</span><span class="w"> </span>-j<span class="w"> </span>ACCEPT
 
-iptables<span class="w"> </span>-P<span class="w"> </span>INPUT<span class="w"> </span>DROP
-iptables<span class="w"> </span>-P<span class="w"> </span>FORWARD<span class="w"> </span>DROP
-iptables<span class="w"> </span>-P<span class="w"> </span>OUTPUT<span class="w"> </span>DROP
-&gt;<span class="w"> </span>default<span class="w"> </span>to<span class="w"> </span>block<span class="w"> </span>all<span class="w"> </span>traffic
+<span class="w">    </span><span class="c1"># ssh server on eth1 on port 22</span>
+<span class="w">    </span>iptables<span class="w"> </span>-A<span class="w"> </span>INPUT<span class="w"> </span>-i<span class="w"> </span>eth1<span class="w"> </span>-p<span class="w"> </span>tcp<span class="w"> </span>--dport<span class="w"> </span><span class="m">22</span><span class="w"> </span>-j<span class="w"> </span>ACCEPT
+<span class="w">    </span>iptables<span class="w"> </span>-A<span class="w"> </span>OUTPUT<span class="w"> </span>-o<span class="w"> </span>eth1<span class="w"> </span>-p<span class="w"> </span>tcp<span class="w"> </span>--sport<span class="w"> </span><span class="m">22</span><span class="w"> </span>-j<span class="w"> </span>ACCEPT
 
-iptables<span class="w"> </span>-A<span class="w"> </span>INPUT<span class="w"> </span>-m<span class="w"> </span>state<span class="w"> </span>--state<span class="w"> </span>ESTABLISHED,RELATED<span class="w"> </span>-j<span class="w"> </span>ACCEPT
-&gt;<span class="w"> </span>Accept<span class="w"> </span>packets<span class="w"> </span>belonging<span class="w"> </span>to<span class="w"> </span>established<span class="w"> </span>and<span class="w"> </span>related<span class="w"> </span>connections
+<span class="w">    </span><span class="c1"># default to block all (subsequent) traffic</span>
+<span class="w">    </span>iptables<span class="w"> </span>-P<span class="w"> </span>INPUT<span class="w"> </span>DROP
+<span class="w">    </span>iptables<span class="w"> </span>-P<span class="w"> </span>FORWARD<span class="w"> </span>DROP
+<span class="w">    </span>iptables<span class="w"> </span>-P<span class="w"> </span>OUTPUT<span class="w"> </span>DROP
 
-iptables<span class="w"> </span>-A<span class="w"> </span>INPUT<span class="w"> </span>-i<span class="w"> </span>eth1<span class="w"> </span>-p<span class="w"> </span>icmp<span class="w"> </span>--icmp-type<span class="w"> </span>echo-request<span class="w"> </span>-j<span class="w"> </span>ACCEPT
-&gt;<span class="w"> </span>Allow<span class="w"> </span>incoming<span class="w"> </span>ping<span class="w"> </span>requests<span class="w"> </span>from<span class="w"> </span>eth1<span class="w"> </span>,<span class="w"> </span>echo-request<span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">8</span><span class="w"> </span><span class="k">in</span><span class="w"> </span>numeric
+<span class="w">    </span><span class="c1"># Accept packets belonging to established and related connections</span>
+<span class="w">    </span>iptables<span class="w"> </span>-A<span class="w"> </span>INPUT<span class="w"> </span>-m<span class="w"> </span>state<span class="w"> </span>--state<span class="w"> </span>ESTABLISHED,RELATED<span class="w"> </span>-j<span class="w"> </span>ACCEPT
 
-iptables<span class="w"> </span>-A<span class="w"> </span>OUTPUT<span class="w"> </span>-o<span class="w"> </span>eth1<span class="w"> </span>-p<span class="w"> </span>icmp<span class="w"> </span>--icmp-type<span class="w"> </span>echo-reply<span class="w"> </span>-j<span class="w"> </span>ACCEPT
-&gt;<span class="w"> </span>Allow<span class="w"> </span>outgoing<span class="w"> </span>ping<span class="w"> </span>replies<span class="w"> </span>to<span class="w"> </span>eth1<span class="w"> </span>,<span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="nv">reply</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">0</span><span class="w"> </span><span class="k">in</span><span class="w"> </span>numeric
+<span class="w">    </span><span class="c1"># Allow incoming ping requests from eth1 , echo-request = 8 in numeric</span>
+<span class="w">    </span>iptables<span class="w"> </span>-A<span class="w"> </span>INPUT<span class="w"> </span>-i<span class="w"> </span>eth1<span class="w"> </span>-p<span class="w"> </span>icmp<span class="w"> </span>--icmp-type<span class="w"> </span>echo-request<span class="w"> </span>-j<span class="w"> </span>ACCEPT
+
+<span class="w">    </span><span class="c1"># Allow outgoing ping replies to eth1 , echo reply = 0 in numeric</span>
+<span class="w">    </span>iptables<span class="w"> </span>-A<span class="w"> </span>OUTPUT<span class="w"> </span>-o<span class="w"> </span>eth1<span class="w"> </span>-p<span class="w"> </span>icmp<span class="w"> </span>--icmp-type<span class="w"> </span>echo-reply<span class="w"> </span>-j<span class="w"> </span>ACCEPT
 </code></pre></div>
 <hr/>
 <div class="highlight"><pre><span></span><code>cat /proc/sys/net/ipv4/ip_forward
@@ -178,7 +190,7 @@ echo 1 &gt; /proc/sys/net/ipv4/ip_forward
 <blockquote>
 <p>enable packet forwarding by the kernel, required to enable routing (especially with dual nics)</p>
 </blockquote>
-<h3 id="bash-script-to-set-iptables-during-initd">bash script to set iptables during init.d</h3>
+<h2 id="bash-script-to-set-iptables-during-initd">bash script to set iptables during init.d</h2>
 <div class="highlight"><pre><span></span><code><span class="ch">#!/bin/bash</span>
 <span class="c1"># script to set the initial firewall state as very restrictive</span>
 <span class="c1"># chmod +x SCRIPTNAME.sh</span>
@@ -196,7 +208,7 @@ iptables<span class="w"> </span>-P<span class="w"> </span>INPUT<span class="w"> 
 iptables<span class="w"> </span>-P<span class="w"> </span>FORWARD<span class="w"> </span>DROP
 iptables<span class="w"> </span>-P<span class="w"> </span>OUTPUT<span class="w"> </span>DROP
 
-<span class="c1"># Protect against SYN flood attacks (see http://cr.yp.to/syncookies.html).</span>
+<span class="c1"># Protect against SYN flood attacks (see https://cr.yp.to/syncookies.html).</span>
 <span class="nb">echo</span><span class="w"> </span><span class="m">1</span><span class="w"> </span>&gt;<span class="w"> </span>/proc/sys/net/ipv4/tcp_syncookies
 
 <span class="c1"># Allow loopback</span>
@@ -223,7 +235,7 @@ iptables<span class="w"> </span>-A<span class="w"> </span>OUTPUT<span class="w">
 iptables<span class="w"> </span>-A<span class="w"> </span>OUTPUT<span class="w"> </span>-p<span class="w"> </span>tcp<span class="w"> </span>--dport<span class="w"> </span><span class="m">443</span><span class="w"> </span>-m<span class="w"> </span>state<span class="w"> </span>--state<span class="w"> </span>NEW,ESTABLISHED<span class="w"> </span>-j<span class="w"> </span>ACCEPT
 iptables<span class="w"> </span>-A<span class="w"> </span>INPUT<span class="w"> </span>-p<span class="w"> </span>tcp<span class="w"> </span>-s<span class="w"> </span><span class="m">0</span>/0<span class="w"> </span>--sport<span class="w"> </span><span class="m">443</span><span class="w"> </span>--dport<span class="w"> </span><span class="m">1024</span>:65535<span class="w"> </span>-m<span class="w"> </span>state<span class="w"> </span>--state<span class="w"> </span>ESTABLISHED<span class="w"> </span>-j<span class="w"> </span>ACCEPT
 </code></pre></div>
-<h3 id="web-server">Web Server</h3>
+<h2 id="example-web-server-firewall-config">Example Web Server Firewall Config</h2>
 <div class="highlight"><pre><span></span><code><span class="ch">#!/bin/sh</span>
 iptables<span class="w"> </span>-F
 iptables<span class="w"> </span>--delete-chain
@@ -264,7 +276,7 @@ iptables<span class="w"> </span>-P<span class="w"> </span>OUTPUT<span class="w">
 <span class="c1"># iptables -A INPUT -p icmp -m limit --limit 6/second -j ACCEPT</span>
 <span class="c1"># iptables -A OUPUT -p icmp -j ACCEPT</span>
 </code></pre></div>
-<h3 id="web-and-xmpp-server">Web and XMPP Server</h3>
+<h2 id="web-and-xmpp-server">Web and XMPP Server</h2>
 <p><code>vi /etc/iptables.rules.xmpp</code></p>
 <div class="highlight"><pre><span></span><code>*filter
 :INPUT<span class="w"> </span>DROP<span class="w"> </span><span class="o">[</span><span class="m">3</span>:572<span class="o">]</span>
@@ -293,7 +305,8 @@ COMMIT
 </code></pre></div>
 <p><code>iptables-restore &lt; /etc/iptables.rules.xmpp</code></p>
 <hr/>
-<h3 id="ntp">NTP</h3>
+<h1 id="more-protocols-and-configs">More protocols and configs</h1>
+<h2 id="ntp">NTP</h2>
 <p><em>Getting the time and date synchronized through a restricted firewall</em></p>
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="normal">1</span>
 <span class="normal">2</span>
@@ -326,7 +339,7 @@ iptables<span class="w"> </span>-A<span class="w"> </span>OUTPUT<span class="w">
 <span class="o">&gt;</span><span class="w"> </span><span class="nv">MANUAL</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nv">ntpdate</span><span class="w"> </span><span class="nv">pool</span>.<span class="nv">ntp</span>.<span class="nv">org</span><span class="w"> </span><span class="nv">will</span><span class="w"> </span><span class="nv">now</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="nv">socket</span><span class="w"> </span><span class="mi">123</span><span class="w"> </span><span class="nv">is</span><span class="w"> </span><span class="nv">in</span><span class="w"> </span><span class="nv">use</span>
 </code></pre></div>
 <hr/>
-<h3 id="nat-forwarding">NAT forwarding</h3>
+<h2 id="nat-forwarding">NAT forwarding</h2>
 <div class="highlight"><pre><span></span><code>iptables -A FORWARD -i eth1 -o eth0 -j ACCEPT
 iptables -A FORWARD -i eth0 -o eth1 -j ACCEPT
 iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
@@ -337,7 +350,7 @@ iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
 <p>enable "nat" so that packets are addressed properly</p>
 </blockquote>
 <hr/>
-<h3 id="cifs">CIFS</h3>
+<h2 id="cifs">CIFS</h2>
 <div class="highlight"><pre><span></span><code><span class="nx">iptables</span><span class="w"> </span><span class="o">-</span><span class="nx">A</span><span class="w"> </span><span class="nx">INPUT</span><span class="w"> </span><span class="o">-</span><span class="nx">p</span><span class="w"> </span><span class="nx">tcp</span><span class="w"> </span><span class="o">-</span><span class="nx">s</span><span class="w"> </span><span class="m m-Double">10.10.10.250</span><span class="w"> </span><span class="o">--</span><span class="nx">sport</span><span class="w"> </span><span class="mi">445</span><span class="w"> </span><span class="o">-</span><span class="nx">d</span><span class="w"> </span><span class="mi">0</span><span class="o">/</span><span class="mi">0</span><span class="w"> </span><span class="o">-</span><span class="nx">j</span><span class="w"> </span><span class="nx">ACCEPT</span>
 <span class="nx">iptables</span><span class="w"> </span><span class="o">-</span><span class="nx">A</span><span class="w"> </span><span class="nx">OUTPUT</span><span class="w"> </span><span class="o">-</span><span class="nx">p</span><span class="w"> </span><span class="nx">tcp</span><span class="w"> </span><span class="o">-</span><span class="nx">s</span><span class="w"> </span><span class="mi">0</span><span class="o">/</span><span class="mi">0</span><span class="w"> </span><span class="o">--</span><span class="nx">sport</span><span class="w"> </span><span class="mi">1024</span><span class="p">:</span><span class="mi">65535</span><span class="w"> </span><span class="o">-</span><span class="nx">d</span><span class="w"> </span><span class="m m-Double">10.10.10.250</span><span class="w"> </span><span class="o">--</span><span class="nx">dport</span><span class="w"> </span><span class="mi">445</span><span class="w"> </span><span class="o">-</span><span class="nx">m</span><span class="w"> </span><span class="nx">state</span><span class="w"> </span><span class="o">--</span><span class="nx">state</span><span class="w"> </span><span class="nx">NEW</span><span class="p">,</span><span class="nx">ESTABLISHED</span><span class="w"> </span><span class="o">-</span><span class="nx">j</span><span class="w"> </span><span class="nx">ACCEPT</span>
 <span class="p">&gt;</span><span class="w"> </span><span class="nx">CIFS</span><span class="w"> </span><span class="nx">has</span><span class="w"> </span><span class="nx">been</span><span class="w"> </span><span class="nx">simplified</span><span class="w"> </span><span class="nx">to</span><span class="w"> </span><span class="nx">just</span><span class="w"> </span><span class="nx">use</span><span class="w"> </span><span class="mi">445</span><span class="w"> </span><span class="nx">TCP</span><span class="w"> </span><span class="nx">first</span><span class="o">...</span>
@@ -347,7 +360,7 @@ iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
 <span class="nx">netbios</span><span class="o">-</span><span class="nx">ssn</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">139</span><span class="o">/</span><span class="nx">tcp</span><span class="w"> </span><span class="err">#</span><span class="w"> </span><span class="nx">NETBIOS</span><span class="w"> </span><span class="nx">session</span><span class="w"> </span><span class="nx">service</span>
 <span class="nx">microsoft</span><span class="o">-</span><span class="nx">ds</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">445</span><span class="o">/</span><span class="nx">tcp</span><span class="w"> </span><span class="err">#</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="nx">you</span><span class="w"> </span><span class="nx">are</span><span class="w"> </span><span class="nx">using</span><span class="w"> </span><span class="nx">Active</span><span class="w"> </span><span class="nx">Directory</span>
 </code></pre></div>
-<h3 id="allow-ad-lookups-ldapldaps">Allow AD Lookups LDAP/LDAPS</h3>
+<h2 id="allow-ad-lookups-ldapldaps">Allow AD Lookups LDAP/LDAPS</h2>
 <div class="highlight"><pre><span></span><code>iptables -A INPUT -p tcp -s 0/0 --sport 1024:65535 --dport 389 -m state --state NEW,ESTABLISHED -j ACCEPT
 iptables -A OUTPUT -p tcp -s 0/0 --sport 389 --dport 1024:65535 -m state --state ESTABLISHED -j ACCEPT
 
@@ -361,7 +374,7 @@ iptables -A OUTPUT -p tcp --dport 636 -m state --state NEW,ESTABLISHED -j ACCEPT
 iptables -A INPUT -p tcp -s 0/0 --sport 636 --dport 1024:65535 -m state --state ESTABLISHED -j ACCEPT
 </code></pre></div>
 <hr/>
-<h3 id="dmz-setup-with-dual-nic">DMZ Setup with dual nic</h3>
+<h2 id="dmz-setup-with-dual-nic">DMZ Setup with dual nic</h2>
 <ul>
 <li>ATMOS = 10.10.254.195</li>
 <li>LAN (router?) =  10.10.254.1</li>
@@ -370,7 +383,7 @@ iptables -A INPUT -p tcp -s 0/0 --sport 636 --dport 1024:65535 -m state --state 
 <li>eth2 = DMZ  192.168.50.1</li>
 <li>Router 172.16.255.1</li>
 </ul>
-<h4 id="forward-traffic-between-dmz-and-lan">forward traffic between DMZ and LAN</h4>
+<h3 id="forward-traffic-between-dmz-and-lan">forward traffic between DMZ and LAN</h3>
 <div class="highlight"><pre><span></span><code>iptables -A FORWARD -i eth0 -o eth2 -m state --state NEW,ESTABLISHED,RELATED -j ACCEPT
 iptables -A FORWARD -i eth2 -o eth0 -m state --state ESTABLISHED,RELATED -j ACCEPT
 </code></pre></div>
@@ -389,7 +402,7 @@ iptables -A FORWARD -i eth1 -o eth2 -m state --state NEW,ESTABLISHED,RELATED -j 
     iptables -t nat -A PREROUTING -p tcp -i eth1 -d 202.54.1.1 --dport 443 -j DNAT --to-destination 192.168.2.4</p>
 <p>End DMZ .. Add other rules</p>
 </blockquote>
-<h2 id="uncomplicated-firewall-ufw">Uncomplicated Firewall UFW</h2>
+<h1 id="uncomplicated-firewall-ufw">Uncomplicated Firewall UFW</h1>
 <p>The uncomplicated firewall is a much simpler way to configure some basic rules and enable the firewall</p>
 <div class="highlight"><pre><span></span><code>sudo su
 ufw status verbose
@@ -411,11 +424,13 @@ ufw status verbose
 <p>removing a rule is as simple as prefixing the allow or deny command with delete
 disabling the firewall allows all traffic</p>
 </blockquote>
-<p>Most unfortunately there are some basic gaps that make it not very production ready (i.e. if you know what you are doing just keep using iptables)
-1. ping, also known as icmp, packets (even just outbound) have to be handled in a very complex way, really not much better than iptables
-1. established connection traffic is not just easily allowed
-1. attempting to do something more complex very quickly requires very complex commands including just using iptables (lolwut)
-1. iptables -nvL becomes almost unreadable with the extra layer</p>
+<p>Most unfortunately there are some basic gaps that make it not very production ready (i.e. if you know what you are doing just keep using iptables)</p>
+<ol>
+<li>ping, also known as icmp, packets (even just outbound) have to be handled in a very complex way, really not much better than iptables</li>
+<li>established connection traffic is not just easily allowed</li>
+<li>attempting to do something more complex very quickly requires very complex commands including just using iptables (lolwut)</li>
+<li>iptables -nvL becomes almost unreadable with the extra layer</li>
+</ol>
 <p><a href="https://wiki.ubuntu.com/UncomplicatedFirewall">https://wiki.ubuntu.com/UncomplicatedFirewall</a></p>
             <aside>
             <hr/>
@@ -436,7 +451,7 @@ disabling the firewall allows all traffic</p>
             <time pubdate="pubdate" datetime="2009-01-01T00:00:00-08:00">Jan 1, 2009</time>
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#linux-ref">linux</a> 
-            <h4>~1799 words</h4>
+            <h4>~1815 words</h4>
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article"> 
                 <li><a href="/tags.html#firewall-ref">firewall
