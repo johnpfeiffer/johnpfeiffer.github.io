@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en-US">
+    <head>
+        <meta charset="utf-8"> 
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="author" content="john pfeiffer" />
+        <meta name="copyright" content="john pfeiffer" />
+
+<meta name="keywords" content="cloudflare, static-site, react, ai, llm, ai, " />
+        <title>Experiment fast with Cloudflare - Pages and Workers and LLMs  · johnpfeiffer
+</title>
+        <!--link href="https://cdn-images.mailchimp.com/embedcode/slim-081711.css" rel="stylesheet" type="text/css"-->
+        <!--link href="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css" rel="stylesheet"-->
+        <link href="https://blog.john-pfeiffer.com/theme/css/bootstrap-combined.min.css" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="https://blog.john-pfeiffer.com/theme/css/style.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="https://blog.john-pfeiffer.com/theme/css/solarizedlight.css" media="screen">
+        <link rel="shortcut icon" href="https://blog.john-pfeiffer.com/theme/images/favicon.ico" type="image/x-icon" />
+        <link rel="apple-touch-icon" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon.png" />
+        <link rel="apple-touch-icon" sizes="57x57" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-57x57.png" />
+        <link rel="apple-touch-icon" sizes="72x72" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-72x72.png" />
+        <link rel="apple-touch-icon" sizes="114x114" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-114x114.png" />
+        <link rel="apple-touch-icon" sizes="144x144" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-144x144.png" />
+        <link rel="icon" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-144x144.png" />
+    </head>
+    <body>
+	<div id="content-sans-footer">
+        <div class="dropdown-backdrop">
+
+			<div class="navbar navbar-static-top">
+				<div class="navbar-inner">
+					<div class="container">
+						<a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+							<span class="icon-bar"></span>
+							<span class="icon-bar"></span>
+							<span class="icon-bar"></span>
+						</a>
+						<a class="brand" href="https://blog.john-pfeiffer.com/"><span class=site-name>johnpfeiffer</span></a>
+						<div class="nav-collapse collapse">
+							<ul class="nav pull-right top-menu">
+								<li ><a href="https://blog.john-pfeiffer.com">Home</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/engineering-people-managers/">Engineering (People) Managers</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/john-likes/">John Likes</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/software-engineer-favorites/">Software Engineer Favorites</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/categories.html">Categories</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/tags.html">Tags</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/archives.html">Archives</a></li>
+								<li><form class="navbar-search" action="https://blog.john-pfeiffer.com/search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="container-fluid">
+			<div class="row-fluid">
+				<div class="span1"></div>
+				<div class="span10">
+<article>
+<div class="row-fluid">
+    <header class="page_header span10 offset2">
+    <h1><a href="https://blog.john-pfeiffer.com/experiment-fast-with-cloudflare-pages-and-workers-and-llms/"> Experiment fast with Cloudflare - Pages and Workers and LLMs  </a></h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+    <div class="span2 table-of-content">
+        <nav>
+        <h4>Contents</h4>
+        <div class="toc">
+<ul>
+<li><a href="#monorepo-to-move-fast">Monorepo to move fast</a></li>
+<li><a href="#cloudflare-pages-and-github">Cloudflare Pages and GitHub</a><ul>
+<li><a href="#file-layout-in-the-monorepo">File layout in the monorepo</a></li>
+<li><a href="#scripts-for-the-build-pipeline">Scripts for the Build pipeline</a><ul>
+<li><a href="#deploying-to-cloudflare-pages">Deploying to Cloudflare Pages</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#middleware-as-an-architectural-seam">Middleware as an Architectural Seam</a><ul>
+<li><a href="#the-hardest-problem-url-rewriting-in-spas">The Hardest Problem - URL Rewriting in SPAs</a></li>
+</ul>
+</li>
+<li><a href="#cloudflare-pages-functions-convention-for-workers">Cloudflare Pages Functions convention for Workers</a><ul>
+<li><a href="#debugging-deployments-with-realtime-logs">Debugging Deployments with Realtime Logs</a></li>
+</ul>
+</li>
+<li><a href="#cloudflare-workers-ai">Cloudflare Workers AI</a><ul>
+<li><a href="#code">Code</a></li>
+<li><a href="#logs">Logs</a></li>
+<li><a href="#references">References</a></li>
+</ul>
+</li>
+</ul>
+</div>
+        </nav>
+    </div>
+    <div class="span8 article-content">
+
+            
+<blockquote>
+<p>Go slow to go fast: building my own frontend app platform sped up my experimentation by 10x</p>
+</blockquote>
+<p>I'm continually exploring free and low cost hosting providers as an avenue for unlimited experimentation within constraints.</p>
+<p>Cloudflare's evolution from simple CDN (ContentDeliveryNetwork) serving static assets (e.g. .jpg or .css) into the clever adjacency of more complicated .js files meant a new fast, reliable competitor to the hosting space.</p>
+<p>In the React/Javascript pattern, compute occurs on the client side - hence Cloudflare can offer generous "free hosting".</p>
+<p><em>A previous blog post on Google's ecosystem <a href="https://blog.john-pfeiffer.com/maximum-leverage-and-minimum-ops-with-google-cloud-run-and-the-jules-coding-agent/">https://blog.john-pfeiffer.com/maximum-leverage-and-minimum-ops-with-google-cloud-run-and-the-jules-coding-agent/</a></em></p>
+<h1 id="monorepo-to-move-fast">Monorepo to move fast</h1>
+<p>I used a single private github repo that serves as the vehicle for multiple frontend applications.</p>
+<p>At first I only used React with JS but later adopted Typescript to improve reliability (and with LLM coding it's "free" to rewrite from JS to TS ;)</p>
+<p>Every sub-app is "unaware" that it is in a monorepo, unaware of the "shared hosting" setup. This allows for local development and future portability.</p>
+<div class="highlight"><pre><span></span><code><span class="o">/</span><span class="nv">apps</span>
+<span class="w">  </span><span class="o">/</span><span class="nv">example</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nv">the</span><span class="w"> </span><span class="nv">most</span><span class="w"> </span><span class="nv">minimal</span><span class="w"> </span><span class="nv">skeleton</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="nv">easy</span><span class="w"> </span><span class="nv">copy</span><span class="w"> </span><span class="nv">paste</span><span class="w"> </span><span class="nv">as</span><span class="w"> </span><span class="nv">a</span><span class="w"> </span><span class="nv">template</span>
+<span class="w">  </span><span class="o">/</span><span class="nv">material</span><span class="o">-</span><span class="nv">ui</span><span class="o">-</span><span class="nv">example</span>
+<span class="w">  </span><span class="o">/</span><span class="nv">sso</span><span class="o">-</span><span class="nv">example</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nv">Google</span><span class="w"> </span><span class="nv">OAuth</span><span class="w"> </span><span class="nv">integration</span>
+<span class="w">  </span><span class="o">/</span><span class="nv">rands</span><span class="o">-</span><span class="nv">game</span>
+...
+</code></pre></div>
+<p>Every new idea can simply be a new directory in "apps". Further accelerated by a template and an LLM.</p>
+<blockquote>
+<p>Git push and it's live in production</p>
+</blockquote>
+<h1 id="cloudflare-pages-and-github">Cloudflare Pages and GitHub</h1>
+<p>I started with an LLM to generate the minimum react/typescript app that was compatible with Cloudflare.</p>
+<ul>
+<li><a href="https://developers.cloudflare.com/pages/framework-guides/deploy-a-react-site/">https://developers.cloudflare.com/pages/framework-guides/deploy-a-react-site/</a></li>
+</ul>
+<p>Cloudflare's integration with GitHub was very straightforward and smooth:</p>
+<ul>
+<li>https://dash.cloudflare.com/ , (a sometimes confusing/changing UI) ... Build -&gt; Compute -&gt; Workers &amp; Pages</li>
+<li>"Create application" -&gt; Pages -&gt; Import an existing Git repository </li>
+<li>Add GitHub account (authenticate in the "Install Cloudflare Workers and Pages" popup)</li>
+</ul>
+<p><em>In the (sometimes confusing) GitHub UI it is listed as Integrations -&gt; Application , "Cloudflare Workers and Pages"</em></p>
+<p><strong>Least Privilege Permissions:</strong> make sure you choose "Repository access" -&gt; "Only select repositories"</p>
+<p>In this case Cloudflare should only have access to the monorepo.</p>
+<p>Easy simple defaults:</p>
+<ul>
+<li>Build command: <code>npm run build</code></li>
+<li>Build output: <code>dist</code></li>
+</ul>
+<blockquote>
+<p>The Cloudflare GitHub App automatically deploys your code to Cloudflare when it detects a new commit to the default branch of the GitHub repository</p>
+</blockquote>
+<h2 id="file-layout-in-the-monorepo">File layout in the monorepo</h2>
+<div class="highlight"><pre><span></span><code><span class="nx">MONOREPO</span><span class="o">/</span>
+<span class="err">├──</span><span class="w"> </span><span class="kn">package</span><span class="p">.</span><span class="nx">json</span><span class="w">              </span><span class="err">#</span><span class="w"> </span><span class="nx">Root</span><span class="p">:</span><span class="w"> </span><span class="nx">orchestrates</span><span class="w"> </span><span class="nx">builds</span>
+<span class="err">├──</span><span class="w"> </span><span class="nx">functions</span><span class="o">/</span>
+<span class="err">│</span><span class="w">   </span><span class="err">└──</span><span class="w"> </span><span class="nx">_middleware</span><span class="p">.</span><span class="nx">js</span><span class="w">         </span><span class="err">#</span><span class="w"> </span><span class="nx">Cloudflare</span><span class="w"> </span><span class="nx">Worker</span><span class="p">:</span><span class="w"> </span><span class="nx">routes</span><span class="w"> </span><span class="nx">requests</span>
+<span class="err">├──</span><span class="w"> </span><span class="nx">scripts</span><span class="o">/</span>
+<span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="nx">build</span><span class="o">-</span><span class="nx">all</span><span class="o">-</span><span class="nx">apps</span><span class="p">.</span><span class="nx">js</span><span class="w">      </span><span class="err">#</span><span class="w"> </span><span class="nx">Discovers</span><span class="w"> </span><span class="k">and</span><span class="w"> </span><span class="nx">builds</span><span class="w"> </span><span class="nx">all</span><span class="w"> </span><span class="nx">apps</span>
+<span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="nx">collect</span><span class="o">-</span><span class="nx">builds</span><span class="p">.</span><span class="nx">js</span><span class="w">      </span><span class="err">#</span><span class="w"> </span><span class="nx">Assembles</span><span class="w"> </span><span class="nx">dist</span><span class="o">/</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="nx">deployment</span>
+<span class="err">├──</span><span class="w"> </span><span class="nx">apps</span><span class="o">/</span>
+<span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="nx">example</span><span class="o">/</span>
+<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="kn">package</span><span class="p">.</span><span class="nx">json</span>
+<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="nx">vite</span><span class="p">.</span><span class="nx">config</span><span class="p">.</span><span class="nx">ts</span>
+<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="nx">index</span><span class="p">.</span><span class="nx">html</span>
+<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">   </span><span class="err">└──</span><span class="w"> </span><span class="nx">src</span><span class="o">/</span>
+<span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="nx">material</span><span class="o">-</span><span class="nx">ui</span><span class="o">-</span><span class="nx">example</span><span class="o">/</span>
+<span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="o">...</span>
+<span class="err">│</span><span class="w">   </span><span class="err">└──</span><span class="w"> </span><span class="o">...</span>
+<span class="err">└──</span><span class="w"> </span><span class="nx">dist</span><span class="o">/</span><span class="w">                      </span><span class="err">#</span><span class="w"> </span><span class="nx">Generated</span><span class="p">:</span><span class="w"> </span><span class="nx">what</span><span class="w"> </span><span class="nx">gets</span><span class="w"> </span><span class="nx">deployed</span>
+<span class="err">├──</span><span class="w"> </span><span class="nx">apps</span><span class="o">/</span>
+<span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="nx">example</span><span class="o">/</span>
+<span class="err">│</span><span class="w">   </span><span class="err">├──</span><span class="w"> </span><span class="nx">material</span><span class="o">-</span><span class="nx">ui</span><span class="o">-</span><span class="nx">example</span><span class="o">/</span>
+<span class="err">│</span><span class="w">   </span><span class="err">└──</span><span class="w"> </span><span class="o">...</span>
+</code></pre></div>
+<h2 id="scripts-for-the-build-pipeline">Scripts for the Build pipeline</h2>
+<p>The root package.json orchestrates: build every app, collect the outputs into the final deployment artifact.</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">    </span><span class="nt">"scripts"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"build"</span><span class="p">:</span><span class="w"> </span><span class="s2">"npm run build:all &amp;&amp; npm run collect"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"build:all"</span><span class="p">:</span><span class="w"> </span><span class="s2">"node scripts/build-all-apps.js"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"collect"</span><span class="p">:</span><span class="w"> </span><span class="s2">"node scripts/collect-builds.js"</span><span class="p">,</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<ol>
+<li>
+<p><code>build-all-apps.js</code></p>
+</li>
+<li>
+<p>Copies any shared assets (i.e. favicon.ico or robots.txt) from a SHARED/public directory into each app's "/public/"</p>
+</li>
+<li>
+<p>Iterates through every directory in /apps and runs <code>npm install &amp;&amp; npm run build</code> </p>
+</li>
+<li>
+<p><code>collect-builds.js</code></p>
+</li>
+<li>
+<p>Gathers each app's <code>dist/</code> output into the production bundle area: /dist/apps/appname</p>
+</li>
+<li>Copies the <code>/functions/</code> directory into the production bundle area: /dist/functions/</li>
+</ol>
+<h3 id="deploying-to-cloudflare-pages">Deploying to Cloudflare Pages</h3>
+<p>The monorepo's a platform: modify code in <code>/apps/example</code> and commit + push the change.</p>
+<p>The GitHub + Cloudflare integration detects the new change, auto-builds, auto-deploys.</p>
+<h1 id="middleware-as-an-architectural-seam">Middleware as an Architectural Seam</h1>
+<blockquote>
+<p>How to scale adding common functionality to every app?</p>
+</blockquote>
+<p>Middleware is a common systems design pattern to take advantage of the "connection/space" between two components.</p>
+<ul>
+<li><a href="https://martinfowler.com/bliki/LegacySeam.html">https://martinfowler.com/bliki/LegacySeam.html</a></li>
+</ul>
+<p>In this monorepo, Apps don't know where they're hosted. <em>(every app's config sets base: '/')</em></p>
+<p>Cloudflare sits between the client (browser) and the Application, and via the /functions directory, code can become <strong>Cloudflare Workers</strong> that intercept requests.</p>
+<p><code>/functions/_middleware.js</code> intercepts every request, based on the Cloudflare Pages Functions convention...</p>
+<blockquote>
+<p>A _middleware.js file exports an <code>onRequest</code> function</p>
+</blockquote>
+<ul>
+<li><a href="https://developers.cloudflare.com/pages/functions/middleware/">https://developers.cloudflare.com/pages/functions/middleware/</a></li>
+</ul>
+<p>Here's what the Middleware pattern does for my monorepo at runtime:</p>
+<ul>
+<li>At run time in production it routes requests like <code>https://example.com/myapp/*</code> to the actual app's build files</li>
+<li>Asset routing: A request for /EXAMPLE/assets/index-abc123.js gets rewritten to /apps/EXAMPLE/assets/index-abc123.js , where the file actually lives.</li>
+<li>SPA fallback: Any path without a file extension (like /EXAMPLE/my-slug) serves EXAMPLE app's index.html so React Router can handle it client-side.</li>
+<li>HTML rewriting: Since each app is built with base: '/', the HTML references assets at /assets/.... The middleware rewrites these to /{appname}/assets/... and injects a <base/> tag so the browser resolves relative paths correctly.</li>
+</ul>
+<h2 id="the-hardest-problem-url-rewriting-in-spas">The Hardest Problem - URL Rewriting in SPAs</h2>
+<p>A gotcha: the middleware rewrite only occurs when the file is first served, i.e. for the first navigation - after that the Browser is interacting with the Application code and the app's own SPA router takes over.</p>
+<p>This is not an issue for a simple app (single view, no navigation that modifies the URL) - it always presents the same URL. e.g. https://example.com/SIMPLEAPP/</p>
+<p>But if the app is more complex, with functionality that rewrites URLs and/or navigation history, then...</p>
+<p>The app needs to preserve the "app name" in any navigation history or url rewriting; the app should work identically with or without the "app name" prefix.</p>
+<p>In development the SPA could have /dashboard and /someform , and in production it would be https://example.com/APPNAME/dashboard and https://example.com/APPNAME/someform .</p>
+<p>While the default answer would be "modify basename", this hardcodes the production deploy details into every dev environment.</p>
+<p>And basename is static and set at app init time, and the app discovers it is in production (has an appname prefix in the URL) at runtime.</p>
+<p>My solution is to leverage a clean internal navigation pattern even in simple apps - code that manages URLs/Navigation to ensure it parses the first path segment as an optional app prefix and includes it in every internally generated route.</p>
+<div class="highlight"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">router</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">createBrowserRouter</span><span class="p">([</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">path</span><span class="o">:</span><span class="w"> </span><span class="s1">'/'</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">element</span><span class="o">:</span><span class="w"> </span><span class="o">&lt;</span><span class="nx">Outlet</span><span class="w"> </span><span class="o">/&gt;</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">children</span><span class="o">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">path</span><span class="o">:</span><span class="w"> </span><span class="s1">':app'</span><span class="p">,</span>
+<span class="w">        </span><span class="nx">element</span><span class="o">:</span><span class="w"> </span><span class="o">&lt;</span><span class="nx">AppLayout</span><span class="w"> </span><span class="o">/&gt;</span><span class="p">,</span>
+<span class="w">        </span><span class="nx">children</span><span class="o">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">          </span><span class="p">{</span>
+<span class="w">            </span><span class="nx">index</span><span class="o">:</span><span class="w"> </span><span class="kt">true</span><span class="p">,</span>
+<span class="w">            </span><span class="nx">element</span><span class="o">:</span><span class="w"> </span><span class="o">&lt;</span><span class="nx">HomePage</span><span class="w"> </span><span class="o">/&gt;</span><span class="p">,</span>
+<span class="w">          </span><span class="p">},</span>
+<span class="w">          </span><span class="p">{</span>
+<span class="w">            </span><span class="nx">path</span><span class="o">:</span><span class="w"> </span><span class="s1">'survey'</span><span class="p">,</span>
+<span class="w">            </span><span class="nx">element</span><span class="o">:</span><span class="w"> </span><span class="o">&lt;</span><span class="nx">SurveyPage</span><span class="w"> </span><span class="o">/&gt;</span><span class="p">,</span>
+<span class="w">          </span><span class="p">},</span>
+</code></pre></div>
+<p>There's a thin layout that extracts the prefix and passes it down via context:</p>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="k">export</span><span class="w"> </span><span class="kr">type</span><span class="w"> </span><span class="nx">AppContext</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">app</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="p">}</span>
+
+<span class="w">  </span><span class="kd">function</span><span class="w"> </span><span class="nx">AppLayout</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">app</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">''</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">useParams</span><span class="p">()</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="o">&lt;</span><span class="nx">Outlet</span><span class="w"> </span><span class="nx">context</span><span class="o">=</span><span class="p">{{</span><span class="w"> </span><span class="nx">app</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="nx">satisfies</span><span class="w"> </span><span class="nx">AppContext</span><span class="p">}</span><span class="w"> </span><span class="o">/&gt;</span>
+<span class="w">  </span><span class="p">}</span>
+</code></pre></div>
+<p>Then every component just does:</p>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">app</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">useOutletContext</span><span class="o">&lt;</span><span class="nx">AppContext</span><span class="o">&gt;</span><span class="p">()</span>
+<span class="w">  </span><span class="nx">navigate</span><span class="p">(</span><span class="sb">`/</span><span class="si">${</span><span class="nx">app</span><span class="si">}</span><span class="sb">/survey`</span><span class="p">)</span>
+<span class="w">  </span><span class="nx">navigate</span><span class="p">(</span><span class="sb">`/</span><span class="si">${</span><span class="nx">app</span><span class="si">}</span><span class="sb">/result/</span><span class="si">${</span><span class="nx">id</span><span class="si">}</span><span class="sb">`</span><span class="p">)</span>
+</code></pre></div>
+<p>That's the pattern, <code>:app</code> as a parent route segment means child routes don't duplicate anything — they just exist once under the prefix.</p>
+<p>The AppLayout captures it, context distributes it.</p>
+<p>This router and URL management pattern is a good practice even if you don't have my specific monorepo multi-app situation.</p>
+<h1 id="cloudflare-pages-functions-convention-for-workers">Cloudflare Pages Functions convention for Workers</h1>
+<p>The Cloudflare Pages build system has a convention where <code>/functions</code> become Functions - but all generated into a single Worker script.</p>
+<p>That Worker is deployed as an internal part of the Pages deployment itself, versioned with each deploy, so it won't appear in the Workers list (it's owned by the Pages project).</p>
+<p><em>The one binding the middleware needs — env.ASSETS — is system-injected by Pages into every Functions deployment automatically.</em></p>
+<h2 id="debugging-deployments-with-realtime-logs">Debugging Deployments with Realtime Logs</h2>
+<p>When I was troubleshooting my middleware, from the (Compute -&gt; Workers &amp; Pages) Dashboard for my Application, I could see every deployment; on the right click on the "Details" button.</p>
+<div class="highlight"><pre><span></span><code>"Production - Deployment details"
+Deployment URL: https://6e1762b8.APPNAME.pages.dev
+</code></pre></div>
+<p>Below there are a series of tabs: Build log <em>(useful for debugging build script issues)</em>, Assets uploaded, <strong>Functions</strong>, Redirects, Headers</p>
+<p>When you click on Functions you can see the deployed <strong>Routing configuration</strong></p>
+<div class="highlight"><pre><span></span><code>{
+  "routes": [
+    {
+      "routePath": "/",
+      "mountPath": "/",
+      "method": "",
+      "middleware": [
+        "_middleware.js:onRequest"
+      ]
+    }
+  ],
+  "baseURL": "/"
+}
+</code></pre></div>
+<p>When the code in <code>_middleware.js</code> contains log statements - these are then logged in the Functions (Workers) logs.</p>
+<div class="highlight"><pre><span></span><code><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="nx">validApps</span><span class="p">.</span><span class="nx">includes</span><span class="p">(</span><span class="nx">appName</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">"not a valid app name"</span><span class="p">);</span>
+<span class="w">      </span><span class="k">return</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">next</span><span class="p">();</span>
+<span class="w">    </span><span class="p">}</span>
+</code></pre></div>
+<p><strong>Functions</strong> have "Real-time Logs" (beta)</p>
+<blockquote>
+<p>View the console.log output and errors from your Functions.</p>
+</blockquote>
+<p>Click on the button "Begin log stream"</p>
+<p><code>Websocket connection established. Listening for events...</code></p>
+<p>Use a browser and navigate to a part of your application that leverages the middleware, i.e. https://example.com/APPNAME</p>
+<p>Observe the new streaming events and click for details:</p>
+<div class="highlight"><pre><span></span><code><span class="nv">GET</span><span class="w"> </span><span class="nv">https</span>:<span class="o">//</span><span class="nv">example</span>.<span class="nv">com</span><span class="o">/</span><span class="nv">favicon</span>.<span class="nv">ico</span>
+
+<span class="s2">"logs"</span>:<span class="w"> </span>[
+<span class="w">    </span>{
+<span class="w">      </span><span class="s2">"message"</span>:<span class="w"> </span>[
+<span class="w">        </span><span class="s2">"not a valid app name"</span>
+<span class="w">      </span>],
+<span class="w">      </span><span class="s2">"level"</span>:<span class="w"> </span><span class="s2">"log"</span>,
+
+<span class="nv">GET</span><span class="w"> </span><span class="nv">https</span>:<span class="o">//</span><span class="nv">example</span>.<span class="nv">com</span><span class="o">/</span><span class="nv">APPNAME</span>
+<span class="w">    </span>{
+<span class="w">      </span><span class="s2">"message"</span>:<span class="w"> </span>[
+<span class="w">        </span><span class="s2">"Rewriting HTML for:"</span>,
+<span class="w">        </span><span class="s2">"APPNAME"</span>
+<span class="w">      </span>],<span class="w">      </span>
+</code></pre></div>
+<p>More detailed info about the internals of Cloudflare Workers:</p>
+<ul>
+<li><a href="https://blog.cloudflare.com/workerd-open-source-workers-runtime/">https://blog.cloudflare.com/workerd-open-source-workers-runtime/</a></li>
+<li><a href="https://blog.cloudflare.com/mitigating-spectre-and-other-security-threats-the-cloudflare-workers-security-model/">https://blog.cloudflare.com/mitigating-spectre-and-other-security-threats-the-cloudflare-workers-security-model/</a></li>
+</ul>
+<h1 id="cloudflare-workers-ai">Cloudflare Workers AI</h1>
+<p>Let's add AI! Cloudflare provides vertical integration from CDN to Hosting to LLMs; The Cloudflare Workers AI models run on Cloudflare’s network, not locally.</p>
+<p>This means your Application needs a "Workers AI" binding configured. At the Cloudflare dashboard for your Application:</p>
+<p>(Compute) Workers &amp; Pages -&gt; Your Application Name: Deployments, Metrics, Custom Domains, <strong>Settings</strong></p>
+<p><strong>Bindings</strong> -&gt; +Add -&gt; "Add a resource binding" -&gt; Workers AI</p>
+<p>Give your binding a name under Variable name, e.g. AI</p>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Name</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Workers AI</td>
+<td>AI</td>
+<td>Workers AI Catalog</td>
+</tr>
+</tbody>
+</table>
+<p><em>Redeploy your project for the binding to take effect.</em></p>
+<ul>
+<li><a href="https://developers.cloudflare.com/workers/runtime-apis/bindings/">https://developers.cloudflare.com/workers/runtime-apis/bindings/</a></li>
+</ul>
+<h2 id="code">Code</h2>
+<p>Since Pages Functions use file-based routing: one more file in the monorepo, <code>functions/ai/chat.js</code>, becomes a shared <code>POST /ai/chat</code> endpoint for every app.</p>
+<p>Exporting <code>onRequestPost</code> means Pages handles method routing for you.</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// functions/ai/chat.js  -&gt;  POST /ai/chat</span>
+<span class="k">export</span><span class="w"> </span><span class="k">async</span><span class="w"> </span><span class="kd">function</span><span class="w"> </span><span class="nx">onRequestPost</span><span class="p">({</span><span class="w"> </span><span class="nx">request</span><span class="p">,</span><span class="w"> </span><span class="nx">env</span><span class="w"> </span><span class="p">})</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">message</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">request</span><span class="p">.</span><span class="nx">json</span><span class="p">();</span>
+
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="ow">typeof</span><span class="w"> </span><span class="nx">message</span><span class="w"> </span><span class="o">!==</span><span class="w"> </span><span class="s2">"string"</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="o">!</span><span class="nx">message</span><span class="p">.</span><span class="nx">trim</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">Response</span><span class="p">.</span><span class="nx">json</span><span class="p">({</span><span class="w"> </span><span class="nx">error</span><span class="o">:</span><span class="w"> </span><span class="s2">"message is required"</span><span class="w"> </span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">status</span><span class="o">:</span><span class="w"> </span><span class="mf">400</span><span class="w"> </span><span class="p">});</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">env</span><span class="p">.</span><span class="nx">AI</span><span class="p">.</span><span class="nx">run</span><span class="p">(</span><span class="s2">"@cf/openai/gpt-oss-120b"</span><span class="p">,</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">instructions</span><span class="o">:</span><span class="w"> </span><span class="s2">"You are a concise assistant."</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">input</span><span class="o">:</span><span class="w"> </span><span class="nx">message</span><span class="p">,</span>
+<span class="w">  </span><span class="p">});</span>
+
+<span class="w">  </span><span class="c1">// gpt-oss speaks the OpenAI Responses API: reasoning items first, the answer is in the "message" item.</span>
+<span class="w">  </span><span class="c1">// Shapes vary by model so log the raw result once before writing the extraction.</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">text</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="nx">result</span><span class="p">.</span><span class="nx">output</span><span class="w"> </span><span class="o">??</span><span class="w"> </span><span class="p">[])</span>
+<span class="w">    </span><span class="p">.</span><span class="nx">filter</span><span class="p">((</span><span class="nx">item</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">item</span><span class="p">.</span><span class="nx">type</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="s2">"message"</span><span class="p">)</span>
+<span class="w">    </span><span class="p">.</span><span class="nx">flatMap</span><span class="p">((</span><span class="nx">item</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">item</span><span class="p">.</span><span class="nx">content</span><span class="w"> </span><span class="o">??</span><span class="w"> </span><span class="p">[])</span>
+<span class="w">    </span><span class="p">.</span><span class="nx">filter</span><span class="p">((</span><span class="nx">part</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">part</span><span class="p">.</span><span class="nx">type</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="s2">"output_text"</span><span class="p">)</span>
+<span class="w">    </span><span class="p">.</span><span class="nx">map</span><span class="p">((</span><span class="nx">part</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">part</span><span class="p">.</span><span class="nx">text</span><span class="p">)</span>
+<span class="w">    </span><span class="p">.</span><span class="nx">join</span><span class="p">(</span><span class="s2">""</span><span class="p">);</span>
+
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="nx">Response</span><span class="p">.</span><span class="nx">json</span><span class="p">({</span><span class="w"> </span><span class="nx">message</span><span class="o">:</span><span class="w"> </span><span class="nx">text</span><span class="p">,</span><span class="w"> </span><span class="nx">usage</span><span class="o">:</span><span class="w"> </span><span class="nx">result</span><span class="p">.</span><span class="nx">usage</span><span class="w"> </span><span class="p">});</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Any app in the monorepo calls it same-origin — no client config, no CORS, no API keys:</p>
+<div class="highlight"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">res</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">fetch</span><span class="p">(</span><span class="s2">"/ai/chat"</span><span class="p">,</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">method</span><span class="o">:</span><span class="w"> </span><span class="s2">"POST"</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">headers</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="s2">"Content-Type"</span><span class="o">:</span><span class="w"> </span><span class="s2">"application/json"</span><span class="w"> </span><span class="p">},</span>
+<span class="w">  </span><span class="nx">body</span><span class="o">:</span><span class="w"> </span><span class="nb">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">({</span><span class="w"> </span><span class="nx">message</span><span class="o">:</span><span class="w"> </span><span class="s2">"Tell me a joke"</span><span class="w"> </span><span class="p">}),</span>
+<span class="p">});</span>
+<span class="kd">const</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">message</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">res</span><span class="p">.</span><span class="nx">json</span><span class="p">();</span>
+</code></pre></div>
+<p><strong>Production notes:</strong></p>
+<ul>
+<li>my <code>_middleware.js</code> passes this route through untouched because <code>ai</code> is not an app name. <code>context.next()</code> falls through to file-based functions</li>
+<li>as I hardened it in production I added CORS origin checks, input limits, and a retry</li>
+<li>beware that reasoning models can spend your entire <code>max_tokens</code> budget thinking before they answer</li>
+</ul>
+<blockquote>
+<p>finish_reason: "length" with content: null</p>
+</blockquote>
+<h2 id="logs">Logs</h2>
+<p>Log before you need it!</p>
+<p>A best practice is to "bracket" logs with a start and end (and of course log errors!)</p>
+<p>From the (Dashboard) Application -&gt; Deployments -&gt; Details -&gt; Functions</p>
+<p>You will see your new route:</p>
+<div class="highlight"><pre><span></span><code>{
+  "routes": [
+    {
+      "routePath": "/ai/chat",
+      "mountPath": "/ai",
+      "method": "",
+      "module": [
+        "ai/chat.js:onRequest"
+      ]
+    },
+    {
+      "routePath": "/",
+      "mountPath": "/",
+      "method": "",
+      "middleware": [
+        "_middleware.js:onRequest"
+      ]
+    }
+  ],
+  "baseURL": "/"
+}
+</code></pre></div>
+<p>Real-time Logs (beta) -&gt; "Begin log stream"</p>
+<h2 id="references">References</h2>
+<p>For more info on all of the Cloudflare AI models:</p>
+<ul>
+<li><a href="https://developers.cloudflare.com/workers-ai/platform/pricing/">https://developers.cloudflare.com/workers-ai/platform/pricing/</a></li>
+</ul>
+            <aside>
+            <hr/>
+            <nav>
+            <ul class="articles_timeline">
+ 
+                <li class="previous_article">« <a href="https://blog.john-pfeiffer.com/intro-to-mcp-give-your-llm-tools-with-model-context-protocol/" title="Previous: Intro to MCP - give your LLM tools with model context protocol">Intro to MCP - give your LLM tools with model context protocol</a></li>
+ 
+                <li class="next_article"><a href="https://blog.john-pfeiffer.com/ai-with-agents-aka-llms-with-tools/" title="Next: AI with Agents aka LLMs with Tools">AI with Agents aka LLMs with Tools</a> »</li>
+            </ul>
+            </nav>
+            </aside>
+        </div>
+        <section>
+        <div class="span2" style="float:right;font-size:0.9em;">
+ 
+            <h4>Published</h4>
+            <time pubdate="pubdate" datetime="2025-08-27T20:20:00-07:00">Aug 27, 2025</time>
+            <h4>Category</h4>
+            <a class="category-link" href="/categories.html#ai-ref">ai</a> 
+            <h4>~1685 words</h4>
+            <h4>Tags</h4>
+            <ul class="list-of-tags tags-in-article"> 
+                <li><a href="/tags.html#ai-ref">ai
+                    <span>12</span>
+</a></li>
+                <li><a href="/tags.html#cloudflare-ref">cloudflare
+                    <span>1</span>
+</a></li>
+                <li><a href="/tags.html#llm-ref">llm
+                    <span>5</span>
+</a></li>
+                <li><a href="/tags.html#react-ref">react
+                    <span>4</span>
+</a></li>
+                <li><a href="/tags.html#static-site-ref">static-site
+                    <span>4</span>
+</a></li>
+            </ul>
+
+        </div>
+        </section>
+</div>
+</article>
+				</div>
+				<div class="span1"></div>
+			</div>
+		</div>
+    </div>
+<footer>
+<div id="footer">
+    <ul class="footer-content">
+    </ul>
+</div>
+</footer>            <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+    </body>
+</html>
