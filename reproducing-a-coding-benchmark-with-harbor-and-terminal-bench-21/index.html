@@ -71,7 +71,12 @@
 <li><a href="#results">Results</a><ul>
 <li><a href="#high-level-diagram">High Level Diagram</a></li>
 <li><a href="#llm-api-key">LLM API Key</a></li>
-<li><a href="#just-a-smoke-test">Just a smoke test</a><ul>
+<li><a href="#just-a-smoke-test">Just a smoke test</a></li>
+</ul>
+</li>
+<li><a href="#benchmarks">Benchmarks</a><ul>
+<li><a href="#regex-log">Regex Log</a></li>
+<li><a href="#cohere-north-mini-code">Cohere North Mini-Code</a><ul>
 <li><a href="#model-stuck-in-a-loop">Model stuck in a loop</a></li>
 </ul>
 </li>
@@ -107,7 +112,7 @@
 <p>In the era of AI and frenetic change, how to discern "good" among so many new Large Language Models?</p>
 <p>New LLM capabilities like "reasoning" or "tool use" become table stakes for the next generation; benchmarks become saturated and older models become obsolete.</p>
 <p>Since coding is a concrete way to measure one axis of progress, here's how you can actually test a model with a coding benchmark and an agent (harness).</p>
-<p>My step by step approach, leveraging mostly free resources (*~$10 to unlock higher rate limits), allows you to reproduce the findings from the paper: <a href="https://arxiv.org/html/2601.11868v1">https://arxiv.org/html/2601.11868v1</a></p>
+<p>My step by step approach, leveraging mostly free resources (*~$10 to unlock higher rate limits), allows you to reproduce the findings from the 2024 SWE Agent NeurIpps paper and be on the path to reproducing the 2026 Terminal Bench paper: <a href="https://arxiv.org/html/2601.11868v1">https://arxiv.org/html/2601.11868v1</a></p>
 <blockquote>
 <p>Then, we benchmark frontier LLMs and agents on the 89 tasks in Terminal-Bench 2.0, and find that frontier models and agents resolve less than 65% of tasks, with smaller models scoring around 15%.</p>
 </blockquote>
@@ -258,61 +263,55 @@ result.json
 <div class="highlight"><pre><span></span><code>CONTAINER<span class="w"> </span>ID<span class="w">   </span>IMAGE<span class="w">                          </span>COMMAND<span class="w">                  </span>CREATED<span class="w">          </span>STATUS<span class="w">                        </span>PORTS<span class="w">     </span>NAMES
 72ef64cd5ccb<span class="w">   </span>python:3.13-slim<span class="w">               </span><span class="s2">"sh -c 'sleep infini…"</span><span class="w">   </span><span class="m">35</span><span class="w"> </span>minutes<span class="w"> </span>ago<span class="w">   </span>Up<span class="w"> </span><span class="m">35</span><span class="w"> </span>minutes<span class="w">                           </span>analyze-python-30__cejrwg3__a2ojddk__env-main-1
 ...
-<span class="sb">````</span>
-
-Stopping<span class="w"> </span>the<span class="w"> </span>suite<span class="w"> </span>rather<span class="w"> </span>than<span class="w"> </span>running<span class="w"> </span>serially<span class="w"> </span>through<span class="w"> </span><span class="m">164</span><span class="w"> </span>tasks:
-
-<span class="sb">`</span>control<span class="w"> </span>+<span class="w"> </span>c<span class="sb">`</span>
-
-&gt;<span class="w"> </span>python-16__3Jea2iG:<span class="w"> </span>canceling<span class="w"> </span>trial<span class="p">;</span><span class="w"> </span>this<span class="w"> </span>may<span class="w"> </span>take<span class="w"> </span>up<span class="w"> </span>to<span class="w"> </span>a<span class="w"> </span>minute...
-&gt;<span class="w"> </span>⠴<span class="w">   </span><span class="sb">`</span><span class="m">6</span>/164<span class="sb">`</span><span class="w"> </span>Mean:<span class="w"> </span><span class="m">0</span>.500<span class="w"> </span>━╺━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━<span class="w"> </span><span class="m">0</span>:29:30<span class="w"> </span>-:--:--
-
-
-**HumanEvalFix**<span class="w"> </span>was<span class="w"> </span>used<span class="w"> </span>alongside<span class="w"> </span>SWE-bench<span class="w"> </span><span class="k">in</span><span class="w"> </span>SWE-agent<span class="s1">'s NeurIPS 2024 paper which demonstrated the power of the agent harness compared to just an LLM or an LLM-with-RAG.</span>
-
-<span class="s1">- &lt;https://proceedings.neurips.cc/paper_files/paper/2024/hash/5a7c947568c1b1328ccc5230172e1e7c-Abstract-Conference.html&gt;</span>
-
-<span class="s1"># Benchmarks</span>
-
-<span class="s1">Consider what domain you are interested in using the model for, for instance HumanEvalFix was focused on pure code bug fixing.</span>
-
-<span class="s1">A more modern benchmark is **Terminal Bench 2.1** that specifically tests AI agents in terminal environments - like real work =p</span>
-
-<span class="s1">Selecting a benchmark means asking:</span>
-
-<span class="s1">- how was it designed and constructed? (for which domain: coding, science, math, vision/images, etc)</span>
-<span class="s1">- - "contamination" or "leaked" benchmarks are ones a new release of models easily get 100%</span>
-<span class="s1">- - will this benchmark still be relevant a year later?</span>
-<span class="s1">- is it challenging enough to separate weak models from intermediate and advanced ones?</span>
-<span class="s1">- Can you run it yourself? What does it require, including costs, to run?</span>
-<span class="s1">- Is it reputable enough that using it means your results reference something credible?</span>
-
-<span class="s1">## Regex Log</span>
-
-<span class="s1">I picked a specific task that I can relate to: finding that one log message in a sea of logs!</span>
-
-<span class="s1">- &lt;https://www.tbench.ai/benchmarks/terminal-bench-2/regex-log&gt;</span>
-<span class="s1">- &lt;https://github.com/harbor-framework/terminal-bench-2-1/tree/main/tasks/regex-log&gt;</span>
-
-
-<span class="s1">## Cohere North Mini-Code</span>
-
-<span class="s1">Using an open source model focused on coding, a "Mixture of Experts" 30B parameters with just 3B active.</span>
-
-<span class="s1">- &lt;https://cohere.com/blog/north-mini-code&gt;</span>
-<span class="s1">- &lt;https://en.wikipedia.org/wiki/Cohere&gt;</span>
-<span class="s1">- &lt;https://openrouter.ai/cohere/north-mini-code:free&gt;</span>
-
-<span class="s1">**mini-swe-agent** is an open source and minimal agent, often used in published research for benchmarks, &lt;https://github.com/SWE-agent/mini-swe-agent&gt;</span>
-
-
-<span class="s1">`harbor run -d terminal-bench/terminal-bench-2-1 --agent mini-swe-agent --model openrouter/cohere/north-mini-code:free --include-task-name "terminal-bench/regex-log" `</span>
-
-
-<span class="s1">```bash</span>
-<span class="s1">docker ps -a</span>
-<span class="s1">CONTAINER ID   IMAGE                          COMMAND                  CREATED         STATUS         PORTS     NAMES</span>
-<span class="s1">ad18feb94f0d   alexgshaw/regex-log:20251031   "sh -c '</span>sleep<span class="w"> </span>infini…<span class="s2">"   2 minutes ago   Up 2 minutes             regex-log__hjz2gsa__env-main-1</span>
+</code></pre></div>
+<p>Stopping the suite rather than running serially through 164 tasks:</p>
+<p><code>control + c</code></p>
+<blockquote>
+<p>python-16__3Jea2iG: canceling trial; this may take up to a minute...
+⠴   <code>6/164</code> Mean: 0.500 ━╺━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 0:29:30 -:--:--</p>
+</blockquote>
+<p><strong>HumanEvalFix</strong> was used alongside SWE-bench in SWE-agent's NeurIPS 2024 paper which demonstrated the power of the agent harness compared to just an LLM or an LLM-with-RAG.</p>
+<ul>
+<li><a href="https://proceedings.neurips.cc/paper_files/paper/2024/hash/5a7c947568c1b1328ccc5230172e1e7c-Abstract-Conference.html">https://proceedings.neurips.cc/paper_files/paper/2024/hash/5a7c947568c1b1328ccc5230172e1e7c-Abstract-Conference.html</a></li>
+</ul>
+<h1 id="benchmarks">Benchmarks</h1>
+<p>Consider what domain you are interested in using the model for, for instance HumanEvalFix was focused on pure code bug fixing.</p>
+<p>A more modern benchmark is <strong>Terminal Bench 2.1</strong> that specifically tests AI agents in terminal environments - like real work =p</p>
+<p>Selecting a benchmark means asking:</p>
+<ul>
+<li>how was it designed and constructed? (for which domain: coding, science, math, vision/images, etc)</li>
+<li>
+<ul>
+<li>"contamination" or "leaked" benchmarks are ones a new release of models easily get 100%</li>
+</ul>
+</li>
+<li>
+<ul>
+<li>will this benchmark still be relevant a year later?</li>
+</ul>
+</li>
+<li>is it challenging enough to separate weak models from intermediate and advanced ones?</li>
+<li>Can you run it yourself? What does it require, including costs, to run?</li>
+<li>Is it reputable enough that using it means your results reference something credible?</li>
+</ul>
+<h2 id="regex-log">Regex Log</h2>
+<p>I picked a specific task that I can relate to: finding that one log message in a sea of logs!</p>
+<ul>
+<li><a href="https://www.tbench.ai/benchmarks/terminal-bench-2/regex-log">https://www.tbench.ai/benchmarks/terminal-bench-2/regex-log</a></li>
+<li><a href="https://github.com/harbor-framework/terminal-bench-2-1/tree/main/tasks/regex-log">https://github.com/harbor-framework/terminal-bench-2-1/tree/main/tasks/regex-log</a></li>
+</ul>
+<h2 id="cohere-north-mini-code">Cohere North Mini-Code</h2>
+<p>Using an open source model focused on coding, a "Mixture of Experts" 30B parameters with just 3B active.</p>
+<ul>
+<li><a href="https://cohere.com/blog/north-mini-code">https://cohere.com/blog/north-mini-code</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Cohere">https://en.wikipedia.org/wiki/Cohere</a></li>
+<li><a href="https://openrouter.ai/cohere/north-mini-code:free">https://openrouter.ai/cohere/north-mini-code:free</a></li>
+</ul>
+<p><strong>mini-swe-agent</strong> is an open source and minimal agent, often used in published research for benchmarks, <a href="https://github.com/SWE-agent/mini-swe-agent">https://github.com/SWE-agent/mini-swe-agent</a></p>
+<p><code>harbor run -d terminal-bench/terminal-bench-2-1 --agent mini-swe-agent --model openrouter/cohere/north-mini-code:free --include-task-name "terminal-bench/regex-log"</code></p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>ps<span class="w"> </span>-a
+CONTAINER<span class="w"> </span>ID<span class="w">   </span>IMAGE<span class="w">                          </span>COMMAND<span class="w">                  </span>CREATED<span class="w">         </span>STATUS<span class="w">         </span>PORTS<span class="w">     </span>NAMES
+ad18feb94f0d<span class="w">   </span>alexgshaw/regex-log:20251031<span class="w">   </span><span class="s2">"sh -c 'sleep infini…"</span><span class="w">   </span><span class="m">2</span><span class="w"> </span>minutes<span class="w"> </span>ago<span class="w">   </span>Up<span class="w"> </span><span class="m">2</span><span class="w"> </span>minutes<span class="w">             </span>regex-log__hjz2gsa__env-main-1
 </code></pre></div>
 <h3 id="model-stuck-in-a-loop">Model stuck in a loop</h3>
 <blockquote>
@@ -541,7 +540,7 @@ free<span class="w"> </span>-h
             <time pubdate="pubdate" datetime="2026-07-21T23:59:00-07:00">Jul 21, 2026</time>
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#ai-ref">ai</a> 
-            <h4>~1864 words</h4>
+            <h4>~1877 words</h4>
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article"> 
                 <li><a href="/tags.html#agent-ref">agent
