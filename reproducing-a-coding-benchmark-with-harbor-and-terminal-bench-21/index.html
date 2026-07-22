@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en-US">
+    <head>
+        <meta charset="utf-8"> 
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="author" content="john pfeiffer" />
+        <meta name="copyright" content="john pfeiffer" />
+
+<meta name="keywords" content="ai, agent, evals, benchmark, ai, " />
+        <title>Reproducing a coding benchmark with Harbor and Terminal Bench 2.1  · johnpfeiffer
+</title>
+        <!--link href="https://cdn-images.mailchimp.com/embedcode/slim-081711.css" rel="stylesheet" type="text/css"-->
+        <!--link href="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css" rel="stylesheet"-->
+        <link href="https://blog.john-pfeiffer.com/theme/css/bootstrap-combined.min.css" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="https://blog.john-pfeiffer.com/theme/css/style.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="https://blog.john-pfeiffer.com/theme/css/solarizedlight.css" media="screen">
+        <link rel="shortcut icon" href="https://blog.john-pfeiffer.com/theme/images/favicon.ico" type="image/x-icon" />
+        <link rel="apple-touch-icon" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon.png" />
+        <link rel="apple-touch-icon" sizes="57x57" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-57x57.png" />
+        <link rel="apple-touch-icon" sizes="72x72" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-72x72.png" />
+        <link rel="apple-touch-icon" sizes="114x114" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-114x114.png" />
+        <link rel="apple-touch-icon" sizes="144x144" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-144x144.png" />
+        <link rel="icon" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-144x144.png" />
+    </head>
+    <body>
+	<div id="content-sans-footer">
+        <div class="dropdown-backdrop">
+
+			<div class="navbar navbar-static-top">
+				<div class="navbar-inner">
+					<div class="container">
+						<a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+							<span class="icon-bar"></span>
+							<span class="icon-bar"></span>
+							<span class="icon-bar"></span>
+						</a>
+						<a class="brand" href="https://blog.john-pfeiffer.com/"><span class=site-name>johnpfeiffer</span></a>
+						<div class="nav-collapse collapse">
+							<ul class="nav pull-right top-menu">
+								<li ><a href="https://blog.john-pfeiffer.com">Home</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/engineering-people-managers/">Engineering (People) Managers</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/john-likes/">John Likes</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/software-engineer-favorites/">Software Engineer Favorites</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/categories.html">Categories</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/tags.html">Tags</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/archives.html">Archives</a></li>
+								<li><form class="navbar-search" action="https://blog.john-pfeiffer.com/search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="container-fluid">
+			<div class="row-fluid">
+				<div class="span1"></div>
+				<div class="span10">
+<article>
+<div class="row-fluid">
+    <header class="page_header span10 offset2">
+    <h1><a href="https://blog.john-pfeiffer.com/reproducing-a-coding-benchmark-with-harbor-and-terminal-bench-21/"> Reproducing a coding benchmark with Harbor and Terminal Bench 2.1  </a></h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+    <div class="span2 table-of-content">
+        <nav>
+        <h4>Contents</h4>
+        <div class="toc">
+<ul>
+<li><a href="#results">Results</a><ul>
+<li><a href="#high-level-diagram">High Level Diagram</a></li>
+<li><a href="#llm-api-key">LLM API Key</a></li>
+<li><a href="#just-a-smoke-test">Just a smoke test</a><ul>
+<li><a href="#model-stuck-in-a-loop">Model stuck in a loop</a></li>
+</ul>
+</li>
+<li><a href="#nemotron-3-ultra-with-mini-swe-agent">Nemotron-3-Ultra with mini-swe-agent</a></li>
+<li><a href="#nemotron-3-ultra-with-terminus-2">Nemotron-3-Ultra with Terminus-2</a></li>
+<li><a href="#non-determinism">Non-Determinism</a></li>
+</ul>
+</li>
+<li><a href="#results-analysis">Results Analysis</a></li>
+<li><a href="#appendix">Appendix</a><ul>
+<li><a href="#troubleshooting-issues">Troubleshooting Issues</a></li>
+<li><a href="#hosting">Hosting</a><ul>
+<li><a href="#how-to-connect-and-download-things">How to connect and download things</a></li>
+<li><a href="#increase-swap">Increase swap</a></li>
+</ul>
+</li>
+<li><a href="#install-docker">Install Docker</a></li>
+<li><a href="#install-uv-and-harbor">Install UV and Harbor</a></li>
+<li><a href="#reboot">Reboot</a></li>
+</ul>
+</li>
+</ul>
+</div>
+        </nav>
+    </div>
+    <div class="span8 article-content">
+
+            
+<blockquote>
+<p>Reproducibility is under-appreciated</p>
+</blockquote>
+<p>When you say a bridge is engineered to carry a specified load - you must have reproducible evidence of that claim.</p>
+<p>In the era of AI and frenetic change, how to discern "good" among so many new Large Language Models?</p>
+<p>New LLM capabilities like "reasoning" or "tool use" become table stakes for the next generation; benchmarks become saturated and older models become obsolete.</p>
+<p>Since coding is a concrete way to measure one axis of progress, here's how you can actually test a model with a coding benchmark and an agent (harness).</p>
+<p>My step by step approach, leveraging mostly free resources (*~$10 to unlock higher rate limits), allows you to reproduce the findings from the paper: <a href="https://arxiv.org/html/2601.11868v1">https://arxiv.org/html/2601.11868v1</a></p>
+<blockquote>
+<p>Then, we benchmark frontier LLMs and agents on the 89 tasks in Terminal-Bench 2.0, and find that frontier models and agents resolve less than 65% of tasks, with smaller models scoring around 15%.</p>
+</blockquote>
+<h1 id="results">Results</h1>
+<blockquote>
+<p>tldr: agent harness affects outcomes almost as much as model size, including dramatically reducing time and tokens used</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>North Mini Code + mini-swe-agent</th>
+<th>Nemotron 3 Ultra + mini-swe-agent</th>
+<th>Nemotron 3 Ultra + terminus-2</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Result</td>
+<td>timeout, reward 0.0</td>
+<td>pass, reward 1.0</td>
+<td>pass, reward 1.0</td>
+</tr>
+<tr>
+<td>Steps</td>
+<td>15 (timed out)</td>
+<td>16 (completed)</td>
+<td>5 (completed)</td>
+</tr>
+<tr>
+<td>Reasoning tokens</td>
+<td>57,735 (96% of output)</td>
+<td>9,894 (40% of output)</td>
+<td>~3,500 (41% of output, estimated)</td>
+</tr>
+<tr>
+<td>Completion tokens</td>
+<td>59,951</td>
+<td>24,820</td>
+<td>8,493</td>
+</tr>
+<tr>
+<td>Input tokens</td>
+<td>15,323</td>
+<td>286,276</td>
+<td>18,962</td>
+</tr>
+<tr>
+<td>Cache hits</td>
+<td>0</td>
+<td>208,896 (73%)</td>
+<td>4,352 (23%)</td>
+</tr>
+<tr>
+<td>Time</td>
+<td>&gt;15 min (killed)</td>
+<td>12m 30s</td>
+<td>4m 10s</td>
+</tr>
+<tr>
+<td>Behavior</td>
+<td><code>grep -R "regex" /</code></td>
+<td>wrote solution, ran 33 edge cases</td>
+<td>analyzed, wrote regex, verified in one shot</td>
+</tr>
+</tbody>
+</table>
+<h2 id="high-level-diagram">High Level Diagram</h2>
+<div class="highlight"><pre><span></span><code><span class="err">┌──────────────┐</span><span class="w">            </span><span class="err">┌─────────────┐</span><span class="w">   </span><span class="err">┌─────────────┐</span>
+<span class="err">│</span><span class="w">  </span><span class="n">Harbor</span><span class="w"> </span><span class="n">Hub</span><span class="w">  </span><span class="err">│</span><span class="w">            </span><span class="err">│</span><span class="w">  </span><span class="n">OpenRouter</span><span class="w"> </span><span class="err">│</span><span class="o">---&gt;</span><span class="w"> </span><span class="n">LLM</span><span class="w"> </span><span class="n">Provider</span><span class="err">│</span>
+<span class="err">│</span><span class="w">  </span><span class="p">(</span><span class="nf">dataset</span><span class="p">)</span><span class="w">   </span><span class="err">│</span><span class="w">            </span><span class="err">│</span><span class="w">             </span><span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w">             </span><span class="err">│</span>
+<span class="err">└──────┬───────┘</span><span class="w">            </span><span class="err">└──────▲──────┘</span><span class="w">   </span><span class="err">└─────────────┘</span>
+<span class="w">       </span><span class="err">│</span><span class="w"> </span><span class="nf">pull</span><span class="w">                      </span><span class="err">│</span><span class="w"> </span><span class="n">LLM</span><span class="w"> </span><span class="n">calls</span>
+<span class="err">┌──────┤───────────────────────────┤──────────────────────┐</span><span class="w"> </span>
+<span class="err">│──────▼───────────────────────────┤────────────────────┐</span><span class="w"> </span><span class="err">│</span>
+<span class="err">│</span><span class="w">  </span><span class="n">Harbor</span><span class="w"> </span><span class="n">CLI</span><span class="w">                      </span><span class="err">│</span><span class="w">                    </span><span class="err">│</span><span class="w"> </span><span class="err">│</span>
+<span class="err">│</span><span class="w">                                  </span><span class="err">│</span><span class="w">                    </span><span class="err">│</span><span class="w"> </span><span class="err">│</span>
+<span class="err">│</span><span class="w">  </span><span class="err">┌──────────────────┐</span><span class="w">   </span><span class="err">┌────────┘──────────────┐</span><span class="w">     </span><span class="err">│</span><span class="w"> </span><span class="err">│</span>
+<span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w"> </span><span class="n">Docker</span><span class="w"> </span><span class="n">Container</span><span class="w"> </span><span class="err">│</span><span class="w">   </span><span class="err">│</span><span class="w"> </span><span class="n">Agent</span><span class="w"> </span><span class="p">(</span><span class="n">Harness</span><span class="p">)</span><span class="w">       </span><span class="err">│</span><span class="w">     </span><span class="err">│</span><span class="w"> </span><span class="err">│</span>
+<span class="err">│</span><span class="w">  </span><span class="err">│</span><span class="w"> </span><span class="p">(</span><span class="n">per</span><span class="w"> </span><span class="n">task</span><span class="p">)</span><span class="w">       </span><span class="err">│◄──│</span><span class="w"> </span><span class="s">"mini-swe-agent"</span><span class="w">      </span><span class="err">│</span><span class="w">     </span><span class="err">│</span><span class="w"> </span><span class="err">│</span>
+<span class="err">│</span><span class="w">  </span><span class="err">└──────────────────┘</span><span class="w">   </span><span class="err">└───────────────────────┘</span><span class="w">     </span><span class="err">│</span><span class="w"> </span><span class="err">│</span>
+<span class="err">│</span><span class="w">                                                       </span><span class="err">│</span><span class="w"> </span><span class="err">│</span>
+<span class="err">├───────────────────────────────────────────────────────┤</span><span class="w"> </span><span class="err">│</span>
+<span class="err">│</span><span class="w">  </span><span class="n">jobs</span><span class="o">/&lt;</span><span class="n">date</span><span class="o">-</span><span class="kr">and</span><span class="o">-</span><span class="n">time</span><span class="o">&gt;/&lt;</span><span class="n">task</span><span class="o">-</span><span class="n">id</span><span class="o">&gt;/</span><span class="w">                      </span><span class="err">│</span><span class="w"> </span><span class="err">│</span>
+<span class="err">│</span><span class="w">    </span><span class="n">result</span><span class="p">.</span><span class="n">json</span><span class="w">  </span><span class="n">trajectory</span><span class="p">.</span><span class="n">json</span><span class="w">                       </span><span class="err">│</span><span class="w"> </span><span class="err">│</span>
+<span class="err">│───────────────────────────────────────────────────────┘</span><span class="w"> </span><span class="err">│</span>
+<span class="err">│</span><span class="w"> </span><span class="n">VPS</span><span class="w"> </span><span class="p">(</span><span class="mi">4</span><span class="n">CPU</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">8</span><span class="n">GB</span><span class="w"> </span><span class="n">RAM</span><span class="p">)</span><span class="w">                                    </span><span class="err">│</span>
+<span class="err">└─────────────────────────────────────────────────────────┘</span><span class="w"> </span>
+</code></pre></div>
+<p><em>This is an example minimal size to get started</em></p>
+<h2 id="llm-api-key">LLM API Key</h2>
+<p>Bring your LLM provider of choice. <em>I have no affiliation with OpenRouter, it has a free tier and easy access to a large number of models.</em></p>
+<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">OPENROUTER_API_KEY</span><span class="o">=</span><span class="s1">'sk-...'</span>
+
+curl<span class="w"> </span>https://openrouter.ai/api/v1/models<span class="w"> </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span>&gt;<span class="w"> </span>openrouter-models.json
+
+less<span class="w"> </span>openrouter-models.json
+
+curl<span class="w"> </span>https://openrouter.ai/api/v1/chat/completions<span class="w">   </span>-H<span class="w"> </span><span class="s2">"Content-Type: application/json"</span><span class="w">  </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Authorization: Bearer </span><span class="nv">$OPENROUTER_API_KEY</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-d<span class="w"> </span><span class="s1">'{</span>
+<span class="s1">  "model": "cohere/north-mini-code:free",</span>
+<span class="s1">  "messages": [</span>
+<span class="s1">    {</span>
+<span class="s1">      "role": "user",</span>
+<span class="s1">      "content": "One sentence explaining coding evals with Harbor and Terminal Bench 2.1?"</span>
+<span class="s1">    }</span>
+<span class="s1">  ]</span>
+<span class="s1">}'</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>jq
+</code></pre></div>
+<p><a href="https://openrouter.ai/collections/free-models">https://openrouter.ai/collections/free-models</a></p>
+<p><strong>Disclaimer</strong>: <em>for some free models routed by OpenRouter, the actual Provider may store and use your data</em></p>
+<h2 id="just-a-smoke-test">Just a smoke test</h2>
+<p>First let's see if a suite of simple tasks (bug fixes in code) with a small model and minimal agent works.</p>
+<p><code>harbor run --dataset humanevalfix --agent mini-swe-agent --model openrouter/cohere/north-mini-code:free --n-concurrent 1</code></p>
+<p>⠴   0/164 Running trials... ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 0:01:20 -:--:--
+⠦ 0:01:08 python-63__futnKyJ: starting environment...</p>
+<p>I used OpenRouter's dashboard to watch token consumption:</p>
+<ul>
+<li>At 5 mins had 20 requests for 45k tokens</li>
+<li>At 9 mins had 2 of 164 completed for 39 requests and 140k tokens</li>
+</ul>
+<p>In the filesystem you can see a subdirectory created for each task like "python-134" and "python-63":</p>
+<p><code>ls jobs/2026-07-21__03-45-50/</code></p>
+<div class="highlight"><pre><span></span><code>config.json
+job.log
+lock.json
+python-134__B5yi6tu
+python-63__futnKyJ
+result.json
+</code></pre></div>
+<p><code>cat jobs/2026-07-21__03-45-50/results.json</code></p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="err">...</span>
+<span class="w">    </span><span class="nt">"n_total_trials"</span><span class="p">:</span><span class="w"> </span><span class="mi">164</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"stats"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">"n_completed_trials"</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"n_errored_trials"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"n_running_trials"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"n_pending_trials"</span><span class="p">:</span><span class="w"> </span><span class="mi">160</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"n_cancelled_trials"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"n_retries"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"evals"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">"mini-swe-agent__cohere/north-mini-code:free__humanevalfix"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="err">...</span>
+</code></pre></div>
+<p><code>docker ps -a</code></p>
+<div class="highlight"><pre><span></span><code>CONTAINER<span class="w"> </span>ID<span class="w">   </span>IMAGE<span class="w">                          </span>COMMAND<span class="w">                  </span>CREATED<span class="w">          </span>STATUS<span class="w">                        </span>PORTS<span class="w">     </span>NAMES
+72ef64cd5ccb<span class="w">   </span>python:3.13-slim<span class="w">               </span><span class="s2">"sh -c 'sleep infini…"</span><span class="w">   </span><span class="m">35</span><span class="w"> </span>minutes<span class="w"> </span>ago<span class="w">   </span>Up<span class="w"> </span><span class="m">35</span><span class="w"> </span>minutes<span class="w">                           </span>analyze-python-30__cejrwg3__a2ojddk__env-main-1
+...
+<span class="sb">````</span>
+
+Stopping<span class="w"> </span>the<span class="w"> </span>suite<span class="w"> </span>rather<span class="w"> </span>than<span class="w"> </span>running<span class="w"> </span>serially<span class="w"> </span>through<span class="w"> </span><span class="m">164</span><span class="w"> </span>tasks:
+
+<span class="sb">`</span>control<span class="w"> </span>+<span class="w"> </span>c<span class="sb">`</span>
+
+&gt;<span class="w"> </span>python-16__3Jea2iG:<span class="w"> </span>canceling<span class="w"> </span>trial<span class="p">;</span><span class="w"> </span>this<span class="w"> </span>may<span class="w"> </span>take<span class="w"> </span>up<span class="w"> </span>to<span class="w"> </span>a<span class="w"> </span>minute...
+&gt;<span class="w"> </span>⠴<span class="w">   </span><span class="sb">`</span><span class="m">6</span>/164<span class="sb">`</span><span class="w"> </span>Mean:<span class="w"> </span><span class="m">0</span>.500<span class="w"> </span>━╺━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━<span class="w"> </span><span class="m">0</span>:29:30<span class="w"> </span>-:--:--
+
+
+**HumanEvalFix**<span class="w"> </span>was<span class="w"> </span>used<span class="w"> </span>alongside<span class="w"> </span>SWE-bench<span class="w"> </span><span class="k">in</span><span class="w"> </span>SWE-agent<span class="s1">'s NeurIPS 2024 paper which demonstrated the power of the agent harness compared to just an LLM or an LLM-with-RAG.</span>
+
+<span class="s1">- &lt;https://proceedings.neurips.cc/paper_files/paper/2024/hash/5a7c947568c1b1328ccc5230172e1e7c-Abstract-Conference.html&gt;</span>
+
+<span class="s1"># Benchmarks</span>
+
+<span class="s1">Consider what domain you are interested in using the model for, for instance HumanEvalFix was focused on pure code bug fixing.</span>
+
+<span class="s1">A more modern benchmark is **Terminal Bench 2.1** that specifically tests AI agents in terminal environments - like real work =p</span>
+
+<span class="s1">Selecting a benchmark means asking:</span>
+
+<span class="s1">- how was it designed and constructed? (for which domain: coding, science, math, vision/images, etc)</span>
+<span class="s1">- - "contamination" or "leaked" benchmarks are ones a new release of models easily get 100%</span>
+<span class="s1">- - will this benchmark still be relevant a year later?</span>
+<span class="s1">- is it challenging enough to separate weak models from intermediate and advanced ones?</span>
+<span class="s1">- Can you run it yourself? What does it require, including costs, to run?</span>
+<span class="s1">- Is it reputable enough that using it means your results reference something credible?</span>
+
+<span class="s1">## Regex Log</span>
+
+<span class="s1">I picked a specific task that I can relate to: finding that one log message in a sea of logs!</span>
+
+<span class="s1">- &lt;https://www.tbench.ai/benchmarks/terminal-bench-2/regex-log&gt;</span>
+<span class="s1">- &lt;https://github.com/harbor-framework/terminal-bench-2-1/tree/main/tasks/regex-log&gt;</span>
+
+
+<span class="s1">## Cohere North Mini-Code</span>
+
+<span class="s1">Using an open source model focused on coding, a "Mixture of Experts" 30B parameters with just 3B active.</span>
+
+<span class="s1">- &lt;https://cohere.com/blog/north-mini-code&gt;</span>
+<span class="s1">- &lt;https://en.wikipedia.org/wiki/Cohere&gt;</span>
+<span class="s1">- &lt;https://openrouter.ai/cohere/north-mini-code:free&gt;</span>
+
+<span class="s1">**mini-swe-agent** is an open source and minimal agent, often used in published research for benchmarks, &lt;https://github.com/SWE-agent/mini-swe-agent&gt;</span>
+
+
+<span class="s1">`harbor run -d terminal-bench/terminal-bench-2-1 --agent mini-swe-agent --model openrouter/cohere/north-mini-code:free --include-task-name "terminal-bench/regex-log" `</span>
+
+
+<span class="s1">```bash</span>
+<span class="s1">docker ps -a</span>
+<span class="s1">CONTAINER ID   IMAGE                          COMMAND                  CREATED         STATUS         PORTS     NAMES</span>
+<span class="s1">ad18feb94f0d   alexgshaw/regex-log:20251031   "sh -c '</span>sleep<span class="w"> </span>infini…<span class="s2">"   2 minutes ago   Up 2 minutes             regex-log__hjz2gsa__env-main-1</span>
+</code></pre></div>
+<h3 id="model-stuck-in-a-loop">Model stuck in a loop</h3>
+<blockquote>
+<p>AgentTimeoutError</p>
+</blockquote>
+<p>Total runtime: 16m 18s, OpenRouter says 14 requests and 88K tokens</p>
+<p><code>less jobs/2026-07-21__05-21-02/regex-log__uMDx4As/agent/trajectory.json</code></p>
+<div class="highlight"><pre><span></span><code> "final_metrics": {
+     "total_prompt_tokens": 15323,
+     "total_completion_tokens": 59951,
+     "total_steps": 15,
+     "extra": {
+       "total_reasoning_tokens": 57735
+     }
+</code></pre></div>
+<p>The model kept hitting "python: not found" and trying to reinstall python, over and over.</p>
+<h2 id="nemotron-3-ultra-with-mini-swe-agent">Nemotron-3-Ultra with mini-swe-agent</h2>
+<p><strong>NVIDIA's free endpoint warns</strong>: 'Your use is logged for security purposes and to improve NVIDIA products and services.'</p>
+<ul>
+<li><a href="https://research.nvidia.com/labs/nemotron/Nemotron-3-Ultra/">https://research.nvidia.com/labs/nemotron/Nemotron-3-Ultra/</a></li>
+</ul>
+<p><code>harbor run -d terminal-bench/terminal-bench-2-1 --agent mini-swe-agent --model openrouter/nvidia/nemotron-3-ultra-550b-a55b:free --include-task-name "terminal-bench/regex-log"</code></p>
+<p>Sometimes I like to watch the model in realtime by trailing the traces file, seeing each step and reasoning:</p>
+<p><code>tail -f jobs/2026-07-21__06-18-33/regex-log__Q8Jqf7p/agent/mini-swe-agent.trajectory.json</code></p>
+<p>The result was successful!</p>
+<p>Job Info - Total runtime: 12m 30s</p>
+<div class="highlight"><pre><span></span><code><span class="s">"reward_stats"</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                    </span><span class="s">"reward"</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                        </span><span class="s">"1.0"</span><span class="o">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                            </span><span class="s">"regex-log__Q8Jqf7p"</span>
+<span class="w">                        </span><span class="p">]</span>
+</code></pre></div>
+<p><code>less jobs/2026-07-21__06-18-33/regex-log__Q8Jqf7p/agent/trajectory.json</code></p>
+<div class="highlight"><pre><span></span><code><span class="s">"step_id"</span><span class="o">:</span><span class="w"> </span><span class="mh">15</span><span class="p">,</span>
+<span class="s">"message"</span><span class="o">:</span><span class="w"> </span><span class="s">"The regex is saved and working correctly. Let me run one more edge case test to ensure robustness.</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span>
+<span class="p">...</span>
+<span class="s">"step_id"</span><span class="o">:</span><span class="w"> </span><span class="mh">16</span><span class="p">,</span>
+<span class="s">"message"</span><span class="o">:</span><span class="w"> </span><span class="s">"All 33 edge case tests pass.</span>
+<span class="p">...</span><span class="w">                     </span>
+<span class="w">  </span><span class="s">"final_metrics"</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="s">"total_prompt_tokens"</span><span class="o">:</span><span class="w"> </span><span class="mh">286276</span><span class="p">,</span>
+<span class="w">    </span><span class="s">"total_completion_tokens"</span><span class="o">:</span><span class="w"> </span><span class="mh">24820</span><span class="p">,</span>
+<span class="w">    </span><span class="s">"total_cached_tokens"</span><span class="o">:</span><span class="w"> </span><span class="mh">208896</span><span class="p">,</span>
+<span class="w">    </span><span class="s">"total_steps"</span><span class="o">:</span><span class="w"> </span><span class="mh">16</span><span class="p">,</span>
+<span class="w">    </span><span class="s">"extra"</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="s">"total_reasoning_tokens"</span><span class="o">:</span><span class="w"> </span><span class="mh">9894</span>
+<span class="w">    </span><span class="p">}</span>
+</code></pre></div>
+<h2 id="nemotron-3-ultra-with-terminus-2">Nemotron-3-Ultra with Terminus-2</h2>
+<p><strong>Terminus-2</strong> is Harbor's built-in agent, <a href="https://www.harborframework.com/docs/agents/terminus-2">https://www.harborframework.com/docs/agents/terminus-2</a></p>
+<p><code>harbor run -d terminal-bench/terminal-bench-2-1 --agent terminus-2 --model openrouter/nvidia/nemotron-3-ultra-550b-a55b:free --include-task-name "terminal-bench/regex-log"</code></p>
+<p>Job Info - Total runtime: 4m 10s</p>
+<div class="highlight"><pre><span></span><code><span class="s">"reward_stats"</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                    </span><span class="s">"reward"</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                        </span><span class="s">"1.0"</span><span class="o">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                            </span><span class="s">"regex-log__GRksoC7"</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="s">"step_id"</span><span class="o">:</span><span class="w"> </span><span class="mh">3</span><span class="p">,</span>
+
+<span class="p">...</span>
+<span class="s">"step_id"</span><span class="o">:</span><span class="w"> </span><span class="mh">4</span><span class="p">,</span>
+<span class="s">"message"</span><span class="o">:</span><span class="w"> </span><span class="s">"Analysis: All test cases pass. The regex correctly matches </span>
+<span class="p">...</span>
+<span class="s">"step_id"</span><span class="o">:</span><span class="w"> </span><span class="mh">5</span><span class="p">,</span><span class="w"> </span>
+<span class="w"> </span><span class="s">"message"</span><span class="o">:</span><span class="w"> </span><span class="s">"Analysis: All tests passed, regex is saved in /app/regex.txt, task requirements satisfied.</span><span class="se">\n</span><span class="s">Plan: Confirm task completion."</span><span class="p">,</span>
+<span class="w">  </span><span class="s">"final_metrics"</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="s">"total_prompt_tokens"</span><span class="o">:</span><span class="w"> </span><span class="mh">18962</span><span class="p">,</span>
+<span class="w">    </span><span class="s">"total_completion_tokens"</span><span class="o">:</span><span class="w"> </span><span class="mh">8493</span><span class="p">,</span>
+<span class="w">    </span><span class="s">"total_cached_tokens"</span><span class="o">:</span><span class="w"> </span><span class="mh">4352</span>
+<span class="w">  </span><span class="p">}</span>
+</code></pre></div>
+<h2 id="non-determinism">Non-Determinism</h2>
+<p>A single run of a model + agent on a task is not sufficient evidence. Since LLMs are non-deterministic, repeated runs even with the exact same environment will produce different traces (and tokens used, steps taken, wall clock time, etc) and sometimes even generate different results.</p>
+<p>These particular benchmarks are well designed: even when re-running, the results will consistently cluster, providing confidence in the outcomes.</p>
+<h1 id="results-analysis">Results Analysis</h1>
+<p>550B parameters and 55B active clearly outperforms 30B parameters with 3B active.</p>
+<p>And yet even for Nemotron 3 Ultra, the harness made a difference, 16 steps vs 5 steps:</p>
+<p><strong>mini-swe-agent</strong> exposes a bash tool that takes a single command string and returns its output. 1 tool call per command, then wait for the result, then decide the next command... forced a step-by-step exploration pattern: "which python", ls /app, cat instructions.txt, etc.</p>
+<p><strong>terminus-2</strong> uses keystrokes as its tool as it sends characters to a tmux session. It can and does batch multiple shell commands into a single tool call (write the heredoc and cat to verify in one step). One LLM roundtrip for reasoning through the entire problem, constructing the full regex, writing it out, and verification.</p>
+<p>This reproduces the core finding from SWE-agent's NeurIPS 2024 paper: a superior tool interface lets the model do more with fewer roundtrips = a lot more efficiency in both time and tokens.</p>
+<hr/>
+<h1 id="appendix">Appendix</h1>
+<p>Boring nuts and bolts of setup.</p>
+<p>As you scale up testing with concurrency you will naturally want a larger host (more cpu, more ram) and LLM inference capacity (more tokens).</p>
+<h2 id="troubleshooting-issues">Troubleshooting Issues</h2>
+<p><em><code>harbor run --help</code> - what does the CLI do?</em></p>
+<blockquote>
+<p>"ApiRateLimitError":</p>
+</blockquote>
+<p>Job Info - Total runtime: 5m 41s</p>
+<p>Results written to jobs/2026-07-21__04-33-55/result.json</p>
+<p>Debug by looking in the exception.txt and trajectory.json...</p>
+<div class="highlight"><pre><span></span><code>Command failed
+Classified failed command as ApiRateLimitError (pattern: 'rate.?limit')
+</code></pre></div>
+<p>Ran into a ratelimit from OpenRouter free:</p>
+<ul>
+<li><a href="https://openrouter.zendesk.com/hc/en-us/articles/39501163636379-OpenRouter-Rate-Limits-What-You-Need-to-Know">https://openrouter.zendesk.com/hc/en-us/articles/39501163636379-OpenRouter-Rate-Limits-What-You-Need-to-Know</a></li>
+</ul>
+<p><strong>SOLUTION</strong>: have to deposit $10 for credits to unlock higher limits, but by using the free models you can avoid spending those credits</p>
+<blockquote>
+<p>ValueError: Unknown model: google/gemma-4-31b-it:free</p>
+</blockquote>
+<p>User error, <code>--model google/gemma-4-31b-it:free</code> is invalid with the OpenRouter key</p>
+<p><strong>SOLUTION:</strong> the correct name is:  <code>--model openrouter/google/gemma-4-31b-it:free</code></p>
+<blockquote>
+<p>Provider returned error","code":429</p>
+</blockquote>
+<div class="highlight"><pre><span></span><code><span class="n">RateLimitError</span><span class="o">:</span><span class="w"> </span><span class="n">litellm</span><span class="o">.</span><span class="na">RateLimitError</span><span class="o">:</span><span class="w"> </span><span class="n">RateLimitError</span><span class="o">:</span><span class="w"> </span><span class="n">OpenrouterException</span><span class="w"> </span><span class="o">-</span><span class="w"> </span>
+<span class="o">{</span><span class="s2">"error"</span><span class="o">:{</span><span class="s2">"message"</span><span class="o">:</span><span class="s2">"Provider returned error"</span><span class="o">,</span><span class="s2">"code"</span><span class="o">:</span><span class="mi">429</span><span class="o">,</span>
+<span class="s2">"metadata"</span><span class="o">:{</span><span class="s2">"raw"</span><span class="o">:</span><span class="s2">"google/gemma-4-31b-it:free is temporarily rate-limited upstream. </span>
+<span class="s2">Please retry shortly, or add your own key to accumulate your rate limits: https://openrouter.ai/settings/integrations"</span><span class="o">,</span><span class="w"> </span>
+<span class="s2">"provider_name"</span><span class="o">:</span><span class="s2">"Google AI Studio"</span><span class="o">,</span><span class="s2">"is_byok"</span><span class="o">:</span><span class="kc">false</span><span class="o">,</span><span class="s2">"provider_error_code"</span><span class="o">:</span><span class="s2">"429"</span><span class="o">}},</span>
+</code></pre></div>
+<p><a href="https://openrouter.ai/google/gemma-4-31b-it:free">https://openrouter.ai/google/gemma-4-31b-it:free</a></p>
+<p><strong>SOLUTION:</strong> Google AI Studio is not reliable for their free gemma4 offering, attempt using a less popular model and more reliable Provider.</p>
+<blockquote>
+<p>"AgentTimeoutError": [</p>
+</blockquote>
+<p>Total runtime: 16m 18s, OpenRouter says 14 requests and 88K</p>
+<div class="highlight"><pre><span></span><code>Exception AgentTimeoutError is in exclude_exceptions, not retrying
+Not retrying trial because the exception is not in include_exceptions or the maximum number of retries has been reached
+</code></pre></div>
+<p><strong>SOLUTION:</strong> The agent failed due to the model's (Cohere: North Mini Code) limitations, try a different model. <em>This kind of timeout is effectively a "test failed" outcome</em>.</p>
+<h2 id="hosting">Hosting</h2>
+<p>Launch a VPS with 4 cpu and 8GB RAM, <em>(usually at most $0.10 per hour and for convenience I used ubuntu 24.04)</em> </p>
+<p>Or use your own local hardware =]</p>
+<p>I caution against running llm-powered agents on your personal laptop/machine (even in Docker) as there are too many risk scenarios from "stuck in a loop consumes all cpu/memory/disk" to reward-hacking.</p>
+<p><strong>Security: ensure you have a firewall with inbound allowing only port 22 for SSH</strong></p>
+<h3 id="how-to-connect-and-download-things">How to connect and download things</h3>
+<p><em>For convenience logged in as root on this ephemeral box ;p</em></p>
+<p><code>ssh -i ~/.ssh/mykey root@192.168.1.123</code></p>
+<p>To copy files off of the remote box you can use SCP:</p>
+<p><code>scp -i ~/.ssh/mykey root@192.168.1.123:jobs/2026-07-21__06-55-15/regex-log__GRksoC7/agent/trajectory.json .</code></p>
+<p>My previous (somewhat dated) notes <a href="https://blog.john-pfeiffer.com/security-encryption-https-openssl-ssh-keygen-vpn-letsencrypt-certbot/#ssh-encryption">https://blog.john-pfeiffer.com/security-encryption-https-openssl-ssh-keygen-vpn-letsencrypt-certbot/#ssh-encryption</a></p>
+<h3 id="increase-swap">Increase swap</h3>
+<p><code>free -h</code></p>
+<div class="highlight"><pre><span></span><code><span class="w">               </span>total<span class="w">        </span>used<span class="w">        </span>free<span class="w">      </span>shared<span class="w">  </span>buff/cache<span class="w">   </span>available
+Mem:<span class="w">           </span><span class="m">7</span>.8Gi<span class="w">       </span>395Mi<span class="w">       </span><span class="m">7</span>.4Gi<span class="w">       </span>968Ki<span class="w">       </span>230Mi<span class="w">       </span><span class="m">7</span>.4Gi
+Swap:<span class="w">          </span>495Mi<span class="w">          </span>0B<span class="w">       </span><span class="m">4</span>.5Gi
+</code></pre></div>
+<p>Increase swap by 4GB</p>
+<div class="highlight"><pre><span></span><code>swapoff<span class="w"> </span>/swapfile
+rm<span class="w"> </span>/swapfile
+
+fallocate<span class="w"> </span>-l<span class="w"> </span>4G<span class="w"> </span>/swapfile
+chmod<span class="w"> </span><span class="m">600</span><span class="w"> </span>/swapfile
+mkswap<span class="w"> </span>/swapfile
+swapon<span class="w"> </span>/swapfile
+
+
+free<span class="w"> </span>-h
+
+<span class="w">               </span>total<span class="w">        </span>used<span class="w">        </span>free<span class="w">      </span>shared<span class="w">  </span>buff/cache<span class="w">   </span>available
+Mem:<span class="w">            </span><span class="m">7941</span><span class="w">         </span><span class="m">396</span><span class="w">        </span><span class="m">7544</span><span class="w">           </span><span class="m">0</span><span class="w">         </span><span class="m">230</span><span class="w">        </span><span class="m">7544</span>
+Swap:<span class="w">           </span><span class="m">4591</span><span class="w">           </span><span class="m">0</span><span class="w">        </span><span class="m">4591</span>
+
+swapon
+
+<span class="w">    </span>NAME<span class="w">      </span>TYPE<span class="w">      </span>SIZE<span class="w"> </span>USED<span class="w"> </span>PRIO
+<span class="w">    </span>/dev/sdb<span class="w">  </span>partition<span class="w"> </span>496M<span class="w">   </span>0B<span class="w">   </span>-2
+<span class="w">    </span>/swapfile<span class="w"> </span>file<span class="w">        </span>4G<span class="w">   </span>0B<span class="w">   </span>-3
+</code></pre></div>
+<h2 id="install-docker">Install Docker</h2>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>install<span class="w"> </span>-m<span class="w"> </span><span class="m">0755</span><span class="w"> </span>-d<span class="w"> </span>/etc/apt/keyrings
+
+sudo<span class="w"> </span>curl<span class="w"> </span>-fsSL<span class="w"> </span>https://download.docker.com/linux/ubuntu/gpg<span class="w"> </span>-o<span class="w"> </span>/etc/apt/keyrings/docker.asc
+
+sudo<span class="w"> </span>chmod<span class="w"> </span>a+r<span class="w"> </span>/etc/apt/keyrings/docker.asc
+
+sudo<span class="w"> </span>tee<span class="w"> </span>/etc/apt/sources.list.d/docker.sources<span class="w"> </span>&gt;/dev/null<span class="w"> </span><span class="s">&lt;&lt;EOF</span>
+<span class="s">Types: deb</span>
+<span class="s">URIs: https://download.docker.com/linux/ubuntu</span>
+<span class="s">Suites: $(. /etc/os-release &amp;&amp; echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}")</span>
+<span class="s">Components: stable</span>
+<span class="s">Architectures: $(dpkg --print-architecture)</span>
+<span class="s">Signed-By: /etc/apt/keyrings/docker.asc</span>
+<span class="s">EOF</span>
+
+sudo<span class="w"> </span>apt<span class="w"> </span>update
+
+sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>docker-ce<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>docker-ce-cli<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>containerd.io<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>docker-buildx-plugin<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>docker-compose-plugin
+</code></pre></div>
+<p><code>docker info</code>
+<code>docker compose version</code></p>
+<h2 id="install-uv-and-harbor">Install UV and Harbor</h2>
+<div class="highlight"><pre><span></span><code><span class="n">curl</span><span class="w"> </span><span class="o">-</span><span class="n">LsSf</span><span class="w"> </span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">astral</span><span class="o">.</span><span class="n">sh</span><span class="o">/</span><span class="n">uv</span><span class="o">/</span><span class="n">install</span><span class="o">.</span><span class="n">sh</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">sh</span>
+<span class="n">source</span><span class="w"> </span><span class="o">$</span><span class="n">HOME</span><span class="o">/.</span><span class="n">local</span><span class="o">/</span><span class="n">bin</span><span class="o">/</span><span class="n">env</span>
+<span class="n">uv</span><span class="w"> </span><span class="k">tool</span><span class="w"> </span><span class="n">install</span><span class="w"> </span><span class="s2">"harbor==0.20.0"</span>
+<span class="n">harbor</span><span class="w"> </span><span class="o">--</span><span class="n">version</span>
+</code></pre></div>
+<p>One of the simplest open standards for running benchmarks (especially with agents)</p>
+<ul>
+<li><a href="https://github.com/harbor-framework/harbor">https://github.com/harbor-framework/harbor</a></li>
+<li><a href="https://www.harborframework.com/docs/tasks">https://www.harborframework.com/docs/tasks</a></li>
+<li><a href="https://docs.nvidia.com/nemo-platform/documentation/evaluate-models/agent-eval/harbor-runner">https://docs.nvidia.com/nemo-platform/documentation/evaluate-models/agent-eval/harbor-runner</a></li>
+</ul>
+<h2 id="reboot">Reboot</h2>
+<p>reboot the VPS, ssh in again, double check the host is on the correct kernel and swap is on</p>
+<p><code>reboot</code></p>
+<div class="highlight"><pre><span></span><code>uname<span class="w"> </span>-r<span class="w">  </span><span class="c1"># expecting 6.8.0-136-generic</span>
+
+swapon<span class="w"> </span>/swapfile
+
+free<span class="w"> </span>-h
+</code></pre></div>
+            <aside>
+            <hr/>
+            <nav>
+            <ul class="articles_timeline">
+ 
+                <li class="previous_article">« <a href="https://blog.john-pfeiffer.com/a-coding-agent-in-the-cloud-with-factory-and-railway/" title="Previous: A coding agent in the cloud with Factory and Railway">A coding agent in the cloud with Factory and Railway</a></li>
+            </ul>
+            </nav>
+            </aside>
+        </div>
+        <section>
+        <div class="span2" style="float:right;font-size:0.9em;">
+ 
+            <h4>Published</h4>
+            <time pubdate="pubdate" datetime="2026-07-21T23:59:00-07:00">Jul 21, 2026</time>
+            <h4>Category</h4>
+            <a class="category-link" href="/categories.html#ai-ref">ai</a> 
+            <h4>~1864 words</h4>
+            <h4>Tags</h4>
+            <ul class="list-of-tags tags-in-article"> 
+                <li><a href="/tags.html#agent-ref">agent
+                    <span>3</span>
+</a></li>
+                <li><a href="/tags.html#ai-ref">ai
+                    <span>13</span>
+</a></li>
+                <li><a href="/tags.html#benchmark-ref">benchmark
+                    <span>3</span>
+</a></li>
+                <li><a href="/tags.html#evals-ref">evals
+                    <span>1</span>
+</a></li>
+            </ul>
+
+        </div>
+        </section>
+</div>
+</article>
+				</div>
+				<div class="span1"></div>
+			</div>
+		</div>
+    </div>
+<footer>
+<div id="footer">
+    <ul class="footer-content">
+    </ul>
+</div>
+</footer>            <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+    </body>
+</html>

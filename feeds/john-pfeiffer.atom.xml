@@ -1,5 +1,435 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>johnpfeiffer - john pfeiffer</title><link href="https://blog.john-pfeiffer.com/" rel="alternate"/><link href="https://blog.john-pfeiffer.com/feeds/john-pfeiffer.atom.xml" rel="self"/><id>https://blog.john-pfeiffer.com/</id><updated>2026-06-22T09:10:00-07:00</updated><entry><title>A coding agent in the cloud with Factory and Railway</title><link href="https://blog.john-pfeiffer.com/a-coding-agent-in-the-cloud-with-factory-and-railway/" rel="alternate"/><published>2026-06-22T09:10:00-07:00</published><updated>2026-06-22T09:10:00-07:00</updated><author><name>john pfeiffer</name></author><id>tag:blog.john-pfeiffer.com,2026-06-22:/a-coding-agent-in-the-cloud-with-factory-and-railway/</id><summary type="html">
+<feed xmlns="http://www.w3.org/2005/Atom"><title>johnpfeiffer - john pfeiffer</title><link href="https://blog.john-pfeiffer.com/" rel="alternate"/><link href="https://blog.john-pfeiffer.com/feeds/john-pfeiffer.atom.xml" rel="self"/><id>https://blog.john-pfeiffer.com/</id><updated>2026-07-21T23:59:00-07:00</updated><entry><title>Reproducing a coding benchmark with Harbor and Terminal Bench 2.1</title><link href="https://blog.john-pfeiffer.com/reproducing-a-coding-benchmark-with-harbor-and-terminal-bench-21/" rel="alternate"/><published>2026-07-21T23:59:00-07:00</published><updated>2026-07-21T23:59:00-07:00</updated><author><name>john pfeiffer</name></author><id>tag:blog.john-pfeiffer.com,2026-07-21:/reproducing-a-coding-benchmark-with-harbor-and-terminal-bench-21/</id><summary type="html">
+&lt;blockquote&gt;
+&lt;p&gt;Reproducibility is under-appreciated&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;When you say a bridge is engineered to carry a specified load - you must have reproducible evidence of that claim.&lt;/p&gt;
+&lt;p&gt;In the era of AI and frenetic change, how to discern "good" among so many new Large Language Models?&lt;/p&gt;
+&lt;p&gt;New LLM capabilities like "reasoning" or "tool use …&lt;/p&gt;</summary><content type="html">
+&lt;blockquote&gt;
+&lt;p&gt;Reproducibility is under-appreciated&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;When you say a bridge is engineered to carry a specified load - you must have reproducible evidence of that claim.&lt;/p&gt;
+&lt;p&gt;In the era of AI and frenetic change, how to discern "good" among so many new Large Language Models?&lt;/p&gt;
+&lt;p&gt;New LLM capabilities like "reasoning" or "tool use" become table stakes for the next generation; benchmarks become saturated and older models become obsolete.&lt;/p&gt;
+&lt;p&gt;Since coding is a concrete way to measure one axis of progress, here's how you can actually test a model with a coding benchmark and an agent (harness).&lt;/p&gt;
+&lt;p&gt;My step by step approach, leveraging mostly free resources (*~$10 to unlock higher rate limits), allows you to reproduce the findings from the paper: &lt;a href="https://arxiv.org/html/2601.11868v1"&gt;https://arxiv.org/html/2601.11868v1&lt;/a&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Then, we benchmark frontier LLMs and agents on the 89 tasks in Terminal-Bench 2.0, and find that frontier models and agents resolve less than 65% of tasks, with smaller models scoring around 15%.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h1 id="results"&gt;Results&lt;/h1&gt;
+&lt;blockquote&gt;
+&lt;p&gt;tldr: agent harness affects outcomes almost as much as model size, including dramatically reducing time and tokens used&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;&lt;/th&gt;
+&lt;th&gt;North Mini Code + mini-swe-agent&lt;/th&gt;
+&lt;th&gt;Nemotron 3 Ultra + mini-swe-agent&lt;/th&gt;
+&lt;th&gt;Nemotron 3 Ultra + terminus-2&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;Result&lt;/td&gt;
+&lt;td&gt;timeout, reward 0.0&lt;/td&gt;
+&lt;td&gt;pass, reward 1.0&lt;/td&gt;
+&lt;td&gt;pass, reward 1.0&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;Steps&lt;/td&gt;
+&lt;td&gt;15 (timed out)&lt;/td&gt;
+&lt;td&gt;16 (completed)&lt;/td&gt;
+&lt;td&gt;5 (completed)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;Reasoning tokens&lt;/td&gt;
+&lt;td&gt;57,735 (96% of output)&lt;/td&gt;
+&lt;td&gt;9,894 (40% of output)&lt;/td&gt;
+&lt;td&gt;~3,500 (41% of output, estimated)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;Completion tokens&lt;/td&gt;
+&lt;td&gt;59,951&lt;/td&gt;
+&lt;td&gt;24,820&lt;/td&gt;
+&lt;td&gt;8,493&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;Input tokens&lt;/td&gt;
+&lt;td&gt;15,323&lt;/td&gt;
+&lt;td&gt;286,276&lt;/td&gt;
+&lt;td&gt;18,962&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;Cache hits&lt;/td&gt;
+&lt;td&gt;0&lt;/td&gt;
+&lt;td&gt;208,896 (73%)&lt;/td&gt;
+&lt;td&gt;4,352 (23%)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;Time&lt;/td&gt;
+&lt;td&gt;&amp;gt;15 min (killed)&lt;/td&gt;
+&lt;td&gt;12m 30s&lt;/td&gt;
+&lt;td&gt;4m 10s&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;Behavior&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;grep -R "regex" /&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;wrote solution, ran 33 edge cases&lt;/td&gt;
+&lt;td&gt;analyzed, wrote regex, verified in one shot&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h2 id="high-level-diagram"&gt;High Level Diagram&lt;/h2&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="err"&gt;┌──────────────┐&lt;/span&gt;&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="err"&gt;┌─────────────┐&lt;/span&gt;&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="err"&gt;┌─────────────┐&lt;/span&gt;
+&lt;span class="err"&gt;│&lt;/span&gt;&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="n"&gt;Harbor&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;Hub&lt;/span&gt;&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="err"&gt;│&lt;/span&gt;&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="err"&gt;│&lt;/span&gt;&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="n"&gt;OpenRouter&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="err"&gt;│&lt;/span&gt;&lt;span class="o"&gt;---&amp;gt;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;LLM&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;Provider&lt;/span&gt;&lt;span class="err"&gt;│&lt;/span&gt;
+&lt;span class="err"&gt;│&lt;/span&gt;&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nf"&gt;dataset&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="err"&gt;│&lt;/span&gt;&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="err"&gt;│&lt;/span&gt;&lt;span class="w"&gt;             &lt;/span&gt;&lt;span class="err"&gt;│&lt;/span&gt;&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="err"&gt;│&lt;/span&gt;&lt;span class="w"&gt;             &lt;/span&gt;&lt;span class="err"&gt;│&lt;/span&gt;
+&lt;span class="err"&gt;└──────┬───────┘&lt;/span&gt;&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="err"&gt;└──────▲──────┘&lt;/span&gt;&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="err"&gt;└─────────────┘&lt;/span&gt;
+&lt;span class="w"&gt;       &lt;/span&gt;&lt;span class="err"&gt;│&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nf"&gt;pull&lt;/span&gt;&lt;span class="w"&gt;                      &lt;/span&gt;&lt;span class="err"&gt;│&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;LLM&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;calls&lt;/span&gt;
+&lt;span class="err"&gt;┌──────┤───────────────────────────┤──────────────────────┐&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;
+&lt;span class="err"&gt;│──────▼───────────────────────────┤────────────────────┐&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="err"&gt;│&lt;/span&gt;
+&lt;span class="err"&gt;│&lt;/span&gt;&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="n"&gt;Harbor&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;CLI&lt;/span&gt;&lt;span class="w"&gt;                      &lt;/span&gt;&lt;span class="err"&gt;│&lt;/span&gt;&lt;span class="w"&gt;                    &lt;/span&gt;&lt;span class="err"&gt;│&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="err"&gt;│&lt;/span&gt;
+&lt;span class="err"&gt;│&lt;/span&gt;&lt;span class="w"&gt;                                  &lt;/span&gt;&lt;span class="err"&gt;│&lt;/span&gt;&lt;span class="w"&gt;                    &lt;/span&gt;&lt;span class="err"&gt;│&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="err"&gt;│&lt;/span&gt;
+&lt;span class="err"&gt;│&lt;/span&gt;&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="err"&gt;┌──────────────────┐&lt;/span&gt;&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="err"&gt;┌────────┘──────────────┐&lt;/span&gt;&lt;span class="w"&gt;     &lt;/span&gt;&lt;span class="err"&gt;│&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="err"&gt;│&lt;/span&gt;
+&lt;span class="err"&gt;│&lt;/span&gt;&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="err"&gt;│&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;Docker&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;Container&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="err"&gt;│&lt;/span&gt;&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="err"&gt;│&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;Agent&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;Harness&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="w"&gt;       &lt;/span&gt;&lt;span class="err"&gt;│&lt;/span&gt;&lt;span class="w"&gt;     &lt;/span&gt;&lt;span class="err"&gt;│&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="err"&gt;│&lt;/span&gt;
+&lt;span class="err"&gt;│&lt;/span&gt;&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="err"&gt;│&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;per&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;task&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="w"&gt;       &lt;/span&gt;&lt;span class="err"&gt;│◄──│&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s"&gt;"mini-swe-agent"&lt;/span&gt;&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="err"&gt;│&lt;/span&gt;&lt;span class="w"&gt;     &lt;/span&gt;&lt;span class="err"&gt;│&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="err"&gt;│&lt;/span&gt;
+&lt;span class="err"&gt;│&lt;/span&gt;&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="err"&gt;└──────────────────┘&lt;/span&gt;&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="err"&gt;└───────────────────────┘&lt;/span&gt;&lt;span class="w"&gt;     &lt;/span&gt;&lt;span class="err"&gt;│&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="err"&gt;│&lt;/span&gt;
+&lt;span class="err"&gt;│&lt;/span&gt;&lt;span class="w"&gt;                                                       &lt;/span&gt;&lt;span class="err"&gt;│&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="err"&gt;│&lt;/span&gt;
+&lt;span class="err"&gt;├───────────────────────────────────────────────────────┤&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="err"&gt;│&lt;/span&gt;
+&lt;span class="err"&gt;│&lt;/span&gt;&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="n"&gt;jobs&lt;/span&gt;&lt;span class="o"&gt;/&amp;lt;&lt;/span&gt;&lt;span class="n"&gt;date&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="kr"&gt;and&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;time&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;/&amp;lt;&lt;/span&gt;&lt;span class="n"&gt;task&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;id&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;/&lt;/span&gt;&lt;span class="w"&gt;                      &lt;/span&gt;&lt;span class="err"&gt;│&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="err"&gt;│&lt;/span&gt;
+&lt;span class="err"&gt;│&lt;/span&gt;&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="n"&gt;result&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;json&lt;/span&gt;&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="n"&gt;trajectory&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;json&lt;/span&gt;&lt;span class="w"&gt;                       &lt;/span&gt;&lt;span class="err"&gt;│&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="err"&gt;│&lt;/span&gt;
+&lt;span class="err"&gt;│───────────────────────────────────────────────────────┘&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="err"&gt;│&lt;/span&gt;
+&lt;span class="err"&gt;│&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;VPS&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="n"&gt;CPU&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;8&lt;/span&gt;&lt;span class="n"&gt;GB&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;RAM&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="w"&gt;                                    &lt;/span&gt;&lt;span class="err"&gt;│&lt;/span&gt;
+&lt;span class="err"&gt;└─────────────────────────────────────────────────────────┘&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;&lt;em&gt;This is an example minimal size to get started&lt;/em&gt;&lt;/p&gt;
+&lt;h2 id="llm-api-key"&gt;LLM API Key&lt;/h2&gt;
+&lt;p&gt;Bring your LLM provider of choice. &lt;em&gt;I have no affiliation with OpenRouter, it has a free tier and easy access to a large number of models.&lt;/em&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nb"&gt;export&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;OPENROUTER_API_KEY&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s1"&gt;'sk-...'&lt;/span&gt;
+
+curl&lt;span class="w"&gt; &lt;/span&gt;https://openrouter.ai/api/v1/models&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;|&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;jq&lt;span class="w"&gt; &lt;/span&gt;&amp;gt;&lt;span class="w"&gt; &lt;/span&gt;openrouter-models.json
+
+less&lt;span class="w"&gt; &lt;/span&gt;openrouter-models.json
+
+curl&lt;span class="w"&gt; &lt;/span&gt;https://openrouter.ai/api/v1/chat/completions&lt;span class="w"&gt;   &lt;/span&gt;-H&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;"Content-Type: application/json"&lt;/span&gt;&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="se"&gt;\&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;-H&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;"Authorization: Bearer &lt;/span&gt;&lt;span class="nv"&gt;$OPENROUTER_API_KEY&lt;/span&gt;&lt;span class="s2"&gt;"&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="se"&gt;\&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;-d&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s1"&gt;'{&lt;/span&gt;
+&lt;span class="s1"&gt;  "model": "cohere/north-mini-code:free",&lt;/span&gt;
+&lt;span class="s1"&gt;  "messages": [&lt;/span&gt;
+&lt;span class="s1"&gt;    {&lt;/span&gt;
+&lt;span class="s1"&gt;      "role": "user",&lt;/span&gt;
+&lt;span class="s1"&gt;      "content": "One sentence explaining coding evals with Harbor and Terminal Bench 2.1?"&lt;/span&gt;
+&lt;span class="s1"&gt;    }&lt;/span&gt;
+&lt;span class="s1"&gt;  ]&lt;/span&gt;
+&lt;span class="s1"&gt;}'&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;|&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;jq
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;&lt;a href="https://openrouter.ai/collections/free-models"&gt;https://openrouter.ai/collections/free-models&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Disclaimer&lt;/strong&gt;: &lt;em&gt;for some free models routed by OpenRouter, the actual Provider may store and use your data&lt;/em&gt;&lt;/p&gt;
+&lt;h2 id="just-a-smoke-test"&gt;Just a smoke test&lt;/h2&gt;
+&lt;p&gt;First let's see if a suite of simple tasks (bug fixes in code) with a small model and minimal agent works.&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;harbor run --dataset humanevalfix --agent mini-swe-agent --model openrouter/cohere/north-mini-code:free --n-concurrent 1&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;⠴   0/164 Running trials... ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 0:01:20 -:--:--
+⠦ 0:01:08 python-63__futnKyJ: starting environment...&lt;/p&gt;
+&lt;p&gt;I used OpenRouter's dashboard to watch token consumption:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;At 5 mins had 20 requests for 45k tokens&lt;/li&gt;
+&lt;li&gt;At 9 mins had 2 of 164 completed for 39 requests and 140k tokens&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;In the filesystem you can see a subdirectory created for each task like "python-134" and "python-63":&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;ls jobs/2026-07-21__03-45-50/&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;config.json
+job.log
+lock.json
+python-134__B5yi6tu
+python-63__futnKyJ
+result.json
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;&lt;code&gt;cat jobs/2026-07-21__03-45-50/results.json&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="p"&gt;{&lt;/span&gt;
+&lt;span class="err"&gt;...&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="nt"&gt;"n_total_trials"&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;164&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="nt"&gt;"stats"&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="nt"&gt;"n_completed_trials"&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="nt"&gt;"n_errored_trials"&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="nt"&gt;"n_running_trials"&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="nt"&gt;"n_pending_trials"&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;160&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="nt"&gt;"n_cancelled_trials"&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="nt"&gt;"n_retries"&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="nt"&gt;"evals"&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;
+&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="nt"&gt;"mini-swe-agent__cohere/north-mini-code:free__humanevalfix"&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;
+&lt;span class="err"&gt;...&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;&lt;code&gt;docker ps -a&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;CONTAINER&lt;span class="w"&gt; &lt;/span&gt;ID&lt;span class="w"&gt;   &lt;/span&gt;IMAGE&lt;span class="w"&gt;                          &lt;/span&gt;COMMAND&lt;span class="w"&gt;                  &lt;/span&gt;CREATED&lt;span class="w"&gt;          &lt;/span&gt;STATUS&lt;span class="w"&gt;                        &lt;/span&gt;PORTS&lt;span class="w"&gt;     &lt;/span&gt;NAMES
+72ef64cd5ccb&lt;span class="w"&gt;   &lt;/span&gt;python:3.13-slim&lt;span class="w"&gt;               &lt;/span&gt;&lt;span class="s2"&gt;"sh -c 'sleep infini…"&lt;/span&gt;&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="m"&gt;35&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;minutes&lt;span class="w"&gt; &lt;/span&gt;ago&lt;span class="w"&gt;   &lt;/span&gt;Up&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;35&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;minutes&lt;span class="w"&gt;                           &lt;/span&gt;analyze-python-30__cejrwg3__a2ojddk__env-main-1
+...
+&lt;span class="sb"&gt;````&lt;/span&gt;
+
+Stopping&lt;span class="w"&gt; &lt;/span&gt;the&lt;span class="w"&gt; &lt;/span&gt;suite&lt;span class="w"&gt; &lt;/span&gt;rather&lt;span class="w"&gt; &lt;/span&gt;than&lt;span class="w"&gt; &lt;/span&gt;running&lt;span class="w"&gt; &lt;/span&gt;serially&lt;span class="w"&gt; &lt;/span&gt;through&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;164&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;tasks:
+
+&lt;span class="sb"&gt;`&lt;/span&gt;control&lt;span class="w"&gt; &lt;/span&gt;+&lt;span class="w"&gt; &lt;/span&gt;c&lt;span class="sb"&gt;`&lt;/span&gt;
+
+&amp;gt;&lt;span class="w"&gt; &lt;/span&gt;python-16__3Jea2iG:&lt;span class="w"&gt; &lt;/span&gt;canceling&lt;span class="w"&gt; &lt;/span&gt;trial&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;this&lt;span class="w"&gt; &lt;/span&gt;may&lt;span class="w"&gt; &lt;/span&gt;take&lt;span class="w"&gt; &lt;/span&gt;up&lt;span class="w"&gt; &lt;/span&gt;to&lt;span class="w"&gt; &lt;/span&gt;a&lt;span class="w"&gt; &lt;/span&gt;minute...
+&amp;gt;&lt;span class="w"&gt; &lt;/span&gt;⠴&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="sb"&gt;`&lt;/span&gt;&lt;span class="m"&gt;6&lt;/span&gt;/164&lt;span class="sb"&gt;`&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;Mean:&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;.500&lt;span class="w"&gt; &lt;/span&gt;━╺━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;:29:30&lt;span class="w"&gt; &lt;/span&gt;-:--:--
+
+
+**HumanEvalFix**&lt;span class="w"&gt; &lt;/span&gt;was&lt;span class="w"&gt; &lt;/span&gt;used&lt;span class="w"&gt; &lt;/span&gt;alongside&lt;span class="w"&gt; &lt;/span&gt;SWE-bench&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;in&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;SWE-agent&lt;span class="s1"&gt;'s NeurIPS 2024 paper which demonstrated the power of the agent harness compared to just an LLM or an LLM-with-RAG.&lt;/span&gt;
+
+&lt;span class="s1"&gt;- &amp;lt;https://proceedings.neurips.cc/paper_files/paper/2024/hash/5a7c947568c1b1328ccc5230172e1e7c-Abstract-Conference.html&amp;gt;&lt;/span&gt;
+
+&lt;span class="s1"&gt;# Benchmarks&lt;/span&gt;
+
+&lt;span class="s1"&gt;Consider what domain you are interested in using the model for, for instance HumanEvalFix was focused on pure code bug fixing.&lt;/span&gt;
+
+&lt;span class="s1"&gt;A more modern benchmark is **Terminal Bench 2.1** that specifically tests AI agents in terminal environments - like real work =p&lt;/span&gt;
+
+&lt;span class="s1"&gt;Selecting a benchmark means asking:&lt;/span&gt;
+
+&lt;span class="s1"&gt;- how was it designed and constructed? (for which domain: coding, science, math, vision/images, etc)&lt;/span&gt;
+&lt;span class="s1"&gt;- - "contamination" or "leaked" benchmarks are ones a new release of models easily get 100%&lt;/span&gt;
+&lt;span class="s1"&gt;- - will this benchmark still be relevant a year later?&lt;/span&gt;
+&lt;span class="s1"&gt;- is it challenging enough to separate weak models from intermediate and advanced ones?&lt;/span&gt;
+&lt;span class="s1"&gt;- Can you run it yourself? What does it require, including costs, to run?&lt;/span&gt;
+&lt;span class="s1"&gt;- Is it reputable enough that using it means your results reference something credible?&lt;/span&gt;
+
+&lt;span class="s1"&gt;## Regex Log&lt;/span&gt;
+
+&lt;span class="s1"&gt;I picked a specific task that I can relate to: finding that one log message in a sea of logs!&lt;/span&gt;
+
+&lt;span class="s1"&gt;- &amp;lt;https://www.tbench.ai/benchmarks/terminal-bench-2/regex-log&amp;gt;&lt;/span&gt;
+&lt;span class="s1"&gt;- &amp;lt;https://github.com/harbor-framework/terminal-bench-2-1/tree/main/tasks/regex-log&amp;gt;&lt;/span&gt;
+
+
+&lt;span class="s1"&gt;## Cohere North Mini-Code&lt;/span&gt;
+
+&lt;span class="s1"&gt;Using an open source model focused on coding, a "Mixture of Experts" 30B parameters with just 3B active.&lt;/span&gt;
+
+&lt;span class="s1"&gt;- &amp;lt;https://cohere.com/blog/north-mini-code&amp;gt;&lt;/span&gt;
+&lt;span class="s1"&gt;- &amp;lt;https://en.wikipedia.org/wiki/Cohere&amp;gt;&lt;/span&gt;
+&lt;span class="s1"&gt;- &amp;lt;https://openrouter.ai/cohere/north-mini-code:free&amp;gt;&lt;/span&gt;
+
+&lt;span class="s1"&gt;**mini-swe-agent** is an open source and minimal agent, often used in published research for benchmarks, &amp;lt;https://github.com/SWE-agent/mini-swe-agent&amp;gt;&lt;/span&gt;
+
+
+&lt;span class="s1"&gt;`harbor run -d terminal-bench/terminal-bench-2-1 --agent mini-swe-agent --model openrouter/cohere/north-mini-code:free --include-task-name "terminal-bench/regex-log" `&lt;/span&gt;
+
+
+&lt;span class="s1"&gt;```bash&lt;/span&gt;
+&lt;span class="s1"&gt;docker ps -a&lt;/span&gt;
+&lt;span class="s1"&gt;CONTAINER ID   IMAGE                          COMMAND                  CREATED         STATUS         PORTS     NAMES&lt;/span&gt;
+&lt;span class="s1"&gt;ad18feb94f0d   alexgshaw/regex-log:20251031   "sh -c '&lt;/span&gt;sleep&lt;span class="w"&gt; &lt;/span&gt;infini…&lt;span class="s2"&gt;"   2 minutes ago   Up 2 minutes             regex-log__hjz2gsa__env-main-1&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h3 id="model-stuck-in-a-loop"&gt;Model stuck in a loop&lt;/h3&gt;
+&lt;blockquote&gt;
+&lt;p&gt;AgentTimeoutError&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Total runtime: 16m 18s, OpenRouter says 14 requests and 88K tokens&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;less jobs/2026-07-21__05-21-02/regex-log__uMDx4As/agent/trajectory.json&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt; "final_metrics": {
+     "total_prompt_tokens": 15323,
+     "total_completion_tokens": 59951,
+     "total_steps": 15,
+     "extra": {
+       "total_reasoning_tokens": 57735
+     }
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;The model kept hitting "python: not found" and trying to reinstall python, over and over.&lt;/p&gt;
+&lt;h2 id="nemotron-3-ultra-with-mini-swe-agent"&gt;Nemotron-3-Ultra with mini-swe-agent&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;NVIDIA's free endpoint warns&lt;/strong&gt;: 'Your use is logged for security purposes and to improve NVIDIA products and services.'&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://research.nvidia.com/labs/nemotron/Nemotron-3-Ultra/"&gt;https://research.nvidia.com/labs/nemotron/Nemotron-3-Ultra/&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;code&gt;harbor run -d terminal-bench/terminal-bench-2-1 --agent mini-swe-agent --model openrouter/nvidia/nemotron-3-ultra-550b-a55b:free --include-task-name "terminal-bench/regex-log"&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;Sometimes I like to watch the model in realtime by trailing the traces file, seeing each step and reasoning:&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;tail -f jobs/2026-07-21__06-18-33/regex-log__Q8Jqf7p/agent/mini-swe-agent.trajectory.json&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;The result was successful!&lt;/p&gt;
+&lt;p&gt;Job Info - Total runtime: 12m 30s&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="s"&gt;"reward_stats"&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;
+&lt;span class="w"&gt;                    &lt;/span&gt;&lt;span class="s"&gt;"reward"&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;
+&lt;span class="w"&gt;                        &lt;/span&gt;&lt;span class="s"&gt;"1.0"&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;
+&lt;span class="w"&gt;                            &lt;/span&gt;&lt;span class="s"&gt;"regex-log__Q8Jqf7p"&lt;/span&gt;
+&lt;span class="w"&gt;                        &lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;&lt;code&gt;less jobs/2026-07-21__06-18-33/regex-log__Q8Jqf7p/agent/trajectory.json&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="s"&gt;"step_id"&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mh"&gt;15&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="s"&gt;"message"&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s"&gt;"The regex is saved and working correctly. Let me run one more edge case test to ensure robustness.&lt;/span&gt;&lt;span class="se"&gt;\n&lt;/span&gt;&lt;span class="s"&gt;"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="p"&gt;...&lt;/span&gt;
+&lt;span class="s"&gt;"step_id"&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mh"&gt;16&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="s"&gt;"message"&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s"&gt;"All 33 edge case tests pass.&lt;/span&gt;
+&lt;span class="p"&gt;...&lt;/span&gt;&lt;span class="w"&gt;                     &lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="s"&gt;"final_metrics"&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="s"&gt;"total_prompt_tokens"&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mh"&gt;286276&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="s"&gt;"total_completion_tokens"&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mh"&gt;24820&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="s"&gt;"total_cached_tokens"&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mh"&gt;208896&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="s"&gt;"total_steps"&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mh"&gt;16&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="s"&gt;"extra"&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;
+&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="s"&gt;"total_reasoning_tokens"&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mh"&gt;9894&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h2 id="nemotron-3-ultra-with-terminus-2"&gt;Nemotron-3-Ultra with Terminus-2&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Terminus-2&lt;/strong&gt; is Harbor's built-in agent, &lt;a href="https://www.harborframework.com/docs/agents/terminus-2"&gt;https://www.harborframework.com/docs/agents/terminus-2&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;harbor run -d terminal-bench/terminal-bench-2-1 --agent terminus-2 --model openrouter/nvidia/nemotron-3-ultra-550b-a55b:free --include-task-name "terminal-bench/regex-log"&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;Job Info - Total runtime: 4m 10s&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="s"&gt;"reward_stats"&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;
+&lt;span class="w"&gt;                    &lt;/span&gt;&lt;span class="s"&gt;"reward"&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;
+&lt;span class="w"&gt;                        &lt;/span&gt;&lt;span class="s"&gt;"1.0"&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;
+&lt;span class="w"&gt;                            &lt;/span&gt;&lt;span class="s"&gt;"regex-log__GRksoC7"&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="s"&gt;"step_id"&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mh"&gt;3&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+
+&lt;span class="p"&gt;...&lt;/span&gt;
+&lt;span class="s"&gt;"step_id"&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mh"&gt;4&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="s"&gt;"message"&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s"&gt;"Analysis: All test cases pass. The regex correctly matches &lt;/span&gt;
+&lt;span class="p"&gt;...&lt;/span&gt;
+&lt;span class="s"&gt;"step_id"&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mh"&gt;5&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;
+&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s"&gt;"message"&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s"&gt;"Analysis: All tests passed, regex is saved in /app/regex.txt, task requirements satisfied.&lt;/span&gt;&lt;span class="se"&gt;\n&lt;/span&gt;&lt;span class="s"&gt;Plan: Confirm task completion."&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="s"&gt;"final_metrics"&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="s"&gt;"total_prompt_tokens"&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mh"&gt;18962&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="s"&gt;"total_completion_tokens"&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mh"&gt;8493&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="s"&gt;"total_cached_tokens"&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mh"&gt;4352&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h2 id="non-determinism"&gt;Non-Determinism&lt;/h2&gt;
+&lt;p&gt;A single run of a model + agent on a task is not sufficient evidence. Since LLMs are non-deterministic, repeated runs even with the exact same environment will produce different traces (and tokens used, steps taken, wall clock time, etc) and sometimes even generate different results.&lt;/p&gt;
+&lt;p&gt;These particular benchmarks are well designed: even when re-running, the results will consistently cluster, providing confidence in the outcomes.&lt;/p&gt;
+&lt;h1 id="results-analysis"&gt;Results Analysis&lt;/h1&gt;
+&lt;p&gt;550B parameters and 55B active clearly outperforms 30B parameters with 3B active.&lt;/p&gt;
+&lt;p&gt;And yet even for Nemotron 3 Ultra, the harness made a difference, 16 steps vs 5 steps:&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;mini-swe-agent&lt;/strong&gt; exposes a bash tool that takes a single command string and returns its output. 1 tool call per command, then wait for the result, then decide the next command... forced a step-by-step exploration pattern: "which python", ls /app, cat instructions.txt, etc.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;terminus-2&lt;/strong&gt; uses keystrokes as its tool as it sends characters to a tmux session. It can and does batch multiple shell commands into a single tool call (write the heredoc and cat to verify in one step). One LLM roundtrip for reasoning through the entire problem, constructing the full regex, writing it out, and verification.&lt;/p&gt;
+&lt;p&gt;This reproduces the core finding from SWE-agent's NeurIPS 2024 paper: a superior tool interface lets the model do more with fewer roundtrips = a lot more efficiency in both time and tokens.&lt;/p&gt;
+&lt;hr/&gt;
+&lt;h1 id="appendix"&gt;Appendix&lt;/h1&gt;
+&lt;p&gt;Boring nuts and bolts of setup.&lt;/p&gt;
+&lt;p&gt;As you scale up testing with concurrency you will naturally want a larger host (more cpu, more ram) and LLM inference capacity (more tokens).&lt;/p&gt;
+&lt;h2 id="troubleshooting-issues"&gt;Troubleshooting Issues&lt;/h2&gt;
+&lt;p&gt;&lt;em&gt;&lt;code&gt;harbor run --help&lt;/code&gt; - what does the CLI do?&lt;/em&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;"ApiRateLimitError":&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Job Info - Total runtime: 5m 41s&lt;/p&gt;
+&lt;p&gt;Results written to jobs/2026-07-21__04-33-55/result.json&lt;/p&gt;
+&lt;p&gt;Debug by looking in the exception.txt and trajectory.json...&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;Command failed
+Classified failed command as ApiRateLimitError (pattern: 'rate.?limit')
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Ran into a ratelimit from OpenRouter free:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://openrouter.zendesk.com/hc/en-us/articles/39501163636379-OpenRouter-Rate-Limits-What-You-Need-to-Know"&gt;https://openrouter.zendesk.com/hc/en-us/articles/39501163636379-OpenRouter-Rate-Limits-What-You-Need-to-Know&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;SOLUTION&lt;/strong&gt;: have to deposit $10 for credits to unlock higher limits, but by using the free models you can avoid spending those credits&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;ValueError: Unknown model: google/gemma-4-31b-it:free&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;User error, &lt;code&gt;--model google/gemma-4-31b-it:free&lt;/code&gt; is invalid with the OpenRouter key&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;SOLUTION:&lt;/strong&gt; the correct name is:  &lt;code&gt;--model openrouter/google/gemma-4-31b-it:free&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Provider returned error","code":429&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="n"&gt;RateLimitError&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;litellm&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;RateLimitError&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;RateLimitError&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;OpenrouterException&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;
+&lt;span class="o"&gt;{&lt;/span&gt;&lt;span class="s2"&gt;"error"&lt;/span&gt;&lt;span class="o"&gt;:{&lt;/span&gt;&lt;span class="s2"&gt;"message"&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="s2"&gt;"Provider returned error"&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;&lt;span class="s2"&gt;"code"&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="mi"&gt;429&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;
+&lt;span class="s2"&gt;"metadata"&lt;/span&gt;&lt;span class="o"&gt;:{&lt;/span&gt;&lt;span class="s2"&gt;"raw"&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="s2"&gt;"google/gemma-4-31b-it:free is temporarily rate-limited upstream. &lt;/span&gt;
+&lt;span class="s2"&gt;Please retry shortly, or add your own key to accumulate your rate limits: https://openrouter.ai/settings/integrations"&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;
+&lt;span class="s2"&gt;"provider_name"&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="s2"&gt;"Google AI Studio"&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;&lt;span class="s2"&gt;"is_byok"&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="kc"&gt;false&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;&lt;span class="s2"&gt;"provider_error_code"&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="s2"&gt;"429"&lt;/span&gt;&lt;span class="o"&gt;}},&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;&lt;a href="https://openrouter.ai/google/gemma-4-31b-it:free"&gt;https://openrouter.ai/google/gemma-4-31b-it:free&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;SOLUTION:&lt;/strong&gt; Google AI Studio is not reliable for their free gemma4 offering, attempt using a less popular model and more reliable Provider.&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;"AgentTimeoutError": [&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Total runtime: 16m 18s, OpenRouter says 14 requests and 88K&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;Exception AgentTimeoutError is in exclude_exceptions, not retrying
+Not retrying trial because the exception is not in include_exceptions or the maximum number of retries has been reached
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;&lt;strong&gt;SOLUTION:&lt;/strong&gt; The agent failed due to the model's (Cohere: North Mini Code) limitations, try a different model. &lt;em&gt;This kind of timeout is effectively a "test failed" outcome&lt;/em&gt;.&lt;/p&gt;
+&lt;h2 id="hosting"&gt;Hosting&lt;/h2&gt;
+&lt;p&gt;Launch a VPS with 4 cpu and 8GB RAM, &lt;em&gt;(usually at most $0.10 per hour and for convenience I used ubuntu 24.04)&lt;/em&gt; &lt;/p&gt;
+&lt;p&gt;Or use your own local hardware =]&lt;/p&gt;
+&lt;p&gt;I caution against running llm-powered agents on your personal laptop/machine (even in Docker) as there are too many risk scenarios from "stuck in a loop consumes all cpu/memory/disk" to reward-hacking.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Security: ensure you have a firewall with inbound allowing only port 22 for SSH&lt;/strong&gt;&lt;/p&gt;
+&lt;h3 id="how-to-connect-and-download-things"&gt;How to connect and download things&lt;/h3&gt;
+&lt;p&gt;&lt;em&gt;For convenience logged in as root on this ephemeral box ;p&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;ssh -i ~/.ssh/mykey root@192.168.1.123&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;To copy files off of the remote box you can use SCP:&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;scp -i ~/.ssh/mykey root@192.168.1.123:jobs/2026-07-21__06-55-15/regex-log__GRksoC7/agent/trajectory.json .&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;My previous (somewhat dated) notes &lt;a href="https://blog.john-pfeiffer.com/security-encryption-https-openssl-ssh-keygen-vpn-letsencrypt-certbot/#ssh-encryption"&gt;https://blog.john-pfeiffer.com/security-encryption-https-openssl-ssh-keygen-vpn-letsencrypt-certbot/#ssh-encryption&lt;/a&gt;&lt;/p&gt;
+&lt;h3 id="increase-swap"&gt;Increase swap&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;free -h&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="w"&gt;               &lt;/span&gt;total&lt;span class="w"&gt;        &lt;/span&gt;used&lt;span class="w"&gt;        &lt;/span&gt;free&lt;span class="w"&gt;      &lt;/span&gt;shared&lt;span class="w"&gt;  &lt;/span&gt;buff/cache&lt;span class="w"&gt;   &lt;/span&gt;available
+Mem:&lt;span class="w"&gt;           &lt;/span&gt;&lt;span class="m"&gt;7&lt;/span&gt;.8Gi&lt;span class="w"&gt;       &lt;/span&gt;395Mi&lt;span class="w"&gt;       &lt;/span&gt;&lt;span class="m"&gt;7&lt;/span&gt;.4Gi&lt;span class="w"&gt;       &lt;/span&gt;968Ki&lt;span class="w"&gt;       &lt;/span&gt;230Mi&lt;span class="w"&gt;       &lt;/span&gt;&lt;span class="m"&gt;7&lt;/span&gt;.4Gi
+Swap:&lt;span class="w"&gt;          &lt;/span&gt;495Mi&lt;span class="w"&gt;          &lt;/span&gt;0B&lt;span class="w"&gt;       &lt;/span&gt;&lt;span class="m"&gt;4&lt;/span&gt;.5Gi
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Increase swap by 4GB&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;swapoff&lt;span class="w"&gt; &lt;/span&gt;/swapfile
+rm&lt;span class="w"&gt; &lt;/span&gt;/swapfile
+
+fallocate&lt;span class="w"&gt; &lt;/span&gt;-l&lt;span class="w"&gt; &lt;/span&gt;4G&lt;span class="w"&gt; &lt;/span&gt;/swapfile
+chmod&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;600&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;/swapfile
+mkswap&lt;span class="w"&gt; &lt;/span&gt;/swapfile
+swapon&lt;span class="w"&gt; &lt;/span&gt;/swapfile
+
+
+free&lt;span class="w"&gt; &lt;/span&gt;-h
+
+&lt;span class="w"&gt;               &lt;/span&gt;total&lt;span class="w"&gt;        &lt;/span&gt;used&lt;span class="w"&gt;        &lt;/span&gt;free&lt;span class="w"&gt;      &lt;/span&gt;shared&lt;span class="w"&gt;  &lt;/span&gt;buff/cache&lt;span class="w"&gt;   &lt;/span&gt;available
+Mem:&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="m"&gt;7941&lt;/span&gt;&lt;span class="w"&gt;         &lt;/span&gt;&lt;span class="m"&gt;396&lt;/span&gt;&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="m"&gt;7544&lt;/span&gt;&lt;span class="w"&gt;           &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="w"&gt;         &lt;/span&gt;&lt;span class="m"&gt;230&lt;/span&gt;&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="m"&gt;7544&lt;/span&gt;
+Swap:&lt;span class="w"&gt;           &lt;/span&gt;&lt;span class="m"&gt;4591&lt;/span&gt;&lt;span class="w"&gt;           &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="m"&gt;4591&lt;/span&gt;
+
+swapon
+
+&lt;span class="w"&gt;    &lt;/span&gt;NAME&lt;span class="w"&gt;      &lt;/span&gt;TYPE&lt;span class="w"&gt;      &lt;/span&gt;SIZE&lt;span class="w"&gt; &lt;/span&gt;USED&lt;span class="w"&gt; &lt;/span&gt;PRIO
+&lt;span class="w"&gt;    &lt;/span&gt;/dev/sdb&lt;span class="w"&gt;  &lt;/span&gt;partition&lt;span class="w"&gt; &lt;/span&gt;496M&lt;span class="w"&gt;   &lt;/span&gt;0B&lt;span class="w"&gt;   &lt;/span&gt;-2
+&lt;span class="w"&gt;    &lt;/span&gt;/swapfile&lt;span class="w"&gt; &lt;/span&gt;file&lt;span class="w"&gt;        &lt;/span&gt;4G&lt;span class="w"&gt;   &lt;/span&gt;0B&lt;span class="w"&gt;   &lt;/span&gt;-3
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h2 id="install-docker"&gt;Install Docker&lt;/h2&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;sudo&lt;span class="w"&gt; &lt;/span&gt;install&lt;span class="w"&gt; &lt;/span&gt;-m&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;0755&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;-d&lt;span class="w"&gt; &lt;/span&gt;/etc/apt/keyrings
+
+sudo&lt;span class="w"&gt; &lt;/span&gt;curl&lt;span class="w"&gt; &lt;/span&gt;-fsSL&lt;span class="w"&gt; &lt;/span&gt;https://download.docker.com/linux/ubuntu/gpg&lt;span class="w"&gt; &lt;/span&gt;-o&lt;span class="w"&gt; &lt;/span&gt;/etc/apt/keyrings/docker.asc
+
+sudo&lt;span class="w"&gt; &lt;/span&gt;chmod&lt;span class="w"&gt; &lt;/span&gt;a+r&lt;span class="w"&gt; &lt;/span&gt;/etc/apt/keyrings/docker.asc
+
+sudo&lt;span class="w"&gt; &lt;/span&gt;tee&lt;span class="w"&gt; &lt;/span&gt;/etc/apt/sources.list.d/docker.sources&lt;span class="w"&gt; &lt;/span&gt;&amp;gt;/dev/null&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s"&gt;&amp;lt;&amp;lt;EOF&lt;/span&gt;
+&lt;span class="s"&gt;Types: deb&lt;/span&gt;
+&lt;span class="s"&gt;URIs: https://download.docker.com/linux/ubuntu&lt;/span&gt;
+&lt;span class="s"&gt;Suites: $(. /etc/os-release &amp;amp;&amp;amp; echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}")&lt;/span&gt;
+&lt;span class="s"&gt;Components: stable&lt;/span&gt;
+&lt;span class="s"&gt;Architectures: $(dpkg --print-architecture)&lt;/span&gt;
+&lt;span class="s"&gt;Signed-By: /etc/apt/keyrings/docker.asc&lt;/span&gt;
+&lt;span class="s"&gt;EOF&lt;/span&gt;
+
+sudo&lt;span class="w"&gt; &lt;/span&gt;apt&lt;span class="w"&gt; &lt;/span&gt;update
+
+sudo&lt;span class="w"&gt; &lt;/span&gt;apt&lt;span class="w"&gt; &lt;/span&gt;install&lt;span class="w"&gt; &lt;/span&gt;-y&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="se"&gt;\&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;docker-ce&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="se"&gt;\&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;docker-ce-cli&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="se"&gt;\&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;containerd.io&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="se"&gt;\&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;docker-buildx-plugin&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="se"&gt;\&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;docker-compose-plugin
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;&lt;code&gt;docker info&lt;/code&gt;
+&lt;code&gt;docker compose version&lt;/code&gt;&lt;/p&gt;
+&lt;h2 id="install-uv-and-harbor"&gt;Install UV and Harbor&lt;/h2&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="n"&gt;curl&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;LsSf&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;https&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="o"&gt;//&lt;/span&gt;&lt;span class="n"&gt;astral&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;sh&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;uv&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;install&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;sh&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;|&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;sh&lt;/span&gt;
+&lt;span class="n"&gt;source&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;$&lt;/span&gt;&lt;span class="n"&gt;HOME&lt;/span&gt;&lt;span class="o"&gt;/.&lt;/span&gt;&lt;span class="n"&gt;local&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;bin&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;env&lt;/span&gt;
+&lt;span class="n"&gt;uv&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;tool&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;install&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;"harbor==0.20.0"&lt;/span&gt;
+&lt;span class="n"&gt;harbor&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;--&lt;/span&gt;&lt;span class="n"&gt;version&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;One of the simplest open standards for running benchmarks (especially with agents)&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://github.com/harbor-framework/harbor"&gt;https://github.com/harbor-framework/harbor&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://www.harborframework.com/docs/tasks"&gt;https://www.harborframework.com/docs/tasks&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://docs.nvidia.com/nemo-platform/documentation/evaluate-models/agent-eval/harbor-runner"&gt;https://docs.nvidia.com/nemo-platform/documentation/evaluate-models/agent-eval/harbor-runner&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="reboot"&gt;Reboot&lt;/h2&gt;
+&lt;p&gt;reboot the VPS, ssh in again, double check the host is on the correct kernel and swap is on&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;reboot&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;uname&lt;span class="w"&gt; &lt;/span&gt;-r&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="c1"&gt;# expecting 6.8.0-136-generic&lt;/span&gt;
+
+swapon&lt;span class="w"&gt; &lt;/span&gt;/swapfile
+
+free&lt;span class="w"&gt; &lt;/span&gt;-h
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;</content><category term="ai"/><category term="ai"/><category term="agent"/><category term="evals"/><category term="benchmark"/></entry><entry><title>A coding agent in the cloud with Factory and Railway</title><link href="https://blog.john-pfeiffer.com/a-coding-agent-in-the-cloud-with-factory-and-railway/" rel="alternate"/><published>2026-06-22T09:10:00-07:00</published><updated>2026-06-22T09:10:00-07:00</updated><author><name>john pfeiffer</name></author><id>tag:blog.john-pfeiffer.com,2026-06-22:/a-coding-agent-in-the-cloud-with-factory-and-railway/</id><summary type="html">
 &lt;h1 id="untether-your-coding-from-your-laptop"&gt;Untether your coding from your Laptop&lt;/h1&gt;
 &lt;p&gt;My "coding with AI" progression is likely similar to your own:&lt;/p&gt;
 &lt;ul&gt;
@@ -22031,371 +22461,4 @@ cat /dev/random &amp;gt; /dev/null
 &lt;ul&gt;
 &lt;li&gt;&lt;a href="https://en.wikipedia.org/wiki//dev/random"&gt;https://en.wikipedia.org/wiki//dev/random&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href="https://linuxcommand.org/man_pages/rngtest1.html"&gt;https://linuxcommand.org/man_pages/rngtest1.html&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;</content><category term="linux"/><category term="grep"/><category term="linux"/><category term="bash"/><category term="cut"/><category term="awk"/><category term="sort"/><category term="dd"/><category term="files"/><category term="text"/><category term="ls"/><category term="sort by size"/><category term="sort by date"/><category term="exec"/></entry><entry><title>A concise summary of amazing and great ideas</title><link href="https://blog.john-pfeiffer.com/a-concise-summary-of-amazing-and-great-ideas/" rel="alternate"/><published>2011-08-08T00:00:00-07:00</published><updated>2011-08-08T00:00:00-07:00</updated><author><name>john pfeiffer</name></author><id>tag:blog.john-pfeiffer.com,2011-08-08:/a-concise-summary-of-amazing-and-great-ideas/</id><summary type="html">
-&lt;h3 id="test-driven-development-tdd"&gt;Test Driven Development (TDD)&lt;/h3&gt;
-&lt;p&gt;Test, Code, Refactor &lt;a href="https://en.wikipedia.org/wiki/Test-driven_development"&gt;https://en.wikipedia.org/wiki/Test-driven_development&lt;/a&gt;&lt;/p&gt;
-&lt;h3 id="lean"&gt;Lean&lt;/h3&gt;
-&lt;ul&gt;
-&lt;li&gt;Lean: Identify Value -&amp;gt; Breakdown Steps -&amp;gt; Continuous Flow -&amp;gt; Reduce Waste&lt;/li&gt;
-&lt;li&gt;Lean Startup: Measure, Learn, Build &lt;a href="http://theleanstartup.com/principles"&gt;http://theleanstartup.com/principles&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h3 id="better-than-free"&gt;Better than Free&lt;/h3&gt;
-&lt;p&gt;&lt;a href="https://kk.org/thetechnium/better-than-fre/"&gt;https://kk.org/thetechnium/better-than-fre/&lt;/a&gt;&lt;/p&gt;
-&lt;ol&gt;
-&lt;li&gt;immediacy&lt;/li&gt;
-&lt;li&gt;personalization&lt;/li&gt;
-&lt;li&gt;interpretation/support&lt;/li&gt;
-&lt;li&gt;authenticity&lt;/li&gt;
-&lt;li&gt;accessibility&lt;/li&gt;
-&lt;li&gt;embodiment&lt;/li&gt;
-&lt;li&gt;patronage&lt;/li&gt;
-&lt;li&gt;findability&lt;/li&gt;
-&lt;/ol&gt;
-&lt;h3 id="persuasion"&gt;Persuasion …&lt;/h3&gt;</summary><content type="html">
-&lt;h3 id="test-driven-development-tdd"&gt;Test Driven Development (TDD)&lt;/h3&gt;
-&lt;p&gt;Test, Code, Refactor &lt;a href="https://en.wikipedia.org/wiki/Test-driven_development"&gt;https://en.wikipedia.org/wiki/Test-driven_development&lt;/a&gt;&lt;/p&gt;
-&lt;h3 id="lean"&gt;Lean&lt;/h3&gt;
-&lt;ul&gt;
-&lt;li&gt;Lean: Identify Value -&amp;gt; Breakdown Steps -&amp;gt; Continuous Flow -&amp;gt; Reduce Waste&lt;/li&gt;
-&lt;li&gt;Lean Startup: Measure, Learn, Build &lt;a href="http://theleanstartup.com/principles"&gt;http://theleanstartup.com/principles&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h3 id="better-than-free"&gt;Better than Free&lt;/h3&gt;
-&lt;p&gt;&lt;a href="https://kk.org/thetechnium/better-than-fre/"&gt;https://kk.org/thetechnium/better-than-fre/&lt;/a&gt;&lt;/p&gt;
-&lt;ol&gt;
-&lt;li&gt;immediacy&lt;/li&gt;
-&lt;li&gt;personalization&lt;/li&gt;
-&lt;li&gt;interpretation/support&lt;/li&gt;
-&lt;li&gt;authenticity&lt;/li&gt;
-&lt;li&gt;accessibility&lt;/li&gt;
-&lt;li&gt;embodiment&lt;/li&gt;
-&lt;li&gt;patronage&lt;/li&gt;
-&lt;li&gt;findability&lt;/li&gt;
-&lt;/ol&gt;
-&lt;h3 id="persuasion"&gt;Persuasion&lt;/h3&gt;
-&lt;p&gt;&lt;a href="https://en.wikipedia.org/wiki/Robert_Cialdini"&gt;https://en.wikipedia.org/wiki/Robert_Cialdini&lt;/a&gt;&lt;/p&gt;
-&lt;ol&gt;
-&lt;li&gt;reciprocity &lt;/li&gt;
-&lt;li&gt;commitment/consistency&lt;/li&gt;
-&lt;li&gt;social proof&lt;/li&gt;
-&lt;li&gt;authority&lt;/li&gt;
-&lt;li&gt;liking&lt;/li&gt;
-&lt;li&gt;scarcity&lt;/li&gt;
-&lt;/ol&gt;
-&lt;h3 id="competition-and-profit"&gt;Competition and Profit&lt;/h3&gt;
-&lt;p&gt;&lt;a href="https://en.wikipedia.org/wiki/Porter_five_forces_analysis"&gt;https://en.wikipedia.org/wiki/Porter_five_forces_analysis&lt;/a&gt;&lt;/p&gt;
-&lt;ol&gt;
-&lt;li&gt;Threat of new competition (barriers to entry, customer loyalty, desirability of that industry/biz model)&lt;/li&gt;
-&lt;li&gt;Threat of substitute products or services (switching costs, quality, compatibility)&lt;/li&gt;
-&lt;li&gt;Bargaining power of customers (switching costs, market options, dependency for other services)&lt;/li&gt;
-&lt;li&gt;Bargaining power of suppliers (switching costs, supplier choice, supplier becoming competitor)&lt;/li&gt;
-&lt;li&gt;Intensity of competitive rivalry (innovation, branding, economies of scale)&lt;/li&gt;
-&lt;/ol&gt;
-&lt;h3 id="schellings-segregation-model"&gt;Schelling's segregation model&lt;/h3&gt;
-&lt;p&gt;Micromotives and macrobehavior , &lt;a href="https://en.wikipedia.org/wiki/Thomas_Schelling#Models_of_segregation"&gt;https://en.wikipedia.org/wiki/Thomas_Schelling#Models_of_segregation&lt;/a&gt;&lt;/p&gt;
-&lt;p&gt;Granovetter threshold model for peer effect on collective behavior and Strength of Weak Ties (aka how LinkedIn gets you a new job), &lt;a href="https://en.wikipedia.org/wiki/Mark_Granovetter"&gt;https://en.wikipedia.org/wiki/Mark_Granovetter&lt;/a&gt;&lt;/p&gt;
-&lt;h3 id="cognitive-biases"&gt;Cognitive Biases&lt;/h3&gt;
-&lt;ul&gt;
-&lt;li&gt;Bandwagon Effect (Groupthink)&lt;/li&gt;
-&lt;li&gt;Confirmation Bias: search for and interpret information and memories that support preconceptions&lt;/li&gt;
-&lt;li&gt;Gambler's Fallacy: future probabilities are affected by previous outcomes&lt;/li&gt;
-&lt;li&gt;Negativity Bias: paying more attention to bad news&lt;/li&gt;
-&lt;li&gt;Neglect of Probability: disregarding probabilities when making a decision (risk of flying versus driving)&lt;/li&gt;
-&lt;li&gt;Observational Selection Bias (Frequency Illusion): noting something previously ignored results in a misconception that it has increased in frequency &lt;/li&gt;
-&lt;li&gt;Projection Bias: wrongly presuming others think like us&lt;/li&gt;
-&lt;li&gt;Status Quo Bias: things should stay the same&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h3 id="logical-fallacies-and-disinformation"&gt;Logical Fallacies and Disinformation&lt;/h3&gt;
-&lt;ul&gt;
-&lt;li&gt;Appeal to probability: because something could happen it is inevitable that it will happen (see Gambler's Fallacy and Neglect of Probability)&lt;/li&gt;
-&lt;li&gt;Silence, Indignant, Rumors, Straw Man, Ad Hominem, Hit and Run, Question Motives, Invoke Authority, Play Dumb, "That's old news", Confess to a lesser item and "come clean", Enigma, Rube Goldberg Logic, Demand a complete solution, Fit the facts to alternate conclusions, Remove witnesses/evidence, Change the subject, Antagonize, Ignore proof and demand impossible proof, False evidence/facts, Loudly call for a separate investigation (ideally either biased or with confidential findings), Manufacture a new truth, Larger distractions, Silence critics, Lie low&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;&lt;em&gt;note that these topics are often associated with paranoid conspiracy theories, "Rules of Disinformation"&lt;/em&gt;&lt;/p&gt;
-&lt;h3 id="keys-to-being-successful"&gt;Keys to being successful&lt;/h3&gt;
-&lt;ul&gt;
-&lt;li&gt;lists&lt;/li&gt;
-&lt;li&gt;organize (categorize)&lt;/li&gt;
-&lt;li&gt;prioritize&lt;/li&gt;
-&lt;li&gt;schedule&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;brainstorm goals and feelings: "say what you're going to do and then do what you say"&lt;/p&gt;
-&lt;h4 id="concentrate-iterate-automate-validate-appreciate"&gt;Concentrate, Iterate, Automate, Validate, Appreciate&lt;/h4&gt;
-&lt;ul&gt;
-&lt;li&gt;Software version: core tech strengths &amp;amp; problem, quick releases, automate, test!, style? + recognize the contributions&lt;/li&gt;
-&lt;li&gt;Military version: core strength and enemy weaknesses, rapid short executions, make excellence a reflex, check for brittleness, engender loyalty&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h4 id="7-habits-of-highly-effective-people"&gt;7 habits of highly effective people&lt;/h4&gt;
-&lt;ol&gt;
-&lt;li&gt;be proactive&lt;/li&gt;
-&lt;li&gt;"begin with the end in mind" (envision the goal)&lt;/li&gt;
-&lt;li&gt;"put first things first" (order and prioritize)&lt;/li&gt;
-&lt;li&gt;"think win-win" (good outcomes for everyone)&lt;/li&gt;
-&lt;li&gt;"Seek First to Understand, Then to be Understood" (listen, then persuade)&lt;/li&gt;
-&lt;li&gt;"synergize" (teamwork)&lt;/li&gt;
-&lt;li&gt;"sharpen the saw" (sustainable balance)&lt;/li&gt;
-&lt;/ol&gt;
-&lt;p&gt;&lt;a href="https://en.wikipedia.org/wiki/The_7_Habits_of_Highly_Effective_People"&gt;https://en.wikipedia.org/wiki/The_7_Habits_of_Highly_Effective_People&lt;/a&gt;&lt;/p&gt;
-&lt;h4 id="maslows-hierarchy-of-needs"&gt;Maslow's Hierarchy of Needs&lt;/h4&gt;
-&lt;p&gt;The lowest levels of the pyramid must be satisfied before people can focus and succeed at higher levels.&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="w"&gt;     &lt;/span&gt;&lt;span class="k"&gt;Self&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="nx"&gt;Actualization&lt;/span&gt;
-&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="nx"&gt;_______Esteem________&lt;/span&gt;
-&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="nx"&gt;_____Love&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nx"&gt;Belonging______&lt;/span&gt;
-&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;__________Safety___________&lt;/span&gt;
-&lt;span class="nx"&gt;_________Physiological_________&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;&lt;a href="https://en.wikipedia.org/wiki/Maslow's_hierarchy_of_needs"&gt;https://en.wikipedia.org/wiki/Maslow's_hierarchy_of_needs&lt;/a&gt;&lt;/p&gt;
-&lt;h3 id="important-software-concepts"&gt;Important Software Concepts&lt;/h3&gt;
-&lt;ul&gt;
-&lt;li&gt;Do Not Repeat Yourself (DRY)&lt;/li&gt;
-&lt;li&gt;Model View Controller (MVC)&lt;/li&gt;
-&lt;li&gt;Atomic Consistent Isolation Durability (ACID)&lt;/li&gt;
-&lt;li&gt;Abstraction Polymorphism (overloading, inheritance, overriding interface) ,  Inheritance , Encapsulation&lt;/li&gt;
-&lt;li&gt;Consistency Availability Partition tolerance vs Basically Available Soft-State with Eventual consistency&lt;/li&gt;
-&lt;li&gt;Nondeterministic Polynomial ... NP-hard &lt;a href="https://en.wikipedia.org/wiki/NP-hard"&gt;https://en.wikipedia.org/wiki/NP-hard&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;
-&lt;ul&gt;
-&lt;li&gt;NP-complete (subset sum problem can be verified) &lt;a href="https://en.wikipedia.org/wiki/NP-complete"&gt;https://en.wikipedia.org/wiki/NP-complete&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;ul&gt;
-&lt;li&gt;co-NP (verifier of "no" answer")&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;&lt;a href="https://en.wikipedia.org/wiki/Timeline_of_algorithms"&gt;https://en.wikipedia.org/wiki/Timeline_of_algorithms&lt;/a&gt;&lt;/p&gt;
-&lt;h4 id="amdahls-law"&gt;Amdahl's Law&lt;/h4&gt;
-&lt;ul&gt;
-&lt;li&gt;A system cannot be sped up by parallelization more than the inherently serial steps &lt;a href="https://en.wikipedia.org/wiki/Amdahl%27s_law"&gt;https://en.wikipedia.org/wiki/Amdahl%27s_law&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;
-&lt;ul&gt;
-&lt;li&gt;So benchmark your system, then determine what parts can be parallelized and how much that will improve the result and how much will it cost to do so&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h4 id="conways-law"&gt;Conway's Law&lt;/h4&gt;
-&lt;ul&gt;
-&lt;li&gt;The system design produced by an organization will reflect the organization's communication structure. &lt;a href="https://www.melconway.com/Home/Conways_Law.html"&gt;https://www.melconway.com/Home/Conways_Law.html&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;a href="https://www.thoughtworks.com/insights/blog/demystifying-conways-law"&gt;https://www.thoughtworks.com/insights/blog/demystifying-conways-law&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;ul&gt;
-&lt;li&gt;Possibly disastrous results when combined with Groupthink &lt;a href="https://en.wikipedia.org/wiki/Groupthink"&gt;https://en.wikipedia.org/wiki/Groupthink&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;ul&gt;
-&lt;li&gt;Commonly referred to when considering how adding a new person or new team to organization will affect productivity&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h4 id="brooks-law"&gt;Brooks' Law&lt;/h4&gt;
-&lt;ul&gt;
-&lt;li&gt;Adding resources (people) later in a project will make it even later &lt;a href="https://en.wikipedia.org/wiki/Brooks%27s_law"&gt;https://en.wikipedia.org/wiki/Brooks%27s_law&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;
-&lt;ul&gt;
-&lt;li&gt;A decent observation given the above "laws": if a task has serial parts adding people (parallelization) will not speed it up AND every person will have to interface &lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h4 id="moores-law"&gt;Moore's Law&lt;/h4&gt;
-&lt;ul&gt;
-&lt;li&gt;Computing power will double (or become cheaper by half) every two years &lt;a href="https://en.wikipedia.org/wiki/Moore%27s_law"&gt;https://en.wikipedia.org/wiki/Moore%27s_law&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;
-&lt;ul&gt;
-&lt;li&gt;Sustained in part by improvements in complimentary technologies like Memory, Storage, Cooling, etc.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;ul&gt;
-&lt;li&gt;At a certain point in the future potentially only possible using parallel computing but with an increased coordination cost (including software that leverages parellization)&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h4 id="postels-law"&gt;Postel's Law&lt;/h4&gt;
-&lt;p&gt;Be conservative in what you do, be liberal in what you accept from others&lt;/p&gt;
-&lt;p&gt;&lt;a href="https://en.m.wikipedia.org/wiki/Robustness_principle"&gt;https://en.m.wikipedia.org/wiki/Robustness_principle&lt;/a&gt;&lt;/p&gt;
-&lt;h4 id="laws-of-unix"&gt;Laws of Unix&lt;/h4&gt;
-&lt;p&gt;&lt;a href="https://en.wikipedia.org/wiki/Unix_philosophy#Eric_Raymond.E2.80.99s_17_Unix_Rules"&gt;https://en.wikipedia.org/wiki/Unix_philosophy#Eric_Raymond.E2.80.99s_17_Unix_Rules&lt;/a&gt;&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;Modularity: Write simple parts connected by clean interfaces.&lt;/li&gt;
-&lt;li&gt;Clarity: Clarity is better than cleverness.&lt;/li&gt;
-&lt;li&gt;Composition: Design programs to be connected with other programs.&lt;/li&gt;
-&lt;li&gt;Separation: Separate policy from mechanism; separate interfaces from engines.&lt;/li&gt;
-&lt;li&gt;Simplicity: Design for simplicity; add complexity only where you must.&lt;/li&gt;
-&lt;li&gt;Parsimony: Write a big program only when it is clear by demonstration that nothing else will do.&lt;/li&gt;
-&lt;li&gt;Transparency: Design for visibility to make inspection and debugging easier.&lt;/li&gt;
-&lt;li&gt;Robustness: Robustness is the child of transparency and simplicity.&lt;/li&gt;
-&lt;li&gt;Representation: Fold knowledge into data, so program logic can be stupid and robust.&lt;/li&gt;
-&lt;li&gt;Least Surprise: In interface design, always do the least surprising thing.&lt;/li&gt;
-&lt;li&gt;Silence: When a program has nothing surprising to say, it should say nothing.&lt;/li&gt;
-&lt;li&gt;Repair: Repair what you can, but when you must fail, fail noisily and as soon as possible.&lt;/li&gt;
-&lt;li&gt;Economy: Programmer time is expensive; conserve it in preference to machine time.&lt;/li&gt;
-&lt;li&gt;Generation: Avoid hand-hacking; write programs to write programs when you can.&lt;/li&gt;
-&lt;li&gt;Optimization: Prototype before polishing. Get it working before you optimize it.&lt;/li&gt;
-&lt;li&gt;Diversity: Distrust all claims for one true way.&lt;/li&gt;
-&lt;li&gt;Extensibility: Design for the future, because it will be here sooner than you think. (Or, to put it another way, your creations will last longer than you think!)&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h4 id="clean-code"&gt;Clean Code&lt;/h4&gt;
-&lt;ul&gt;
-&lt;li&gt;Source Code is for humans, make it easy to read and understand&lt;/li&gt;
-&lt;li&gt;The code is the authoritative source (comments add context)&lt;/li&gt;
-&lt;li&gt;Leave the campground cleaner than you found it&lt;/li&gt;
-&lt;li&gt;Tests reveal what the code outputs; clean code runs all of the tests&lt;/li&gt;
-&lt;li&gt;Meaningful Names&lt;/li&gt;
-&lt;li&gt;Functions: A minimum number of parameters and the smaller the better&lt;/li&gt;
-&lt;li&gt;Open - Close principle&lt;/li&gt;
-&lt;li&gt;Single Responsibility (do one thing, and do it well)&lt;/li&gt;
-&lt;li&gt;No Duplication (DRY)&lt;/li&gt;
-&lt;li&gt;Objects allow modularity, Boundaries keep you sane&lt;/li&gt;
-&lt;li&gt;Separate Constructing a System from Using it (and Initialization from Runtime)&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h3 id="fallacies-of-distributed-computing"&gt;Fallacies of Distributed Computing&lt;/h3&gt;
-&lt;p&gt;&lt;a href="https://en.wikipedia.org/wiki/Fallacies_of_distributed_computing"&gt;https://en.wikipedia.org/wiki/Fallacies_of_distributed_computing&lt;/a&gt;&lt;/p&gt;
-&lt;ol&gt;
-&lt;li&gt;The network is reliable.&lt;/li&gt;
-&lt;li&gt;Latency is zero.&lt;/li&gt;
-&lt;li&gt;Bandwidth is infinite.&lt;/li&gt;
-&lt;li&gt;The network is secure.&lt;/li&gt;
-&lt;li&gt;Topology doesn't change.&lt;/li&gt;
-&lt;li&gt;There is one administrator.&lt;/li&gt;
-&lt;li&gt;Transport cost is zero.&lt;/li&gt;
-&lt;li&gt;The network is homogeneous.&lt;/li&gt;
-&lt;/ol&gt;
-&lt;h3 id="how-complex-systems-fail"&gt;How Complex Systems Fail&lt;/h3&gt;
-&lt;p&gt;&lt;a href="http://web.mit.edu/2.75/resources/random/How%20Complex%20Systems%20Fail.pdf"&gt;http://web.mit.edu/2.75/resources/random/How%20Complex%20Systems%20Fail.pdf&lt;/a&gt;&lt;/p&gt;
-&lt;ol&gt;
-&lt;li&gt;Complex systems are intrinsically hazardous systems&lt;/li&gt;
-&lt;li&gt;Complex systems are heavily and successfully defended against failure&lt;/li&gt;
-&lt;li&gt;Catastrophe requires multiple failures – single point failures are not enough&lt;/li&gt;
-&lt;li&gt;Complex systems contain changing mixtures of failures latent within them&lt;/li&gt;
-&lt;li&gt;Complex systems run in degraded mode&lt;/li&gt;
-&lt;li&gt;Catastrophe is always just around the corner&lt;/li&gt;
-&lt;li&gt;Post-accident attribution accident to a ‘root cause’ is fundamentally wrong&lt;/li&gt;
-&lt;li&gt;Hindsight biases post-accident assessments of human performance&lt;/li&gt;
-&lt;li&gt;Human operators have dual roles: as producers &amp;amp; as defenders against failure&lt;/li&gt;
-&lt;li&gt;All practitioner actions are gambles&lt;/li&gt;
-&lt;li&gt;Actions at the sharp end resolve all ambiguity&lt;/li&gt;
-&lt;li&gt;Human practitioners are the adaptable element of complex systems&lt;/li&gt;
-&lt;li&gt;Human expertise in complex systems is constantly changing&lt;/li&gt;
-&lt;li&gt;Change introduces new forms of failure&lt;/li&gt;
-&lt;li&gt;Views of ‘cause’ limit the effectiveness of defenses against future events&lt;/li&gt;
-&lt;li&gt;Safety is a characteristic of systems and not of their components&lt;/li&gt;
-&lt;li&gt;People continuously create safety&lt;/li&gt;
-&lt;li&gt;Failure free operations require experience with failure&lt;/li&gt;
-&lt;/ol&gt;
-&lt;h3 id="why-do-computers-stop-and-what-can-be-done-about-it"&gt;Why do computers stop and what can be done about it&lt;/h3&gt;
-&lt;p&gt;Jim Gray: &lt;a href="http://www.hpl.hp.com/techreports/tandem/TR-85.7.pdf"&gt;http://www.hpl.hp.com/techreports/tandem/TR-85.7.pdf&lt;/a&gt;&lt;/p&gt;
-&lt;h3 id="dickersons-hierarchy-of-reliability"&gt;Dickerson's Hierarchy of Reliability&lt;/h3&gt;
-&lt;p&gt;Product
-Development
-Capacity Planning
-Testing and Release Procedures
-Postmortem and Root Cause Analysis
-Incident Response
-Monitoring&lt;/p&gt;
-&lt;p&gt;&lt;a href="https://docs.google.com/drawings/d/1kshrK2RLkW-XV8enmWZxeRFRgADj6d4Ru_w5txz_k9I/edit"&gt;https://docs.google.com/drawings/d/1kshrK2RLkW-XV8enmWZxeRFRgADj6d4Ru_w5txz_k9I/edit&lt;/a&gt;&lt;/p&gt;
-&lt;h3 id="designerscreators-of-programming-languages"&gt;Designers/Creators of Programming Languages&lt;/h3&gt;
-&lt;table&gt;
-&lt;thead&gt;
-&lt;tr&gt;
-&lt;th style="text-align: center;"&gt;Language&lt;/th&gt;
-&lt;th style="text-align: center;"&gt;Creator/Designer&lt;/th&gt;
-&lt;th style="text-align: center;"&gt;Year&lt;/th&gt;
-&lt;th style="text-align: center;"&gt;more info&lt;/th&gt;
-&lt;/tr&gt;
-&lt;/thead&gt;
-&lt;tbody&gt;
-&lt;tr&gt;
-&lt;td style="text-align: center;"&gt;Fortran&lt;/td&gt;
-&lt;td style="text-align: center;"&gt;John Backus&lt;/td&gt;
-&lt;td style="text-align: center;"&gt;  1957&lt;/td&gt;
-&lt;td style="text-align: center;"&gt;  &lt;a href="https://en.wikipedia.org/wiki/Fortran"&gt;https://en.wikipedia.org/wiki/Fortran&lt;/a&gt;&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="text-align: center;"&gt;Lisp&lt;/td&gt;
-&lt;td style="text-align: center;"&gt;John McCarthy&lt;/td&gt;
-&lt;td style="text-align: center;"&gt;  1958&lt;/td&gt;
-&lt;td style="text-align: center;"&gt;  &lt;a href="https://en.wikipedia.org/wiki/Lisp_(programming_language)"&gt;https://en.wikipedia.org/wiki/Lisp_(programming_language)&lt;/a&gt;&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="text-align: center;"&gt;C&lt;/td&gt;
-&lt;td style="text-align: center;"&gt;Dennis Ritchie&lt;/td&gt;
-&lt;td style="text-align: center;"&gt;  1972&lt;/td&gt;
-&lt;td style="text-align: center;"&gt;  &lt;a href="https://en.wikipedia.org/wiki/C_(programming_language)"&gt;https://en.wikipedia.org/wiki/C_(programming_language)&lt;/a&gt;&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="text-align: center;"&gt;C++&lt;/td&gt;
-&lt;td style="text-align: center;"&gt;Bjarne Stroustrup&lt;/td&gt;
-&lt;td style="text-align: center;"&gt;  1983&lt;/td&gt;
-&lt;td style="text-align: center;"&gt;  &lt;a href="https://en.wikipedia.org/wiki/C%2B%2B"&gt;https://en.wikipedia.org/wiki/C%2B%2B&lt;/a&gt;&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="text-align: center;"&gt;Perl&lt;/td&gt;
-&lt;td style="text-align: center;"&gt;Larry Wall&lt;/td&gt;
-&lt;td style="text-align: center;"&gt;  1987&lt;/td&gt;
-&lt;td style="text-align: center;"&gt;  &lt;a href="https://en.wikipedia.org/wiki/Perl"&gt;https://en.wikipedia.org/wiki/Perl&lt;/a&gt;&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="text-align: center;"&gt;Python&lt;/td&gt;
-&lt;td style="text-align: center;"&gt;Guido van Roosum&lt;/td&gt;
-&lt;td style="text-align: center;"&gt;  1991&lt;/td&gt;
-&lt;td style="text-align: center;"&gt;  &lt;a href="https://en.wikipedia.org/wiki/Python_(programming_language)"&gt;https://en.wikipedia.org/wiki/Python_(programming_language)&lt;/a&gt;&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="text-align: center;"&gt;Java&lt;/td&gt;
-&lt;td style="text-align: center;"&gt;James Gosling&lt;/td&gt;
-&lt;td style="text-align: center;"&gt;  1995&lt;/td&gt;
-&lt;td style="text-align: center;"&gt;  &lt;a href="https://en.wikipedia.org/wiki/Java_(programming_language)"&gt;https://en.wikipedia.org/wiki/Java_(programming_language)&lt;/a&gt;&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="text-align: center;"&gt;PHP&lt;/td&gt;
-&lt;td style="text-align: center;"&gt;Rasmus Lerdorf&lt;/td&gt;
-&lt;td style="text-align: center;"&gt;  1995&lt;/td&gt;
-&lt;td style="text-align: center;"&gt;  &lt;a href="https://en.wikipedia.org/wiki/PHP"&gt;https://en.wikipedia.org/wiki/PHP&lt;/a&gt;&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="text-align: center;"&gt;Javascript&lt;/td&gt;
-&lt;td style="text-align: center;"&gt;Brendan Eich&lt;/td&gt;
-&lt;td style="text-align: center;"&gt;  1995&lt;/td&gt;
-&lt;td style="text-align: center;"&gt;  &lt;a href="https://en.wikipedia.org/wiki/JavaScript"&gt;https://en.wikipedia.org/wiki/JavaScript&lt;/a&gt;&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="text-align: center;"&gt;Ruby&lt;/td&gt;
-&lt;td style="text-align: center;"&gt;Yukihiro Matsumoto&lt;/td&gt;
-&lt;td style="text-align: center;"&gt;  1995&lt;/td&gt;
-&lt;td style="text-align: center;"&gt;  &lt;a href="https://en.wikipedia.org/wiki/Ruby_(programming_language)"&gt;https://en.wikipedia.org/wiki/Ruby_(programming_language)&lt;/a&gt;&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td style="text-align: center;"&gt;Go&lt;/td&gt;
-&lt;td style="text-align: center;"&gt;Robert Griesemer, Rob Pike, Ken Thompson&lt;/td&gt;
-&lt;td style="text-align: center;"&gt;  2009&lt;/td&gt;
-&lt;td style="text-align: center;"&gt;  &lt;a href="https://en.wikipedia.org/wiki/Go_(programming_language)"&gt;https://en.wikipedia.org/wiki/Go_(programming_language)&lt;/a&gt;&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/tbody&gt;
-&lt;/table&gt;
-&lt;h3 id="a-quick-history-of-software-in-ascii"&gt;A quick history of software (in ascii)&lt;/h3&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="n"&gt;hardcoded&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;hardware&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;ENIAC&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&amp;gt;&lt;/span&gt;
-&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="n"&gt;von&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;neumann&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;architecture&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kr"&gt;stored&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;programs&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&amp;gt;&lt;/span&gt;
-&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="n"&gt;mainframes&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;with&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;custom&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;punch&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;cards&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;assembly&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&amp;gt;&lt;/span&gt;
-&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="n"&gt;procedural&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;code&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;fortran&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;c&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&amp;gt;&lt;/span&gt;
-&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="n"&gt;object&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;oriented&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;simula&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;java&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&amp;gt;&lt;/span&gt;
-&lt;span class="w"&gt;          &lt;/span&gt;&lt;span class="kr"&gt;parallel&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;programming&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&amp;gt;&lt;/span&gt;
-&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="n"&gt;Artificial&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;Intelligence&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;that&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;writes&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kr"&gt;self&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;adapting&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;Domain&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;Specific&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;Langauges&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;for&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;everything&lt;/span&gt;&lt;span class="o"&gt;?&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;Start by reading all of the following to nitpick how the above is fast and loose with history and the truth...&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;a href="https://en.wikipedia.org/wiki/Computer"&gt;https://en.wikipedia.org/wiki/Computer&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href="https://en.wikipedia.org/wiki/ENIAC"&gt;https://en.wikipedia.org/wiki/ENIAC&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href="https://en.wikipedia.org/wiki/Von_Neumann_architecture"&gt;https://en.wikipedia.org/wiki/Von_Neumann_architecture&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href="https://en.wikipedia.org/wiki/Programming_paradigm"&gt;https://en.wikipedia.org/wiki/Programming_paradigm&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href="https://en.wikipedia.org/wiki/Object-oriented_programming#History"&gt;https://en.wikipedia.org/wiki/Object-oriented_programming#History&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href="https://en.wikipedia.org/wiki/Parallel_computing#Software"&gt;https://en.wikipedia.org/wiki/Parallel_computing#Software&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href="https://en.wikipedia.org/wiki/Concurrent_computing"&gt;https://en.wikipedia.org/wiki/Concurrent_computing&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h3 id="hackers-jargon"&gt;Hacker's Jargon&lt;/h3&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;a href="http://www.catb.org/jargon/oldversions/"&gt;http://www.catb.org/jargon/oldversions/&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;</content><category term="puzzles"/><category term="thoughts"/><category term="tdd"/><category term="lean"/><category term="persuasion"/><category term="great"/><category term="efficiency"/><category term="laws"/><category term="software"/></entry></feed>
+&lt;/ul&gt;</content><category term="linux"/><category term="grep"/><category term="linux"/><category term="bash"/><category term="cut"/><category term="awk"/><category term="sort"/><category term="dd"/><category term="files"/><category term="text"/><category term="ls"/><category term="sort by size"/><category term="sort by date"/><category term="exec"/></entry></feed>
