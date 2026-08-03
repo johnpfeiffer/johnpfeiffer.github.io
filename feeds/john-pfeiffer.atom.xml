@@ -7,7 +7,7 @@
 &lt;p&gt;A single A100 with 80GB VRAM running Gemma4 31B with vLLM sustained 138 output tokens per second (serving 8 concurrent client agents). &lt;em&gt;(extrapolates to a ceiling of ~500k tokens per hour)&lt;/em&gt;&lt;/p&gt;
 &lt;p&gt;The bottleneck to more parallelism is the amount of VRAM available for KV cache; the model took roughly 60 GB of VRAM in BF16, with ~14 GB for vLLM runtime overhead and KV cache. &lt;em&gt;(10 agents achieved 160 tokens per second - but also pushed to 87% of KV.)&lt;/em&gt;&lt;/p&gt;
 &lt;p&gt;So why/when would I prefer renting a GPU that costs more even when fully utilized, where I pay even when it's idle?&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;Running specific configurations like quantized or customized versions of the model, no mystery ratelimit, with predictable spend.&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Running specific configs like quantized or custom models, no mystery ratelimit, data remains in infra you control... with predictable spend.&lt;/strong&gt;&lt;/p&gt;
 &lt;h2 id="diagram"&gt;Diagram&lt;/h2&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="n"&gt;A100&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;GPU&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;with&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;vLLM&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mf"&gt;127.0.0.1&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="mi"&gt;8000&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="o"&gt;|&lt;/span&gt;
@@ -45,12 +45,14 @@
 &lt;p&gt;Paying per token became fuzzy math: input vs output tokens, invisible thinking tokens, and more tokens needed to accomplish a task.&lt;/p&gt;
 &lt;p&gt;And when agents get stuck going in a circle or Loops that don't converge, failure is even more costly.&lt;/p&gt;
 &lt;p&gt;This is not new: cost over-runs were a regular challenge of early (~2010s) cloud adoption, and I've personally seen shocking cloud bills in 2026. Amazon even have a special support request for "huge accidental charges".&lt;/p&gt;
-&lt;h1 id="predictable-spend"&gt;Predictable Spend&lt;/h1&gt;
-&lt;p&gt;GPU rental was $1.09 per hour (for an A100 with 80GB of VRAM). At full utilization (500k tokens per hour) that's roughly 2 hours, or $2.18 for a million output tokens.&lt;/p&gt;
+&lt;h1 id="privacy-and-predictable-spend"&gt;Privacy and Predictable Spend&lt;/h1&gt;
+&lt;p&gt;If the data the agents are working on has strict privacy and confidentiality requirements, you may not be able to use most LLM API vendors.&lt;/p&gt;
+&lt;p&gt;GPU rental solves it for a known price.&lt;/p&gt;
+&lt;p&gt;At $1.09 per hour for an A100 with 80GB of VRAM, full utilization (500k tokens per hour) for 2 hours costs $2.18 for a million output tokens.&lt;/p&gt;
 &lt;p&gt;The API cost is less, maybe $1 (from a blended rate of input, reasoning, and output tokens).&lt;/p&gt;
 &lt;p&gt;The difference is what you get for the money: any model you want, any configuration, no ratelimit, and a bill you can predict before you start.&lt;/p&gt;
-&lt;p&gt;&lt;em&gt;The tradeoff is real: you own the ops. A misconfiguration can cause OOM the server and lose the work in flight.&lt;/em&gt;&lt;/p&gt;
-&lt;p&gt;When the workload is specific enough that API models can't meet, or heavy enough to trigger limits, having the know-how to rent a GPU and manage it yourself gives you a solution.&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;The tradeoff is real: you own the ops. A misconfiguration can cause the server to OOM and lose the work in flight.&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;When the workload needs a specific model or config that isn't offered, or is heavy enough to trigger limits, having the know-how to rent a GPU and manage it yourself gives you a solution.&lt;/p&gt;
 &lt;p&gt;Walk through the full setup step by step in the Appendix =)&lt;/p&gt;
 &lt;h1 id="appendix-and-methodology"&gt;Appendix and Methodology&lt;/h1&gt;
 &lt;p&gt;&lt;em&gt;all IP addresses are fictional - replace with your real values&lt;/em&gt;&lt;/p&gt;
