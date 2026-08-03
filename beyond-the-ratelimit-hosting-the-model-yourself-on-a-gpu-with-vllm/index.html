@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en-US">
+    <head>
+        <meta charset="utf-8"> 
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="author" content="john pfeiffer" />
+        <meta name="copyright" content="john pfeiffer" />
+
+<meta name="keywords" content="ai, inference, benchmark, gpu, ai, " />
+        <title>Beyond the ratelimit - hosting the model yourself on a GPU with vLLM  · johnpfeiffer
+</title>
+        <!--link href="https://cdn-images.mailchimp.com/embedcode/slim-081711.css" rel="stylesheet" type="text/css"-->
+        <!--link href="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css" rel="stylesheet"-->
+        <link href="https://blog.john-pfeiffer.com/theme/css/bootstrap-combined.min.css" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="https://blog.john-pfeiffer.com/theme/css/style.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="https://blog.john-pfeiffer.com/theme/css/solarizedlight.css" media="screen">
+        <link rel="shortcut icon" href="https://blog.john-pfeiffer.com/theme/images/favicon.ico" type="image/x-icon" />
+        <link rel="apple-touch-icon" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon.png" />
+        <link rel="apple-touch-icon" sizes="57x57" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-57x57.png" />
+        <link rel="apple-touch-icon" sizes="72x72" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-72x72.png" />
+        <link rel="apple-touch-icon" sizes="114x114" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-114x114.png" />
+        <link rel="apple-touch-icon" sizes="144x144" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-144x144.png" />
+        <link rel="icon" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-144x144.png" />
+    </head>
+    <body>
+	<div id="content-sans-footer">
+        <div class="dropdown-backdrop">
+
+			<div class="navbar navbar-static-top">
+				<div class="navbar-inner">
+					<div class="container">
+						<a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+							<span class="icon-bar"></span>
+							<span class="icon-bar"></span>
+							<span class="icon-bar"></span>
+						</a>
+						<a class="brand" href="https://blog.john-pfeiffer.com/"><span class=site-name>johnpfeiffer</span></a>
+						<div class="nav-collapse collapse">
+							<ul class="nav pull-right top-menu">
+								<li ><a href="https://blog.john-pfeiffer.com">Home</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/engineering-people-managers/">Engineering (People) Managers</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/john-likes/">John Likes</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/software-engineer-favorites/">Software Engineer Favorites</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/categories.html">Categories</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/tags.html">Tags</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/archives.html">Archives</a></li>
+								<li><form class="navbar-search" action="https://blog.john-pfeiffer.com/search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="container-fluid">
+			<div class="row-fluid">
+				<div class="span1"></div>
+				<div class="span10">
+<article>
+<div class="row-fluid">
+    <header class="page_header span10 offset2">
+    <h1><a href="https://blog.john-pfeiffer.com/beyond-the-ratelimit-hosting-the-model-yourself-on-a-gpu-with-vllm/"> Beyond the ratelimit - hosting the model yourself on a GPU with vLLM  </a></h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+    <div class="span2 table-of-content">
+        <nav>
+        <h4>Contents</h4>
+        <div class="toc">
+<ul>
+<li><a href="#findings">Findings</a><ul>
+<li><a href="#diagram">Diagram</a></li>
+</ul>
+</li>
+<li><a href="#api-vs-buy-server-vs-rent-gpus">API vs Buy Server vs Rent GPUs</a></li>
+<li><a href="#here-to-learn">Here to Learn</a></li>
+<li><a href="#api-superiority">API superiority</a></li>
+<li><a href="#agents-demand-more-inference">Agents demand more inference</a></li>
+<li><a href="#predictable-spend">Predictable Spend</a></li>
+<li><a href="#appendix-and-methodology">Appendix and Methodology</a><ul>
+<li><a href="#harbor-terminal-21-benchmark">Harbor Terminal 2.1 Benchmark</a></li>
+<li><a href="#evaluating-renting-gpus">Evaluating Renting GPUs</a></li>
+<li><a href="#thundercompute-gpu-rental">ThunderCompute GPU rental</a><ul>
+<li><a href="#install-uv-and-vllm-and-huggingface">Install UV and vLLM and HuggingFace</a></li>
+<li><a href="#download-the-model-weights">Download the Model Weights</a></li>
+<li><a href="#vllm-serving">vLLM serving</a></li>
+</ul>
+</li>
+<li><a href="#linode">Linode</a><ul>
+<li><a href="#ssh-tunnel">SSH tunnel</a></li>
+<li><a href="#verify-the-ssh-tunnel-to-vllm">Verify the SSH tunnel to vLLM</a></li>
+<li><a href="#run-the-harbor-benchmark">Run The Harbor Benchmark</a></li>
+<li><a href="#tokens-per-second-and-kv-usage">Tokens Per Second and KV Usage</a></li>
+<li><a href="#quick-server-diagnostics">Quick Server Diagnostics</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#references">References</a></li>
+</ul>
+</div>
+        </nav>
+    </div>
+    <div class="span8 article-content">
+
+            
+<h1 id="findings">Findings</h1>
+<p>A single A100 with 80GB VRAM running Gemma4 31B with vLLM sustained 138 output tokens per second (serving 8 concurrent client agents). <em>(extrapolates to a ceiling of ~500k tokens per hour)</em></p>
+<p>The bottleneck to more parallelism is the amount of VRAM available for KV cache; the model took roughly 60 GB of VRAM in BF16, with ~14 GB for vLLM runtime overhead and KV cache. <em>(10 agents achieved 160 tokens per second - but also pushed to 87% of KV.)</em></p>
+<p>So why/when would I prefer renting a GPU that costs more even when fully utilized, where I pay even when it's idle?</p>
+<p><strong>Running specific configurations like quantized or customized versions of the model, no mystery ratelimit, with predictable spend.</strong></p>
+<h2 id="diagram">Diagram</h2>
+<div class="highlight"><pre><span></span><code><span class="n">A100</span><span class="w"> </span><span class="n">GPU</span><span class="w"> </span><span class="n">with</span><span class="w"> </span><span class="n">vLLM</span><span class="w"> </span><span class="p">(</span><span class="mf">127.0.0.1</span><span class="o">:</span><span class="mi">8000</span><span class="p">)</span>
+<span class="w">    </span><span class="o">|</span>
+<span class="w">    </span><span class="o">|</span>
+<span class="n">SSH</span><span class="w"> </span><span class="kr">local</span><span class="w"> </span><span class="n">tunnel</span>
+<span class="w">    </span><span class="o">|</span>
+<span class="w">    </span><span class="o">|</span>
+<span class="n">Harbor</span><span class="w"> </span><span class="n">agents</span><span class="w"> </span><span class="n">on</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">VPS</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">http</span><span class="o">://</span><span class="mf">127.0.0.1</span><span class="o">:</span><span class="mi">18000</span><span class="o">/</span><span class="n">v1</span>
+</code></pre></div>
+<h1 id="api-vs-buy-server-vs-rent-gpus">API vs Buy Server vs Rent GPUs</h1>
+<p>APIs look like a fixed price where someone else handles the hardware/infrastructure complexity.</p>
+<p>Some real downsides I've seen are ratelimits, intermittent failures, outages, breaking API changes, and surprise large bills. <em>And there's the opacity of exactly what they do with your data.</em></p>
+<p>At the other end of the spectrum is buying and operating a GPU server which provides maximum control, but requires substantial capital, specialized operational knowledge, and enough sustained use to justify owning hardware that depreciates quickly.</p>
+<p>Some less obvious downsides are: hardware availability, finding a place to run the server that's secure, with cheap electricity in the KWs, and liquid cooling!</p>
+<p>The pragmatic compromise: rent GPUs on demand.</p>
+<p><em>Similar pros and cons of cloud servers vs colocated datacenters: convenience vs cost, how much expertise is needed versus how much control you need/get.</em></p>
+<p>The right answer is always <strong>it depends</strong>.</p>
+<h1 id="here-to-learn">Here to Learn</h1>
+<blockquote>
+<p>Learning how it works is something you get to keep</p>
+</blockquote>
+<p>Even if you bought the hardware, having a software abstraction layer above the hardware and loose coupling makes sense.</p>
+<p>Understanding how cloud inference providers actually operate their APIs can give you better insights into failure modes and best practices as an end user managing workloads.</p>
+<h1 id="api-superiority">API superiority</h1>
+<p>I used a deliberately biased comparison: Cerebras offer some of the fastest inference available, 35x faster than other APIs on Gemma 4.</p>
+<p>It only took ~3 mins to run a single harbor terminal-bench-2.1 task (regex-log), most of the time was taken up by Harbor's setup and verification. You only pay for an API when you use it: I ran 8 concurrently, and theoretically can go as parallel as my budget allows.</p>
+<p>Specifically for Cerebras, with its specialized feature of low latency, it's $.99 per M input tokens and $1.49 per M output tokens. <em>(Usually Gemma4 costs about $0.40 per million output tokens)</em></p>
+<p>Yet cost is only a single dimension. When a 429 ratelimit kicked in - I'm not in control. The vendor answer makes sense: prevent runaway issues running up huge bills, prevent bad actors from consuming all of the resources. <em>Just create another API key, pay for a higher limit.</em></p>
+<p>And with an API vendor, they decide which models to offer, and tomorrow they could decide to remove the one you depend on.</p>
+<h1 id="agents-demand-more-inference">Agents demand more inference</h1>
+<blockquote>
+<p>Interactive chat &lt; agentic coding &lt; many agents in parallel</p>
+</blockquote>
+<p>Agentic workflows, Evals, and removing the "human in the loop" unlocks exponentially more need for inference.</p>
+<p>Paying per token became fuzzy math: input vs output tokens, invisible thinking tokens, and more tokens needed to accomplish a task.</p>
+<p>And when agents get stuck going in a circle or Loops that don't converge, failure is even more costly.</p>
+<p>This is not new: cost over-runs were a regular challenge of early (~2010s) cloud adoption, and I've personally seen shocking cloud bills in 2026. Amazon even have a special support request for "huge accidental charges".</p>
+<h1 id="predictable-spend">Predictable Spend</h1>
+<p>GPU rental was $1.09 per hour (for an A100 with 80GB of VRAM). At full utilization (500k tokens per hour) that's roughly 2 hours, or $2.18 for a million output tokens.</p>
+<p>The API cost is less, maybe $1 (from a blended rate of input, reasoning, and output tokens).</p>
+<p>The difference is what you get for the money: any model you want, any configuration, no ratelimit, and a bill you can predict before you start.</p>
+<p><em>The tradeoff is real: you own the ops. A misconfiguration can cause OOM the server and lose the work in flight.</em></p>
+<p>When the workload is specific enough that API models can't meet, or heavy enough to trigger limits, having the know-how to rent a GPU and manage it yourself gives you a solution.</p>
+<p>Walk through the full setup step by step in the Appendix =)</p>
+<h1 id="appendix-and-methodology">Appendix and Methodology</h1>
+<p><em>all IP addresses are fictional - replace with your real values</em></p>
+<h2 id="harbor-terminal-21-benchmark">Harbor Terminal 2.1 Benchmark</h2>
+<p>Harbor is a well respected, widely adopted, agentic benchmark framework that's open source and used by frontier labs.</p>
+<p>For comparing APIs to vLLM on GPUs, Harbor acts as proxy for agents making varied LLM calls over time.</p>
+<p>As an open standard, well structured to ramp up real world challenges for LLMs, it makes findings both applicable and reproducible. And the framework also provides a simple way to scale up load in parallel. Also, the standardized format of results provides an easy way to inspect start and end times, agent trajectories.</p>
+<p>Useful side-effect is more data (and a methodology) on specific models that we're interested in. Direct observations on how they actually performed on a known benchmark.</p>
+<ul>
+<li><a href="https://www.harborframework.com/docs">https://www.harborframework.com/docs</a></li>
+<li><a href="https://artificialanalysis.ai/evaluations/terminalbench-v2-1">https://artificialanalysis.ai/evaluations/terminalbench-v2-1</a></li>
+<li><a href="https://blog.john-pfeiffer.com/reproducing-a-coding-benchmark-with-harbor-and-terminal-bench-21/">https://blog.john-pfeiffer.com/reproducing-a-coding-benchmark-with-harbor-and-terminal-bench-21/</a></li>
+</ul>
+<p><em>Terminal Bench 2.1 is 89 tasks. If they all ran serially until before the framework's max timeout of 15 mins = ~22.25 hours.</em></p>
+<p><strong>Quick Analysis</strong></p>
+<p>With the weights loaded and taking VRAM, KV quickly becomes the bottleneck for concurrency.</p>
+<p>A nuance: 8 short agent trajectories may use less KV than 4 long trajectories (where the prompt accumulates more and more context over the turns).</p>
+<h2 id="evaluating-renting-gpus">Evaluating Renting GPUs</h2>
+<p>Critical thinking is needed for careful vendor analysis: what specifically do you need, what exactly are they offering?</p>
+<ol>
+<li>Control - what configurations can you modify</li>
+<li>Stable and Predictable - both in their product and in their pricing</li>
+<li>Transparency - how it is setup, and metrics on how it's operating</li>
+</ol>
+<p><em>During the transition from magentic disks to solid-state-drives (SSD) I learned to depend on their interface/drivers, but to run the benchmarks myself.</em></p>
+<p>And similarly we've seen this when everyone was learning to adopt the cloud (examples from Netflix):</p>
+<ul>
+<li><a href="https://netflixtechblog.com/5-lessons-weve-learned-using-aws-1f2a28588e4c">https://netflixtechblog.com/5-lessons-weve-learned-using-aws-1f2a28588e4c</a></li>
+<li><a href="https://www.brendangregg.com/Slides/AWSreInvent2017_performance_tuning_EC2.pdf">https://www.brendangregg.com/Slides/AWSreInvent2017_performance_tuning_EC2.pdf</a></li>
+</ul>
+<h2 id="thundercompute-gpu-rental">ThunderCompute GPU rental</h2>
+<blockquote>
+<p>~10 mins from server launch to serving an LLM</p>
+</blockquote>
+<p><em>I have no connection to Thundercompute, just a simple place to create an account and pre-pay for credits, "Instances and snapshots are automatically deleted if your balance reaches $0"</em></p>
+<ul>
+<li>create and provide an SSH key</li>
+<li>Use the UI to launch a single A100 with the default 64GB RAM and 100GB disk</li>
+<li>copy the IP address of the newly launched box</li>
+</ul>
+<p><code>ssh ubuntu@192.168.1.111 -p 34567 -i ~/.ssh/MYKEY</code></p>
+<p><em>Tip of the hat to default security by obscurity random ssh port number</em></p>
+<p>To be clear:</p>
+<div class="highlight"><pre><span></span><code>VM with CPU and RAM
+   |
+   | ThunderCompute network/proxy transport
+   v
+
+remote A100 VRAM
+</code></pre></div>
+<p><em>This means changing models or transferring to the GPU will take time</em></p>
+<h3 id="install-uv-and-vllm-and-huggingface">Install UV and vLLM and HuggingFace</h3>
+<div class="highlight"><pre><span></span><code><span class="n">sudo</span><span class="w"> </span><span class="n">su</span><span class="w"> </span><span class="c1"># slightly unsafe but conveniently fast</span>
+<span class="n">apt</span><span class="w"> </span><span class="n">update</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">apt</span><span class="w"> </span><span class="n">install</span><span class="w"> </span><span class="o">-</span><span class="n">y</span><span class="w"> </span><span class="n">byobu</span>
+
+<span class="n">curl</span><span class="w"> </span><span class="o">-</span><span class="n">LsSf</span><span class="w"> </span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">astral</span><span class="o">.</span><span class="n">sh</span><span class="o">/</span><span class="n">uv</span><span class="o">/</span><span class="n">install</span><span class="o">.</span><span class="n">sh</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">sh</span>
+<span class="n">source</span><span class="w"> </span><span class="o">$</span><span class="n">HOME</span><span class="o">/.</span><span class="n">local</span><span class="o">/</span><span class="n">bin</span><span class="o">/</span><span class="n">env</span>
+
+<span class="n">uv</span><span class="w"> </span><span class="k">tool</span><span class="w"> </span><span class="n">install</span><span class="w"> </span><span class="n">huggingface</span><span class="o">-</span><span class="n">hub</span><span class="w"> </span>
+<span class="n">uv</span><span class="w"> </span><span class="k">tool</span><span class="w"> </span><span class="n">install</span><span class="w"> </span><span class="n">vllm</span>
+</code></pre></div>
+<h3 id="download-the-model-weights">Download the Model Weights</h3>
+<div class="highlight"><pre><span></span><code><span class="n">hf</span><span class="w"> </span><span class="n">download</span><span class="w"> </span><span class="n">google</span><span class="o">/</span><span class="n">gemma</span><span class="o">-</span><span class="mi">4</span><span class="o">-</span><span class="mi">31</span><span class="n">B</span><span class="o">-</span><span class="n">it</span>
+<span class="n">ll</span><span class="w"> </span><span class="o">/</span><span class="n">root</span><span class="o">/.</span><span class="n">cache</span><span class="o">/</span><span class="n">huggingface</span><span class="o">/</span><span class="n">hub</span><span class="o">/</span>
+
+<span class="n">du</span><span class="w"> </span><span class="o">-</span><span class="n">sh</span><span class="w"> </span><span class="o">/</span><span class="n">root</span><span class="o">/.</span><span class="n">cache</span><span class="o">/</span><span class="n">huggingface</span><span class="o">/</span><span class="n">hub</span><span class="o">/</span><span class="n">models</span><span class="o">--</span><span class="n">google</span><span class="o">--</span><span class="n">gemma</span><span class="o">-</span><span class="mi">4</span><span class="o">-</span><span class="mi">31</span><span class="n">B</span><span class="o">-</span><span class="n">it</span><span class="o">/</span>
+<span class="w">    </span><span class="mi">59</span><span class="n">G</span><span class="w">     </span><span class="o">/</span><span class="n">root</span><span class="o">/.</span><span class="n">cache</span><span class="o">/</span><span class="n">huggingface</span><span class="o">/</span><span class="n">hub</span><span class="o">/</span><span class="n">models</span><span class="o">--</span><span class="n">google</span><span class="o">--</span><span class="n">gemma</span><span class="o">-</span><span class="mi">4</span><span class="o">-</span><span class="mi">31</span><span class="n">B</span><span class="o">-</span><span class="n">it</span><span class="o">/</span>
+</code></pre></div>
+<p><em>actually only took about 3 mins</em> <a href="https://huggingface.co/google/gemma-4-31B-it">https://huggingface.co/google/gemma-4-31B-it</a></p>
+<h3 id="vllm-serving">vLLM serving</h3>
+<blockquote>
+<p>as simple as one long command</p>
+</blockquote>
+<p>VLLM_USE_V2_MODEL_RUNNER=0 uv tool run vllm serve google/gemma-4-31B-it \
+  --dtype bfloat16 \
+  --max-model-len 16384 \
+  --gpu-memory-utilization 0.92 \
+  --enable-auto-tool-choice \
+  --reasoning-parser gemma4 \
+  --tool-call-parser gemma4 \
+  --default-chat-template-kwargs '{"enable_thinking":true}' \
+  --limit-mm-per-prompt '{"image":0,"audio":0}' \
+  --host 127.0.0.1 \
+  --port 8000</p>
+<p><strong>security</strong> <em>note: local binding to 127.0.0.1</em></p>
+<p><em>preferred the VLLM V1 model runner as a stable baseline</em></p>
+<p><em>vLLM resolves google/gemma-4-31B-it against the local HF cache before hitting the network, the capital letter B matters</em></p>
+<p><em>maybe the agent, with thinking disabled, would have performed better (used less tokens to fail faster)</em></p>
+<blockquote>
+<p>Verify that it is successful locally </p>
+</blockquote>
+<p><code>curl -s localhost:8000/health -o /dev/null -w '%{http_code}\n'</code>
+<em>200</em></p>
+<p><code>curl -s localhost:8000/v1/models</code></p>
+<div class="highlight"><pre><span></span><code>{"object":"list","data":[{"id":"google/gemma-4-31B-it",...
+</code></pre></div>
+<p><em>When you are finally done just delete the box to stop the per minute charges.</em></p>
+<h2 id="linode">Linode</h2>
+<p>Linode 8GB with Harbor setup: <a href="https://blog.john-pfeiffer.com/reproducing-a-coding-benchmark-with-harbor-and-terminal-bench-21/#install-docker">https://blog.john-pfeiffer.com/reproducing-a-coding-benchmark-with-harbor-and-terminal-bench-21/#install-docker</a></p>
+<p><code>apt install -y autossh</code></p>
+<p><em>ensure the MYKEY ssh key for ThunderCompute is put onto the Linode box</em></p>
+<p><strong>Why an external benchmark box?</strong></p>
+<ul>
+<li>the same starting point for comparisons to running Harbor with API</li>
+<li>not as operationally sound or supported to run "docker in docker" for Thundercompute (or any GPU provider)</li>
+<li>network latency (milliseconds) was neglible is a factor compared to LLM response times (seconds to minutes)</li>
+<li>real world usage will be from "a server somewhere over a network"</li>
+</ul>
+<h3 id="ssh-tunnel">SSH tunnel</h3>
+<p>Verify you can connect to the GPU host box:</p>
+<p><code>ssh -i /root/.ssh/MYKEY  ubuntu@192.168.1.111 -p 34567</code></p>
+<p><em>(accept the unknown fingerprint)</em></p>
+<p>Setup a more resilient tunnel with <strong>autossh</strong>:</p>
+<div class="highlight"><pre><span></span><code><span class="n">autossh</span><span class="w"> </span><span class="o">-</span><span class="n">M</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="o">-</span><span class="n">f</span><span class="w"> </span><span class="o">-</span><span class="n">N</span><span class="w"> </span><span class="o">-</span><span class="n">T</span><span class="w"> </span>\
+<span class="w">  </span><span class="o">-</span><span class="n">o</span><span class="w"> </span><span class="n">ExitOnForwardFailure</span><span class="o">=</span><span class="n">yes</span><span class="w"> </span><span class="o">-</span><span class="n">o</span><span class="w"> </span><span class="n">ServerAliveInterval</span><span class="o">=</span><span class="mi">30</span><span class="w"> </span><span class="o">-</span><span class="n">o</span><span class="w"> </span><span class="n">ServerAliveCountMax</span><span class="o">=</span><span class="mi">3</span><span class="w"> </span><span class="o">-</span><span class="n">o</span><span class="w"> </span><span class="n">Compression</span><span class="o">=</span><span class="n">no</span><span class="w"> </span>\
+<span class="w">  </span><span class="o">-</span><span class="n">L</span><span class="w"> </span><span class="mf">127.0.0.1</span><span class="o">:</span><span class="mi">18000</span><span class="o">:</span><span class="mf">127.0.0.1</span><span class="o">:</span><span class="mi">8000</span><span class="w"> </span>\
+<span class="w">  </span><span class="o">-</span><span class="n">p</span><span class="w"> </span><span class="mi">34567</span><span class="w"> </span><span class="o">-</span><span class="n">i</span><span class="w"> </span><span class="o">/</span><span class="n">root</span><span class="o">/</span><span class="p">.</span><span class="n">ssh</span><span class="o">/</span><span class="n">MYKEY</span><span class="w"> </span><span class="n">ubuntu</span><span class="mf">@192.168.1.111</span>
+
+
+<span class="n">ss</span><span class="w"> </span><span class="o">-</span><span class="n">ltnp</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">grep</span><span class="w"> </span><span class="err">'</span><span class="o">:</span><span class="mi">18000</span><span class="err">'</span>
+</code></pre></div>
+<p><em>security note: local binding to 127.0.0.1</em></p>
+<h3 id="verify-the-ssh-tunnel-to-vllm">Verify the SSH tunnel to vLLM</h3>
+<p><code>curl -s http://127.0.0.1:18000/v1/models | jq</code></p>
+<div class="highlight"><pre><span></span><code>{"object":"list","data":[{"id":"google/gemma-4-31B-it",...
+</code></pre></div>
+<p><strong>Initial metrics before testing</strong> with <code>curl -s http://127.0.0.1:18000/metrics &gt; vllm-before.log</code></p>
+<p><em>The metrics are cumulative so you could consider offloading them if you want to disaggregate.</em></p>
+<p>After done with all testing get the stats: <code>curl -s http://127.0.0.1:18000/metrics &gt; vllm-after.log</code></p>
+<p><em>To download results to your local machine afterwards:</em>
+<code>scp -i ~/.ssh/MYKEY root@192.168.2.222:/jobs .</code></p>
+<p>An alternative one-off way to load test:</p>
+<div class="highlight"><pre><span></span><code>seq 1 32 | xargs -P32 -I{} curl -s -o /dev/null -w '%{time_total}\n' \
+  http://127.0.0.1:18000/v1/completions -H 'Content-Type: application/json' \
+  -d '{"model":"google/gemma-4-31B-it","prompt":"write 3 long detailed paragraphs about a random animal","max_tokens":4096}' | sort -n
+</code></pre></div>
+<h3 id="run-the-harbor-benchmark">Run The Harbor Benchmark</h3>
+<p><code>export OPENAI_API_KEY=dummy</code>
+<code>export OPENAI_BASE_URL=http://127.0.0.1:18000/v1</code></p>
+<div class="highlight"><pre><span></span><code><span class="n">harbor</span><span class="w"> </span><span class="n">run</span><span class="w"> </span><span class="o">-</span><span class="n">d</span><span class="w"> </span><span class="n">terminal</span><span class="o">-</span><span class="n">bench</span><span class="o">/</span><span class="n">terminal</span><span class="o">-</span><span class="n">bench</span><span class="o">-</span><span class="mh">2</span><span class="o">-</span><span class="mh">1</span><span class="w"> </span><span class="o">--</span><span class="n">agent</span><span class="w"> </span><span class="n">terminus</span><span class="o">-</span><span class="mh">2</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span><span class="o">--</span><span class="n">model</span><span class="w"> </span><span class="n">openai</span><span class="o">/</span><span class="n">google</span><span class="o">/</span><span class="n">gemma</span><span class="o">-</span><span class="mh">4</span><span class="o">-</span><span class="mh">31</span><span class="n">B</span><span class="o">-</span><span class="n">it</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span><span class="o">--</span><span class="n">include</span><span class="o">-</span><span class="k">task</span><span class="o">-</span><span class="n">name</span><span class="w"> </span><span class="n">terminal</span><span class="o">-</span><span class="n">bench</span><span class="o">/</span><span class="n">regex</span><span class="o">-</span><span class="n">log</span><span class="w"> </span><span class="o">-</span><span class="n">k</span><span class="w"> </span><span class="mh">8</span><span class="w"> </span><span class="o">-</span><span class="n">n</span><span class="w"> </span><span class="mh">8</span>
+</code></pre></div>
+<p>It worked, started producing the result.json with tasks running and eventual successes and fails.</p>
+<p>Via vLLM verifying the agent requests and token generation stats:</p>
+<div class="highlight"><pre><span></span><code>curl -s http://127.0.0.1:18000/metrics | grep 'request_success_total'
+    vllm:request_success_total{engine="0",finished_reason="stop",model_name="google/gemma-4-31B-it"} 19.0
+    vllm:request_success_total{engine="0",finished_reason="length",model_name="google/gemma-4-31B-it"} 96.0
+
+curl -s http://127.0.0.1:18000/metrics | grep 'tokens_sum'
+    vllm:request_prompt_tokens_sum{engine="0",model_name="google/gemma-4-31B-it"} 50222.0
+    vllm:request_generation_tokens_sum{engine="0",model_name="google/gemma-4-31B-it"} 27900.0
+    vllm:request_max_num_generation_tokens_sum{engine="0",model_name="google/gemma-4-31B-it"} 27900.0
+    vllm:request_params_max_tokens_sum{engine="0",model_name="google/gemma-4-31B-it"} 257100.0
+    vllm:request_prefill_kv_computed_tokens_sum{engine="0",model_name="google/gemma-4-31B-it"} 17646.0
+</code></pre></div>
+<h3 id="tokens-per-second-and-kv-usage">Tokens Per Second and KV Usage</h3>
+<p>From the vLLM streaming logs:</p>
+<div class="highlight"><pre><span></span><code><span class="o">&gt;</span><span class="w"> </span><span class="mh">20</span><span class="w"> </span><span class="n">tokens</span><span class="w"> </span><span class="n">per</span><span class="w"> </span><span class="n">second</span>
+
+<span class="n">harbor</span><span class="w"> </span><span class="n">run</span><span class="w"> </span><span class="o">-</span><span class="n">d</span><span class="w"> </span><span class="n">terminal</span><span class="o">-</span><span class="n">bench</span><span class="o">/</span><span class="n">terminal</span><span class="o">-</span><span class="n">bench</span><span class="o">-</span><span class="mh">2</span><span class="o">-</span><span class="mh">1</span><span class="w"> </span><span class="o">--</span><span class="n">agent</span><span class="w"> </span><span class="n">terminus</span><span class="o">-</span><span class="mh">2</span><span class="w">   </span><span class="o">--</span><span class="n">model</span><span class="w"> </span><span class="n">openai</span><span class="o">/</span><span class="n">google</span><span class="o">/</span><span class="n">gemma</span><span class="o">-</span><span class="mh">4</span><span class="o">-</span><span class="mh">31</span><span class="n">B</span><span class="o">-</span><span class="n">it</span><span class="w">  </span><span class="o">-</span><span class="n">k</span><span class="w"> </span><span class="mh">1</span><span class="w"> </span><span class="o">-</span><span class="n">n</span><span class="w"> </span><span class="mh">1</span><span class="w">  </span><span class="o">--</span><span class="n">include</span><span class="o">-</span><span class="k">task</span><span class="o">-</span><span class="n">name</span><span class="w"> </span><span class="s">"terminal-bench/regex-log"</span>
+
+<span class="p">(</span><span class="n">APIServer</span><span class="w"> </span><span class="n">pid</span><span class="o">=</span><span class="mh">11745</span><span class="p">)</span><span class="w"> </span><span class="n">INFO</span><span class="w"> </span><span class="mh">08</span><span class="o">-</span><span class="mh">01</span><span class="w"> </span><span class="mh">19</span><span class="o">:</span><span class="mh">16</span><span class="o">:</span><span class="mh">16</span><span class="w"> </span><span class="p">[</span><span class="n">loggers</span><span class="p">.</span><span class="nl">py:</span><span class="mh">310</span><span class="p">]</span><span class="w"> </span><span class="n">Engine</span><span class="w"> </span><span class="mh">000</span><span class="o">:</span><span class="w"> </span><span class="n">Avg</span><span class="w"> </span><span class="n">prompt</span><span class="w"> </span><span class="nl">throughput:</span><span class="w"> </span><span class="mf">0.0</span><span class="w"> </span><span class="n">tokens</span><span class="o">/</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="n">Avg</span><span class="w"> </span><span class="n">generation</span><span class="w"> </span><span class="nl">throughput:</span><span class="w"> </span><span class="mf">20.0</span><span class="w"> </span><span class="n">tokens</span><span class="o">/</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="nl">Running:</span><span class="w"> </span><span class="mh">1</span><span class="w"> </span><span class="n">reqs</span><span class="p">,</span><span class="w"> </span><span class="nl">Waiting:</span><span class="w"> </span><span class="mh">0</span><span class="w"> </span><span class="n">reqs</span><span class="p">,</span><span class="w"> </span><span class="n">GPU</span><span class="w"> </span><span class="n">KV</span><span class="w"> </span><span class="n">cache</span><span class="w"> </span><span class="nl">usage:</span><span class="w"> </span><span class="mf">10.9</span><span class="o">%</span><span class="p">,</span><span class="w"> </span><span class="n">Prefix</span><span class="w"> </span><span class="n">cache</span><span class="w"> </span><span class="n">hit</span><span class="w"> </span><span class="nl">rate:</span><span class="w"> </span><span class="mf">0.6</span><span class="o">%</span>
+
+<span class="o">&gt;</span><span class="w"> </span><span class="mh">40</span><span class="w"> </span><span class="n">tokens</span><span class="w"> </span><span class="n">per</span><span class="w"> </span><span class="n">second</span>
+
+<span class="n">harbor</span><span class="w"> </span><span class="n">run</span><span class="w"> </span><span class="o">-</span><span class="n">d</span><span class="w"> </span><span class="n">terminal</span><span class="o">-</span><span class="n">bench</span><span class="o">/</span><span class="n">terminal</span><span class="o">-</span><span class="n">bench</span><span class="o">-</span><span class="mh">2</span><span class="o">-</span><span class="mh">1</span><span class="w"> </span><span class="o">--</span><span class="n">agent</span><span class="w"> </span><span class="n">terminus</span><span class="o">-</span><span class="mh">2</span><span class="w">   </span><span class="o">--</span><span class="n">model</span><span class="w"> </span><span class="n">openai</span><span class="o">/</span><span class="n">google</span><span class="o">/</span><span class="n">gemma</span><span class="o">-</span><span class="mh">4</span><span class="o">-</span><span class="mh">31</span><span class="n">B</span><span class="o">-</span><span class="n">it</span><span class="w">  </span><span class="o">-</span><span class="n">k</span><span class="w"> </span><span class="mh">1</span><span class="w"> </span><span class="o">-</span><span class="n">n</span><span class="w"> </span><span class="mh">1</span><span class="w">  </span><span class="o">--</span><span class="n">include</span><span class="o">-</span><span class="k">task</span><span class="o">-</span><span class="n">name</span><span class="w"> </span><span class="s">"terminal-bench/regex-log"</span>
+
+<span class="p">(</span><span class="n">APIServer</span><span class="w"> </span><span class="n">pid</span><span class="o">=</span><span class="mh">11745</span><span class="p">)</span><span class="w"> </span><span class="n">INFO</span><span class="w"> </span><span class="mh">08</span><span class="o">-</span><span class="mh">01</span><span class="w"> </span><span class="mh">19</span><span class="o">:</span><span class="mh">29</span><span class="o">:</span><span class="mh">26</span><span class="w"> </span><span class="p">[</span><span class="n">loggers</span><span class="p">.</span><span class="nl">py:</span><span class="mh">310</span><span class="p">]</span><span class="w"> </span><span class="n">Engine</span><span class="w"> </span><span class="mh">000</span><span class="o">:</span><span class="w"> </span><span class="n">Avg</span><span class="w"> </span><span class="n">prompt</span><span class="w"> </span><span class="nl">throughput:</span><span class="w"> </span><span class="mf">0.0</span><span class="w"> </span><span class="n">tokens</span><span class="o">/</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="n">Avg</span><span class="w"> </span><span class="n">generation</span><span class="w"> </span><span class="nl">throughput:</span><span class="w"> </span><span class="mf">40.8</span><span class="w"> </span><span class="n">tokens</span><span class="o">/</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="nl">Running:</span><span class="w"> </span><span class="mh">2</span><span class="w"> </span><span class="n">reqs</span><span class="p">,</span><span class="w"> </span><span class="nl">Waiting:</span><span class="w"> </span><span class="mh">0</span><span class="w"> </span><span class="n">reqs</span><span class="p">,</span><span class="w"> </span><span class="n">GPU</span><span class="w"> </span><span class="n">KV</span><span class="w"> </span><span class="n">cache</span><span class="w"> </span><span class="nl">usage:</span><span class="w"> </span><span class="mf">16.6</span><span class="o">%</span><span class="p">,</span><span class="w"> </span><span class="n">Prefix</span><span class="w"> </span><span class="n">cache</span><span class="w"> </span><span class="n">hit</span><span class="w"> </span><span class="nl">rate:</span><span class="w"> </span><span class="mf">0.7</span><span class="o">%</span>
+
+<span class="o">&gt;</span><span class="w"> </span><span class="mh">76</span><span class="w"> </span><span class="n">tokens</span><span class="w"> </span><span class="n">per</span><span class="w"> </span><span class="n">second</span><span class="w"> </span><span class="p">(</span><span class="mh">4</span><span class="w"> </span><span class="n">parallel</span><span class="p">)</span>
+
+<span class="n">harbor</span><span class="w"> </span><span class="n">run</span><span class="w"> </span><span class="o">-</span><span class="n">d</span><span class="w"> </span><span class="n">terminal</span><span class="o">-</span><span class="n">bench</span><span class="o">/</span><span class="n">terminal</span><span class="o">-</span><span class="n">bench</span><span class="o">-</span><span class="mh">2</span><span class="o">-</span><span class="mh">1</span><span class="w"> </span><span class="o">--</span><span class="n">agent</span><span class="w"> </span><span class="n">terminus</span><span class="o">-</span><span class="mh">2</span><span class="w">   </span><span class="o">--</span><span class="n">model</span><span class="w"> </span><span class="n">openai</span><span class="o">/</span><span class="n">google</span><span class="o">/</span><span class="n">gemma</span><span class="o">-</span><span class="mh">4</span><span class="o">-</span><span class="mh">31</span><span class="n">B</span><span class="o">-</span><span class="n">it</span><span class="w">  </span><span class="o">-</span><span class="n">k</span><span class="w"> </span><span class="mh">2</span><span class="w"> </span><span class="o">-</span><span class="n">n</span><span class="w"> </span><span class="mh">2</span><span class="w">  </span><span class="o">--</span><span class="n">include</span><span class="o">-</span><span class="k">task</span><span class="o">-</span><span class="n">name</span><span class="w"> </span><span class="s">"terminal-bench/regex-log"</span>
+
+<span class="p">(</span><span class="n">APIServer</span><span class="w"> </span><span class="n">pid</span><span class="o">=</span><span class="mh">11745</span><span class="p">)</span><span class="w"> </span><span class="n">INFO</span><span class="w"> </span><span class="mh">08</span><span class="o">-</span><span class="mh">01</span><span class="w"> </span><span class="mh">19</span><span class="o">:</span><span class="mh">32</span><span class="o">:</span><span class="mh">56</span><span class="w"> </span><span class="p">[</span><span class="n">loggers</span><span class="p">.</span><span class="nl">py:</span><span class="mh">310</span><span class="p">]</span><span class="w"> </span><span class="n">Engine</span><span class="w"> </span><span class="mh">000</span><span class="o">:</span><span class="w"> </span><span class="n">Avg</span><span class="w"> </span><span class="n">prompt</span><span class="w"> </span><span class="nl">throughput:</span><span class="w"> </span><span class="mf">0.0</span><span class="w"> </span><span class="n">tokens</span><span class="o">/</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="n">Avg</span><span class="w"> </span><span class="n">generation</span><span class="w"> </span><span class="nl">throughput:</span><span class="w"> </span><span class="mf">76.4</span><span class="w"> </span><span class="n">tokens</span><span class="o">/</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="nl">Running:</span><span class="w"> </span><span class="mh">4</span><span class="w"> </span><span class="n">reqs</span><span class="p">,</span><span class="w"> </span><span class="nl">Waiting:</span><span class="w"> </span><span class="mh">0</span><span class="w"> </span><span class="n">reqs</span><span class="p">,</span><span class="w"> </span><span class="n">GPU</span><span class="w"> </span><span class="n">KV</span><span class="w"> </span><span class="n">cache</span><span class="w"> </span><span class="nl">usage:</span><span class="w"> </span><span class="mf">34.9</span><span class="o">%</span><span class="p">,</span><span class="w"> </span><span class="n">Prefix</span><span class="w"> </span><span class="n">cache</span><span class="w"> </span><span class="n">hit</span><span class="w"> </span><span class="nl">rate:</span><span class="w"> </span><span class="mf">0.8</span><span class="o">%</span>
+
+<span class="o">&gt;</span><span class="w"> </span><span class="mh">108</span><span class="w"> </span><span class="n">tokens</span><span class="w"> </span><span class="n">per</span><span class="w"> </span><span class="n">second</span><span class="w"> </span><span class="p">(</span><span class="mh">6</span><span class="w"> </span><span class="n">parallel</span><span class="p">)</span>
+
+<span class="n">harbor</span><span class="w"> </span><span class="n">run</span><span class="w"> </span><span class="o">-</span><span class="n">d</span><span class="w"> </span><span class="n">terminal</span><span class="o">-</span><span class="n">bench</span><span class="o">/</span><span class="n">terminal</span><span class="o">-</span><span class="n">bench</span><span class="o">-</span><span class="mh">2</span><span class="o">-</span><span class="mh">1</span><span class="w"> </span><span class="o">--</span><span class="n">agent</span><span class="w"> </span><span class="n">terminus</span><span class="o">-</span><span class="mh">2</span><span class="w">   </span><span class="o">--</span><span class="n">model</span><span class="w"> </span><span class="n">openai</span><span class="o">/</span><span class="n">google</span><span class="o">/</span><span class="n">gemma</span><span class="o">-</span><span class="mh">4</span><span class="o">-</span><span class="mh">31</span><span class="n">B</span><span class="o">-</span><span class="n">it</span><span class="w">  </span><span class="o">-</span><span class="n">k</span><span class="w"> </span><span class="mh">2</span><span class="w"> </span><span class="o">-</span><span class="n">n</span><span class="w"> </span><span class="mh">2</span><span class="w">  </span><span class="o">--</span><span class="n">include</span><span class="o">-</span><span class="k">task</span><span class="o">-</span><span class="n">name</span><span class="w"> </span><span class="s">"terminal-bench/regex-log"</span>
+
+<span class="p">(</span><span class="n">APIServer</span><span class="w"> </span><span class="n">pid</span><span class="o">=</span><span class="mh">11745</span><span class="p">)</span><span class="w"> </span><span class="n">INFO</span><span class="w"> </span><span class="mh">08</span><span class="o">-</span><span class="mh">01</span><span class="w"> </span><span class="mh">19</span><span class="o">:</span><span class="mh">37</span><span class="o">:</span><span class="mh">26</span><span class="w"> </span><span class="p">[</span><span class="n">loggers</span><span class="p">.</span><span class="nl">py:</span><span class="mh">310</span><span class="p">]</span><span class="w"> </span><span class="n">Engine</span><span class="w"> </span><span class="mh">000</span><span class="o">:</span><span class="w"> </span><span class="n">Avg</span><span class="w"> </span><span class="n">prompt</span><span class="w"> </span><span class="nl">throughput:</span><span class="w"> </span><span class="mf">0.0</span><span class="w"> </span><span class="n">tokens</span><span class="o">/</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="n">Avg</span><span class="w"> </span><span class="n">generation</span><span class="w"> </span><span class="nl">throughput:</span><span class="w"> </span><span class="mf">108.0</span><span class="w"> </span><span class="n">tokens</span><span class="o">/</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="nl">Running:</span><span class="w"> </span><span class="mh">6</span><span class="w"> </span><span class="n">reqs</span><span class="p">,</span><span class="w"> </span><span class="nl">Waiting:</span><span class="w"> </span><span class="mh">0</span><span class="w"> </span><span class="n">reqs</span><span class="p">,</span><span class="w"> </span><span class="n">GPU</span><span class="w"> </span><span class="n">KV</span><span class="w"> </span><span class="n">cache</span><span class="w"> </span><span class="nl">usage:</span><span class="w"> </span><span class="mf">52.7</span><span class="o">%</span><span class="p">,</span><span class="w"> </span><span class="n">Prefix</span><span class="w"> </span><span class="n">cache</span><span class="w"> </span><span class="n">hit</span><span class="w"> </span><span class="nl">rate:</span><span class="w"> </span><span class="mf">0.9</span><span class="o">%</span>
+
+<span class="o">&gt;</span><span class="w"> </span><span class="mh">138</span><span class="w"> </span><span class="n">tokens</span><span class="w"> </span><span class="n">per</span><span class="w"> </span><span class="n">second</span><span class="w"> </span><span class="p">(</span><span class="mh">8</span><span class="w"> </span><span class="n">parallel</span><span class="p">)</span>
+
+<span class="p">(</span><span class="n">APIServer</span><span class="w"> </span><span class="n">pid</span><span class="o">=</span><span class="mh">11745</span><span class="p">)</span><span class="w"> </span><span class="n">INFO</span><span class="w"> </span><span class="mh">08</span><span class="o">-</span><span class="mh">01</span><span class="w"> </span><span class="mh">19</span><span class="o">:</span><span class="mh">44</span><span class="o">:</span><span class="mh">06</span><span class="w"> </span><span class="p">[</span><span class="n">loggers</span><span class="p">.</span><span class="nl">py:</span><span class="mh">310</span><span class="p">]</span><span class="w"> </span><span class="n">Engine</span><span class="w"> </span><span class="mh">000</span><span class="o">:</span><span class="w"> </span><span class="n">Avg</span><span class="w"> </span><span class="n">prompt</span><span class="w"> </span><span class="nl">throughput:</span><span class="w"> </span><span class="mf">0.0</span><span class="w"> </span><span class="n">tokens</span><span class="o">/</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="n">Avg</span><span class="w"> </span><span class="n">generation</span><span class="w"> </span><span class="nl">throughput:</span><span class="w"> </span><span class="mf">138.4</span><span class="w"> </span><span class="n">tokens</span><span class="o">/</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="nl">Running:</span><span class="w"> </span><span class="mh">8</span><span class="w"> </span><span class="n">reqs</span><span class="p">,</span><span class="w"> </span><span class="nl">Waiting:</span><span class="w"> </span><span class="mh">0</span><span class="w"> </span><span class="n">reqs</span><span class="p">,</span><span class="w"> </span><span class="n">GPU</span><span class="w"> </span><span class="n">KV</span><span class="w"> </span><span class="n">cache</span><span class="w"> </span><span class="nl">usage:</span><span class="w"> </span><span class="mf">70.6</span><span class="o">%</span><span class="p">,</span><span class="w"> </span><span class="n">Prefix</span><span class="w"> </span><span class="n">cache</span><span class="w"> </span><span class="n">hit</span><span class="w"> </span><span class="nl">rate:</span><span class="w"> </span><span class="mf">1.1</span><span class="o">%</span>
+
+<span class="o">&gt;</span><span class="w"> </span><span class="mh">160</span><span class="w"> </span><span class="n">tokens</span><span class="w"> </span><span class="n">per</span><span class="w"> </span><span class="n">second</span><span class="w"> </span><span class="p">(</span><span class="mh">10</span><span class="w"> </span><span class="n">parallel</span><span class="p">)</span>
+
+<span class="p">(</span><span class="n">APIServer</span><span class="w"> </span><span class="n">pid</span><span class="o">=</span><span class="mh">11745</span><span class="p">)</span><span class="w"> </span><span class="n">INFO</span><span class="w"> </span><span class="mh">08</span><span class="o">-</span><span class="mh">01</span><span class="w"> </span><span class="mh">19</span><span class="o">:</span><span class="mh">47</span><span class="o">:</span><span class="mh">46</span><span class="w"> </span><span class="p">[</span><span class="n">loggers</span><span class="p">.</span><span class="nl">py:</span><span class="mh">310</span><span class="p">]</span><span class="w"> </span><span class="n">Engine</span><span class="w"> </span><span class="mh">000</span><span class="o">:</span><span class="w"> </span><span class="n">Avg</span><span class="w"> </span><span class="n">prompt</span><span class="w"> </span><span class="nl">throughput:</span><span class="w"> </span><span class="mf">0.0</span><span class="w"> </span><span class="n">tokens</span><span class="o">/</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="n">Avg</span><span class="w"> </span><span class="n">generation</span><span class="w"> </span><span class="nl">throughput:</span><span class="w"> </span><span class="mf">160.0</span><span class="w"> </span><span class="n">tokens</span><span class="o">/</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="nl">Running:</span><span class="w"> </span><span class="mh">10</span><span class="w"> </span><span class="n">reqs</span><span class="p">,</span><span class="w"> </span><span class="nl">Waiting:</span><span class="w"> </span><span class="mh">0</span><span class="w"> </span><span class="n">reqs</span><span class="p">,</span><span class="w"> </span><span class="n">GPU</span><span class="w"> </span><span class="n">KV</span><span class="w"> </span><span class="n">cache</span><span class="w"> </span><span class="nl">usage:</span><span class="w"> </span><span class="mf">87.3</span><span class="o">%</span><span class="p">,</span><span class="w"> </span><span class="n">Prefix</span><span class="w"> </span><span class="n">cache</span><span class="w"> </span><span class="n">hit</span><span class="w"> </span><span class="nl">rate:</span><span class="w"> </span><span class="mf">1.3</span><span class="o">%</span>
+</code></pre></div>
+<p><code>curl -s http://127.0.0.1:18000/metrics &gt; vllm-after.log</code></p>
+<h3 id="quick-server-diagnostics">Quick Server Diagnostics</h3>
+<p>On the GPU host, confirm the linux kernel, the available memory, and the Nvidia stats:</p>
+<div class="highlight"><pre><span></span><code>uname -a ; free -m
+    64  GB RAM
+</code></pre></div>
+<p><code>nvidia-smi</code></p>
+<div class="highlight"><pre><span></span><code>| NVIDIA-SMI 610.43.02              KMD Version: 610.43.02     CUDA UMD Version: 13.3     |
++-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  NVIDIA A100-SXM4-80GB          Off |   00000000:9D:00.0 Off |                    0 |
+| N/A   33C    P0             70W /  500W |       4MiB /  81920MiB |      0%      Default |
+|                                         |                        |             Disabled |
+</code></pre></div>
+<p><code>python3 --version &amp;&amp; pip --version</code></p>
+<div class="highlight"><pre><span></span><code><span class="n">Python</span><span class="w"> </span><span class="mf">3.12.13</span>
+<span class="n">pip</span><span class="w"> </span><span class="mf">26.1.2</span><span class="w"> </span><span class="kn">from</span><span class="w"> </span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">python3</span><span class="mf">.12</span><span class="o">/</span><span class="n">dist</span><span class="o">-</span><span class="n">packages</span><span class="o">/</span><span class="n">pip</span><span class="w"> </span><span class="p">(</span><span class="n">python</span><span class="w"> </span><span class="mf">3.12</span><span class="p">)</span>
+
+<span class="n">python3</span><span class="w"> </span><span class="o">-</span><span class="n">c</span><span class="w"> </span><span class="s2">"import torch; print(torch.__version__, torch.version.cuda, torch.cuda.is_available(), torch.cuda.get_device_name(0))"</span><span class="w"> </span><span class="mi">2</span><span class="o">&gt;/</span><span class="n">dev</span><span class="o">/</span><span class="n">null</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">echo</span><span class="w"> </span><span class="s2">"no torch"</span>
+
+<span class="mf">2.12.1</span><span class="o">+</span><span class="n">cu130</span><span class="w"> </span><span class="mf">13.0</span><span class="w"> </span><span class="kc">True</span><span class="w"> </span><span class="n">NVIDIA</span><span class="w"> </span><span class="n">A100</span><span class="o">-</span><span class="n">SXM4</span><span class="o">-</span><span class="mi">80</span><span class="n">GB</span>
+</code></pre></div>
+<p><em>the nvidia-smi is not that useful for realtime stats, but watts used does correlate to load</em></p>
+<div class="highlight"><pre><span></span><code>watch -n 1 \
+'nvidia-smi --query-gpu=timestamp,name,utilization.gpu,utilization.memory,memory.used,memory.total,power.draw,temperature.gpu --format=csv,noheader'
+
+
+2026/08/01 18:51:16.773, NVIDIA A100-SXM4-80GB, 92 %, 82 %, 75351 MiB, 81920 MiB, 312.13 W, 59
+</code></pre></div>
+<h1 id="references">References</h1>
+<blockquote>
+<p>Instead of reserving a GPU, cloud instances on Thunder Compute share a pool of network-attached GPUs.</p>
+</blockquote>
+<p>More details: <a href="https://www.thundercompute.com/blog/how-thunder-compute-works-gpu-over-tcp">https://www.thundercompute.com/blog/how-thunder-compute-works-gpu-over-tcp</a></p>
+<p>Thunder A100-SXM4-80GB , $1.09/hr</p>
+            <aside>
+            <hr/>
+            <nav>
+            <ul class="articles_timeline">
+ 
+                <li class="previous_article">« <a href="https://blog.john-pfeiffer.com/reproducing-a-coding-benchmark-with-harbor-and-terminal-bench-21/" title="Previous: Reproducing a coding benchmark with Harbor and Terminal Bench 2.1">Reproducing a coding benchmark with Harbor and Terminal Bench 2.1</a></li>
+            </ul>
+            </nav>
+            </aside>
+        </div>
+        <section>
+        <div class="span2" style="float:right;font-size:0.9em;">
+ 
+            <h4>Published</h4>
+            <time pubdate="pubdate" datetime="2026-07-31T08:08:00-07:00">Jul 31, 2026</time>
+            <h4>Category</h4>
+            <a class="category-link" href="/categories.html#ai-ref">ai</a> 
+            <h4>~2118 words</h4>
+            <h4>Tags</h4>
+            <ul class="list-of-tags tags-in-article"> 
+                <li><a href="/tags.html#ai-ref">ai
+                    <span>14</span>
+</a></li>
+                <li><a href="/tags.html#benchmark-ref">benchmark
+                    <span>4</span>
+</a></li>
+                <li><a href="/tags.html#gpu-ref">gpu
+                    <span>1</span>
+</a></li>
+                <li><a href="/tags.html#inference-ref">inference
+                    <span>1</span>
+</a></li>
+            </ul>
+
+        </div>
+        </section>
+</div>
+</article>
+				</div>
+				<div class="span1"></div>
+			</div>
+		</div>
+    </div>
+<footer>
+<div id="footer">
+    <ul class="footer-content">
+    </ul>
+</div>
+</footer>            <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+    </body>
+</html>
