@@ -78,7 +78,7 @@
 &lt;li&gt;Stable and Predictable - both in their product and in their pricing&lt;/li&gt;
 &lt;li&gt;Transparency - how it is setup, and metrics on how it's operating&lt;/li&gt;
 &lt;/ol&gt;
-&lt;p&gt;&lt;em&gt;During the transition from magentic disks to solid-state-drives (SSD) I learned to depend on their interface/drivers, but to run the benchmarks myself.&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;During the transition from magnetic disks to solid-state-drives (SSD) I learned to depend on their interface/drivers, but to run the benchmarks myself.&lt;/em&gt;&lt;/p&gt;
 &lt;p&gt;And similarly we've seen this when everyone was learning to adopt the cloud (examples from Netflix):&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;a href="https://netflixtechblog.com/5-lessons-weve-learned-using-aws-1f2a28588e4c"&gt;https://netflixtechblog.com/5-lessons-weve-learned-using-aws-1f2a28588e4c&lt;/a&gt;&lt;/li&gt;
@@ -127,26 +127,31 @@ remote A100 VRAM
 &lt;blockquote&gt;
 &lt;p&gt;as simple as one long command&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;p&gt;VLLM_USE_V2_MODEL_RUNNER=0 uv tool run vllm serve google/gemma-4-31B-it \
-  --dtype bfloat16 \
-  --max-model-len 16384 \
-  --gpu-memory-utilization 0.92 \
-  --enable-auto-tool-choice \
-  --reasoning-parser gemma4 \
-  --tool-call-parser gemma4 \
-  --default-chat-template-kwargs '{"enable_thinking":true}' \
-  --limit-mm-per-prompt '{"image":0,"audio":0}' \
-  --host 127.0.0.1 \
-  --port 8000&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;security&lt;/strong&gt; &lt;em&gt;note: local binding to 127.0.0.1&lt;/em&gt;&lt;/p&gt;
-&lt;p&gt;&lt;em&gt;preferred the VLLM V1 model runner as a stable baseline&lt;/em&gt;&lt;/p&gt;
-&lt;p&gt;&lt;em&gt;vLLM resolves google/gemma-4-31B-it against the local HF cache before hitting the network, the capital letter B matters&lt;/em&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="nx"&gt;VLLM_USE_V2_MODEL_RUNNER&lt;/span&gt;&lt;span class="p"&gt;=&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;uv&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;tool&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;run&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;vllm&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;serve&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;google&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="nx"&gt;gemma&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;31&lt;/span&gt;&lt;span class="nx"&gt;B&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="nx"&gt;it&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;\
+&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="o"&gt;--&lt;/span&gt;&lt;span class="nx"&gt;dtype&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;bfloat16&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;\
+&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="o"&gt;--&lt;/span&gt;&lt;span class="nx"&gt;max&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="nx"&gt;model&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="nx"&gt;len&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;16384&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;\
+&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="o"&gt;--&lt;/span&gt;&lt;span class="nx"&gt;gpu&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="nx"&gt;memory&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="nx"&gt;utilization&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m m-Double"&gt;0.92&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;\
+&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="o"&gt;--&lt;/span&gt;&lt;span class="nx"&gt;enable&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="kt"&gt;auto&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="nx"&gt;tool&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="kd"&gt;choice&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;\
+&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="o"&gt;--&lt;/span&gt;&lt;span class="nx"&gt;reasoning&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="nx"&gt;parser&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;gemma4&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;\
+&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="o"&gt;--&lt;/span&gt;&lt;span class="nx"&gt;tool&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="nx"&gt;call&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="nx"&gt;parser&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;gemma4&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;\
+&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="o"&gt;--&lt;/span&gt;&lt;span class="k"&gt;default&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="nx"&gt;chat&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="nx"&gt;template&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="nx"&gt;kwargs&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="err"&gt;'&lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="s"&gt;"enable_thinking"&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="kc"&gt;true&lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="err"&gt;'&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;\
+&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="o"&gt;--&lt;/span&gt;&lt;span class="nx"&gt;limit&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="nx"&gt;mm&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="nx"&gt;per&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="nx"&gt;prompt&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="err"&gt;'&lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="s"&gt;"image"&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="s"&gt;"audio"&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="err"&gt;'&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;\
+&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="o"&gt;--&lt;/span&gt;&lt;span class="nx"&gt;host&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m m-Double"&gt;127.0.0.1&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;\
+&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="o"&gt;--&lt;/span&gt;&lt;span class="nx"&gt;port&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;8000&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;em&gt;preferred the VLLM V1 model runner as a stable baseline&lt;/em&gt;&lt;/li&gt;
+&lt;li&gt;&lt;em&gt;vLLM resolves google/gemma-4-31B-it , the capital B matters, against the local HF cache before hitting the network&lt;/em&gt;&lt;/li&gt;
+&lt;li&gt;constrain a single request to at most 16k tokens (prompt + generated)&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;security&lt;/strong&gt; &lt;em&gt;note: local binding to 127.0.0.1&lt;/em&gt;&lt;/li&gt;
+&lt;li&gt;enable "Reasoning"&lt;/li&gt;
+&lt;li&gt;disabled the multimodal (image and audio) capabilities&lt;/li&gt;
+&lt;/ul&gt;
 &lt;p&gt;&lt;em&gt;maybe the agent, with thinking disabled, would have performed better (used less tokens to fail faster)&lt;/em&gt;&lt;/p&gt;
 &lt;blockquote&gt;
 &lt;p&gt;Verify that it is successful locally &lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;p&gt;&lt;code&gt;curl -s localhost:8000/health -o /dev/null -w '%{http_code}\n'&lt;/code&gt;
-&lt;em&gt;200&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;curl -s localhost:8000/health -o /dev/null -w '%{http_code}\n'&lt;/code&gt; = &lt;em&gt;200&lt;/em&gt;&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;curl -s localhost:8000/v1/models&lt;/code&gt;&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;{"object":"list","data":[{"id":"google/gemma-4-31B-it",...
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
@@ -159,7 +164,7 @@ remote A100 VRAM
 &lt;ul&gt;
 &lt;li&gt;the same starting point for comparisons to running Harbor with API&lt;/li&gt;
 &lt;li&gt;not as operationally sound or supported to run "docker in docker" for Thundercompute (or any GPU provider)&lt;/li&gt;
-&lt;li&gt;network latency (milliseconds) was neglible is a factor compared to LLM response times (seconds to minutes)&lt;/li&gt;
+&lt;li&gt;network latency (milliseconds) was negligible as a factor compared to LLM response times (seconds to minutes)&lt;/li&gt;
 &lt;li&gt;real world usage will be from "a server somewhere over a network"&lt;/li&gt;
 &lt;/ul&gt;
 &lt;h3 id="ssh-tunnel"&gt;SSH tunnel&lt;/h3&gt;
@@ -191,8 +196,8 @@ remote A100 VRAM
   -d '{"model":"google/gemma-4-31B-it","prompt":"write 3 long detailed paragraphs about a random animal","max_tokens":4096}' | sort -n
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 &lt;h3 id="run-the-harbor-benchmark"&gt;Run The Harbor Benchmark&lt;/h3&gt;
-&lt;p&gt;&lt;code&gt;export OPENAI_API_KEY=dummy&lt;/code&gt;
-&lt;code&gt;export OPENAI_BASE_URL=http://127.0.0.1:18000/v1&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;export OPENAI_API_KEY=dummy&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;export OPENAI_BASE_URL=http://127.0.0.1:18000/v1&lt;/code&gt;&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="n"&gt;harbor&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;run&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;d&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;terminal&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;bench&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;terminal&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;bench&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mh"&gt;2&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mh"&gt;1&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;--&lt;/span&gt;&lt;span class="n"&gt;agent&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;terminus&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mh"&gt;2&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="se"&gt;\&lt;/span&gt;
 &lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="o"&gt;--&lt;/span&gt;&lt;span class="n"&gt;model&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;openai&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;google&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;gemma&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mh"&gt;4&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mh"&gt;31&lt;/span&gt;&lt;span class="n"&gt;B&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;it&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="se"&gt;\&lt;/span&gt;
 &lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="o"&gt;--&lt;/span&gt;&lt;span class="n"&gt;include&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="k"&gt;task&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;name&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;terminal&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;bench&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;regex&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;log&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;k&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mh"&gt;8&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;n&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mh"&gt;8&lt;/span&gt;

@@ -179,7 +179,7 @@
 <li>Stable and Predictable - both in their product and in their pricing</li>
 <li>Transparency - how it is setup, and metrics on how it's operating</li>
 </ol>
-<p><em>During the transition from magentic disks to solid-state-drives (SSD) I learned to depend on their interface/drivers, but to run the benchmarks myself.</em></p>
+<p><em>During the transition from magnetic disks to solid-state-drives (SSD) I learned to depend on their interface/drivers, but to run the benchmarks myself.</em></p>
 <p>And similarly we've seen this when everyone was learning to adopt the cloud (examples from Netflix):</p>
 <ul>
 <li><a href="https://netflixtechblog.com/5-lessons-weve-learned-using-aws-1f2a28588e4c">https://netflixtechblog.com/5-lessons-weve-learned-using-aws-1f2a28588e4c</a></li>
@@ -228,26 +228,31 @@ remote A100 VRAM
 <blockquote>
 <p>as simple as one long command</p>
 </blockquote>
-<p>VLLM_USE_V2_MODEL_RUNNER=0 uv tool run vllm serve google/gemma-4-31B-it \
-  --dtype bfloat16 \
-  --max-model-len 16384 \
-  --gpu-memory-utilization 0.92 \
-  --enable-auto-tool-choice \
-  --reasoning-parser gemma4 \
-  --tool-call-parser gemma4 \
-  --default-chat-template-kwargs '{"enable_thinking":true}' \
-  --limit-mm-per-prompt '{"image":0,"audio":0}' \
-  --host 127.0.0.1 \
-  --port 8000</p>
-<p><strong>security</strong> <em>note: local binding to 127.0.0.1</em></p>
-<p><em>preferred the VLLM V1 model runner as a stable baseline</em></p>
-<p><em>vLLM resolves google/gemma-4-31B-it against the local HF cache before hitting the network, the capital letter B matters</em></p>
+<div class="highlight"><pre><span></span><code><span class="nx">VLLM_USE_V2_MODEL_RUNNER</span><span class="p">=</span><span class="mi">0</span><span class="w"> </span><span class="nx">uv</span><span class="w"> </span><span class="nx">tool</span><span class="w"> </span><span class="nx">run</span><span class="w"> </span><span class="nx">vllm</span><span class="w"> </span><span class="nx">serve</span><span class="w"> </span><span class="nx">google</span><span class="o">/</span><span class="nx">gemma</span><span class="o">-</span><span class="mi">4</span><span class="o">-</span><span class="mi">31</span><span class="nx">B</span><span class="o">-</span><span class="nx">it</span><span class="w"> </span>\
+<span class="w">  </span><span class="o">--</span><span class="nx">dtype</span><span class="w"> </span><span class="nx">bfloat16</span><span class="w"> </span>\
+<span class="w">  </span><span class="o">--</span><span class="nx">max</span><span class="o">-</span><span class="nx">model</span><span class="o">-</span><span class="nx">len</span><span class="w"> </span><span class="mi">16384</span><span class="w"> </span>\
+<span class="w">  </span><span class="o">--</span><span class="nx">gpu</span><span class="o">-</span><span class="nx">memory</span><span class="o">-</span><span class="nx">utilization</span><span class="w"> </span><span class="m m-Double">0.92</span><span class="w"> </span>\
+<span class="w">  </span><span class="o">--</span><span class="nx">enable</span><span class="o">-</span><span class="kt">auto</span><span class="o">-</span><span class="nx">tool</span><span class="o">-</span><span class="kd">choice</span><span class="w"> </span>\
+<span class="w">  </span><span class="o">--</span><span class="nx">reasoning</span><span class="o">-</span><span class="nx">parser</span><span class="w"> </span><span class="nx">gemma4</span><span class="w"> </span>\
+<span class="w">  </span><span class="o">--</span><span class="nx">tool</span><span class="o">-</span><span class="nx">call</span><span class="o">-</span><span class="nx">parser</span><span class="w"> </span><span class="nx">gemma4</span><span class="w"> </span>\
+<span class="w">  </span><span class="o">--</span><span class="k">default</span><span class="o">-</span><span class="nx">chat</span><span class="o">-</span><span class="nx">template</span><span class="o">-</span><span class="nx">kwargs</span><span class="w"> </span><span class="err">'</span><span class="p">{</span><span class="s">"enable_thinking"</span><span class="p">:</span><span class="kc">true</span><span class="p">}</span><span class="err">'</span><span class="w"> </span>\
+<span class="w">  </span><span class="o">--</span><span class="nx">limit</span><span class="o">-</span><span class="nx">mm</span><span class="o">-</span><span class="nx">per</span><span class="o">-</span><span class="nx">prompt</span><span class="w"> </span><span class="err">'</span><span class="p">{</span><span class="s">"image"</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span><span class="s">"audio"</span><span class="p">:</span><span class="mi">0</span><span class="p">}</span><span class="err">'</span><span class="w"> </span>\
+<span class="w">  </span><span class="o">--</span><span class="nx">host</span><span class="w"> </span><span class="m m-Double">127.0.0.1</span><span class="w"> </span>\
+<span class="w">  </span><span class="o">--</span><span class="nx">port</span><span class="w"> </span><span class="mi">8000</span>
+</code></pre></div>
+<ul>
+<li><em>preferred the VLLM V1 model runner as a stable baseline</em></li>
+<li><em>vLLM resolves google/gemma-4-31B-it , the capital B matters, against the local HF cache before hitting the network</em></li>
+<li>constrain a single request to at most 16k tokens (prompt + generated)</li>
+<li><strong>security</strong> <em>note: local binding to 127.0.0.1</em></li>
+<li>enable "Reasoning"</li>
+<li>disabled the multimodal (image and audio) capabilities</li>
+</ul>
 <p><em>maybe the agent, with thinking disabled, would have performed better (used less tokens to fail faster)</em></p>
 <blockquote>
 <p>Verify that it is successful locally </p>
 </blockquote>
-<p><code>curl -s localhost:8000/health -o /dev/null -w '%{http_code}\n'</code>
-<em>200</em></p>
+<p><code>curl -s localhost:8000/health -o /dev/null -w '%{http_code}\n'</code> = <em>200</em></p>
 <p><code>curl -s localhost:8000/v1/models</code></p>
 <div class="highlight"><pre><span></span><code>{"object":"list","data":[{"id":"google/gemma-4-31B-it",...
 </code></pre></div>
@@ -260,7 +265,7 @@ remote A100 VRAM
 <ul>
 <li>the same starting point for comparisons to running Harbor with API</li>
 <li>not as operationally sound or supported to run "docker in docker" for Thundercompute (or any GPU provider)</li>
-<li>network latency (milliseconds) was neglible is a factor compared to LLM response times (seconds to minutes)</li>
+<li>network latency (milliseconds) was negligible as a factor compared to LLM response times (seconds to minutes)</li>
 <li>real world usage will be from "a server somewhere over a network"</li>
 </ul>
 <h3 id="ssh-tunnel">SSH tunnel</h3>
@@ -292,8 +297,8 @@ remote A100 VRAM
   -d '{"model":"google/gemma-4-31B-it","prompt":"write 3 long detailed paragraphs about a random animal","max_tokens":4096}' | sort -n
 </code></pre></div>
 <h3 id="run-the-harbor-benchmark">Run The Harbor Benchmark</h3>
-<p><code>export OPENAI_API_KEY=dummy</code>
-<code>export OPENAI_BASE_URL=http://127.0.0.1:18000/v1</code></p>
+<p><code>export OPENAI_API_KEY=dummy</code></p>
+<p><code>export OPENAI_BASE_URL=http://127.0.0.1:18000/v1</code></p>
 <div class="highlight"><pre><span></span><code><span class="n">harbor</span><span class="w"> </span><span class="n">run</span><span class="w"> </span><span class="o">-</span><span class="n">d</span><span class="w"> </span><span class="n">terminal</span><span class="o">-</span><span class="n">bench</span><span class="o">/</span><span class="n">terminal</span><span class="o">-</span><span class="n">bench</span><span class="o">-</span><span class="mh">2</span><span class="o">-</span><span class="mh">1</span><span class="w"> </span><span class="o">--</span><span class="n">agent</span><span class="w"> </span><span class="n">terminus</span><span class="o">-</span><span class="mh">2</span><span class="w"> </span><span class="se">\</span>
 <span class="w">  </span><span class="o">--</span><span class="n">model</span><span class="w"> </span><span class="n">openai</span><span class="o">/</span><span class="n">google</span><span class="o">/</span><span class="n">gemma</span><span class="o">-</span><span class="mh">4</span><span class="o">-</span><span class="mh">31</span><span class="n">B</span><span class="o">-</span><span class="n">it</span><span class="w"> </span><span class="se">\</span>
 <span class="w">  </span><span class="o">--</span><span class="n">include</span><span class="o">-</span><span class="k">task</span><span class="o">-</span><span class="n">name</span><span class="w"> </span><span class="n">terminal</span><span class="o">-</span><span class="n">bench</span><span class="o">/</span><span class="n">regex</span><span class="o">-</span><span class="n">log</span><span class="w"> </span><span class="o">-</span><span class="n">k</span><span class="w"> </span><span class="mh">8</span><span class="w"> </span><span class="o">-</span><span class="n">n</span><span class="w"> </span><span class="mh">8</span>
@@ -403,7 +408,7 @@ curl -s http://127.0.0.1:18000/metrics | grep 'tokens_sum'
             <time pubdate="pubdate" datetime="2026-07-31T08:08:00-07:00">Jul 31, 2026</time>
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#ai-ref">ai</a> 
-            <h4>~2203 words</h4>
+            <h4>~2222 words</h4>
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article"> 
                 <li><a href="/tags.html#ai-ref">ai
