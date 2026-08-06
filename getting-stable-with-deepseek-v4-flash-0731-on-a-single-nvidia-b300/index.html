@@ -74,11 +74,7 @@
 <li><a href="#explanations-of-flags">Explanations of flags</a></li>
 </ul>
 </li>
-<li><a href="#gotchas">GOTCHAS</a><ul>
-<li><a href="#skip-warmup">Skip warmup</a></li>
-<li><a href="#sparse-prefill-invalid-pointer">Sparse-Prefill invalid pointer</a></li>
-</ul>
-</li>
+<li><a href="#gotchas">GOTCHAS</a></li>
 </ul>
 </li>
 <li><a href="#performance-benchmarks">Performance Benchmarks</a></li>
@@ -112,7 +108,7 @@
 <li><a href="#harbor-terminal-bench-task">Harbor Terminal Bench Task</a></li>
 </ul>
 </li>
-<li><a href="#success-vllm-logs-cudagraphmode-full_and_piecewise">SUCCESS vLLM logs CUDAGraphMode FULL_AND_PIECEWISE</a><ul>
+<li><a href="#even-more-vllm-logs">Even more vLLM logs</a><ul>
 <li><a href="#example-of-vllm-logs-with-an-agent-in-a-bad-loop">Example of vLLM logs with an Agent in a bad Loop</a></li>
 <li><a href="#deepseek-successful-cache-logs">DeepSeek successful cache logs</a></li>
 </ul>
@@ -194,7 +190,7 @@
 
 
 
-The `--data-parallel-size 4` only makes sense if you have four B300s.
+"--data-parallel-size 4" only makes sense if you have four B300s.
 </details>
 <h3 id="explanations-of-flags">Explanations of flags</h3>
 <p>What works:</p>
@@ -205,78 +201,52 @@ The `--data-parallel-size 4` only makes sense if you have four B300s.
 <li>FP4 indexer cache</li>
 <li>DSpark enabled</li>
 </ul>
-<table>
-<thead>
-<tr>
-<th>Flag</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>--served-model-name deepseek-v4-flash-0731</code></td>
-<td>Model name exposed through the API</td>
-</tr>
-<tr>
-<td><code>--host 127.0.0.1</code></td>
-<td><strong>Security</strong>: listen only on localhost</td>
-</tr>
-<tr>
-<td><code>--port 8000</code></td>
-<td>HTTP server port</td>
-</tr>
-<tr>
-<td><code>--max-model-len 65536</code></td>
-<td>Maximum context window (input + output tokens) per request</td>
-</tr>
-<tr>
-<td><code>--tokenizer-mode deepseek_v4</code></td>
-<td>Use DeepSeek-V4 tokenizer/chat formatting</td>
-</tr>
-<tr>
-<td><code>--reasoning-parser deepseek_v4</code></td>
-<td>Parse DeepSeek reasoning output into structured API fields</td>
-</tr>
-<tr>
-<td><code>--tool-call-parser deepseek_v4</code></td>
-<td>Parse DeepSeek-native tool calls into OpenAI tool calls</td>
-</tr>
-<tr>
-<td><code>--enable-auto-tool-choice</code></td>
-<td>Allow the model to automatically decide whether to call tools</td>
-</tr>
-<tr>
-<td><code>--trust-remote-code</code></td>
-<td><em>Insecure:</em> Execute custom model code from the Hugging Face repository</td>
-</tr>
-<tr>
-<td><code>--kv-cache-dtype fp8</code></td>
-<td>Store the KV cache in FP8 to reduce memory usage</td>
-</tr>
-<tr>
-<td><code>--block-size 256</code></td>
-<td>Allocate KV cache in 256-token pages</td>
-</tr>
-<tr>
-<td><code>--enable-expert-parallel</code></td>
-<td>Distribute MoE experts across GPUs instead of tensor-splitting them</td>
-</tr>
-<tr>
-<td><code>--attention-config '{"use_fp4_indexer_cache": true}'</code></td>
-<td>Enable FP4 compressed attention index cache to reduce memory/bandwidth</td>
-</tr>
-<tr>
-<td><code>--speculative-config '{"method":"dspark","num_speculative_tokens":7,"draft_sample_method":"greedy"}'</code></td>
-<td>Enable DSpark speculative decoding with a 7-token draft window</td>
-</tr>
-</tbody>
-</table>
-<p><em>considered but not used    --moe-backend deep_gemm_mega_moe , --enforce-eager (for safe compatibility)</em></p>
+<details>
+
+- `--served-model-name deepseek-v4-flash-0731`
+  - Model name exposed through the API.
+
+- `--host 127.0.0.1` and `--port 8000`
+  - **Security:** Listen only on localhost, with the HTTP Server port 8000
+
+- `--max-model-len 65536`
+  - Maximum context window (input + output tokens) per request.
+
+- `--tokenizer-mode deepseek_v4`
+  - Use the DeepSeek-V4 tokenizer and chat formatting.
+
+- `--reasoning-parser deepseek_v4`
+  - Parse DeepSeek reasoning output into structured API fields.
+
+- `--tool-call-parser deepseek_v4`
+  - Convert DeepSeek-native tool calls into OpenAI-compatible tool calls.
+
+- `--enable-auto-tool-choice`
+  - Allow the model to decide automatically when to call tools.
+
+- `--trust-remote-code`
+  - *Insecure Security:* Execute custom model code from the Hugging Face repository.
+
+- `--kv-cache-dtype fp8`
+  - Store the KV cache in FP8 to reduce memory usage.
+
+- `--block-size 256`
+  - Allocate the KV cache in 256-token pages.
+
+- `--enable-expert-parallel`
+  - Required for DeepSeek-V4. Distribute MoE experts instead of tensor-splitting them.
+
+- `--attention-config '{"use_fp4_indexer_cache": true}'`
+  - Enable FP4 compressed attention index caching to reduce memory bandwidth.
+
+- `--speculative-config '{"method":"dspark","num_speculative_tokens":7,"draft_sample_method":"greedy"}'`
+  - Enable DSpark speculative decoding with a 7-token draft window.
+
+
+*considered but not used    --moe-backend deep_gemm_mega_moe , --enforce-eager (for safe compatibility)*
+
+</details>
 <h2 id="gotchas">GOTCHAS</h2>
-<blockquote>
-<p>If you "migrate your pod" it auto-starts</p>
-</blockquote>
-<p>So if you're not there when it's completed, then you can burn through your credit balance.</p>
 <blockquote>
 <p>If you change a flag or config you may re-trigger auto-tuning which eats ~5 to 10 mins</p>
 </blockquote>
@@ -291,6 +261,7 @@ The `--data-parallel-size 4` only makes sense if you have four B300s.
 <p>actively compiling GPU kernels with ptxas -arch sm_103a</p>
 </blockquote>
 <p>The log looks very slow but... this is fine:</p>
+<details>
 <div class="highlight"><pre><span></span><code><span class="p">(</span><span class="n">EngineCore</span><span class="w"> </span><span class="n">pid</span><span class="o">=</span><span class="mi">69594</span><span class="p">)</span><span class="w"> </span><span class="mi">2026-08</span><span class="mo">-04</span><span class="w"> </span><span class="mi">19</span><span class="o">:</span><span class="mi">20</span><span class="o">:</span><span class="mo">05</span><span class="p">,</span><span class="mi">325</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">INFO</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">cubin_loader</span><span class="p">.</span><span class="n">py</span><span class="o">:</span><span class="mi">84</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">flashinfer</span><span class="p">.</span><span class="n">jit</span><span class="o">:</span><span class="w"> </span><span class="n">Acquired</span><span class="w"> </span><span class="n">lock</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="o">/</span><span class="n">root</span><span class="o">/</span><span class="p">.</span><span class="n">cache</span><span class="o">/</span><span class="n">flashinfer</span><span class="o">/</span><span class="n">cubins</span><span class="o">/</span><span class="mi">481</span><span class="n">dce07c89a216cbfd18cf39de49a82d40739a8</span><span class="o">/</span><span class="n">batched_gemm</span><span class="o">-</span><span class="n">dd6d23e</span><span class="mi">-721</span><span class="n">ae60</span><span class="o">/</span><span class="n">include</span><span class="o">/</span><span class="n">trtllmGen_bmm_export</span><span class="o">/</span><span class="n">trtllm</span><span class="o">/</span><span class="n">gen</span><span class="o">/</span><span class="n">SparsityDecl</span><span class="p">.</span><span class="n">h</span>
 <span class="p">(</span><span class="n">EngineCore</span><span class="w"> </span><span class="n">pid</span><span class="o">=</span><span class="mi">69594</span><span class="p">)</span><span class="w"> </span><span class="mi">2026-08</span><span class="mo">-04</span><span class="w"> </span><span class="mi">19</span><span class="o">:</span><span class="mi">20</span><span class="o">:</span><span class="mo">05</span><span class="p">,</span><span class="mi">510</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">INFO</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">cubin_loader</span><span class="p">.</span><span class="n">py</span><span class="o">:</span><span class="mi">114</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">flashinfer</span><span class="p">.</span><span class="n">jit</span><span class="o">:</span><span class="w"> </span><span class="n">File</span><span class="w"> </span><span class="n">downloaded</span><span class="w"> </span><span class="n">successfully</span><span class="o">:</span><span class="w"> </span><span class="n">https</span><span class="o">:</span><span class="c1">//edge.urm.nvidia.com/artifactory/sw-kernelinferencelibrary-public-generic-local/481dce07c89a216cbfd18cf39de49a82d40739a8/batched_gemm-dd6d23e-721ae60/include/trtllmGen_bmm_export/trtllm/gen/SparsityDecl.h -&gt; /root/.cache/flashinfer/cubins/481dce07c89a216cbfd18cf39de49a82d40739a8/batched_gemm-dd6d23e-721ae60/include/trtllmGen_bmm_export/trtllm/gen/SparsityDecl.h</span>
 
@@ -307,18 +278,16 @@ The `--data-parallel-size 4` only makes sense if you have four B300s.
 <span class="w">    </span><span class="mi">668</span><span class="w">  </span><span class="mf">0.0</span><span class="w">  </span><span class="mf">0.0</span><span class="w">       </span><span class="mi">55</span><span class="o">:</span><span class="mi">15</span><span class="w"> </span><span class="n">nginx</span><span class="o">:</span><span class="w"> </span><span class="n">master</span><span class="w"> </span><span class="n">process</span><span class="w"> </span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">sbin</span><span class="o">/</span><span class="n">nginx</span>
 <span class="w">    </span><span class="mi">669</span><span class="w">  </span><span class="mf">0.0</span><span class="w">  </span><span class="mf">0.0</span><span class="w">       </span><span class="mi">55</span><span class="o">:</span><span class="mi">15</span><span class="w"> </span><span class="n">nginx</span><span class="o">:</span><span class="w"> </span><span class="n">worker</span><span class="w"> </span><span class="n">process</span>
 </code></pre></div>
+</details>
 <p><em>Preserve /root/.cache/flashinfer if you recreate or restart the environment; otherwise you may pay this compilation cost again.</em></p>
-<h3 id="skip-warmup">Skip warmup</h3>
 <blockquote>
-<p>This is a real DeepGEMM kernel failure on SM103</p>
-</blockquote>
-<div class="highlight"><pre><span></span><code><span class="k">export</span><span class="w"> </span><span class="n">VLLM_USE_DEEP_GEMM</span><span class="o">=</span><span class="mi">1</span>
-</code></pre></div>
-<h3 id="sparse-prefill-invalid-pointer">Sparse-Prefill invalid pointer</h3>
-<blockquote>
-<p>known upstream vLLM/FlashMLA class of failure</p>
+<p>known upstream vLLM/FlashMLA class of failure of Sparse-Prefill invalid pointer </p>
 </blockquote>
 <p>There is an open vLLM issue describing essentially the same DeepSeek V4 + DSpark failure: the FlashMLA sparse-prefill kernel receives an invalid pointer during TMA descriptor initialization. </p>
+<blockquote>
+<p>In Runpod, if you "migrate your pod" it auto-starts</p>
+</blockquote>
+<p>So if you're not there when it's completed, then you can burn through your credit balance.</p>
 <h1 id="performance-benchmarks">Performance Benchmarks</h1>
 <p>One specific task (<code>regex-log</code>) from Terminal Bench 2.1.</p>
 <ul>
@@ -331,10 +300,10 @@ The `--data-parallel-size 4` only makes sense if you have four B300s.
 <li>15 of 16 agents succeeded</li>
 <li>
 <ul>
-<li><strong>55 tokens per second, per agent</strong></li>
+<li>55 tokens per second, per agent</li>
 </ul>
 </li>
-<li>Prefix cache ~92% = can double output to 880 t/s</li>
+<li>Prefix cache ~92% = can double output to <strong>880 t/s</strong></li>
 </ul>
 <p><strong>Gemma4 31B</strong></p>
 <ul>
@@ -342,6 +311,7 @@ The `--data-parallel-size 4` only makes sense if you have four B300s.
 <li>64 tokens per second for a 1 agent  <em>(scales to about 60 t/s at 4x agents)</em></li>
 <li>55 tokens per second for 8 agents <em>(Avg generation throughput: 440.0 tokens/s, Running: 8 reqs)</em></li>
 </ul>
+<hr/>
 <h1 id="appendix-and-methodology">Appendix and Methodology</h1>
 <p><em>all IP addresses are fictional - replace with your real values</em></p>
 <ol>
@@ -473,6 +443,7 @@ source /workspace/.venv/bin/activate
 <p>The usual verification checks:</p>
 <p><code>curl -s localhost:8000/health -o /dev/null -w '%{http_code}\n'</code></p>
 <p><code>curl -s http://localhost:8000/v1/models | jq</code></p>
+<p><em>{"object": "list","data": [{"id": "deepseek-v4-flash-0731",...</em></p>
 <hr/>
 <h1 id="linode-and-harbor">Linode and Harbor</h1>
 <p>I suggest using 16B as you can push the B300 harder =)</p>
@@ -494,7 +465,7 @@ source /workspace/.venv/bin/activate
 <span class="w">    </span><span class="n">LISTEN</span><span class="w"> </span><span class="mi">0</span><span class="w">      </span><span class="mi">128</span><span class="w">        </span><span class="mf">127.0.0.1</span><span class="o">:</span><span class="mi">18000</span><span class="w">      </span><span class="mf">0.0.0.0</span><span class="o">:*</span><span class="w">    </span><span class="n">users</span><span class="o">:</span><span class="p">((</span><span class="s">"ssh"</span><span class="p">,</span><span class="n">pid</span><span class="o">=</span><span class="mi">123778</span><span class="p">,</span><span class="n">fd</span><span class="o">=</span><span class="mi">4</span><span class="p">))</span>
 </code></pre></div>
 <p><code>curl -s http://localhost:18000/v1/models | jq</code></p>
-<p><code>{"object": "list","data": [{"id": "deepseek-v4-flash-0731",...</code></p>
+<p><em>{"object": "list","data": [{"id": "deepseek-v4-flash-0731",...</em></p>
 <div class="highlight"><pre><span></span><code><span class="s s-Atom">export</span> <span class="nv">OPENAI_BASE_URL</span><span class="o">=</span><span class="s s-Atom">http</span><span class="p">:</span><span class="o">//</span><span class="s s-Atom">localhost</span><span class="p">:</span><span class="mi">18000</span><span class="o">/</span><span class="s s-Atom">v1</span>
 <span class="s s-Atom">export</span> <span class="nv">OPENAI_API_KEY</span><span class="o">=</span><span class="nv">EMPTY</span>
 
@@ -518,11 +489,12 @@ source /workspace/.venv/bin/activate
 <p>For this workload this length of speculative decoding was inefficient.</p>
 <p>The per-position acceptance drops off a cliff: 67% -&gt; 43% -&gt; 31% -&gt; 24% -&gt; 17% -&gt; 12% -&gt; 9%. </p>
 <p><strong>The learning</strong>: worth try num_speculative tokens as 4.</p>
-<p>| <code>--speculative-config '{"method":"dspark","num_speculative_tokens":7,"draft_sample_method":"greedy"}'</code> | Enable DSpark speculative decoding with a 7-token draft window |</p>
+<p><code>--speculative-config '{"method":"dspark","num_speculative_tokens":4,"draft_sample_method":"greedy"}'</code></p>
 <hr/>
 <h1 id="example-vllm-logs">Example vLLM logs</h1>
 <p>Waiting 20 minutes for a lot of JIT compilation takes patience.</p>
 <p>Concurrently (byobu/tmux) check on things with <code>ps aux | grep ptax</code></p>
+<details>
 <div class="highlight"><pre><span></span><code><span class="p">(</span><span class="n">APIServer</span><span class="w"> </span><span class="n">pid</span><span class="o">=</span><span class="mi">347228</span><span class="p">)</span><span class="w"> </span><span class="n">INFO</span><span class="o">:</span><span class="w">     </span><span class="n">Started</span><span class="w"> </span><span class="k">server</span><span class="w"> </span><span class="k">process</span><span class="w"> </span><span class="err">[</span><span class="mi">347228</span><span class="err">]</span>
 <span class="p">(</span><span class="n">APIServer</span><span class="w"> </span><span class="n">pid</span><span class="o">=</span><span class="mi">347228</span><span class="p">)</span><span class="w"> </span><span class="n">INFO</span><span class="o">:</span><span class="w">     </span><span class="n">Waiting</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">application</span><span class="w"> </span><span class="n">startup</span><span class="p">.</span>
 <span class="p">(</span><span class="n">APIServer</span><span class="w"> </span><span class="n">pid</span><span class="o">=</span><span class="mi">347228</span><span class="p">)</span><span class="w"> </span><span class="n">INFO</span><span class="o">:</span><span class="w">     </span><span class="n">Application</span><span class="w"> </span><span class="n">startup</span><span class="w"> </span><span class="n">complete</span><span class="p">.</span>
@@ -543,6 +515,7 @@ source /workspace/.venv/bin/activate
 <span class="p">(</span><span class="n">APIServer</span><span class="w"> </span><span class="n">pid</span><span class="o">=</span><span class="mi">347228</span><span class="p">)</span><span class="w"> </span><span class="n">INFO</span><span class="w"> </span><span class="mi">08</span><span class="o">-</span><span class="mi">04</span><span class="w"> </span><span class="mi">21</span><span class="o">:</span><span class="mi">02</span><span class="o">:</span><span class="mi">08</span><span class="w"> </span><span class="err">[</span><span class="n">loggers</span><span class="p">.</span><span class="n">py</span><span class="o">:</span><span class="mi">310</span><span class="err">]</span><span class="w"> </span><span class="k">Engine</span><span class="w"> </span><span class="mi">000</span><span class="o">:</span><span class="w"> </span><span class="k">Avg</span><span class="w"> </span><span class="n">prompt</span><span class="w"> </span><span class="n">throughput</span><span class="o">:</span><span class="w"> </span><span class="mf">0.0</span><span class="w"> </span><span class="n">tokens</span><span class="o">/</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="k">Avg</span><span class="w"> </span><span class="n">generation</span><span class="w"> </span><span class="n">throughput</span><span class="o">:</span><span class="w"> </span><span class="mf">4.4</span><span class="w"> </span><span class="n">tokens</span><span class="o">/</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="n">Running</span><span class="o">:</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="n">reqs</span><span class="p">,</span><span class="w"> </span><span class="n">Waiting</span><span class="o">:</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="n">reqs</span><span class="p">,</span><span class="w"> </span><span class="n">GPU</span><span class="w"> </span><span class="n">KV</span><span class="w"> </span><span class="k">cache</span><span class="w"> </span><span class="k">usage</span><span class="o">:</span><span class="w"> </span><span class="mf">0.0</span><span class="o">%</span><span class="p">,</span><span class="w"> </span><span class="n">Prefix</span><span class="w"> </span><span class="k">cache</span><span class="w"> </span><span class="n">hit</span><span class="w"> </span><span class="n">rate</span><span class="o">:</span><span class="w"> </span><span class="mf">83.7</span><span class="o">%</span>
 <span class="p">(</span><span class="n">APIServer</span><span class="w"> </span><span class="n">pid</span><span class="o">=</span><span class="mi">347228</span><span class="p">)</span><span class="w"> </span><span class="n">INFO</span><span class="w"> </span><span class="mi">08</span><span class="o">-</span><span class="mi">04</span><span class="w"> </span><span class="mi">21</span><span class="o">:</span><span class="mi">02</span><span class="o">:</span><span class="mi">08</span><span class="w"> </span><span class="err">[</span><span class="n">metrics</span><span class="p">.</span><span class="n">py</span><span class="o">:</span><span class="mi">120</span><span class="err">]</span><span class="w"> </span><span class="n">SpecDecoding</span><span class="w"> </span><span class="n">metrics</span><span class="o">:</span><span class="w"> </span><span class="n">Mean</span><span class="w"> </span><span class="n">acceptance</span><span class="w"> </span><span class="n">length</span><span class="o">:</span><span class="w"> </span><span class="mf">7.50</span><span class="p">,</span><span class="w"> </span><span class="n">Accepted</span><span class="w"> </span><span class="n">throughput</span><span class="o">:</span><span class="w"> </span><span class="mf">3.90</span><span class="w"> </span><span class="n">tokens</span><span class="o">/</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="n">Drafted</span><span class="w"> </span><span class="n">throughput</span><span class="o">:</span><span class="w"> </span><span class="mf">4.20</span><span class="w"> </span><span class="n">tokens</span><span class="o">/</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="n">Accepted</span><span class="o">:</span><span class="w"> </span><span class="mi">39</span><span class="w"> </span><span class="n">tokens</span><span class="p">,</span><span class="w"> </span><span class="n">Drafted</span><span class="o">:</span><span class="w"> </span><span class="mi">42</span><span class="w"> </span><span class="n">tokens</span><span class="p">,</span><span class="w"> </span><span class="n">Per</span><span class="o">-</span><span class="n">position</span><span class="w"> </span><span class="n">acceptance</span><span class="w"> </span><span class="n">rate</span><span class="o">:</span><span class="w"> </span><span class="mf">1.000</span><span class="p">,</span><span class="w"> </span><span class="mf">1.000</span><span class="p">,</span><span class="w"> </span><span class="mf">1.000</span><span class="p">,</span><span class="w"> </span><span class="mf">1.000</span><span class="p">,</span><span class="w"> </span><span class="mf">1.000</span><span class="p">,</span><span class="w"> </span><span class="mf">1.000</span><span class="p">,</span><span class="w"> </span><span class="mf">0.500</span><span class="p">,</span><span class="w"> </span><span class="k">Avg</span><span class="w"> </span><span class="n">Draft</span><span class="w"> </span><span class="n">acceptance</span><span class="w"> </span><span class="n">rate</span><span class="o">:</span><span class="w"> </span><span class="mf">92.9</span><span class="o">%</span>
 </code></pre></div>
+</details>
 <h2 id="vllm-start-with-breakable-cuda-graph-enabled">vLLM start with Breakable CUDA Graph enabled</h2>
 <p>This is the configuration that crashed when the following load was added:</p>
 <div class="highlight"><pre><span></span><code><span class="n">harbor</span><span class="w"> </span><span class="n">run</span><span class="w"> </span><span class="o">-</span><span class="n">d</span><span class="w"> </span><span class="n">terminal</span><span class="o">-</span><span class="n">bench</span><span class="o">/</span><span class="n">terminal</span><span class="o">-</span><span class="n">bench</span><span class="o">-</span><span class="mh">2</span><span class="o">-</span><span class="mh">1</span><span class="w"> </span><span class="o">--</span><span class="n">agent</span><span class="w"> </span><span class="n">terminus</span><span class="o">-</span><span class="mh">2</span><span class="w"> </span><span class="o">--</span><span class="n">model</span><span class="w"> </span><span class="n">openai</span><span class="o">/</span><span class="n">deepseek</span><span class="o">-</span><span class="n">v4</span><span class="o">-</span><span class="n">flash</span><span class="o">-</span><span class="mh">0731</span><span class="w"> </span><span class="se">\</span>
@@ -1114,12 +1087,12 @@ uv venv
 <span class="n">Job</span><span class="w"> </span><span class="n">Info</span><span class="w"> </span><span class="n">Total</span><span class="w"> </span><span class="n">runtime</span><span class="o">:</span><span class="w"> </span><span class="mi">7</span><span class="n">m</span><span class="w"> </span><span class="mi">49</span><span class="n">s</span>
 </code></pre></div>
 <hr/>
-<h1 id="success-vllm-logs-cudagraphmode-full_and_piecewise">SUCCESS vLLM logs CUDAGraphMode FULL_AND_PIECEWISE</h1>
+<h1 id="even-more-vllm-logs">Even more vLLM logs</h1>
+<p>Success with <strong>CUDAGraphMode FULL_AND_PIECEWISE</strong></p>
+<p><code>export VLLM_USE_DEEP_GEMM=1</code></p>
+<p><code>export VLLM_USE_BREAKABLE_CUDAGRAPH=0</code></p>
 <details>
-<div class="highlight"><pre><span></span><code><span class="k">export</span><span class="w"> </span><span class="n">VLLM_USE_DEEP_GEMM</span><span class="o">=</span><span class="mi">1</span>
-<span class="k">export</span><span class="w"> </span><span class="n">VLLM_USE_BREAKABLE_CUDAGRAPH</span><span class="o">=</span><span class="mi">0</span>
-
-<span class="p">(</span><span class="n">MODELS</span><span class="p">)</span><span class="w"> </span><span class="n">root</span><span class="err">@</span><span class="n">f31f388770e0</span><span class="p">:</span><span class="o">/</span><span class="n">MODELS</span><span class="c1"># vllm serve /MODELS/DeepSeek-V4-Flash-0731   --served-model-name deepseek-v4-flash-0731   --host 127.0.0.1 --port 8000   --max-model-len 65536   --tokenizer-mode deepseek_v4   --reasoning-parser deepseek_v4   --tool-call-parser deepseek_v4   --enable-auto-tool-choice   --trust-remote-code --kv-cache-dtype fp8 --block-size 256   --enable-expert-parallel   --attention-config '{"use_fp4_indexer_cache": true}'   --speculative-config '{"method":"dspark","num_speculative_tokens":7,"draft_sample_method":"greedy"}'   2&gt;&amp;1 | tee /workspace/vllm-warmup.log</span>
+<div class="highlight"><pre><span></span><code><span class="p">(</span><span class="n">MODELS</span><span class="p">)</span><span class="w"> </span><span class="n">root</span><span class="err">@</span><span class="n">f31f388770e0</span><span class="p">:</span><span class="o">/</span><span class="n">MODELS</span><span class="c1"># vllm serve /MODELS/DeepSeek-V4-Flash-0731   --served-model-name deepseek-v4-flash-0731   --host 127.0.0.1 --port 8000   --max-model-len 65536   --tokenizer-mode deepseek_v4   --reasoning-parser deepseek_v4   --tool-call-parser deepseek_v4   --enable-auto-tool-choice   --trust-remote-code --kv-cache-dtype fp8 --block-size 256   --enable-expert-parallel   --attention-config '{"use_fp4_indexer_cache": true}'   --speculative-config '{"method":"dspark","num_speculative_tokens":7,"draft_sample_method":"greedy"}'   2&gt;&amp;1 | tee /workspace/vllm-warmup.log</span>
 <span class="p">(</span><span class="n">APIServer</span><span class="w"> </span><span class="n">pid</span><span class="o">=</span><span class="mi">87905</span><span class="p">)</span><span class="w"> </span><span class="n">INFO</span><span class="w"> </span><span class="mi">08</span><span class="o">-</span><span class="mi">06</span><span class="w"> </span><span class="mi">21</span><span class="p">:</span><span class="mi">23</span><span class="p">:</span><span class="mi">15</span><span class="w"> </span><span class="p">[</span><span class="n">api_utils</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">345</span><span class="p">]</span><span class="w"> </span>
 <span class="p">(</span><span class="n">APIServer</span><span class="w"> </span><span class="n">pid</span><span class="o">=</span><span class="mi">87905</span><span class="p">)</span><span class="w"> </span><span class="n">INFO</span><span class="w"> </span><span class="mi">08</span><span class="o">-</span><span class="mi">06</span><span class="w"> </span><span class="mi">21</span><span class="p">:</span><span class="mi">23</span><span class="p">:</span><span class="mi">15</span><span class="w"> </span><span class="p">[</span><span class="n">api_utils</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">345</span><span class="p">]</span><span class="w">        </span><span class="err">█</span><span class="w">     </span><span class="err">█</span><span class="w">     </span><span class="err">█▄</span><span class="w">   </span><span class="err">▄█</span>
 <span class="p">(</span><span class="n">APIServer</span><span class="w"> </span><span class="n">pid</span><span class="o">=</span><span class="mi">87905</span><span class="p">)</span><span class="w"> </span><span class="n">INFO</span><span class="w"> </span><span class="mi">08</span><span class="o">-</span><span class="mi">06</span><span class="w"> </span><span class="mi">21</span><span class="p">:</span><span class="mi">23</span><span class="p">:</span><span class="mi">15</span><span class="w"> </span><span class="p">[</span><span class="n">api_utils</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">345</span><span class="p">]</span><span class="w">  </span><span class="err">▄▄</span><span class="w"> </span><span class="err">▄█</span><span class="w"> </span><span class="err">█</span><span class="w">     </span><span class="err">█</span><span class="w">     </span><span class="err">█</span><span class="w"> </span><span class="err">▀▄▀</span><span class="w"> </span><span class="err">█</span><span class="w">  </span><span class="n">version</span><span class="w"> </span><span class="mf">0.26</span><span class="o">.</span><span class="mi">0</span>
@@ -1395,7 +1368,7 @@ uv venv
             <time pubdate="pubdate" datetime="2026-08-04T15:00:00-07:00">Aug 4, 2026</time>
             <h4>Category</h4>
             <a class="category-link" href="/categories.html#ai-ref">ai</a> 
-            <h4>~13050 words</h4>
+            <h4>~13046 words</h4>
             <h4>Tags</h4>
             <ul class="list-of-tags tags-in-article"> 
                 <li><a href="/tags.html#benchmark-ref">benchmark
