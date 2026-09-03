@@ -1,5 +1,106 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>johnpfeiffer - john pfeiffer</title><link href="https://blog.john-pfeiffer.com/" rel="alternate"/><link href="https://blog.john-pfeiffer.com/feeds/john-pfeiffer.atom.xml" rel="self"/><id>https://blog.john-pfeiffer.com/</id><updated>2026-08-10T09:11:00-07:00</updated><entry><title>Real velocity from a Backlog Deferred and a Skill'd Agent</title><link href="https://blog.john-pfeiffer.com/real-velocity-from-a-backlog-deferred-and-a-skilld-agent/" rel="alternate"/><published>2026-08-10T09:11:00-07:00</published><updated>2026-08-10T09:11:00-07:00</updated><author><name>john pfeiffer</name></author><id>tag:blog.john-pfeiffer.com,2026-08-10:/real-velocity-from-a-backlog-deferred-and-a-skilld-agent/</id><summary type="html">
+<feed xmlns="http://www.w3.org/2005/Atom"><title>johnpfeiffer - john pfeiffer</title><link href="https://blog.john-pfeiffer.com/" rel="alternate"/><link href="https://blog.john-pfeiffer.com/feeds/john-pfeiffer.atom.xml" rel="self"/><id>https://blog.john-pfeiffer.com/</id><updated>2026-09-02T18:00:00-07:00</updated><entry><title>Multi-Region Active-Active on AWS in Hours instead of Weeks</title><link href="https://blog.john-pfeiffer.com/multi-region-active-active-on-aws-in-hours-instead-of-weeks/" rel="alternate"/><published>2026-09-02T18:00:00-07:00</published><updated>2026-09-02T18:00:00-07:00</updated><author><name>john pfeiffer</name></author><id>tag:blog.john-pfeiffer.com,2026-09-02:/multi-region-active-active-on-aws-in-hours-instead-of-weeks/</id><summary type="html">
+&lt;h1 id="multi-region-active-active-on-aws-a-poc-in-hours-not-weeks"&gt;Multi-Region Active-Active on AWS: A POC in Hours, Not Weeks&lt;/h1&gt;
+&lt;blockquote&gt;
+&lt;p&gt;The best disaster recovery is the one you build and test before the disaster, not the one still on the whiteboard&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id="why"&gt;Why&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;At Atlassian, and then at Helix, we lived through multiple AWS outages; we were in us-east-1 so we …&lt;/li&gt;&lt;/ul&gt;</summary><content type="html">
+&lt;h1 id="multi-region-active-active-on-aws-a-poc-in-hours-not-weeks"&gt;Multi-Region Active-Active on AWS: A POC in Hours, Not Weeks&lt;/h1&gt;
+&lt;blockquote&gt;
+&lt;p&gt;The best disaster recovery is the one you build and test before the disaster, not the one still on the whiteboard&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id="why"&gt;Why&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;At Atlassian, and then at Helix, we lived through multiple AWS outages; we were in us-east-1 so we waited patiently (along with many other SaaS/cloud companies)&lt;/li&gt;
+&lt;li&gt;The us-east-1 control plane going down can cascade globally — even if your workload runs elsewhere&lt;/li&gt;
+&lt;li&gt;Active-active multi-region is a strong answer, but historically it's been weeks of infrastructure work&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;"AWS Post-Event Summaries": note that often outages in one service cascade into issues in other services or even regions.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://aws.amazon.com/premiumsupport/technology/pes/"&gt;https://aws.amazon.com/premiumsupport/technology/pes/&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://aws.amazon.com/message/101925/"&gt;https://aws.amazon.com/message/101925/&lt;/a&gt; DynamoDB, Network (Load Balancers), Lambda&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://aws.amazon.com/message/12721/"&gt;https://aws.amazon.com/message/12721/&lt;/a&gt; Control Plane&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://aws.amazon.com/message/11201/"&gt;https://aws.amazon.com/message/11201/&lt;/a&gt; Kinesis and Cloudwatch&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://aws.amazon.com/message/41926/"&gt;https://aws.amazon.com/message/41926/&lt;/a&gt; S3&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id="the-architecture"&gt;The Architecture&lt;/h1&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;Client → www.example.com (DNS)
+  → AWS Global Accelerator (anycast static IPs)
+    → Private ALB (us-west-2) → Go Lambda → DynamoDB MRSC Global Table
+    → Private ALB (us-east-1) → Go Lambda → DynamoDB MRSC Global Table
+                                              └── Witness: us-east-2
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;&lt;strong&gt;Key design decisions:&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Global Accelerator&lt;/strong&gt; as the only public entry point — ALBs are private&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;DynamoDB Multi-Region Strong Consistency (MRSC)&lt;/strong&gt; global table with active-active writes with strong consistency, witness region (us-east-2) for quorum&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Serverless: Lambda in Golang&lt;/strong&gt; — minimal cold start, single binary deployment&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;AWS CDK in Go&lt;/strong&gt; — infrastructure as code, deterministic deploys&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;HTTPS everywhere&lt;/strong&gt; — ACM certs in both regions, TLS terminates at the ALB&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;em&gt;East and West gives you a very large geographic separation, but may also provide lower local latency&lt;/em&gt;&lt;/p&gt;
+&lt;h2 id="whats-in-the-stack"&gt;What's In the Stack&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;ACM certificates (one per region)&lt;/li&gt;
+&lt;li&gt;Private ALBs with HTTPS listeners in us-west-2 and us-east-1&lt;/li&gt;
+&lt;li&gt;Global Accelerator with endpoint groups in both regions (TCP 443 passthrough)&lt;/li&gt;
+&lt;li&gt;Go Lambda behind each ALB&lt;/li&gt;
+&lt;li&gt;DynamoDB MRSC global table (us-west-2, us-east-1 replicas + us-east-2 witness)&lt;/li&gt;
+&lt;li&gt;DNS CNAME (&lt;code&gt;www&lt;/code&gt; → Global Accelerator)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id="llm-assisted-development"&gt;LLM-Assisted Development&lt;/h1&gt;
+&lt;p&gt;I oversaw an LLM, pair-programmed it all. I approved and deployed.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;CDK stack, Lambda code, Makefile&lt;/strong&gt; — written by coding agents, every line reviewed by me (a human :)&lt;/li&gt;
+&lt;li&gt;
+&lt;ul&gt;
+&lt;li&gt;executed the Makefile locally, had it build/leverage the local docker container approach to DynamoDB &lt;em&gt;(another item forever on my wish list!)&lt;/em&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;DNS, ACM, Global Accelerator setup&lt;/strong&gt; step-by-step guided by an LLM, including debugging cert SANs, DNS propagation, DNS config quirks&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Total wall-clock time&lt;/strong&gt;: hours, not the days/weeks this would have taken reading docs cold and slogging through the mis-steps and misunderstandings&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;em&gt;Agents are great for research and toil&lt;/em&gt;&lt;/p&gt;
+&lt;h2 id="proof-it-works"&gt;Proof It Works&lt;/h2&gt;
+&lt;p&gt;&lt;code&gt;curl -X POST "https://www.example.com/items"  -H 'Content-Type: application/json' -d '{"id":"demo","seq":1,"payload":"hello"}'&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="o"&gt;{&lt;/span&gt;&lt;span class="s2"&gt;"id"&lt;/span&gt;:&lt;span class="s2"&gt;"demo"&lt;/span&gt;,&lt;span class="s2"&gt;"occurred_at"&lt;/span&gt;:&lt;span class="s2"&gt;"2026-09-02T19:16:55Z"&lt;/span&gt;,&lt;span class="s2"&gt;"seq"&lt;/span&gt;:1,&lt;span class="s2"&gt;"payload"&lt;/span&gt;:&lt;span class="s2"&gt;"hello"&lt;/span&gt;,&lt;span class="s2"&gt;"written_in"&lt;/span&gt;:&lt;span class="s2"&gt;"us-west-2"&lt;/span&gt;&lt;span class="o"&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;&lt;code&gt;curl "https://www.example.com/items?id=demo"&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;Authentication elided for brevity&lt;/em&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="o"&gt;{&lt;/span&gt;&lt;span class="s2"&gt;"count"&lt;/span&gt;:1,&lt;span class="s2"&gt;"items"&lt;/span&gt;:&lt;span class="o"&gt;[&lt;/span&gt;...&lt;span class="o"&gt;]&lt;/span&gt;,&lt;span class="s2"&gt;"region"&lt;/span&gt;:&lt;span class="s2"&gt;"us-west-2"&lt;/span&gt;&lt;span class="o"&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;The &lt;code&gt;written_in&lt;/code&gt; and &lt;code&gt;region&lt;/code&gt; fields prove which region handled the request and Global Accelerator routes to the nearest healthy endpoint.&lt;/p&gt;
+&lt;h2 id="deeper-on-dynamodb-and-strong-consistency"&gt;Deeper on DynamoDB and Strong Consistency&lt;/h2&gt;
+&lt;p&gt;Multi-region strong consistency is a hard problem that's nice as a managed product/service feature. (DynamoDB MRSC)&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://aws.amazon.com/blogs/aws/build-the-highest-resilience-apps-with-multi-region-strong-consistency-in-amazon-dynamodb-global-tables/"&gt;https://aws.amazon.com/blogs/aws/build-the-highest-resilience-apps-with-multi-region-strong-consistency-in-amazon-dynamodb-global-tables/&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Traditional global tables (MREC) replicate asynchronously — fast writes, but if a region dies, recent writes might be lost (non-zero RecoveryPointObjective). MRSC changes the deal: a write must be durably committed to at least 2 of 3 regions before it's acknowledged. This gives you zero RPO, but adds cross-region latency to every write and strongly consistent read.&lt;/p&gt;
+&lt;p&gt;An example latency tradeoff for your regions (~P50 data)&lt;/p&gt;
+&lt;p&gt;us-west-2 &amp;lt;-&amp;gt; us-east-1: ~65ms RTT
+us-west-2 &amp;lt;-&amp;gt; us-east-2: ~55ms RTT
+us-east-1 &amp;lt;-&amp;gt; us-east-2: ~15ms RTT&lt;/p&gt;
+&lt;p&gt;So for MRSC writes, expect roughly:&lt;/p&gt;
+&lt;p&gt;Write from us-east-1: fast — quorum partner us-east-2 is only ~13ms away
+Write from us-west-2: slower — nearest quorum partner (us-east-2) is ~53ms away&lt;/p&gt;
+&lt;p&gt;Eventually consistent reads remain local-speed (single-digit ms). Strongly consistent reads also pay the cross-region heartbeat cost.&lt;/p&gt;
+&lt;p&gt;The witness region (us-east-2) is clever as it participates in quorum but doesn't serve traffic, so you don't pay for a full third replica. Placing it near us-east-1 means east-coast writes get a fast quorum partner.&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;Key constraints: exactly 3 regions, no transactions API, can't change consistency mode after creation.&lt;/em&gt;&lt;/p&gt;
+&lt;h1 id="next-steps"&gt;Next Steps&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Failure simulation&lt;/strong&gt;: kill a health check, verify GA routes 100% to the surviving region&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Deeper health checks&lt;/strong&gt;: Lambda health endpoint that verifies DynamoDB connectivity, not just Lambda liveness&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Simulate DynamoDB regional failure&lt;/strong&gt;: prove the witness region enables the remaining replica to continue serving strong-consistency reads&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Latency measurement&lt;/strong&gt;: compare single-region vs. GA-routed multi-region from different geographies&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id="resources"&gt;Resources&lt;/h1&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://github.com/johnpfeiffer/multiregion"&gt;https://github.com/johnpfeiffer/multiregion&lt;/a&gt; (the source code)&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://docs.aws.amazon.com/global-accelerator/latest/dg/about-endpoints.html"&gt;https://docs.aws.amazon.com/global-accelerator/latest/dg/about-endpoints.html&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://docs.aws.amazon.com/elasticloadbalancing/latest/application/introduction.html"&gt;https://docs.aws.amazon.com/elasticloadbalancing/latest/application/introduction.html&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/GlobalTables.html"&gt;https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/GlobalTables.html&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.DownloadingAndRunning.html"&gt;https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.DownloadingAndRunning.html&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</content><category term="build-CI-CD-devops"/><category term="aws"/><category term="devops"/><category term="dynamodb"/><category term="lambda"/><category term="cdk"/></entry><entry><title>Real velocity from a Backlog Deferred and a Skill'd Agent</title><link href="https://blog.john-pfeiffer.com/real-velocity-from-a-backlog-deferred-and-a-skilld-agent/" rel="alternate"/><published>2026-08-10T09:11:00-07:00</published><updated>2026-08-10T09:11:00-07:00</updated><author><name>john pfeiffer</name></author><id>tag:blog.john-pfeiffer.com,2026-08-10:/real-velocity-from-a-backlog-deferred-and-a-skilld-agent/</id><summary type="html">
 &lt;h1 id="why-the-heck-am-i-reading-this"&gt;Why the heck am I reading this?&lt;/h1&gt;
 &lt;p&gt;You have a thing you're putting off because it's boring and manual. You want the outcome, but not the toil.&lt;/p&gt;
 &lt;p&gt;10x velocity on shiny-new-thing is the wrong framing, nobody would have dared invest in your black hole of a backlog.&lt;/p&gt;
@@ -23069,26 +23170,4 @@ ldapsearch -H ldaps://ldap.domain.com:636 -x -D &amp;quot;uid=example,ou=system&
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 &lt;h3 id="goal-achieved"&gt;Goal Achieved&lt;/h3&gt;
 &lt;p&gt;A user can self test if they've misconfigured the VM or there's  missing conf files/app, etc. SUCCESS!&lt;/p&gt;
-&lt;p&gt;Next steps: further unit and system tests, debug, refactor&lt;/p&gt;</content><category term="programming"/><category term="java"/><category term="perl"/><category term="TDD"/></entry><entry><title>Technology Careers (part 1)</title><link href="https://blog.john-pfeiffer.com/technology-careers-part-1/" rel="alternate"/><published>2012-02-27T02:38:00-08:00</published><updated>2012-02-27T02:38:00-08:00</updated><author><name>john pfeiffer</name></author><id>tag:blog.john-pfeiffer.com,2012-02-27:/technology-careers-part-1/</id><summary type="html">
-&lt;h3 id="a-system-administrator-is-like-a-firefighter"&gt;A System Administrator is like a Firefighter&lt;/h3&gt;
-&lt;p&gt;Always available to fix an emergency, but without the glamour; after putting out a fire a SysAdmin has to report (with vague implications of guilt): what happened, why it happened, and how it can be prevented in the future. (Who's fault is it …&lt;/p&gt;</summary><content type="html">
-&lt;h3 id="a-system-administrator-is-like-a-firefighter"&gt;A System Administrator is like a Firefighter&lt;/h3&gt;
-&lt;p&gt;Always available to fix an emergency, but without the glamour; after putting out a fire a SysAdmin has to report (with vague implications of guilt): what happened, why it happened, and how it can be prevented in the future. (Who's fault is it?)&lt;/p&gt;
-&lt;p&gt;Good System Administrators are well paid but usually work on the invisible and complex "back end" and are on "on call".&lt;/p&gt;
-&lt;p&gt;(Yes, your dinner, sleep, and other private activities will be interrupted.)&lt;/p&gt;
-&lt;p&gt;A stable, in demand, career since it's hard to fire a good System Administrator but there's often a belief that the position could/should be outsourced.&lt;/p&gt;
-&lt;p&gt;(Ever hear the story of the SysAdmin who was so good at automating server tasks and desktop deployments that he put himself out of a job?)&lt;/p&gt;
-&lt;p&gt;The overly general term "Operations" is often applied.  In non technology focused companies you might be managed by a Chief Operations Officer who is more concerned with facilities (buildings), logistics (trucks, ships, planes, etc.) or even janitorial services.&lt;/p&gt;
-&lt;p&gt;If you're not careful, methodical, detailed, and cool headed then this may not be the right path for you. (Cynical is optional but it helps a lot).&lt;/p&gt;
-&lt;h3 id="an-it-manager-is-like-an-accountant"&gt;An IT Manager is like an Accountant&lt;/h3&gt;
-&lt;p&gt;Always asked to do more with less. In fairness an IT Manager gets to be more creative (legally) as innovation and change drive technological efficiency.&lt;/p&gt;
-&lt;p&gt;Good IT Managers spend as little time as possible in meetings but can organize and automate the heck out of everything. Diagrams, Business Cases, Reporting, Schedules; not often a hands on role.&lt;/p&gt;
-&lt;p&gt;Being in charge of IT resources is well paid and it's a stable career (you're in charge of the budget, right?) but when "downsizing" occurs you may be considered an acceptable loss (if your business cases prove you've saved/earned enough then it's usually a non issue).&lt;/p&gt;
-&lt;p&gt;Gluing together services often means jugging time zones (remote contractors and services are the norm) and balancing/network internal departmental demands.&lt;/p&gt;
-&lt;p&gt;If you're not good at understanding people or technology (yes you have to hire/fire people and purchase wisely) then this may not be the right path for you.&lt;/p&gt;
-&lt;h2 id="a-developer-is-like-an-artist"&gt;A Developer is like an Artist&lt;/h2&gt;
-&lt;p&gt;Eccentric, misunderstood, and something rare for the Arts, well paid.&lt;/p&gt;
-&lt;p&gt;Good Developers understand it's Art with a purpose and apply rigorous engineering principles to their work (since software runs things like airplanes and hospitals this is a good thing).&lt;/p&gt;
-&lt;p&gt;It's well paid but sometimes unpredictable work (software project done = goodbye expensive labor), luckily there's an endless demand for the foreseeable future. &lt;/p&gt;
-&lt;p&gt;(Interestingly it often takes awhile to discover a "bad" developer and even then employers are reluctant to let them go).&lt;/p&gt;
-&lt;p&gt;If you're not creative and logical; unable to unriddle paradoxes (yes it's a required dependency but no we don't want it), or just don't want to spend most of your waking hours in front of a screen (human contact optional), then this might not be the right path for you.&lt;/p&gt;</content><category term="leadership"/><category term="career"/><category term="management"/></entry></feed>
+&lt;p&gt;Next steps: further unit and system tests, debug, refactor&lt;/p&gt;</content><category term="programming"/><category term="java"/><category term="perl"/><category term="TDD"/></entry></feed>
