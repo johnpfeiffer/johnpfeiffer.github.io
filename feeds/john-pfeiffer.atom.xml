@@ -7076,7 +7076,91 @@ Go routines can operate concurrently to main (and any other go routines). It onl
 &lt;/ul&gt;
 &lt;p&gt;&lt;em&gt;sometimes people need a day or week to fully process, be open and prepared for them to bring those questions about a week later&lt;/em&gt;&lt;/p&gt;
 &lt;p&gt;Part of the reason you put in all the effort to a framework and process is to be prepared to persuade each part of the "Sudoku Puzzle" why the solution you've chosen works.&lt;/p&gt;
-&lt;p&gt;And sometimes, when you've done this work with care and delivered it with empathy, even if they're not happy with the result, they will understand that you worked hard on their behalf.&lt;/p&gt;</content><category term="leadership"/><category term="career"/><category term="engineering"/><category term="management"/><category term="budget"/></entry><entry><title>The answer is not the solution</title><link href="https://blog.john-pfeiffer.com/the-answer-is-not-the-solution/" rel="alternate"/><published>2023-01-16T10:00:00-08:00</published><updated>2023-01-16T10:00:00-08:00</updated><author><name>john pfeiffer</name></author><id>tag:blog.john-pfeiffer.com,2023-01-16:/the-answer-is-not-the-solution/</id><summary type="html">&lt;p&gt;Look at the number 5: it can have many of representations: IIIII , 10/2 , 05.00 , 5^1&lt;/p&gt;
+&lt;p&gt;And sometimes, when you've done this work with care and delivered it with empathy, even if they're not happy with the result, they will understand that you worked hard on their behalf.&lt;/p&gt;</content><category term="leadership"/><category term="career"/><category term="engineering"/><category term="management"/><category term="budget"/></entry><entry><title>Firewalls in the cloud</title><link href="https://blog.john-pfeiffer.com/firewalls-in-the-cloud/" rel="alternate"/><published>2023-02-26T21:21:00-08:00</published><updated>2023-02-26T21:21:00-08:00</updated><author><name>john pfeiffer</name></author><id>tag:blog.john-pfeiffer.com,2023-02-26:/firewalls-in-the-cloud/</id><summary type="html">
+&lt;p&gt;System Administrators, Network Administrators, and Ops all know 1 truth: if you have a resource on the network, eventually it will be overwhelmed by traffic.&lt;/p&gt;
+&lt;p&gt;If your server only has a fixed quota or limited amount of network capacity, or you pay for network transfer, attackers can download enough to …&lt;/p&gt;</summary><content type="html">
+&lt;p&gt;System Administrators, Network Administrators, and Ops all know 1 truth: if you have a resource on the network, eventually it will be overwhelmed by traffic.&lt;/p&gt;
+&lt;p&gt;If your server only has a fixed quota or limited amount of network capacity, or you pay for network transfer, attackers can download enough to bankrupt your bandwidth budget.&lt;/p&gt;
+&lt;p&gt;Even for a simple website with static content, bad actors can "denial of service" your system, saturating your server or network until it can no longer function.&lt;/p&gt;
+&lt;p&gt;This was one of the reasons I eventually moved my static blog to be distributed by Cloudflare, to not have to think about network traffic and security. Even with that foundation, you still make configuration/policy decisions. And there are a spectrum of tools and approaches, from blunt to surgical, that can help you keep your system alive and usable.&lt;/p&gt;
+&lt;h1 id="it-happens"&gt;It happens&lt;/h1&gt;
+&lt;p&gt;Personally I have had to protect a box and keep it up by simply blocking whole IP address ranges. Knowing that none of our customers or employees would be in a certain country, but that country had a disproportionately large number of probes and malicious network traffic, meant it was pragmatic to just block all inbound requests from that range of IP Addresses.&lt;/p&gt;
+&lt;p&gt;Specifically at work, during security incidents, I have also blocked specific suspicious ip addresses that were in the logs. This firewall level control disrupted their attack while patches, resets, and other hardening efforts were put in place. &lt;/p&gt;
+&lt;h2 id="before-you-block-anything-the-obvious-mistake"&gt;Before you block anything - the obvious mistake&lt;/h2&gt;
+&lt;blockquote&gt;
+&lt;p&gt;One thing that happens to everyone as they lock things down - to lock yourself out!&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;That moment when you lose access and realize that your ip address is in the group that the firewall is now blocking =|&lt;/p&gt;
+&lt;p&gt;This sometimes happens when you start over-zealous and decide to use the best practice of whitelists, so you "block everything by default"... before your own addresses are whitelisted.&lt;/p&gt;
+&lt;p&gt;It can happen over time if you only whitelisted a few IP addresses, and then your IP address changes.&lt;/p&gt;
+&lt;p&gt;The main mitigations are:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;separate the control of configuring the security from the resources being secured&lt;/li&gt;
+&lt;li&gt;have physical control or an out-of-band way to reset the configuration&lt;/li&gt;
+&lt;li&gt;have tiered levels of restrictions: only a few areas are outright blocked, whereas others are only rate limited&lt;/li&gt;
+&lt;li&gt;have certain short windows of time where you temporarily allow access to the configuration&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;For more in the weeds details about directly managing a linux firewall see my previous article: &lt;a href="https://blog.john-pfeiffer.com/firewall-iptables-ufw-ssh-https-nat-forwarding-redirect/"&gt;https://blog.john-pfeiffer.com/firewall-iptables-ufw-ssh-https-nat-forwarding-redirect/&lt;/a&gt;&lt;/p&gt;
+&lt;h1 id="the-basics-of-assigning-ip-addresses-and-network-ranges"&gt;The basics of Assigning IP Addresses and Network Ranges&lt;/h1&gt;
+&lt;p&gt;The "inter-network" is fundamentally communication between a client with a unique address and a server with a specific address. You may have seen in your network a local device, like a printer, at 192.168.1.10, and your computer at 192.168.1.11.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Your operations team or network admins are (with hardware and software devices like Routers) ensuring every connected device gets a unique address&lt;/li&gt;
+&lt;li&gt;Organizations get blocks of usable (not-already-reserved) addresses from their ISP/Telcos; or more currently hosting/cloud providers - the natural monopoly and distribution through those with (physical) infrastructure&lt;/li&gt;
+&lt;li&gt;Internet Service Providers, Telecommunication Providers, and Cloud Providers get assigned blocks of addresses to manage from a "Regional Internet Registry"&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;IP Addresses are globally allocated by region ("continent-ish")&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://en.wikipedia.org/wiki/Regional_Internet_registry"&gt;https://en.wikipedia.org/wiki/Regional_Internet_registry&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://www.nro.net/about/rirs/"&gt;https://www.nro.net/about/rirs/&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://www.ripe.net/about-us/press-centre/understanding-ip-addressing/"&gt;https://www.ripe.net/about-us/press-centre/understanding-ip-addressing/&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id="brute-force-defense-blocking-by-ip-addresses"&gt;Brute force defense - blocking by IP Addresses&lt;/h1&gt;
+&lt;p&gt;So everyone comes from somewhere - maybe some places have a very high percent of risky or problematic traffic.&lt;/p&gt;
+&lt;p&gt;The blunt approach means a few simple techniques and most of your headache goes away. It also means some good traffic may get blocked too.&lt;/p&gt;
+&lt;h2 id="blocking-a-specific-area"&gt;Blocking a specific area&lt;/h2&gt;
+&lt;p&gt;Because large address blocks rarely get reassigned, there is a strong correlation between the virtual (IP) address and physical location. &lt;/p&gt;
+&lt;p&gt;Here's some examples for looking up large swathes of addresses by country:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://www.nirsoft.net/countryip/ru.html"&gt;https://www.nirsoft.net/countryip/ru.html&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://lite.ip2location.com/ip-address-ranges-by-country"&gt;https://lite.ip2location.com/ip-address-ranges-by-country&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;em&gt;It is through this system of assignments that common website traffic analytics dashboards can show you X% of visitors from a specific country.&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;At the firewall level (or even at the network routing level), now that you know "who/what", you can configure your system to block traffic originating from that IP range (ergo geography). &lt;a href="https://en.wikipedia.org/wiki/Geo-blocking"&gt;https://en.wikipedia.org/wiki/Geo-blocking&lt;/a&gt;&lt;/p&gt;
+&lt;h2 id="cloudflare-ip-access-rules"&gt;Cloudflare IP access rules&lt;/h2&gt;
+&lt;p&gt;&lt;em&gt;This IP Address based control  may have been discontinued or merged into Security Rules&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;From the &lt;a href="https://dash.cloudflare.com/"&gt;Cloudflare dashboard&lt;/a&gt;, click on Compute -&amp;gt; Workers &amp;amp; Pages -&amp;gt; select the application&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;Alternatively you may click on "Domains" and select the specific one&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;Security -&amp;gt; Security Rules&lt;/p&gt;
+&lt;h1 id="blocking-by-asn"&gt;Blocking by ASN&lt;/h1&gt;
+&lt;p&gt;A more targeted place of control can be the Autonomous System Number&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://www.arin.net/resources/guide/asn/"&gt;https://www.arin.net/resources/guide/asn/&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://radar.cloudflare.com/routing/as132203"&gt;https://radar.cloudflare.com/routing/as132203&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Cloudflare Security -&amp;gt; Security Rules -&amp;gt; Create Rule -&amp;gt; Custom Rules&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="n"&gt;Field&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;AS&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;Num&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;
+&lt;span class="n"&gt;Operator&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;equals&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;or&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;in&lt;/span&gt;
+&lt;span class="n"&gt;Value&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;as132203&lt;/span&gt;
+&lt;span class="n"&gt;Action&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;Block&lt;/span&gt;
+&lt;span class="n"&gt;Status&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;Active&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Using this technique dropped undesirable traffic of 10k requests and 100MB per minute down to zero&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id="surgical-use-of-blocking"&gt;Surgical Use of Blocking&lt;/h2&gt;
+&lt;p&gt;Blocking a whole hosting company like OVH, GCP, or AWS can have serious consequences for your web traffic. &lt;/p&gt;
+&lt;p&gt;Consider &lt;/p&gt;
+&lt;h1 id="polite-blocking-with-robots-txt"&gt;Polite Blocking with Robots txt&lt;/h1&gt;
+&lt;p&gt;&lt;strong&gt;robots.txt&lt;/strong&gt; is a venerable standard, emblematic of an earlier, more trusting internet. &lt;a href="https://en.wikipedia.org/wiki/Robots.txt"&gt;https://en.wikipedia.org/wiki/Robots.txt&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Web crawlers (think Google's bot) would theoretically not scrape and index your website.&lt;/p&gt;
+&lt;p&gt;My previous article &lt;a href="https://blog.john-pfeiffer.com/attack-of-the-spiders-bots-and-crawlers/"&gt;https://blog.john-pfeiffer.com/attack-of-the-spiders-bots-and-crawlers/&lt;/a&gt;&lt;/p&gt;
+&lt;h2 id="blocking-ai-crawlers"&gt;Blocking AI Crawlers&lt;/h2&gt;
+&lt;p&gt;&lt;em&gt;2024 addendum&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;With the rise of AI crawlers there is a new kind of traffic that drains resources and clogs your logs and analytics.&lt;/p&gt;
+&lt;p&gt;If the agent comes from IP address blocks or regions (ASN) you do not want to block outright, and of course if the agent is honest enough to self-disclose and obey:&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://developers.cloudflare.com/waf/tools/user-agent-blocking/"&gt;https://developers.cloudflare.com/waf/tools/user-agent-blocking/&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;People try to catalog all of the AI agents and crawlers and scrapers: &lt;a href="https://github.com/ai-robots-txt/"&gt;https://github.com/ai-robots-txt/&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://blog.cloudflare.com/declaring-your-aindependence-block-ai-bots-scrapers-and-crawlers-with-a-single-click"&gt;https://blog.cloudflare.com/declaring-your-aindependence-block-ai-bots-scrapers-and-crawlers-with-a-single-click&lt;/a&gt;&lt;/p&gt;</content><category term="it"/><category term="network"/><category term="security"/><category term="firewall"/><category term="cloudflare"/></entry><entry><title>The answer is not the solution</title><link href="https://blog.john-pfeiffer.com/the-answer-is-not-the-solution/" rel="alternate"/><published>2023-01-16T10:00:00-08:00</published><updated>2023-01-16T10:00:00-08:00</updated><author><name>john pfeiffer</name></author><id>tag:blog.john-pfeiffer.com,2023-01-16:/the-answer-is-not-the-solution/</id><summary type="html">&lt;p&gt;Look at the number 5: it can have many of representations: IIIII , 10/2 , 05.00 , 5^1&lt;/p&gt;
 &lt;p&gt;Those representations are not "wrong", they are all still "5".&lt;/p&gt;
 &lt;p&gt;When people argue about a solution, they can both be "right", and yet there is a reason to pick one solution over …&lt;/p&gt;</summary><content type="html">&lt;p&gt;Look at the number 5: it can have many of representations: IIIII , 10/2 , 05.00 , 5^1&lt;/p&gt;
 &lt;p&gt;Those representations are not "wrong", they are all still "5".&lt;/p&gt;
@@ -22966,192 +23050,4 @@ involving extensive legwork, detective work, and persistence).&lt;/p&gt;
 &lt;li&gt;Add any further subdomain redirects (e.g. www.example1.com) by repeating steps 1 and 2&lt;/li&gt;
 &lt;/ol&gt;
 &lt;h3 id="more-info"&gt;more info&lt;/h3&gt;
-&lt;p&gt;&lt;a href="http://docs.aws.amazon.com/AmazonS3/latest/dev/how-to-page-redirect.html"&gt;http://docs.aws.amazon.com/AmazonS3/latest/dev/how-to-page-redirect.html&lt;/a&gt;&lt;/p&gt;</content><category term="programming"/><category term="Amazon"/><category term="S3"/><category term="html redirect"/></entry><entry><title>LDAP and LDAPS with Apache Directory Studio and the Java Keystore</title><link href="https://blog.john-pfeiffer.com/ldap-and-ldaps-with-apache-directory-studio-and-the-java-keystore/" rel="alternate"/><published>2012-03-29T21:44:51-07:00</published><updated>2012-03-29T21:44:51-07:00</updated><author><name>john pfeiffer</name></author><id>tag:blog.john-pfeiffer.com,2012-03-29:/ldap-and-ldaps-with-apache-directory-studio-and-the-java-keystore/</id><summary type="html">&lt;p&gt;The popularity of LDAP for directory service/lookup means Apache Directory Services + Apache Directory Studio is an excellent combination for getting started with identity and user management.&lt;/p&gt;
-&lt;p&gt;&lt;a href="http://directory.apache.org/apacheds/"&gt;http://directory.apache.org/apacheds/&lt;/a&gt;&lt;/p&gt;
-&lt;blockquote&gt;
-&lt;p&gt;on windows it requires a 32bit JRE =(&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;p&gt;Download then install: &lt;code&gt;dpkg -i  apacheds-1.5.7.deb&lt;/code&gt;&lt;/p&gt;
-&lt;blockquote&gt;
-&lt;p&gt;later on …&lt;/p&gt;&lt;/blockquote&gt;</summary><content type="html">&lt;p&gt;The popularity of LDAP for directory service/lookup means Apache Directory Services + Apache Directory Studio is an excellent combination for getting started with identity and user management.&lt;/p&gt;
-&lt;p&gt;&lt;a href="http://directory.apache.org/apacheds/"&gt;http://directory.apache.org/apacheds/&lt;/a&gt;&lt;/p&gt;
-&lt;blockquote&gt;
-&lt;p&gt;on windows it requires a 32bit JRE =(&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;p&gt;Download then install: &lt;code&gt;dpkg -i  apacheds-1.5.7.deb&lt;/code&gt;&lt;/p&gt;
-&lt;blockquote&gt;
-&lt;p&gt;later on uinstall is possible via: &lt;code&gt;dpkg -r apacheds&lt;/code&gt;&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;p&gt;By default Apache DS listens on &lt;strong&gt;10389&lt;/strong&gt; and &lt;strong&gt;10636&lt;/strong&gt; (SSL)&lt;/p&gt;
-&lt;p&gt;You can connect to it with Apache Dir Studio with "LDAP -&amp;gt; New Connection -&amp;gt; hostname , port = 10389"&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;BindDN or user (click on Check Authentication)
-uid=admin,ou=system
-password= secret
-
-ldapsearch -v -H ldap://ldap.domain.com:10389 -x -D &amp;quot;uid=admin,ou=system&amp;quot; -w &amp;quot;secret&amp;quot; &amp;quot;(objectclass=*)&amp;quot; -b &amp;quot;ou=system&amp;quot;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-&lt;h3 id="self-signed-java-keystore"&gt;Self Signed Java Keystore&lt;/h3&gt;
-&lt;p&gt;A Java Keystore is different from a normal cert + key combo. Example "self signed" java keystore, key, certificate combo&lt;/p&gt;
-&lt;p&gt;NOTE: CN should really be ldap.domain.com , not Zanzibar!!!!&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="n"&gt;keytool&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;genkey&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;keyalg&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;RSA&amp;quot;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;dname&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;cn=zanzibar, ou=ApacheDS, o=ASF, c=US&amp;quot;&lt;/span&gt;&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;alias&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;zanzibar&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;keystore&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;zanzibar&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;jks&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;storepass&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;secret&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;validity&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;730&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-&lt;blockquote&gt;
-&lt;p&gt;Press Enter to use the same password for certificate as we already entered above for the keystore&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="n"&gt;keytool&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;list&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;v&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;keystore&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;zanzibar&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;jks&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;storetype&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;jks&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;storepass&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;secret&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-&lt;h3 id="apacheds-config-file"&gt;ApacheDS Config File&lt;/h3&gt;
-&lt;p&gt;SSL is enabled by default but needs to be modified to use a separate certificate:&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;sudo vi /var/lib/apacheds-1.5.7/default/conf/server.xml&lt;/code&gt;&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;&amp;lt;ldapServer&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="na"&gt;id=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;ldapServer&amp;quot;&lt;/span&gt;
-
-&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="err"&gt;allowAnonyn&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="na"&gt;mousAccess=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;false&amp;quot;&lt;/span&gt;
-&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="na"&gt;saslHost=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;ldap.example.com&amp;quot;&lt;/span&gt;
-&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="na"&gt;saslPrincipal=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;ldap/ldap.example.com@EXAMPLE.COM&amp;quot;&lt;/span&gt;
-&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="na"&gt;searchBaseDn=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;ou=users,ou=system&amp;quot;&lt;/span&gt;
-&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="na"&gt;maxTimeLimit=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;15000&amp;quot;&lt;/span&gt;
-&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="na"&gt;maxSizeLimit=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;1000&amp;quot;&lt;/span&gt;
-&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="na"&gt;keystoreFile=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;/var/lib/ssl/zanzibar.jks&amp;quot;&lt;/span&gt;
-&lt;span class="w"&gt;   &lt;/span&gt;&lt;span class="na"&gt;certificatePassword=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;secret&amp;quot;&lt;/span&gt;&lt;span class="nt"&gt;&amp;gt;&lt;/span&gt;
-
-&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="nt"&gt;&amp;lt;transports&amp;gt;&lt;/span&gt;
-&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="nt"&gt;&amp;lt;tcpTransport&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="na"&gt;address=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;0.0.0.0&amp;quot;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="na"&gt;port=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;10389&amp;quot;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="na"&gt;nbThreads=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;8&amp;quot;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="na"&gt;backLog=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;50&amp;quot;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="na"&gt;enableSSL=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;false&amp;quot;&lt;/span&gt;&lt;span class="nt"&gt;/&amp;gt;&lt;/span&gt;
-&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="nt"&gt;&amp;lt;tcpTransport&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="na"&gt;address=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;0.0.0.0&amp;quot;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="na"&gt;port=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;10636&amp;quot;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="na"&gt;nbThreads=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;8&amp;quot;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="na"&gt;backLog=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;50&amp;quot;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="na"&gt;enableSSL=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;true&amp;quot;&lt;/span&gt;&lt;span class="nt"&gt;/&amp;gt;&lt;/span&gt;
-&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="nt"&gt;&amp;lt;/transports&amp;gt;&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-&lt;hr&gt;
-&lt;h3 id="start-and-verify-the-new-config"&gt;Start and verify the new config&lt;/h3&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;/etc/init.d/apacheds-1.5.7-default restart
-/etc/init.d/apacheds-1.5.7-default status
-
-netstat -an --inet
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-&lt;blockquote&gt;
-&lt;p&gt;start the service and check ports listening, established, time wait (especially 10636)&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;p&gt;JXplorer or ApacheDirectoryStudio connection "LDAP -&amp;gt; New Connection -&amp;gt; hostname , port = 10636" (SSL or LDAPS)&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;BindDN or user (click on Check Authentication)
-uid=admin,ou=system 
-password= secret
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;SELF SIGNED CERTIFICATE WARNING - you can view the certificate and choose to manually accept...&lt;/p&gt;
-&lt;blockquote&gt;
-&lt;p&gt;NOTE IF YOU SEE THE ERROR "The connection failed - Connection refused: connect (zanzibar:10636)"&lt;br&gt;
-    javax.naming.CommunicationException: zanzibar:10636 [Root exception is java.net.ConnectException: Connection refused: connect]&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;p&gt;ENSURE THAT YOUR TRANSPORT IS NOT ONLY ALLOWING localhost! (below is the locked down setting...)&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="p"&gt;&amp;lt;&lt;/span&gt;&lt;span class="nx"&gt;tcpTransport&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;address&lt;/span&gt;&lt;span class="p"&gt;=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;localhost&amp;quot;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;port&lt;/span&gt;&lt;span class="p"&gt;=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;10636&amp;quot;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;enableSSL&lt;/span&gt;&lt;span class="p"&gt;=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;true&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="p"&gt;&amp;gt;&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-&lt;h3 id="modify-the-iptables-firewall"&gt;Modify the iptables firewall&lt;/h3&gt;
-&lt;p&gt;Allow well known LDAP (389) and LDAPS (636) ports to work with ApacheDS&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;iptables -A PREROUTING -t nat -i eth0 -p tcp --dport 389 -j REDIRECT --to-port 10389
-iptables -A PREROUTING -t nat -i eth0 -p tcp --dport 636 -j REDIRECT --to-port 10636
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-&lt;h3 id="test-and-verify-connectivity-from-a-remote-machine"&gt;Test and verify connectivity from a remote machine&lt;/h3&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;ldapsearch -H ldap://ldap.domain.com:389 -x -D &amp;quot;uid=example,ou=system&amp;quot; -W -b &amp;quot;ou=system&amp;quot; &amp;quot;(uid=example)&amp;quot;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-&lt;h3 id="extract-a-certificate-from-the-java-key-store"&gt;Extract a Certificate from the Java Key Store&lt;/h3&gt;
-&lt;p&gt;EXTRACT A CERTIFICATE FROM A JKS INTO A .DER, THEN CONVERT IT INTO A .PEM AND IMPORT INTO THE JVM cacerts
-(this allows a java based app to connect to your self signed cert LDAP server)&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="n"&gt;keytool&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="nb"&gt;list&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;v&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;keystore&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;zanzibar&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;jks&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;storetype&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;jks&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;storepass&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;secret&lt;/span&gt;
-&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="n"&gt;Alias&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;name&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;zanzibar&lt;/span&gt;
-
-&lt;span class="n"&gt;keytool&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;export&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="k"&gt;alias&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;zanzibar&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;keystore&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;zanzibar&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;jks&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;storepass&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;secret&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;zanzibar&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;der&lt;/span&gt;
-&lt;span class="n"&gt;openssl&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;x509&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="ow"&gt;in&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;zanzibar&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;der&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;inform&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;DER&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;out&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;zanzibar&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;crt&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;outform&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;PEM&lt;/span&gt;
-&lt;span class="n"&gt;openssl&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;x509&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;text&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="ow"&gt;in&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;zanzibar&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;crt&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;|&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;head&lt;/span&gt;&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="o"&gt;//&lt;/span&gt;&lt;span class="n"&gt;verify&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;you&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;have&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;a&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;valid&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;cert&lt;/span&gt;
-
-&lt;span class="n"&gt;openssl&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;s_client&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;connect&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;localhost&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="mi"&gt;10636&lt;/span&gt;&lt;span class="w"&gt;                           &lt;/span&gt;&lt;span class="o"&gt;//&lt;/span&gt;&lt;span class="n"&gt;Verify&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;return&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;code&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;18&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;signed&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;certificate&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-&lt;span class="n"&gt;openssl&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;s_client&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;connect&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;localhost&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="mi"&gt;10636&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;CAfile&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;zanzibar&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;crt&lt;/span&gt;&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="o"&gt;//&lt;/span&gt;&lt;span class="n"&gt;Verify&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;return&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;code&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;ok&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-
-&lt;span class="n"&gt;keytool&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="kn"&gt;import&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;trustcacerts&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="k"&gt;alias&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;zanzibar&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;file&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;zanzibar&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;crt&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;keystore&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;etc&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;java&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mi"&gt;6&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;sun&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;security&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;cacerts&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;storepass&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;changeit&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-&lt;h3 id="test-and-verify-the-ldaps-connection"&gt;Test and Verify the LDAPS connection&lt;/h3&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;openssl s_client -connect ldap.domain.com:636
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-&lt;blockquote&gt;
-&lt;p&gt;Verify return code: 18 (self signed certificate)
-    openssl s_client -connect ldap.domain.com:636 -CAfile zanzibar.crt
-Verify return code: 0 (ok)&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;hr&gt;
-&lt;hr&gt;
-&lt;h3 id="use-an-existing-certificate-and-key-and-create-a-java-key-store"&gt;Use an existing certificate and key and create a Java Key Store&lt;/h3&gt;
-&lt;p&gt;EXISTING CERTIFICATE AND KEY AND CREATE A .JKS&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="n"&gt;openssl&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;pkcs12&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="k"&gt;export&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="ow"&gt;in&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;cert&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;crt&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;inkey&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;cert&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;key&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;out&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;keystore&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;p12&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;name&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;serveraliashostname&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;CAfile&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;intermediatebundle&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;crt&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;caname&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;root&lt;/span&gt;
-&lt;span class="n"&gt;Enter&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;Export&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;Password&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;secret&lt;/span&gt;
-
-&lt;span class="n"&gt;keytool&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;list&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;v&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;keystore&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;keystore&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;p12&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;storetype&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;pkcs12&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-&lt;h4 id="convert-the-pkcs12-to-jks-format"&gt;CONVERT THE PKCS12 TO JKS FORMAT&lt;/h4&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="n"&gt;keytool&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;importkeystore&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;srckeystore&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;keystore&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;p12&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;srcstoretype&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;PKCS12&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;deststoretype&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;JKS&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;destkeystore&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;keystore&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;jks&lt;/span&gt;
-
-&lt;span class="n"&gt;keytool&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;list&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;v&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;keystore&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;keystore&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;jks&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;storetype&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;jks&lt;/span&gt;
-
-&lt;span class="n"&gt;sudo&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;vi&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="k"&gt;var&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;lib&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;apacheds&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="mf"&gt;1.5&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="mi"&gt;7&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;default&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;conf&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;server&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;xml&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;
-&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="n"&gt;keystoreFile&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;/var/lib/ssl/keystore.jks&amp;quot;&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;still need to figure out how to include the intermediate CAcert root chain...!&lt;/p&gt;
-&lt;h3 id="importingreplacing-a-jks-keystore"&gt;IMPORTING/REPLACING A JKS KEYSTORE&lt;/h3&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="n"&gt;keytool&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;importkeystore&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;deststorepass&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;secret&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;destkeypass&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;secret&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;destkeystore&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;keystore&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;jks&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;srckeystore&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;keystore&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;p12&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;srcstoretype&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;PKCS12&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;srcstorepass&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;secret&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;alias&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;oldaliasname&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;GUI CONVERTER FROM PKCS12 to JKS (requires Java 1.6 or higher)
-&lt;a href="http://portecle.sourceforge.net/"&gt;http://portecle.sourceforge.net/&lt;/a&gt;  (open the .p12 , Tools -&amp;gt; Keystore type to JKS)
-(seems to have a funny message where it needed change the password to "password)")&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="n"&gt;keytool&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="kn"&gt;import&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;trustcacerts&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="k"&gt;alias&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;ldap&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;domain&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;com&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;file&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;cert&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;crt&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;keystore&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;zanzibar&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;ks&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;storepass&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;secret&lt;/span&gt;
-&lt;span class="n"&gt;keytool&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="kn"&gt;import&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;trustcacerts&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="k"&gt;alias&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;root&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;file&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;GeoTrust&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;crt&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="n"&gt;keystore&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;zanzibar&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;ks&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-&lt;blockquote&gt;
-&lt;p&gt;Both self signed and third party certificates can be supported with ApacheDS LDAPS.&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;p&gt;LDAP with SSL is a little tricky and it's useful to use openssl and ldapsearch to verify.&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;&amp;lt;ldapServer&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="na"&gt;id=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;ldapServer&amp;quot;&lt;/span&gt;
-&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="na"&gt;allowAnonymousAccess=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;false&amp;quot;&lt;/span&gt;
-&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="na"&gt;saslHost=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;ldap.example.com&amp;quot;&lt;/span&gt;
-&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="na"&gt;saslPrincipal=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;ldap/ldap.example.com@EXAMPLE.COM&amp;quot;&lt;/span&gt;
-&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="na"&gt;searchBaseDn=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;ou=users,ou=system&amp;quot;&lt;/span&gt;
-&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="na"&gt;maxTimeLimit=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;15000&amp;quot;&lt;/span&gt;
-&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="na"&gt;maxSizeLimit=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;1000&amp;quot;&lt;/span&gt;
-&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="na"&gt;keystoreFile=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;/var/lib/ssl/zanzibar.jks&amp;quot;&lt;/span&gt;
-&lt;span class="w"&gt;            &lt;/span&gt;&lt;span class="na"&gt;certificatePassword=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;secret&amp;quot;&lt;/span&gt;&lt;span class="nt"&gt;&amp;gt;&lt;/span&gt;
-
-&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="nt"&gt;&amp;lt;transports&amp;gt;&lt;/span&gt;
-&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="nt"&gt;&amp;lt;tcpTransport&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="na"&gt;address=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;0.0.0.0&amp;quot;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="na"&gt;port=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;10389&amp;quot;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="na"&gt;nbThreads=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;8&amp;quot;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="na"&gt;backLog=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;50&amp;quot;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="na"&gt;enableSSL=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;false&amp;quot;&lt;/span&gt;&lt;span class="nt"&gt;/&amp;gt;&lt;/span&gt;
-&lt;span class="w"&gt;      &lt;/span&gt;&lt;span class="nt"&gt;&amp;lt;tcpTransport&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="na"&gt;address=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;0.0.0.0&amp;quot;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="na"&gt;port=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;10636&amp;quot;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="na"&gt;nbThreads=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;8&amp;quot;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="na"&gt;backLog=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;50&amp;quot;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="na"&gt;enableSSL=&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;true&amp;quot;&lt;/span&gt;&lt;span class="nt"&gt;/&amp;gt;&lt;/span&gt;
-&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="nt"&gt;&amp;lt;/transports&amp;gt;&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;&lt;code&gt;openssl s_client -connect domain.com:10636 -CAfile intermediate.crt&lt;/code&gt;&lt;/p&gt;
-&lt;hr&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;ldapsearch -H ldaps://ldap.domain.com:10636 -x -D &amp;quot;uid=example,ou=system&amp;quot; -w PASSWORD -b &amp;quot;ou=system&amp;quot; &amp;quot;(uid=example)&amp;quot;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-&lt;blockquote&gt;
-&lt;p&gt;ERROR: ldap_sasl_bind(SIMPLE): Can't contact LDAP server (-1)&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;p&gt;ON A REMOTE MACHINE IN ORDER TO USE LDAPSEARCH WITH LDAPS 636...&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class="n"&gt;sudo&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;nano&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;etc&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;ldap&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;ldap&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;conf&lt;/span&gt;
-
-&lt;span class="n"&gt;TLS_CACERT&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="k"&gt;var&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;lib&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;ssl&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;intermediate&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;crt&lt;/span&gt;
-&lt;span class="n"&gt;TLS_CACERTDIR&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="k"&gt;var&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;lib&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;ssl&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;
-&lt;span class="n"&gt;TLS_CERT&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="k"&gt;var&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;lib&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;ssl&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="n"&gt;cert&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;crt&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;NOW THE BELOW WILL WORK&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;ldapsearch -H ldaps://ldap.domain.com:10636 -x -D &amp;quot;uid=example,ou=system&amp;quot; -w PASSWORD -b &amp;quot;ou=system&amp;quot; &amp;quot;(uid=example)&amp;quot;
-ldapsearch -H ldaps://ldap.domain.com:636 -x -D &amp;quot;uid=example,ou=system&amp;quot; -w PASSWORD -b &amp;quot;ou=system&amp;quot; &amp;quot;(objectclass=*)&amp;quot;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;</content><category term="it"/><category term="linux"/><category term="ldap"/><category term="apache"/><category term="directory"/><category term="studio"/><category term="ldaps"/><category term="ldapsearch"/><category term="java keystore"/><category term="keystore"/><category term="keytool"/></entry></feed>
+&lt;p&gt;&lt;a href="http://docs.aws.amazon.com/AmazonS3/latest/dev/how-to-page-redirect.html"&gt;http://docs.aws.amazon.com/AmazonS3/latest/dev/how-to-page-redirect.html&lt;/a&gt;&lt;/p&gt;</content><category term="programming"/><category term="Amazon"/><category term="S3"/><category term="html redirect"/></entry></feed>

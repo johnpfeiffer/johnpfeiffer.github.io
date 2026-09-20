@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en-US">
+    <head>
+        <meta charset="utf-8"> 
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="author" content="john pfeiffer" />
+        <meta name="copyright" content="john pfeiffer" />
+
+<meta name="keywords" content="network, security, firewall, cloudflare, it, " />
+        <title>Firewalls in the cloud  · johnpfeiffer
+</title>
+        <!--link href="https://cdn-images.mailchimp.com/embedcode/slim-081711.css" rel="stylesheet" type="text/css"-->
+        <!--link href="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css" rel="stylesheet"-->
+        <link href="https://blog.john-pfeiffer.com/theme/css/bootstrap-combined.min.css" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="https://blog.john-pfeiffer.com/theme/css/style.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="https://blog.john-pfeiffer.com/theme/css/solarizedlight.css" media="screen">
+        <link rel="shortcut icon" href="https://blog.john-pfeiffer.com/theme/images/favicon.ico" type="image/x-icon" />
+        <link rel="apple-touch-icon" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon.png" />
+        <link rel="apple-touch-icon" sizes="57x57" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-57x57.png" />
+        <link rel="apple-touch-icon" sizes="72x72" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-72x72.png" />
+        <link rel="apple-touch-icon" sizes="114x114" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-114x114.png" />
+        <link rel="apple-touch-icon" sizes="144x144" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-144x144.png" />
+        <link rel="icon" href="https://blog.john-pfeiffer.com/theme/images/apple-touch-icon-144x144.png" />
+    </head>
+    <body>
+	<div id="content-sans-footer">
+        <div class="dropdown-backdrop">
+
+			<div class="navbar navbar-static-top">
+				<div class="navbar-inner">
+					<div class="container">
+						<a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+							<span class="icon-bar"></span>
+							<span class="icon-bar"></span>
+							<span class="icon-bar"></span>
+						</a>
+						<a class="brand" href="https://blog.john-pfeiffer.com/"><span class=site-name>johnpfeiffer</span></a>
+						<div class="nav-collapse collapse">
+							<ul class="nav pull-right top-menu">
+								<li ><a href="https://blog.john-pfeiffer.com">Home</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/engineering-people-managers/">Engineering (People) Managers</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/john-likes/">John Likes</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/software-engineer-favorites/">Software Engineer Favorites</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/categories.html">Categories</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/tags.html">Tags</a></li>
+								<li ><a href="https://blog.john-pfeiffer.com/archives.html">Archives</a></li>
+								<li><form class="navbar-search" action="https://blog.john-pfeiffer.com/search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="container-fluid">
+			<div class="row-fluid">
+				<div class="span1"></div>
+				<div class="span10">
+<article>
+<div class="row-fluid">
+    <header class="page_header span10 offset2">
+    <h1><a href="https://blog.john-pfeiffer.com/firewalls-in-the-cloud/"> Firewalls in the cloud  </a></h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+    <div class="span2 table-of-content">
+        <nav>
+        <h4>Contents</h4>
+        <div class="toc">
+<ul>
+<li><a href="#it-happens">It happens</a><ul>
+<li><a href="#before-you-block-anything-the-obvious-mistake">Before you block anything - the obvious mistake</a></li>
+</ul>
+</li>
+<li><a href="#the-basics-of-assigning-ip-addresses-and-network-ranges">The basics of Assigning IP Addresses and Network Ranges</a></li>
+<li><a href="#brute-force-defense-blocking-by-ip-addresses">Brute force defense - blocking by IP Addresses</a><ul>
+<li><a href="#blocking-a-specific-area">Blocking a specific area</a></li>
+<li><a href="#cloudflare-ip-access-rules">Cloudflare IP access rules</a></li>
+</ul>
+</li>
+<li><a href="#blocking-by-asn">Blocking by ASN</a><ul>
+<li><a href="#surgical-use-of-blocking">Surgical Use of Blocking</a></li>
+</ul>
+</li>
+<li><a href="#polite-blocking-with-robots-txt">Polite Blocking with Robots txt</a><ul>
+<li><a href="#blocking-ai-crawlers">Blocking AI Crawlers</a></li>
+</ul>
+</li>
+</ul>
+</div>
+        </nav>
+    </div>
+    <div class="span8 article-content">
+
+            
+<p>System Administrators, Network Administrators, and Ops all know 1 truth: if you have a resource on the network, eventually it will be overwhelmed by traffic.</p>
+<p>If your server only has a fixed quota or limited amount of network capacity, or you pay for network transfer, attackers can download enough to bankrupt your bandwidth budget.</p>
+<p>Even for a simple website with static content, bad actors can "denial of service" your system, saturating your server or network until it can no longer function.</p>
+<p>This was one of the reasons I eventually moved my static blog to be distributed by Cloudflare, to not have to think about network traffic and security. Even with that foundation, you still make configuration/policy decisions. And there are a spectrum of tools and approaches, from blunt to surgical, that can help you keep your system alive and usable.</p>
+<h1 id="it-happens">It happens</h1>
+<p>Personally I have had to protect a box and keep it up by simply blocking whole IP address ranges. Knowing that none of our customers or employees would be in a certain country, but that country had a disproportionately large number of probes and malicious network traffic, meant it was pragmatic to just block all inbound requests from that range of IP Addresses.</p>
+<p>Specifically at work, during security incidents, I have also blocked specific suspicious ip addresses that were in the logs. This firewall level control disrupted their attack while patches, resets, and other hardening efforts were put in place. </p>
+<h2 id="before-you-block-anything-the-obvious-mistake">Before you block anything - the obvious mistake</h2>
+<blockquote>
+<p>One thing that happens to everyone as they lock things down - to lock yourself out!</p>
+</blockquote>
+<p>That moment when you lose access and realize that your ip address is in the group that the firewall is now blocking =|</p>
+<p>This sometimes happens when you start over-zealous and decide to use the best practice of whitelists, so you "block everything by default"... before your own addresses are whitelisted.</p>
+<p>It can happen over time if you only whitelisted a few IP addresses, and then your IP address changes.</p>
+<p>The main mitigations are:</p>
+<ul>
+<li>separate the control of configuring the security from the resources being secured</li>
+<li>have physical control or an out-of-band way to reset the configuration</li>
+<li>have tiered levels of restrictions: only a few areas are outright blocked, whereas others are only rate limited</li>
+<li>have certain short windows of time where you temporarily allow access to the configuration</li>
+</ul>
+<p>For more in the weeds details about directly managing a linux firewall see my previous article: <a href="https://blog.john-pfeiffer.com/firewall-iptables-ufw-ssh-https-nat-forwarding-redirect/">https://blog.john-pfeiffer.com/firewall-iptables-ufw-ssh-https-nat-forwarding-redirect/</a></p>
+<h1 id="the-basics-of-assigning-ip-addresses-and-network-ranges">The basics of Assigning IP Addresses and Network Ranges</h1>
+<p>The "inter-network" is fundamentally communication between a client with a unique address and a server with a specific address. You may have seen in your network a local device, like a printer, at 192.168.1.10, and your computer at 192.168.1.11.</p>
+<ul>
+<li>Your operations team or network admins are (with hardware and software devices like Routers) ensuring every connected device gets a unique address</li>
+<li>Organizations get blocks of usable (not-already-reserved) addresses from their ISP/Telcos; or more currently hosting/cloud providers - the natural monopoly and distribution through those with (physical) infrastructure</li>
+<li>Internet Service Providers, Telecommunication Providers, and Cloud Providers get assigned blocks of addresses to manage from a "Regional Internet Registry"</li>
+</ul>
+<p>IP Addresses are globally allocated by region ("continent-ish")</p>
+<ul>
+<li><a href="https://en.wikipedia.org/wiki/Regional_Internet_registry">https://en.wikipedia.org/wiki/Regional_Internet_registry</a></li>
+<li><a href="https://www.nro.net/about/rirs/">https://www.nro.net/about/rirs/</a></li>
+<li><a href="https://www.ripe.net/about-us/press-centre/understanding-ip-addressing/">https://www.ripe.net/about-us/press-centre/understanding-ip-addressing/</a></li>
+</ul>
+<h1 id="brute-force-defense-blocking-by-ip-addresses">Brute force defense - blocking by IP Addresses</h1>
+<p>So everyone comes from somewhere - maybe some places have a very high percent of risky or problematic traffic.</p>
+<p>The blunt approach means a few simple techniques and most of your headache goes away. It also means some good traffic may get blocked too.</p>
+<h2 id="blocking-a-specific-area">Blocking a specific area</h2>
+<p>Because large address blocks rarely get reassigned, there is a strong correlation between the virtual (IP) address and physical location. </p>
+<p>Here's some examples for looking up large swathes of addresses by country:</p>
+<ul>
+<li><a href="https://www.nirsoft.net/countryip/ru.html">https://www.nirsoft.net/countryip/ru.html</a></li>
+<li><a href="https://lite.ip2location.com/ip-address-ranges-by-country">https://lite.ip2location.com/ip-address-ranges-by-country</a></li>
+</ul>
+<p><em>It is through this system of assignments that common website traffic analytics dashboards can show you X% of visitors from a specific country.</em></p>
+<p>At the firewall level (or even at the network routing level), now that you know "who/what", you can configure your system to block traffic originating from that IP range (ergo geography). <a href="https://en.wikipedia.org/wiki/Geo-blocking">https://en.wikipedia.org/wiki/Geo-blocking</a></p>
+<h2 id="cloudflare-ip-access-rules">Cloudflare IP access rules</h2>
+<p><em>This IP Address based control  may have been discontinued or merged into Security Rules</em></p>
+<p>From the <a href="https://dash.cloudflare.com/">Cloudflare dashboard</a>, click on Compute -&gt; Workers &amp; Pages -&gt; select the application</p>
+<p><em>Alternatively you may click on "Domains" and select the specific one</em></p>
+<p>Security -&gt; Security Rules</p>
+<h1 id="blocking-by-asn">Blocking by ASN</h1>
+<p>A more targeted place of control can be the Autonomous System Number</p>
+<ul>
+<li><a href="https://www.arin.net/resources/guide/asn/">https://www.arin.net/resources/guide/asn/</a></li>
+<li><a href="https://radar.cloudflare.com/routing/as132203">https://radar.cloudflare.com/routing/as132203</a></li>
+</ul>
+<p>Cloudflare Security -&gt; Security Rules -&gt; Create Rule -&gt; Custom Rules</p>
+<div class="highlight"><pre><span></span><code><span class="n">Field</span><span class="o">:</span><span class="w"> </span><span class="n">AS</span><span class="w"> </span><span class="n">Num</span><span class="w"> </span>
+<span class="n">Operator</span><span class="o">:</span><span class="w"> </span><span class="n">equals</span><span class="w"> </span><span class="n">or</span><span class="w"> </span><span class="k">in</span>
+<span class="n">Value</span><span class="o">:</span><span class="w"> </span><span class="n">as132203</span>
+<span class="n">Action</span><span class="o">:</span><span class="w"> </span><span class="n">Block</span>
+<span class="n">Status</span><span class="o">:</span><span class="w"> </span><span class="n">Active</span>
+</code></pre></div>
+<blockquote>
+<p>Using this technique dropped undesirable traffic of 10k requests and 100MB per minute down to zero</p>
+</blockquote>
+<h2 id="surgical-use-of-blocking">Surgical Use of Blocking</h2>
+<p>Blocking a whole hosting company like OVH, GCP, or AWS can have serious consequences for your web traffic. </p>
+<p>Consider </p>
+<h1 id="polite-blocking-with-robots-txt">Polite Blocking with Robots txt</h1>
+<p><strong>robots.txt</strong> is a venerable standard, emblematic of an earlier, more trusting internet. <a href="https://en.wikipedia.org/wiki/Robots.txt">https://en.wikipedia.org/wiki/Robots.txt</a></p>
+<p>Web crawlers (think Google's bot) would theoretically not scrape and index your website.</p>
+<p>My previous article <a href="https://blog.john-pfeiffer.com/attack-of-the-spiders-bots-and-crawlers/">https://blog.john-pfeiffer.com/attack-of-the-spiders-bots-and-crawlers/</a></p>
+<h2 id="blocking-ai-crawlers">Blocking AI Crawlers</h2>
+<p><em>2024 addendum</em></p>
+<p>With the rise of AI crawlers there is a new kind of traffic that drains resources and clogs your logs and analytics.</p>
+<p>If the agent comes from IP address blocks or regions (ASN) you do not want to block outright, and of course if the agent is honest enough to self-disclose and obey:</p>
+<p><a href="https://developers.cloudflare.com/waf/tools/user-agent-blocking/">https://developers.cloudflare.com/waf/tools/user-agent-blocking/</a></p>
+<p>People try to catalog all of the AI agents and crawlers and scrapers: <a href="https://github.com/ai-robots-txt/">https://github.com/ai-robots-txt/</a></p>
+<p><a href="https://blog.cloudflare.com/declaring-your-aindependence-block-ai-bots-scrapers-and-crawlers-with-a-single-click">https://blog.cloudflare.com/declaring-your-aindependence-block-ai-bots-scrapers-and-crawlers-with-a-single-click</a></p>
+            <aside>
+            <hr/>
+            <nav>
+            <ul class="articles_timeline">
+ 
+                <li class="previous_article">« <a href="https://blog.john-pfeiffer.com/the-answer-is-not-the-solution/" title="Previous: The answer is not the solution">The answer is not the solution</a></li>
+ 
+                <li class="next_article"><a href="https://blog.john-pfeiffer.com/compensation-planning-is-sudoku-with-feelings/" title="Next: Compensation Planning is Sudoku with Feelings">Compensation Planning is Sudoku with Feelings</a> »</li>
+            </ul>
+            </nav>
+            </aside>
+        </div>
+        <section>
+        <div class="span2" style="float:right;font-size:0.9em;">
+ 
+            <h4>Published</h4>
+            <time pubdate="pubdate" datetime="2023-02-26T21:21:00-08:00">Feb 26, 2023</time>
+            <h4>Category</h4>
+            <a class="category-link" href="/categories.html#it-ref">it</a> 
+            <h4>~914 words</h4>
+            <h4>Tags</h4>
+            <ul class="list-of-tags tags-in-article"> 
+                <li><a href="/tags.html#cloudflare-ref">cloudflare
+                    <span>2</span>
+</a></li>
+                <li><a href="/tags.html#firewall-ref">firewall
+                    <span>2</span>
+</a></li>
+                <li><a href="/tags.html#network-ref">network
+                    <span>2</span>
+</a></li>
+                <li><a href="/tags.html#security-ref">security
+                    <span>7</span>
+</a></li>
+            </ul>
+
+        </div>
+        </section>
+</div>
+</article>
+				</div>
+				<div class="span1"></div>
+			</div>
+		</div>
+    </div>
+<footer>
+<div id="footer">
+    <ul class="footer-content">
+    </ul>
+</div>
+</footer>            <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+    </body>
+</html>
